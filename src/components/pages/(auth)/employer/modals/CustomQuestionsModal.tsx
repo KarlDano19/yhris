@@ -187,13 +187,13 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                                   onClick={() => handleEditQuestion(index)}
                                   className="text-gray-600 hover:text-blue-600 transition-colors"
                                 >
-                                  <EditIcon className="h-5 w-5" />
+                                  <EditIcon/>
                                 </button>
                                 <button
                                   onClick={() => handleDeleteQuestion(index)}
                                   className="text-gray-600 hover:text-red-600 transition-colors"
                                 >
-                                  <DeleteIcon className="h-5 w-5" />
+                                  <DeleteIcon/>
                                 </button>
                               </div>
                             </div>
@@ -222,8 +222,8 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                           setShowAddForm(false);
                           setEditingQuestion(null);
                         }}
-                        editingQuestion={editingQuestion}
-                        isEditing={!!editingQuestion}
+                        editMode={editingQuestion !== null}
+                        initialData={editingQuestion !== null ? questions[editingQuestion] : undefined}
                       />
                     </div>
                   )}
@@ -233,7 +233,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                     <div className="absolute inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
                       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 ease-out">
                         <div className="flex items-center mb-4">
-                          <WarningRed className="h-8 w-8 text-red-600 mr-3" />
+                          <WarningRed />
                           <h3 className="text-lg font-medium text-gray-900">
                             Delete Question
                           </h3>
