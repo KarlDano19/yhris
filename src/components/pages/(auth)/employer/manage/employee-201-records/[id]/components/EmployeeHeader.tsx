@@ -133,7 +133,7 @@ export default function EmployeeHeader({
 
         {/* Tabs: just add dot=... */}
         <nav
-          className="no-scrollbar flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:flex-nowrap md:justify-start md:overflow-x-auto"
+          className="no-scrollbar flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:flex-nowrap md:justify-start md:overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#9ca3af_transparent]"
           role="tablist"
           aria-label="Employee sections"
         >

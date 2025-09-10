@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import Pagination from "@/components/Pagination";
@@ -358,7 +358,7 @@ export default function TrainingDevelopmentForm({
         </div>
       )}
       {error && !isLoading && (
-        <div className="rounded-xl border bg-white p-6 text-sm text-red-600">
+        <div className="rounded-xl border bg-white p-6 text-sm text-red-600 mb-6">
           {error.message}
         </div>
       )}
@@ -382,7 +382,7 @@ export default function TrainingDevelopmentForm({
               <button
                 type="button"
                 onClick={() => askDelete(row.id)}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-300 text-red-600 hover:bg-red-50"
+                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-300 text-red-500 hover:bg-red-50"
                 title="Remove Training"
                 aria-label="Remove Training"
                 disabled={isLoading || confirmBusy}

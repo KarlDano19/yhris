@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import AddEmploymentForm from "./AddEmploymentForm";
 import EmploymentHistoryEditForm from "./EmploymentHistoryEditForm";
@@ -105,7 +106,7 @@ export default function EmploymentHistoryModal({
             onClick={onClose}
             className="rounded-full p-1 hover:bg-white/10 focus:outline-none"
           >
-            ✕
+            <XCircleIcon className='w-8 h-8 text-white cursor-pointer' />
           </button>
         </div>
 

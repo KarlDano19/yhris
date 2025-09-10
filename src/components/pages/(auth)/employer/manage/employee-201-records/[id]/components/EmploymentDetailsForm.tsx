@@ -363,6 +363,9 @@ export default function EmploymentDetailsForm({
           >
             View Salary History
           </button>
+          <p className="mt-1 text-xs text-gray-500">
+            + Add salary here
+          </p>
         </div>
 
         <div className="mt-6">

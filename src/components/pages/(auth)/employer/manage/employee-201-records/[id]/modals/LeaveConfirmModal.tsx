@@ -22,7 +22,7 @@ export default function LeaveConfirmModal({
   return (
     <div data-testid="leave-confirm-modal" className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} aria-hidden />
-      <div className="relative w-full max-w-[260px] sm:max-w-sm rounded-lg sm:rounded-2xl bg-white shadow-xl p-3 sm:p-6">
+      <div className="relative w-full max-w-[260px] sm:max-w-sm rounded-lg sm:rounded-2xl bg-white shadow-xl p-3 sm:p-8">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900">Leave without saving?</h3>
         <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-600 leading-snug">
           You have unsaved changes. What would you like to do?

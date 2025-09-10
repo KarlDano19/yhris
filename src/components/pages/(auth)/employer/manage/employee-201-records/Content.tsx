@@ -65,7 +65,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-10 min-h-[80vh] flex flex-col">
       <div className="flex p-4">
         <Link data-testid="back-link" href="/manage" className="flex-none flex gap-3 items-center rounded-md px-2 py-1 hover:bg-gray-100">
           <ArrowLeftIcon className="h-5 w-5 text-gray-700" />
@@ -100,7 +100,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       </div>
 
       {/* content */}
-      <div className="px-2 md:px-8 lg:px-4 mt-6">
+      <div className="px-2 md:px-8 lg:px-4 mt-6 flex-1">
         {isLoading ? (
           <SkeletonGrid />
         ) : error ? (
@@ -114,14 +114,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           <EmployeeGrid locked={!hasActiveSubscription} employees={data ?? []} />
         )}
         {!isLoading && (data?.length ?? 0) === 0 && (
-          <div className="mt-4 rounded-xl border border-dashed border-gray-300 p-10 text-center text-sm text-gray-500">
-            No results
+          <div className="mt-4 rounded-2xl border-2 border-dashed border-gray-300 min-h-[350px] flex flex-col items-center justify-center gap-4 bg-gray-50">
+            <span className="text-xl font-semibold text-gray-600">No results</span>
+            <p className="text-sm text-gray-400">Try adjusting your filters or search.</p>
           </div>
         )}
       </div>
 
       {/* footer */}
-      <div className="px-2 md:px-8 lg:px-4 mt-8 mb-12">
+      <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
         <Pagination
           pagination={{ totalPages: meta?.totalPages ?? 1, totalRecords: meta?.total ?? 0 }}
           currentPage={query.page}

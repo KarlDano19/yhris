@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { FunnelIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-
 import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import SelectChevronDown from "@/svg/SelectChevronDown";
+
 type FilterValues = {
-  location: string;   
+  location: string;
   department: string;
   position: string;
   onlyIncomplete: boolean;
@@ -43,7 +44,12 @@ const toOptions = (items?: ApiItem[], includeUnspecified = false): Option[] => {
 const ensureValue = (value: string, options: Option[]) =>
   options.some((o) => o.value === value) ? value : "ALL";
 
-export default function FilterPopover({ open, onOpenChange, initial, onApply }: Props) {
+export default function FilterPopover({
+  open,
+  onOpenChange,
+  initial,
+  onApply,
+}: Props) {
   const [draft, setDraft] = useState<FilterValues>(initial);
 
   // locations
@@ -70,9 +76,18 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
     error: posError,
   } = useGetPositionItems();
 
-  const locationOptions = useMemo(() => toOptions(locationItems as ApiItem[]), [locationItems]);
-  const departmentOptions = useMemo(() => toOptions(departmentItems as ApiItem[]), [departmentItems]);
-  const positionOptions = useMemo(() => toOptions(positionItems as ApiItem[]), [positionItems]);
+  const locationOptions = useMemo(
+    () => toOptions(locationItems as ApiItem[]),
+    [locationItems]
+  );
+  const departmentOptions = useMemo(
+    () => toOptions(departmentItems as ApiItem[]),
+    [departmentItems]
+  );
+  const positionOptions = useMemo(
+    () => toOptions(positionItems as ApiItem[]),
+    [positionItems]
+  );
 
   useEffect(() => {
     if (open) setDraft(initial);
@@ -85,7 +100,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
       <button
         data-testid="filter-btn"
         onClick={() => onOpenChange(!open)}
-        className="flex items-center gap-2 border border-gray-300 bg-white px-4 py-2 text-sm rounded-md hover:bg-gray-50"
+        className="flex items-center gap-2 border border-gray-300 bg-white px-4 py-2.5 text-sm rounded-md hover:bg-gray-50"
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -103,12 +118,16 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
           <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
             {/* Location */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Location</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                Location
+              </label>
               <div className="relative">
                 <select
                   data-testid="select-location"
                   value={ensureValue(draft.location, locationOptions)}
-                  onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, location: e.target.value }))
+                  }
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isLocLoading}
@@ -120,23 +139,31 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                     </option>
                   ))}
                 </select>
-                <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  <SelectChevronDown />
+                </div>
               </div>
               {isLocError && (
                 <p className="mt-1 text-xs text-red-600">
-                  {(locError as any)?.message ?? String(locError) ?? "Failed to load locations."}
+                  {(locError as any)?.message ??
+                    String(locError) ??
+                    "Failed to load locations."}
                 </p>
               )}
             </div>
 
             {/* Department */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Department</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                Department
+              </label>
               <div className="relative">
                 <select
                   data-testid="select-department"
                   value={ensureValue(draft.department, departmentOptions)}
-                  onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, department: e.target.value }))
+                  }
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isDeptLoading}
@@ -148,23 +175,31 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                     </option>
                   ))}
                 </select>
-                <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  <SelectChevronDown />
+                </div>
               </div>
               {isDeptError && (
                 <p className="mt-1 text-xs text-red-600">
-                  {(deptError as any)?.message ?? String(deptError) ?? "Failed to load departments."}
+                  {(deptError as any)?.message ??
+                    String(deptError) ??
+                    "Failed to load departments."}
                 </p>
               )}
             </div>
 
             {/* Position */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">Position</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                Position
+              </label>
               <div className="relative">
                 <select
                   data-testid="select-position"
                   value={ensureValue(draft.position, positionOptions)}
-                  onChange={(e) => setDraft((d) => ({ ...d, position: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, position: e.target.value }))
+                  }
                   className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
                   disabled={anyLoading}
                   aria-busy={isPosLoading}
@@ -176,11 +211,15 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                     </option>
                   ))}
                 </select>
-                <ChevronDownIcon className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-indigo-dye/70" />
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  <SelectChevronDown />
+                </div>
               </div>
               {isPosError && (
                 <p className="mt-1 text-xs text-red-600">
-                  {(posError as any)?.message ?? String(posError) ?? "Failed to load positions."}
+                  {(posError as any)?.message ??
+                    String(posError) ??
+                    "Failed to load positions."}
                 </p>
               )}
             </div>
@@ -192,7 +231,9 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-[#355fd0] focus:ring-[#355fd0]"
                 checked={draft.onlyIncomplete}
-                onChange={(e) => setDraft((d) => ({ ...d, onlyIncomplete: e.target.checked }))}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, onlyIncomplete: e.target.checked }))
+                }
               />
               Show only incomplete
             </label>
@@ -200,7 +241,7 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
             {/* Footer */}
             <div className="pt-2 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               <button
-                data-testid='reset-btn'
+                data-testid="reset-btn"
                 onClick={() =>
                   setDraft({
                     location: "ALL",
@@ -214,9 +255,9 @@ export default function FilterPopover({ open, onOpenChange, initial, onApply }: 
                 Reset
               </button>
               <button
-                data-testid='search-btn'
+                data-testid="search-btn"
                 onClick={() => {
-                  onApply(draft); 
+                  onApply(draft);
                   onOpenChange(false);
                 }}
                 className="rounded-lg bg-[#355fd0] px-5 py-1.5 sm:px-6 sm:py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60"

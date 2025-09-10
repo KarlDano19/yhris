@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
 import SalaryHistoryHistory from "./SalaryHistoryHistory";
 import SalaryHistoryAnalysis from "./SalaryHistoryAnalysis";
 
@@ -49,7 +51,7 @@ export default function SalaryHistoryModal({
             onClick={onClose}
             className="rounded-full p-1 hover:bg-white/10 focus:outline-none"
           >
-            ✕
+             <XCircleIcon className='w-8 h-8 text-white cursor-pointer' />
           </button>
         </div>
 
