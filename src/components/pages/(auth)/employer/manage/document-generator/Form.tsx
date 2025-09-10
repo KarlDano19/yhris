@@ -305,6 +305,7 @@ export default function Form({
       const resetData: NoticeToExplainFormData = {
         employeeName: '',
         position: '',
+        department: '',
         dateIssued: '',
         companyName: '',
         dateOfIssuance: '',
@@ -323,7 +324,8 @@ export default function Form({
         logoImage: null,
         sampleLogoPath: '',
         signature: null,
-        borderColor: '#FFC107'
+        borderColor: '#FFC107',
+        referenceNumber: ''
       };
       setFormData(resetData);
       setColorValue('#FFC107'); // Make sure color picker is also reset
