@@ -5,7 +5,7 @@ import CustomScreeningForm from '../CustomScreeningForm';
 import CustomQuestionsModal from '../CustomQuestionsModal';
 import PresetQuestionOptions, { PRESET_QUESTIONS } from '../PresetQuestionOptions';
 import EditIcon from '@/svg/EditIcon';
-
+import MinusIconWithBorder from '@/svg/MinusIconWithBorder';
 // Extend Window interface to include our custom properties
 declare global {
   interface Window {
@@ -596,9 +596,9 @@ export default function CreateJobPageJobSettings({
                   className="ml-4 p-1 rounded hover:bg-gray-100"
                   onClick={toggleScreeningSection}
                 >
-                  {/* Edit Icon */}
-                  <span className="sr-only">Edit</span>
-                  <EditIcon />
+                  {/* Edit Icon / Back Icon */}
+                  <span className="sr-only">{isScreeningOpen ? 'Back' : 'Edit'}</span>
+                  {isScreeningOpen ? <MinusIconWithBorder /> : <EditIcon />}
                 </button>
               </div>
 
@@ -746,8 +746,8 @@ export default function CreateJobPageJobSettings({
               className="ml-4 p-1 rounded hover:bg-gray-100"
               onClick={toggleRejectionSettings}
             >
-              <span className="sr-only">Edit</span>
-              <EditIcon />
+              <span className="sr-only">{isRejectionSettingsOpen ? 'Back' : 'Edit'}</span>
+              {isRejectionSettingsOpen ? <MinusIconWithBorder /> : <EditIcon />}
             </button>
           </div>
 

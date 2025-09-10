@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import ModalLayout from './ModalLayout';
@@ -65,16 +65,10 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
 
   // Add refresh state
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Add refresh handler that fetches fresh archived data
   const handleRefresh = useCallback(async () => {
-    if (isRefreshDisabled) return;
-    
     setIsRefreshing(true);
-    setIsRefreshDisabled(true);
-    
     try {
       // Call the parent's refetch function to get fresh archived applicants data
       if (onRefresh) {
@@ -82,22 +76,8 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
       }
     } finally {
       setIsRefreshing(false);
-      
-      // Set timer to re-enable refresh button after 5 seconds
-      refreshTimerRef.current = setTimeout(() => {
-        setIsRefreshDisabled(false);
-      }, 5000);
     }
-  }, [onRefresh, isRefreshDisabled]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
-    };
-  }, []);
+  }, [onRefresh]);
 
   // Separate applications by status
   const rejectedApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'rejected') || [];
@@ -318,20 +298,22 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                 />
               </div>
               
-              {/* Add refresh button with spin */}
+              {/* Add refresh button */}
               <button
                 onClick={handleRefresh}
-                disabled={isRefreshing || isRefreshDisabled}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isRefreshing}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                <svg 
-                  className={`h-4 w-4 ${(isRefreshing || isRefreshDisabled) ? 'animate-spin' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                {isRefreshing ? (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
               </button>
               
               {selectedApplicants.length > 0 && (
