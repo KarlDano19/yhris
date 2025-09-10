@@ -161,15 +161,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   ];
 
   useEffect(() => {
-    if (employeeListData) {
-      employeeListData.records.map((employee: any) => {
-        employee.date_hired = Intl.DateTimeFormat('en-US').format(new Date(employee.date_hired));
-        return employee;
-      });
-      setEmployeeItems(employeeListData.records);
+    // Add proper null/undefined checks
+    if (employeeListData && employeeListData.records && Array.isArray(employeeListData.records)) {
+      // Create a new array instead of mutating the original
+      const formattedEmployees = employeeListData.records.map((employee: any) => ({
+        ...employee,
+        date_hired: Intl.DateTimeFormat('en-US').format(new Date(employee.date_hired))
+      }));
+      
+      setEmployeeItems(formattedEmployees);
       setPagination({
-        totalPages: employeeListData.total_pages,
-        totalRecords: employeeListData.total_records,
+        totalPages: employeeListData.total_pages || 1,
+        totalRecords: employeeListData.total_records || 0,
+      });
+    } else {
+      // Reset to empty state when data is invalid/undefined
+      setEmployeeItems([]);
+      setPagination({
+        totalPages: 1,
+        totalRecords: 0,
       });
     }
   }, [employeeListData]);

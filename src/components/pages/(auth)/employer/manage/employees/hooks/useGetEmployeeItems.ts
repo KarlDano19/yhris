@@ -28,18 +28,32 @@ async function getEmployeeItems(filters: any) {
     };
     if (token) {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/?${searchParams}`, config);
+
+      if (res.status === 401 || res.status === 403) {
+        const error = await res.json();
+        if (error.detail?.includes('Invalid token') || error.detail?.includes('Token has expired')) {
+          window.dispatchEvent(new CustomEvent('token-expired'));
+          throw new Error('Token has expired');
+        }
+      }
       if (!res.ok) {
+        const error = await res.json();
         throw res.json();
       }
       return res.json();
     }
     return [];
   } catch (err: any) {
-    let errStringify = await err;
-    if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
+    if (err.message === 'Token has expired') {
+      throw err;
     }
-    throw errStringify.message;
+    if (err.then) {
+      let errStringify = await err;
+      if (Object.hasOwn(errStringify, 'response')) {
+        throw errStringify.response.data.message;
+      }
+      throw errStringify.message;
+    }
   }
 }
 
