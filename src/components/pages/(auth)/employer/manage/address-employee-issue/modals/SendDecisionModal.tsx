@@ -14,10 +14,13 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_SendDecisionModal } from '@/types/globals';
@@ -47,6 +50,20 @@ function stripHtml(html: string) {
   return tmp.textContent || tmp.innerText || '';
 }
 
+// Get filename from attachment URL
+const getFilenameFromUrl = (url: string) => {
+  if (!url) return '';
+  
+  // Remove AWS credentials from the URL if present
+  let cleanUrl = url;
+  if (url.includes('?AWSAccessKeyId=')) {
+    cleanUrl = url.split('?AWSAccessKeyId=')[0];
+  }
+  
+  const urlParts = cleanUrl.split('/');
+  return urlParts[urlParts.length - 1];
+};
+
 export default function SendDecisionModal({
   employeeIssueItems,
   setEmployeeIssueItems,
@@ -61,7 +78,7 @@ export default function SendDecisionModal({
   refetch?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
@@ -81,6 +98,9 @@ export default function SendDecisionModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  // Fetch employee issue details to get attachment
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -149,7 +169,14 @@ export default function SendDecisionModal({
         setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, employeeIssueItems, setTagsTo]);
+
+  // Load attachment when employee issue details are available
+  useEffect(() => {
+    if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
+      setPdfAttachment(employeeIssueDetails.nte_attachment);
+    }
+  }, [employeeIssueDetails]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -164,7 +191,7 @@ export default function SendDecisionModal({
     if (subjectContent && subjectContent.trim() !== '') {
       clearErrors('subject');
     }
-  }, [watch('subject'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when message changes
   useEffect(() => {
@@ -173,7 +200,7 @@ export default function SendDecisionModal({
     if (!isHtmlEmpty(messageContent)) {
       clearErrors('message');
     }
-  }, [watch('message'), clearErrors]);
+  }, [watch, clearErrors]);
 
   const onSubmit = handleSubmit((data) => {
     // Validate "To" field manually since it uses tags
@@ -531,6 +558,35 @@ export default function SendDecisionModal({
                           />
                         </div>
                       </div>
+                      
+                      {/* Attachment section with ClipIcon - moved outside the quill container */}
+                      <div className="mt-10 pt-4">
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
+                        </label>
+                        <div className="mt-2 flex items-center gap-2 pl-2">
+                          <ClipIcon hasFile={!!pdfAttachment} />
+                          {pdfAttachment && (
+                            <>
+                              <span className="text-sm text-gray-600">
+                                {getFilenameFromUrl(pdfAttachment)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => window.open(pdfAttachment, '_blank')}
+                                className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
+                                title="View attachment"
+                              >
+                                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                              </button>
+                            </>
+                          )}
+                          {!pdfAttachment && (
+                            <span className="text-sm text-gray-400">No attachment</span>
+                          )}
+                        </div>
+                      </div>
+                      
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
