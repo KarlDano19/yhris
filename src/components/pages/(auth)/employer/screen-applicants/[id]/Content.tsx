@@ -472,6 +472,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           archivedApplicantRefetch();
           setIsArchivedApplicantsModalOpen(false);
         }}
+        onRefresh={archivedApplicantRefetch}
       />
     </>
   );
