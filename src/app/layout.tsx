@@ -4,9 +4,10 @@ import 'react-quill/dist/quill.snow.css';
 
 import { Toaster } from 'react-hot-toast';
 
+import { PostHogProvider } from '@/components/PostHogProvider';
+import GlobalErrorHandler from '@/components/GlobalErrorHandler';
 import ReactQueryWrapper from '@/app/reactQueryWrapper';
 import Auth from '@/app/auth';
-import { PostHogProvider } from '@/components/PostHogProvider';
 
 import './quill-tooltips.css';
 import './globals.css';
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang='en'>
       <body className={`${golos_text.className}`}>  
         <PostHogProvider>
+          <GlobalErrorHandler />
           <ReactQueryWrapper>
             <Auth>{children}</Auth>
           </ReactQueryWrapper>
