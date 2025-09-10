@@ -15,8 +15,9 @@ import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
+import { useDeleteNTEAttachment } from '../hooks/useDeleteNTEAttachment';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import ClipIcon from '@/svg/ClipIcon';
@@ -93,6 +94,7 @@ export default function SendNTEModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
@@ -353,6 +355,41 @@ export default function SendNTEModal({
     
     const urlParts = cleanUrl.split('/');
     return urlParts[urlParts.length - 1];
+  };
+
+  // Handle delete NTE attachment
+  const handleDeleteAttachment = () => {
+    if (isOpen?.id) {
+      deleteNTEAttachment(isOpen.id, {
+        onSuccess: (data: any) => {
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message || 'Attachment deleted successfully'} type='success' />, { duration: 3000 });
+          
+          // Close the modal and reset form data
+          setIsOpen(null);
+          resetFormData();
+          
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to delete attachment';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 5000,
+          });
+        },
+      });
+    }
   };
 
   return (
@@ -680,24 +717,38 @@ export default function SendNTEModal({
                         <label className='block text-sm font-medium leading-6 text-gray-900'>
                           Attachment
                         </label>
-                        <div className="mt-2 flex items-center">
-                          <div className="flex items-center gap-2 pl-2 cursor-pointer">
-                            <ClipIcon hasFile={!!pdfAttachment} />
-                            {pdfAttachment && (
-                              <>
-                                <span className="text-sm text-gray-600">
-                                  {getFilenameFromUrl(pdfAttachment)}
-                                </span>
-                                <ArrowTopRightOnSquareIcon 
-                                  className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
-                                  onClick={() => window.open(pdfAttachment, '_blank')}
-                                />
-                              </>
-                            )}
-                            {!pdfAttachment && (
-                              <span className="text-sm text-gray-400">No attachment</span>
-                            )}
-                          </div>
+                        <div className="mt-2 flex items-center gap-2 pl-2">
+                          <ClipIcon hasFile={!!pdfAttachment} />
+                          {pdfAttachment && (
+                            <>
+                              <span className="text-sm text-gray-600">
+                                {getFilenameFromUrl(pdfAttachment)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => window.open(pdfAttachment, '_blank')}
+                                className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
+                                title="View attachment"
+                              >
+                                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleDeleteAttachment}
+                                disabled={isDeleting}
+                                className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                              >
+                                {isDeleting ? (
+                                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <TrashIcon className="h-4 w-4" />
+                                )}
+                              </button>
+                            </>
+                          )}
+                          {!pdfAttachment && (
+                            <span className="text-sm text-gray-400">No attachment</span>
+                          )}
                         </div>
                       </div>
                       
