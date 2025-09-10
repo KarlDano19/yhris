@@ -170,15 +170,32 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                                     <span className="font-medium">Response Type:</span> {question.responseType || 'Text'}
                                   </span>
                                   <span>
-                                    <span className="font-medium">Ideal answer:</span> {Array.isArray(question.idealAnswer) 
-                                      ? question.idealAnswer.join(', ') 
-                                      : question.idealAnswer}
+                                    <span className="font-medium">Ideal answer:</span> 
+                                    {Array.isArray(question.idealAnswer) ? (
+                                      <span className="ml-1">
+                                        {question.idealAnswer.map((answer: string, idx: number) => (
+                                          <span key={idx} className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium ml-1">
+                                            {answer}
+                                          </span>
+                                        ))}
+                                      </span>
+                                    ) : (
+                                      <span className={`ml-1 font-medium ${question.idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {question.idealAnswer}
+                                      </span>
+                                    )}
                                   </span>
                                   <span>
-                                    <span className="font-medium">Must Have:</span> {question.mustHave ? 'Yes' : 'No'}
+                                    <span className="font-medium">Must Have:</span> 
+                                    <span className={`ml-1 font-medium ${question.mustHave ? 'text-green-600' : 'text-red-600'}`}>
+                                      {question.mustHave ? 'Yes' : 'No'}
+                                    </span>
                                   </span>
                                   <span>
-                                    <span className="font-medium">Show to Candidates:</span> {question.showToCandidates ? 'Yes' : 'No'}
+                                    <span className="font-medium">Show to Candidates:</span> 
+                                    <span className={`ml-1 font-medium ${question.showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
+                                      {question.showToCandidates ? 'Yes' : 'No'}
+                                    </span>
                                   </span>
                                 </div>
                               </div>
@@ -231,33 +248,43 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                   {/* Simple Delete Confirmation Overlay - INSIDE the Dialog.Panel */}
                   {deleteModal?.open && (
                     <div className="absolute inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
-                      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all duration-200 ease-out">
-                        <div className="flex items-center mb-4">
+                      <div className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-[500px]">
+                        <div className="flex justify-center py-8 px-2">
                           <WarningRed />
-                          <h3 className="text-lg font-medium text-gray-900">
-                            Delete Question
-                          </h3>
                         </div>
-                        <p className="text-gray-600 mb-6">
-                          Are you sure you want to delete this question? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-end space-x-3">
-                          <button
-                            onClick={() => setDeleteModal(null)}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (deleteModal) {
-                                handleConfirmDelete(deleteModal.id);
-                              }
-                            }}
-                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          >
-                            Delete
-                          </button>
+                        <div className="text-xl px-20 text-center">
+                          <p className="text-xl text-gray-600 font-bold">
+                            Are you sure you want to <span className="text-red-500">delete</span> this question?
+                          </p>
+                          {deleteModal.question && (
+                            <p className="text-sm text-gray-500 mt-2 italic">
+                              "{deleteModal.question}"
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex justify-center w-full px-4 space-x-8 pt-10 pb-7">
+                          <span className="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                            <button
+                              type="button"
+                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+                              onClick={() => setDeleteModal(null)}
+                            >
+                              No
+                            </button>
+                          </span>
+                          <span className="flex w-full rounded-md shadow-sm sm:w-auto">
+                            <button
+                              type="button"
+                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+                              onClick={() => {
+                                if (deleteModal) {
+                                  handleConfirmDelete(deleteModal.id);
+                                }
+                              }}
+                            >
+                              Yes
+                            </button>
+                          </span>
                         </div>
                       </div>
                     </div>

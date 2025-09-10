@@ -606,25 +606,33 @@ export default function CreateJobPageJobSettings({
               {!isScreeningOpen && screeningQuestions.length > 0 && (
                 <div className="ml-5 text-sm text-gray-900">
                   <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
-                    <ol className="list-decimal space-y-2">
+                    <ol className="list-decimal space-y-3 pl-6">
                       {screeningQuestions.map((question, index) => (
-                        <li key={question.id} className="text-sm">
-                          <div className="font-medium text-gray-900">{question.question}</div>
-                          <div className="text-xs text-gray-500 mt-1">
+                        <li key={question.id} className="text-sm leading-relaxed">
+                          <div className="font-medium text-gray-900 mb-1">{question.question}</div>
+                          <div className="text-sm text-gray-500 ml-0">
                             {question.responseType === 'Text' ? (
-                              'No ideal answer required'
+                              <span className="text-gray-500">No ideal answer required</span>
                             ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
                               question.idealAnswer.length > 0 ? (
-                                `Ideal answers: ${question.idealAnswer.join(', ')}`
+                                <span>
+                                  Ideal answers: <span className="font-semibold text-green-600 text-base">{question.idealAnswer.join(', ')}</span>
+                                </span>
                               ) : (
-                                'No ideal answers selected'
+                                <span className="text-gray-500">No ideal answers selected</span>
                               )
                             ) : (
-                              `Ideal answer: ${question.idealAnswer}`
+                              <span>
+                                Ideal answer: <span className={`font-semibold text-base ${question.idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                                  {question.idealAnswer}
+                                </span>
+                              </span>
                             )}
                             {question.showToCandidates !== undefined && (
                               <span className="ml-2">
-                                | Show to candidates: {question.showToCandidates ? 'Yes' : 'No'}
+                                | Show to candidates: <span className={`font-semibold text-base ${question.showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
+                                  {question.showToCandidates ? 'Yes' : 'No'}
+                                </span>
                               </span>
                             )}
                           </div>
