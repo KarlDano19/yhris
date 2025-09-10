@@ -6,6 +6,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
@@ -57,6 +58,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isAccountsListLoading,
     refetch: accountsListRefetch,
   } = useGetAccountsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+
+  // Form Methods
+  const createFormMethods = useForm();
+  const updateFormMethods = useForm();
 
   useEffect(() => {
     if (accountsListData) {
@@ -223,6 +228,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isAddAccountModalOpen}
           setIsOpen={setIsAddAccountModalOpen}
           refetch={accountsListRefetch}
+          formMethods={createFormMethods}
         />
       )}
       {isUpdateAccountModalOpen && (
@@ -230,6 +236,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isUpdateAccountModalOpen}
           setIsOpen={setIsUpdateAccountModalOpen}
           refetch={accountsListRefetch}
+          formMethods={updateFormMethods}
         />
       )}
       {isResetPasswordModalOpen && (

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -62,6 +63,8 @@ export default function SendContractModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
@@ -75,6 +78,65 @@ export default function SendContractModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = useUpdateApplicantOrient();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    // Check if tagsTo has more than just the default applicant email
+    const hasAdditionalRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== applicantEmail);
+    
+    return (
+      (formData.template && formData.template !== '') ||
+      (formData.subject && formData.subject.trim() !== '') ||
+      hasAdditionalRecipients ||
+      (tagsCc.length > 0) ||
+      (tagsBcc.length > 0) ||
+      (formData.message && !isHtmlEmpty(formData.message))
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setValue('template', '');
+    setValue('subject', '');
+    setValue('message', '');
+    setTagsTo(applicantEmail ? [applicantEmail] : []);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setInputTo('');
+    setInputCc('');
+    setInputBcc('');
+    setIsCCOPen(false);
+    setIsBCCOpen(false);
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -168,7 +230,10 @@ export default function SendContractModal({
       const callbackReq = {
         onSuccess: () => {
           setOrientItems(orientItemCopy);
-          customCloseModal();
+          // Reset form data before closing modal to prevent unsaved changes detection
+          resetFormData();
+          reset();
+          setIsOpen(false);
           setSuccessModal(true);
           toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
             duration: 5000,
@@ -198,8 +263,11 @@ export default function SendContractModal({
   }, [isOpen]);
 
   const customCloseModal = () => {
-    reset();
-    setIsOpen(false);
+    handleModalClose(() => {
+      resetFormData();
+      reset();
+      setIsOpen(false);
+    });
   };
 
   
@@ -582,6 +650,18 @@ export default function SendContractModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="email"
+        />
+      )}
     </>
   );
 }

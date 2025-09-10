@@ -523,14 +523,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setSuccessModal={setIsSuccessSendContractModalOpen}
         />
       )}
-      <OrientOptionModal
-        selectedOrientId={selectedOrientId}
-        orientItems={orientItems}
-        setOrientItems={setOrientItems}
-        setIsOpen={setIsOrientOptionModalOpen}
-        isOpen={isOrientOptionModalOpen}
-        setIsNewHireOrientedOpen={setNewHireOriented}
-      />
+      {isOrientOptionModalOpen && (
+        <OrientOptionModal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          setIsOpen={setIsOrientOptionModalOpen}
+          isOpen={isOrientOptionModalOpen}
+          setIsNewHireOrientedOpen={setNewHireOriented}
+        />
+      )}
       <SuccessModal
         isOpen={isSuccessSendContractModalOpen}
         setIsOpen={setIsSuccessSendContractModalOpen}
