@@ -24,9 +24,6 @@ export async function batchUploadResumes(data: FormData) {
       
       const result = await res.json();
       
-      // Debug: log the response structure
-      console.log('API Response:', result);
-      
       return result;
     }
     

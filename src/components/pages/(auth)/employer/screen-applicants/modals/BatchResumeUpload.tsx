@@ -160,8 +160,6 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
 
     batchUploadMutate(formData, {
       onSuccess: (data) => {
-        // Debug: log the response structure
-        console.log('Batch upload response:', data);
         
         // Handle the response structure - data should contain the results directly
         const results = data || {};
