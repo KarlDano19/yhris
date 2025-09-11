@@ -4,17 +4,31 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import Warning from '@/svg/Warning';
 
+interface ConfirmSubmitModalProps {
+  isOpen: boolean;
+  setIsOpen: Dispatch<boolean>;
+  isLoading: boolean;
+  onSubmit: () => void;
+  title: string;
+  subtitle?: string;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+  highlightText?: string;
+  highlightColor?: string;
+}
+
 export default function ConfirmSubmitModal({
   isOpen,
   setIsOpen,
   isLoading,
   onSubmit,
-}: {
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
-  isLoading: any;
-  onSubmit: any;
-}) {
+  title,
+  subtitle,
+  confirmButtonText = 'Yes',
+  cancelButtonText = 'No',
+  highlightText,
+  highlightColor = '#fcba03',
+}: ConfirmSubmitModalProps) {
   const cancelButtonRef = useRef(null);
 
   return (
@@ -49,7 +63,16 @@ export default function ConfirmSubmitModal({
                 </div>
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
-                    Are you sure you want to <span className='text-[#fcba03]'>submit</span> your response?
+                    {title}
+                    {highlightText && (
+                      <span style={{ color: highlightColor }}> {highlightText}</span>
+                    )}
+                    {subtitle && (
+                      <>
+                        <br />
+                        <span className='text-xl text-gray-600 mt-2 block'>{subtitle}</span>
+                      </>
+                    )}
                   </p>
                 </div>
                 <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
@@ -59,7 +82,7 @@ export default function ConfirmSubmitModal({
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                       onClick={() => setIsOpen(false)}
                     >
-                      No
+                      {cancelButtonText}
                     </button>
                   </span>
                   <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
@@ -90,7 +113,7 @@ export default function ConfirmSubmitModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoading && 'Yes'}
+                      {!isLoading && confirmButtonText}
                     </button>
                   </span>
                 </div>

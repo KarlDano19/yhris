@@ -7,40 +7,25 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
   try {
     const token = getCookie('token');
     let data: any = {};
+    
     if (employeeIssue.actionType === 'sending') {
       data = {
         type_of_action: employeeIssue.actionType,
         type_of_email: employeeIssue.emailType,
-        subject: '',
-        to: '',
-        cc: '',
-        bcc: '',
-        context: '',
       };
+      
       if (employeeIssue.emailType === 'nte') {
-        data.subject = employeeIssue.issueNTEForm.subject
-          ? employeeIssue.issueNTEForm.subject
-          : `NTE | ${employeeIssue.issueNTEForm.template}`;
-        data.nte_subject = employeeIssue.issueNTEForm.subject;
-        data.to = employeeIssue.issueNTEForm.to;
-        data.cc = employeeIssue.issueNTEForm.cc;
-        data.bcc = employeeIssue.issueNTEForm.bcc;
-        data.context = employeeIssue.issueNTEForm.message;
+        // Only save NTE form data to backend fields
         data.nte_subject = employeeIssue.nte_subject;
         data.nte_to = employeeIssue.nte_to;
         data.nte_cc = employeeIssue.nte_cc;
         data.nte_bcc = employeeIssue.nte_bcc;
         data.nte_message = employeeIssue.nte_message;
       }
+      
       if (employeeIssue.emailType === 'decision') {
-        data.subject = employeeIssue.sendDecisionForm.subject
-          ? employeeIssue.sendDecisionForm.subject
-          : `Decision | ${employeeIssue.sendDecisionForm.template}`;
-        data.decision_subject = employeeIssue.sendDecisionForm.subject;
-        data.to = employeeIssue.sendDecisionForm.to;
-        data.cc = employeeIssue.sendDecisionForm.cc;
-        data.bcc = employeeIssue.sendDecisionForm.bcc;
-        data.context = employeeIssue.sendDecisionForm.message;
+        // Only save decision form data to backend fields
+        data.decision_subject = employeeIssue.decision_subject;
         data.decision_to = employeeIssue.decision_to;
         data.decision_cc = employeeIssue.decision_cc;
         data.decision_bcc = employeeIssue.decision_bcc;

@@ -45,21 +45,11 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
-function stripHtml(html: string) {
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
 export default function SendNTEModal({
-  employeeIssueItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeIssueItems: any;
-  setEmployeeIssueItems: any;
   isOpen: T_SendNTEModal | null;
   setIsOpen: Dispatch<T_SendNTEModal | null>;
   refetch?: () => void;
@@ -292,11 +282,17 @@ export default function SendNTEModal({
     if (isOpen && isOpen.id) {
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
       
-      // Create the payload directly without depending on employeeIssueItems array
+      // Create the simplified payload - only save form data to backend fields
       const payload = {
         id: isOpen.id.toString(),
         actionType: 'sending',
         emailType: 'nte',
+        nte_subject: data.subject,
+        nte_to: JSON.stringify(tagsTo),
+        nte_cc: JSON.stringify(tagsCc),
+        nte_bcc: JSON.stringify(tagsBcc),
+        nte_message: data.message,
+        // Required by type but not used for NTE
         issueNTEForm: {
           template: template ? template.subject : '',
           subject: data.subject,
@@ -306,18 +302,21 @@ export default function SendNTEModal({
           message: data.message,
           attachment: pdfAttachment || null
         },
-        sendDecisionForm: {}, // Required by type but not used for NTE
-        dateReceived: null, // Required by type but not used for sending
-        nte_subject: data.subject,
-        nte_to: JSON.stringify(tagsTo),
-        nte_cc: JSON.stringify(tagsCc),
-        nte_bcc: JSON.stringify(tagsBcc),
-        nte_message: data.message,
-        decision_subject: '', // Required by type but not used for NTE
-        decision_to: '', // Required by type but not used for NTE
-        decision_cc: '', // Required by type but not used for NTE
-        decision_bcc: '', // Required by type but not used for NTE
-        decision_message: '' // Required by type but not used for NTE
+        sendDecisionForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        dateReceived: null,
+        decision_subject: '',
+        decision_to: '',
+        decision_cc: '',
+        decision_bcc: '',
+        decision_message: ''
       };
       
       const callbackReq = {

@@ -44,12 +44,6 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
-function stripHtml(html: string) {
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
 // Get filename from attachment URL
 const getFilenameFromUrl = (url: string) => {
   if (!url) return '';
@@ -65,14 +59,10 @@ const getFilenameFromUrl = (url: string) => {
 };
 
 export default function SendDecisionModal({
-  employeeIssueItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeIssueItems: any;
-  setEmployeeIssueItems: any;
   isOpen: T_SendDecisionModal | null;
   setIsOpen: Dispatch<T_SendDecisionModal | null>;
   refetch?: () => void;
@@ -161,15 +151,14 @@ export default function SendDecisionModal({
   };
 
   useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+    if (isOpen && isOpen.id && employeeIssueDetails) {
+      const employeeEmail = employeeIssueDetails.email;
+      setApplicantEmail(employeeEmail);
+      if (employeeEmail) {
+        setTagsTo([employeeEmail]);
       }
     }
-  }, [isOpen, employeeIssueItems, setTagsTo]);
+  }, [isOpen, employeeIssueDetails, setTagsTo]);
 
   // Load attachment when employee issue details are available
   useEffect(() => {
@@ -213,33 +202,47 @@ export default function SendDecisionModal({
       return;
     }
     if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
-      employeeIssueItemsCopy[itemIndex].id = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].actionType = 'sending';
-      employeeIssueItemsCopy[itemIndex].emailType = 'decision';
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template ? template.subject : '';
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = tagsTo;
-      if (tagsCc) {
-        employeeIssueItemsCopy[itemIndex].sendDecisionForm.cc = tagsCc;
-      }
-      if (tagsBcc) {
-        employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = tagsBcc;
-      }
-      // Store message as HTML (preserve formatting)
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
-      employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
-      // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
-      employeeIssueItemsCopy[itemIndex].decision_subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
-      employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
-      employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].decision_message = data.message;
+      
+      // Create the simplified payload - only save form data to backend fields
+      const payload = {
+        id: isOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'decision',
+        decision_subject: data.subject,
+        decision_to: JSON.stringify(tagsTo),
+        decision_cc: JSON.stringify(tagsCc),
+        decision_bcc: JSON.stringify(tagsBcc),
+        decision_message: data.message,
+        // Required by type but not used for decision
+        issueNTEForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        sendDecisionForm: {
+          template: template ? template.subject : '',
+          subject: data.subject,
+          to: tagsTo,
+          cc: tagsCc,
+          bcc: tagsBcc,
+          message: data.message,
+          attachment: null
+        },
+        dateReceived: null,
+        nte_subject: '',
+        nte_to: '',
+        nte_cc: '',
+        nte_bcc: '',
+        nte_message: ''
+      };
+      
       const callbackReq = {
         onSuccess: (data: any) => {
-          setEmployeeIssueItems([...employeeIssueItemsCopy]);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           // Reset form data before closing modal to prevent unsaved changes detection
           resetFormData();
@@ -254,7 +257,7 @@ export default function SendDecisionModal({
           });
         },
       };
-      mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
+      mutate(payload, callbackReq);
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }

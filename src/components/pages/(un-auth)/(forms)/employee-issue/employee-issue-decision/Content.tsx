@@ -3,16 +3,18 @@
 import { useEffect, useState } from 'react';
 
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 import toast from 'react-hot-toast';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import Confetti from 'react-confetti';
 
 import CustomToast from '@/components/CustomToast';
-import ConfirmSubmitModal from './modals/ConfirmSubmitModal';
-import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
-import useGetEmployeeIssueResponseDetails from './hooks/useGetEmployeeIssueResponseDetails';
-import useUpdateEmployeeIssueResponse from './hooks/useUpdateEmployeeIssueResponse';
+import ConfirmSubmitModal from '../modals/ConfirmSubmitModal';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
+import useGetEmployeeIssueActionDetails from '../hooks/useGetEmployeeIssueActionDetails';
+import useUpdateEmployeeIssueAction from '../hooks/useUpdateEmployeeIssueAction';
+import SignatureModal from '../modals/SignatureModal';
 
 import ConfettiLogo from '@/svg/Confetti';
 
@@ -20,21 +22,22 @@ function Content() {
   const { width, height } = useWindowSize();
   const params = useParams<{ employee_issue_id: string }>();
   const [hasIssue, setHasIssue] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isAcknowledged, setIsAcknowledged] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isConfirmSubmitModalOpen, setIsConfirmSubmitModalOpen] = useState(false);
   const [employeeIssueDetails, setEmployeeIssueDetails] = useState<any>({});
-  const [responseText, setResponseText] = useState('');
+  const [signatureFile, setSignatureFile] = useState<File | string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   
   const { data: dataEmployeeIssueDetails, isLoading: employeeIssueDetailsLoading } =
     useGetEmployeeIssueDetails(params.employee_issue_id || null);
   const {
-    data: dataEmployeeIssueResponseDetails,
-    isLoading: employeeIssueResponseDetailsLoading,
-    refetch: refetchEmployeeIssueResponseDetails,
-  } = useGetEmployeeIssueResponseDetails(params.employee_issue_id || null);
-  const { mutate, isLoading } = useUpdateEmployeeIssueResponse();
+    data: dataEmployeeIssueDecisionDetails,
+    isLoading: employeeIssueDecisionDetailsLoading,
+    refetch: refetchEmployeeIssueDecisionDetails,
+  } = useGetEmployeeIssueActionDetails(params.employee_issue_id || null);
+  const { mutate, isLoading } = useUpdateEmployeeIssueAction();
 
   useEffect(() => {
     if (
@@ -49,38 +52,70 @@ function Content() {
 
   useEffect(() => {
     if (
-      dataEmployeeIssueResponseDetails &&
-      Object.keys(dataEmployeeIssueResponseDetails).length !== 0 &&
-      !employeeIssueResponseDetailsLoading
+      dataEmployeeIssueDecisionDetails &&
+      Object.keys(dataEmployeeIssueDecisionDetails).length !== 0 &&
+      !employeeIssueDecisionDetailsLoading
     ) {
-      // If already responded, show submitted state
-      if (dataEmployeeIssueResponseDetails.is_responded) {
-        setIsSubmitted(true);
-        setResponseText(dataEmployeeIssueResponseDetails.response || '');
+      // If already acknowledged, show acknowledged state
+      if (dataEmployeeIssueDecisionDetails.is_decision_acknowledged) {
+        setIsAcknowledged(true);
       }
     }
-  }, [dataEmployeeIssueResponseDetails, employeeIssueResponseDetailsLoading]);
+  }, [dataEmployeeIssueDecisionDetails, employeeIssueDecisionDetailsLoading]);
+
+  // Helper function to convert base64 data URL to File
+  const convertDataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: 'image/png' });
+  };
+
+  // Handle signature from modal (both drawn and uploaded)
+  const handleSignatureSave = async (signatureData: string | File) => {
+    try {
+      if (typeof signatureData === 'string') {
+        // Drawn signature (base64 data URL)
+        const signatureFile = await convertDataUrlToFile(signatureData, 'signature.png');
+        setSignatureFile(signatureFile);
+      } else {
+        // Uploaded file
+        setSignatureFile(signatureData);
+      }
+    } catch (error) {
+      console.error('Error processing signature:', error);
+      toast.custom(() => <CustomToast message="Error processing signature. Please try again." type='error' />, { duration: 4000 });
+    }
+  };
+
+  // Handle transparency check (optional)
+  const handleTransparencyCheck = (result: {hasTransparency: boolean, message: string, type: 'success' | 'warning' | 'error'}) => {
+    if (result.type === 'error') {
+      toast.custom(() => <CustomToast message={result.message} type='error' />, { duration: 4000 });
+    } else if (result.type === 'warning') {
+      toast.custom(() => <CustomToast message={result.message} type='warning' />, { duration: 4000 });
+    }
+  };
 
   const handleSubmit = () => {
-    if (!responseText.trim()) {
-      toast.custom(() => <CustomToast message="Please provide your response." type='error' />, { duration: 4000 });
+    if (!signatureFile) {
+      toast.custom(() => <CustomToast message="Please provide your signature." type='error' />, { duration: 4000 });
       return;
     }
 
     setIsConfirmSubmitModalOpen(true);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     setIsSubmitting(true);
     
     const callbackReq = {
       onSuccess: (data: any) => {
-        setIsSubmitted(true);
+        setIsAcknowledged(true);
         setIsConfirmSubmitModalOpen(false);
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         
-        // Refetch response details to get updated data
-        refetchEmployeeIssueResponseDetails();
+        // Refetch decision details to get updated data
+        refetchEmployeeIssueDecisionDetails();
       },
       onError: (err: any) => {
         const errorMessage = typeof err === 'string' ? err : err.message || 'An error occurred';
@@ -90,15 +125,27 @@ function Content() {
       },
     };
 
-    mutate(
-      {
-        employee_issue_id: params.employee_issue_id,
-        data: {
-          response: responseText,
-        },
-      },
-      callbackReq
-    );
+    if (signatureFile) {
+      try {
+        // Ensure we have a File object for upload
+        const fileToUpload = typeof signatureFile === 'string' 
+          ? await convertDataUrlToFile(signatureFile, 'signature.png')
+          : signatureFile;
+          
+        mutate(
+          {
+            employee_issue_id: params.employee_issue_id,
+            action_type: 'decision',
+            employee_signature: fileToUpload,
+          },
+          callbackReq
+        );
+      } catch (error) {
+        console.error('Error processing signature file:', error);
+        toast.custom(() => <CustomToast message="Error processing signature. Please try again." type='error' />, { duration: 4000 });
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -111,7 +158,7 @@ function Content() {
     });
   };
 
-  if (employeeIssueDetailsLoading || employeeIssueResponseDetailsLoading) {
+  if (employeeIssueDetailsLoading || employeeIssueDecisionDetailsLoading) {
     return (
       <div className='w-screen h-screen flex justify-center items-center'>
         <div className='fixed z-20 inset-0 overflow-y-auto'>
@@ -144,8 +191,8 @@ function Content() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Issue Not Found</h1>
-          <p className="text-gray-600">The employee issue you&apos;re looking for could not be found.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Issue Decision Not Found</h1>
+          <p className="text-gray-600">The employee issue decision you&apos;re looking for could not be found.</p>
         </div>
       </div>
     );
@@ -153,7 +200,7 @@ function Content() {
 
   return (
     <>
-      {isSubmitted ? (
+      {isAcknowledged ? (
         <>
           <div className='w-screen h-screen flex justify-center items-center'>
             <div className='fixed z-20 inset-0 overflow-y-auto'>
@@ -168,7 +215,7 @@ function Content() {
                       <ConfettiLogo />
                     </div>
                     <h1 className='text-center text-[#46d663] text-[32px] font-bold'>
-                      Congratulations on submitting your response!
+                      Thank you for acknowledging the decision!
                     </h1>
                   </div>
                 </div>
@@ -187,8 +234,8 @@ function Content() {
                 <div className="h-full flex flex-col">
                   {/* PDF Header */}
                   <div className="bg-gray-50 px-6 py-4 border-b-2 border-gray-200 rounded-t-lg">
-                    <h2 className="text-lg font-semibold text-gray-900">Notice to Explain Document</h2>
-                    <p className="text-sm text-gray-600 mt-1">Please review the document before providing your response</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Employee Issue Decision Document</h2>
+                    <p className="text-sm text-gray-600 mt-1">Please review the decision document before providing your acknowledgment</p>
                   </div>
                   
                   {/* PDF Content */}
@@ -198,7 +245,7 @@ function Content() {
                         <iframe
                           src={employeeIssueDetails.nte_attachment}
                           className="w-full h-full border border-gray-300 rounded-lg shadow-sm"
-                          title="NTE Document"
+                          title="Decision Document"
                         />
                       </div>
                     ) : (
@@ -207,9 +254,9 @@ function Content() {
                           <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
-                          <h3 className="mt-4 text-lg font-medium text-gray-900">No NTE Document</h3>
+                          <h3 className="mt-4 text-lg font-medium text-gray-900">No Decision Document</h3>
                           <p className="mt-2 text-sm text-gray-500">
-                            No attachment was provided with this Notice to Explain.
+                            No attachment was provided with this decision.
                           </p>
                         </div>
                       </div>
@@ -218,30 +265,76 @@ function Content() {
                 </div>
               </div>
 
-              {/* Right Side - Response Form */}
+              {/* Right Side - Acknowledgment Form */}
               <div className="w-96 bg-white border-2 rounded-lg border-gray-200">
                 <div className="h-full flex flex-col">
                   {/* Form Header */}
                   <div className="bg-gray-50 px-6 py-4 border-b-2 border-gray-200 rounded-t-lg">
-                    <h2 className="text-lg font-semibold text-gray-900">Your Response</h2>
-                    <p className="text-sm text-gray-600 mt-1">Provide your response to the incident</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Decision Acknowledgment</h2>
+                    <p className="text-sm text-gray-600 mt-1">Please provide your signature to acknowledge the decision</p>
                   </div>
                   
                   {/* Form Content */}
                   <div className="flex-1 p-6 overflow-y-auto">
                     <div className="space-y-6">
+                      {/* Decision Message Display */}
+                      {employeeIssueDetails.decision_message && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h3 className="text-sm font-medium text-blue-900 mb-2">Management Decision:</h3>
+                          <div 
+                            className="text-sm text-blue-800"
+                            dangerouslySetInnerHTML={{ __html: employeeIssueDetails.decision_message }}
+                          />
+                        </div>
+                      )}
+                      
                       <div>
-                        <label htmlFor="response" className="block text-sm font-medium text-gray-700 mb-3">
-                          Your response to the incident:
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Provide your signature:
                         </label>
-                        <textarea
-                          id="response"
-                          rows={12}
-                          className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm resize-none px-3 py-2"
-                          placeholder="write your response here..."
-                          value={responseText}
-                          onChange={(e) => setResponseText(e.target.value)}
-                        />
+                        
+                        <div className={`border-2 border-dashed rounded-md p-3 sm:p-6 flex flex-col items-center justify-center ${
+                          isSubmitting ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300'
+                        }`}>
+                          {signatureFile ? (
+                            <div className="flex flex-col items-center w-full">
+                              <Image 
+                                src={typeof signatureFile === 'string' 
+                                  ? signatureFile 
+                                  : URL.createObjectURL(signatureFile as File)} 
+                                alt="Signature Preview" 
+                                width={160}
+                                height={80}
+                                style={{ maxHeight: '6rem', width: 'auto', objectFit: 'contain' }}
+                                className="mb-3 sm:mb-4"
+                                unoptimized={true}
+                              />
+                              {!isSubmitting && (
+                                <button 
+                                  onClick={() => setIsSignatureModalOpen(true)}
+                                  className="text-blue-500 text-xs sm:text-sm hover:underline focus:outline-none"
+                                >
+                                  Change Signature
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => setIsSignatureModalOpen(true)}
+                              className="flex flex-col items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3"
+                              disabled={isSubmitting}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-12 sm:h-12 text-gray-400">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10 17 15 12 10 7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                              </svg>
+                              <span className="hover:underline focus:outline-none text-sm sm:text-base text-center text-blue-500">
+                                Click to add signature
+                              </span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="pt-4">
@@ -251,7 +344,7 @@ function Content() {
                           disabled={isSubmitting || isLoading}
                           className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Submit Response
+                          Submit Signature
                         </button>
                       </div>
                     </div>
@@ -261,7 +354,7 @@ function Content() {
                   <div className="border-t-2 border-gray-200 px-6 py-4 bg-gray-50 rounded-b-lg">
                     <div className="text-center text-xs text-gray-500">
                       <p>
-                        If you have any questions about this employee issue, please contact your HR representative.
+                        If you have any questions about this decision, please contact your HR representative.
                       </p>
                     </div>
                   </div>
@@ -275,6 +368,16 @@ function Content() {
             setIsOpen={setIsConfirmSubmitModalOpen}
             isLoading={isLoading}
             onSubmit={submitForm}
+            title="Are you sure you want to"
+            highlightText="submit your signature"
+            subtitle="for this decision?"
+          />
+          
+          <SignatureModal
+            isOpen={isSignatureModalOpen}
+            onClose={() => setIsSignatureModalOpen(false)}
+            onSave={handleSignatureSave}
+            onTransparencyCheck={handleTransparencyCheck}
           />
         </div>
       )}

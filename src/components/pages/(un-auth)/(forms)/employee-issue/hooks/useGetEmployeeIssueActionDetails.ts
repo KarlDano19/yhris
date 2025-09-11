@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-async function getEmployeeIssueDetails(employee_issue_id: string | null) {
+async function getEmployeeIssueActionDetails(employee_issue_id: string | null) {
   try {
     const config = {
       method: 'GET',
@@ -9,7 +9,7 @@ async function getEmployeeIssueDetails(employee_issue_id: string | null) {
       },
     };
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/employee-issues/${employee_issue_id}/`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/public/employee-issue-actions/${employee_issue_id}/`,
       config
     );
     if (!res.ok) {
@@ -25,10 +25,10 @@ async function getEmployeeIssueDetails(employee_issue_id: string | null) {
   }
 }
 
-function useGetEmployeeIssueDetails(employee_issue_id: string | null) {
+function useGetEmployeeIssueActionDetails(employee_issue_id: string | null) {
   const query = useQuery(
-    ['employeeIssueDetailsPublicCache'],
-    () => getEmployeeIssueDetails(employee_issue_id),
+    ['employeeIssueActionDetailsPublicCache'],
+    () => getEmployeeIssueActionDetails(employee_issue_id),
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
@@ -38,4 +38,4 @@ function useGetEmployeeIssueDetails(employee_issue_id: string | null) {
   return query;
 }
 
-export default useGetEmployeeIssueDetails;
+export default useGetEmployeeIssueActionDetails;

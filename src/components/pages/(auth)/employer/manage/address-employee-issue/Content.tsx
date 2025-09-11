@@ -569,8 +569,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <SendNTEModal
         isOpen={isSendNTEModalOpen}
         setIsOpen={setIsSendNTEModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
         refetch={refetch}
       />
       <InvestigationModal
@@ -582,8 +580,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <SendDecisionModal
         isOpen={isSendDecisionModalOpen}
         setIsOpen={setIsSendDecisionModalOpen}
-        employeeIssueItems={employeeIssueItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
         refetch={refetch}
       />
       {isInvestigationReportDetailsModalOpen && (
