@@ -182,7 +182,14 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           ${logoSrc ? `<img src="${logoSrc}" alt="Company Logo">` : `<div class="space"></div>`}
         </div>
         
-        <div class="document-title">NOTICE TO EXPLAIN</div>
+        <div class="header-row">
+          <div class="document-title">NOTICE TO EXPLAIN</div>
+          ${data.referenceNumber ? `
+            <div class="reference-number-header">
+              Ref: ${data.referenceNumber}
+            </div>
+          ` : ''}
+        </div>
         <div class="document-subtitle">${data.incidentPlace || '[Place of Incident]'}</div>
         
         <div class="decorative-line" style="border-color: ${borderColor}"></div>
@@ -381,6 +388,21 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           margin: 0 0 2px;
           text-transform: uppercase;
           color: #000;
+        }
+        
+        .header-row {
+          position: relative;
+          text-align: center;
+          margin-bottom: 2px;
+        }
+        
+        .reference-number-header {
+          position: absolute;
+          right: 0;
+          top: 0;
+          font-size: 12px;
+          color: #666;
+          font-style: italic;
         }
         
         .document-subtitle {

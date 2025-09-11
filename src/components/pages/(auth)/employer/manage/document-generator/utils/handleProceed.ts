@@ -43,6 +43,30 @@ export function handleProceedUtil({
         `<style>
           /* Override styles for PDF generation */
 
+          .document-title {
+            text-align: center !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            margin: 0 0 2px !important;
+            text-transform: uppercase !important;
+            color: #000 !important;
+          }
+          
+          .header-row {
+            position: relative !important;
+            text-align: center !important;
+            margin-bottom: 2px !important;
+          }
+          
+          .reference-number-header {
+            position: absolute !important;
+            right: 0 !important;
+            top: 0 !important;
+            font-size: 12px !important;
+            color: #666 !important;
+            font-style: italic !important;
+          }
+
           .document-subtitle {
             margin-bottom: 20px !important;
           }

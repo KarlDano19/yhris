@@ -5,9 +5,11 @@ interface ScreeningQuestionProps {
   idealAnswer: string | string[];
   degree?: string;
   mustHave: boolean;
+  showToCandidates: boolean;
   recommended?: boolean;
   onRemove: () => void;
   onToggleMustHave: () => void;
+  onToggleShowToCandidates: () => void;
   editable: boolean;
   onEdit: () => void;
   responseType?: string;
@@ -19,9 +21,11 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
   idealAnswer,
   degree,
   mustHave,
+  showToCandidates,
   recommended,
   onRemove,
   onToggleMustHave,
+  onToggleShowToCandidates,
   editable,
   onEdit,
   responseType = 'Yes / No',
@@ -39,7 +43,7 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
           {idealAnswer.map((answer, index) => (
             <span
               key={index}
-              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+              className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium"
             >
               {answer}
             </span>
@@ -47,7 +51,9 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
         </div>
       );
     } else {
-      return <span className="text-gray-900 text-sm font-medium">{idealAnswer as string}</span>;
+      // Color code Yes/No answers
+      const answerColor = idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600';
+      return <span className={`text-sm font-medium ${answerColor}`}>{idealAnswer as string}</span>;
     }
   };
 
@@ -62,7 +68,7 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
                 key={index}
                 className={`text-xs px-2 py-1 rounded ${
                   Array.isArray(idealAnswer) && idealAnswer.includes(option)
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-green-100 text-green-800 font-medium'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
@@ -110,16 +116,29 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
       </div>
       {renderOptions()}
       <div className="flex items-center mt-3 gap-2 justify-between">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={mustHave}
-            onChange={onToggleMustHave}
-            id="mustHaveCheckbox"
-            className="w-4 h-4"
-          />
-          <label className="text-sm text-gray-700 font-medium">Must–have qualification</label>
-          
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={mustHave}
+              onChange={onToggleMustHave}
+              id="mustHaveCheckbox"
+              className="w-4 h-4"
+            />
+            <label className="text-sm text-gray-700 font-medium">Must–have qualification</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showToCandidates}
+              onChange={onToggleShowToCandidates}
+              id="showToCandidatesCheckbox"
+              className="w-4 h-4"
+            />
+            <label className={`text-sm font-medium ${showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
+              Show to candidates
+            </label>
+          </div>
         </div>
         {recommended && (
           <div>

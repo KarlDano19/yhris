@@ -341,10 +341,35 @@ function Content() {
                               <div className='flex gap-4 items-center text-center whitespace-nowrap'>
                                 <select
                                   id={`dropdown-${evaluationCriterionIndex}-${index}`}
+                                  value={item.score || 0}
+                                  onChange={(event) => {
+                                    const newScore = Number(event.target.value);
+                                    setEvaluationForm((prevForm: any) => {
+                                      const updatedForm = prevForm.map(
+                                        (criterionItem: any, criterionIndex: number) => {
+                                          if (criterionIndex === evaluationCriterionIndex) {
+                                            return {
+                                              ...criterionItem,
+                                              criterion: criterionItem.criterion.map(
+                                                (item: any, itemIndex: number) => {
+                                                  if (itemIndex === index) {
+                                                    return { ...item, score: newScore };
+                                                  }
+                                                  return item;
+                                                }
+                                              ),
+                                            };
+                                          }
+                                          return criterionItem;
+                                        }
+                                      );
+                                      return updatedForm;
+                                    });
+                                  }}
                                   className='border px-8 py-2 rounded-md'
                                 >
                                   {Array.from({ length: parseInt(item.max_score) + 1 }, (_, i) => (
-                                    <option key={i}>{i}</option>
+                                    <option key={i} value={i}>{i}</option>
                                   ))}
                                 </select>
                               </div>
@@ -356,12 +381,39 @@ function Content() {
                                   type='range'
                                   min='0'
                                   max={item.max_score}
-                                  defaultValue='0'
+                                  value={item.score || 0}
+                                  onChange={(event) => {
+                                    const newScore = Number(event.target.value);
+                                    setEvaluationForm((prevForm: any) => {
+                                      const updatedForm = prevForm.map(
+                                        (criterionItem: any, criterionIndex: number) => {
+                                          if (criterionIndex === evaluationCriterionIndex) {
+                                            return {
+                                              ...criterionItem,
+                                              criterion: criterionItem.criterion.map(
+                                                (item: any, itemIndex: number) => {
+                                                  if (itemIndex === index) {
+                                                    return { ...item, score: newScore };
+                                                  }
+                                                  return item;
+                                                }
+                                              ),
+                                            };
+                                          }
+                                          return criterionItem;
+                                        }
+                                      );
+                                      return updatedForm;
+                                    });
+                                  }}
                                   className='w-full'
                                 />
                                 <div className='flex justify-between'>
                                   <div>0</div>
                                   <div>{item.max_score}</div>
+                                </div>
+                                <div className='text-center mt-2 font-semibold text-blue-600'>
+                                  Score: {item.score || 0}
                                 </div>
                               </div>
                             )}

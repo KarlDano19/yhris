@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Location from './tabs/Location';
 import Department from './tabs/Department';
 import Position from './tabs/Position';
+import EmployeeStatus from './tabs/EmployeeStatus';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -53,10 +54,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           >
             Position
           </div>
+          <div
+            onClick={() => setActiveTab('employee-status')}
+            className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+              activeTab === 'employee-status'
+                ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+            }`}
+          >
+            Employee Status
+          </div>
         </div>
         {activeTab === 'location' && <Location hasActiveSubscription={hasActiveSubscription} />}
         {activeTab === 'department' && <Department hasActiveSubscription={hasActiveSubscription} />}
         {activeTab === 'position' && <Position hasActiveSubscription={hasActiveSubscription} />}
+        {activeTab === 'employee-status' && <EmployeeStatus hasActiveSubscription={hasActiveSubscription} />}
       </div>
     </>
   );

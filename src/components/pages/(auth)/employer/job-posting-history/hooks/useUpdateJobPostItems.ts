@@ -113,7 +113,6 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     
     // Add rejection feedback if available
     if (jobPost.rejectionFeedback) {
-      console.log('Adding rejection feedback:', jobPost.rejectionFeedback);
       formData.append('rejection_feedback', jobPost.rejectionFeedback);
     }
     

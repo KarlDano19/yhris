@@ -11,6 +11,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import useTagTo from '@/components/hooks/useTagTo';
 import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import usePatchSeparationItem from '../hooks/usePatchSeparation';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -55,6 +56,8 @@ export default function LetterModal({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, reset, control, trigger, setValue, watch, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
@@ -63,6 +66,55 @@ export default function LetterModal({
     },
   });
   const { mutate, isLoading } = usePatchSeparationItem();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const formData = watch();
+    // Check if tagsTo has more than just the default applicant email
+    const hasAdditionalRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== applicantEmail);
+    
+    return (
+      (formData.date && formData.date !== '') ||
+      hasAdditionalRecipients ||
+      (formData.message && !isHtmlEmpty(formData.message))
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to reset all form data
+  const resetFormData = () => {
+    setValue('date', '');
+    setValue('message', '');
+    setTagsTo(applicantEmail ? [applicantEmail] : []);
+    setInputTo('');
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   useEffect(() => {
     if (isOpen && isOpen.id) {
@@ -114,7 +166,10 @@ export default function LetterModal({
       separationItemsCopy[itemIndex].separationLetter.message = data.message;
       separationItemsCopy[itemIndex].isLetterSent = true;
       setToSaveData(separationItemsCopy[itemIndex]);
-      customCloseModal();
+      // Reset form data before closing modal to prevent unsaved changes detection
+      resetFormData();
+      reset();
+      setIsOpen(null);
       setLetterType(type || '');
       setIsConfirmModalOpen(true);
     } else {
@@ -150,8 +205,11 @@ export default function LetterModal({
   };
 
   const customCloseModal = () => {
-    // reset();
-    setIsOpen(null);
+    handleModalClose(() => {
+      resetFormData();
+      reset();
+      setIsOpen(null);
+    });
   };
 
   return (
@@ -375,6 +433,18 @@ export default function LetterModal({
         confirmAction={saveData}
         isLoading={isLoading}
       />
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="email"
+        />
+      )}
     </>
   );
 }

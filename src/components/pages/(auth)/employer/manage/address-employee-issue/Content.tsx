@@ -359,6 +359,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             // onClick={() => alert('Clicked Employee Issue Item')}
             // className='hover:bg-gray-200/30 cursor-pointer'
           >
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 font-mono'>
+              {item.nte_id || 'NTE-000'}
+            </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.incidentDate}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
               <span>{item.name}</span>
@@ -409,7 +412,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
@@ -520,6 +523,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Reference No.
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date
                       </th>

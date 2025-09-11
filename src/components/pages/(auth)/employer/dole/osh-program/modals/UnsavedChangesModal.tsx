@@ -11,6 +11,8 @@ interface UnsavedChangesModalProps {
   onDiscard: () => void;
   isLoading?: boolean;
   currentTab?: string;
+  isNavigatingToTab?: boolean;
+  targetTab?: string;
 }
 
 export default function UnsavedChangesModal({
@@ -19,7 +21,9 @@ export default function UnsavedChangesModal({
   onSave,
   onDiscard,
   isLoading = false,
-  currentTab = 'current tab'
+  currentTab = 'current tab',
+  isNavigatingToTab = false,
+  targetTab
 }: UnsavedChangesModalProps) {
   const cancelButtonRef = useRef(null);
 
@@ -58,7 +62,10 @@ export default function UnsavedChangesModal({
                     You have unsaved changes in the <span className='text-red-500'>{currentTab}</span>
                   </p>
                   <p className='text-sm md:text-base text-gray-500 mt-2'>
-                    Do you want to save your changes before leaving this page?
+                    {isNavigatingToTab 
+                      ? `Do you want to save your changes before switching to ${targetTab || 'another tab'}?`
+                      : 'Do you want to save your changes before leaving this page?'
+                    }
                   </p>
                 </div>
                 <div className='flex flex-row justify-center w-full gap-2 md:gap-4 px-4 pt-6 md:pt-8 pb-4 md:pb-6'>

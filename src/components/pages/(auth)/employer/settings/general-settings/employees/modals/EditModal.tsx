@@ -1,19 +1,19 @@
-import { Dispatch, Fragment, useState, useRef, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-
-import classNames from '@/helpers/classNames';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import useAddLocation from '../hooks/useAddLocation';
+
 import CustomToast from '@/components/CustomToast';
-import useEditLocationDetails from '../hooks/useEditLocationDetails';
-import useGetLocationDetails from '../hooks/useGetLocationDetails';
+import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
+import useGetLocationDetails from '../hooks/location/useGetLocationDetails';
 import useEditDepartmentDetails from '../hooks/department/useEditDepartmentDetails';
 import useGetDepartmentDetails from '../hooks/department/useGetDepartmentDetails';
 import useGetPositionDetails from '../hooks/position/useGetPositionDetails';
 import useEditPositionDetails from '../hooks/position/useEditPositionDetails';
+import useGetEmployeeStatusDetails from '../hooks/employee-status/useGetEmployeeStatusDetails';
+import useEditEmployeeStatusDetails from '../hooks/employee-status/useEditEmployeeStatusDetails';
 
 type T_ModalData = {
   id: number;
@@ -48,9 +48,15 @@ export default function EditModal({
     refetch: refetchPositionDetails,
     remove: removePosition,
   } = useGetPositionDetails(isOpen.id);
+  const {
+    data: employeeStatusDetailsData,
+    refetch: refetchEmployeeStatusDetails,
+    remove: removeEmployeeStatus,
+  } = useGetEmployeeStatusDetails(isOpen.id);
   const { mutate: editLocation, isLoading: isLoadingEditLocation } = useEditLocationDetails();
   const { mutate: editDepartment, isLoading: isLoadingEditDepartment } = useEditDepartmentDetails();
   const { mutate: editPosition, isLoading: isLoadingEditPosition } = useEditPositionDetails();
+  const { mutate: editEmployeeStatus, isLoading: isLoadingEditEmployeeStatus } = useEditEmployeeStatusDetails();
 
   useEffect(() => {
     if (isOpen) {
@@ -60,6 +66,8 @@ export default function EditModal({
         refetchDepartmentDetails();
       } else if (module === 'position') {
         refetchPositionDetails();
+      } else if (module === 'employee-status') {
+        refetchEmployeeStatusDetails();
       }
     } 
   }, [isOpen]);
@@ -77,8 +85,12 @@ export default function EditModal({
       if (positionDetailsData) {
         setValue('name', positionDetailsData.name);
       }
+    } else if (module === 'employee-status') {
+      if (employeeStatusDetailsData) {
+        setValue('name', employeeStatusDetailsData.name);
+      }
     }
-  }, [locationDetailsData, departmentDetailsData, positionDetailsData]);
+  }, [locationDetailsData, departmentDetailsData, positionDetailsData, employeeStatusDetailsData]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -101,6 +113,8 @@ export default function EditModal({
       editDepartment({ department_id: isOpen.id, data: data }, callbackReq);
     } else if (module === 'position') {
       editPosition({ position_id: isOpen.id, data: data }, callbackReq);
+    } else if (module === 'employee-status') {
+      editEmployeeStatus({ employee_status_id: isOpen.id, data: data }, callbackReq);
     }
   });
 
@@ -109,6 +123,7 @@ export default function EditModal({
     removeLocation();
     removeDepartment();
     removePosition();
+    removeEmployeeStatus();
     setIsOpen(null);
   };
 
@@ -168,9 +183,9 @@ export default function EditModal({
                     <button
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                      disabled={isLoadingEditLocation || isLoadingEditDepartment || isLoadingEditPosition}
+                      disabled={isLoadingEditLocation || isLoadingEditDepartment || isLoadingEditPosition || isLoadingEditEmployeeStatus}
                     >
-                      {isLoadingEditLocation || isLoadingEditDepartment || isLoadingEditPosition && (
+                      {(isLoadingEditLocation || isLoadingEditDepartment || isLoadingEditPosition || isLoadingEditEmployeeStatus) && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -191,7 +206,7 @@ export default function EditModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoadingEditLocation && !isLoadingEditDepartment && !isLoadingEditPosition && 'Save'}
+                      {!isLoadingEditLocation && !isLoadingEditDepartment && !isLoadingEditPosition && !isLoadingEditEmployeeStatus && 'Save'}
                     </button>
                   </div>
                 </form>

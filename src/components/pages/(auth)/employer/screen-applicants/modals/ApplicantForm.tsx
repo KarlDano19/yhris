@@ -125,18 +125,14 @@ export default function ApplicantForm({ title }: PropTypes) {
         {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
           <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
             <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
-            <div className='space-y-4'>
+            <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
               {applicant.stage_notes.map((stageNote, index) => (
                 <div key={index} className='border-l-4 border-blue-400 pl-4'>
                   <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title}</h5>
+                    <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
                   </div>
                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
-                  {stageNote.created_at && (
-                    <p className='text-xs text-gray-400 mt-2'>
-                      Added: {new Date(stageNote.created_at).toLocaleDateString()}
-                    </p>
-                  )}
+                  
                 </div>
               ))}
             </div>
