@@ -89,7 +89,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               location: query.location,
               department: query.department,
               position: query.position,
-              onlyIncomplete: query.onlyIncomplete,
+              recordStatus: query.recordStatus
             }}
             onApply={(vals) => {
               // triggers API + resets to page 1 inside the hook

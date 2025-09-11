@@ -4,14 +4,14 @@ import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
-import { FunnelIcon } from "@heroicons/react/24/outline";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type FilterValues = {
   location: string;
   department: string;
   position: string;
-  onlyIncomplete: boolean;
+  recordStatus: string;
 };
 
 type Props = {
@@ -89,6 +89,16 @@ export default function FilterPopover({
     [positionItems]
   );
 
+  // Static options for Record Status
+  const recordStatusOptions: Option[] = useMemo(
+    () => [
+      { value: "ALL", label: "ALL" },
+      { value: "complete", label: "Complete" },
+      { value: "incomplete", label: "Incomplete" },
+    ],
+    []
+  );
+
   useEffect(() => {
     if (open) setDraft(initial);
   }, [open, initial]);
@@ -104,7 +114,7 @@ export default function FilterPopover({
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <FunnelIcon className="h-5 w-5 text-gray-700" />
+        <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-700" />
         <span className="text-gray-800 font-medium">Filter</span>
       </button>
 
@@ -224,19 +234,35 @@ export default function FilterPopover({
               )}
             </div>
 
-            {/* Only Incomplete */}
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                data-testid="check-incomplete"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-[#355fd0] focus:ring-[#355fd0]"
-                checked={draft.onlyIncomplete}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, onlyIncomplete: e.target.checked }))
-                }
-              />
-              Show only incomplete
-            </label>
+            {/* Record Status */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                Record Status
+              </label>
+              <div className="relative">
+                <select
+                  data-testid="select-record-status"
+                  value={ensureValue(draft.recordStatus, recordStatusOptions)}
+                  onChange={(e) =>
+                    setDraft((d) => ({
+                      ...d,
+                      recordStatus: e.target.value as FilterValues["recordStatus"],
+                    }))
+                  }
+                  className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 sm:py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60"
+                  disabled={anyLoading}
+                >
+                  {recordStatusOptions.map((opt) => (
+                    <option key={`rec-${opt.value}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  <SelectChevronDown />
+                </div>
+              </div>
+            </div>
 
             {/* Footer */}
             <div className="pt-2 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -247,7 +273,7 @@ export default function FilterPopover({
                     location: "ALL",
                     department: "ALL",
                     position: "ALL",
-                    onlyIncomplete: false,
+                    recordStatus: "ALL",
                   })
                 }
                 className="rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10"
