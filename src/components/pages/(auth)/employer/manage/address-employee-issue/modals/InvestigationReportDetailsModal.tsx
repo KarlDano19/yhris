@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetInvestigationReportDetails from '../hooks/useGetInvestigationReportDetails';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -11,16 +12,22 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
   const { data: investigationReportData, remove: removeInvestigationReport } = useGetInvestigationReportDetails(
     isOpen.id
   );
-  const [isSummaryView, setIsSummaryView] = useState(false);
+  const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
+  const [currentView, setCurrentView] = useState<'default' | 'summary' | 'attachment'>('default');
 
   const customCloseModal = () => {
     removeInvestigationReport();
+    removeEmployeeIssue();
     setIsOpen(null);
-    setIsSummaryView(false);
+    setCurrentView('default');
   };
 
   const toggleView = () => {
-    setIsSummaryView(!isSummaryView);
+    setCurrentView(currentView === 'summary' ? 'default' : 'summary');
+  };
+
+  const viewAttachment = () => {
+    setCurrentView('attachment');
   };
 
   const formatDate = (dateString: string) => {
@@ -60,29 +67,59 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl ${isSummaryView ? 'h-auto max-h-[95vh] sm:max-h-[80vh]' : 'h-[98vh] sm:h-[95vh]'}`}>
+                <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl ${
+                  currentView === 'summary' 
+                    ? 'h-auto max-h-[80vh]' 
+                    : currentView === 'attachment'
+                    ? 'h-[98vh] sm:h-[95vh]'
+                    : 'h-[98vh] sm:h-[95vh]'
+                }`}>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
-                  <div className={`${isSummaryView ? 'flex flex-col' : 'h-full flex flex-col overflow-hidden'}`}>
-                    <div className={`${isSummaryView ? 'p-4' : 'flex-1 p-4 overflow-hidden'}`}>
-                      <div className={`flex flex-col gap-4 ${isSummaryView ? '' : 'h-full'}`}>
+                  <div className={`${currentView === 'summary' ? 'flex flex-col' : 'h-full flex flex-col overflow-hidden'}`}>
+                    <div className={`${currentView === 'summary' ? 'p-4' : 'flex-1 p-4 overflow-hidden'}`}>
+                      <div className={`flex flex-col gap-4 ${currentView === 'summary' ? '' : 'h-full'}`}>
                         <div className='flex flex-wrap gap-2 justify-start'>
-                          <button 
-                            className={`px-4 py-2 rounded-md transition-colors ${
-                              isSummaryView 
-                                ? 'bg-savoy-blue text-white hover:bg-blue-700' 
-                                : 'bg-savoy-blue text-white hover:bg-blue-700'
-                            }`}
-                            onClick={toggleView}
-                          >
-                            {isSummaryView ? 'Back' : 'View Summary'}
-                          </button>
+                          {currentView === 'default' && (
+                            <>
+                              <button 
+                                className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                                onClick={toggleView}
+                              >
+                                View Summary
+                              </button>
+                              {investigationReportData?.attachments && (
+                                <button 
+                                  className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                                  onClick={viewAttachment}
+                                >
+                                  View Attachment
+                                </button>
+                              )}
+                            </>
+                          )}
+                          {currentView === 'summary' && (
+                            <button 
+                              className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                              onClick={toggleView}
+                            >
+                              Back
+                            </button>
+                          )}
+                          {currentView === 'attachment' && (
+                            <button 
+                              className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                              onClick={() => setCurrentView('default')}
+                            >
+                              Back
+                            </button>
+                          )}
                         </div>
                         
-                        <div className={`${isSummaryView ? '' : 'flex-1 overflow-hidden'}`}>
-                          {isSummaryView ? (
+                        <div className={`${currentView === 'summary' ? '' : 'flex-1 overflow-hidden'}`}>
+                          {currentView === 'summary' ? (
                             <div className='space-y-4'>
                               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <div>
@@ -177,18 +214,35 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                                   className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
                                 />
                               </div>
+                              
                             </div>
-                          ) : (
+                          ) : currentView === 'attachment' ? (
                             investigationReportData?.attachments && (
-                              <div className='h-full'>
+                              <div className='h-full overflow-hidden'>
                                 <iframe 
                                   src={investigationReportData.attachments} 
                                   width='100%' 
-                                  height='93%' 
+                                  height='90%' 
                                   className='min-h-[500px] sm:min-h-0 border-0'
                                 />
                               </div>
                             )
+                          ) : (
+                            <div className='h-full flex flex-col gap-4'>
+                              {employeeIssueData?.nte_attachment && (
+                                <div className='flex-1'>
+                                  <label className='block text-sm font-bold text-gray-700 mb-1'>NTE Attachment:</label>
+                                  <div className='h-full overflow-hidden'>
+                                    <iframe 
+                                      src={employeeIssueData.nte_attachment} 
+                                      width='100%' 
+                                      height='90%' 
+                                      className='min-h-[500px] sm:min-h-0 border-0'
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
