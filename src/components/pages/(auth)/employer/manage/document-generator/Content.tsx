@@ -26,7 +26,6 @@ import { EmploymentAgreementFormData } from "@/types/document-generator/document
 import { NoticeToExplainFormData } from "@/types/document-generator/documents";
 import { DocumentType } from "@/types/document-generator/form";
 import { print } from './print/index';
-import { generateNoticeToExplainHTML } from './print/documents/NoticeToExplain';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './utils/handleProceed';
 
