@@ -109,7 +109,25 @@ export default function EmploymentDetailsForm({
   );
 
   useEffect(() => {
-    setEmploymentStatus(s(emp?.employment_status ?? ""));
+    const v = employment_status;
+    if (v && !employmentStatusOptions.includes(v)) {
+      setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+    // no revalidate needed; value didn't change
+  }, [employmentStatusOptions, employment_status]);
+
+  useEffect(() => {
+    const v = s(emp?.employment_status ?? "");
+    setEmploymentStatus(v);
+
+    // If the current value isn't in the server-provided list, seed it into extras.
+    const base = (emp?.employment_status_list as string[] | undefined) ?? [];
+    if (v && !base.includes(v)) {
+      setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+
+    // Re-validate with the new value so the error clears.
+    setErr("employment_status", validate.employment_status(v));
   }, [emp?.employment_status]);
 
   useEffect(() => {
@@ -172,7 +190,6 @@ export default function EmploymentDetailsForm({
 
   useEffect(() => {
     setErrors(buildInitialErrors());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setErr = (key: string, msg: string | null) =>
@@ -389,6 +406,7 @@ export default function EmploymentDetailsForm({
           employeeName={employeeName}
           employeeId={emp?.id as string | number}
           onRefetch={refetch}
+          defaultPosition={s(emp?.position ?? "")} // ← pass default position from prop
         />
       )}
 

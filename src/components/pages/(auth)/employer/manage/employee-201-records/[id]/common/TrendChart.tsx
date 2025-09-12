@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export type TrendPoint = { x: number; y: number };
 
 type Props = {
   points: TrendPoint[];
   yMax?: number;
+  showLabels?: boolean;
 };
 
-export default function TrendChart({ points, yMax }: Props) {
+export default function TrendChart({
+  points,
+  yMax,
+  showLabels = false,
+}: Props) {
   if (!points?.length) return null;
 
   // Chronological order
@@ -53,7 +58,7 @@ export default function TrendChart({ points, yMax }: Props) {
     .map((p, i) => `${i ? "L" : "M"} ${nx(p.x)},${ny(p.y)}`)
     .join(" ");
 
-  // Fill entire bottom (left padded edge → first x → line → last x → right padded edge)
+  // Area fill (under line)
   let areaPath = `M ${nx(xMin)},${height - padB}`;
   areaPath += ` L ${nx(data[0].x)},${height - padB}`;
   areaPath += ` L ${nx(data[0].x)},${ny(data[0].y)}`;
@@ -66,7 +71,6 @@ export default function TrendChart({ points, yMax }: Props) {
   // Grid ticks
   const yTicks = 5;
   const yStep = (maxY - minY) / yTicks;
-
   const vCols = 3;
   const vStep = (rightX - leftX) / vCols;
 
@@ -91,7 +95,7 @@ export default function TrendChart({ points, yMax }: Props) {
     year: "numeric",
   });
 
-  // Tooltip (hover anywhere)
+  // Hover state — only from point hit areas
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const hovered = hoverIdx != null ? data[hoverIdx] : null;
   const tipX = hovered ? nx(hovered.x) : 0;
@@ -99,39 +103,29 @@ export default function TrendChart({ points, yMax }: Props) {
 
   const tipWidth = 170;
   const tipHeight = 32;
-  const tipOffset = 8;
 
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const onMove = (e: React.MouseEvent) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    // Only react inside plot area
-    if (mouseX < padL || mouseX > width - padR) {
-      setHoverIdx(null);
-      return;
-    }
-    // Find nearest point by X position
-    let nearest = 0;
-    let best = Number.POSITIVE_INFINITY;
-    for (let i = 0; i < data.length; i++) {
-      const dx = Math.abs(nx(data[i].x) - mouseX);
-      if (dx < best) {
-        best = dx;
-        nearest = i;
-      }
-    }
-    setHoverIdx(nearest);
-  };
-  const onLeave = () => setHoverIdx(null);
-
+  // Tooltip positioning
   const anchorLeft = tipX + tipWidth / 2 > width - padR;
-  const bubbleX = anchorLeft ? tipX - tipWidth + 6 : tipX - 6;
-  const bubbleY = Math.max(padT, tipY - tipHeight - 14);
+  const bubbleX = anchorLeft ? tipX - tipWidth - 8 : tipX + 8; // offset bubble away from point
+  const bubbleY = Math.max(padT, tipY - tipHeight / 2);
+
+  // Arrow anchored to bubble edge (not close to the point)
+  const arrowSize = 6;
+  const arrowCY = Math.min(
+    Math.max(tipY, bubbleY + arrowSize + 4),
+    bubbleY + tipHeight - arrowSize - 4
+  );
+  const arrowBaseX = anchorLeft ? bubbleX + tipWidth : bubbleX;
+  const pointerPath = anchorLeft
+    ? `M ${arrowBaseX} ${arrowCY - arrowSize} L ${
+        arrowBaseX + arrowSize
+      } ${arrowCY} L ${arrowBaseX} ${arrowCY + arrowSize} Z`
+    : `M ${arrowBaseX} ${arrowCY - arrowSize} L ${
+        arrowBaseX - arrowSize
+      } ${arrowCY} L ${arrowBaseX} ${arrowCY + arrowSize} Z`;
 
   return (
     <svg
-      ref={svgRef}
       width="100%"
       viewBox={`0 0 ${width} ${height}`}
       aria-label="Salary Trend"
@@ -208,45 +202,70 @@ export default function TrendChart({ points, yMax }: Props) {
         <path d={linePath} stroke={line} strokeWidth={2} fill="none" />
       </g>
 
-      {/* Dots (kept for focus/hover target, but tooltip comes from overlay) */}
-      {data.map((p, i) => (
-        <circle
-          key={`pt-${i}`}
-          cx={nx(p.x)}
-          cy={ny(p.y)}
-          r={hoverIdx === i ? 5 : 4}
-          fill="white"
-          stroke={line}
-          strokeWidth={2}
-        />
-      ))}
+      {/* Points: hollow circles + larger invisible hit-area capturing hover */}
+      {data.map((p, i) => {
+        const cx = nx(p.x);
+        const cy = ny(p.y);
+        const r = hoverIdx === i ? 5 : 4; // visible point radius
+        const hitR = r + 15; // slightly larger hit area
 
-      {/* Transparent overlay to capture hover ANYWHERE within plot */}
-      <rect
-        x={padL}
-        y={padT}
-        width={plotW}
-        height={plotH}
-        fill="transparent"
-        pointerEvents="all"
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-      />
+        return (
+          <g
+            key={`ptg-${i}`}
+            onMouseEnter={() => setHoverIdx(i)}
+            onMouseLeave={() => setHoverIdx(null)}
+            style={{ cursor: "pointer" }}
+          >
+            {/* Invisible hit area (just a bit bigger) */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={hitR}
+              fill="transparent"
+              pointerEvents="all"
+            />
+            {/* Visible hollow bubble */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="white"
+              stroke={line}
+              strokeWidth={2}
+            />
+          </g>
+        );
+      })}
 
-      {/* Tooltip */}
+      {/* ALWAYS-SHOWN point labels (toggle with prop) */}
+      {showLabels &&
+        data.map((p, i) => {
+          const x = nx(p.x);
+          const y = ny(p.y);
+          const labelY = Math.max(padT + 10, y - 12);
+          const text = `₱ ${p.y.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+          return (
+            <text
+              key={`lbl-${i}`}
+              x={x}
+              y={labelY}
+              textAnchor="middle"
+              fontSize={11}
+              fill="#111827"
+              style={{ paintOrder: "stroke", stroke: "white", strokeWidth: 3 }}
+            >
+              {text}
+            </text>
+          );
+        })}
+
+      {/* Tooltip (appears only when hovering a bubble) */}
       {hovered && (
         <g>
-          {/* pointer */}
-          <path
-            d={
-              anchorLeft
-                ? `M ${tipX - 6} ${tipY - 8} l 6 6 l -12 0 Z`
-                : `M ${tipX + 6} ${tipY - 8} l -6 6 l 12 0 Z`
-            }
-            fill="white"
-            stroke="#CBD5E1"
-          />
-          {/* bubble */}
+          <path d={pointerPath} fill="white" stroke="#CBD5E1" />
           <rect
             x={bubbleX}
             y={bubbleY}

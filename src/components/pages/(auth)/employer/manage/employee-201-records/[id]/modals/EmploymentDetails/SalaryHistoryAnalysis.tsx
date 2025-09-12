@@ -34,7 +34,8 @@ export default function SalaryHistoryAnalysis({
   const currentSalary = data?.currentSalary ?? 0;
   const lastAdjustmentAmount = data?.lastAdjustmentAmount ?? 0;
   const daysBetweenChanges = data?.daysBetweenChanges ?? 0;
-
+  const [showTrendLabelsForExport, setShowTrendLabelsForExport] =
+    useState(false);
   const points: TrendPoint[] = useMemo(
     () =>
       (data?.entries ?? []).map((e) => ({
@@ -139,77 +140,90 @@ export default function SalaryHistoryAnalysis({
     const node = captureRef.current;
     if (!node) return;
 
-    await notify.promise(
-      (async () => {
-        const canvas = await html2canvas(node, {
-          backgroundColor: "#ffffff",
-          scale: 2,
-          useCORS: true,
-          onclone: (doc) => {
-            const root = doc.getElementById("salary-analysis-capture");
-            if (!root) return;
-            root.setAttribute("data-export", "true");
-            root.querySelectorAll(".sticky").forEach((el) => {
-              (el as HTMLElement).style.position = "static";
-              (el as HTMLElement).style.top = "auto";
-            });
-            const grid = root.querySelector(".tile-grid") as HTMLElement | null;
-            if (grid) {
-              grid.style.display = "grid";
-              grid.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
-              grid.style.gap = "12px";
-            }
-            const style = doc.createElement("style");
-            style.textContent = `
+    // Show labels for the export only
+    setShowTrendLabelsForExport(true);
+    // Wait a frame so the DOM updates before html2canvas snapshots it
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+
+    try {
+      await notify.promise(
+        (async () => {
+          const canvas = await html2canvas(node, {
+            backgroundColor: "#ffffff",
+            scale: 2,
+            useCORS: true,
+            onclone: (doc) => {
+              const root = doc.getElementById("salary-analysis-capture");
+              if (!root) return;
+              root.setAttribute("data-export", "true");
+              root.querySelectorAll(".sticky").forEach((el) => {
+                (el as HTMLElement).style.position = "static";
+                (el as HTMLElement).style.top = "auto";
+              });
+              const grid = root.querySelector(
+                ".tile-grid"
+              ) as HTMLElement | null;
+              if (grid) {
+                grid.style.display = "grid";
+                grid.style.gridTemplateColumns = "repeat(3, minmax(0, 1fr))";
+                grid.style.gap = "12px";
+              }
+              const style = doc.createElement("style");
+              style.textContent = `
               [data-export] .no-print { display: none !important; }
               [data-export] .export-only { display: block !important; }
               [data-export] .card { border-color: #ffffffff !important; }
+              [data-export] .border { border-width: 0px !important; }
             `;
-            doc.head.appendChild(style);
-          },
-        });
+              doc.head.appendChild(style);
+            },
+          });
 
-        const pdf = new jsPDF({ unit: "pt", format: "a4" });
-        const pageW = pdf.internal.pageSize.getWidth();
-        const pageH = pdf.internal.pageSize.getHeight();
-        const margin = 24;
+          const pdf = new jsPDF({ unit: "pt", format: "a4" });
+          const pageW = pdf.internal.pageSize.getWidth();
+          const pageH = pdf.internal.pageSize.getHeight();
+          const margin = 24;
 
-        const imgW = pageW - margin * 2;
-        const ratio = canvas.width / imgW;
-        const sliceH = (pageH - margin * 2) * ratio;
+          const imgW = pageW - margin * 2;
+          const ratio = canvas.width / imgW;
+          const sliceH = (pageH - margin * 2) * ratio;
 
-        const pageCanvas = document.createElement("canvas");
-        const ctx = pageCanvas.getContext("2d")!;
+          const pageCanvas = document.createElement("canvas");
+          const ctx = pageCanvas.getContext("2d")!;
 
-        let drawn = 0;
-        while (drawn < canvas.height) {
-          const h = Math.min(sliceH, canvas.height - drawn);
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = h;
-          ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0,
-            drawn,
-            canvas.width,
-            h,
-            0,
-            0,
-            canvas.width,
-            h
-          );
+          let drawn = 0;
+          while (drawn < canvas.height) {
+            const h = Math.min(sliceH, canvas.height - drawn);
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = h;
+            ctx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+            ctx.drawImage(
+              canvas,
+              0,
+              drawn,
+              canvas.width,
+              h,
+              0,
+              0,
+              canvas.width,
+              h
+            );
 
-          const pageImg = pageCanvas.toDataURL("image/png");
-          if (drawn > 0) pdf.addPage();
-          pdf.addImage(pageImg, "PNG", margin, margin, imgW, h / ratio);
+            const pageImg = pageCanvas.toDataURL("image/png");
+            if (drawn > 0) pdf.addPage();
+            pdf.addImage(pageImg, "PNG", margin, margin, imgW, h / ratio);
 
-          drawn += h;
-        }
+            drawn += h;
+          }
 
-        pdf.save(`Salary_History_Analysis_${employeeName}.pdf`);
-      })(),
-      { success: "PDF exported.", error: "Failed to export PDF." }
-    );
+          pdf.save(`Salary_History_Analysis_${employeeName}.pdf`);
+        })(),
+        { success: "PDF exported.", error: "Failed to export PDF." }
+      );
+    } finally {
+      // Hide labels again for normal UI
+      setShowTrendLabelsForExport(false);
+    }
   };
 
   const trend = (n: number | undefined) => (n === 0 ? undefined : n! > 0);
@@ -278,7 +292,7 @@ export default function SalaryHistoryAnalysis({
                 dataTestid="current-salary-tile"
                 title="Current Salary"
                 value={`₱ ${formatMoney(currentSalary)}`}
-                up={trend(lastAdjustmentAmount)} 
+                up={trend(lastAdjustmentAmount)}
               />
 
               <Metric
@@ -304,7 +318,7 @@ export default function SalaryHistoryAnalysis({
                     )}
                   </>
                 }
-                up={trend(lastAdjustmentAmount)} 
+                up={trend(lastAdjustmentAmount)}
               />
 
               <Metric
@@ -325,7 +339,10 @@ export default function SalaryHistoryAnalysis({
             {showLoading ? (
               <div className="h-48 w-full rounded bg-gray-100 animate-pulse" />
             ) : points.length > 0 ? (
-              <TrendChart points={points} />
+              <TrendChart
+                points={points}
+                showLabels={showTrendLabelsForExport}
+              />
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center text-sm text-gray-500">
                 There&apos;s no salary trend yet.
@@ -413,7 +430,10 @@ export default function SalaryHistoryAnalysis({
               ))}
             </ul>
           ) : notes.length === 0 ? (
-            <div data-testid="no-notes-view" className="p-6 text-center text-sm text-gray-500">
+            <div
+              data-testid="no-notes-view"
+              className="p-6 text-center text-sm text-gray-500"
+            >
               No HR notes yet.
             </div>
           ) : (
@@ -425,10 +445,16 @@ export default function SalaryHistoryAnalysis({
                   className="flex items-start justify-between rounded-lg border bg-white p-3"
                 >
                   <div className="pr-2">
-                    <p data-testid="note-content" className="text-sm text-gray-700 whitespace-pre-wrap">
+                    <p
+                      data-testid="note-content"
+                      className="text-sm text-gray-700 whitespace-pre-wrap"
+                    >
                       {n.note_content}
                     </p>
-                    <div data-testid="note-created" className="mt-2 text-xs text-gray-400">
+                    <div
+                      data-testid="note-created"
+                      className="mt-2 text-xs text-gray-400"
+                    >
                       {formatDateTime(new Date(n.date_created))}
                     </div>
                   </div>
@@ -460,17 +486,19 @@ export default function SalaryHistoryAnalysis({
           )}
         </div>
 
-        <Pagination
-          pagination={{
-            totalPages,
-            totalRecords,
-          }}
-          currentPage={page}
-          pageSize={pageSize}
-          onPageSizeChange={handlePageSizeChange}
-          onPageChange={handlePageChange}
-          pageType={pageType}
-        />
+        <div className="no-print">
+          <Pagination
+            pagination={{
+              totalPages,
+              totalRecords,
+            }}
+            currentPage={page}
+            pageSize={pageSize}
+            onPageSizeChange={handlePageSizeChange}
+            onPageChange={handlePageChange}
+            pageType={pageType}
+          />
+        </div>
       </div>
     </div>
   );
@@ -504,7 +532,7 @@ function Metric({
   title,
   value,
   up,
-  dataTestid
+  dataTestid,
 }: {
   title: string;
   value: React.ReactNode;
@@ -512,7 +540,10 @@ function Metric({
   dataTestid?: string;
 }) {
   return (
-    <div data-testid={dataTestid} className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid">
+    <div
+      data-testid={dataTestid}
+      className="metric-card relative flex h-28 flex-col items-center justify-center rounded-xl border border-slate-300/70 p-4 print:break-inside-avoid"
+    >
       {up !== undefined && <TrendIcon up={up} />}
       <div className="flex w-full items-center justify-center text-center font-semibold text-slate-800">
         {value}

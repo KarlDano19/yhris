@@ -8,7 +8,7 @@ export type EmployeeQuery = {
   location: string;       
   department: string;     
   position: string;       
-  onlyIncomplete: boolean;
+  recordStatus: string;
   page: number;           
   pageSize: number;       
 };
@@ -18,7 +18,7 @@ const DEFAULT_QUERY: EmployeeQuery = {
   location: "ALL",
   department: "ALL",
   position: "ALL",
-  onlyIncomplete: false,
+  recordStatus: "ALL",
   page: 1,
   pageSize: 12,
 };
@@ -29,15 +29,14 @@ function buildParams(q: EmployeeQuery) {
   const params = new URLSearchParams();
   if (q.q.trim()) params.set("search", q.q.trim());
 
-  const setIfNotAll = (key: "department" | "position" | "location", val: string) => {
+  const setIfNotAll = (key: "department" | "position" | "location" | "recordStatus", val: string) => {
     const s = (val || "").trim();
     if (s && s.toLowerCase() !== "all") params.set(key, s);
   };
   setIfNotAll("location", q.location);
   setIfNotAll("department", q.department);
   setIfNotAll("position", q.position);
-  
-  if (q.onlyIncomplete) params.set("incomplete", "1");
+  setIfNotAll("recordStatus", q.recordStatus);
 
   params.set("current_page", String(q.page));
   params.set("page_size", String(q.pageSize));
@@ -121,7 +120,7 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
   }, []);
 
   const applyFilters = useCallback(
-    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "onlyIncomplete">) => {
+    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "recordStatus">) => {
       setQuery((prev) => ({ ...prev, ...filters, page: 1 }));
     },
     []
