@@ -145,17 +145,17 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
               complete ? "border-yellow-400" : "border-yellow-400 border-dashed"
             }`}
           />
+
           {showPhoto ? (
-            <Image
-              src={photoUrl!}
-              alt={`${displayName || "Employee"} ${
-                complete ? "– complete" : "– incomplete"
-              }`}
-              width={96}
-              height={96}
-              className="absolute inset-0 rounded-full object-cover"
-              onError={() => setImgError(true)}
-            />
+            <div className="absolute inset-0 overflow-hidden rounded-full bg-white">
+              <Image
+                src={photoUrl!}
+                alt={`${displayName || "Employee"} ${complete ? "– complete" : "– incomplete"}`}
+                fill
+                className="object-cover"
+                onError={() => setImgError(true)}
+              />
+            </div>
           ) : (
             <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
               <PlacholderPicture
