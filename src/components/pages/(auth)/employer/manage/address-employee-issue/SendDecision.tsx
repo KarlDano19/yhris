@@ -105,16 +105,24 @@ const SendDecision = ({
       {isDecisionReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <div
-              className='cursor-pointer'
-              onClick={() =>
-                setIsDecisionAttachmentViewModalOpen({
-                  isOpen: true,
-                  id,
-                })
-              }
-            >
-              <ClipIcon hasFile={true} />
+            <div className='relative'>
+              <div
+                className='cursor-pointer'
+                onClick={() =>
+                  setIsDecisionAttachmentViewModalOpen({
+                    isOpen: true,
+                    id,
+                  })
+                }
+              >
+                <ClipIcon hasFile={true} />
+              </div>
+              {/* Notification badge for employee signature */}
+              {employeeIssueDetails && employeeIssueDetails.employee_signature && (
+                <div className="absolute -top-2 -right-2.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  !
+                </div>
+              )}
             </div>
             <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
           </div>

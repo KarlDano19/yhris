@@ -7,11 +7,6 @@ interface DocumentPageSevenProps {
 }
 
 const DocumentPageSeven: React.FC<DocumentPageSevenProps> = ({ data }) => {
-  // Debug: Log the data
-  console.log('DocumentPageSeven - health_training:', data.health_training);
-  console.log('DocumentPageSeven - risk_assessment:', data.risk_assessment);
-  console.log('DocumentPageSeven - safety_meeting:', data.safety_meeting);
-  console.log('DocumentPageSeven - data:', data);
   
   // Format date to readable format (MM/DD/YYYY)
   const formatDate = (dateString: string) => {

@@ -15,8 +15,9 @@ import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
+import { useDeleteNTEAttachment } from '../hooks/useDeleteNTEAttachment';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import ClipIcon from '@/svg/ClipIcon';
@@ -44,21 +45,11 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
-function stripHtml(html: string) {
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
-
 export default function SendNTEModal({
-  employeeIssueItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeIssueItems: any;
-  setEmployeeIssueItems: any;
   isOpen: T_SendNTEModal | null;
   setIsOpen: Dispatch<T_SendNTEModal | null>;
   refetch?: () => void;
@@ -93,6 +84,7 @@ export default function SendNTEModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   // Fetch employee issue details to get attachment
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
@@ -160,34 +152,30 @@ export default function SendNTEModal({
   };
 
   useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        const employeeEmail = employeeIssueItemsCopy[itemIndex].email;
-        setApplicantEmail(employeeEmail);
+    if (isOpen && isOpen.id && employeeIssueDetails) {
+      const employeeEmail = employeeIssueDetails.email;
+      setApplicantEmail(employeeEmail);
+      
+      // Check if this is a different employee than the current one
+      const isDifferentEmployee = currentEmployeeId !== isOpen.id;
+      
+      if (isDifferentEmployee) {
+        // Reset everything for new employee
+        resetFormData();
         
-        // Check if this is a different employee than the current one
-        const isDifferentEmployee = currentEmployeeId !== isOpen.id;
-        
-        if (isDifferentEmployee) {
-          // Reset everything for new employee
-          resetFormData();
-          
-          // Set the employee email for new employee
-          if (employeeEmail) {
-            setTagsTo([employeeEmail]);
-          }
+        // Set the employee email for new employee
+        if (employeeEmail) {
+          setTagsTo([employeeEmail]);
         }
-        
-        // Update current employee ID
-        setCurrentEmployeeId(isOpen.id);
-        
-        // Always reset initialization flag when modal opens to ensure fresh data is loaded
-        setIsInitialized(false);
       }
+      
+      // Update current employee ID
+      setCurrentEmployeeId(isOpen.id);
+      
+      // Always reset initialization flag when modal opens to ensure fresh data is loaded
+      setIsInitialized(false);
     }
-  }, [isOpen, employeeIssueItems, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
+  }, [isOpen, employeeIssueDetails, setTagsTo, setValue, setTagsCc, setTagsBcc, currentEmployeeId]);
 
 
   // Prefill fields from backend when details are loaded
@@ -292,38 +280,47 @@ export default function SendNTEModal({
     }
 
     if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
-      employeeIssueItemsCopy[itemIndex].id = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].actionType = 'sending';
-      employeeIssueItemsCopy[itemIndex].emailType = 'nte';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.template = template ? template.subject : '';
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.to = tagsTo;
-      if (tagsCc) {
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.cc = tagsCc;
-      }
-      if (tagsBcc) {
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.bcc = tagsBcc;
-      }
-      // Store message as HTML (preserve formatting)
-      employeeIssueItemsCopy[itemIndex].issueNTEForm.message = data.message;
-      // Save nte_to, nte_cc, nte_bcc as JSON stringified arrays
-      employeeIssueItemsCopy[itemIndex].nte_subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].nte_to = JSON.stringify(tagsTo);
-      employeeIssueItemsCopy[itemIndex].nte_cc = JSON.stringify(tagsCc);
-      employeeIssueItemsCopy[itemIndex].nte_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].nte_message = data.message;
-      // Include PDF attachment if available
-      if (pdfAttachment) {
-        employeeIssueItemsCopy[itemIndex].attachment = pdfAttachment;
-        employeeIssueItemsCopy[itemIndex].issueNTEForm.attachment = pdfAttachment;
-      }
-      employeeIssueItemsCopy[itemIndex].isNTESent = true;
+      
+      // Create the simplified payload - only save form data to backend fields
+      const payload = {
+        id: isOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'nte',
+        nte_subject: data.subject,
+        nte_to: JSON.stringify(tagsTo),
+        nte_cc: JSON.stringify(tagsCc),
+        nte_bcc: JSON.stringify(tagsBcc),
+        nte_message: data.message,
+        // Required by type but not used for NTE
+        issueNTEForm: {
+          template: template ? template.subject : '',
+          subject: data.subject,
+          to: tagsTo,
+          cc: tagsCc,
+          bcc: tagsBcc,
+          message: data.message,
+          attachment: pdfAttachment || null
+        },
+        sendDecisionForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        dateReceived: null,
+        decision_subject: '',
+        decision_to: '',
+        decision_cc: '',
+        decision_bcc: '',
+        decision_message: ''
+      };
+      
       const callbackReq = {
         onSuccess: (data: any) => {
-          setEmployeeIssueItems([...employeeIssueItemsCopy]);
           setIsOpen(null);
           // Reset form data after successful submission
           resetFormData();
@@ -339,7 +336,7 @@ export default function SendNTEModal({
           });
         },
       };
-      mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
+      mutate(payload, callbackReq);
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
@@ -357,6 +354,41 @@ export default function SendNTEModal({
     
     const urlParts = cleanUrl.split('/');
     return urlParts[urlParts.length - 1];
+  };
+
+  // Handle delete NTE attachment
+  const handleDeleteAttachment = () => {
+    if (isOpen?.id) {
+      deleteNTEAttachment(isOpen.id, {
+        onSuccess: (data: any) => {
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message || 'Attachment deleted successfully'} type='success' />, { duration: 3000 });
+          
+          // Close the modal and reset form data
+          setIsOpen(null);
+          resetFormData();
+          
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to delete attachment';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 5000,
+          });
+        },
+      });
+    }
   };
 
   return (
@@ -684,24 +716,41 @@ export default function SendNTEModal({
                         <label className='block text-sm font-medium leading-6 text-gray-900'>
                           Attachment
                         </label>
-                        <div className="mt-2 flex items-center">
-                          <div className="flex items-center gap-2 pl-2 cursor-pointer">
-                            <ClipIcon hasFile={!!pdfAttachment} />
-                            {pdfAttachment && (
-                              <>
-                                <span className="text-sm text-gray-600">
-                                  {getFilenameFromUrl(pdfAttachment)}
-                                </span>
-                                <ArrowTopRightOnSquareIcon 
-                                  className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
-                                  onClick={() => window.open(pdfAttachment, '_blank')}
-                                />
-                              </>
-                            )}
-                            {!pdfAttachment && (
-                              <span className="text-sm text-gray-400">No attachment</span>
-                            )}
-                          </div>
+                        <div className="mt-2 flex items-center gap-2 pl-2">
+                          <ClipIcon hasFile={!!pdfAttachment} />
+                          {pdfAttachment && (
+                            <>
+                              <span className="text-sm text-gray-600">
+                                {getFilenameFromUrl(pdfAttachment)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => window.open(pdfAttachment, '_blank')}
+                                className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
+                                title="View attachment"
+                              >
+                                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                              </button>
+                              {!employeeIssueDetails?.is_nte_sent && (
+                                <button
+                                  type="button"
+                                  onClick={handleDeleteAttachment}
+                                  disabled={isDeleting}
+                                  className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                                  title="Delete attachment"
+                                >
+                                  {isDeleting ? (
+                                    <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <TrashIcon className="h-4 w-4" />
+                                  )}
+                                </button>
+                              )}
+                            </>
+                          )}
+                          {!pdfAttachment && (
+                            <span className="text-sm text-gray-400">No attachment</span>
+                          )}
                         </div>
                       </div>
                       
