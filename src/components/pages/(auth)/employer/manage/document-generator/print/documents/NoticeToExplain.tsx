@@ -603,30 +603,19 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
             
             if (images.length === 0) {
               // No images to load, proceed with print
-              console.log('No images to load, ready to print');
             } else {
               // Wait for all images to load
               images.forEach(img => {
                 if (img.complete) {
                   loadedImages++;
-                  if (loadedImages === images.length) {
-                    console.log('All images loaded, ready to print');
-                  }
                 } else {
                   img.onload = function() {
                     loadedImages++;
-                    if (loadedImages === images.length) {
-                      console.log('All images loaded, ready to print');
-                    }
                   };
                   
                   // Handle image load errors
                   img.onerror = function() {
-                    console.error('Error loading image:', img.src);
                     loadedImages++;
-                    if (loadedImages === images.length) {
-                      console.log('All images attempted to load, ready to print');
-                    }
                   };
                 }
               });
