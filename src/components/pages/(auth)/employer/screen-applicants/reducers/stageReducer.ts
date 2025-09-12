@@ -10,7 +10,7 @@ import setRequirements from "./actions/setRequirements"
 import setTitle from "./actions/setTitle"
 import setApplicant from "./actions/setApplicant"
 import clearStage from "./actions/clearStage";
-
+import archivedApplicants from "./actions/archivedApplicants";
 const {
   CLEAR_STAGE,
   STAGE_REQUIREMENTS,
@@ -23,6 +23,7 @@ const {
   ADD_STAGE,
   SET_ONBOARDING,
   SET_APPLICANT,
+  ARCHIVED_APPLICANTS,
 } = actionTypes
 
 export const INITIAL_STATE = []
@@ -51,6 +52,8 @@ export const stageReducer = (state: any, action: any) => {
       return sendEmail(state, action)
     case SCHEDULE_INTERVIEW: 
      return scheduleInterview(state, action)
+    case ARCHIVED_APPLICANTS:
+      return archivedApplicants(state, action)
     default:
       return state
   }

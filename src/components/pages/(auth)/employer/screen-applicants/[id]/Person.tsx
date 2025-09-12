@@ -1,4 +1,5 @@
 import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import ArchiveButton from '../ArchiveButton';
 import Image from 'next/image';
 import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
 import CheckListIcon from '@/svg/CheckListIcon';
@@ -7,6 +8,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import StateContext from '../contexts/StateContext';
 import classNames from '@/helpers/classNames';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import { useParams } from 'next/navigation';
 
 const menuList = [
   {
@@ -76,6 +78,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const menuRef = useRef<HTMLDivElement>(null);
   const { image, name, id } = applicant;
+  const params = useParams();
 
   const isPassedFinalInterview = applicant.status === 'hired';
 
@@ -155,7 +158,25 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
           </div>
         )}
       </div>
-      <button onClick={handleOpenMenu} type='button' className='ml-auto text-indigo-dye disabled:text-gray-400'>
+      
+      {/* Archive Button - only show for rejected or withdrawn applicants */}
+      {(isRejected || isWithdrawn) && (
+        <div className='mr-2'>
+          <ArchiveButton
+            appliedJobId={applicant.applicationId}
+            isArchived={false} // These are not archived yet, they're just rejected/withdrawn
+            status={applicant.status || 'rejected'}
+            onSuccess={() => {
+              // Refresh the applicants list after archiving
+              // This will be handled by the parent component
+            }}
+            applicantName={name || 'Applicant'}
+            jobPostingId={params.id as string}
+          />
+        </div>
+      )}
+      
+      <button onClick={handleOpenMenu} type='button' className='text-indigo-dye disabled:text-gray-400' data-testid="elipsis-btn">
         <EllipsisVerticalIcon className='w-7 h-7' />
       </button>
 
@@ -165,9 +186,9 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
               return (
-                <>
+                <React.Fragment key={id}>
                   {isPassedFinalInterview && name !== 'Checklist' && (
-                    <li key={id}>
+                    <li>
                       <button
                         onClick={() =>
                           setActionState({
@@ -186,7 +207,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
                     </li>
                   )}
                   {!isPassedFinalInterview && (
-                    <li key={id}>
+                    <li>
                       <button
                         onClick={() => {
                           let lastElement = state[state.length - 1];
@@ -210,7 +231,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
                       </button>
                     </li>
                   )}
-                </>
+                </React.Fragment>
               );
             })}
           </ul>
