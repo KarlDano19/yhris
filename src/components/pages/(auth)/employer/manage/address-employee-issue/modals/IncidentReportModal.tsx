@@ -84,7 +84,14 @@ export default function IncidentReportModal({
 
   // Handle brief background input change with character limit
   const handleBriefBackgroundChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    
+    // Prevent excessive consecutive line breaks (more than 2)
+    // Replace 3 or more consecutive line breaks with just 2
+    value = value.replace(/\n{3,}/g, '\n\n');
+    
+    // Also prevent excessive spaces (more than 2 consecutive spaces)
+    value = value.replace(/ {3,}/g, '  ');
     
     if (value.length <= maxLength) {
       // Reset the toast flag when back under the limit
@@ -349,13 +356,13 @@ export default function IncidentReportModal({
                       </label>
                       <div className='mt-2'>
                         <textarea
-                          rows={4}
+                          rows={Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
                           {...register('briefBackground', { required: true })}
                           id='briefBackground'
                           value={briefBackgroundValue}
                           onChange={handleBriefBackgroundChange}
                           maxLength={maxLength + 1}
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 resize-none sm:text-sm sm:leading-6'
                         />
                         <div className='text-xs text-gray-500 text-right mt-1'>
                           {briefBackgroundValue.length}/{maxLength} characters

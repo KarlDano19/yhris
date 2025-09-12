@@ -552,7 +552,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
             {/* Inner light effect - hidden when printing */}
             <div className="absolute inset-0 rounded-lg from-white to-amber-50 agreement-glow print-hide"></div>
             
-            <div className="relative preview-content text-black" style={{ minHeight: '883px', maxHeight: '1123px' }}>
+            <div className="relative preview-content text-black" style={{ minHeight: '883px', maxHeight: 'auto' }}>
               {renderPageContent()}
             </div>
           </div>
