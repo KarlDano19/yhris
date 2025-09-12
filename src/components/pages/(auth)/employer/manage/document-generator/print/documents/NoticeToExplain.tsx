@@ -242,7 +242,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       <div class="section">
         <div class="background-section">
           <div class="detail-label">Brief background :</div>
-          <div style="white-space: normal; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
+          <div style="white-space: pre-wrap; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
         </div>
         
         <div class="signatures-grid">
@@ -279,37 +279,37 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Employee Explanation Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 25px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">I. Employee Explanation</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.employeeExplanation || ''}
           </div>
         </div>
       </div>
 
       <!-- Hearing Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 15px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">II. Hearing</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.hearingNotes || ''}
           </div>
         </div>
       </div>
 
       <!-- Management Decision Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">III. Management Decision</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.managementDecision || ''}
           </div>
         </div>
       </div>
 
       <!-- Footer Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <table class="footer-table">
           <tr>
             <td class="footer-cell footer-cell-left">

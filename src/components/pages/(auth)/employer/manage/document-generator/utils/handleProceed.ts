@@ -42,6 +42,7 @@ export async function handleProceedUtil({
         uploadData.border_color = currentData.borderColor;
         uploadData.company_name = currentData.companyName;
         uploadData.date_issued = currentData.dateOfIssuance;
+        uploadData.brief_background = currentData.briefBackground;
         uploadData.prepared_by = currentData.preparedBy;
         uploadData.reviewed_by = currentData.reviewedBy;
         

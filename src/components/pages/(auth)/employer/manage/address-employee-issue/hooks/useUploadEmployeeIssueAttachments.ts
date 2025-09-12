@@ -11,6 +11,7 @@ type UploadParams = {
   border_color?: string;
   company_name?: string;
   date_issued?: string;
+  brief_background?: string;
   prepared_by?: string;
   reviewed_by?: string;
   hr_signature?: File;
@@ -27,6 +28,7 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
       border_color,
       company_name,
       date_issued,
+      brief_background,
       prepared_by,
       reviewed_by,
       hr_signature,
@@ -36,11 +38,12 @@ async function uploadEmployeeIssueAttachments(params: UploadParams) {
     formData.append('nte_attachment', nte_attachment || '');
     formData.append('decision_attachment', decision_attachment || '');
     
-    // Add additional fields if provided
+    // Handle Proceed Updated Employee Issue Form Fields
     if (nte_logo) formData.append('nte_logo', nte_logo);
     if (border_color) formData.append('border_color', border_color);
     if (company_name) formData.append('company_name', company_name);
     if (date_issued) formData.append('date_issued', date_issued);
+    if (brief_background) formData.append('brief_background', brief_background);
     if (prepared_by) formData.append('prepared_by', prepared_by);
     if (reviewed_by) formData.append('reviewed_by', reviewed_by);
     if (hr_signature) formData.append('hr_signature', hr_signature);

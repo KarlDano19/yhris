@@ -254,7 +254,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:max-w-lg w-full">
-                <div className="flex bg-blue-600 p-2 items-center">
+                <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {signatureMode === 'draw' ? 'Draw Signature' : 'Upload Signature'}
                   </h3>
@@ -271,7 +271,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                       onClick={() => setSignatureMode('draw')}
                       className={`px-4 py-2 rounded-md ${
                         signatureMode === 'draw' 
-                          ? 'bg-blue-600 text-white' 
+                          ? 'bg-savoy-blue text-white' 
                           : 'bg-gray-200 text-gray-800'
                       }`}
                     >
@@ -281,7 +281,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                       onClick={() => setSignatureMode('upload')}
                       className={`px-4 py-2 rounded-md ${
                         signatureMode === 'upload' 
-                          ? 'bg-blue-600 text-white' 
+                          ? 'bg-savoy-blue text-white' 
                           : 'bg-gray-200 text-gray-800'
                       }`}
                     >
@@ -292,7 +292,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                   {/* Clear button */}
                   <div className="text-right mb-2">
                     <button
-                      className="underline text-blue-600"
+                      className="underline text-savoy-blue"
                       onClick={handleClearSignature}
                     >
                       Clear
@@ -329,7 +329,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                                 {uploadedSignature.name}
                               </p>
                               <label 
-                                className="text-blue-600 text-sm hover:underline focus:outline-none cursor-pointer"
+                                className="text-savoy-blue text-sm hover:underline focus:outline-none cursor-pointer"
                               >
                                 Change
                                 <input 
@@ -351,7 +351,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                                 <line x1="9" y1="15" x2="15" y2="15"></line>
                               </svg>
                             </div>
-                            <label className="text-blue-600 hover:underline focus:outline-none cursor-pointer">
+                            <label className="text-savoy-blue hover:underline focus:outline-none cursor-pointer">
                               Click to upload signature image
                               <input 
                                 type="file"
@@ -373,14 +373,14 @@ export default function SignatureModal({ isOpen, onClose, onSave, onTransparency
                 <div className="mt-4 sm:flex sm:flex-row-reverse px-4">
                   <button
                     type="submit"
-                    className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
+                    className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
                     onClick={handleSaveSignature}
                   >
                     {signatureMode === 'draw' ? 'Sign' : 'Upload'}
                   </button>
                   <button
                     type="button"
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-blue-600 shadow-sm ring-1 ring-inset ring-blue-600 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto"
                     onClick={onClose}
                     ref={cancelButtonRef}
                   >

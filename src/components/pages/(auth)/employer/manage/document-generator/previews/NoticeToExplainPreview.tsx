@@ -386,7 +386,7 @@ export default function NoticeToExplainPreview({ data }: NoticeToExplainPreviewP
       
       <div className="mb-4 text-black text-xs">
         <div className="font-bold">Brief background :</div>
-        <div className="mt-1" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+        <div className="mt-1" style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
           {content || '[Brief description of the incident...]'}
         </div>
       </div>
