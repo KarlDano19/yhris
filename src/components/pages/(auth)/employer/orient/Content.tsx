@@ -27,6 +27,8 @@ import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
+import LocationDepartment from './LocationDepartment';
+import LocationDepartmentModal from './modals/LocationDepartmentModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -80,6 +82,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
+  const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
@@ -118,6 +122,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             bcc: '',
           };
           item['isEnrolled'] = item.is_enrolled;
+          item['isLocationDepartmentAssigned'] = item.is_location_department_assigned;
           return item;
         });
         totalPages = applicationOrient.total_pages || 1;
@@ -147,6 +152,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             bcc: '',
           };
           item['isEnrolled'] = item.is_enrolled;
+          item['isLocationDepartmentAssigned'] = item.is_location_department_assigned;
           return item;
         });
         totalRecords = items.length;
@@ -366,6 +372,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center'>
+              <LocationDepartment
+                isAssigned={item.isLocationDepartmentAssigned}
+                setIsLocationDepartmentModalOpen={(e) => {
+                  setSelectedOrientId(item.id);
+                  setIsLocationDepartmentModalOpen(e);
+                }}
+              />
+            </div>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex justify-center'>
               <EnrollToPayroll
                 id={String(item.id)}
                 isEnrolled={item.isEnrolled}
@@ -381,7 +398,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm'>Please click create to add separtion of employee.</h4>
           </td>
@@ -492,6 +509,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Introduce to the team
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Location & Department
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Enroll to system
@@ -777,6 +797,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isEnrollModalOpen}
         setIsOpen={setIsEnrollModalOpen}
         message='You have successfully enrolled New Hire to YAHSHUA Payroll.'
+      />
+      {isLocationDepartmentModalOpen && (
+        <LocationDepartmentModal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          setIsOpen={setIsLocationDepartmentModalOpen}
+          isOpen={isLocationDepartmentModalOpen}
+          setSuccessModal={setIsSuccessLocationDepartmentModalOpen}
+        />
+      )}
+      <SuccessModal
+        isOpen={isSuccessLocationDepartmentModalOpen}
+        setIsOpen={setIsSuccessLocationDepartmentModalOpen}
+        message='You have successfully assigned location and department.'
       />
       <Tooltip id='search-tooltip'/>
     </>
