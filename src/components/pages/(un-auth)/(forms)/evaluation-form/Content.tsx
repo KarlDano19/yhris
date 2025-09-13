@@ -22,7 +22,7 @@ import ConfettiLogo from '@/svg/Confetti';
 function Content() {
   const { width, height } = useWindowSize();
   const params = useParams<{ evaluation_template_id: string; form_uuid: string }>();
-  const [hasTemplate, setHasTemplate] = useState(false);
+  const [hasTemplate, setHasTemplate] = useState(false);    
   const [hasForm, setHasForm] = useState(false);
   const [isConfirmSubmitModalOpen, setIsConfirmSubmitModalOpen] = useState(false);
   const [currentTab, setSelectedTab] = useState(0);

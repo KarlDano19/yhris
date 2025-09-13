@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -6,19 +6,31 @@ import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
+// Helper to always return an array of strings
+const parseArrayField = (field: any) => {
+  if (Array.isArray(field) && field.length === 1 && typeof field[0] === "string" && field[0].includes(",")) {
+    return field[0].split(",").map((s: string) => s.trim());
+  }
+  if (typeof field === "string") {
+    try {
+      // Try to parse JSON string
+      const parsed = JSON.parse(field);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not JSON, treat as comma-separated
+      return field.split(",").map((s: string) => s.trim());
+    }
+  }
+  return Array.isArray(field) ? field : field ? [field] : [];
+};
+
 function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen: Dispatch<any> }) {
   const cancelButtonRef = useRef(null);
   const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
-  const [isResponseView, setIsResponseView] = useState(false);
 
   const customCloseModal = () => {
     removeEmployeeIssue();
     setIsOpen(null);
-    setIsResponseView(false);
-  };
-
-  const toggleView = () => {
-    setIsResponseView(!isResponseView);
   };
 
   return (
@@ -47,49 +59,40 @@ function NTEAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIsOpen:
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                  <div className='flex bg-savoy-blue p-2 items-center'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl h-[98vh] sm:h-[95vh]'>
+                  <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>NTE Attachment</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
-                  <div>
-                    <div className='flex flex-col gap-2 p-4'>
-                      <div className='flex flex-wrap gap-2 justify-start'>
-                        <button 
-                          className={`px-4 py-2 rounded-md transition-colors ${
-                            isResponseView 
-                              ? 'bg-savoy-blue text-white hover:bg-blue-700' 
-                              : employeeIssueData?.is_responded 
-                                ? 'bg-savoy-blue text-white hover:bg-blue-700' 
-                                : 'bg-gray-400 text-white cursor-not-allowed'
-                          }`}
-                          onClick={toggleView}
-                          disabled={!isResponseView && !employeeIssueData?.is_responded}
-                        >
-                          {isResponseView ? 'Back' : (employeeIssueData?.is_responded ? 'View Response' : 'View Response')}
-                        </button>
-                      </div>
-                      
-                      <div className='mt-4'>
-                        {isResponseView ? (
-                          <div className='space-y-4'>
-                            <label htmlFor='response-message' className='block text-sm font-bold text-gray-700'>
-                              Response Message:
-                            </label>
-                            <textarea
-                              id='response-message'
-                              value={employeeIssueData?.response || ''}
-                              readOnly
-                              className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:border-transparent resize-none'
-                              placeholder='No response yet'
-                            />
+                  <div className='h-full flex flex-col overflow-hidden'>
+                    <div className='flex-1 p-4 overflow-hidden'>
+                      <div className='flex flex-col gap-4 h-full'>
+                        <div>
+                          <label className='block text-sm font-bold text-gray-700 mb-1'>To:</label>
+                          <div className='flex flex-wrap gap-2'>
+                            {parseArrayField(employeeIssueData?.nte_to).map((email: string, idx: number) => (
+                              <span
+                                key={idx}
+                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                              >
+                                {email}
+                              </span>
+                            ))}
                           </div>
-                        ) : (
-                          employeeIssueData?.nte_attachment && (
-                            <div className='mt-4'>
-                              <object data={employeeIssueData.nte_attachment} width='100%' height='500px' />
+                        </div>
+                        
+                        {employeeIssueData?.nte_attachment && (
+                          <div className='flex-1'>
+                            <label className='block text-sm font-bold text-gray-700 mb-1'>NTE Attachment:</label>
+                            <div className='h-full overflow-hidden'>
+                              <iframe 
+                                src={employeeIssueData.nte_attachment} 
+                                width='100%' 
+                                height='90%' 
+                                className='min-h-[500px] sm:min-h-0 border-0'
+                              />
                             </div>
-                          )
+                          </div>
                         )}
                       </div>
                     </div>

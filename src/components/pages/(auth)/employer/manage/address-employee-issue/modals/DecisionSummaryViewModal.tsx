@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef} from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -59,33 +59,41 @@ function DecisionAttachmentViewModal({ isOpen, setIsOpen }: { isOpen: any; setIs
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                  <div className='flex bg-savoy-blue p-2 items-center'>
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl h-[98vh] sm:h-[95vh]'>
+                  <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Decision Summary</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
-                  <div>
-                    <div className='flex flex-col gap-4 p-4'>
-                      <div>
-                        <label className='block text-sm font-bold text-gray-700 mb-1'>To:</label>
-                        <div className='flex flex-wrap gap-2'>
-                          {parseArrayField(employeeIssueData?.decision_to).map((email: string, idx: number) => (
-                            <span
-                              key={idx}
-                              className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                            >
-                              {email}
-                            </span>
-                          ))}
+                  <div className='h-full flex flex-col overflow-hidden'>
+                    <div className='flex-1 p-4 overflow-hidden'>
+                      <div className='flex flex-col gap-4 h-full'>
+                        <div>
+                          <label className='block text-sm font-bold text-gray-700 mb-1'>To:</label>
+                          <div className='flex flex-wrap gap-2'>
+                            {parseArrayField(employeeIssueData?.decision_to).map((email: string, idx: number) => (
+                              <span
+                                key={idx}
+                                className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                              >
+                                {email}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <label className='block text-sm font-bold text-gray-700 mb-1'>Message:</label>
-                        <div
-                          className='cursor-not-allowed w-full min-h-[8rem] px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
-                          style={{ whiteSpace: 'pre-wrap' }}
-                          dangerouslySetInnerHTML={{ __html: employeeIssueData?.decision_message || '' }}
-                        />
+                        
+                        {employeeIssueData?.nte_attachment && (
+                          <div className='flex-1'>
+                            <label className='block text-sm font-bold text-gray-700 mb-1'>NTE Attachment:</label>
+                            <div className='h-full overflow-hidden'>
+                              <iframe 
+                                src={employeeIssueData.nte_attachment} 
+                                width='100%' 
+                                height='90%' 
+                                className='min-h-[500px] sm:min-h-0 border-0'
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

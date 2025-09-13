@@ -146,11 +146,24 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
   }, [isSubmitted, formData.briefBackground]);
 
   const handleBriefBackgroundChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    
+    // Prevent excessive consecutive line breaks (more than 2)
+    // Replace 3 or more consecutive line breaks with just 2
+    value = value.replace(/\n{3,}/g, '\n\n');
+    
+    // Also prevent excessive spaces (more than 2 consecutive spaces)
+    value = value.replace(/ {3,}/g, '  ');
     
     if (value.length <= maxLength) {
       // Reset the toast flag when back under the limit
       if (hasShownToast) setHasShownToast(false);
+      
+      // Update the input value if we modified it
+      if (value !== e.target.value) {
+        e.target.value = value;
+      }
+      
       handleInputChange(e);
     } else if (!hasShownToast) {
       // Show toast only once per limit exceeding attempt
@@ -178,9 +191,9 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         placeholder="Enter brief background"
         value={formData.briefBackground ?? ''}
         onChange={handleBriefBackgroundChange}
-        rows={4}
+        rows={Math.max(4, Math.min(10, (formData.briefBackground || '').split('\n').length + 1))}
         maxLength={maxLength + 1}
-        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors resize-none ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
         } ${
           showValidation
