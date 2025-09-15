@@ -6,7 +6,7 @@ import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import { advertiseOptions } from '@/utils/advertiseOptions';
 import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
 import useGetPositionItems from '../../settings/general-settings/employees/hooks/position/useGetPositionItems';
-import React from 'react'; // Added missing import
+import React from 'react';
 
 interface Field {
   onChange: (value: any) => void;
@@ -31,13 +31,21 @@ export default function CreateJobPageTitleInfo({
   errors?: any;
 }) {
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
-  const [newlyAddedPositions, setNewlyAddedPositions] = useState<number[]>([]);
   
   // Fetch positions for the dropdown with a large page size to get all positions
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems({ 
     pageSize: 1000,  // Large page size to get all positions
     currentPage: 1
   });
+  
+  // Helper function to check if an item was created within 24 hours
+  const isWithin24Hours = (createdAt: string | Date): boolean => {
+    if (!createdAt) return false;
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffInHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24;
+  };
   
   // Transform position data for react-select with separation for newly added positions
   const positionOptions = useMemo(() => {
@@ -46,12 +54,22 @@ export default function CreateJobPageTitleInfo({
     const allPositions = positionData.records.map((position: any) => ({
       value: position.id,
       label: position.name,
-      isNew: newlyAddedPositions.includes(position.id)
+      createdAt: position.created_at
     }));
     
-    // Separate newly added positions from regular positions
-    const newPositions = allPositions.filter((pos: any) => pos.isNew);
-    const regularPositions = allPositions.filter((pos: any) => !pos.isNew);
+    // Filter and sort newly added positions (within 24 hours of creation)
+    const newPositions = allPositions
+      .filter((pos: any) => isWithin24Hours(pos.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular positions alphabetically
+    const regularPositions = allPositions
+      .filter((pos: any) => !isWithin24Hours(pos.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
     
     // Create options with separation
     const options = [];
@@ -62,7 +80,7 @@ export default function CreateJobPageTitleInfo({
         label: "New Positions",
         options: newPositions.map((pos: any) => ({
           ...pos,
-          label: `${pos.label} (New)`
+          label: `${pos.label}`
         })),
         isDisabled: true
       });
@@ -87,7 +105,7 @@ export default function CreateJobPageTitleInfo({
     }
     
     return options;
-  }, [positionData?.records, newlyAddedPositions]);
+  }, [positionData?.records]);
 
   const firstFormSubmit = handleSubmit((data: any) => {
     onSubmit(data);
@@ -98,21 +116,13 @@ export default function CreateJobPageTitleInfo({
   };
 
   const handlePositionCreated = () => {
-    // Refresh positions list and get the latest position
-    refetchPositions().then(() => {
-      // Find the most recently created position (highest ID)
-      if (positionData?.records && positionData.records.length > 0) {
-        const latestPosition = positionData.records.reduce((prev: any, current: any) => 
-          (prev.id > current.id) ? prev : current
-        );
-        setNewlyAddedPositions(prev => [...prev, latestPosition.id]);
-      }
-    });
+    // Refresh positions list to get the updated data with new creation dates
+    refetchPositions();
   };
 
   const handleJobCompleted = () => {
     // Clear newly added positions when job is completed
-    setNewlyAddedPositions([]);
+    // setNewlyAddedPositions([]); // This line is removed as per the new_code
   };
 
   // Call handleJobCompleted when the form is submitted

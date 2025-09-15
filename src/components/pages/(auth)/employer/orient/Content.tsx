@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 
@@ -34,6 +34,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
+  const router = useRouter(); // NEW: Add router for navigation
   const [orientItems, setOrientItems] = useState<any>([]);
   const [selectedOrientId, setSelectedOrientId] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -84,12 +85,52 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
+  const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
+  const [isLeaveWarningModalOpen, setIsLeaveWarningModalOpen] = useState(false); // NEW: Add leave warning modal state
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
     }
   }, [cachedUserDetails]);
+
+  // NEW: Add window warning function
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    const handlePopState = () => {
+      setIsLeaveWarningModalOpen(true);
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    // Push initial state to enable popstate detection
+    window.history.pushState(null, '', window.location.href);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // NEW: Function to handle leaving the page
+  const handleLeavePage = () => {
+    setIsLeaveWarningModalOpen(false);
+    router.push('/orient');
+  };
+
+  // NEW: Function to continue editing
+  const handleContinueEdit = () => {
+    setIsLeaveWarningModalOpen(false);
+    // Push state again to maintain the warning functionality
+    window.history.pushState(null, '', window.location.href);
+  };
 
   useEffect(() => {
     if (applicationOrient) {
@@ -204,7 +245,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(orientItemCopy[itemIndex], callbackReq);
   };
 
-  const setEnrolled = (id: any) => {
+  const setEnrolled = (id: any, isLocationDepartmentAssigned: boolean) => {
+    if (!isLocationDepartmentAssigned) {
+      setSelectedOrientId(id); // Set the selected ID for the assignment modal
+      setIsLocationDepartmentWarningModalOpen(true);
+      return;
+    }
+
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
@@ -387,9 +434,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id={String(item.id)}
                 isEnrolled={item.isEnrolled}
                 setEnrolled={() => {
-                  setEnrolled(item.id);
+                  setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
                 isLoading={isLoading}
+                isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>
           </td>
@@ -411,10 +459,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          {/* NEW: Replace Link with button to trigger warning modal */}
+          <button 
+            onClick={() => setIsLeaveWarningModalOpen(true)}
+            className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'
+          >
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Positions</h4>
-          </Link>
+          </button>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
@@ -813,6 +865,61 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSuccessLocationDepartmentModalOpen}
         message='You have successfully assigned location and department.'
       />
+      {/* Updated warning modal for location/department assignment */}
+      <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
+          Please assign location and department first.
+          <br />
+          <br />
+          You need to complete this step before enrolling the applicant.
+        </h5>
+        <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
+            onClick={() => {
+              setIsLocationDepartmentWarningModalOpen(false);
+              setIsLocationDepartmentModalOpen(true);
+            }}
+          >
+            ASSIGN LOCATION & DEPARTMENT
+          </button>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all'
+            onClick={() => {
+              setIsLocationDepartmentWarningModalOpen(false);
+            }}
+          >
+            CANCEL
+          </button>
+        </div>
+      </NoticeModal>
+      {/* NEW: Add leave warning modal */}
+      <NoticeModal isOpen={isLeaveWarningModalOpen} setIsOpen={setIsLeaveWarningModalOpen}>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
+          Are you sure you want to leave?
+          <br />
+          <br />
+          Any unsaved changes will be lost.
+        </h5>
+        <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
+            onClick={handleLeavePage}
+          >
+            LEAVE
+          </button>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all'
+            onClick={handleContinueEdit}
+          >
+            CONTINUE EDITING
+          </button>
+        </div>
+      </NoticeModal>
       <Tooltip id='search-tooltip'/>
     </>
   );

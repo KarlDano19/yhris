@@ -268,6 +268,7 @@ const Content = () => {
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
+        jobPost['position_name'] = jobPost['position_name'] || 'N/A'; // Add this line
         // Use the exact same property names as in the API response
         // This ensures the toggle works correctly
         jobPost['is_show_salary'] = jobPost['is_show_salary'];
@@ -419,6 +420,13 @@ const Content = () => {
               setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
               setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
+          </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.position_name || 'N/A'}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
@@ -718,6 +726,9 @@ const Content = () => {
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Title
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Position
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Type

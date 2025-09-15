@@ -46,8 +46,6 @@ export default function LocationDepartmentModal({
   // State for modals
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] = useState(false);
   const [isAddDepartmentModalOpen, setIsAddDepartmentModalOpen] = useState(false);
-  const [newlyAddedLocations, setNewlyAddedLocations] = useState<number[]>([]);
-  const [newlyAddedDepartments, setNewlyAddedDepartments] = useState<number[]>([]);
   
   // Fetch locations and departments with parameters like the Position hook
   const { data: locationData, refetch: refetchLocations } = useGetLocationItems({ 
@@ -60,6 +58,15 @@ export default function LocationDepartmentModal({
     currentPage: 1
   });
   
+  // Helper function to check if an item was created within 24 hours
+  const isWithin24Hours = (createdAt: string | Date): boolean => {
+    if (!createdAt) return false;
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffInHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24;
+  };
+  
   // Transform location data for react-select with separation for newly added locations
   const locationOptions = useMemo(() => {
     if (!locationData?.records) return [];
@@ -67,12 +74,22 @@ export default function LocationDepartmentModal({
     const allLocations = locationData.records.map((location: any) => ({
       value: location.id,
       label: location.name,
-      isNew: newlyAddedLocations.includes(location.id)
+      createdAt: location.created_at
     }));
     
-    // Separate newly added locations from regular locations
-    const newLocations = allLocations.filter((loc: any) => loc.isNew);
-    const regularLocations = allLocations.filter((loc: any) => !loc.isNew);
+    // Filter and sort newly added locations (within 24 hours of creation)
+    const newLocations = allLocations
+      .filter((loc: any) => isWithin24Hours(loc.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular locations alphabetically
+    const regularLocations = allLocations
+      .filter((loc: any) => !isWithin24Hours(loc.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
     
     // Create options with separation
     const options = [];
@@ -83,7 +100,7 @@ export default function LocationDepartmentModal({
         label: "New Locations",
         options: newLocations.map((loc: any) => ({
           ...loc,
-          label: `${loc.label} (New)`
+          label: `${loc.label}`
         })),
         isDisabled: true
       });
@@ -108,7 +125,7 @@ export default function LocationDepartmentModal({
     }
     
     return options;
-  }, [locationData?.records, newlyAddedLocations]);
+  }, [locationData?.records]);
   
   // Transform department data for react-select with separation for newly added departments
   const departmentOptions = useMemo(() => {
@@ -117,12 +134,22 @@ export default function LocationDepartmentModal({
     const allDepartments = departmentData.records.map((department: any) => ({
       value: department.id,
       label: department.name,
-      isNew: newlyAddedDepartments.includes(department.id)
+      createdAt: department.created_at
     }));
     
-    // Separate newly added departments from regular departments
-    const newDepartments = allDepartments.filter((dept: any) => dept.isNew);
-    const regularDepartments = allDepartments.filter((dept: any) => !dept.isNew);
+    // Filter and sort newly added departments (within 24 hours of creation)
+    const newDepartments = allDepartments
+      .filter((dept: any) => isWithin24Hours(dept.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular departments alphabetically
+    const regularDepartments = allDepartments
+      .filter((dept: any) => !isWithin24Hours(dept.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
     
     // Create options with separation
     const options = [];
@@ -133,7 +160,7 @@ export default function LocationDepartmentModal({
         label: "New Departments",
         options: newDepartments.map((dept: any) => ({
           ...dept,
-          label: `${dept.label} (New)`
+          label: `${dept.label}`
         })),
         isDisabled: true
       });
@@ -158,18 +185,32 @@ export default function LocationDepartmentModal({
     }
     
     return options;
-  }, [departmentData?.records, newlyAddedDepartments]);
+  }, [departmentData?.records]);
 
   const onSubmit = handleSubmit((data) => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
+    // Find the selected location and department names for display
+    const selectedLocation = locationOptions.flatMap(group => group.options)
+      .find((item: any) => item.value === parseInt(data.location));
+    const selectedDepartment = departmentOptions.flatMap(group => group.options)
+      .find((item: any) => item.value === parseInt(data.department));
+    
+    // Prepare the data for API call
     orientItemCopy[itemIndex].id = selectedOrientId;
     orientItemCopy[itemIndex].actionType = 'update_status';
     orientItemCopy[itemIndex].emailType = 'location_department';
-    orientItemCopy[itemIndex].location_id = data.location;
-    orientItemCopy[itemIndex].department_id = data.department;
+    
+    // Send location name as string (for CharField)
+    orientItemCopy[itemIndex].location_name = selectedLocation?.label.replace(' (New)', '') || '';
+    // Send department ID as number (for ForeignKey)
+    orientItemCopy[itemIndex].department_id = parseInt(data.department);
+    
+    // Update local state for UI
     orientItemCopy[itemIndex].isLocationDepartmentAssigned = true;
+    orientItemCopy[itemIndex].location_name_display = selectedLocation?.label || '';
+    orientItemCopy[itemIndex].department_name_display = selectedDepartment?.label || '';
     
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -200,35 +241,19 @@ export default function LocationDepartmentModal({
   };
 
   const handleLocationCreated = () => {
-    // Refresh locations list and get the latest location
-    refetchLocations().then(() => {
-      // Find the most recently created location (highest ID)
-      if (locationData?.records && locationData.records.length > 0) {
-        const latestLocation = locationData.records.reduce((prev: any, current: any) => 
-          (prev.id > current.id) ? prev : current
-        );
-        setNewlyAddedLocations(prev => [...prev, latestLocation.id]);
-      }
-    });
+    // Refresh locations list to get the updated data with new creation dates
+    refetchLocations();
   };
 
   const handleDepartmentCreated = () => {
-    // Refresh departments list and get the latest department
-    refetchDepartments().then(() => {
-      // Find the most recently created department (highest ID)
-      if (departmentData?.records && departmentData.records.length > 0) {
-        const latestDepartment = departmentData.records.reduce((prev: any, current: any) => 
-          (prev.id > current.id) ? prev : current
-        );
-        setNewlyAddedDepartments(prev => [...prev, latestDepartment.id]);
-      }
-    });
+    // Refresh departments list to get the updated data with new creation dates
+    refetchDepartments();
   };
 
   const handleAssignmentCompleted = () => {
     // Clear newly added locations and departments when assignment is completed
-    setNewlyAddedLocations([]);
-    setNewlyAddedDepartments([]);
+    // setNewlyAddedLocations([]); // This state is no longer needed
+    // setNewlyAddedDepartments([]); // This state is no longer needed
   };
 
   // Call handleAssignmentCompleted when the form is submitted
