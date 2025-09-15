@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Section from "../common/Section";
 import Grid from "../common/Grid";
@@ -21,6 +22,7 @@ type Props = {
   onPatchChange?: (patch: Record<string, any>) => void;
   onErrorsChange?: (hasErrors: boolean) => void;
   refetch?: () => void | Promise<void>;
+  editing?: boolean;                
 };
 
 const uniq = (xs: (string | undefined | null)[]) =>
@@ -33,12 +35,21 @@ export default function EmploymentDetailsForm({
   onPatchChange,
   onErrorsChange,
   refetch,
+  editing = false,                 
 }: Props) {
   const emit = (patch: Record<string, any>) => onPatchChange?.(patch);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showSalaryModal, setShowSalaryModal] = useState(false);
   const [showEmploymentModal, setShowEmploymentModal] = useState(false);
 
   // --- helpers ---
+  const setSalaryModalParam = (open: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (open) params.set("viewSalaryHistory", "true");
+    else params.delete("viewSalaryHistory");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
   const toDate = (val?: string | Date | null): Date | undefined => {
     if (!val) return undefined;
     if (val instanceof Date) return isNaN(val.getTime()) ? undefined : val;
@@ -109,24 +120,26 @@ export default function EmploymentDetailsForm({
   );
 
   useEffect(() => {
+    const shouldOpen = searchParams.get("viewSalaryHistory") === "true";
+    setShowSalaryModal(shouldOpen);
+  }, [searchParams]);
+
+  useEffect(() => {
     const v = employment_status;
     if (v && !employmentStatusOptions.includes(v)) {
       setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
     }
-    // no revalidate needed; value didn't change
   }, [employmentStatusOptions, employment_status]);
 
   useEffect(() => {
     const v = s(emp?.employment_status ?? "");
     setEmploymentStatus(v);
 
-    // If the current value isn't in the server-provided list, seed it into extras.
     const base = (emp?.employment_status_list as string[] | undefined) ?? [];
     if (v && !base.includes(v)) {
       setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
     }
 
-    // Re-validate with the new value so the error clears.
     setErr("employment_status", validate.employment_status(v));
   }, [emp?.employment_status]);
 
@@ -172,7 +185,6 @@ export default function EmploymentDetailsForm({
       if (dOnly > tOnly) return "Date Hired cannot be in the future.";
       return null;
     },
-    // required-only now that it's addable (no fixed whitelist)
     employment_status: (v: string) =>
       isEmpty(v) ? "Employment Status is required." : null,
     location: (v: string) => (isEmpty(v) ? "Location is required." : null),
@@ -205,6 +217,9 @@ export default function EmploymentDetailsForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasErrors]);
 
+  // gate error display when not editing
+  const showErr = (k: string) => (editing ? errors[k] || null : null);
+
   return (
     <Section title="">
       {/* Row 1: System ID | Date Hired | Employment Status | Location */}
@@ -228,88 +243,120 @@ export default function EmploymentDetailsForm({
           <CustomDatePicker
             id="date-hired"
             selected={date_hired ?? null}
-            pickerOnChange={(d: Date | null) => {
-              const v = d ?? undefined;
-              setDateHired(v);
-              emit({ date_hired: fmtYmd(v || undefined) });
-              setErr("date_hired", validate.date_hired(v));
-            }}
-            inputOnChange={(d: Date | null) => {
-              const v = d ?? undefined;
-              setDateHired(v);
-              emit({ date_hired: fmtYmd(v || undefined) });
-              setErr("date_hired", validate.date_hired(v));
-            }}
+            pickerOnChange={
+              editing
+                ? (d: Date | null) => {
+                    const v = d ?? undefined;
+                    setDateHired(v);
+                    emit({ date_hired: fmtYmd(v || undefined) });
+                    setErr("date_hired", validate.date_hired(v));
+                  }
+                : undefined
+            }
+            inputOnChange={
+              editing
+                ? (d: Date | null) => {
+                    const v = d ?? undefined;
+                    setDateHired(v);
+                    emit({ date_hired: fmtYmd(v || undefined) });
+                    setErr("date_hired", validate.date_hired(v));
+                  }
+                : undefined
+            }
             placeholder="MM/DD/YYYY"
+            disabled={!editing}  // forward if supported by the component
             className={[
-              "w-full rounded-md bg-white px-3 py-2 text-sm",
-              errors["date_hired"]
+              "w-full rounded-md px-3 py-2 text-sm",
+              !editing
+                ? "bg-gray-100 border border-gray-200 cursor-not-allowed"
+                : showErr("date_hired")
                 ? "border border-red-500 focus:border-red-500"
-                : "border border-gray-300 focus:border-[#355fd0]",
+                : "bg-white border border-gray-300 focus:border-[#355fd0]",
             ].join(" ")}
           />
           <p
             className={`mt-1 text-xs ${
-              errors["date_hired"] ? "text-red-600" : "text-transparent"
+              showErr("date_hired") ? "text-red-600" : "text-transparent"
             }`}
           >
-            {errors["date_hired"] || "placeholder"}
+            {showErr("date_hired") || "placeholder"}
           </p>
         </div>
 
-        {/* Employment Status — now ADDABLE */}
+        {/* Employment Status — addable */}
         <AddableSelect
           dataTestid="employment-status-select"
           label="Employment Status"
           options={employmentStatusOptions}
           value={employment_status}
-          onAddOption={(newOpt) => {
-            setExtraEmploymentStatuses((opts) => {
-              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq(
-                (emp?.employment_status_list as string[] | undefined) ?? [],
-                next
-              );
-              emit({ employment_status_list: merged }); // keep the list in sync (like others)
-              return next;
-            });
-            setEmploymentStatus(newOpt);
-            emit({ employment_status: newOpt });
-            setErr("employment_status", validate.employment_status(newOpt));
-          }}
-          onChange={(val) => {
-            setEmploymentStatus(val);
-            emit({ employment_status: val });
-            setErr("employment_status", validate.employment_status(val));
-          }}
-          error={errors["employment_status"] || null}
+          onAddOption={
+            editing
+              ? (newOpt) => {
+                  setExtraEmploymentStatuses((opts) => {
+                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const merged = mergeUniq(
+                      (emp?.employment_status_list as string[] | undefined) ?? [],
+                      next
+                    );
+                    emit({ employment_status_list: merged });
+                    return next;
+                  });
+                  setEmploymentStatus(newOpt);
+                  emit({ employment_status: newOpt });
+                  setErr("employment_status", validate.employment_status(newOpt));
+                }
+              : undefined
+          }
+          onChange={
+            editing
+              ? (val) => {
+                  setEmploymentStatus(val);
+                  emit({ employment_status: val });
+                  setErr("employment_status", validate.employment_status(val));
+                }
+              : undefined
+          }
+          error={showErr("employment_status")}
+          disabled={!editing}     // 👈 ensure AddableSelect supports this
+          showErrors={editing}    // 👈 gate inline error display
         />
 
+        {/* Location */}
         <AddableSelect
           dataTestid="location-select"
           label="Location"
           options={locations}
           value={location}
-          onAddOption={(newOpt) => {
-            setExtraLocations((opts) => {
-              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq(
-                (emp?.locations_list as string[] | undefined) ?? [],
-                next
-              );
-              emit({ locations_list: merged });
-              return next;
-            });
-            setLocation(newOpt);
-            emit({ location: newOpt });
-            setErr("location", validate.location(newOpt));
-          }}
-          onChange={(val) => {
-            setLocation(val);
-            emit({ location: val });
-            setErr("location", validate.location(val));
-          }}
-          error={errors["location"] || null}
+          onAddOption={
+            editing
+              ? (newOpt) => {
+                  setExtraLocations((opts) => {
+                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const merged = mergeUniq(
+                      (emp?.locations_list as string[] | undefined) ?? [],
+                      next
+                    );
+                    emit({ locations_list: merged });
+                    return next;
+                  });
+                  setLocation(newOpt);
+                  emit({ location: newOpt });
+                  setErr("location", validate.location(newOpt));
+                }
+              : undefined
+          }
+          onChange={
+            editing
+              ? (val) => {
+                  setLocation(val);
+                  emit({ location: val });
+                  setErr("location", validate.location(val));
+                }
+              : undefined
+          }
+          error={showErr("location")}
+          disabled={!editing}
+          showErrors={editing}
         />
       </Grid>
 
@@ -320,26 +367,36 @@ export default function EmploymentDetailsForm({
           label="Position"
           options={positionOptions}
           value={position}
-          onAddOption={(newOpt) => {
-            setExtraPositions((opts) => {
-              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq(
-                (emp?.positions_list as string[] | undefined) ?? [],
-                next
-              );
-              emit({ positions_list: merged });
-              return next;
-            });
-            setPosition(newOpt);
-            emit({ position: newOpt });
-            setErr("position", validate.position(newOpt));
-          }}
-          onChange={(val) => {
-            setPosition(val);
-            emit({ position: val });
-            setErr("position", validate.position(val));
-          }}
-          error={errors["position"] || null}
+          onAddOption={
+            editing
+              ? (newOpt) => {
+                  setExtraPositions((opts) => {
+                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const merged = mergeUniq(
+                      (emp?.positions_list as string[] | undefined) ?? [],
+                      next
+                    );
+                    emit({ positions_list: merged });
+                    return next;
+                  });
+                  setPosition(newOpt);
+                  emit({ position: newOpt });
+                  setErr("position", validate.position(newOpt));
+                }
+              : undefined
+          }
+          onChange={
+            editing
+              ? (val) => {
+                  setPosition(val);
+                  emit({ position: val });
+                  setErr("position", validate.position(val));
+                }
+              : undefined
+          }
+          error={showErr("position")}
+          disabled={!editing}
+          showErrors={editing}
         />
 
         <AddableSelect
@@ -347,26 +404,36 @@ export default function EmploymentDetailsForm({
           label="Department"
           options={departmentOptions}
           value={department}
-          onAddOption={(newOpt) => {
-            setExtraDepartments((opts) => {
-              const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
-              const merged = mergeUniq(
-                (emp?.departments_list as string[] | undefined) ?? [],
-                next
-              );
-              emit({ departments_list: merged });
-              return next;
-            });
-            setDepartment(newOpt);
-            emit({ department: newOpt });
-            setErr("department", validate.department(newOpt));
-          }}
-          onChange={(val) => {
-            setDepartment(val);
-            emit({ department: val });
-            setErr("department", validate.department(val));
-          }}
-          error={errors["department"] || null}
+          onAddOption={
+            editing
+              ? (newOpt) => {
+                  setExtraDepartments((opts) => {
+                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const merged = mergeUniq(
+                      (emp?.departments_list as string[] | undefined) ?? [],
+                      next
+                    );
+                    emit({ departments_list: merged });
+                    return next;
+                  });
+                  setDepartment(newOpt);
+                  emit({ department: newOpt });
+                  setErr("department", validate.department(newOpt));
+                }
+              : undefined
+          }
+          onChange={
+            editing
+              ? (val) => {
+                  setDepartment(val);
+                  emit({ department: val });
+                  setErr("department", validate.department(val));
+                }
+              : undefined
+          }
+          error={showErr("department")}
+          disabled={!editing}
+          showErrors={editing}
         />
 
         <div className="mt-6">
@@ -375,14 +442,13 @@ export default function EmploymentDetailsForm({
             type="button"
             onClick={() => {
               setShowSalaryModal(true);
+              setSalaryModalParam(true);
             }}
             className="w-full rounded-md border border-[#355fd0] text-[#355fd0] px-4 py-2 text-sm hover:bg-[#355fd0]/5"
           >
             View Salary History
           </button>
-          <p className="mt-1 text-xs text-gray-500">
-            + Add salary here
-          </p>
+          <p className="mt-1 text-xs text-gray-500">+ Add salary here</p>
         </div>
 
         <div className="mt-6">
@@ -402,11 +468,11 @@ export default function EmploymentDetailsForm({
       {showSalaryModal && (
         <SalaryHistoryModal
           isOpen
-          onClose={() => setShowSalaryModal(false)}
+          onClose={() => { setShowSalaryModal(false); setSalaryModalParam(false); }}
           employeeName={employeeName}
           employeeId={emp?.id as string | number}
           onRefetch={refetch}
-          defaultPosition={s(emp?.position ?? "")} // ← pass default position from prop
+          defaultPosition={s(emp?.position ?? "")}
         />
       )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
@@ -28,6 +29,8 @@ export default function SalaryHistoryHistory({
   onRefetch?: () => void | Promise<void>;
   defaultPosition?: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [pageSize, setPageSize] = useState<number>(
     pageType === "employee201" ? 12 : 10
   );
@@ -86,6 +89,13 @@ export default function SalaryHistoryHistory({
     setErrors({});
   };
 
+  const setModalParam = (open: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (open) params.set("viewSalaryHistory", "true");
+    else params.delete("viewSalaryHistory");
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
   const handleSave = async () => {
     if (!validate()) return;
 
@@ -119,6 +129,7 @@ export default function SalaryHistoryHistory({
       }
 
       notify.success?.("Salary updated.");
+      setModalParam(true);
       setShowForm(false);
       resetForm();
       await onRefetch?.();
