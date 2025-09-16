@@ -14,7 +14,6 @@ import Field from "../common/Field";
 import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
 import { TrainingRecord } from "../types/trainingRecords";
 
-
 /* ------------------------------- Types ------------------------------- */
 type FileAction = "keep" | "replace" | "clear";
 export type TrainingChangeSet = {
@@ -51,6 +50,7 @@ type RowErrors = {
   title?: string | null;
   dateCompleted?: string | null;
   provider?: string | null;
+  fileError?: string | null; // file validation / required error
 };
 type ErrorsBag = Record<string, RowErrors>;
 
@@ -75,9 +75,38 @@ function toDate(iso?: string): Date | null {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d;
 }
+
+/* --------- File validation: max 10 MB; allow only images & PDFs ---------- */
+const MAX_FILE_MB = 10;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+// Extensions help the picker; runtime checks use both MIME & extension
+const ALLOWED_EXTS = ["pdf", "png", "jpg", "jpeg", "webp"];
+const ALLOWED_MIME = [
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+];
+
+function validateProofFile(file: File | null): string | null {
+  if (!file) return null; // presence is checked elsewhere (required rule)
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  const typeOk = ALLOWED_MIME.includes(file.type);
+  const extOk = ALLOWED_EXTS.includes(ext);
+  if (!(typeOk || extOk)) {
+    return "Only PDF or image files are allowed (.pdf, .png, .jpg, .jpeg, .webp).";
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    return `File is too large. Maximum size is ${MAX_FILE_MB} MB.`;
+  }
+  return null;
+}
+
 function validateRow(row: Row): RowErrors {
   const errs: RowErrors = {};
+  // title
   errs.title = isEmpty(row.title) ? "Training Title is required." : null;
+  // date
   if (isEmpty(row.dateCompleted)) {
     errs.dateCompleted = "Date Completed is required.";
   } else {
@@ -95,9 +124,34 @@ function validateRow(row: Row): RowErrors {
         dOnly > tOnly ? "Date Completed cannot be in the future." : null;
     }
   }
+  // provider
   errs.provider = isEmpty(row.provider)
     ? "Training Provider is required."
     : null;
+
+  // file REQUIRED rule
+  const hasServer = !!row.existingFileUrl;
+  const keepingServer = hasServer && row.fileAction === "keep";
+  const needsFile =
+    row.isNew || // new rows must upload a file
+    !hasServer || // existing row had no server file → must upload
+    row.fileAction === "replace" || // replacing requires a file
+    row.fileAction === "clear"; // clearing would leave none → must replace
+
+  if (keepingServer) {
+    // fine; no further checks
+    errs.fileError = null;
+  } else if (needsFile) {
+    if (!row.file) {
+      errs.fileError = "Proof of Completion is required.";
+    } else {
+      const v = validateProofFile(row.file);
+      errs.fileError = v || null;
+    }
+  } else {
+    errs.fileError = null;
+  }
+
   return errs;
 }
 
@@ -123,11 +177,11 @@ export default function TrainingDevelopmentForm({
     isLoading,
     error,
     refetch,
-    setPage, 
-    setPageSize, 
+    setPage,
+    setPageSize,
   } = useGetTrainingRecordsList(employeeId, {
     current_page: 1,
-    page_size: 10, 
+    page_size: 10,
   });
 
   const currentPage = listData?.current_page ?? 1;
@@ -195,12 +249,13 @@ export default function TrainingDevelopmentForm({
     setDeletedServerIds([]);
     onDirtyChange?.(false);
   }, [listData, onDirtyChange]);
-  
+
   // errors aggregate
   const hasErrors = useMemo(
     () =>
       Object.values(errorsBag).some(
-        (e) => !!(e?.title || e?.dateCompleted || e?.provider)
+        (e) =>
+          !!(e?.title || e?.dateCompleted || e?.provider || e?.fileError)
       ),
     [errorsBag]
   );
@@ -290,7 +345,7 @@ export default function TrainingDevelopmentForm({
     for (const r of rows) bag[r.id] = validateRow(r);
     setErrorsBag(bag);
     const anyErrors = Object.values(bag).some(
-      (e) => !!(e.title || e.dateCompleted || e.provider)
+      (e) => !!(e.title || e.dateCompleted || e.provider || e.fileError)
     );
 
     const creates = rows
@@ -299,7 +354,7 @@ export default function TrainingDevelopmentForm({
         training_title: r.title,
         date_completed: r.dateCompleted || null,
         training_provider: r.provider || "",
-        proof_of_completion: r.file || null,
+        proof_of_completion: r.file || null, // required is enforced by validateRow
       }));
 
     const updates = rows
@@ -371,200 +426,257 @@ export default function TrainingDevelopmentForm({
       )}
 
       {/* Rows */}
-      {!isLoading && rows.map((row) => {
-        const rowErr = errorsBag[row.id] ?? {};
-        const hasServerFile =
-          !!row.existingFileUrl && row.fileAction === "keep";
-        return (
-          <div key={row.id} className="mb-5">
-            <div className="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              {/* Delete */}
-              <button
-                type="button"
-                onClick={() => askDelete(row.id)}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-300 text-red-500 hover:bg-red-50"
-                title="Remove Training"
-                aria-label="Remove Training"
-                disabled={isLoading || confirmBusy}
-              >
-                <TrashIcon className="h-3.5 w-3.5" />
-              </button>
+      {!isLoading &&
+        rows.map((row) => {
+          const rowErr = errorsBag[row.id] ?? {};
+          const hasServerFile =
+            !!row.existingFileUrl && row.fileAction === "keep";
+          return (
+            <div key={row.id} className="mb-5">
+              <div className="relative rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                {/* Delete */}
+                <button
+                  type="button"
+                  onClick={() => askDelete(row.id)}
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-300 text-red-500 hover:bg-red-50"
+                  title="Remove Training"
+                  aria-label="Remove Training"
+                  disabled={isLoading || confirmBusy}
+                >
+                  <TrashIcon className="h-3.5 w-3.5" />
+                </button>
 
-              {/* Fields */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Field
-                  dataTestid="title-field"
-                  label="Training Title"
-                  placeholder="Enter Training Title..."
-                  value={row.title}
-                  onChange={(e) => updateRow(row.id, { title: e.target.value })}
-                  error={rowErr.title ?? null}
-                  required
-                />
+                {/* Fields */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field
+                    dataTestid="title-field"
+                    label="Training Title"
+                    placeholder="Enter Training Title..."
+                    value={row.title}
+                    onChange={(e) =>
+                      updateRow(row.id, { title: e.target.value })
+                    }
+                    error={rowErr.title ?? null}
+                    required
+                  />
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Date Completed<span className="ml-0.5 text-red-600">*</span>
-                  </label>
-                  <div className="relative">
-                    <CustomDatePicker
-                      id={`training-date-${row.id}`}
-                      selected={toDate(row.dateCompleted)}
-                      pickerOnChange={(d: Date | null) =>
-                        updateRow(row.id, {
-                          dateCompleted: d ? toISODateInput(d) : "",
-                        })
-                      }
-                      inputOnChange={(d: Date | null) =>
-                        updateRow(row.id, {
-                          dateCompleted: d ? toISODateInput(d) : "",
-                        })
-                      }
-                      placeholder="MM/DD/YYYY"
-                      className={[
-                        "w-full rounded-md bg-white px-3 py-2 text-sm",
-                        rowErr.dateCompleted
-                          ? "border border-red-500 focus:border-red-500"
-                          : "border border-gray-300 focus:border-[#355fd0]",
-                      ].join(" ")}
-                    />
-                  </div>
-                  <p
-                    className={`mt-1 text-xs ${
-                      rowErr.dateCompleted ? "text-red-600" : "text-transparent"
-                    }`}
-                  >
-                    {rowErr.dateCompleted || "placeholder"}
-                  </p>
-                </div>
-
-                <Field
-                  dataTestid="provider-field"
-                  label="Training Provider"
-                  placeholder="Enter Training Provider..."
-                  value={row.provider}
-                  onChange={(e) =>
-                    updateRow(row.id, { provider: e.target.value })
-                  }
-                  error={rowErr.provider ?? null}
-                  required
-                />
-
-                {/* Proof of completion */}
-                <div data-testid="proof-field">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Proof of Completion (e.g., Certificate)
-                  </label>
-
-                  {hasServerFile && (
-                    <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                      <a
-                        href={row.existingFileUrl!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="truncate underline"
-                      >
-                        View current file
-                      </a>
-                      <div className="flex items-center gap-2">
-                        <button
-                          data-testid="remove-file-btn"
-                          type="button"
-                          onClick={() =>
-                            updateRow(row.id, {
-                              fileAction: "clear",
-                              file: null,
-                            })
-                          }
-                          className="text-xs text-red-600 hover:underline"
-                        >
-                          Remove
-                        </button>
-                        <label data-testid="replace-file-btn" className="text-xs text-blue-600 hover:underline cursor-pointer">
-                          Replace
-                          <input
-                            type="file"
-                            accept=".pdf,.png,.jpg,.jpeg,.webp"
-                            className="hidden"
-                            onChange={(e) =>
-                              updateRow(row.id, {
-                                file: e.target.files?.[0] ?? null,
-                                fileAction: e.target.files?.[0]
-                                  ? "replace"
-                                  : "keep",
-                              })
-                            }
-                          />
-                        </label>
-                      </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Date Completed
+                      <span className="ml-0.5 text-red-600">*</span>
+                    </label>
+                    <div className="relative">
+                      <CustomDatePicker
+                        id={`training-date-${row.id}`}
+                        selected={toDate(row.dateCompleted)}
+                        pickerOnChange={(d: Date | null) =>
+                          updateRow(row.id, {
+                            dateCompleted: d ? toISODateInput(d) : "",
+                          })
+                        }
+                        inputOnChange={(d: Date | null) =>
+                          updateRow(row.id, {
+                            dateCompleted: d ? toISODateInput(d) : "",
+                          })
+                        }
+                        placeholder="MM/DD/YYYY"
+                        className={[
+                          "w-full rounded-md bg-white px-3 py-2 text-sm",
+                          rowErr.dateCompleted
+                            ? "border border-red-500 focus:border-red-500"
+                            : "border border-gray-300 focus:border-[#355fd0]",
+                        ].join(" ")}
+                      />
                     </div>
-                  )}
+                    <p
+                      className={`mt-1 text-xs ${
+                        rowErr.dateCompleted
+                          ? "text-red-600"
+                          : "text-transparent"
+                      }`}
+                    >
+                      {rowErr.dateCompleted || "placeholder"}
+                    </p>
+                  </div>
 
-                  {!hasServerFile &&
-                    row.fileAction === "clear" &&
-                    row.existingFileUrl && (
-                      <div className="mb-2 text-xs text-orange-600">
-                        File will be removed on Save.
-                      </div>
-                    )}
+                  <Field
+                    dataTestid="provider-field"
+                    label="Training Provider"
+                    placeholder="Enter Training Provider..."
+                    value={row.provider}
+                    onChange={(e) =>
+                      updateRow(row.id, { provider: e.target.value })
+                    }
+                    error={rowErr.provider ?? null}
+                    required
+                  />
 
-                  {!hasServerFile && (
-                    <>
-                      {row.file ? (
-                        <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                          <span className="truncate">{row.file.name}</span>
+                  {/* Proof of completion (REQUIRED) */}
+                  <div data-testid="proof-field">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Proof of Completion (PDF or Image) <span className="ml-0.5 text-red-600">*</span>
+                    </label>
+
+                    {hasServerFile && (
+                      <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+                        <a
+                          href={row.existingFileUrl!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="truncate underline"
+                        >
+                          View current file
+                        </a>
+                        <div className="flex items-center gap-2">
                           <button
                             data-testid="remove-file-btn"
                             type="button"
-                            onClick={() =>
+                            onClick={() => {
+                              // clearing requires replacement (required)
                               updateRow(row.id, {
+                                fileAction: "clear",
                                 file: null,
-                                fileAction: row.existingFileUrl
-                                  ? "clear"
-                                  : "keep",
-                              })
-                            }
+                              });
+                              setErrorsBag((prev) => ({
+                                ...prev,
+                                [row.id]: {
+                                  ...(prev[row.id] || {}),
+                                  fileError: "Proof of Completion is required.",
+                                },
+                              }));
+                            }}
                             className="text-xs text-red-600 hover:underline"
                           >
-                            Remove file
+                            Remove
                           </button>
+                          <label
+                            data-testid="replace-file-btn"
+                            className="text-xs text-blue-600 hover:underline cursor-pointer"
+                          >
+                            Replace
+                            <input
+                              type="file"
+                              accept=".pdf,.png,.jpg,.jpeg,.webp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0] ?? null;
+                                const err = validateProofFile(f);
+                                if (err) {
+                                  setErrorsBag((prev) => ({
+                                    ...prev,
+                                    [row.id]: {
+                                      ...(prev[row.id] || {}),
+                                      fileError: err,
+                                    },
+                                  }));
+                                  e.currentTarget.value = "";
+                                  return;
+                                }
+                                updateRow(row.id, {
+                                  file: f,
+                                  fileAction: f ? "replace" : "keep",
+                                });
+                              }}
+                            />
+                          </label>
                         </div>
-                      ) : (
-                        <input
-                          type="file"
-                          accept=".pdf,.png,.jpg,.jpeg,.webp"
-                          onChange={(e) =>
-                            updateRow(row.id, {
-                              file: e.target.files?.[0] ?? null,
-                              fileAction: e.target.files?.[0]
-                                ? "replace"
-                                : row.existingFileUrl
-                                ? "clear"
-                                : "keep",
-                            })
-                          }
-                          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-                        />
-                      )}
-                    </>
-                  )}
+                      </div>
+                    )}
 
-                  <p className="mt-1 text-xs text-transparent">placeholder</p>
+                    {!hasServerFile && (
+                      <>
+                        {row.file ? (
+                          <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+                            <span className="truncate">{row.file.name}</span>
+                            <button
+                              data-testid="remove-file-btn"
+                              type="button"
+                              onClick={() => {
+                                // after removing local file, still required
+                                updateRow(row.id, {
+                                  file: null,
+                                  fileAction: row.existingFileUrl
+                                    ? "clear"
+                                    : "keep",
+                                });
+                                setErrorsBag((prev) => ({
+                                  ...prev,
+                                  [row.id]: {
+                                    ...(prev[row.id] || {}),
+                                    fileError: "Proof of Completion is required.",
+                                  },
+                                }));
+                              }}
+                              className="text-xs text-red-600 hover:underline"
+                            >
+                              Remove file
+                            </button>
+                          </div>
+                        ) : (
+                          <input
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg,.webp"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0] ?? null;
+                              const err = validateProofFile(f);
+                              if (err) {
+                                setErrorsBag((prev) => ({
+                                  ...prev,
+                                  [row.id]: {
+                                    ...(prev[row.id] || {}),
+                                    fileError: err,
+                                  },
+                                }));
+                                e.currentTarget.value = "";
+                                return;
+                              }
+                              updateRow(row.id, {
+                                file: f,
+                                fileAction: f
+                                  ? "replace"
+                                  : row.existingFileUrl
+                                  ? "clear"
+                                  : "keep",
+                              });
+                            }}
+                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {!hasServerFile &&
+                      row.fileAction === "clear" &&
+                      row.existingFileUrl && (
+                        <div className="mt-1 text-xs text-orange-600">
+                          File will be removed on Save.
+                        </div>
+                      )}
+
+                    <p
+                      className={`mt-1 text-xs ${
+                        errorsBag[row.id]?.fileError
+                          ? "text-red-600"
+                          : "text-transparent"
+                      }`}
+                    >
+                      {errorsBag[row.id]?.fileError || "placeholder"}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
       {/* Pagination footer */}
       <Pagination
         pagination={{ totalPages, totalRecords }}
         currentPage={currentPage}
         pageSize={pageSize}
-        onPageSizeChange={(size: number) => setPageSize(size)} // 👈 calls hook
-        onPageChange={({ selected }) => setPage(selected + 1)} // 👈 calls hook
-        pageType="standard" // or whatever your component expects
+        onPageSizeChange={(size: number) => setPageSize(size)} // calls hook
+        onPageChange={({ selected }) => setPage(selected + 1)} // calls hook
+        pageType="standard"
       />
 
       {/* Confirm modal */}

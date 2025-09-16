@@ -382,7 +382,7 @@ export default function InvestigationModal({
         isOpen={isConfirmModalOpen}
         setIsOpen={setIsConfirmModalOpen}
         confirmAction={saveData}
-        isLoading={false}
+        isLoading={isLoading}
       />
       
       {/* Unsaved Changes Confirmation Modal */}

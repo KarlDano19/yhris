@@ -13,6 +13,7 @@ type Props = {
   employeeName: string;
   employeeId: number | string;
   onRefetch?: () => void | Promise<void>;
+  defaultPosition: string;
 };
 
 export default function SalaryHistoryModal({
@@ -21,6 +22,7 @@ export default function SalaryHistoryModal({
   employeeName,
   employeeId,
   onRefetch,
+  defaultPosition
 }: Props) {
   const [tab, setTab] = useState<"history" | "analysis">("history");
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -70,9 +72,9 @@ export default function SalaryHistoryModal({
         {/* Content */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {tab === "history" ? (
-            <SalaryHistoryHistory employeeId={employeeId} onRefetch={onRefetch}/>
+            <SalaryHistoryHistory employeeId={employeeId} onRefetch={onRefetch} defaultPosition={defaultPosition}/>
           ) : (
-            // We'll wire the analysis API next; for now, render an empty state
+
             <SalaryHistoryAnalysis
               employeeName={employeeName}
               employeeId={employeeId}

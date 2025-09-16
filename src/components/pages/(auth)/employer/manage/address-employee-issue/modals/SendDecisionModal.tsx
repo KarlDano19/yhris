@@ -14,10 +14,13 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import usePatchEmployeeIssueItems from '../hooks/usePatchEmployeeIssueItems';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import ClipIcon from '@/svg/ClipIcon';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_SendDecisionModal } from '@/types/globals';
@@ -41,27 +44,31 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
-function stripHtml(html: string) {
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-}
+// Get filename from attachment URL
+const getFilenameFromUrl = (url: string) => {
+  if (!url) return '';
+  
+  // Remove AWS credentials from the URL if present
+  let cleanUrl = url;
+  if (url.includes('?AWSAccessKeyId=')) {
+    cleanUrl = url.split('?AWSAccessKeyId=')[0];
+  }
+  
+  const urlParts = cleanUrl.split('/');
+  return urlParts[urlParts.length - 1];
+};
 
 export default function SendDecisionModal({
-  employeeIssueItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeIssueItems: any;
-  setEmployeeIssueItems: any;
   isOpen: T_SendDecisionModal | null;
   setIsOpen: Dispatch<T_SendDecisionModal | null>;
   refetch?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [applicantEmail, setApplicantEmail] = useState<string | null>(null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
@@ -81,6 +88,9 @@ export default function SendDecisionModal({
   });
   const { data: dataEmailTemplate } = useGetEmailTemplateItems();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  // Fetch employee issue details to get attachment
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isOpen?.id || null);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -141,15 +151,21 @@ export default function SendDecisionModal({
   };
 
   useEffect(() => {
-    if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
-      if (employeeIssueItemsCopy[itemIndex]) {
-        setApplicantEmail(employeeIssueItemsCopy[itemIndex].email);
-        setTagsTo([employeeIssueItemsCopy[itemIndex].email]);
+    if (isOpen && isOpen.id && employeeIssueDetails) {
+      const employeeEmail = employeeIssueDetails.email;
+      setApplicantEmail(employeeEmail);
+      if (employeeEmail) {
+        setTagsTo([employeeEmail]);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, employeeIssueDetails, setTagsTo]);
+
+  // Load attachment when employee issue details are available
+  useEffect(() => {
+    if (employeeIssueDetails && employeeIssueDetails.nte_attachment) {
+      setPdfAttachment(employeeIssueDetails.nte_attachment);
+    }
+  }, [employeeIssueDetails]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -164,7 +180,7 @@ export default function SendDecisionModal({
     if (subjectContent && subjectContent.trim() !== '') {
       clearErrors('subject');
     }
-  }, [watch('subject'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when message changes
   useEffect(() => {
@@ -173,7 +189,7 @@ export default function SendDecisionModal({
     if (!isHtmlEmpty(messageContent)) {
       clearErrors('message');
     }
-  }, [watch('message'), clearErrors]);
+  }, [watch, clearErrors]);
 
   const onSubmit = handleSubmit((data) => {
     // Validate "To" field manually since it uses tags
@@ -186,33 +202,47 @@ export default function SendDecisionModal({
       return;
     }
     if (isOpen && isOpen.id) {
-      const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === isOpen.id);
-      const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
       const template = dataEmailTemplate.find((item: any) => item.id === parseInt(data.template));
-      employeeIssueItemsCopy[itemIndex].id = isOpen.id;
-      employeeIssueItemsCopy[itemIndex].actionType = 'sending';
-      employeeIssueItemsCopy[itemIndex].emailType = 'decision';
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.template = template ? template.subject : '';
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.to = tagsTo;
-      if (tagsCc) {
-        employeeIssueItemsCopy[itemIndex].sendDecisionForm.cc = tagsCc;
-      }
-      if (tagsBcc) {
-        employeeIssueItemsCopy[itemIndex].sendDecisionForm.bcc = tagsBcc;
-      }
-      // Store message as HTML (preserve formatting)
-      employeeIssueItemsCopy[itemIndex].sendDecisionForm.message = data.message;
-      employeeIssueItemsCopy[itemIndex].isDecisionSent = true;
-      // Save decision_to, decision_cc, decision_bcc as JSON stringified arrays
-      employeeIssueItemsCopy[itemIndex].decision_subject = data.subject;
-      employeeIssueItemsCopy[itemIndex].decision_to = JSON.stringify(tagsTo);
-      employeeIssueItemsCopy[itemIndex].decision_cc = JSON.stringify(tagsCc);
-      employeeIssueItemsCopy[itemIndex].decision_bcc = JSON.stringify(tagsBcc);
-      employeeIssueItemsCopy[itemIndex].decision_message = data.message;
+      
+      // Create the simplified payload - only save form data to backend fields
+      const payload = {
+        id: isOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'decision',
+        decision_subject: data.subject,
+        decision_to: JSON.stringify(tagsTo),
+        decision_cc: JSON.stringify(tagsCc),
+        decision_bcc: JSON.stringify(tagsBcc),
+        decision_message: data.message,
+        // Required by type but not used for decision
+        issueNTEForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        sendDecisionForm: {
+          template: template ? template.subject : '',
+          subject: data.subject,
+          to: tagsTo,
+          cc: tagsCc,
+          bcc: tagsBcc,
+          message: data.message,
+          attachment: null
+        },
+        dateReceived: null,
+        nte_subject: '',
+        nte_to: '',
+        nte_cc: '',
+        nte_bcc: '',
+        nte_message: ''
+      };
+      
       const callbackReq = {
         onSuccess: (data: any) => {
-          setEmployeeIssueItems([...employeeIssueItemsCopy]);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           // Reset form data before closing modal to prevent unsaved changes detection
           resetFormData();
@@ -227,7 +257,7 @@ export default function SendDecisionModal({
           });
         },
       };
-      mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
+      mutate(payload, callbackReq);
     } else {
       toast.custom(() => <CustomToast message='Incomplete information.' type='error' />, { duration: 4000 });
     }
@@ -531,6 +561,35 @@ export default function SendDecisionModal({
                           />
                         </div>
                       </div>
+                      
+                      {/* Attachment section with ClipIcon - moved outside the quill container */}
+                      <div className="mt-10 pt-4">
+                        <label className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
+                        </label>
+                        <div className="mt-2 flex items-center gap-2 pl-2">
+                          <ClipIcon hasFile={!!pdfAttachment} />
+                          {pdfAttachment && (
+                            <>
+                              <span className="text-sm text-gray-600">
+                                {getFilenameFromUrl(pdfAttachment)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => window.open(pdfAttachment, '_blank')}
+                                className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
+                                title="View attachment"
+                              >
+                                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                              </button>
+                            </>
+                          )}
+                          {!pdfAttachment && (
+                            <span className="text-sm text-gray-400">No attachment</span>
+                          )}
+                        </div>
+                      </div>
+                      
                     </div>
                     <hr />
                     <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>

@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
 import Field from "../../common/Field";
-import AddableSelect from "../../common/AddableSelect";
-
 import { notify } from "../../utils/notify";
 
 import { useGetSalaryHistory } from "../../hooks/useGetSalaryHistory";
@@ -22,36 +20,34 @@ export default function SalaryHistoryHistory({
   pageType = "employee201",
   onCreate,
   onRefetch,
+  defaultPosition,
 }: {
-  employeeId?: number | string; // if provided, we fetch with server-side pagination
-  entries?: SalaryHistoryEntry[]; // optional fallback (no server pagination)
+  employeeId?: number | string;
+  entries?: SalaryHistoryEntry[];
   pageType?: string;
   onCreate?: (entry: SalaryHistoryEntry) => Promise<void> | void;
   onRefetch?: () => void | Promise<void>;
+  defaultPosition?: string;
 }) {
-  // -------------------- pagination state (server-driven) --------------------
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [pageSize, setPageSize] = useState<number>(
     pageType === "employee201" ? 12 : 10
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // -------------------- fetch when employeeId is present --------------------
   const enabledFetch = Boolean(employeeId);
   const {
     entries: fetched,
     isLoading,
     error: loadError,
-    meta, // { total_pages, total_records, ... } when backend returns ObjectManager meta
+    meta,
     refetch,
   } = useGetSalaryHistory(employeeId!, { pageSize, page: currentPage });
 
-  // Choose source list:
-  // - If fetching from API (employeeId present): use 'fetched' which already corresponds to currentPage/pageSize
-  // - Else: fall back to 'entries' prop and do client-side pagination
   const remoteItems = enabledFetch ? fetched : [];
   const localItems = !enabledFetch ? entries ?? [] : [];
 
-  // Keep local list for optimistic add (always used for rendering)
   const [items, setItems] = useState<SalaryHistoryEntry[]>(
     enabledFetch ? remoteItems : localItems
   );
@@ -59,7 +55,6 @@ export default function SalaryHistoryHistory({
     setItems(enabledFetch ? remoteItems : localItems);
   }, [enabledFetch, remoteItems, localItems]);
 
-  /* ------------ inline update form state ------------ */
   const [showForm, setShowForm] = useState(false);
   const [position, setPosition] = useState("");
   const [salary, setSalary] = useState("");
@@ -70,27 +65,11 @@ export default function SalaryHistoryHistory({
     salary?: string;
     effDate?: string;
   }>({});
-  const { data: positionItems } = useGetPositionItems();
-  const {
-    create,
-    isSaving: isCreating,
-    error: createError,
-  } = useCreateSalaryHistory(employeeId);
+  const { create, isSaving: isCreating } = useCreateSalaryHistory(employeeId);
 
-  // User-added options (not from API)
-  const [extraPositions, setExtraPositions] = useState<string[]>([]);
-
-  const positionOptions = useMemo(() => {
-    const names = Array.isArray(positionItems)
-      ? (positionItems as any[])
-          .map((x) => (typeof x === "string" ? x : x?.name))
-          .filter(Boolean)
-      : [];
-    const uniq = Array.from(new Set(names as string[])).sort((a, b) =>
-      a.localeCompare(b)
-    );
-    return [...uniq, ...extraPositions.filter((x) => !uniq.includes(x))];
-  }, [positionItems, extraPositions]);
+  useEffect(() => {
+    setPosition(defaultPosition || "");
+  }, [defaultPosition]);
 
   const validate = () => {
     const e: typeof errors = {};
@@ -105,10 +84,16 @@ export default function SalaryHistoryHistory({
   };
 
   const resetForm = () => {
-    setPosition("");
     setSalary("");
     setEffDate(null);
     setErrors({});
+  };
+
+  const setModalParam = (open: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (open) params.set("viewSalaryHistory", "true");
+    else params.delete("viewSalaryHistory");
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   const handleSave = async () => {
@@ -125,7 +110,6 @@ export default function SalaryHistoryHistory({
     };
 
     try {
-      // optimistic UI
       setItems((prev) => {
         const next = [...prev, entry];
         next.sort(
@@ -136,28 +120,24 @@ export default function SalaryHistoryHistory({
         return next;
       });
 
-      // persist to API
       if (employeeId) {
         const res = await create(entry);
         if (!res.ok) throw res.error;
-        // pull canonical list (correct order/ids) from server
         await refetch();
       } else if (onCreate) {
-        // fallback if parent handles persistence
         await onCreate(entry);
       }
 
       notify.success?.("Salary updated.");
+      setModalParam(true);
       setShowForm(false);
       resetForm();
       await onRefetch?.();
     } catch (err: any) {
       notify.error?.(err?.message || "Failed to update salary.");
-      // optional: you could refetch() here to ensure consistency
     }
   };
 
-  // -------------------- pagination (client-side fallback) --------------------
   const totalRecords = enabledFetch
     ? meta?.total_records ?? items.length
     : items.length;
@@ -166,8 +146,7 @@ export default function SalaryHistoryHistory({
     : Math.max(1, Math.ceil(totalRecords / pageSize));
 
   const pageItems = useMemo(() => {
-    if (enabledFetch) return items; // already server-paged
-    // client-side slice
+    if (enabledFetch) return items;
     const start = (currentPage - 1) * pageSize;
     const end = start + pageSize;
     return items.slice(start, end);
@@ -175,15 +154,14 @@ export default function SalaryHistoryHistory({
 
   const handlePageSizeChange = (value: number) => {
     setPageSize(value);
-    setCurrentPage(1); // resetting to first page triggers hook re-fetch
+    setCurrentPage(1);
   };
   const handlePageChange = (selectedItem: { selected: number }) => {
-    setCurrentPage(selectedItem.selected + 1); // triggers hook re-fetch
+    setCurrentPage(selectedItem.selected + 1);
   };
 
   return (
     <div className="w-full">
-      {/* Inline update form toggle */}
       <div className="flex justify-end no-print mb-4">
         {!showForm ? (
           <button
@@ -202,20 +180,38 @@ export default function SalaryHistoryHistory({
         ) : (
           <div className="w-full rounded-lg border p-3 bg-white">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <AddableSelect
-                dataTestid="position-select"
-                label="Position"
-                options={positionOptions}
-                value={position}
-                onAddOption={(newOpt) => {
-                  setExtraPositions((opts) =>
-                    opts.includes(newOpt) ? opts : [...opts, newOpt]
-                  );
-                  setPosition(newOpt);
-                }}
-                onChange={(val) => setPosition(val)}
-                error={errors["position"] || null}
-              />
+              {/* Position (read-only) */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor="position-input"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Position <span className="ml-0.5 text-red-600">*</span>
+                </label>
+                <input
+                  id="position-input"
+                  data-testid="position-input"
+                  type="text"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  disabled
+                  className={[
+                    "w-full rounded-md px-3 py-2 text-sm cursor-not-allowed",
+                    "bg-gray-100",
+                    errors["position"]
+                      ? "border border-red-500 focus:border-red-500"
+                      : "border border-gray-300 focus:border-[#355fd0]",
+                  ].join(" ")}
+                />
+                <p
+                  className={`mt-1 text-xs ${
+                    errors["position"] ? "text-red-600" : "text-transparent"
+                  }`}
+                >
+                  {errors["position"] || "placeholder"}
+                </p>
+              </div>
+
               <Field
                 dataTestid="salary-input"
                 label="Salary"
@@ -234,6 +230,7 @@ export default function SalaryHistoryHistory({
                 error={errors.salary || null}
                 required
               />
+
               <div className="flex flex-col">
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   Effective Date <span className="ml-0.5 text-red-600">*</span>
@@ -300,7 +297,6 @@ export default function SalaryHistoryHistory({
       {/* Table */}
       <div className="overflow-hidden rounded-lg border">
         {enabledFetch && isLoading ? (
-          // skeleton table during load
           <table className="min-w-full divide-y divide-gray-200 animate-pulse">
             <thead className="bg-gray-50">
               <tr>
@@ -330,7 +326,10 @@ export default function SalaryHistoryHistory({
             {loadError.message || "Failed to load salary history."}
           </div>
         ) : (
-          <table data-testid="salary-history-table" className="min-w-full divide-y divide-gray-200">
+          <table
+            data-testid="salary-history-table"
+            className="min-w-full divide-y divide-gray-200"
+          >
             <thead className="bg-gray-50">
               <tr>
                 <Th>Position</Th>
@@ -363,7 +362,6 @@ export default function SalaryHistoryHistory({
         )}
       </div>
 
-      {/* Pagination footer */}
       <Pagination
         pagination={{
           totalPages,
@@ -372,14 +370,13 @@ export default function SalaryHistoryHistory({
         currentPage={currentPage}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
-        onPageChange={handlePageChange} // triggers new fetch by updating state
+        onPageChange={handlePageChange}
         pageType={pageType}
       />
     </div>
   );
 }
 
-/* ---------- table helpers ---------- */
 function Th({
   children,
   align = "left",

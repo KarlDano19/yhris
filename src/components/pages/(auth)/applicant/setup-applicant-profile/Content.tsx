@@ -57,13 +57,6 @@ const Content = () => {
   }, [applicantProfileData]);
 
   const onSubmit = handleSubmit((data) => {
-    console.log('Form submitted with data:', data);
-    
-    // Preserve the exp field if it exists (from WorkExperienceTab)
-    if ((data as any).exp) {
-      console.log('Found exp field in form data:', (data as any).exp);
-    }
-    
     const callbackReq = {
       onSuccess: async (data: any) => {
         await updateSession({ hasProfile: true });
@@ -74,7 +67,6 @@ const Content = () => {
         }, 2000);
       },
       onError: (err: any) => {
-        console.log('Profile save error:', err);
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
