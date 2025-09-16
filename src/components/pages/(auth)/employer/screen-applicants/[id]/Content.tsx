@@ -21,6 +21,7 @@ import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
+import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import Filter, { FilterOptions } from './Filter';
@@ -79,6 +80,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
+  const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
@@ -97,6 +99,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     // Only trigger if status is rejected or withdrawn (archived statuses)
     return status === 'rejected' || status === 'withdrawn';
   }, []);
+
+  /**
+   * Check if status update should trigger navigation modal
+   * Only show navigation modal when applicant is hired (passed) AND it's the final stage
+   */
+  const shouldTriggerNavigationModal = useCallback((status: string) => {
+    // Only trigger if status is passed (hired) AND it's the final stage
+    return status === 'passed' && actionState.isFinalStage;
+  }, [actionState.isFinalStage]);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -276,6 +287,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             // ============================================================================
             if (shouldTriggerArchivedRefresh(data.status)) {
               archivedApplicantRefetch();
+            }
+            
+            // ============================================================================
+            // SHOW NAVIGATION MODAL ON SUCCESSFUL HIRING FROM FINAL STAGE
+            // ============================================================================
+            if (shouldTriggerNavigationModal(data.status)) {
+              setIsNavigationModalOpen(true);
             }
             
             // Reset actionState after successful submission to allow modal to be reopened
@@ -473,6 +491,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           setIsArchivedApplicantsModalOpen(false);
         }}
         onRefresh={archivedApplicantRefetch}
+      />
+      <NavigationModal
+        isOpen={isNavigationModalOpen}
+        setIsOpen={setIsNavigationModalOpen}
+        jobPostingId={params.id as string}
       />
     </>
   );

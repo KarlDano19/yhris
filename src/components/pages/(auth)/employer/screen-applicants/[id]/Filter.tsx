@@ -114,7 +114,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                 />
                 <span className="text-sm text-gray-800">Passed</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              {/* <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   className="rounded text-blue-500 focus:ring-blue-500"
@@ -131,7 +131,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                   onChange={() => handleStatusChange('Rejected')}
                 />
                 <span className="text-sm text-gray-800">Rejected</span>
-              </label>
+              </label> */}
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
