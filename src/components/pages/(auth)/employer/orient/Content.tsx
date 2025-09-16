@@ -34,7 +34,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
-  const router = useRouter(); // NEW: Add router for navigation
+  const router = useRouter();
   const [orientItems, setOrientItems] = useState<any>([]);
   const [selectedOrientId, setSelectedOrientId] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -86,51 +86,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
-  const [isLeaveWarningModalOpen, setIsLeaveWarningModalOpen] = useState(false); // NEW: Add leave warning modal state
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
     }
   }, [cachedUserDetails]);
-
-  // NEW: Add window warning function
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
-
-    const handlePopState = () => {
-      setIsLeaveWarningModalOpen(true);
-    };
-
-    // Add event listeners
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
-
-    // Push initial state to enable popstate detection
-    window.history.pushState(null, '', window.location.href);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
-  // NEW: Function to handle leaving the page
-  const handleLeavePage = () => {
-    setIsLeaveWarningModalOpen(false);
-    router.push('/orient');
-  };
-
-  // NEW: Function to continue editing
-  const handleContinueEdit = () => {
-    setIsLeaveWarningModalOpen(false);
-    // Push state again to maintain the warning functionality
-    window.history.pushState(null, '', window.location.href);
-  };
 
   useEffect(() => {
     if (applicationOrient) {
@@ -408,22 +369,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center'>
-              <IntroduceToTeam
-                isIntroduced={item.isIntroduced}
-                setIsIntroducedModalOpen={(e) => {
+              <LocationDepartment
+                isAssigned={item.isLocationDepartmentAssigned}
+                setIsLocationDepartmentModalOpen={(e) => {
                   setSelectedOrientId(item.id);
-                  setIsIntroducedModalOpen(e);
+                  setIsLocationDepartmentModalOpen(e);
                 }}
               />
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center'>
-              <LocationDepartment
-                isAssigned={item.isLocationDepartmentAssigned}
-                setIsLocationDepartmentModalOpen={(e) => {
+              <IntroduceToTeam
+                isIntroduced={item.isIntroduced}
+                setIsIntroducedModalOpen={(e) => {
                   setSelectedOrientId(item.id);
-                  setIsLocationDepartmentModalOpen(e);
+                  setIsIntroducedModalOpen(e);
                 }}
               />
             </div>
@@ -459,14 +420,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          {/* NEW: Replace Link with button to trigger warning modal */}
-          <button 
-            onClick={() => setIsLeaveWarningModalOpen(true)}
-            className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'
-          >
+          <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Positions</h4>
-          </button>
+          </Link>
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
@@ -560,10 +517,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Introduce to the team
+                        Location & Department
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Location & Department
+                        Introduce to the team
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Enroll to system
@@ -892,31 +849,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             }}
           >
             CANCEL
-          </button>
-        </div>
-      </NoticeModal>
-      {/* NEW: Add leave warning modal */}
-      <NoticeModal isOpen={isLeaveWarningModalOpen} setIsOpen={setIsLeaveWarningModalOpen}>
-        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Are you sure you want to leave?
-          <br />
-          <br />
-          Any unsaved changes will be lost.
-        </h5>
-        <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
-          <button
-            type='button'
-            className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
-            onClick={handleLeavePage}
-          >
-            LEAVE
-          </button>
-          <button
-            type='button'
-            className='text-lg text-center block w-full font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all'
-            onClick={handleContinueEdit}
-          >
-            CONTINUE EDITING
           </button>
         </div>
       </NoticeModal>
