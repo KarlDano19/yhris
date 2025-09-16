@@ -46,12 +46,14 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   const router = useRouter();
 
   // ------------------------ State ------------------------
+  const TABS_REQUIRE_EDIT: TabKey[] = ["personal", "employment"];
   const [activeTab, setActiveTab] = useState<TabKey>("personal");
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [pendingTab, setPendingTab] = useState<TabKey | null>(null);
+  const [leaveMessage, setLeaveMessage] = useState<string>("");
 
   // per-section flags
   const [sections, setSections] = useState<SectionMap>(() =>
@@ -86,6 +88,16 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     [sections]
   );
 
+  const [editMode, setEditMode] = useState<{ personal: boolean; employment: boolean }>({
+    personal: false,
+    employment: false,
+  });
+
+  // helpers
+  const requiresEdit = TABS_REQUIRE_EDIT.includes(activeTab);
+  const isEditingTab =
+    activeTab === "personal" ? editMode.personal :
+    activeTab === "employment" ? editMode.employment : false;
   // ------------------------ Data hooks ------------------------
   const { data, isLoading, refetch } = useEmployee(params?.id);
   const employee = toDisplayEmployee(data, emp);
@@ -114,14 +126,26 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   const saving = sections[activeTab]?.saving;
 
   // ------------------------ Navigation helpers ------------------------
+
+  const buildLeaveMessage = useCallback(() => {
+    const tabLabel = labelForTab(activeTab);
+    if (isEditingTab && !isDirty) {
+      return `You are currently in Edit mode for ${tabLabel}. What would you like to do?`;
+    }
+    // default when there are unsaved edits
+    return `You have unsaved changes in ${tabLabel}. What would you like to do?`;
+  }, [activeTab, isEditingTab, isDirty]);
+
+
   const attemptNavigate = useCallback((href: string | "back") => {
-    if (isDirty) {
+    if (isDirty || isEditingTab) {
       setPendingHref(href);
+      setLeaveMessage(buildLeaveMessage());
       setShowLeaveConfirm(true);
     } else {
       href === "back" ? router.back() : router.push(href);
     }
-  }, [isDirty, router]);
+  }, [isDirty, isEditingTab, router, buildLeaveMessage]);
 
   const proceedAfterLeave = useCallback(() => {
     if (pendingTab) {
@@ -143,13 +167,13 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   // warn on unload when dirty
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isDirty) return;
+      if (!isDirty && !isEditingTab) return;
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", beforeUnload);
     return () => window.removeEventListener("beforeunload", beforeUnload);
-  }, [isDirty]);
+  }, [isDirty, isEditingTab]);
 
   // keyboard: Esc to close, Ctrl/Cmd+S to open
   useEffect(() => {
@@ -303,28 +327,33 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     });
 
     setConfirmBusy(false);
-    if (ok) setShowConfirm(false);
-    else
-      setSections((prev) => ({
+    if (ok) {
+      if (activeTab === "personal")   setEditMode((m) => ({ ...m, personal: false }));
+      if (activeTab === "employment") setEditMode((m) => ({ ...m, employment: false }));
+      setShowConfirm(false); // harmless if not shown
+    }
+    else {
+        setSections((prev) => ({
         ...prev,
         [key]: { ...prev[key], saving: false },
       }));
+    }
   }, [activeTab, sections, savePersonalTab, saveEmploymentTab, saveTrainingTab]);
 
   // ------------------------ Tab click ------------------------
   const handleTabClick = useCallback(
     (key: TabKey) => {
       if (key === activeTab) return;
-      const curDirty = sections[activeTab]?.dirty;
-      if (curDirty) {
+      if (isDirty || isEditingTab) {
         setPendingTab(key);
+        setLeaveMessage(buildLeaveMessage());
         setShowLeaveConfirm(true);
         return;
       }
       setActiveTab(key);
       void loadSection(key);
     },
-    [activeTab, sections, loadSection]
+    [activeTab, isDirty, isEditingTab, loadSection, buildLeaveMessage]
   );
 
   // helper to mark errors for a section (stable)
@@ -376,6 +405,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           <PersonalInfoForm
             key={`personal-${resetKey.personal}`}
             emp={employeeDetails}
+            editing={editMode.personal}
             onPatchChange={(patch) => {
               Object.assign(personalPatchRef.current, patch);
               setSections((p) => ({ ...p, personal: { ...p.personal, dirty: true } }));
@@ -389,6 +419,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           <EmploymentDetailsForm
             key={`employment-${resetKey.employment}`}
             emp={employeeDetails}
+            editing={editMode.employment}
             onPatchChange={(patch) => {
               Object.assign(employmentPatchRef.current, patch);
               setSections((p) => ({ ...p, employment: { ...p.employment, dirty: true } }));
@@ -453,11 +484,25 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
 
         <button
           data-testid="save-btn"
-          onClick={() => setShowConfirm(true)}
-          disabled={!canSave}
+          onClick={() => {
+            if (requiresEdit && !isEditingTab) {
+              // EDIT: enable fields
+              setEditMode((m) => ({ ...m, [activeTab]: true }));
+              return;
+            }
+            // SAVE: open confirm modal (do NOT save immediately)
+            setShowConfirm(true);
+          }}
+          disabled={
+            requiresEdit
+              ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
+              : !canSave                            // other tabs: Save only when valid+dirty
+          }
           className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
         >
-          {saving ? "Saving…" : "Save"}
+          {requiresEdit
+            ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
+            : (saving ? "Saving…" : "Save")}
         </button>
         </div>
 
@@ -524,6 +569,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
       {/* Leave confirmation for tab switches or route navigation */}
       {showLeaveConfirm && (
         <LeaveConfirmModal
+          message={leaveMessage}
           onCancel={() => {
             setShowLeaveConfirm(false);
             setPendingHref(null);
@@ -538,9 +584,11 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
             if (activeTab === "personal") {
               personalPatchRef.current = {};
               setResetKey((k) => ({ ...k, personal: k.personal + 1 }));
+              setEditMode((m) => ({ ...m, personal: false }));
             } else if (activeTab === "employment") {
               employmentPatchRef.current = {};
               setResetKey((k) => ({ ...k, employment: k.employment + 1 }));
+              setEditMode((m) => ({ ...m, employment: false }));
             } else if (activeTab === "training") {
               // reset the child form UI
               setTrainingRefreshKey((k) => k + 1);

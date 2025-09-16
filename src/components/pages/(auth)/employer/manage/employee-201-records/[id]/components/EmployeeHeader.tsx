@@ -77,16 +77,18 @@ export default function EmployeeHeader({
                 employee.complete ? "border-solid" : "border-dashed"
               }`}
             />
+
             {showPhoto ? (
-              <Image
-                src={employee.photo as string}
-                alt={employee.name}
-                width={100}
-                height={100}
-                className="relative rounded-full object-cover"
-                onError={() => setImgError(true)}
-                priority
-              />
+              <div className="absolute inset-0 overflow-hidden rounded-full bg-white">
+                <Image
+                  src={employee.photo as string}
+                  alt={employee.name}
+                  fill
+                  className="object-cover"
+                  onError={() => setImgError(true)}
+                  priority
+                />
+              </div>
             ) : (
               <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
                 <PlacholderPicture
