@@ -498,7 +498,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
               ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
               : !canSave                            // other tabs: Save only when valid+dirty
           }
-          className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
+          className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
         >
           {requiresEdit
             ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
