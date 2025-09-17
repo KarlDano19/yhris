@@ -7,12 +7,13 @@ import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
+import { Menu, Transition } from '@headlessui/react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useGetUserRightsList from './hooks/useGetUserRightsList';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import EditIcon from '@/svg/EditIcon';
 import JobUserRightsModal from './modals/JobUserRightsModal';
@@ -26,8 +27,6 @@ import DoleRightsModal from './modals/DoleRightsModal';
 import SettingsRightsModal from './modals/SettingsRightsModal';
 import AuditLogsRightsModal from './modals/AuditLogsRightsModal';
 import EmployeekitRightsModal from './modals/EmployeekitRightsModal';
-import EmployeeRightsModal from './modals/EmployeeRightsModal';
-import BenefitsRightsModal from './modals/BenefitsRightsModal';
 import classNames from '@/helpers/classNames';
 type PaginationProps = {
   totalRecords: number;
@@ -38,6 +37,22 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
+const columnDefinitions = [
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'post_job', label: 'Post a Job' },
+  { key: 'screen_applicants', label: 'Screen Applicants' },
+  { key: 'orient', label: 'Orient' },
+  { key: 'manage', label: 'Manage' },
+  { key: 'train', label: 'Train' },
+  { key: 'payroll', label: 'Payroll' },
+  { key: 'employee_separation', label: 'Employee Separation' },
+  { key: 'employee_kit', label: 'Employee Kit' },
+  { key: 'dole', label: 'DOLE' },
+  { key: 'settings', label: 'Settings' },
+  { key: 'audit_logs', label: 'Audit Logs' },
+];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -54,8 +69,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [auditLogsRightsModal, setAuditLogsRightsModal] = useState<T_ModalData | null>(null);
   const [settingsRightsModal, setSettingsRightsModal] = useState<T_ModalData | null>(null);
   const [employeekitRightsModal, setEmployeekitRightsModal] = useState<T_ModalData | null>(null);
-  const [employeeRightsModal, setEmployeeRightsModal] = useState<T_ModalData | null>(null);
-  const [benefitsRightsModal, setBenefitsRightsModal] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -68,6 +81,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
   const [appliedFilter, setAppliedFilter] = useState<any>({
     search: '',
+  });
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    name: true,
+    email: true,
+    post_job: true,
+    screen_applicants: true,
+    orient: true,
+    manage: true,
+    train: true,
+    payroll: false,
+    employee_separation: false,
+    employee_kit: false,
+    dole: false,
+    settings: false,
+    audit_logs: false,
   });
   const {
     data: userRightsListData,
@@ -111,6 +139,51 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleColumnToggle = (columnKey: string) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [columnKey]: !prev[columnKey]
+    }));
+  };
+
+  const handleColumnReset = () => {
+    const defaultColumns: Record<string, boolean> = {
+      name: true,
+      email: true,
+      post_job: true,
+      screen_applicants: true,
+      orient: true,
+      manage: true,
+      train: true,
+      payroll: false,
+      employee_separation: false,
+      employee_kit: false,
+      dole: false,
+      settings: false,
+      audit_logs: false,
+    };
+    setVisibleColumns(defaultColumns);
+  };
+
+  const handleShowAll = () => {
+    const allColumns: Record<string, boolean> = {
+      name: true,
+      email: true,
+      post_job: true,
+      screen_applicants: true,
+      orient: true,
+      manage: true,
+      train: true,
+      payroll: true,
+      employee_separation: true,
+      employee_kit: true,
+      dole: true,
+      settings: true,
+      audit_logs: true,
+    };
+    setVisibleColumns(allColumns);
+  };
+
   const renderRows = () => {
     if (isSearching || isUserRightsListLoading) {
       return (
@@ -126,53 +199,73 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (userRightsItems && userRightsItems.length > 0) {
       return userRightsItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setJobUserRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setScreenApplicantsRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setOrientRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setManageRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setEmployeeRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setBenefitsRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setTrainRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setPayrollRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setEmployeeSeparationRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setEmployeekitRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setDoleRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setSettingsRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span onClick={() => setAuditLogsRightsModal({ id: item.id, open: true })}>Edit</span>
-          </td>
+          {visibleColumns.name && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          )}
+          {visibleColumns.email && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+          )}
+          {visibleColumns.post_job && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setJobUserRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.screen_applicants && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setScreenApplicantsRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.orient && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setOrientRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.manage && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setManageRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.train && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setTrainRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.payroll && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setPayrollRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.employee_separation && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setEmployeeSeparationRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.employee_kit && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setEmployeekitRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.dole && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setDoleRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.settings && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setSettingsRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
+          {visibleColumns.audit_logs && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span onClick={() => setAuditLogsRightsModal({ id: item.id, open: true })}>Edit</span>
+            </td>
+          )}
         </tr>
       ));
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={6}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee.</h4>
           </td>
@@ -221,73 +314,157 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
+            <div className='flex-1 flex justify-start lg:justify-end'>
+              <Menu as='div' className='relative'>
+                <Menu.Button className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
+                  <Cog6ToothIcon className='h-5 w-5' />
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter='transition ease-out duration-100'
+                  enterFrom='transform opacity-0 scale-95'
+                  enterTo='transform opacity-100 scale-100'
+                  leave='transition ease-in duration-75'
+                  leaveFrom='transform opacity-100 scale-100'
+                  leaveTo='transform opacity-0 scale-95'
+                >
+                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <div className='p-4'>
+                      <div className='mb-4'>
+                        <h3 className='text-sm font-semibold text-gray-900 mb-2'>
+                          Filter Columns ({Object.values(visibleColumns).filter(Boolean).length} of {columnDefinitions.length})
+                        </h3>
+                        <p className='text-xs text-gray-600'>
+                          Select which columns to display in the table.
+                        </p>
+                      </div>
+                      <div className='max-h-64 overflow-y-auto mb-4'>
+                        <div className='grid grid-cols-1 gap-2'>
+                          {columnDefinitions.map((column) => (
+                            <label key={column.key} className='flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50'>
+                              <input
+                                type='checkbox'
+                                checked={visibleColumns[column.key] || false}
+                                onChange={() => handleColumnToggle(column.key)}
+                                className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
+                              />
+                              <span className='text-sm text-gray-700'>{column.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div className='flex gap-2'>
+                        <button
+                          onClick={handleColumnReset}
+                          className='flex-1 bg-gray-500 text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-gray-600'
+                        >
+                          Reset
+                        </button>
+                        <button
+                          onClick={handleShowAll}
+                          className='flex-1 bg-savoy-blue text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-blue-700'
+                        >
+                          Show All
+                        </button>
+                      </div>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
           </div>
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
+            <div 
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
+              <div className='py-2 sm:px-6 lg:px-8'>
+                <table className='w-full divide-y divide-gray-300 text-center table-fixed'>
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Email
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Post a Job
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Screen Applicants
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Orient
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Manage
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Employee
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Benefits
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Train
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Payroll
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Employee Separation
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Employee Kit
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Dole
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Settings
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Audit Logs
-                      </th>
+                      {visibleColumns.name && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[150px]'>
+                          Name
+                        </th>
+                      )}
+                      {visibleColumns.email && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[200px]'>
+                          Email
+                        </th>
+                      )}
+                      {visibleColumns.post_job && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Post a Job
+                        </th>
+                      )}
+                      {visibleColumns.screen_applicants && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[130px]'>
+                          Screen Applicants
+                        </th>
+                      )}
+                      {visibleColumns.orient && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Orient
+                        </th>
+                      )}
+                      {visibleColumns.manage && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Manage
+                        </th>
+                      )}
+                      {visibleColumns.train && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Train
+                        </th>
+                      )}
+                      {visibleColumns.payroll && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Payroll
+                        </th>
+                      )}
+                      {visibleColumns.employee_separation && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[140px]'>
+                          Employee Separation
+                        </th>
+                      )}
+                      {visibleColumns.employee_kit && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[120px]'>
+                          Employee Kit
+                        </th>
+                      )}
+                      {visibleColumns.dole && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          DOLE
+                        </th>
+                      )}
+                      {visibleColumns.settings && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Settings
+                        </th>
+                      )}
+                      {visibleColumns.audit_logs && (
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-[100px]'>
+                          Audit Logs
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
@@ -365,20 +542,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <EmployeekitRightsModal
           isOpen={employeekitRightsModal}
           setIsOpen={setEmployeekitRightsModal}
-          refetch={userRightsListRefetch}
-        />
-      )}
-      {employeeRightsModal && (
-        <EmployeeRightsModal
-          isOpen={employeeRightsModal}
-          setIsOpen={setEmployeeRightsModal}
-          refetch={userRightsListRefetch}
-        />
-      )}
-      {benefitsRightsModal && (
-        <BenefitsRightsModal
-          isOpen={benefitsRightsModal}
-          setIsOpen={setBenefitsRightsModal}
           refetch={userRightsListRefetch}
         />
       )}
