@@ -3,12 +3,45 @@ import { getCookie } from 'cookies-next';
 
 import { T_IncidentReportEmail } from '@/types/globals';
 
-async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
+export interface EmployeeIssueUpdateData {
+  id: string | number;
+  status?: string;
+  actionType?: string;
+  emailType?: string;
+  dateReceived?: any;
+  // NTE fields
+  nte_subject?: string;
+  nte_to?: string;
+  nte_cc?: string;
+  nte_bcc?: string;
+  nte_message?: string;
+  // Decision fields
+  decision_subject?: string;
+  decision_to?: string;
+  decision_cc?: string;
+  decision_bcc?: string;
+  decision_message?: string;
+  // General update fields
+  employee_id?: number;
+  incident_date?: string;
+  position?: string;
+  department?: string;
+  incident_place?: string;
+  issue_type?: string;
+  brief_background?: string;
+}
+
+async function addEmployeeIssue(employeeIssue: EmployeeIssueUpdateData) {
   try {
     const token = getCookie('token');
     let data: any = {};
     
-    if (employeeIssue.actionType === 'sending') {
+    // Check if this is a status update (approve/disapprove)
+    if (employeeIssue.status && ['approved', 'disapproved'].includes(employeeIssue.status)) {
+      data = {
+        status: employeeIssue.status,
+      };
+    } else if (employeeIssue.actionType === 'sending') {
       data = {
         type_of_action: employeeIssue.actionType,
         type_of_email: employeeIssue.emailType,
@@ -31,6 +64,23 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
         data.decision_bcc = employeeIssue.decision_bcc;
         data.decision_message = employeeIssue.decision_message;
       }
+    } else if (employeeIssue.employee_id || employeeIssue.incident_date || employeeIssue.position || employeeIssue.department || employeeIssue.incident_place || employeeIssue.issue_type || employeeIssue.brief_background) {
+      // General update (edit functionality)
+      data = {
+        employee_id: employeeIssue.employee_id,
+        incident_date: employeeIssue.incident_date,
+        position: employeeIssue.position,
+        department: employeeIssue.department,
+        incident_place: employeeIssue.incident_place,
+        issue_type: employeeIssue.issue_type,
+        brief_background: employeeIssue.brief_background,
+      };
+      // Remove undefined values
+      Object.keys(data).forEach(key => {
+        if (data[key] === undefined) {
+          delete data[key];
+        }
+      });
     } else {
       data = {
         type_of_action: employeeIssue.actionType,
@@ -64,7 +114,7 @@ async function addEmployeeIssue(employeeIssue: T_IncidentReportEmail) {
 }
 
 function useAddEmployeeIssueItems() {
-  const query = useMutation((employeeIssue: T_IncidentReportEmail) =>
+  const query = useMutation((employeeIssue: EmployeeIssueUpdateData) =>
     addEmployeeIssue(employeeIssue)
   );
 

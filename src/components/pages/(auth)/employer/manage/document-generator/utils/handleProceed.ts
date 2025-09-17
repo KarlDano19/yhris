@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { NoticeToExplainFormData } from '@/types/document-generator/documents';
 
-                // Helper function to convert base64 data URL to File
+// Helper function to convert base64 data URL to File
 async function convertDataUrlToFile(dataUrl: string, filename: string): Promise<File> {
   const response = await fetch(dataUrl);
   const blob = await response.blob();
