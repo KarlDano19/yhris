@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
   onChange?: (value: string) => void;
   onAddOption?: (newOption: string) => void;
   dataTestid?: string;
+  disabled?: boolean;   
+  showErrors?: boolean; 
 };
 
 export default function AddableSelect({
@@ -21,17 +23,29 @@ export default function AddableSelect({
   onChange,
   onAddOption,
   dataTestid,
+  disabled = false,
+  showErrors = true,
 }: Props) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
 
+  useEffect(() => {
+    if (disabled) {
+      setAdding(false);
+      setDraft("");
+    }
+  }, [disabled]);
+
   const handleAdd = () => {
+    if (disabled) return;
     const v = draft.trim();
     if (!v) return;
     onAddOption?.(v);
     setDraft("");
     setAdding(false);
   };
+
+  const hasError = !!error && showErrors;
 
   return (
     <div data-testid={dataTestid}>
@@ -42,11 +56,20 @@ export default function AddableSelect({
 
       <div className="relative">
         <select
+          disabled={disabled}
+          aria-invalid={hasError || undefined}
           value={value ?? ""}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={(e) => {
+            if (disabled) return;
+            onChange?.(e.target.value);
+          }}
           className={[
-            "appearance-none w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100",
-            error ? "ring-red-500 focus:ring-red-500" : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#355fd0]",
+            "appearance-none w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6",
+            disabled
+              ? "bg-stone-50 text-opacity-100 ring-gray-200 cursor-not-allowed focus:outline-none focus:ring-0"
+              : hasError
+              ? "ring-red-500 focus:ring-red-500"
+              : "ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-[#355fd0]",
           ].join(" ")}
         >
           <option value="" disabled hidden>
@@ -63,7 +86,11 @@ export default function AddableSelect({
         </div>
       </div>
 
-      {!adding ? (
+      {/* error first line (only if showErrors) */}
+      {hasError && <div className="mt-1 text-xs text-red-600">{error}</div>}
+
+      {/* add action second line (hidden when disabled) */}
+      {!disabled && !adding && (
         <div className="mt-1 text-xs">
           <button
             type="button"
@@ -72,11 +99,10 @@ export default function AddableSelect({
           >
             + Add new {label.toLowerCase()}
           </button>
-          <span className={`ml-2 ${error ? "text-red-600" : "text-transparent"}`}>
-            {error || "placeholder"}
-          </span>
         </div>
-      ) : (
+      )}
+
+      {!disabled && adding && (
         <div className="mt-1 flex items-center gap-2">
           <input
             type="text"
