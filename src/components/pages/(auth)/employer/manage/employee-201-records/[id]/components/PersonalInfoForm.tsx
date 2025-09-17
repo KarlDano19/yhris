@@ -14,12 +14,20 @@ type Props = {
   emp?: Partial<Employee>;
   onPatchChange?: (patch: Record<string, any>) => void; 
   onErrorsChange?: (hasErrors: boolean) => void;
+  editing?: boolean;
 };
 
-export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }: Props) {
-  const [firstname, setFirstname] = useState(s(emp?.firstname));
-  const [middlename, setMiddlename] = useState(s(emp?.middlename));
-  const [lastname,   setLastname]   = useState(s(emp?.lastname));
+export default function PersonalInfoForm({
+  emp,
+  onPatchChange,
+  onErrorsChange,
+  editing = false,
+}: Props) {
+  // names are display-only (no state, no setters)
+  const firstname = s(emp?.firstname);
+  const middlename = s(emp?.middlename);
+  const lastname   = s(emp?.lastname);
+
   const [email,      setEmail]      = useState(s(emp?.email));
   const [address,    setAddress]    = useState(s(emp?.address));
   const [mobile,     setMobile]     = useState(s(emp?.mobile));
@@ -39,20 +47,18 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
   // error bag
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
-  const emit = (key: string, value: any) => onPatchChange?.({ [key]: value });
+  const emit  = (key: string, value: any) => onPatchChange?.({ [key]: value });
   const setErr = (key: string, msg: string | null) =>
     setErrors((e) => ({ ...e, [key]: msg }));
 
-  /* ------------ validators (API keys) ------------ */
+  /* ------------ validators ------------ */
   const isEmpty = (v: string) => !v || v.trim().length === 0;
   const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
   const validateTop = {
-    firstname: (v: string) => (isEmpty(v) ? "First Name is required." : null),
-    lastname:  (v: string) => (isEmpty(v) ? "Last Name is required."  : null),
-    email:     (v: string) =>
+    email: (v: string) =>
       isEmpty(v) ? "Email is required." : validEmail(v) ? null : "Invalid email address.",
-    mobile:    (v: string) => {
+    mobile: (v: string) => {
       if (isEmpty(v)) return "Contact Number is required.";
       if (!/^\d+$/.test(v)) return "Contact Number must be digits only.";
       if (v.length !== 11) return "Contact Number must be exactly 11 digits.";
@@ -115,15 +121,11 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
       contact_number: overrides?.contact_number ?? ecContact,
       address:        overrides?.address ?? ecAddress,
     };
-    emit("emergency_contact", ec); // send the full object
+    emit("emergency_contact", ec);
   };
-  /* ---------------------------------------------------------------- */
 
   /* -------------- pre-validate on first render -------------- */
   const buildInitialErrors = () => ({
-    firstname: validateTop.firstname(firstname),
-    middlename: null,
-    lastname: validateTop.lastname(lastname),
     email: validateTop.email(email),
     address: null,
     mobile: validateTop.mobile(mobile),
@@ -143,7 +145,7 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
     setErrors(buildInitialErrors());
   }, []); // once
 
-  /* -------------- change handlers (emit API keys) -------------- */
+  /* -------------- change handlers -------------- */
   const handle =
     (setter: (v: string) => void, key: string, validate?: (v: string) => string | null) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,40 +182,25 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
     onErrorsChange?.(hasErrors);
   }, [hasErrors]);
 
+  // gate error display when not editing
+  const showErr = (k: string) => (editing ? errors[k] || null : null);
+
   return (
     <>
       <Section>
         <Grid>
-          <Field
-            dataTestid="first-name-field"
-            label="First Name"
-            defaultValue={firstname}
-            onChange={handle(setFirstname, "firstname", validateTop.firstname)}
-            error={errors["firstname"] || null}
-            required
-          />
-          <Field
-            dataTestid="middle-name-field"
-            label="Middle Name"
-            defaultValue={middlename}
-            placeholder="Enter Middle Name..."
-            onChange={handle(setMiddlename, "middlename")}
-            error={errors["middlename"] || null}
-          />
-          <Field
-            dataTestid="last-name-field"
-            label="Last Name"
-            defaultValue={lastname}
-            onChange={handle(setLastname, "lastname", validateTop.lastname)}
-            error={errors["lastname"] || null}
-            required
-          />
+          {/* Read-only name fields */}
+          <Field dataTestid="first-name-field"  label="First Name"  value={firstname}  disabled />
+          <Field dataTestid="middle-name-field" label="Middle Name" value={middlename} disabled />
+          <Field dataTestid="last-name-field"   label="Last Name"   value={lastname}   disabled />
+
           <Field
             dataTestid="email-field"
             label="Email Address"
             defaultValue={email}
             onChange={handle(setEmail, "email", validateTop.email)}
-            error={errors["email"] || null}
+            error={showErr("email")}
+            disabled={!editing}
             required
           />
           <Field
@@ -222,7 +209,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             label="Address"
             defaultValue={address}
             onChange={handle(setAddress, "address")}
-            error={errors["address"] || null}
+            error={showErr("address")}
+            disabled={!editing}
             hint="House/Unit, Street, Barangay, City, Province"
           />
           <Field
@@ -230,7 +218,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             label="Contact Number"
             defaultValue={mobile}
             onChange={handlePhone(setMobile, "mobile", validateTop.mobile)}
-            error={errors["mobile"] || null}
+            error={showErr("mobile")}
+            disabled={!editing}
             hint="Digits only (11 digits, starts with '09')"
             required
           />
@@ -249,7 +238,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
               emit("tin", val);
               setErr("tin", validateGov.tin(val));
             }}
-            error={errors["tin"] || null}
+            error={showErr("tin")}
+            disabled={!editing}
             hint="Digits only; 9 or 12 digits"
             required
           />
@@ -263,7 +253,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
               emit("sss", val);
               setErr("sss", validateGov.sss(val));
             }}
-            error={errors["sss"] || null}
+            error={showErr("sss")}
+            disabled={!editing}
             hint="Digits only; 10 digits"
             required
           />
@@ -277,7 +268,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
               emit("pagibig", val);
               setErr("pagibig", validateGov.pagibig(val));
             }}
-            error={errors["pagibig"] || null}
+            error={showErr("pagibig")}
+            disabled={!editing}
             hint="Digits only; 12 digits"
             required
           />
@@ -291,7 +283,8 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
               emit("philhealth", val);
               setErr("philhealth", validateGov.philhealth(val));
             }}
-            error={errors["philhealth"] || null}
+            error={showErr("philhealth")}
+            disabled={!editing}
             hint="Digits only; 12 digits"
             required
           />
@@ -307,10 +300,11 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             onChange={(e) => {
               const v = e.target.value;
               setEcName(v);
-              emitEmergency({ name: v }); // send whole object
+              emitEmergency({ name: v });
               setErr("emergency_contact.name", validateEmergency.name(v));
             }}
-            error={errors["emergency_contact.name"] || null}
+            error={showErr("emergency_contact.name")}
+            disabled={!editing}
             required
           />
           <Field
@@ -320,10 +314,11 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             onChange={(e) => {
               const v = e.target.value;
               setEcRelation(v);
-              emitEmergency({ relation: v }); // send whole object
+              emitEmergency({ relation: v });
               setErr("emergency_contact.relation", validateEmergency.relation(v));
             }}
-            error={errors["emergency_contact.relation"] || null}
+            error={showErr("emergency_contact.relation")}
+            disabled={!editing}
           />
           <Field
             dataTestid="emergency-no-field"
@@ -332,10 +327,11 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             onChange={(e) => {
               const digits = e.target.value.replace(/\D/g, "");
               setEcContact(digits);
-              emitEmergency({ contact_number: digits }); // send whole object
+              emitEmergency({ contact_number: digits });
               setErr("emergency_contact.contact_number", validateEmergency.contact_number(digits));
             }}
-            error={errors["emergency_contact.contact_number"] || null}
+            error={showErr("emergency_contact.contact_number")}
+            disabled={!editing}
             hint="Digits only (11 digits, starts with '09')"
             required
           />
@@ -347,10 +343,11 @@ export default function PersonalInfoForm({ emp, onPatchChange, onErrorsChange }:
             onChange={(e) => {
               const v = e.target.value;
               setEcAddress(v);
-              emitEmergency({ address: v }); // send whole object
+              emitEmergency({ address: v });
               setErr("emergency_contact.address", validateEmergency.address(v));
             }}
-            error={errors["emergency_contact.address"] || null}
+            error={showErr("emergency_contact.address")}
+            disabled={!editing}
           />
         </Grid>
       </Section>

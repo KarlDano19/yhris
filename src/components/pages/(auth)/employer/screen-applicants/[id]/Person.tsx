@@ -46,9 +46,13 @@ const menuList = [
 const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: number }) => {
   const [imageError, setImageError] = useState(false);
 
-  // Check if we have a valid image URL
   const hasValidImage =
-    applicant.image && typeof applicant.image === 'string' && applicant.image.trim() !== '' && !imageError;
+    applicant.image && 
+    typeof applicant.image === 'string' && 
+    applicant.image.trim() !== '' && 
+    applicant.image !== 'null' && 
+    !applicant.image.includes('no-photo.png') && 
+    !imageError;
 
   if (!hasValidImage) {
     return (
@@ -77,7 +81,7 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
 export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: PropTypes) {
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const menuRef = useRef<HTMLDivElement>(null);
-  const { image, name, id } = applicant;
+  const { photo_url, name, id } = applicant;
   const params = useParams();
 
   const isPassedFinalInterview = applicant.status === 'hired';

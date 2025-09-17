@@ -20,6 +20,7 @@ import SendEmail from '../modals/SendEmail';
 import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
+import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
@@ -83,6 +84,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
   });
+  
+  const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
+  
 
 
   // Get screening questions and ideal answers from the job posting
@@ -217,7 +221,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           id: item.applicant.id,
           email: item.applicant.email,
           applicationId: item.id,
-          image: `${item.applicant.photo}`,
+          image: item.applicant.photo_url || item.applicant.photo || null,
           name: item.applicant.name,
           checklists: [],
           status: item.status,
@@ -403,6 +407,20 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     setFilters(newFilters);
   };
 
+  const handleBatchUploadSuccess = () => {
+    // Refresh the applicants list after successful batch upload
+    appliedApplicantRefetch();
+    toast.custom(<CustomToast message="Batch upload completed successfully!" type="success" />);
+  };
+
+  const handleOpenBatchUpload = () => {
+    setIsBatchUploadOpen(true);
+  };
+
+  const handleCloseBatchUpload = () => {
+    setIsBatchUploadOpen(false);
+  };
+
   return (
     <>
       {!isGetJobPostDetailsLoading && (
@@ -422,6 +440,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 {whichModal && modals[whichModal].component}
 
                 <div className='flex justify-end items-center gap-4 my-6'>
+                  <button
+                    onClick={handleOpenBatchUpload}
+                    className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 text-sm font-medium'
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    Batch Upload Resumes
+                  </button>
                   <div className='flex-1 flex justify-start lg:justify-between gap-2'>
                     <button
                       onClick={() => setIsAddApplicantModalOpen(true)}
@@ -443,6 +470,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     </button>
                   <Filter onFilterChange={handleFilterChange} />
                 </div>
+
+                <BatchResumeUpload
+                  isOpen={isBatchUploadOpen}
+                  onClose={handleCloseBatchUpload}
+                  jobPostingId={parseInt(params.id as string)}
+                  onSuccess={handleBatchUploadSuccess}
+                />
 
                 <DragAndDrop
                   containerRef={containerRef}
