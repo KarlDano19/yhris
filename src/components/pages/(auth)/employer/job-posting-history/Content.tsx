@@ -652,13 +652,13 @@ const Content = () => {
           
           {/* Status Filter Tabs */}
           <div className="mt-8">
-            <div className="flex pl-4 md:pl-10 mb-5 gap-2">
+            <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 mb-5 gap-2">
               <div
                 onClick={() => {
                   setPendingFilter({ ...pendingFilter, status: 'all' });
                   setAppliedFilter({ ...appliedFilter, status: 'all' });
                 }}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'all'
                     ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -671,7 +671,7 @@ const Content = () => {
                   setPendingFilter({ ...pendingFilter, status: 'active' });
                   setAppliedFilter({ ...appliedFilter, status: 'active' });
                 }}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'active'
                     ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -684,7 +684,7 @@ const Content = () => {
                   setPendingFilter({ ...pendingFilter, status: 'inactive' });
                   setAppliedFilter({ ...appliedFilter, status: 'inactive' });
                 }}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'inactive'
                     ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -696,7 +696,13 @@ const Content = () => {
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'>
+            <div 
+              className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
                 <table
                   className={classNames(

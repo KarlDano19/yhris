@@ -683,10 +683,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           
           {/* Status Filter Tabs */}
           <div className="mt-8">
-            <div className="flex pl-4 md:pl-10 mb-5 gap-2">
+            <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 mb-5 gap-2">
               <div
                 onClick={() => handleStatusFilter('all')}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'all'
                     ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -696,7 +696,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
               <div
                 onClick={() => handleStatusFilter('approved')}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'approved'
                     ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -706,7 +706,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
               <div
                 onClick={() => handleStatusFilter('disapproved')}
-                className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'disapproved'
                     ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
@@ -768,15 +768,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
