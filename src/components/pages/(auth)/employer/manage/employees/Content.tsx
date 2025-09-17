@@ -249,6 +249,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setVisibleColumns(defaultColumns);
   };
 
+  const handleShowAll = () => {
+    const allColumns: Record<string, boolean> = {
+      date_hired: true,
+      system_id: true,
+      employee_id: true,
+      firstname: true,
+      middlename: true,
+      lastname: true,
+      location: true,
+      position: true,
+      department: true,
+      email: true,
+      mobile: true,
+      gender: true,
+      address: true,
+    };
+    setVisibleColumns(allColumns);
+  };
+
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
@@ -551,6 +570,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         >
                           Reset
                         </button>
+                        <button
+                          onClick={handleShowAll}
+                          className='flex-1 bg-savoy-blue text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-blue-700'
+                        >
+                          Show All
+                        </button>
                       </div>
                     </div>
                   </Menu.Items>
@@ -562,7 +587,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
               <div className='py-2 sm:px-6 lg:px-8'>
-                <div className='overflow-x-auto'>
+                <div 
+                  className='overflow-x-auto'
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#2d3e58 #f1f1f1'
+                  }}
+                >
                   <table className='divide-y divide-gray-300 text-center min-w-full'>
                     <thead>
                       <tr>
