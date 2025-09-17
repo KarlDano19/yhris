@@ -39,7 +39,7 @@ async function getEmployeeIssueItems(filters: any) {
 
 function useGetEmployeeIssueItems(filters: any) {
   const query = useQuery(
-    ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
+    ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to, filters.status, filters.status_sort],
     () => getEmployeeIssueItems(filters),
     {
       // enabled: false,
