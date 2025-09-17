@@ -4,11 +4,12 @@ import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useDeleteLocation from '../hooks/useDeleteLocation';
-
-import WarningRed from '@/svg/WarningRed';
+import useDeleteLocation from '../hooks/location/useDeleteLocation';
 import useDeleteDepartment from '../hooks/department/useDeleteDepartments';
 import useDeletePosition from '../hooks/position/useDeletePosition';
+import useDeleteEmployeeStatus from '../hooks/employee-status/useDeleteEmployeeStatus';
+
+import WarningRed from '@/svg/WarningRed';
 
 type T_ModalData = {
   id: number;
@@ -31,6 +32,7 @@ export default function DeleteModal({
   const { mutate: mutateLocation, isLoading: isLocationLoading } = useDeleteLocation();
   const { mutate: mutateDepartment, isLoading: isDepartmentLoading } = useDeleteDepartment();
   const { mutate: mutatePosition, isLoading: isPositionLoading } = useDeletePosition();
+  const { mutate: mutateEmployeeStatus, isLoading: isEmployeeStatusLoading } = useDeleteEmployeeStatus();
 
   const onSubmit = () => {
     const callbackReq = {
@@ -49,6 +51,8 @@ export default function DeleteModal({
       mutateDepartment(isOpen.id, callbackReq);
     } else if (module === 'position') {
       mutatePosition(isOpen.id, callbackReq);
+    } else if (module === 'employee-status') {
+      mutateEmployeeStatus(isOpen.id, callbackReq);
     }
   };
 
@@ -106,9 +110,9 @@ export default function DeleteModal({
                       type='button'
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                       onClick={() => onSubmit()}
-                      disabled={isLocationLoading || isDepartmentLoading}
+                      disabled={isLocationLoading || isDepartmentLoading || isPositionLoading || isEmployeeStatusLoading}
                     >
-                      {isLocationLoading || isDepartmentLoading || isPositionLoading && (
+                      {(isLocationLoading || isDepartmentLoading || isPositionLoading || isEmployeeStatusLoading) && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -129,7 +133,7 @@ export default function DeleteModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLocationLoading && !isDepartmentLoading && !isPositionLoading && 'Yes'}
+                      {!isLocationLoading && !isDepartmentLoading && !isPositionLoading && !isEmployeeStatusLoading && 'Yes'}
                     </button>
                   </span>
                 </div>

@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
-import useGetLocationItems from '../hooks/useGetLocationItems';
+import useGetLocationItems from '../hooks/location/useGetLocationItems';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';

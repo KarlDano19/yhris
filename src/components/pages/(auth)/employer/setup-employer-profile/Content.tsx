@@ -153,8 +153,8 @@ const Content = () => {
             <Settings 
               register={register} 
               onSubmit={onSubmit} 
-              setProgressBar={setProgressBar} 
-              isLoading={isLoading} 
+              isLoading={isLoading}
+              onBack={() => setProgressBar(0)}
             />
           </div>
         </div>

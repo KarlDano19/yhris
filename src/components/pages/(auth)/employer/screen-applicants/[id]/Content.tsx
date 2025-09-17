@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useRef, useState, useEffect } from 'react';
+import React, { useReducer, useRef, useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
-import { ModalTypes, StageType, ApplicantType } from '../types';
+import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import CustomToast from '@/components/CustomToast';
@@ -20,6 +20,8 @@ import SendEmail from '../modals/SendEmail';
 import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
+import BatchResumeUpload from '../modals/BatchResumeUpload';
+import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import Filter, { FilterOptions } from './Filter';
@@ -30,9 +32,9 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
-import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import ArchiveIcon from '@/svg/ArchiveIcon';
 
 import '../styles.css';
 
@@ -54,7 +56,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = useGetJobPostDetails(params.id);
-  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id);
+  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id, false);
+  const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(params.id, true);
   const {
     CLEAR_STAGE,
     STAGE_REQUIREMENTS,
@@ -64,6 +67,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     ADD_STAGE,
     SET_ONBOARDING,
     SET_APPLICANT,
+    ARCHIVED_APPLICANTS,
   } = actionTypes;
   const [state, dispatch] = useReducer(stageReducer, INITIAL_STATE);
   const [actionState, setActionState] = useState(initialActionState);
@@ -75,14 +79,28 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   })?.requirements;
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
+  const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Rejected', 'Withdrawn'],
+    status: ['Ongoing', 'Passed'],
   });
+  
+  const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
+  
+
 
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
+
+
+  /**
+   * Check if status update should trigger archived modal refresh
+   */
+  const shouldTriggerArchivedRefresh = useCallback((status: string) => {
+    // Only trigger if status is rejected or withdrawn (archived statuses)
+    return status === 'rejected' || status === 'withdrawn';
+  }, []);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -96,21 +114,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const processApplicants = (applicants: any[]) => {
     if (!screeningQuestions.length || !applicants?.length) return applicants;
 
-    return applicants.map((applicant) => {
+    // Filter out rejected and withdrawn applicants from the main list
+    const activeApplicants = applicants.filter((applicant) => 
+      applicant.status !== 'rejected' && applicant.status !== 'withdrawn'
+    );
+
+    return activeApplicants.map((applicant) => {
       // Get the applicant's screening answers
       const answers =
         applicant.applicant?.screening_answers && applicant.applicant.screening_answers !== null
           ? applicant.applicant.screening_answers
           : [];
-
-      // If applicant is rejected or withdrawn, they are automatically "Not Fit"
-      if (applicant.status === 'rejected' || applicant.status === 'withdrawn') {
-        return {
-          ...applicant,
-          screeningFit: 'bad',
-          screeningAnswers: answers,
-        };
-      }
 
       // Only check if mustHave questions match their ideal answers
       let isGoodFit = true;
@@ -207,7 +221,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           id: item.applicant.id,
           email: item.applicant.email,
           applicationId: item.id,
-          image: `${item.applicant.photo}`,
+          image: item.applicant.photo_url || item.applicant.photo || null,
           name: item.applicant.name,
           checklists: [],
           status: item.status,
@@ -260,6 +274,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             });
             jobPostDetailsRefetch();
             appliedApplicantRefetch();
+            
+            // ============================================================================
+            // REFRESH ARCHIVED APPLICANTS ON STATUS UPDATE
+            // ============================================================================
+            if (shouldTriggerArchivedRefresh(data.status)) {
+              archivedApplicantRefetch();
+            }
+            
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -352,7 +374,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       component: <Success title={title} />,
     },
     CONFIRMATION: {
-      component: <Confirmation />,
+      component: <Confirmation onStageDeleted={() => {
+        jobPostDetailsRefetch();
+        appliedApplicantRefetch();
+        archivedApplicantRefetch();
+      }} />,
     },
     APPLICANT_FORM: {
       component: <ApplicantForm title={title} />,
@@ -381,6 +407,20 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     setFilters(newFilters);
   };
 
+  const handleBatchUploadSuccess = () => {
+    // Refresh the applicants list after successful batch upload
+    appliedApplicantRefetch();
+    toast.custom(<CustomToast message="Batch upload completed successfully!" type="success" />);
+  };
+
+  const handleOpenBatchUpload = () => {
+    setIsBatchUploadOpen(true);
+  };
+
+  const handleCloseBatchUpload = () => {
+    setIsBatchUploadOpen(false);
+  };
+
   return (
     <>
       {!isGetJobPostDetailsLoading && (
@@ -400,6 +440,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 {whichModal && modals[whichModal].component}
 
                 <div className='flex justify-end items-center gap-4 my-6'>
+                  <button
+                    onClick={handleOpenBatchUpload}
+                    className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 text-sm font-medium'
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    Batch Upload Resumes
+                  </button>
                   <div className='flex-1 flex justify-start lg:justify-between gap-2'>
                     <button
                       onClick={() => setIsAddApplicantModalOpen(true)}
@@ -407,10 +456,27 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     >
                       ADD APPLICANT
                     </button>
+                    
                     <AddStageBtn handleAddStage={handleAddStage} />
                   </div>
+                  <button
+                    onClick={() => {
+                      setIsArchivedApplicantsModalOpen(true);
+                    }}
+                    className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
+                    >
+                    <ArchiveIcon />
+                      ARCHIVED
+                    </button>
                   <Filter onFilterChange={handleFilterChange} />
                 </div>
+
+                <BatchResumeUpload
+                  isOpen={isBatchUploadOpen}
+                  onClose={handleCloseBatchUpload}
+                  jobPostingId={parseInt(params.id as string)}
+                  onSuccess={handleBatchUploadSuccess}
+                />
 
                 <DragAndDrop
                   containerRef={containerRef}
@@ -429,6 +495,18 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         isOpen={isAddApplicantModalOpen}
         setIsOpen={setIsAddApplicantModalOpen}
         jobPostingId={params.id as string}
+      />
+      <ArchivedApplicantsModal
+        isOpen={isArchivedApplicantsModalOpen}
+        handleClose={() => setIsArchivedApplicantsModalOpen(false)}
+        jobPostingId={params.id as string}
+        archivedApplicants={dataArchivedApplicants}
+        onUnarchive={() => {
+          appliedApplicantRefetch();
+          archivedApplicantRefetch();
+          setIsArchivedApplicantsModalOpen(false);
+        }}
+        onRefresh={archivedApplicantRefetch}
       />
     </>
   );

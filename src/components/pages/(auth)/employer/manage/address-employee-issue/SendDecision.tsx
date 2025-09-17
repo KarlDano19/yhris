@@ -17,6 +17,7 @@ const SendDecision = ({
   setReleased,
   isLoading,
   hasInvestigationReport,
+  userRights,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -29,6 +30,7 @@ const SendDecision = ({
   setReleased: any;
   isLoading: boolean;
   hasInvestigationReport?: boolean;
+  userRights?: any;
 }) => {
   // Disable send decision button if there is no investigation report
   const shouldDisableSendDecision = hasInvestigationReport === false;
@@ -45,7 +47,7 @@ const SendDecision = ({
   }
   
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
       <div>
         <button
           className={classNames(
@@ -54,17 +56,21 @@ const SendDecision = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={isDecisionSent || shouldDisableSendDecision}
+          disabled={isDecisionSent || shouldDisableSendDecision || !userRights?.decide_employee_issue}
           onClick={(e) => {
             e.stopPropagation();
-            if (!isDecisionSent && !shouldDisableSendDecision) {
+            if (!isDecisionSent && !shouldDisableSendDecision && userRights?.decide_employee_issue) {
               setIsSendDecisionModalOpen({
                 isOpen: true,
                 id,
               });
             }
           }}
-          title={shouldDisableSendDecision ? 'Investigation report is required before sending decision' : ''}
+          title={
+            !userRights?.decide_employee_issue 
+              ? 'No permission to send decision'
+              : (shouldDisableSendDecision ? 'Investigation report is required before sending decision' : '')
+          }
         >
           {isDecisionSent ? 'Sent' : 'Send'}
         </button>
@@ -102,9 +108,9 @@ const SendDecision = ({
           {!isLoading && (isDecisionReceived ? 'Received' : 'Receive')}
         </button>
       </div>
-      {isDecisionReceived ? (
-        <div>
-          <div className='flex gap-1 items-center justify-center'>
+      {isDecisionReceived && (
+        <div className='flex gap-1 items-center justify-center'>
+          <div className='relative'>
             <div
               className='cursor-pointer'
               onClick={() =>
@@ -116,10 +122,16 @@ const SendDecision = ({
             >
               <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
+            {/* Notification badge for employee signature */}
+            {employeeIssueDetails && employeeIssueDetails.employee_signature && (
+              <div className="absolute -top-2 -right-2.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                !
+              </div>
+            )}
           </div>
+          <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

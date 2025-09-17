@@ -146,6 +146,9 @@ function PreviewTab({ setIsPreview, getValues }: { setIsPreview: any; getValues:
                           <div>0</div>
                           <div>{item.max_score}</div>
                         </div>
+                        <div className='text-center mt-2 font-semibold text-blue-600'>
+                          Score: 0
+                        </div>
                       </div>
                     )}
                   </div>

@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetInvestigationReportDetails from '../hooks/useGetInvestigationReportDetails';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -11,16 +12,22 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
   const { data: investigationReportData, remove: removeInvestigationReport } = useGetInvestigationReportDetails(
     isOpen.id
   );
-  const [isSummaryView, setIsSummaryView] = useState(false);
+  const { data: employeeIssueData, remove: removeEmployeeIssue } = useGetEmployeeIssueDetails(isOpen.id);
+  const [currentView, setCurrentView] = useState<'default' | 'summary' | 'attachment'>('default');
 
   const customCloseModal = () => {
     removeInvestigationReport();
+    removeEmployeeIssue();
     setIsOpen(null);
-    setIsSummaryView(false);
+    setCurrentView('default');
   };
 
   const toggleView = () => {
-    setIsSummaryView(!isSummaryView);
+    setCurrentView(currentView === 'summary' ? 'default' : 'summary');
+  };
+
+  const viewAttachment = () => {
+    setCurrentView('attachment');
   };
 
   const formatDate = (dateString: string) => {
@@ -60,130 +67,184 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                  <div className='flex bg-savoy-blue p-2 items-center'>
+                <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-2 sm:my-4 w-full max-w-4xl ${
+                  currentView === 'summary' 
+                    ? 'h-auto max-h-[80vh]' 
+                    : currentView === 'attachment'
+                    ? 'h-[98vh] sm:h-[95vh]'
+                    : 'h-[98vh] sm:h-[95vh]'
+                }`}>
+                  <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Investigation Report</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
-                  <div>
-                    <div className='flex flex-col gap-2 p-4'>
-                      <div className='flex flex-wrap gap-2 justify-start'>
-                        <button 
-                          className={`px-4 py-2 rounded-md transition-colors ${
-                            isSummaryView 
-                              ? 'bg-savoy-blue text-white hover:bg-blue-700' 
-                              : 'bg-savoy-blue text-white hover:bg-blue-700'
-                          }`}
-                          onClick={toggleView}
-                        >
-                          {isSummaryView ? 'Back' : 'View Summary'}
-                        </button>
-                      </div>
-                      
-                      <div className='mt-4'>
-                        {isSummaryView ? (
-                          <div className='space-y-4'>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                              <div>
-                                <label htmlFor='date-of-investigation' className='block text-sm font-bold text-gray-700 mb-1'>
-                                  Date of Investigation:
-                                </label>
-                                <input
-                                  id='date-of-investigation'
-                                  type='text'
-                                  value={formatDate(investigationReportData?.date_of_investigation)}
-                                  readOnly
-                                  className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                />
-                              </div>
-                              
-                              <div>
-                                <label htmlFor='witness' className='block text-sm font-bold text-gray-700 mb-1'>
-                                  Witness:
-                                </label>
-                                <input
-                                  id='witness'
-                                  type='text'
-                                  value={investigationReportData?.witness || 'N/A'}
-                                  readOnly
-                                  className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                />
-                              </div>
-                              
-                              <div>
-                                <label htmlFor='presider' className='block text-sm font-bold text-gray-700 mb-1'>
-                                  Presider:
-                                </label>
-                                <input
-                                  id='presider'
-                                  type='text'
-                                  value={investigationReportData?.presider || 'N/A'}
-                                  readOnly
-                                  className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                />
-                              </div>
-                              
-                              <div>
-                                <label htmlFor='has-attended-hearing' className='block text-sm font-bold text-gray-700 mb-1'>
-                                  Has Attended Hearing:
-                                </label>
-                                <input
-                                  id='has-attended-hearing'
-                                  type='text'
-                                  value={investigationReportData?.has_attended_hearing || 'N/A'}
-                                  readOnly
-                                  className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                />
-                              </div>
-                              
-                              <div>
-                                <label htmlFor='decision' className='block text-sm font-bold text-gray-700 mb-1'>
-                                  Decision:
-                                </label>
-                                <input
-                                  id='decision'
-                                  type='text'
-                                  value={investigationReportData?.decision || 'N/A'}
-                                  readOnly
-                                  className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
-                                />
-                              </div>
-                              
-                              {investigationReportData?.custom_decision && (
+                  <div className={`${currentView === 'summary' ? 'flex flex-col' : 'h-full flex flex-col overflow-hidden'}`}>
+                    <div className={`${currentView === 'summary' ? 'p-4' : 'flex-1 p-4 overflow-hidden'}`}>
+                      <div className={`flex flex-col gap-4 ${currentView === 'summary' ? '' : 'h-full'}`}>
+                        <div className='flex flex-wrap gap-2 justify-start'>
+                          {currentView === 'default' && (
+                            <>
+                              <button 
+                                className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                                onClick={toggleView}
+                              >
+                                View Summary
+                              </button>
+                              {investigationReportData?.attachments && (
+                                <button 
+                                  className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                                  onClick={viewAttachment}
+                                >
+                                  View Attachment
+                                </button>
+                              )}
+                            </>
+                          )}
+                          {currentView === 'summary' && (
+                            <button 
+                              className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                              onClick={toggleView}
+                            >
+                              Back
+                            </button>
+                          )}
+                          {currentView === 'attachment' && (
+                            <button 
+                              className='px-4 py-2 rounded-md transition-colors bg-savoy-blue text-white hover:bg-blue-700'
+                              onClick={() => setCurrentView('default')}
+                            >
+                              Back
+                            </button>
+                          )}
+                        </div>
+                        
+                        <div className={`${currentView === 'summary' ? '' : 'flex-1 overflow-hidden'}`}>
+                          {currentView === 'summary' ? (
+                            <div className='space-y-4'>
+                              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <div>
-                                  <label htmlFor='custom-decision' className='block text-sm font-bold text-gray-700 mb-1'>
-                                    Custom Decision:
+                                  <label htmlFor='date-of-investigation' className='block text-sm font-bold text-gray-700 mb-1'>
+                                    Date of Investigation:
                                   </label>
                                   <input
-                                    id='custom-decision'
+                                    id='date-of-investigation'
                                     type='text'
-                                    value={investigationReportData.custom_decision}
+                                    value={formatDate(investigationReportData?.date_of_investigation)}
                                     readOnly
                                     className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
                                   />
                                 </div>
+                                
+                                <div>
+                                  <label htmlFor='witness' className='block text-sm font-bold text-gray-700 mb-1'>
+                                    Witness:
+                                  </label>
+                                  <input
+                                    id='witness'
+                                    type='text'
+                                    value={investigationReportData?.witness || 'N/A'}
+                                    readOnly
+                                    className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label htmlFor='presider' className='block text-sm font-bold text-gray-700 mb-1'>
+                                    Presider:
+                                  </label>
+                                  <input
+                                    id='presider'
+                                    type='text'
+                                    value={investigationReportData?.presider || 'N/A'}
+                                    readOnly
+                                    className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label htmlFor='has-attended-hearing' className='block text-sm font-bold text-gray-700 mb-1'>
+                                    Has Attended Hearing:
+                                  </label>
+                                  <input
+                                    id='has-attended-hearing'
+                                    type='text'
+                                    value={investigationReportData?.has_attended_hearing || 'N/A'}
+                                    readOnly
+                                    className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label htmlFor='decision' className='block text-sm font-bold text-gray-700 mb-1'>
+                                    Decision:
+                                  </label>
+                                  <input
+                                    id='decision'
+                                    type='text'
+                                    value={investigationReportData?.decision || 'N/A'}
+                                    readOnly
+                                    className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                  />
+                                </div>
+                                
+                                {investigationReportData?.custom_decision && (
+                                  <div>
+                                    <label htmlFor='custom-decision' className='block text-sm font-bold text-gray-700 mb-1'>
+                                      Custom Decision:
+                                    </label>
+                                    <input
+                                      id='custom-decision'
+                                      type='text'
+                                      value={investigationReportData.custom_decision}
+                                      readOnly
+                                      className='cursor-not-allowed w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm'
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <label htmlFor='results' className='block text-sm font-bold text-gray-700 mb-1'>
+                                  Results:
+                                </label>
+                                <textarea
+                                  id='results'
+                                  value={investigationReportData?.results || 'N/A'}
+                                  readOnly
+                                  className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
+                                />
+                              </div>
+                              
+                            </div>
+                          ) : currentView === 'attachment' ? (
+                            investigationReportData?.attachments && (
+                              <div className='h-full overflow-hidden'>
+                                <iframe 
+                                  src={investigationReportData.attachments} 
+                                  width='100%' 
+                                  height='90%' 
+                                  className='min-h-[500px] sm:min-h-0 border-0'
+                                />
+                              </div>
+                            )
+                          ) : (
+                            <div className='h-full flex flex-col gap-4'>
+                              {employeeIssueData?.nte_attachment && (
+                                <div className='flex-1'>
+                                  <label className='block text-sm font-bold text-gray-700 mb-1'>NTE Attachment:</label>
+                                  <div className='h-full overflow-hidden'>
+                                    <iframe 
+                                      src={employeeIssueData.nte_attachment} 
+                                      width='100%' 
+                                      height='90%' 
+                                      className='min-h-[500px] sm:min-h-0 border-0'
+                                    />
+                                  </div>
+                                </div>
                               )}
                             </div>
-                            
-                            <div>
-                              <label htmlFor='results' className='block text-sm font-bold text-gray-700 mb-1'>
-                                Results:
-                              </label>
-                              <textarea
-                                id='results'
-                                value={investigationReportData?.results || 'N/A'}
-                                readOnly
-                                className='cursor-not-allowed w-full h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 text-sm resize-none'
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          investigationReportData?.attachments && (
-                            <div className='mt-4'>
-                            <object data={investigationReportData.attachments} width='100%' height='500px' />
-                            </div>
-                          )
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

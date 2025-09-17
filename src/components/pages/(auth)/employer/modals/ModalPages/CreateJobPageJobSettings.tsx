@@ -5,7 +5,7 @@ import CustomScreeningForm from '../CustomScreeningForm';
 import CustomQuestionsModal from '../CustomQuestionsModal';
 import PresetQuestionOptions, { PRESET_QUESTIONS } from '../PresetQuestionOptions';
 import EditIcon from '@/svg/EditIcon';
-
+import MinusIconWithBorder from '@/svg/MinusIconWithBorder';
 // Extend Window interface to include our custom properties
 declare global {
   interface Window {
@@ -301,6 +301,26 @@ export default function CreateJobPageJobSettings({
     }
   };
 
+  const handleToggleShowToCandidates = (id: number) => {
+    const question = screeningQuestions.find(q => q.id === id);
+    const updatedQuestions = screeningQuestions.map((q) => 
+      q.id === id ? { ...q, showToCandidates: !q.showToCandidates } : q
+    );
+    setLocalScreeningQuestions(updatedQuestions);
+    
+    // Update parent component state if available
+    if (setScreeningQuestions) {
+      setScreeningQuestions(updatedQuestions);
+    }
+    
+    // If it's a custom question, update custom questions state
+    if (question?.presetId && question.presetId.startsWith('custom-question')) {
+      setCustomQuestions(prev => 
+        prev.map(q => q.id === id ? { ...q, showToCandidates: !q.showToCandidates } : q)
+      );
+    }
+  };
+
   const handleEdit = (id: number) => {
     setEditingQuestion(id);
     setShowAddForm(true);
@@ -525,15 +545,15 @@ export default function CreateJobPageJobSettings({
     setIsRejectionSettingsOpen(!isRejectionSettingsOpen);
   };
   
-
-
-  // Handle submission with validation
+  // Handle submission with validation (NO MAXIMUM LIMIT)
   const handleSubmit = () => {
     if (screeningQuestions.length < 3) {
       setValidationError("At least 3 screening questions are required");
       setIsScreeningOpen(true);
       return;
     }
+    
+    // NO MAXIMUM LIMIT - Users can add unlimited questions!
     setValidationError(null);
     
     // Update parent component state if available
@@ -565,41 +585,61 @@ export default function CreateJobPageJobSettings({
           <div className="flex items-start justify-between border-b border-gray-200 py-4">
             <div className="flex-grow">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-medium font-semibold text-gray-900">Screening questions</div>
+                <div className="text-medium font-semibold text-gray-900">
+                  Screening questions
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({screeningQuestions.length} configured)
+                  </span>
+                </div>
                 <button 
                   type="button" 
                   className="ml-4 p-1 rounded hover:bg-gray-100"
                   onClick={toggleScreeningSection}
                 >
-                  {/* Edit Icon */}
-                  <span className="sr-only">Edit</span>
-                  <EditIcon />
+                  {/* Edit Icon / Back Icon */}
+                  <span className="sr-only">{isScreeningOpen ? 'Back' : 'Edit'}</span>
+                  {isScreeningOpen ? <MinusIconWithBorder /> : <EditIcon />}
                 </button>
               </div>
 
-              {/* Show Questions in Collapsed View */}
+              {/* Show Questions in Collapsed View - SCROLLABLE */}
               {!isScreeningOpen && screeningQuestions.length > 0 && (
                 <div className="ml-5 text-sm text-gray-900">
-                  <ol className="list-decimal">
-                    {screeningQuestions.map((question, index) => (
-                      <li key={question.id} className={index > 0 ? 'mt-2' : ''}>
-                        {question.question}
-                        <div className="text-xs text-gray-500">
-                          {question.responseType === 'Text' ? (
-                            'No ideal answer required'
-                          ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
-                            question.idealAnswer.length > 0 ? (
-                              `Ideal answers: ${question.idealAnswer.join(', ')}`
+                  <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
+                    <ol className="list-decimal space-y-3 pl-6">
+                      {screeningQuestions.map((question, index) => (
+                        <li key={question.id} className="text-sm leading-relaxed">
+                          <div className="font-medium text-gray-900 mb-1">{question.question}</div>
+                          <div className="text-sm text-gray-500 ml-0">
+                            {question.responseType === 'Text' ? (
+                              <span className="text-gray-500">No ideal answer required</span>
+                            ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
+                              question.idealAnswer.length > 0 ? (
+                                <span>
+                                  Ideal answers: <span className="font-semibold text-green-600 text-base">{question.idealAnswer.join(', ')}</span>
+                                </span>
+                              ) : (
+                                <span className="text-gray-500">No ideal answers selected</span>
+                              )
                             ) : (
-                              'No ideal answers selected'
-                            )
-                          ) : (
-                            `Ideal answer: ${question.idealAnswer}`
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
+                              <span>
+                                Ideal answer: <span className={`font-semibold text-base ${question.idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                                  {question.idealAnswer}
+                                </span>
+                              </span>
+                            )}
+                            {question.showToCandidates !== undefined && (
+                              <span className="ml-2">
+                                | Show to candidates: <span className={`font-semibold text-base ${question.showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
+                                  {question.showToCandidates ? 'Yes' : 'No'}
+                                </span>
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 </div>
               )}
               
@@ -622,32 +662,46 @@ export default function CreateJobPageJobSettings({
                 </div>
               )}
 
-              {/* List of current questions */}
-              {screeningQuestions.map((q) => (
-                <ScreeningQuestion
-                  key={q.id}
-                  question={q.question}
-                  idealAnswer={q.idealAnswer}
-                  degree={q.degree}
-                  mustHave={q.mustHave}
-                  recommended={q.recommended}
-                  onRemove={() => handleRemove(q.id)}
-                  onToggleMustHave={() => handleToggleMustHave(q.id)}
-                  editable={true}
-                  onEdit={() => handleEdit(q.id)}
-                  responseType={q.responseType}
-                  options={q.options}
-                />
-              ))}
-
-              {/* Add custom or preset question options */}
-              {screeningQuestions.length === 0 ? (
-                <div className="text-center my-6 text-gray-500">
-                  No screening questions yet. Add some questions below.
+              {/* Question Count Indicator */}
+              <div className="mb-4 flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {screeningQuestions.length} screening questions configured
                 </div>
-              ) : null}
-              
+                <div className="text-xs text-gray-500">
+                  Minimum 3 questions required
+                </div>
+              </div>
 
+              {/* Scrollable List of Current Questions */}
+              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50 mb-4">
+                {screeningQuestions.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No screening questions yet.</p>
+                    <p className="text-sm">Add some questions below.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {screeningQuestions.map((q) => (
+                      <ScreeningQuestion
+                        key={q.id}
+                        question={q.question}
+                        idealAnswer={q.idealAnswer}
+                        degree={q.degree}
+                        mustHave={q.mustHave}
+                        showToCandidates={q.showToCandidates}
+                        recommended={q.recommended}
+                        onRemove={() => handleRemove(q.id)}
+                        onToggleMustHave={() => handleToggleMustHave(q.id)}
+                        onToggleShowToCandidates={() => handleToggleShowToCandidates(q.id)}
+                        editable={true}
+                        onEdit={() => handleEdit(q.id)}
+                        responseType={q.responseType}
+                        options={q.options}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Preset question options section */}
               <div className="mt-4">
@@ -692,8 +746,8 @@ export default function CreateJobPageJobSettings({
               className="ml-4 p-1 rounded hover:bg-gray-100"
               onClick={toggleRejectionSettings}
             >
-              <span className="sr-only">Edit</span>
-              <EditIcon />
+              <span className="sr-only">{isRejectionSettingsOpen ? 'Back' : 'Edit'}</span>
+              {isRejectionSettingsOpen ? <MinusIconWithBorder /> : <EditIcon />}
             </button>
           </div>
 

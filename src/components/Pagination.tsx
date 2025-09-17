@@ -55,6 +55,8 @@ const Pagination: React.FC<PaginationProps> = ({ pagination, currentPage, pageSi
     let pageSizes = [5, 10, 25, 50];
     if (pageType && ['screenApplicant', 'hiredApplicant'].includes(pageType)) {
       pageSizes = [6, 12, 24];
+    } else if (pageType && ['employee201'].includes(pageType)) {
+      pageSizes = [12, 24, 36, 60];
     }
     return pageSizes;
   }

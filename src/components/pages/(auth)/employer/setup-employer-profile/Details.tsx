@@ -333,8 +333,10 @@ const Details = ({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className='flex flex-row my-10'>
-        <div className='basis-44 mr-10'>
+      {/* Company Information Section - Mobile: Stacked, Desktop: Original 3-column layout */}
+      <div className='flex flex-col lg:flex-row my-6 lg:my-10 gap-6'>
+        {/* Company Logo - Mobile: Centered, Desktop: Left column */}
+        <div className='flex justify-center lg:justify-start lg:basis-44 lg:mr-10'>
           <Image
             src={watch('imagePath') || '/assets/no-user.png'}
             width={143}
@@ -344,7 +346,9 @@ const Details = ({
             className='rounded object-cover max-w-[143px] h-[164px]'
           />
         </div>
-        <div className='basis-1/3 mr-10'>
+        
+        {/* Company Name & Logo Upload - Mobile: Stacked, Desktop: Middle column */}
+        <div className='lg:basis-1/3 lg:mr-10 space-y-6'>
           <div>
             <label htmlFor='companyName' className='block mb-2 text-sm font-medium text-gray-900'>
               Company Name<span className='text-red-500'>*</span>
@@ -359,7 +363,8 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.companyName.message || 'Company name is required'}</p>
             )}
           </div>
-          <div className='mt-5'>
+          
+          <div>
             <label htmlFor='companyLogo' className='block mb-2 text-sm font-medium text-gray-900'>
               Company Logo
             </label>
@@ -372,24 +377,27 @@ const Details = ({
             />
           </div>
         </div>
-        <div className='basis-2/3'>
+        
+        {/* Company Description - Mobile: Stacked, Desktop: Right column */}
+        <div className='lg:basis-2/3'>
           <label
             htmlFor='companyDescription'
             className='block mb-2 text-sm font-medium text-gray-900'
-            placeholder='Tell us about you...'
           >
             About the Company
           </label>
           <textarea
             id='companyDescription'
             {...register('companyDescription', { required: false })}
-            className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 h-5/6'
+            className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 h-32 lg:h-5/6'
+            placeholder='Tell us about your company...'
           />
-          <label className='text-sm text-gray-500 mt-5 ml-2'>Maximum words: 500</label>
+          <label className='text-sm text-gray-500 mt-2 lg:mt-5 ml-2'>Maximum words: 500</label>
         </div>
       </div>
-      <div className='flex flex-row my-10'>
-        <div className='basis-1/3 mr-10'>
+      {/* Industry and Work Setup Section - Mobile: Stacked, Desktop: Original 3-column layout */}
+      <div className='flex flex-col lg:flex-row my-6 lg:my-10 gap-6'>
+        <div className='lg:basis-1/3 lg:mr-10'>
           <label htmlFor='typeOfIndustry' className='block mb-2 text-sm font-medium text-gray-900'>
             Type of Industry<span className='text-red-500'>*</span>
           </label>
@@ -439,7 +447,7 @@ const Details = ({
             <p className='mt-1 text-sm text-red-600'>{errors.typeOfIndustry.message || 'Type of industry is required'}</p>
           )}
         </div>
-        <div className='basis-1/3 mr-10'>
+        <div className='lg:basis-1/3 lg:mr-10'>
           <label htmlFor='workSetUp' className='block mb-2 text-sm font-medium text-gray-900'>
             Work Set-up
           </label>
@@ -450,14 +458,15 @@ const Details = ({
             className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
           />
         </div>
-        <div className='basis-1/3'></div>
+        <div className='lg:basis-1/3'></div>
       </div>
-      <div className='my-10'>
-        <label>
-          <strong>Contact Details</strong>
+      {/* Contact Details Section - Mobile: Stacked, Desktop: Original 3-column layout */}
+      <div className='my-6 lg:my-10'>
+        <label className='text-lg font-semibold text-gray-900'>
+          Contact Details
         </label>
-        <div className='flex flex-row mt-2'>
-          <div className='basis-1/3 mr-10'>
+        <div className='flex flex-col lg:flex-row mt-4 gap-6'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='mobileNumber' className='block mb-2 text-sm font-medium text-gray-900'>
               Mobile No.<span className='text-red-500'>*</span>
             </label>
@@ -473,7 +482,7 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.mobileNumber.message || 'Mobile number is required'}</p>
             )}
           </div>
-          <div className='basis-1/3 mr-10'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='landlineNumber' className='block mb-2 text-sm font-medium text-gray-900'>
               Landline No.
             </label>
@@ -486,15 +495,18 @@ const Details = ({
               inputMode='numeric'
             />
           </div>
-          <div className='basis-1/3'></div>
+          <div className='lg:basis-1/3'></div>
         </div>
       </div>
-      <div className='my-10'>
-        <label>
-          <strong>Address</strong>
+      {/* Address Section */}
+      <div className='my-6 lg:my-10'>
+        <label className='text-lg font-semibold text-gray-900'>
+          Address
         </label>
-        <div className='flex flex-row mb-5'>
-          <div className='basis-1/3 mr-10'>
+        
+        {/* Region, Province, City Row - Mobile: Stacked, Desktop: Original 3-column layout */}
+        <div className='flex flex-col lg:flex-row mt-4 mb-6 gap-6'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='region' className='block mb-2 text-sm font-medium text-gray-900'>
               Region<span className='text-red-500'>*</span>
             </label>
@@ -513,7 +525,7 @@ const Details = ({
                 onFocus={() => setShowRegionDropdown(true)}
                 onBlur={() => setTimeout(() => setShowRegionDropdown(false), 200)}
                 placeholder='Type to search region...'
-                className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                className={`${watch('region') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -549,7 +561,7 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.region.message || 'Region is required'}</p>
             )}
           </div>
-          <div className='basis-1/3 mr-10'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='province' className='block mb-2 text-sm font-medium text-gray-900'>
               Province<span className='text-red-500'>*</span>
             </label>
@@ -569,7 +581,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowProvinceDropdown(false), 200)}
                 placeholder='Type to search province...'
                 disabled={!selectedRegionCode}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedRegionCode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('province') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedRegionCode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -605,7 +617,7 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.province.message || 'Province is required'}</p>
             )}
           </div>
-          <div className='basis-1/3'>
+          <div className='lg:basis-1/3'>
             <label htmlFor='municipality' className='block mb-2 text-sm font-medium text-gray-900'>
               City/Municipality<span className='text-red-500'>*</span>
             </label>
@@ -625,7 +637,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowMunicipalityDropdown(false), 200)}
                 placeholder='Type to search city/municipality...'
                 disabled={!selectedProvince}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedProvince ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('city') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedProvince ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -662,8 +674,9 @@ const Details = ({
             )}
           </div>
         </div>
-        <div className='flex flex-row mt-2 mb-5'>
-          <div className='basis-1/3 mr-10'>
+        {/* Barangay, Building, Street Row - Mobile: Stacked, Desktop: Original 3-column layout */}
+        <div className='flex flex-col lg:flex-row mb-6 gap-6'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='barangay' className='block mb-2 text-sm font-medium text-gray-900'>
               Town/Brgy<span className='text-red-500'>*</span>
             </label>
@@ -683,7 +696,7 @@ const Details = ({
                 onBlur={() => setTimeout(() => setShowBarangayDropdown(false), 200)}
                 placeholder='Type to search barangay...'
                 disabled={!selectedMunicipality}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedMunicipality ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                className={`${watch('locality') ? 'bg-gray-50' : 'bg-white'} border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 ${!selectedMunicipality ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
@@ -719,7 +732,7 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.locality.message || 'Barangay is required'}</p>
             )}
           </div>
-          <div className='basis-1/3 mr-10'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='building' className='block mb-2 text-sm font-medium text-gray-900'>
               House No./Bldg./Apartment/Suite, etc.
             </label>
@@ -730,7 +743,7 @@ const Details = ({
               className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
             />
           </div>
-          <div className='basis-1/3'>
+          <div className='lg:basis-1/3'>
             <label htmlFor='street' className='block mb-2 text-sm font-medium text-gray-900'>
               Street<span className='text-red-500'>*</span>
             </label>
@@ -745,19 +758,25 @@ const Details = ({
             )}
           </div>
         </div>
-        <div className='flex flex-row mt-5'>
-          <div className='basis-1/3 mr-10'>
+        {/* Country and Zip Code Row - Mobile: Stacked, Desktop: Original 3-column layout */}
+        <div className='flex flex-col lg:flex-row gap-6'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='country' className='block mb-2 text-sm font-medium text-gray-900'>
               Country<span className='text-red-500'>*</span>
             </label>
             <div className='relative mt-2'>
-              <select
+              <input
+                type='text'
                 id='country'
                 {...register('country', { required: true })}
+                value={watch('country') || 'Philippines'}
+                onChange={(e) => {
+                  setValue('country', e.target.value);
+                }}
+                placeholder='Country'
                 className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-              >
-                <option value='Philippines'>Philippines</option>
-              </select>
+                readOnly
+              />
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
               </div>
@@ -766,7 +785,7 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.country.message || 'Country is required'}</p>
             )}
           </div>
-          <div className='basis-1/3 mr-10'>
+          <div className='lg:basis-1/3 lg:mr-10'>
             <label htmlFor='zipCode' className='block mb-2 text-sm font-medium text-gray-900'>
               Zip Code<span className='text-red-500'>*</span>
             </label>
@@ -780,13 +799,15 @@ const Details = ({
               <p className='mt-1 text-sm text-red-600'>{errors.zipCode.message || 'Zip code is required'}</p>
             )}
           </div>
-          <div className='basis-1/3'></div>
+          <div className='lg:basis-1/3'></div>
         </div>
       </div>
-      <div className='flex justify-end'>
+      
+      {/* Submit Button */}
+      <div className='flex justify-center lg:justify-end mt-8'>
         <button
           type='submit'
-          className='w-52 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+          className='w-full lg:w-52 uppercase text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
         >
           Next
         </button>

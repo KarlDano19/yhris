@@ -7,8 +7,6 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import { toast } from 'react-hot-toast';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import Form from "./Form";
@@ -28,7 +26,6 @@ import { EmploymentAgreementFormData } from "@/types/document-generator/document
 import { NoticeToExplainFormData } from "@/types/document-generator/documents";
 import { DocumentType } from "@/types/document-generator/form";
 import { print } from './print/index';
-import { generateNoticeToExplainHTML } from './print/documents/NoticeToExplain';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './utils/handleProceed';
 
@@ -92,6 +89,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [noticeToExplainData, setNoticeToExplainData] = useState<NoticeToExplainFormData>({
     employeeName: '',
     position: '',
+    department: '',
     dateIssued: '',
     companyName: '',
     dateOfIssuance: '',
@@ -110,7 +108,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     logoImage: null,
     sampleLogoPath: '',
     signature: null,
-    borderColor: '#FFC107'
+    borderColor: '#FFC107',
+    referenceNumber: ''
   });
   
   // Modal states
@@ -184,6 +183,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         setNoticeToExplainData({
           employeeName: '',
           position: '',
+          department: '',
           dateIssued: '',
           companyName: '',
           dateOfIssuance: '',
@@ -202,7 +202,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           logoImage: null,
           sampleLogoPath: '',
           signature: null,
-          borderColor: '#FFC107'
+          borderColor: '#FFC107',
+          referenceNumber: ''
         });
       }
     };
@@ -238,6 +239,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         briefBackground: selectedEmployeeIssue.brief_background || '',
         receivedBy: employeeName,
         dateOfIssuance: new Date().toISOString().split('T')[0],
+        referenceNumber: selectedEmployeeIssue.nte_id || ''
       }));
     }
   }, [documentType, employeeId, selectedEmployeeIssue]);
@@ -342,9 +344,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   };
   
   // Handle proceeding (marking as sent and returning to employee issues)
-  const handleProceed = () => {
+  const handleProceed = async () => {
     setIsLoading(true);
-    handleProceedUtil({
+    await handleProceedUtil({
       documentType,
       employeeId: employeeId || '',
       currentData: currentData as NoticeToExplainFormData,
@@ -364,9 +366,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       router,
       toast,
       CustomToast,
-      generateNoticeToExplainHTML,
-      jsPDF,
-      html2canvas
+      // Only provide updateEmployeeIssue function if coming from employee issues page
+      updateEmployeeIssue: employeeId ? true : undefined
     });
   };
   

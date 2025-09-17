@@ -651,56 +651,58 @@ const Content = () => {
           </div>
           
           {/* Status Filter Tabs */}
-          <div className='mt-6 flex w-full border-b border-gray-200'>
-            <button
-              onClick={() => {
-                setPendingFilter({ ...pendingFilter, status: 'all' });
-                setAppliedFilter({ ...appliedFilter, status: 'all' });
-              }}
-              className={`flex-1 py-1.5 text-center text-sm ${
-                appliedFilter.status === 'all' 
-                  ? 'font-medium' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <span className={appliedFilter.status === 'all' ? 'text-indigo-600' : 'text-gray-500'}>
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 mb-5 gap-2">
+              <div
+                onClick={() => {
+                  setPendingFilter({ ...pendingFilter, status: 'all' });
+                  setAppliedFilter({ ...appliedFilter, status: 'all' });
+                }}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'all'
+                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
                 All Jobs
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                setPendingFilter({ ...pendingFilter, status: 'active' });
-                setAppliedFilter({ ...appliedFilter, status: 'active' });
-              }}
-              className={`flex-1 py-1.5 text-center text-sm ${
-                appliedFilter.status === 'active' 
-                  ? 'font-medium' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <span className={appliedFilter.status === 'active' ? 'text-green-500' : 'text-gray-500'}>
+              </div>
+              <div
+                onClick={() => {
+                  setPendingFilter({ ...pendingFilter, status: 'active' });
+                  setAppliedFilter({ ...appliedFilter, status: 'active' });
+                }}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'active'
+                    ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
                 Active
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                setPendingFilter({ ...pendingFilter, status: 'inactive' });
-                setAppliedFilter({ ...appliedFilter, status: 'inactive' });
-              }}
-              className={`flex-1 py-1.5 text-center text-sm ${
-                appliedFilter.status === 'inactive' 
-                  ? 'font-medium' 
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <span className={appliedFilter.status === 'inactive' ? 'text-red-500' : 'text-gray-500'}>
+              </div>
+              <div
+                onClick={() => {
+                  setPendingFilter({ ...pendingFilter, status: 'inactive' });
+                  setAppliedFilter({ ...appliedFilter, status: 'inactive' });
+                }}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'inactive'
+                    ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
                 Inactive
-              </span>
-            </button>
+              </div>
+            </div>
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'>
+            <div 
+              className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
                 <table
                   className={classNames(

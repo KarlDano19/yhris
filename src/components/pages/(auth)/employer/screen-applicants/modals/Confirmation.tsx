@@ -9,7 +9,11 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useDeleteStage from '../hooks/useDeleteStage';
 
-export default function Confirmation() {
+interface ConfirmationProps {
+  onStageDeleted?: () => void;
+}
+
+export default function Confirmation({ onStageDeleted }: ConfirmationProps) {
   const { mutate: deleteMutate, isLoading: isDeleteLoading } = useDeleteStage();
   const { actionState, setActionState, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
   const [isOpen, setIsOpen] = useState(false);
@@ -37,11 +41,20 @@ export default function Confirmation() {
       });
     } else {
       const callbackReq = {
-        onSuccess: () => {
+        onSuccess: (data: any) => {
           dispatch({
             type: 'REMOVE_STAGE',
             payload: { stageId: actionState.stageId, setActionState },
           });
+          // Show success message with archived applicants count
+          const message = data?.message || 'Stage deleted successfully.';
+          toast.custom(() => <CustomToast message={message} type='success' />, {
+            duration: 5000,
+          });
+          // Refresh applicants data to reflect any archived applicants
+          if (onStageDeleted) {
+            onStageDeleted();
+          }
         },
         onError: (err: any) => {
           setTimeout(() => setActionState(initialActionState), 400);

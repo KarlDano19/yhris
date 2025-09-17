@@ -182,7 +182,14 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           ${logoSrc ? `<img src="${logoSrc}" alt="Company Logo">` : `<div class="space"></div>`}
         </div>
         
-        <div class="document-title">NOTICE TO EXPLAIN</div>
+        <div class="header-row">
+          <div class="document-title">NOTICE TO EXPLAIN</div>
+          ${data.referenceNumber ? `
+            <div class="reference-number-header">
+              Ref: ${data.referenceNumber}
+            </div>
+          ` : ''}
+        </div>
         <div class="document-subtitle">${data.incidentPlace || '[Place of Incident]'}</div>
         
         <div class="decorative-line" style="border-color: ${borderColor}"></div>
@@ -235,7 +242,7 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       <div class="section">
         <div class="background-section">
           <div class="detail-label">Brief background :</div>
-          <div style="white-space: normal; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
+          <div style="white-space: pre-wrap; word-wrap: break-word;">${data.briefBackground || '[Brief description of the incident...]'}</div>
         </div>
         
         <div class="signatures-grid">
@@ -272,37 +279,37 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
       </div>
 
       <!-- Employee Explanation Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 25px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">I. Employee Explanation</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.employeeExplanation || ''}
           </div>
         </div>
       </div>
 
       <!-- Hearing Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 15px; margin-bottom: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">II. Hearing</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.hearingNotes || ''}
           </div>
         </div>
       </div>
 
       <!-- Management Decision Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <div style="margin-top: 15px;">
           <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #000;">III. Management Decision</div>
-          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: normal; word-wrap: break-word;">
+          <div style="border: 1px solid #ccc; min-height: 80px; padding: 8px; margin-bottom: 30px; color: #000; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">
             ${data.managementDecision || ''}
           </div>
         </div>
       </div>
 
       <!-- Footer Section -->
-      <div class="section">
+      <div class="section" style="page-break-inside: avoid; break-inside: avoid;">
         <table class="footer-table">
           <tr>
             <td class="footer-cell footer-cell-left">
@@ -381,6 +388,21 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
           margin: 0 0 2px;
           text-transform: uppercase;
           color: #000;
+        }
+        
+        .header-row {
+          position: relative;
+          text-align: center;
+          margin-bottom: 2px;
+        }
+        
+        .reference-number-header {
+          position: absolute;
+          right: 0;
+          top: 0;
+          font-size: 12px;
+          color: #666;
+          font-style: italic;
         }
         
         .document-subtitle {
@@ -581,30 +603,19 @@ export const generateNoticeToExplainHTML = (data: NoticeToExplainFormData): stri
             
             if (images.length === 0) {
               // No images to load, proceed with print
-              console.log('No images to load, ready to print');
             } else {
               // Wait for all images to load
               images.forEach(img => {
                 if (img.complete) {
                   loadedImages++;
-                  if (loadedImages === images.length) {
-                    console.log('All images loaded, ready to print');
-                  }
                 } else {
                   img.onload = function() {
                     loadedImages++;
-                    if (loadedImages === images.length) {
-                      console.log('All images loaded, ready to print');
-                    }
                   };
                   
                   // Handle image load errors
                   img.onerror = function() {
-                    console.error('Error loading image:', img.src);
                     loadedImages++;
-                    if (loadedImages === images.length) {
-                      console.log('All images attempted to load, ready to print');
-                    }
                   };
                 }
               });

@@ -7,9 +7,6 @@ interface DocumentPageSixProps {
 }
 
 const DocumentPageSix: React.FC<DocumentPageSixProps> = ({ data }) => {
-  // Debug: Log the duties_and_responsibilities value
-  console.log('DocumentPageSix - duties_and_responsibilities:', data.duties_and_responsibilities);
-  console.log('DocumentPageSix - data:', data);
   
   return (
     <>
