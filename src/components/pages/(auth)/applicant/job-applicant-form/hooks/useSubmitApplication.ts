@@ -24,30 +24,8 @@ async function submitApplication(data: any) {
     formData.append('application_form', JSON.stringify(finalData));
     formData.append('job_posting', data.jobPosting);
 
-    if (data.profilePicture) {
-      if (data.profilePicture instanceof File) {
-        formData.append("photo", data.profilePicture);
-      } else if (typeof data.profilePicture === "string") {
-        const res = await fetch(data.profilePicture);
-        const blob = await res.blob();
-
-        // Draw blob onto canvas → always export as PNG
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(blob);
-        await new Promise((resolve) => (img.onload = resolve));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        canvas.getContext("2d")!.drawImage(img, 0, 0);
-
-        const pngBlob: Blob = await new Promise((resolve) =>
-          canvas.toBlob((b) => resolve(b!), "image/png")
-        );
-
-        const file = new File([pngBlob], "photo.png", { type: "image/png" });
-        formData.append("photo", file);
-      }
+    if (data.profilePicture && !data.profilePicture.includes('no-photo.png')) {
+      formData.append("photo", data.profilePicture);
     }
     if (data.resume.length !== 0) {
       formData.append('resume', data.resume[0]);
