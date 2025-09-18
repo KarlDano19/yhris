@@ -128,28 +128,28 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-xs sm:max-w-2xl lg:max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                 {/* Header */}
-                <div className="bg-[#2563eb] px-6 py-4 flex justify-between items-center">
-                  <h3 className="text-lg font-medium text-white">
+                <div className="bg-[#2563eb] px-4 sm:px-6 py-4 flex justify-between items-center">
+                  <h3 className="text-base sm:text-lg font-medium text-white">
                     Add Custom Screening Questions
                   </h3>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="text-white hover:text-gray-200 transition-colors"
                   >
-                    <XCircleIcon className="h-6 w-6" />
+                    <XCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {/* Existing Questions List - Scrollable */}
                   <div className="mb-6">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">
+                    <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-4">
                       Existing Questions ({questions.length})
                     </h4>
-                    <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div className="max-h-80 sm:max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-3 sm:p-4 space-y-3">
                       {questions.length === 0 ? (
                         <p className="text-gray-500 text-center py-8">
                           No custom questions added yet.
@@ -160,12 +160,12 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                             key={index}
                             className="bg-gray-50 p-3 rounded-lg border border-gray-200"
                           >
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                               <div className="flex-1">
-                                <p className="font-medium text-gray-900 mb-2">
+                                <p className="font-medium text-gray-900 mb-2 break-words">
                                   {question.question}
                                 </p>
-                                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-gray-600">
                                   <span>
                                     <span className="font-medium">Response Type:</span> {question.responseType || 'Text'}
                                   </span>
@@ -199,7 +199,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex space-x-2 ml-4">
+                              <div className="flex space-x-2 sm:ml-4">
                                 <button
                                   onClick={() => handleEditQuestion(index)}
                                   className="text-gray-600 hover:text-blue-600 transition-colors"
@@ -224,7 +224,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                   <div className="mb-6">
                     <button
                       onClick={handleAddNewQuestion}
-                      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
                     >
                       <span className="text-blue-600 font-medium">+ Add Custom Question</span>
                     </button>
@@ -232,7 +232,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
 
                   {/* Add Custom Question Form - Only show when clicked */}
                   {showAddForm && (
-                    <div ref={addFormRef} className="border-2 border-dashed border-blue-300 rounded-lg p-6 bg-blue-50">
+                    <div ref={addFormRef} className="border-2 border-dashed border-blue-300 rounded-lg p-4 sm:p-6 bg-blue-50">
                       <CustomScreeningForm
                         onSave={handleAddQuestion}
                         onCancel={() => {
@@ -247,26 +247,26 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
 
                   {/* Simple Delete Confirmation Overlay - INSIDE the Dialog.Panel */}
                   {deleteModal?.open && (
-                    <div className="absolute inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60]">
-                      <div className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-[500px]">
-                        <div className="flex justify-center py-8 px-2">
+                    <div className="absolute inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-[60] p-4">
+                      <div className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-sm sm:w-[500px]">
+                        <div className="flex justify-center py-6 sm:py-8 px-2">
                           <WarningRed />
                         </div>
-                        <div className="text-xl px-20 text-center">
-                          <p className="text-xl text-gray-600 font-bold">
+                        <div className="text-lg sm:text-xl px-4 sm:px-20 text-center">
+                          <p className="text-lg sm:text-xl text-gray-600 font-bold">
                             Are you sure you want to <span className="text-red-500">delete</span> this question?
                           </p>
                           {deleteModal.question && (
-                            <p className="text-sm text-gray-500 mt-2 italic">
+                            <p className="text-sm text-gray-500 mt-2 italic break-words">
                               "{deleteModal.question}"
                             </p>
                           )}
                         </div>
-                        <div className="flex justify-center w-full px-4 space-x-8 pt-10 pb-7">
-                          <span className="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                        <div className="flex flex-col sm:flex-row justify-center w-full px-4 space-y-3 sm:space-y-0 sm:space-x-8 pt-6 sm:pt-10 pb-7">
+                          <span className="flex w-full rounded-md shadow-sm sm:w-auto">
                             <button
                               type="button"
-                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-8 sm:px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5"
                               onClick={() => setDeleteModal(null)}
                             >
                               No
@@ -275,7 +275,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                           <span className="flex w-full rounded-md shadow-sm sm:w-auto">
                             <button
                               type="button"
-                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5"
+                              className="inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-8 sm:px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5"
                               onClick={() => {
                                 if (deleteModal) {
                                   handleConfirmDelete(deleteModal.id);
@@ -292,7 +292,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                <div className="bg-gray-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                   <button
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

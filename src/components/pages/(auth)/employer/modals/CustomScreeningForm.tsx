@@ -149,13 +149,13 @@
     };
 
     return (
-      <div className="bg-white p-5 rounded-lg shadow-md">
+      <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Write a custom screening question.</h2>
+          <h2 className="text-base sm:text-lg font-medium">Write a custom screening question.</h2>
           <button
             type="button"
             onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 text-xl sm:text-lg"
           >
             ×
           </button>
@@ -163,15 +163,17 @@
         
         <div className="mb-4 text-sm text-gray-600 flex items-start">
           <span className="text-blue-500 mr-2">ⓘ</span>
-          Help keep Yahshua HRIS respectful and professional. 
-          <a
-            href="/post-job/screening-question-guideline"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 ml-1 hover:underline"
-          >
-            Read our custom question guidelines
-          </a>.
+          <span className="break-words">
+            Help keep Yahshua HRIS respectful and professional. 
+            <a
+              href="/post-job/screening-question-guideline"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 ml-1 hover:underline"
+            >
+              Read our custom question guidelines
+            </a>.
+          </span>
         </div>
         
         <div className="mb-4">
@@ -182,7 +184,7 @@
             id="question"
             value={question}
             onChange={handleQuestionChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows={3}
             required
           />
@@ -191,7 +193,7 @@
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label htmlFor="responseType" className="block text-sm font-medium text-gray-700 mb-1">
               Response type:
@@ -251,7 +253,7 @@
                   type="button"
                   onClick={() => removeOption(index)}
                   disabled={options.length === 1}
-                  className="text-red-500 hover:text-red-700 disabled:text-gray-300"
+                  className="text-red-500 hover:text-red-700 disabled:text-gray-300 text-lg"
                 >
                   ×
                 </button>
@@ -286,27 +288,29 @@
         )}
         
         <div className="mb-4">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              checked={mustHave}
-              onChange={(e) => setMustHave(e.target.checked)}
-              className="form-checkbox h-5 w-5 text-blue-600"
-            />
-            <span className="ml-2 text-sm text-gray-700">Must–have qualification</span>
-          </label>
-          <label className="inline-flex items-center ml-6">
-            <input
-              type="checkbox"
-              checked={showToCandidates}
-              onChange={(e) => setShowToCandidates(e.target.checked)}
-              className="form-checkbox h-5 w-5 text-blue-600"
-            />
-            <span className="ml-2 text-sm text-gray-700">Show question to candidates</span>
-          </label>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                checked={mustHave}
+                onChange={(e) => setMustHave(e.target.checked)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span className="ml-2 text-sm text-gray-700">Must–have qualification</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                checked={showToCandidates}
+                onChange={(e) => setShowToCandidates(e.target.checked)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span className="ml-2 text-sm text-gray-700">Show question to candidates</span>
+            </label>
+          </div>
         </div>
         
-        <div className="flex justify-end space-x-2">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
           <button
             type="button"
             onClick={onCancel}

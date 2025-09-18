@@ -98,7 +98,7 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
               key={option.id}
               type="button"
               onClick={() => onSelectOption(option.id)}
-              className={`flex items-center px-3 py-2 text-sm border rounded-full ${
+              className={`flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm border rounded-full whitespace-nowrap ${
                 isSelected 
                   ? 'bg-savoy-blue text-white border-blue-600 font-semibold' 
                   : option.id === 'custom-question'
