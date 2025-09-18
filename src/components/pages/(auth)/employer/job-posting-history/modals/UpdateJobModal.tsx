@@ -83,6 +83,7 @@ export default function UpdateJobModal({
           : [],
         country: jobPostDataDetails.country,
         language: jobPostDataDetails.language,
+        position: jobPostDataDetails.position_id,
       });
       secondForm.reset({
         jobType: jobPostDataDetails.job_type ? jobPostDataDetails.job_type.split(',') : [],

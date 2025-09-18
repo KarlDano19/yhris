@@ -39,12 +39,21 @@ async function updateApplicantOrient(data: any) {
         type_of_email: data.emailType,
         date_received: data.dateReceived,
       };
+    } else if (data.actionType == 'update_status' && data.emailType == 'location_department') {
+      // NEW: Handle location/department assignment
+      payload = {
+        type_of_action: data.actionType,
+        type_of_email: data.emailType,
+        location: data.location_name, // Send as string (CharField)
+        department: data.department_id, // Send as ID (ForeignKey)
+      };
     } else {
       payload = {
         type_of_action: data.actionType,
         type_of_email: data.emailType,
       };
     }
+    
     const token = getCookie('token');
     const config = {
       method: 'PATCH',

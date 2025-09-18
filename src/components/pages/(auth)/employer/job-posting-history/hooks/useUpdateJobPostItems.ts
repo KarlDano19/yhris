@@ -10,6 +10,7 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('country', jobPost.country);
     formData.append('language', jobPost.language);
     formData.append('job_title', jobPost.jobTitle);
+    formData.append('position', jobPost.position); // Change from 'position_id' to 'position'
     formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise || '');
     formData.append('job_type', jobPost.jobType.join());
     formData.append('work_setup', jobPost.workSetup.join());

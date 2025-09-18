@@ -22,6 +22,7 @@ import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
+import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import Filter, { FilterOptions } from './Filter';
@@ -80,6 +81,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
+  const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
@@ -101,6 +103,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     // Only trigger if status is rejected or withdrawn (archived statuses)
     return status === 'rejected' || status === 'withdrawn';
   }, []);
+
+  /**
+   * Check if status update should trigger navigation modal
+   * Only show navigation modal when applicant is hired (passed) AND it's the final stage
+   */
+  const shouldTriggerNavigationModal = useCallback((status: string) => {
+    // Only trigger if status is passed (hired) AND it's the final stage
+    return status === 'passed' && actionState.isFinalStage;
+  }, [actionState.isFinalStage]);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -282,6 +293,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               archivedApplicantRefetch();
             }
             
+            // ============================================================================
+            // SHOW NAVIGATION MODAL ON SUCCESSFUL HIRING FROM FINAL STAGE
+            // ============================================================================
+            if (shouldTriggerNavigationModal(data.status)) {
+              setIsNavigationModalOpen(true);
+            }
+            
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -442,12 +460,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 <div className='flex justify-end items-center gap-4 my-6'>
                   <button
                     onClick={handleOpenBatchUpload}
-                    className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 text-sm font-medium'
+                    className='rounded-lg bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2'
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                     </svg>
-                    Batch Upload Resumes
+                    BATCH UPLOAD RESUMES
                   </button>
                   <div className='flex-1 flex justify-start lg:justify-between gap-2'>
                     <button
@@ -507,6 +525,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           setIsArchivedApplicantsModalOpen(false);
         }}
         onRefresh={archivedApplicantRefetch}
+      />
+      <NavigationModal
+        isOpen={isNavigationModalOpen}
+        setIsOpen={setIsNavigationModalOpen}
+        jobPostingId={params.id as string}
       />
     </>
   );
