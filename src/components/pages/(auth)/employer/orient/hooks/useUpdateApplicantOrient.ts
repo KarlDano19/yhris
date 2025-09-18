@@ -50,7 +50,6 @@ async function updateApplicantOrient(data: any) {
     } else {
       payload = {
         type_of_action: data.actionType,
-        type_of_email: data.emailType,
       };
     }
     

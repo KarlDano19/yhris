@@ -218,8 +218,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     
     const updateOrientationStatus = () => {
       orientItemCopy[itemIndex].id = id;
-      orientItemCopy[itemIndex].actionType = 'update_status';
-      orientItemCopy[itemIndex].emailType = 'enrolled';
+      orientItemCopy[itemIndex].actionType = 'enrolled';
       orientItemCopy[itemIndex].isEnrolled = true;
       
       mutate(orientItemCopy[itemIndex], {
@@ -276,8 +275,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const setOriented = () => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
-    orientItemCopy[itemIndex].actionType = 'update_status';
-    orientItemCopy[itemIndex].emailType = 'orient';
+    orientItemCopy[itemIndex].actionType = 'completed';
     orientItemCopy[itemIndex].isOriented = true;
     const callbackReq = {
       onSuccess: (data: any) => {
