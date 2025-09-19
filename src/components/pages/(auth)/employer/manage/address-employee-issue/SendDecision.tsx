@@ -1,5 +1,6 @@
 import React, { Dispatch } from 'react';
 
+import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import { T_SendDecisionModal, T_DecisionAttachmentViewModal } from '@/types/globals';
 
@@ -76,6 +77,11 @@ const SendDecision = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={true}
+          data-tooltip-id='decision-received-tooltip'
+          data-tooltip-html={isDecisionReceived ?
+            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully' :
+            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully'}
+          data-tooltip-place='bottom'
           onClick={() => setReleased(id, 'decision')}
         >
           {isLoading && (
@@ -102,11 +108,14 @@ const SendDecision = ({
           {!isLoading && (isDecisionReceived ? 'Received' : 'Receive')}
         </button>
       </div>
-      {isDecisionReceived ? (
+      {isDecisionReceived && (
         <div>
           <div className='flex gap-1 items-center justify-center'>
             <div
               className='cursor-pointer'
+              data-tooltip-id='decision-clip-tooltip'
+              data-tooltip-content='Click to view decision'
+              data-tooltip-place='bottom'
               onClick={() =>
                 setIsDecisionAttachmentViewModalOpen({
                   isOpen: true,
@@ -119,7 +128,10 @@ const SendDecision = ({
             <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
           </div>
         </div>
-      ) : null}
+      )}
+      
+      <Tooltip id='decision-received-tooltip' />
+      <Tooltip id='decision-clip-tooltip' />
     </div>
   );
 };
