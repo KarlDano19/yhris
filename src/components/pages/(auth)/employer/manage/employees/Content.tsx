@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -121,6 +122,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const autocompleteRef = useRef<HTMLUListElement>(null);
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (autocompleteRef.current && index >= 0) {
+      const selectedElement = autocompleteRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (!hasAgreed) {
@@ -366,7 +382,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center             gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -409,53 +425,122 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     type='text'
                     name='search'
                     id='search'
+                    {...(pendingFilter.search === '' && {
+                      'data-tooltip-id': 'employee-search-tooltip',
+                      'data-tooltip-content': 'Search for Employee: Name, Position, Department',
+                      'data-tooltip-place': 'bottom'
+                    })}
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                     value={pendingFilter.search}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
                       setShowAutocomplete(true);
+                      setSelectedIndex(-1); // Reset selection when typing
                     }}
                     onFocus={() => {
                       if (pendingFilter.search) setShowAutocomplete(true);
                     }}
                     onBlur={() => {
-                      setTimeout(() => setShowAutocomplete(false), 100);
+                      setTimeout(() => {
+                        setShowAutocomplete(false);
+                        setSelectedIndex(-1);
+                      }, 100);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleSearch();
+                        if (showAutocomplete && selectedIndex >= 0) {
+                          // If an item is selected from autocomplete, use that
+                          const filteredItems = employeeItemsAll.filter(
+                            (item: any) =>
+                              item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
+                          );
+                          if (filteredItems[selectedIndex]) {
+                            const item = filteredItems[selectedIndex];
+                            const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                            setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+                            setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
+                          }
+                          setShowAutocomplete(false);
+                          setSelectedIndex(-1);
+                        } else {
+                          // Regular search
+                          handleSearch();
+                          setShowAutocomplete(false);
+                        }
+                      } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (showAutocomplete) {
+                          const filteredItems = employeeItemsAll.filter(
+                            (item: any) =>
+                              item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                              item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
+                          );
+                          const newIndex = selectedIndex < filteredItems.length - 1 ? selectedIndex + 1 : selectedIndex;
+                          setSelectedIndex(newIndex);
+                          scrollToSelectedItem(newIndex);
+                        }
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (showAutocomplete) {
+                          const newIndex = selectedIndex > 0 ? selectedIndex - 1 : -1;
+                          setSelectedIndex(newIndex);
+                          if (newIndex >= 0) {
+                            scrollToSelectedItem(newIndex);
+                          }
+                        }
+                      } else if (e.key === 'Escape') {
                         setShowAutocomplete(false);
+                        setSelectedIndex(-1);
                       }
                     }}
                     placeholder='Search ...'
                   />
                   {pendingFilter.search && showAutocomplete && (
-                    <ul className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
+                    <ul 
+                      ref={autocompleteRef}
+                      className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                    >
                       {employeeItemsAll
                         .filter(
                           (item: any) =>
                             item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
                             item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.position_name?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+                            item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
                             item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
                         )
-                        .map((item: any) => (
+                        .map((item: any, index: number) => (
                           <li
                             key={item.id}
-                            className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
+                            className={`px-3 py-2 cursor-pointer ${
+                              index === selectedIndex 
+                                ? 'bg-blue-100' 
+                                : 'hover:bg-blue-100'
+                            }`}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                            }}
+                            onMouseEnter={() => setSelectedIndex(index)}
                             onClick={() => {
-                              setPendingFilter({ ...pendingFilter, search: item.firstname });
+                              const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                              setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+                              setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
                               setShowAutocomplete(false);
+                              setSelectedIndex(-1);
                               document.getElementById('search')?.blur();
                             }}
                           >
                             <div className='flex flex-col'>
                               <span className='font-medium'>{item.firstname} {item.lastname}</span>
-                              {(item.position_name || item.department) && (
+                              {(item.position || item.department) && (
                                 <span className='text-xs text-gray-500'>
-                                  {item.position_name && item.department 
-                                    ? `${item.position_name} | ${item.department}`
-                                    : item.position_name || item.department
+                                  {item.position && item.department 
+                                    ? `${item.department} | ${item.position}`
+                                    : item.position || item.department
                                   }
                                 </span>
                               )}
@@ -734,6 +819,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         departmentItems={departmentItems}
         positionItems={positionItems}
       />
+      <Tooltip id='employee-search-tooltip' />
 
     </>
   );
