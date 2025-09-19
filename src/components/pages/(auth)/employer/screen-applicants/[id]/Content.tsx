@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useRef, useState, useEffect, useCallback, Fragment } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
@@ -34,7 +34,8 @@ import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, EllipsisVerticalIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { Menu, Transition } from '@headlessui/react';
 import ArchiveIcon from '@/svg/ArchiveIcon';
 
 import '../styles.css';
@@ -443,7 +444,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     <>
       {!isGetJobPostDetailsLoading && (
         <StateContext.Provider value={{ state, dispatch, actionState, setActionState }}>
-          <div className='min-h-screen'>
+          <div className='min-h-screen mb-24 md:mb-0'>
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
               <div className='flex px-4 pt-4 pb-2'>
                 <Link href='/screen-applicants' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
@@ -457,36 +458,134 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </h2>
                 {whichModal && modals[whichModal].component}
 
-                <div className='flex justify-end items-center gap-4 my-6'>
-                  <button
-                    onClick={handleOpenBatchUpload}
-                    className='rounded-lg bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2'
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                    BATCH UPLOAD RESUMES
-                  </button>
-                  <div className='flex-1 flex justify-start lg:justify-between gap-2'>
+                {/* Desktop Layout */}
+                <div className='hidden md:flex justify-between items-center gap-4 my-6'>
+                  <div className='flex items-center gap-4'>
+                    <button
+                      onClick={handleOpenBatchUpload}
+                      className='rounded-lg bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 font-bold text-[15px] flex items-center gap-2'
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      BATCH UPLOAD RESUMES
+                    </button>
                     <button
                       onClick={() => setIsAddApplicantModalOpen(true)}
-                      className='rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-6'
+                      className='rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px]'
                     >
                       ADD APPLICANT
                     </button>
-                    
-                    <AddStageBtn handleAddStage={handleAddStage} />
                   </div>
-                  <button
-                    onClick={() => {
-                      setIsArchivedApplicantsModalOpen(true);
-                    }}
-                    className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
+                  <div className='flex items-center gap-4'>
+                    <button
+                      onClick={() => {
+                        setIsArchivedApplicantsModalOpen(true);
+                      }}
+                      className="rounded-lg py-2 px-6 font-bold text-[15px] flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
                     >
-                    <ArchiveIcon />
+                      <ArchiveIcon />
                       ARCHIVED
                     </button>
-                  <Filter onFilterChange={handleFilterChange} />
+                    <Filter onFilterChange={handleFilterChange} />
+                    <AddStageBtn handleAddStage={handleAddStage} />
+                  </div>
+                </div>
+
+                {/* Mobile Layout */}
+                <div className='md:hidden flex justify-between items-center gap-4 my-6'>
+                  <div className='flex items-center gap-2'>
+                    {/* Empty space on left */}
+                  </div>
+                  
+                  <div className='flex items-center gap-2'>
+                    <AddStageBtn handleAddStage={handleAddStage} />
+                    
+                    {/* Mobile Dropdown Menu */}
+                    <Menu as="div" className="relative">
+                      <Menu.Button className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white p-2 flex items-center justify-center">
+                        <EllipsisVerticalIcon className="h-5 w-5" />
+                      </Menu.Button>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="py-1">
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={handleOpenBatchUpload}
+                                  className={`${
+                                    active ? 'bg-blue-50' : 'hover:bg-blue-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#2563eb' }}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                  BATCH UPLOAD RESUMES
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => setIsAddApplicantModalOpen(true)}
+                                  className={`${
+                                    active ? 'bg-green-50' : 'hover:bg-green-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#65c979' }}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  </svg>
+                                  ADD APPLICANT
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                                  className={`${
+                                    active ? 'bg-gray-50' : 'hover:bg-gray-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#6b7280' }}
+                                >
+                                  <ArchiveIcon />
+                                  ARCHIVED
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => {
+                                    // Toggle filter dropdown or open filter modal
+                                    // For now, we'll just trigger the filter change with current filters
+                                    handleFilterChange(filters);
+                                  }}
+                                  className={`${
+                                    active ? 'bg-gray-50' : 'hover:bg-gray-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#6b7280' }}
+                                >
+                                  <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                  FILTER
+                                </button>
+                              )}
+                            </Menu.Item>
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
                 </div>
 
                 <BatchResumeUpload
