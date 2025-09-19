@@ -222,7 +222,7 @@ export default function CompanyProfile({
 
   return (
     <form>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pt-4 pb-6 mb-24">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mt-4">
           <div>
             <label

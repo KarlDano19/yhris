@@ -40,7 +40,7 @@ export default function ComplianceAndCost({
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pt-4 pb-6 mb-24">
         <div className="mt-2">
           <label
             htmlFor="message"
@@ -79,7 +79,13 @@ export default function ComplianceAndCost({
               machine guards,) etc.
             </h1>
       </div>
-      <div className="mt-4 w-full overflow-x-auto">
+      <div
+        className="mt-4 w-full overflow-x-auto"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#2d3e58 #f1f1f1'
+        }}
+      >
         <table className="min-w-full divide-y divide-gray-300 text-center">
           <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
             <tr>

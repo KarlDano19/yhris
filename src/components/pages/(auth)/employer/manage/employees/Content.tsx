@@ -356,7 +356,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -585,16 +585,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
-              <div className='py-2 sm:px-6 lg:px-8'>
-                <div 
-                  className='overflow-x-auto'
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#2d3e58 #f1f1f1'
-                  }}
-                >
-                  <table className='divide-y divide-gray-300 text-center min-w-full'>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
                       <tr>
                         {visibleColumns.date_hired && (
@@ -669,17 +668,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </thead>
                     <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                   </table>
+                  <hr />
                 </div>
-                <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
-              </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

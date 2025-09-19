@@ -162,7 +162,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative mb-24'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -206,8 +206,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               {!isLoading && Object.keys(activePlans).length !== 0 && (
                 <div>
                   <h3 className='text-xl font-semibold text-gray-900 mb-4'>Current Plan</h3>
-                  <div className='flex mb-10'>
-                    <div className='flex py-6 px-12 border-2 rounded-[2rem] mr-10 w-[30rem]'>
+                  <div className='flex flex-col lg:flex-row gap-4 lg:gap-10 mb-10'>
+                    <div className='flex py-6 px-6 lg:px-12 border-2 rounded-[2rem] w-full lg:w-[30rem]'>
                       <div>
                         <img className='h-[70px] mr-2' src={`/assets/bulb.png`} alt='bulb' />
                       </div>
@@ -221,7 +221,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </div>
                     </div>
                     {activePlans.is_used && (
-                      <div className='flex py-6 px-12 border-2 rounded-[2rem] items-center w-[30rem]'>
+                      <div className='flex py-6 px-6 lg:px-12 border-2 rounded-[2rem] items-center w-full lg:w-[30rem]'>
                         <div>
                           <img className='h-[70px]' src={`/assets/restart.png`} alt='restart' />
                         </div>
@@ -301,8 +301,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               {!isLoading && Object.keys(activePlans).length === 0 && (
                 <div>
                   <h3 className='text-xl font-semibold text-gray-900 mb-4'>Current Plan</h3>
-                  <div className='flex mb-10'>
-                    <div className='flex mr-10 w-[30rem] p-0.5 bg-gray-400 rounded-[30px]'>
+                  <div className='flex flex-col lg:flex-row gap-4 lg:gap-10 mb-10'>
+                    <div className='flex w-full lg:w-[30rem] p-0.5 bg-gray-400 rounded-[30px]'>
                       <div className='bg-white py-4 px-6 rounded-[29px] border-2 border-gray-200 w-full flex items-center'>
                         <div>
                           <img className='h-[70px] mr-2' src={`/assets/featured_seasonal_and_gifts.png`} alt='gift' />
@@ -314,7 +314,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </div>
                     </div>
                     <div
-                      className='flex mr-10 w-[30rem] p-0.5 bg-gradient-to-r from-[#FA7417] to-[#FABE23] rounded-[30px] hover:cursor-pointer'
+                      className='flex w-full lg:w-[30rem] p-0.5 bg-gradient-to-r from-[#FA7417] to-[#FABE23] rounded-[30px] hover:cursor-pointer'
                       onClick={() => {
                         window.location.href = '/landing-page/pricing';
                       }}
@@ -429,14 +429,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           {currentTab === '#transactions-history' && (
             <>
-              <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
-                <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
+              <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+                <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
                   <div className='relative'>
                     <CustomDatePicker
                       id='from-datepicker'
                       placeholder={'mm/dd/yyyy'}
                       className={
-                        'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                        'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                       }
                       selected={itemsFilter.from}
                       pickerOnChange={(date: any) => {
@@ -456,7 +456,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       id='to-datepicker'
                       placeholder={'mm/dd/yyyy'}
                       className={
-                        'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                        'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                       }
                       selected={itemsFilter.to}
                       pickerOnChange={(date: any) => {
@@ -473,27 +473,38 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     />
                   </div>
                 </div>
-                <div className='flex-none lg:w-1/3'>
-                  <div className='relative flex items-center'>
+                <div className='flex gap-2 lg:w-1/3'>
+                  <div className='flex flex-row w-full items-center gap-2'>
                     <input
                       type='text'
                       name='search'
                       id='search'
                       className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          checkIfDateIsValid();
+                        }
+                      }}
                       placeholder='Search ...'
                     />
+                    <button
+                      className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                      onClick={checkIfDateIsValid}
+                    >
+                      <MagnifyingGlassIcon className='h-5 w-5' />
+                    </button>
                   </div>
                 </div>
-                <button
-                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                  onClick={checkIfDateIsValid}
-                >
-                  <MagnifyingGlassIcon className='h-5 w-5' />
-                </button>
               </div>
               <div className='mt-8 flow-root'>
-                <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+                <div
+                  className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#2d3e58 #f1f1f1'
+                  }}
+                >
                   <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                     <table className='min-w-full divide-y divide-gray-300 text-center'>
                       <thead className='divide-y divide-gray-200'>

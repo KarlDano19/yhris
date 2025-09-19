@@ -103,7 +103,7 @@ export default function HealthAndWelfare({
   return (
     <>
       <form>
-        <div className="px-4 pt-4 pb-6">
+        <div className="px-4 pt-4 pb-6 mb-24">
           <div className="mt-4">
             <label
               htmlFor="message"
@@ -985,7 +985,13 @@ export default function HealthAndWelfare({
                   facilities based on the total number of workers.
                 </h1>
               </label>
-              <div className="mt-4 w-full overflow-auto">
+              <div
+                className="mt-4 w-full overflow-auto"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#2d3e58 #f1f1f1'
+                }}
+              >
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200 text-cente">
                     <tr>
@@ -1145,29 +1151,29 @@ export default function HealthAndWelfare({
                 Safety and Health Promotion, training and education provided to
                 workers
               </label>
-              <div className="mt-4 w-full">
+              <div className="mt-4 w-full overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 min-w-48"
                       >
                         Name of OSH  Training/Orientation
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-40 min-w-40"
                       >
                         No. of Employees in Attendance
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 min-w-32"
                       >
                         Date
                       </th>
-                      <th>
+                      <th className="w-16 min-w-16">
                       </th>
                     </tr>
                   </thead>
@@ -1177,17 +1183,17 @@ export default function HealthAndWelfare({
                         key={item.id}
                         className="cursor-pointer border-b border-gray-200"
                       >
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-48 min-w-48">
                           <input
                             type="text"
                             {...register(
                               `health_training.${index}.name_of_osh_training`
                             )}
                             id={`health_training.${index}.name_of_osh_training`}
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 truncate"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-40 min-w-40">
                           <input
                             type="number"
                             min="0"
@@ -1196,11 +1202,11 @@ export default function HealthAndWelfare({
                               `health_training.${index}.no_of_employees_in_attendance`
                             )}
                             id={`health_training.${index}.no_of_employees_in_attendance`}
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 truncate"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                          <div className="relative mt-2">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-32 min-w-32">
+                          <div className="relative">
                             <Controller
                               control={control}
                               name={`health_training.${index}.date`}
@@ -1209,7 +1215,7 @@ export default function HealthAndWelfare({
                                   id={`health_training.${index}.date`}
                                   placeholder={"mm/dd/yyyy"}
                                   className={
-                                    "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                                    "block w-full min-w-[120px] py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none truncate"
                                   }
                                   selected={
                                     field.value ? new Date(field.value) : null
@@ -1225,7 +1231,7 @@ export default function HealthAndWelfare({
                             />
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-16 min-w-16">
                           <div className="flex justify-center items-center">
                             <button
                               type="button"
@@ -1254,13 +1260,13 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="mt-4 w-full md:w-2/3">
+          <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
             <table className="min-w-full divide-y divide-gray-300 text-center">
               <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                 <tr>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                    className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 min-w-48"
                   >
                     Conduct of Risk Assessment
                     <h1 className="text-sm text-gray-500 mt-2">
@@ -1269,11 +1275,11 @@ export default function HealthAndWelfare({
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                    className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 min-w-32"
                   >
                     Date
                   </th>
-                  <th>
+                  <th className="w-16 min-w-16">
                   </th>
                 </tr>
               </thead>
@@ -1283,7 +1289,7 @@ export default function HealthAndWelfare({
                     key={item.id}
                     className="cursor-pointer border-b border-gray-200"
                   >
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                    <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-48 min-w-48">
                       <input
                         type="text"
                         {...register(
@@ -1291,11 +1297,11 @@ export default function HealthAndWelfare({
                         )}
                         id={`risk_assessment.${index}.conduct_of_risk_assessment`}
                         placeholder="Enter OSH Training/Orientation"
-                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                        className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 truncate"
                       />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                      <div className="relative mt-2">
+                    <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-32 min-w-32">
+                      <div className="relative">
                         <Controller
                           control={control}
                           name={`risk_assessment.${index}.date`}
@@ -1304,7 +1310,7 @@ export default function HealthAndWelfare({
                               id={`risk_assessment.${index}.date`}
                               placeholder={"mm/dd/yyyy"}
                               className={
-                                "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                                "block w-full min-w-[120px] py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none truncate"
                               }
                               selected={
                                 field.value ? new Date(field.value) : null
@@ -1318,7 +1324,7 @@ export default function HealthAndWelfare({
                         />
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                    <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-16 min-w-16">
                       <div className="flex justify-center items-center">
                         <button
                           type="button"
@@ -1353,13 +1359,13 @@ export default function HealthAndWelfare({
               >
                  Conduct of Tool Box Meetings/ Safety Meetings (if applicable)
               </label>
-              <div className="mt-4 w-full md:w-2/3">
+              <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 min-w-48"
                       >
                         Conduct of Risk Assessment
                         <h1 className="text-sm text-gray-500 mt-2">
@@ -1368,11 +1374,11 @@ export default function HealthAndWelfare({
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 min-w-32"
                       >
                         Date
                       </th>
-                      <th>
+                      <th className="w-16 min-w-16">
                       </th>
                     </tr>
                   </thead>
@@ -1382,7 +1388,7 @@ export default function HealthAndWelfare({
                         key={item.id}
                         className="cursor-pointer border-b border-gray-200"
                       >
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-48 min-w-48">
                           <input
                             type="text"
                             {...register(
@@ -1390,11 +1396,11 @@ export default function HealthAndWelfare({
                             )}
                             id={`safety_meeting.${index}.conduct_of_risk_assessment`}
                             placeholder="Enter OSH Training/Orientation"
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 truncate"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                          <div className="relative mt-2">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-32 min-w-32">
+                          <div className="relative">
                             <Controller
                               control={control}
                               name={`safety_meeting.${index}.date`}
@@ -1403,7 +1409,7 @@ export default function HealthAndWelfare({
                                   id={`safety_meeting.${index}.date`}
                                   placeholder={"mm/dd/yyyy"}
                                   className={
-                                    "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                                    "block w-full min-w-[120px] py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none truncate"
                                   }
                                   selected={
                                     field.value ? new Date(field.value) : null
@@ -1419,7 +1425,7 @@ export default function HealthAndWelfare({
                             />
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-16 min-w-16">
                           <div className="flex justify-center items-center">
                             <button
                               type="button"
@@ -1483,23 +1489,23 @@ export default function HealthAndWelfare({
                   Medical Report (AMR)
                 </h1>
               </label>
-              <div className="mt-4 w-full md:w-2/3">
+              <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 min-w-48"
                       >
                         Report Submitted
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                        className="px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 min-w-32"
                       >
                         Date
                       </th>
-                      <th>
+                      <th className="w-16 min-w-16">
                       </th>
                     </tr>
                   </thead>
@@ -1509,7 +1515,7 @@ export default function HealthAndWelfare({
                         key={item.id}
                         className="cursor-pointer border-b border-gray-200"
                       >
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-48 min-w-48">
                           <input
                             type="text"
                             {...register(
@@ -1517,11 +1523,11 @@ export default function HealthAndWelfare({
                             )}
                             id={`reported_incidents.${index}.report_submitted`}
                             placeholder="select"
-                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+                            className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 truncate"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
-                          <div className="relative mt-2">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-32 min-w-32">
+                          <div className="relative">
                             <Controller
                               control={control}
                               name={`reported_incidents.${index}.date`}
@@ -1530,7 +1536,7 @@ export default function HealthAndWelfare({
                                   id={`reported_incidents.${index}.date`}
                                   placeholder={"mm/dd/yyyy"}
                                   className={
-                                    "block w-full py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                                    "block w-full min-w-[120px] py-1.5 px-3 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none truncate"
                                   }
                                   selected={
                                     field.value ? new Date(field.value) : null
@@ -1546,7 +1552,7 @@ export default function HealthAndWelfare({
                             />
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 border-2 border-gray-200">
+                        <td className="px-3 py-5 text-sm text-gray-500 border-2 border-gray-200 w-16 min-w-16">
                           <div className="flex justify-center items-center">
                             <button
                               type="button"
