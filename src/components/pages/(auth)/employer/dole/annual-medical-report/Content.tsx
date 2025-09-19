@@ -411,7 +411,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             Annual Medical Report
           </h2>
           <div className={classNames("mt-6 flex flex-col lg:flex-row items-left gap-4", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className="flex-none flex flex-col lg:flex-row items-left gap-2">
+            <div className="flex-none flex flex-col lg:flex-row items-left md:items-center gap-2">
               <div className="relative">
                 <CustomDatePicker
                   id="from-datepicker"
