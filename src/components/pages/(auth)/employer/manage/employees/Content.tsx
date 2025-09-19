@@ -321,7 +321,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.location}</td>
           )}
           {visibleColumns.position && (
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position_name || 'N/A'}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.position || 'N/A'}</td>
           )}
           {visibleColumns.department && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
@@ -537,7 +537,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <div className='flex flex-col'>
                               <span className='font-medium'>{item.firstname} {item.lastname}</span>
                               {(item.position || item.department) && (
+                              {(item.position || item.department) && (
                                 <span className='text-xs text-gray-500'>
+                                  {item.position && item.department 
+                                    ? `${item.position} | ${item.department}`
+                                    : item.position || item.department
                                   {item.position && item.department 
                                     ? `${item.department} | ${item.position}`
                                     : item.position || item.department

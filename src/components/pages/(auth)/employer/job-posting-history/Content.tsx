@@ -426,7 +426,7 @@ const Content = () => {
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.position_name || 'N/A'}
+            {jobPost.position || 'N/A'}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${

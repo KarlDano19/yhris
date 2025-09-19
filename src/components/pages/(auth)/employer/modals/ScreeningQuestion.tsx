@@ -83,21 +83,21 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
   };
 
   return (
-    <div className="bg-white border rounded-md p-4 mb-4 relative">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-gray-900 text-base">{question}</span>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+    <div className="bg-white border rounded-md p-3 sm:p-4 mb-4 relative">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-0">
+        <div className="flex-grow">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+            <span className="font-semibold text-gray-900 text-sm sm:text-base break-words">{question}</span>
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded self-start">
               {responseType}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           {editable && (
             <button onClick={onEdit} className="text-savoy-blue hover:underline text-sm font-medium">Edit</button>
           )}
-          <button onClick={onRemove} className="text-gray-400 hover:text-red-500 text-xl ml-2">×</button>
+          <button onClick={onRemove} className="text-gray-400 hover:text-red-500 text-xl">×</button>
         </div>
       </div>
       {degree && (
@@ -106,7 +106,7 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
           <input
             type="text"
             value={degree}
-            className="border rounded px-2 py-1 text-sm"
+            className="border rounded px-2 py-1 text-sm w-full sm:w-auto"
             readOnly
           />
         </div>
@@ -115,8 +115,8 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
         <span className="text-gray-500 text-sm">Ideal answer:</span> {renderIdealAnswer()}
       </div>
       {renderOptions()}
-      <div className="flex items-center mt-3 gap-2 justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center mt-3 gap-2 sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -141,7 +141,7 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
           </div>
         </div>
         {recommended && (
-          <div>
+          <div className="self-start sm:self-auto">
             <span className="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded">Recommended</span>
           </div>
         )}
