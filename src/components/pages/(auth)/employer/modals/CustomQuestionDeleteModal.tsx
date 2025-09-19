@@ -54,25 +54,25 @@ export default function CustomQuestionDeleteModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
-                <div className='flex justify-center py-8 px-2'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-sm sm:w-[500px]'>
+                <div className='flex justify-center py-6 sm:py-8 px-2'>
                   <WarningRed />
                 </div>
-                <div className='text-xl px-20 text-center'>
-                  <p className='text-xl text-gray-600 font-bold'>
+                <div className='text-lg sm:text-xl px-4 sm:px-20 text-center'>
+                  <p className='text-lg sm:text-xl text-gray-600 font-bold'>
                     Are you sure you want to <span className='text-red-500'>delete</span> this question?
                   </p>
                   {isOpen.question && (
-                    <p className='text-sm text-gray-500 mt-2 italic'>
+                    <p className='text-sm text-gray-500 mt-2 italic break-words'>
                       "{isOpen.question}"
                     </p>
                   )}
                 </div>
-                <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
-                  <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
+                <div className='flex flex-col sm:flex-row justify-center w-full px-4 space-y-3 sm:space-y-0 sm:space-x-8 pt-6 sm:pt-10 pb-7'>
+                  <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
                     <button
                       type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-8 sm:px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                       onClick={() => customCloseModal()}
                     >
                       No
@@ -81,7 +81,7 @@ export default function CustomQuestionDeleteModal({
                   <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
                     <button
                       type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-8 sm:px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                       onClick={() => onSubmit()}
                     >
                       Yes

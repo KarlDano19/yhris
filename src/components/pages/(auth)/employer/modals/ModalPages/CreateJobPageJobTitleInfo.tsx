@@ -52,9 +52,10 @@ export default function CreateJobPageTitleInfo({
     if (!positionData?.records) return [];
     
     const allPositions = positionData.records.map((position: any) => ({
-      value: position.id,
+      value: position.name, // Change from position.id to position.name
       label: position.name,
-      createdAt: position.created_at
+      createdAt: position.created_at,
+      id: position.id // Keep the ID for reference if needed
     }));
     
     // Filter and sort newly added positions (within 24 hours of creation)
@@ -213,7 +214,7 @@ export default function CreateJobPageTitleInfo({
                       classNamePrefix='select'
                       options={positionOptions}
                       value={positionOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
-                      onChange={(val) => onChange(val?.value || '')}
+                      onChange={(val) => onChange(val?.value || '')} // This will now send the position name
                       components={{
                         DropdownIndicator: () => (
                           <div className='pointer-events-none px-2'>
