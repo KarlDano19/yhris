@@ -1,5 +1,6 @@
 import React, { Dispatch } from 'react';
 
+import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 
 import { T_InvestigationModal, T_InvestigationReportDetailsModal } from '@/types/globals';
@@ -49,24 +50,27 @@ const Investigation = ({
           {isInvestigated ? 'Investigated' : 'Investigate'}
         </button>
       </div>
-      {isInvestigated ? (
-        <div>
-          <div className='flex gap-1 items-center justify-center'>
-            <div
-              className='cursor-pointer'
-              onClick={() =>
-                setInvestigationReportDetailsModalOpen({
-                  isOpen: true,
-                  id,
-                })
-              }
-            >
-              <ClipIcon hasFile={true} />
-            </div>
-            <p className='text-xs ml-1'>{investigatedDate}</p>
+      {isInvestigated && (
+        <div className='flex gap-1 items-center justify-center'>
+          <div
+            className='cursor-pointer'
+            data-tooltip-id='investigation-clip-tooltip'
+            data-tooltip-content='Click to view investigation report'
+            data-tooltip-place='bottom'
+            onClick={() =>
+              setInvestigationReportDetailsModalOpen({
+                isOpen: true,
+                id,
+              })
+            }
+          >
+            <ClipIcon hasFile={true} />
           </div>
+          <p className='text-xs ml-1'>{investigatedDate}</p>
         </div>
-      ) : null}
+      )}
+      
+      <Tooltip id='investigation-clip-tooltip' />
     </div>
   );
 };
