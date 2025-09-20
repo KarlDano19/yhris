@@ -36,6 +36,23 @@ export default function CreateEmployeeCompensationLogModal({
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
   
+  // Employee dropdown navigation state
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
+  
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -46,6 +63,7 @@ export default function CreateEmployeeCompensationLogModal({
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
+        setSelectedEmployeeIndex(-1);
         refetch();
       },
       onError: (err: any) => {
@@ -165,7 +183,10 @@ export default function CreateEmployeeCompensationLogModal({
                             type='text'
                             placeholder='Select...'
                             value={employeeSearch}
-                            onChange={e => setEmployeeSearch(e.target.value)}
+                            onChange={e => {
+                              setEmployeeSearch(e.target.value);
+                              setSelectedEmployeeIndex(-1); // Reset selection when typing
+                            }}
                             className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                             onClick={() => {
                               if (!employeeSelected) {
@@ -176,6 +197,51 @@ export default function CreateEmployeeCompensationLogModal({
                               }
                             }}
                             readOnly={employeeSelected}
+                            autoComplete='off'
+                            autoCorrect='off'
+                            autoCapitalize='off'
+                            spellCheck='false'
+                            data-lpignore='true'
+                            data-form-type='other'
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (selectedEmployeeIndex >= 0) {
+                                  // Select the highlighted employee
+                                  const filteredEmployees = employeeItems.filter((item: any) => 
+                                    `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase())
+                                  );
+                                  if (filteredEmployees[selectedEmployeeIndex]) {
+                                    const item = filteredEmployees[selectedEmployeeIndex];
+                                    setValue('employee', item.id);
+                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
+                                    setEmployeeSelected(true);
+                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                  }
+                                }
+                              } else if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                const dropdown = document.getElementById('employee-dropdown');
+                                if (dropdown && !dropdown.classList.contains('hidden')) {
+                                  const filteredEmployees = employeeItems.filter((item: any) => 
+                                    `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase())
+                                  );
+                                  const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
+                                  setSelectedEmployeeIndex(newIndex);
+                                  scrollToSelectedItem(newIndex);
+                                }
+                              } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
+                                setSelectedEmployeeIndex(newIndex);
+                                if (newIndex >= 0) {
+                                  scrollToSelectedItem(newIndex);
+                                }
+                              } else if (e.key === 'Escape') {
+                                document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                setSelectedEmployeeIndex(-1);
+                              }
+                            }}
                           />
                           <div
                             className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
@@ -200,6 +266,7 @@ export default function CreateEmployeeCompensationLogModal({
                                   setValue('employee', '');
                                   setEmployeeSearch('');
                                   setEmployeeSelected(false);
+                                  setSelectedEmployeeIndex(-1);
                                 }}
                                 tabIndex={-1}
                               >
@@ -207,21 +274,41 @@ export default function CreateEmployeeCompensationLogModal({
                               </button>
                             )}
                           </div>
-                          <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+                          <div 
+                            id='employee-dropdown' 
+                            ref={dropdownRef}
+                            className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'
+                          >
                             {(employeeItems || [])
                               .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                              .map((item: any) => (
+                              .map((item: any, index: number) => (
                                 <div
                                   key={item.id}
-                                  className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
+                                  className={`px-3 py-2 text-sm cursor-pointer ${
+                                    index === selectedEmployeeIndex 
+                                      ? 'bg-blue-100' 
+                                      : 'bg-[#eeefee] text-gray-900 hover:bg-blue-100'
+                                  }`}
+                                  onMouseEnter={() => setSelectedEmployeeIndex(index)}
                                   onClick={() => {
                                     setValue('employee', item.id);
                                     setEmployeeSearch(`${item.firstname} ${item.lastname}`);
                                     setEmployeeSelected(true);
                                     document.getElementById('employee-dropdown')?.classList.add('hidden');
+                                    setSelectedEmployeeIndex(-1);
                                   }}
                                 >
-                                  {`${item.firstname} ${item.lastname}`}
+                                  <div className='flex flex-col'>
+                                    <span className='font-medium'>{`${item.firstname} ${item.lastname}`}</span>
+                                    {(item.department || item.position) && (
+                                      <span className='text-xs text-gray-500'>
+                                        {item.department && item.position 
+                                          ? `${item.department} | ${item.position}`
+                                          : item.department || item.position
+                                        }
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               ))}
                           </div>

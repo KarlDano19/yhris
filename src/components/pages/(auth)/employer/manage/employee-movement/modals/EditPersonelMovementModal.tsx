@@ -31,6 +31,7 @@ function PrintPersonelMovementModal({
   const cancelButtonRef = useRef(null);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
@@ -80,6 +81,7 @@ function PrintPersonelMovementModal({
   
   const customCloseModal = () => {
     reset();
+    setSelectedEmployeeIndex(-1);
     removePersonelMovement();
     setIsOpen(null);
   };
@@ -219,6 +221,8 @@ function PrintPersonelMovementModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    selectedEmployeeIndex={selectedEmployeeIndex}
+                    setSelectedEmployeeIndex={setSelectedEmployeeIndex}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}

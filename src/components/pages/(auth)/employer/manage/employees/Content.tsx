@@ -131,7 +131,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const selectedElement = autocompleteRef.current.children[index] as HTMLElement;
       if (selectedElement) {
         selectedElement.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'auto',
           block: 'nearest',
         });
       }
@@ -431,6 +431,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       'data-tooltip-place': 'bottom'
                     })}
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    autoComplete='off'
+                    autoCorrect='off'
+                    autoCapitalize='off'
+                    spellCheck='false'
+                    data-lpignore='true'
+                    data-form-type='other'
                     value={pendingFilter.search}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
@@ -537,13 +543,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             <div className='flex flex-col'>
                               <span className='font-medium'>{item.firstname} {item.lastname}</span>
                               {(item.position || item.department) && (
-                              {(item.position || item.department) && (
                                 <span className='text-xs text-gray-500'>
                                   {item.position && item.department 
                                     ? `${item.position} | ${item.department}`
-                                    : item.position || item.department
-                                  {item.position && item.department 
-                                    ? `${item.department} | ${item.position}`
                                     : item.position || item.department
                                   }
                                 </span>

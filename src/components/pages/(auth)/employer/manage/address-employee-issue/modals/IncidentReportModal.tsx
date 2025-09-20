@@ -62,7 +62,7 @@ export default function IncidentReportModal({
       const selectedElement = dropdownRef.current.children[index] as HTMLElement;
       if (selectedElement) {
         selectedElement.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'auto',
           block: 'nearest',
         });
       }
@@ -194,6 +194,12 @@ export default function IncidentReportModal({
                               }
                             }}
                             readOnly={employeeSelected}
+                            autoComplete='off'
+                            autoCorrect='off'
+                            autoCapitalize='off'
+                            spellCheck='false'
+                            data-lpignore='true'
+                            data-form-type='other'
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();

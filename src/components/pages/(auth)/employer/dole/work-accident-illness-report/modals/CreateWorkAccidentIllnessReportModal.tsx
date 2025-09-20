@@ -41,6 +41,7 @@ function CreateWorkAccidentIllnessReportModal({
     isLoading: isLoadingAddWorkAccidentIllnessReport,
   } = useAddWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -55,6 +56,7 @@ function CreateWorkAccidentIllnessReportModal({
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
+        setSelectedEmployeeIndex(-1);
         refetch();
       },
       onError: (err: any) => {
@@ -126,6 +128,8 @@ function CreateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    selectedEmployeeIndex={selectedEmployeeIndex}
+                    setSelectedEmployeeIndex={setSelectedEmployeeIndex}
                   />
                 )}
                 {selectedTab === 2 && (

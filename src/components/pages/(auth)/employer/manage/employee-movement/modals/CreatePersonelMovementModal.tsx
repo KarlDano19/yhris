@@ -27,6 +27,7 @@ function CreatePersonelMovementModal({
   // Local state for employee search and selection, lifted up from EmployeeProfile
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
   // Local state for current and new position
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
@@ -36,6 +37,7 @@ function CreatePersonelMovementModal({
     reset();
     setEmployeeSearch('');
     setEmployeeSelected(false);
+    setSelectedEmployeeIndex(-1);
     setCurrentPosition('');
     setNewPosition('');
     setSelectedTab(1);
@@ -109,6 +111,8 @@ function CreatePersonelMovementModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    selectedEmployeeIndex={selectedEmployeeIndex}
+                    setSelectedEmployeeIndex={setSelectedEmployeeIndex}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}
