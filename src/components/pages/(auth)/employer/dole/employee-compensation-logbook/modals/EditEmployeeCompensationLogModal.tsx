@@ -2,6 +2,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { Controller } from 'react-hook-form';
+import Select, { components } from 'react-select';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -11,6 +12,26 @@ import useUpdateEmployeeCompensationLogbook from '../hooks/useUpdateEmployeeComp
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
+
+// Custom Option component for React Select
+const CustomOption = (props: any) => {
+  const { data, isSelected } = props;
+  return (
+    <components.Option {...props}>
+      <div>
+        <div className="font-medium">{data.label}</div>
+        {(data.department || data.position) && (
+          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+            {data.department && data.position 
+              ? `${data.department} | ${data.position}`
+              : data.department || data.position
+            }
+          </div>
+        )}
+      </div>
+    </components.Option>
+  );
+};
 
 type T_ModalData = {
   id: number;
@@ -46,6 +67,22 @@ export default function EditEmployeeCompensationLogModal({
   } = useGetEmployeeCompensationLogbookDetails(isOpen.id);
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingEditEmployeeCompensationLogbook } = useUpdateEmployeeCompensationLogbook();
+  
+  // React Select employee items
+  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
+
+  // Transform employee data for React Select
+  useEffect(() => {
+    if (employeeItems && employeeItems.length > 0) {
+      const transformedItems = employeeItems.map((employee: any) => ({
+        value: employee.id,
+        label: `${employee.firstname} ${employee.lastname}`,
+        department: employee.department,
+        position: employee.position,
+      }));
+      setReactSelectEmployeeItems(transformedItems);
+    }
+  }, [employeeItems]);
 
   useEffect(() => {
     if (isOpen) {
@@ -201,72 +238,75 @@ export default function EditEmployeeCompensationLogModal({
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                           Employee Name<span className='text-red-600'>*</span>
                         </label>
-                        <div className='relative mt-2'>
-                          <input
-                            id='name'
-                            type='text'
-                            placeholder='Select...'
-                            value={employeeSearch}
-                            onChange={e => setEmployeeSearch(e.target.value)}
-                            className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                            onClick={() => {
-                              if (!employeeSelected) {
-                                const dropdown = document.getElementById('employee-dropdown');
-                                if (dropdown) {
-                                  dropdown.classList.toggle('hidden');
-                                }
-                              }
-                            }}
-                            readOnly={employeeSelected}
-                          />
-                          <div
-                            className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
-                            onClick={() => {
-                              if (!employeeSelected) {
-                                const dropdown = document.getElementById('employee-dropdown');
-                                if (dropdown) {
-                                  dropdown.classList.toggle('hidden');
-                                }
-                              }
-                            }}
-                          >
-                            {!employeeSelected ? (
-                              <span>
-                                <SelectChevronDown />
-                              </span>
-                            ) : (
-                              <button
-                                type='button'
-                                className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
-                                onClick={() => {
-                                  setValue('employee', '');
-                                  setEmployeeSearch('');
-                                  setEmployeeSelected(false);
-                                }}
-                                tabIndex={-1}
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                          <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
-                            {(employeeItems || [])
-                              .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                              .map((item: any) => (
-                                <div
-                                  key={item.id}
-                                  className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
-                                  onClick={() => {
-                                    setValue('employee', item.id);
-                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                                    setEmployeeSelected(true);
-                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
+                        <div className='mt-2'>
+                          <Controller
+                            control={control}
+                            name='employee'
+                            rules={{ required: true }}
+                            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                              <>
+                                <Select
+                                  className="basic-single-select"
+                                  classNamePrefix="select"
+                                  options={reactSelectEmployeeItems}
+                                  value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
+                                  onChange={(selectedOption) => {
+                                    onChange(selectedOption ? selectedOption.value : '');
+                                    if (selectedOption) {
+                                      setEmployeeSearch(selectedOption.label);
+                                      setEmployeeSelected(true);
+                                    } else {
+                                      setEmployeeSearch('');
+                                      setEmployeeSelected(false);
+                                    }
                                   }}
-                                >
-                                  {`${item.firstname} ${item.lastname}`}
-                                </div>
-                              ))}
-                          </div>
+                                  components={{
+                                    Option: CustomOption,
+                                    DropdownIndicator: () => (
+                                      <div className="pointer-events-none px-2">
+                                        <SelectChevronDown />
+                                      </div>
+                                    ),
+                                    IndicatorSeparator: () => null,
+                                  }}
+                                  isClearable={true}
+                                  placeholder="Select employee..."
+                                  isSearchable={true}
+                                  styles={{
+                                    control: (provided) => ({
+                                      ...provided,
+                                      minHeight: '38px',
+                                      border: '1px solid #d1d5db',
+                                      borderRadius: '6px',
+                                      backgroundColor: '#f3f4f6',
+                                    }),
+                                    menu: (provided) => ({
+                                      ...provided,
+                                      zIndex: 9999,
+                                    }),
+                                    option: (provided, state) => ({
+                                      ...provided,
+                                      backgroundColor: state.isSelected 
+                                        ? '#3b82f6' 
+                                        : state.isFocused 
+                                          ? '#dbeafe' 
+                                          : 'white',
+                                      color: state.isSelected ? 'white' : '#374151',
+                                    }),
+                                    singleValue: (provided) => ({
+                                      ...provided,
+                                      color: '#374151',
+                                    }),
+                                  }}
+                                />
+                                {error && (
+                                  <p className="text-red-500 text-sm mt-1 ml-1">
+                                    Employee selection is required
+                                  </p>
+                                )}
+                              </>
+                            )}
+                          />
                         </div>
                       </div>
                       <div>

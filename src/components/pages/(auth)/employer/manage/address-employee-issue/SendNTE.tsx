@@ -2,6 +2,8 @@ import React, { Dispatch, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { Tooltip } from 'react-tooltip';
+
 import classNames from '@/helpers/classNames';
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 
@@ -113,6 +115,11 @@ const SendNTE = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={true}
+          data-tooltip-id='nte-received-tooltip'
+          data-tooltip-html={isNTEReceived ?
+            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully' :
+            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully'}
+          data-tooltip-place='bottom'
           onClick={() => setReleased(id, 'nte')}
         >
           {isLoading && (
@@ -144,6 +151,9 @@ const SendNTE = ({
           <div className='relative'>
             <div
               className='cursor-pointer'
+              data-tooltip-id='nte-clip-tooltip'
+              data-tooltip-content='Click to view NTE attachment'
+              data-tooltip-place='bottom'
               onClick={() =>
                 setNTEAttachmentViewModalOpen({
                   isOpen: true,
@@ -160,9 +170,12 @@ const SendNTE = ({
               </div>
             )}
           </div>
-          <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
+          <p className='text-xs ml-1'>{formattedReceivedDate}</p>
         </div>
       )}
+
+      <Tooltip id='nte-received-tooltip' />
+      <Tooltip id='nte-clip-tooltip' />
     </div>
   );
 };

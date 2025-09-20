@@ -190,7 +190,7 @@ export default function ProgramAndPolicy({
 
   return (
     <form>
-      <div className="px-4 pt-4 pb-6">
+      <div className="px-4 pt-4 pb-6 mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-4">
           <div className="sm:col-span-4 mt-4 mb-6 md:mb-0">
             <label

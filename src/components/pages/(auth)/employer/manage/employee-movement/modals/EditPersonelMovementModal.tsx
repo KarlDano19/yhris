@@ -29,8 +29,6 @@ function PrintPersonelMovementModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
@@ -215,10 +213,6 @@ function PrintPersonelMovementModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingEditPersonelMovement}
                     isEdit={true}
-                    employeeSearch={employeeSearch}
-                    setEmployeeSearch={setEmployeeSearch}
-                    employeeSelected={employeeSelected}
-                    setEmployeeSelected={setEmployeeSelected}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}

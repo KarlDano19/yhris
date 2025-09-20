@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+
+import FilterIcon from '@/svg/FilterIcon';
 
 type FilterProps = {
   onFilterChange: (filters: FilterOptions) => void;
@@ -61,10 +62,9 @@ export default function Filter({ onFilterChange }: FilterProps) {
     <div className="relative">
       <button
         onClick={toggleFilter}
-        className="rounded-lg bg-white border border-gray-300 hover:bg-gray-100 text-indigo-dye py-2 px-6 font-medium text-[15px] flex items-center gap-2"
+        className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
       >
-        <AdjustmentsHorizontalIcon className="h-5 w-5" />
-        Filter
+        <FilterIcon />
       </button>
 
       {isOpen && (

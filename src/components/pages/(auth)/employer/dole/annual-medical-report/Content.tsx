@@ -396,7 +396,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24">
         <div className="flex p-4">
           <Link
             href="/dole"
@@ -411,7 +411,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             Annual Medical Report
           </h2>
           <div className={classNames("mt-6 flex flex-col lg:flex-row items-left gap-4", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className="flex-none flex flex-col lg:flex-row items-left gap-2">
+            <div className="flex-none flex flex-col lg:flex-row items-left md:items-center gap-2">
               <div className="relative">
                 <CustomDatePicker
                   id="from-datepicker"
@@ -523,7 +523,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className={classNames("mt-8 flow-root", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div
+              className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className="min-w-full py-2 sm:px-6 lg:px-8">
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead>

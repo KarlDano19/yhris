@@ -169,7 +169,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -178,14 +178,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Audit Logs</h2>
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-center gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
+          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
@@ -205,7 +205,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
@@ -241,7 +241,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   placeholder='Search ...'
                 />
                 <button
-                  className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
                   onClick={handleSearch}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
@@ -294,45 +294,49 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
-              <div className='py-2 sm:px-6 lg:px-8'>
-                <div className='overflow-x-auto'>
-                  <table className='divide-y divide-gray-300 text-center min-w-full'>
-                    <thead>
-                      <tr>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Unique No.
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Date and Time
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Action
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          User
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Module
-                        </th>
-                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-                  </table>
-                </div>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                  <thead>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Unique No.
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date and Time
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        User
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Module
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+                </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

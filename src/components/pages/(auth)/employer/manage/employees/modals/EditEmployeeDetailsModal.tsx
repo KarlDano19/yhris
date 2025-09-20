@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
 import useEditEmployeeDetails from '../hooks/useEditEmployeeDetails';
 
