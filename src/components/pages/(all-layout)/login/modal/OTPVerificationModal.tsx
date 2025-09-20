@@ -36,6 +36,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   const [isResending, setIsResending] = useState<boolean>(false);
   const [rememberDevice, setRememberDevice] = useState<boolean>(false); // NEW: Add remember device state
   const [currentRemainingAttempts, setCurrentRemainingAttempts] = useState<number>(remainingAttempts); // Track attempts internally
+  const [resendCooldown, setResendCooldown] = useState<number>(0); // NEW: Resend cooldown timer
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -59,6 +60,23 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
     return () => clearInterval(timer);
   }, [isOpen]);
 
+  // Resend cooldown timer
+  useEffect(() => {
+    if (!isOpen || resendCooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, resendCooldown]);
+
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +84,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       setTimeRemaining(timeRemainingSeconds); 
       setIsResending(false);
       setCurrentRemainingAttempts(remainingAttempts); // Reset attempts counter
+      setResendCooldown(0); // Reset resend cooldown
     }
   }, [isOpen, timeRemainingSeconds, remainingAttempts]);
 
@@ -162,7 +181,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
   };
 
   const handleResendOTP = () => {
-    if (isResending || (timeRemaining > 0 && currentRemainingAttempts > 0)) return;
+    if (isResending || resendCooldown > 0) return;
 
     const payload = {
       session_id: sessionId,
@@ -172,6 +191,9 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       onSuccess: (data: any) => {
         setIsResending(false);
         setTimeRemaining(data.time_remaining_seconds || 300); // 5 minutes default
+        
+        // Set 30-second cooldown for next resend
+        setResendCooldown(30);
         
         // Reset attempts counter when new OTP is sent
         if (data.remaining_attempts) {
@@ -190,6 +212,16 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
       },
       onError: (err: any) => {
         setIsResending(false);
+        
+        // Extract cooldown time from error message if it's a rate limit error
+        if (err.includes('Please wait') && err.includes('second(s)')) {
+          const secondsMatch = err.match(/(\d+) second\(s\)/);
+          if (secondsMatch) {
+            const seconds = parseInt(secondsMatch[1], 10);
+            setResendCooldown(seconds);
+          }
+        }
+        
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 4000,
         });
@@ -352,7 +384,7 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                 <button
                   type='button'
                   onClick={handleResendOTP}
-                  disabled={isResendLoading || isResending || (!isExpired && timeRemaining > 30 && currentRemainingAttempts > 0)}
+                  disabled={isResendLoading || isResending || resendCooldown > 0}
                   className='w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed sm:text-sm'
                 >
                   {isResendLoading || isResending ? (
@@ -379,10 +411,10 @@ const OTPVerificationModal: React.FC<OTPVerificationModalProps> = ({
                       </svg>
                       Sending...
                     </>
-                  ) : isExpired ? (
-                    'Resend Code'
+                  ) : resendCooldown > 0 ? (
+                    `Resend Code (${resendCooldown}s)`
                   ) : (
-                    `Resend Code (${formatTime(timeRemaining)})`
+                    'Resend Code'
                   )}
                 </button>
 

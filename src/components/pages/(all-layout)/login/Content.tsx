@@ -36,13 +36,67 @@ function Content() {
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otpData, setOtpData] = useState<any>(null);
+  
+  // NEW: Rate limiting timer states
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0);
 
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
 
+  // NEW: Function to extract time from error message
+  const extractTimeFromError = (errorMessage: string) => {
+    // Extract minutes and seconds from messages like:
+    // "Too many OTP requests. Please try again in 45 minute(s) and 23 second(s)."
+    // "Please wait 15 second(s) before requesting another code."
+    const minutesMatch = errorMessage.match(/(\d+) minute\(s\)/);
+    const secondsMatch = errorMessage.match(/(\d+) second\(s\)/);
+    
+    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+    const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 0;
+    
+    return (minutes * 60) + seconds;
+  };
+
+  // NEW: Format countdown display
+  const formatCountdown = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (minutes > 0) {
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+    return `${remainingSeconds}s`;
+  };
+
+  // NEW: Countdown timer effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (isRateLimited && rateLimitCountdown > 0) {
+      timer = setInterval(() => {
+        setRateLimitCountdown((prev) => {
+          if (prev <= 1) {
+            setIsRateLimited(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isRateLimited, rateLimitCountdown]);
+
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
       onSuccess: (response: any) => {
+        // Reset rate limit state on success
+        setIsRateLimited(false);
+        setRateLimitCountdown(0);
+        
         if (response.otp_required) {
           // Show OTP modal
           setOtpData({
@@ -62,6 +116,15 @@ function Content() {
         }
       },
       onError: (err: any) => {
+        // Check if this is a rate limit error
+        if (err.includes('Too many OTP requests') || err.includes('Please wait')) {
+          const timeRemaining = extractTimeFromError(err);
+          if (timeRemaining > 0) {
+            setIsRateLimited(true);
+            setRateLimitCountdown(timeRemaining);
+          }
+        }
+        
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
@@ -241,7 +304,7 @@ function Content() {
                       id='login-button'
                       className='w-full uppercase text-white bg-blue-600 enabled:hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mb-5 disabled:opacity-50'
                       tabIndex={5}
-                      disabled={isLoading}
+                      disabled={isLoading || isRateLimited}
                     >
                       {isLoading && (
                         <div role='status'>
@@ -264,8 +327,26 @@ function Content() {
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoading && 'Sign in'}
+                      {isRateLimited ? (
+                        `Please wait ${formatCountdown(rateLimitCountdown)}`
+                      ) : !isLoading ? (
+                        'Sign in'
+                      ) : null}
                     </button>
+                    
+                    {/* Rate limit visual indicator */}
+                    {isRateLimited && (
+                      <div className="text-center text-sm text-orange-600 mb-3">
+                        <div className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Too many requests. Please wait {formatCountdown(rateLimitCountdown)}
+                        </div>
+                      </div>
+                    )}
+                    
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
                       Don&apos;t have an account yet?{' '}
                       <Link id='sign-up-link' href='/register' className='font-semibold text-blue-600 hover:underline'>
