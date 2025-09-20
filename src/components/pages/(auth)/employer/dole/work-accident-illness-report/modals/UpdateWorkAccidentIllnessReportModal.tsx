@@ -49,7 +49,6 @@ export default function UpdateWorkAccidentIllnessReportModal({
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
-  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
 
   useEffect(() => {
     if (employeeData) {
@@ -110,7 +109,6 @@ export default function UpdateWorkAccidentIllnessReportModal({
     reset();
     setEmployeeSearch('');
     setEmployeeSelected(false);
-    setSelectedEmployeeIndex(-1);
     removeWorkAccidentIllnessReport();
     setIsOpen(null);
   }
@@ -187,8 +185,6 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
-                    selectedEmployeeIndex={selectedEmployeeIndex}
-                    setSelectedEmployeeIndex={setSelectedEmployeeIndex}
                   />
                 )}
                 {selectedTab === 2 && (
