@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 
 import { Controller } from "react-hook-form";
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
@@ -11,6 +11,26 @@ import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+
+// Custom Option component to display department and position in dropdown
+const CustomOption = (props: any) => {
+  const { data } = props;
+  return (
+    <components.Option {...props}>
+      <div>
+        <div className="font-medium">{data.label}</div>
+        {(data.department || data.position) && (
+          <div className="text-sm text-gray-500">
+            {data.department && data.position
+              ? `${data.department} | ${data.position}`
+              : data.department || data.position
+            }
+          </div>
+        )}
+      </div>
+    </components.Option>
+  );
+};
 
 export default function MeetingInfo({
   control,
@@ -43,6 +63,8 @@ export default function MeetingInfo({
       const formattedEmployees = employeeData.map((item: any) => ({
         value: item.id,
         label: `${item.firstname} ${item.lastname}`,
+        department: item.department,
+        position: item.position,
       }));
       setEmployeeItems(formattedEmployees);
     }
@@ -227,6 +249,7 @@ export default function MeetingInfo({
                     onChange(val ? val.map((item: any) => item.value) : []);
                   }}
                   components={{
+                    Option: CustomOption,
                     DropdownIndicator: () => (
                       <div className="pointer-events-none px-2">
                         <SelectChevronDown />
@@ -261,6 +284,7 @@ export default function MeetingInfo({
                     onChange(val ? val.map((item: any) => item.value) : []);
                   }}
                   components={{
+                    Option: CustomOption,
                     DropdownIndicator: () => (
                       <div className="pointer-events-none px-2">
                         <SelectChevronDown />

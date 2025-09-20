@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
@@ -34,6 +34,20 @@ const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
   printOptions
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSelectedItem = (index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
 
   return (
     <>
@@ -93,6 +107,18 @@ const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  if (!isDropdownOpen) {
+                    setIsDropdownOpen(true);
+                    setSelectedIndex(0);
+                  }
+                } else if (e.key === 'Escape') {
+                  setIsDropdownOpen(false);
+                  setSelectedIndex(-1);
+                }
+              }}
               className="w-full flex items-center justify-between p-3 border border-gray-300 rounded-md bg-white text-left text-sm focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:border-savoy-blue"
             >
               <span className="text-gray-900">
@@ -110,12 +136,45 @@ const EmployeeIssuesSelection: React.FC<EmployeeIssuesSelectionProps> = ({
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {employeeIssueRecords.map((record) => (
+              <div
+                ref={dropdownRef}
+                className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const newIndex = selectedIndex < employeeIssueRecords.length - 1 ? selectedIndex + 1 : selectedIndex;
+                    setSelectedIndex(newIndex);
+                    scrollToSelectedItem(newIndex);
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const newIndex = selectedIndex > 0 ? selectedIndex - 1 : -1;
+                    setSelectedIndex(newIndex);
+                    if (newIndex >= 0) {
+                      scrollToSelectedItem(newIndex);
+                    }
+                  } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && employeeIssueRecords[selectedIndex]) {
+                      handleRecordSelection(employeeIssueRecords[selectedIndex].id || `issue_${employeeIssueRecords[selectedIndex].name}`);
+                      // Keep the selection highlighted for continued navigation
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsDropdownOpen(false);
+                    setSelectedIndex(-1);
+                  }
+                }}
+                tabIndex={-1}
+              >
+                {employeeIssueRecords.map((record, index) => (
                   <div
                     key={record.id || `issue_${record.name}`}
-                    className="flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    className={`flex items-center p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                      index === selectedIndex
+                        ? 'bg-blue-100'
+                        : 'hover:bg-gray-50'
+                    }`}
                     onClick={() => handleRecordSelection(record.id || `issue_${record.name}`)}
+                    onMouseEnter={() => setSelectedIndex(index)}
                   >
                     <input
                       type="checkbox"
