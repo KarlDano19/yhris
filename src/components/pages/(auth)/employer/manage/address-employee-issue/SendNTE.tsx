@@ -147,29 +147,21 @@ const SendNTE = ({
         </button>
       </div>
       {isNTEReceived && (
-        <div>
-          <div className='flex gap-1 items-center justify-center'>
-            <div className='relative'>
-              <div
-                className='cursor-pointer'
-                data-tooltip-id='nte-clip-tooltip'
-                data-tooltip-content='Click to view NTE attachment'
-                data-tooltip-place='bottom'
-                onClick={() =>
-                  setNTEAttachmentViewModalOpen({
-                    isOpen: true,
-                    id,
-                  })
-                }
-              >
-                <ClipIcon hasFile={true} />
-              </div>
-              {/* Notification badge for response */}
-              {employeeIssueDetails && employeeIssueDetails.is_responded && employeeIssueDetails.response && (
-                <div className="absolute -top-2 -right-2.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  !
-                </div>
-              )}
+        <div className='flex gap-1 items-center justify-center'>
+          <div className='relative'>
+            <div
+              className='cursor-pointer'
+              data-tooltip-id='nte-clip-tooltip'
+              data-tooltip-content='Click to view NTE attachment'
+              data-tooltip-place='bottom'
+              onClick={() =>
+                setNTEAttachmentViewModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            >
+              <ClipIcon hasFile={true} />
             </div>
             {/* Notification badge for response */}
             {employeeIssueDetails && employeeIssueDetails.is_responded && employeeIssueDetails.response && (
@@ -178,7 +170,7 @@ const SendNTE = ({
               </div>
             )}
           </div>
-          <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
+          <p className='text-xs ml-1'>{formattedReceivedDate}</p>
         </div>
       )}
 

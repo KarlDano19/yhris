@@ -115,12 +115,12 @@ const SendDecision = ({
         </button>
       </div>
       {isDecisionReceived && (
-        <div>
-          <div className='flex gap-1 items-center justify-center'>
+        <div className='flex gap-1 items-center justify-center'>
+          <div className='relative'>
             <div
               className='cursor-pointer'
               data-tooltip-id='decision-clip-tooltip'
-              data-tooltip-content='Click to view decision'
+              data-tooltip-content='Click to view decision attachment'
               data-tooltip-place='bottom'
               onClick={() =>
                 setIsDecisionAttachmentViewModalOpen({
@@ -138,7 +138,7 @@ const SendDecision = ({
               </div>
             )}
           </div>
-          <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
+          <p className='text-xs ml-1'>{formattedReceivedDate}</p>
         </div>
       )}
       
