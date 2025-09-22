@@ -67,9 +67,9 @@ export default function EditEmployeeDetailsModal({
         setValue('department', '');
       }
 
-      // Find position ID from position name - FIX: Use position_name instead of position
-      if (employeeDetailsData.position_name && positionItems) {
-        const positionItem = positionItems.find((item: any) => item.name === employeeDetailsData.position_name);
+      // Find position ID from position name - FIX: Use position instead of position_name
+      if (employeeDetailsData.position && positionItems) {
+        const positionItem = positionItems.find((item: any) => item.name === employeeDetailsData.position);
         setValue('position', positionItem ? positionItem.id : '');
       } else {
         setValue('position', '');
