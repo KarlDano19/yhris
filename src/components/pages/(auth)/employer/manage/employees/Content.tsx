@@ -28,6 +28,7 @@ import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
@@ -54,6 +55,7 @@ const columnDefinitions = [
   { key: 'location', label: 'Location' },
   { key: 'position', label: 'Position' },
   { key: 'department', label: 'Department' },
+  { key: 'employment_status', label: 'Employment Status' },
   { key: 'email', label: 'Email' },
   { key: 'mobile', label: 'Contact No.' },
   { key: 'gender', label: 'Gender' },
@@ -90,6 +92,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     location: true,
     position: true,
     department: true,
+    employment_status: true,
     email: true,
     mobile: false,
     gender: false,
@@ -114,6 +117,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: locationItems } = useGetLocationItems();
   const { data: departmentItems } = useGetDepartmentItems();
   const { data: positionItems } = useGetPositionItems();
+  const { data: employeeStatusItems } = useGetEmployeeStatusItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
 
@@ -257,6 +261,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       location: true,
       position: true,
       department: true,
+      employment_status: true,
       email: true,
       mobile: false,
       gender: false,
@@ -276,6 +281,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       location: true,
       position: true,
       department: true,
+      employment_status: true,
       email: true,
       mobile: true,
       gender: true,
@@ -325,6 +331,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           {visibleColumns.department && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+          )}
+          {visibleColumns.employment_status && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employment_status || 'N/A'}</td>
           )}
           {visibleColumns.email && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -732,6 +741,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             Department
                           </th>
                         )}
+                        {visibleColumns.employment_status && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Employment Status
+                          </th>
+                        )}
                         {visibleColumns.email && (
                           <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Email
@@ -815,6 +829,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           locationItems={locationItems}
           departmentItems={departmentItems}
           positionItems={positionItems}
+          employeeStatusItems={employeeStatusItems}
         />
       )}
       <AddEmployeeModal
@@ -824,6 +839,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         locationItems={locationItems}
         departmentItems={departmentItems}
         positionItems={positionItems}
+        employeeStatusItems={employeeStatusItems}
       />
       <Tooltip id='employee-search-tooltip' />
 

@@ -18,6 +18,7 @@ export default function AddEmployeeModal({
   locationItems,
   departmentItems,
   positionItems,
+  employeeStatusItems,
 }: {
   refetch: any;
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function AddEmployeeModal({
   locationItems: any[];
   departmentItems: any[];
   positionItems: any[];
+  employeeStatusItems: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
@@ -297,6 +299,28 @@ export default function AddEmployeeModal({
                               >
                                 <option value="">Select Department</option>
                                 {departmentItems && departmentItems.map((item: any) => (
+                                  <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                              </select>
+                              <div className='absolute right-3 top-[14px]'>
+                                <SelectChevronDown />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4'>
+                          <div>
+                            <label htmlFor='employment_status' className='text-sm font-medium leading-6 text-gray-900'>
+                              Employment Status<span className='text-red-500'>*</span>
+                            </label>
+                            <div className='relative mt-2'>
+                              <select
+                                id='employment_status'
+                                {...register('employment_status', { required: true })}
+                                className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
+                              >
+                                <option value="">Select Employment Status</option>
+                                {employeeStatusItems && employeeStatusItems.map((item: any) => (
                                   <option key={item.id} value={item.id}>{item.name}</option>
                                 ))}
                               </select>
