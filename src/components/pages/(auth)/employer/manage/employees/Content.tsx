@@ -544,7 +544,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               <span className='font-medium'>{item.firstname} {item.lastname}</span>
                               {(item.position || item.department) && (
                                 <span className='text-xs text-gray-500'>
-                                  {item.position && item.department 
+                                  • {item.position && item.department 
                                     ? `${item.position} | ${item.department}`
                                     : item.position || item.department
                                   }

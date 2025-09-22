@@ -21,7 +21,7 @@ const CustomOption = (props: any) => {
         <div className="font-medium">{data.label}</div>
         {(data.department || data.position) && (
           <div className="text-sm text-gray-500">
-            {data.department && data.position
+            • {data.department && data.position
               ? `${data.department} | ${data.position}`
               : data.department || data.position
             }
