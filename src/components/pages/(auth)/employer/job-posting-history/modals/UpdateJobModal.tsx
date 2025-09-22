@@ -83,7 +83,7 @@ export default function UpdateJobModal({
           : [],
         country: jobPostDataDetails.country,
         language: jobPostDataDetails.language,
-        position: jobPostDataDetails.position, 
+        position: jobPostDataDetails.position_id || jobPostDataDetails.position, 
       });
       secondForm.reset({
         jobType: jobPostDataDetails.job_type ? jobPostDataDetails.job_type.split(',') : [],
@@ -154,7 +154,13 @@ export default function UpdateJobModal({
   }, [jobPostDataDetails]);
 
   const firstFormSubmit = (data: any) => {
-    setCombinedFormData((prev: any) => ({ ...prev, ...data }));
+    // Ensure we're using position_id for the API call
+    const formData = { ...data };
+    if (jobPostDataDetails?.position_id && !formData.position_id) {
+      formData.position_id = jobPostDataDetails.position_id;
+      formData.position = jobPostDataDetails.position_id; // For API compatibility
+    }
+    setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
     setPageNumber(2);
   };
 
