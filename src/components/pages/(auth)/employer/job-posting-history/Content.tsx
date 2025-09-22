@@ -27,12 +27,13 @@ import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
 import useUpdateJobBenefitStatus from './hooks/useUpdateJobBenefitStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import AssignUsersModal from './modals/AssignUsersModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
 import { useQueryClient } from '@tanstack/react-query';
@@ -67,6 +68,7 @@ const Content = () => {
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
     to: '',
@@ -456,20 +458,43 @@ const Content = () => {
           >
             {jobPost.workSetup}
           </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.assignments_count || 0} users
+          </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
                 <button 
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
                   disabled={!cachedProfile?.state?.data?.edit_job}
+                  data-tooltip-id="edit-tooltip"
+                  data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
                 </button>
                 <button 
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
                   disabled={!cachedProfile?.state?.data?.edit_job}
+                  data-tooltip-id="delete-tooltip"
+                  data-tooltip-content="Delete Job"
                 >
                   <DeleteIcon />
+                </button>
+                <button 
+                  onClick={() => setAssignUsersModal({ 
+                    id: jobPost.id, 
+                    open: true 
+                  })}
+                  disabled={!cachedProfile?.state?.data?.manage_job_access_rules}
+                  data-tooltip-id="assign-tooltip"
+                  data-tooltip-content="Assign to Users"
+                  className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"
+                >
+                  <UserGroupIcon className="h-5 w-5" />
                 </button>
                 <div className="relative more-menu-container pt-1">
                   <button onClick={() => handleMoreMenuClick(jobPost.id)}>
@@ -478,6 +503,20 @@ const Content = () => {
                   {moreMenuOpen[jobPost.id] && (
                     <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
                       <ul className='py-1 text-left'>
+                        <li
+                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
+                          onClick={() => {
+                            setAssignUsersModal({ 
+                              id: jobPost.id, 
+                              open: true 
+                            });
+                            setMoreMenuOpen(prev => ({ ...prev, [jobPost.id]: false }));
+                          }}
+                          style={{ display: cachedProfile?.state?.data?.manage_job_access_rules ? 'block' : 'none' }}
+                        >
+                          <UserGroupIcon className="inline h-4 w-4 mr-2" />
+                          Assign to Users
+                        </li>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                           onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
@@ -745,6 +784,9 @@ const Content = () => {
                         Work Setup
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Assigned Users
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
                       </th>
                     </tr>
@@ -786,7 +828,19 @@ const Content = () => {
       {isDeleteModalOpen?.open && (
         <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
+      {assignUsersModal && assignUsersModal.id && (
+        <AssignUsersModal
+          isOpen={assignUsersModal}
+          setIsOpen={setAssignUsersModal}
+          onAssignmentComplete={() => {
+            refetch(); // Refresh the job postings list
+          }}
+        />
+      )}
       <Tooltip id='search-tooltip' />
+      <Tooltip id="edit-tooltip" />
+      <Tooltip id="delete-tooltip" />
+      <Tooltip id="assign-tooltip" />
     </div>
   );
 };
