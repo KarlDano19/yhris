@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 import EmailProfileModal from '../modal/EmailProfile';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type T_ModalData = {
   id: number;
@@ -69,17 +70,39 @@ function ApplicantProfile({ applicant }: { applicant: any }) {
   // Get the most recent work experience
   const mostRecentExperience = getMostRecentWorkExperience(applicant.work_experience);
 
+  const ApplicantAvatar = ({ applicant, size = 200 }: { applicant: any; size?: number }) => {
+    const [imageError, setImageError] = useState(false);
+
+    if (!applicant.photo || imageError) {
+      return (
+        <PlaceholderAvatar
+          width={size}
+          height={size}
+          firstName={applicant.firstname}
+          lastName={applicant.lastname}
+          className='flex-shrink-0'
+        />
+      );
+    }
+
+    return (
+      <Image
+        src={applicant.photo || '/assets/no-photo.png'}
+        alt={applicant.firstname || 'Applicant'}
+        width={size}
+        height={size}
+        className='rounded-xl object-cover flex-shrink-0'
+        onError={() => setImageError(true)}
+      />
+    );
+  };
+
   return (
     <>
       <div className='flex flex-col h-full gap-4 border-r border-gray-200 pr-4'>
         <div className='flex-1'>
-          <div className='flex justify-between'>
-            <Image
-              src={applicant.photo || '/assets/no-photo.png'}
-              alt={applicant.firstname || 'Applicant'}
-              width={150}
-              height={150}
-            />
+          <div className='flex gap-6'>
+            <ApplicantAvatar applicant={applicant} size={150} />
             <div className='flex flex-col'>
               <h4 className='font-semibold text-lg mb-1'>
                 {applicant.firstname} {applicant.lastname}
