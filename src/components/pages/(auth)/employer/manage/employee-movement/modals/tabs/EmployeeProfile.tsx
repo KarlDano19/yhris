@@ -8,6 +8,7 @@ import Select, { components } from 'react-select';
 
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetEmployeeDetails from '@/components/pages/(auth)/employer/manage/employees/hooks/useGetEmployeeDetails';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
@@ -72,6 +73,9 @@ function EmployeeProfile({
   const { data: positionData } = useGetPositionItems();
   const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
 
+  // Fetch employee details when employee is selected
+  const { data: selectedEmployeeDetails, isLoading: isLoadingEmployeeDetails } = useGetEmployeeDetails(watchedEmployeeId);
+
   useEffect(() => {
     if (employeeData) {
       setEmployeeItems(employeeData);
@@ -99,6 +103,21 @@ function EmployeeProfile({
     });
     return () => subscription.unsubscribe();
   }, [watch]);
+
+  // Auto-populate current position when employee is selected
+  useEffect(() => {
+    if (selectedEmployeeDetails && selectedEmployeeDetails.position && !isEdit && positionItems.length > 0) {
+      // Find the position ID that matches the employee's current position
+      const matchingPosition = positionItems.find((pos: any) => 
+        pos.name === selectedEmployeeDetails.position
+      );
+      
+      if (matchingPosition) {
+        setCurrentPosition(matchingPosition.id);
+        setValue('current_position', matchingPosition.id);
+      }
+    }
+  }, [selectedEmployeeDetails, positionItems, setCurrentPosition, setValue, isEdit]);
 
 
   useEffect(() => {
@@ -256,8 +275,8 @@ function EmployeeProfile({
                   setCurrentPosition(e.target.value);
                   setValue('current_position', e.target.value);
                 }}
-                disabled={isEdit}
-                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                disabled={true} // Disabled since it's auto-populated
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
               >
                 <option value=''>Select...</option>
                 {positionItems.map((item: any) => {
