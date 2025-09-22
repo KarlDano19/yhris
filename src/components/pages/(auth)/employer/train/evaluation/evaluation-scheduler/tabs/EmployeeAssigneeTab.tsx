@@ -17,16 +17,21 @@ interface Field {
   value: any;
 }
 
-// Custom Option component to display department and position in dropdown
+// Custom Option component to display department, position, and email in dropdown
 const CustomOption = (props: any) => {
   const { data } = props;
   return (
     <components.Option {...props}>
       <div>
         <div className="font-medium">{data.label}</div>
+        {data.email && (
+          <div className="text-sm text-gray-500">
+            • {data.email}
+          </div>
+        )}
         {(data.department || data.position) && (
           <div className="text-sm text-gray-500">
-            {data.department && data.position
+             • {data.department && data.position
               ? `${data.department} | ${data.position}`
               : data.department || data.position
             }
@@ -75,6 +80,7 @@ function EmployeeAssigneeTab({
         displayLabel: item.position ? `${item.firstname} ${item.lastname} | ${item.position}` : `${item.firstname} ${item.lastname}`,
         department: item.department,
         position: item.position,
+        email: item.email,
       }));
       setEmployeeItems(employeeItems);
     }
