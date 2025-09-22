@@ -739,7 +739,7 @@ const Content = () => {
                             </div>
                             <div className='flex flex-col h-full'>
                               <div className='flex-1'>
-                                <div className='flex justify-between'>
+                                <div className='flex gap-6'>
                                   <ApplicantAvatar applicant={applicant} size={120} />
                                   <div className='flex flex-col'>
                                     <h4 className='font-semibold text-lg mb-1'>
@@ -898,7 +898,7 @@ const Content = () => {
 
                               <div className='flex flex-col h-full'>
                                 <div className='flex-1'>
-                                  <div className='flex justify-between'>
+                                  <div className='flex gap-6'>
                                     <ApplicantAvatar applicant={applicant} size={120} />
                                     <div className='flex flex-col'>
                                       <h4 className='font-semibold text-lg mb-1'>
