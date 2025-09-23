@@ -368,7 +368,12 @@ export default function LocationDepartmentModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[600px] max-h-[90vh] overflow-y-auto'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Assign Employment Status, Location & Department</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>
+                      Assign - {(() => {
+                        const selectedItem = orientItems.find((item: any) => item.id === selectedOrientId);
+                        return selectedItem ? `${selectedItem.firstname} ${selectedItem.lastname}` : 'Unknown Person';
+                      })()}
+                    </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   <form onSubmit={onSubmitWithCleanup}>      
