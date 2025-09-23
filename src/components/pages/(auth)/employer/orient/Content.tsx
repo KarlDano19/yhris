@@ -523,7 +523,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Location & Department
+                        Location, Department & <br /> Employment Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Introduce to the team

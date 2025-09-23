@@ -7,8 +7,7 @@ import Content from "@/components/pages/(auth)/employer/orient/Content";
 import { SessionData, sessionOptions } from "@/lib/session";
 
 export const metadata = {
-  title: "Orient",
-  description: "Orient",
+  title: "Onboarding - Yahshua HRIS",
 };
 
 async function getSession() {

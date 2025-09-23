@@ -59,7 +59,7 @@ export default function RiskManagement({
           </label>
         </div>
         <div
-          className="mt-4 w-full overflow-x-auto md:overflow-visible"
+          className="mt-4 w-full overflow-x-auto"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#2d3e58 #f1f1f1'

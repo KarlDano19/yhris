@@ -6,6 +6,7 @@ import { CloudArrowUpIcon, DocumentIcon, TrashIcon, XMarkIcon } from '@heroicons
 
 import ModalLayout from './ModalLayout';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useBatchUploadResumes from '../hooks/useBatchUploadResumes';
 
 interface BatchUploadProps {
@@ -290,7 +291,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
                   
                   <div className="flex items-center space-x-2">
                     {file.status === 'uploading' && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <LoadingSpinner size="xs" color="yellow" />
                     )}
                     {file.status === 'success' && (
                       <div className="h-4 w-4 bg-green-600 rounded-full flex items-center justify-center">
@@ -427,7 +428,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
               >
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                    <LoadingSpinner size="xs" color="yellow" className="mr-2 inline-block" />
                     Processing...
                   </>
                 ) : (
@@ -452,7 +453,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
         {isProcessing && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <LoadingSpinner size="sm" color="yellow" className="mr-3" />
               <div>
                 <p className="text-sm font-medium text-blue-800">
                   🤖 Processing resumes with dual Affinda AI calls...
