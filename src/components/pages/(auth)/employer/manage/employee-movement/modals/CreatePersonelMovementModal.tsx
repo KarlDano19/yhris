@@ -28,11 +28,17 @@ function CreatePersonelMovementModal({
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
 
+  // Local state for employment status
+  const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
+  const [newEmploymentStatus, setNewEmploymentStatus] = useState('');
+
   // Reset form and local state only after successful submit
   const resetForm = () => {
     reset();
     setCurrentPosition('');
     setNewPosition('');
+    setCurrentEmploymentStatus('');
+    setNewEmploymentStatus('');
     setSelectedTab(1);
   };
 
@@ -104,6 +110,10 @@ function CreatePersonelMovementModal({
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}
                     setNewPosition={setNewPosition}
+                    currentEmploymentStatus={currentEmploymentStatus}
+                    setCurrentEmploymentStatus={setCurrentEmploymentStatus}
+                    newEmploymentStatus={newEmploymentStatus}
+                    setNewEmploymentStatus={setNewEmploymentStatus}
                     errors={errors}
                   />
                 )}

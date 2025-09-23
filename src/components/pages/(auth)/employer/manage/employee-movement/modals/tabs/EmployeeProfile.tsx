@@ -8,6 +8,7 @@ import Select, { components } from 'react-select';
 
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useGetEmployeeDetails from '@/components/pages/(auth)/employer/manage/employees/hooks/useGetEmployeeDetails';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -48,6 +49,10 @@ function EmployeeProfile({
   setCurrentPosition,
   newPosition,
   setNewPosition,
+  currentEmploymentStatus,
+  setCurrentEmploymentStatus,
+  newEmploymentStatus,
+  setNewEmploymentStatus,
   errors,
 }: {
   control: any;
@@ -63,14 +68,20 @@ function EmployeeProfile({
   setCurrentPosition: (v: string) => void;
   newPosition: string;
   setNewPosition: (v: string) => void;
+  currentEmploymentStatus: string;
+  setCurrentEmploymentStatus: (v: string) => void;
+  newEmploymentStatus: string;
+  setNewEmploymentStatus: (v: string) => void;
   errors: any;
 }) {
   const queryClient = useQueryClient();
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
+  const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
   const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
   const { data: employeeData } = useGetEmployeeItems();
   const { data: positionData } = useGetPositionItems();
+  const { data: employeeStatusData } = useGetEmployeeStatusItems();
   const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
 
   // Fetch employee details when employee is selected
@@ -97,6 +108,12 @@ function EmployeeProfile({
   }, [positionData]);
 
   useEffect(() => {
+    if (employeeStatusData) {
+      setEmployeeStatusItems(employeeStatusData);
+    }
+  }, [employeeStatusData]);
+
+  useEffect(() => {
     const subscription = watch((value: any) => {
       const id = value.employee;
       setWatchedEmployeeId(id ? String(id) : '');
@@ -104,9 +121,9 @@ function EmployeeProfile({
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  // Auto-populate current position when employee is selected
+  // Auto-populate current position and employment status when employee is selected
   useEffect(() => {
-    if (selectedEmployeeDetails && selectedEmployeeDetails.position && !isEdit && positionItems.length > 0) {
+    if (selectedEmployeeDetails && !isEdit && positionItems.length > 0 && employeeStatusItems.length > 0) {
       // Find the position ID that matches the employee's current position
       const matchingPosition = positionItems.find((pos: any) => 
         pos.name === selectedEmployeeDetails.position
@@ -116,15 +133,26 @@ function EmployeeProfile({
         setCurrentPosition(matchingPosition.id);
         setValue('current_position', matchingPosition.id);
       }
-    }
-  }, [selectedEmployeeDetails, positionItems, setCurrentPosition, setValue, isEdit]);
 
+      // Find the employment status ID that matches the employee's current employment status
+      const matchingEmploymentStatus = employeeStatusItems.find((status: any) => 
+        status.name === selectedEmployeeDetails.employment_status
+      );
+      
+      if (matchingEmploymentStatus) {
+        setCurrentEmploymentStatus(matchingEmploymentStatus.id);
+        setValue('current_employment_status', matchingEmploymentStatus.id);
+      }
+    }
+  }, [selectedEmployeeDetails, positionItems, employeeStatusItems, setCurrentPosition, setValue, isEdit]);
 
   useEffect(() => {
     if (isEdit) {
       const subscription = watch((value: any) => {
         const currentPositionValue = value.current_position;
         const newPositionValue = value.new_position;
+        const currentEmploymentStatusValue = value.current_employment_status;
+        const newEmploymentStatusValue = value.new_employment_status;
         
         if (currentPositionValue) {
           setCurrentPosition(String(currentPositionValue));
@@ -132,10 +160,16 @@ function EmployeeProfile({
         if (newPositionValue) {
           setNewPosition(String(newPositionValue));
         }
+        if (currentEmploymentStatusValue) {
+          setCurrentEmploymentStatus(String(currentEmploymentStatusValue));
+        }
+        if (newEmploymentStatusValue) {
+          setNewEmploymentStatus(String(newEmploymentStatusValue));
+        }
       });
       return () => subscription.unsubscribe();
     }
-  }, [isEdit, watch, setCurrentPosition, setNewPosition]);
+  }, [isEdit, watch, setCurrentPosition, setNewPosition, setCurrentEmploymentStatus, setNewEmploymentStatus]);
 
   const onSubmit = (data: any) => {
     if (isEdit) {
@@ -263,7 +297,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='total_non_disabling_injuries' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='current_position' className='block text-sm font-medium leading-6 text-gray-900'>
               Current Position
               <span className='text-red-600'>*</span>
             </label>
@@ -293,7 +327,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='frequency_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='new_position' className='block text-sm font-medium leading-6 text-gray-900'>
               New Position
               <span className='text-red-600'>*</span>
             </label>
@@ -321,6 +355,92 @@ function EmployeeProfile({
                 <SelectChevronDown />
               </div>
             </div>
+          </div>
+          <div>
+            <label htmlFor='current_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              Current Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='current_employment_status'
+                value={currentEmploymentStatus}
+                onChange={e => {
+                  setCurrentEmploymentStatus(e.target.value);
+                  setValue('current_employment_status', e.target.value);
+                }}
+                disabled={true} // Disabled since it's auto-populated
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label htmlFor='new_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              New Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='new_employment_status'
+                value={newEmploymentStatus}
+                onChange={e => {
+                  setNewEmploymentStatus(e.target.value);
+                  setValue('new_employment_status', e.target.value);
+                }}
+                disabled={isEdit}
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label htmlFor='start_date' className='block text-sm font-medium leading-6 text-gray-900'>
+              Start Date
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="start_date"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
+                      disabled={isEdit}
+                    />
+                  )}
+                />
+              </div>
           </div>
           <div>
             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -369,7 +489,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='proposed_rate' className='block text-sm font-medium leading-6 text-gray-900'>
               Proposed Rate
               <span className='text-red-600'>*</span>
             </label>
@@ -416,43 +536,10 @@ function EmployeeProfile({
               </div>
             </div>
           </div>
-          <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
-              Start Date
-              <span className='text-red-600'>*</span>
-            </label>
-            <div className="relative mt-2">
-                <Controller
-                  control={control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <CustomDatePicker
-                      id="start_date"
-                      placeholder={"mm/dd/yyyy"}
-                      className={
-                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                      }
-                      selected={field.value ? new Date(field.value) : null}
-                      pickerOnChange={(date: any) => field.onChange(date)}
-                      inputOnChange={(value: any) => field.onChange(value)}
-                      required={true}
-                      disabled={isEdit}
-                    />
-                  )}
-                />
-              </div>
-          </div>
         </div>
       </div>
       <hr />
-      <div className='flex justify-between py-4 px-4'>
-        <button
-          type='button'
-          className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setSelectedTab(1)}
-        >
-          Back
-        </button>
+      <div className='flex justify-end py-4 px-4'>
         <button
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
