@@ -523,7 +523,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Location, Department & <br /> Employment Status
+                        Location, Department & Employment Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Introduce to the team
@@ -751,7 +751,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         message='You have successfully sent orientation link to the New Hire.'
       />
       <NoticeModal isOpen={newHireOriented} setIsOpen={setNewHireOriented}>
-        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already oriented the New Hire?</h5>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already ORIENTED the NEW HIRE?</h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
           <button
             type='button'
@@ -770,7 +770,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setNewHireOriented(false);
             }}
           >
-            NO, I DON&apos;T.
+            NO, I HAVEN'T.
           </button>
         </div>
       </NoticeModal>
