@@ -1151,7 +1151,7 @@ export default function HealthAndWelfare({
                 Safety and Health Promotion, training and education provided to
                 workers
               </label>
-              <div className="mt-4 w-full overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
+              <div className="mt-4 w-full overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
@@ -1260,7 +1260,7 @@ export default function HealthAndWelfare({
               </div>
             </div>
           </div>
-          <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
+          <div className="mt-4 w-full md:w-2/3 overflow-x-auto " style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
             <table className="min-w-full divide-y divide-gray-300 text-center">
               <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                 <tr>
@@ -1359,7 +1359,7 @@ export default function HealthAndWelfare({
               >
                  Conduct of Tool Box Meetings/ Safety Meetings (if applicable)
               </label>
-              <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
+              <div className="mt-4 w-full md:w-2/3 overflow-x-auto " style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
@@ -1489,7 +1489,7 @@ export default function HealthAndWelfare({
                   Medical Report (AMR)
                 </h1>
               </label>
-              <div className="mt-4 w-full md:w-2/3 overflow-x-auto md:overflow-visible" style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
+              <div className="mt-4 w-full md:w-2/3 overflow-x-auto " style={{ scrollbarWidth: 'thin', scrollbarColor: '#2d3e58 #f1f1f1' }}>
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
                     <tr>
