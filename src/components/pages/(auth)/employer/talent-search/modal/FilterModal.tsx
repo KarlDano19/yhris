@@ -25,7 +25,7 @@ interface FilterModalProps {
 }
 
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Any'];
+const GENDER_OPTIONS = ['Male', 'Female'];
 
 const SALARY_RANGES = [
   'Below ₱15,000',
@@ -34,8 +34,7 @@ const SALARY_RANGES = [
   '₱35,000 - ₱50,000',
   '₱50,000 - ₱75,000',
   '₱75,000 - ₱100,000',
-  'Above ₱100,000',
-  'Any',
+  'Above ₱100,000'
 ];
 
 export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate, currentFilters }: FilterModalProps) {
@@ -167,32 +166,46 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
 
                   <div className='px-4 pb-2'>
                     <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>Gender</label>
-                    <select
-                      {...register('gender')}
-                      className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6'
-                    >
-                      <option value=''>Any Gender</option>
-                      {GENDER_OPTIONS.map((gender) => (
-                        <option key={gender} value={gender}>
-                          {gender}
-                        </option>
-                      ))}
-                    </select>
+                    <div className='relative'>
+                      <select
+                        {...register('gender')}
+                        className='block w-full rounded-md border-0 py-1.5 px-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none'
+                      >
+                        <option value=''>Select gender</option>
+                        {GENDER_OPTIONS.map((gender) => (
+                          <option key={gender} value={gender}>
+                            {gender}
+                          </option>
+                        ))}
+                      </select>
+                      <div className='absolute inset-y-0 right-0 flex items-center'>
+                        <div className='pointer-events-none px-2'>
+                          <SelectChevronDown />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className='px-4 pt-4 pb-2'>
+                  <div className='px-4 pb-2'>
                     <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>Salary Range</label>
-                    <select
-                      {...register('salary')}
-                      className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6'
-                    >
-                      <option value=''>Any Salary Range</option>
-                      {SALARY_RANGES.map((range) => (
-                        <option key={range} value={range}>
-                          {range}
-                        </option>
-                      ))}
-                    </select>
+                    <div className='relative'>
+                      <select
+                        {...register('salary')}
+                        className='block w-full rounded-md border-0 py-1.5 px-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 appearance-none'
+                      >
+                        <option value=''>Select salary range</option>
+                        {SALARY_RANGES.map((range) => (
+                          <option key={range} value={range}>
+                            {range}
+                          </option>
+                        ))}
+                      </select>
+                      <div className='absolute inset-y-0 right-0 flex items-center'>
+                        <div className='pointer-events-none px-2'>
+                          <SelectChevronDown />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className='flex justify-center w-full px-4 space-x-4 pt-6 pb-7'>
