@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon } from "@heroicons/react/24/solid";
+import CheckIcon from "@/svg/CheckIcon";
 import { useRouter } from "next/navigation";
 
 export default function NavigationModal({
@@ -59,7 +59,7 @@ export default function NavigationModal({
                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-9 space-y-5">
                   <div className="flex justify-center">
                     <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
-                      <CheckIcon className="w-8 h-8 text-green-600" />
+                      <CheckIcon />
                     </div>
                   </div>
                   

@@ -40,12 +40,13 @@ async function updateApplicantOrient(data: any) {
         date_received: data.dateReceived,
       };
     } else if (data.actionType == 'update_status' && data.emailType == 'location_department') {
-      // NEW: Handle location/department assignment
+      // Updated: Handle location/department/employment status assignment
       payload = {
         type_of_action: data.actionType,
         type_of_email: data.emailType,
         location: data.location_name, // Send as string (CharField)
         department: data.department_id, // Send as ID (ForeignKey)
+        employment_status_id: data.employment_status_id, // Send as ID (ForeignKey)
       };
     } else {
       payload = {

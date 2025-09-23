@@ -826,10 +826,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSuccessLocationDepartmentModalOpen}
         message='You have successfully assigned location and department.'
       />
-      {/* Updated warning modal for location/department assignment */}
+      {/* Updated warning modal for employment status, location/department assignment */}
       <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Please assign location and department first.
+          Please assign <span className='text-red-600 font-bold'>EMPLOYMENT STATUS, LOCATION AND DEPARTMENT</span> first.
           <br />
           <br />
           You need to complete this step before enrolling the applicant.
@@ -843,7 +843,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLocationDepartmentModalOpen(true);
             }}
           >
-            ASSIGN LOCATION & DEPARTMENT
+            ASSIGN
           </button>
           <button
             type='button'
