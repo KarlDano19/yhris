@@ -147,9 +147,10 @@ export default function Checklist({
   }, [applicant, setValue]);
 
   useEffect(() => {
-    // determining if all checklists are checked in the form
+    // Enable "Passed" status when at least one requirement is checked
     if (requirements.length) {
-      setIsDisabled(requirements.length !== checks.filter((check) => requirements.includes(check)).length);
+      const checkedRequirements = checks.filter((check) => requirements.includes(check));
+      setIsDisabled(checkedRequirements.length === 0);
     } else {
       setIsDisabled(true);
     }

@@ -11,14 +11,14 @@ async function getEmployeeDetails(employeeId: any) {
         Authorization: `Token ${token}`,
       },
     };
-    if (token) {
+    if (token && employeeId) {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/${employeeId}/`, config);
       if (!res.ok) {
         throw res.json();
       }
       return res.json();
     }
-    return {};
+    return null;
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -29,10 +29,15 @@ async function getEmployeeDetails(employeeId: any) {
 }
 
 function useGetEmployeeDetails(employeeId: any) {
-  const query = useQuery(['employeeDetailsCache'], () => getEmployeeDetails(employeeId), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['employeeDetailsCache', employeeId], // Include employeeId in the query key
+    () => getEmployeeDetails(employeeId), 
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: !!employeeId, // Only run query when employeeId is provided
+    }
+  );
 
   return query;
 }

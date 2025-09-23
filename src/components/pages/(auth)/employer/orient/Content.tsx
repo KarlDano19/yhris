@@ -29,6 +29,7 @@ import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
+import EnrollRedirectModal from './modals/EnrollRedirectModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -86,6 +87,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
+  const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
@@ -224,7 +226,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
-          setIsEnrollModalOpen(true);
+          setIsEnrollRedirectModalOpen(true);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
@@ -566,11 +568,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsNewHireOrientedOpen={setNewHireOriented}
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessSendContractModalOpen}
-        setIsOpen={setIsSuccessSendContractModalOpen}
-        message='You have successfully sent an email.'
-      />
       <NoticeModal isOpen={isDoloNewHire} setIsOpen={setIsDoloNewHire}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
           Do you have an account in YAHSHUA Dolo to orient the New Hire?
@@ -806,11 +803,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           SIGN IN TO YAHSHUA PAYROLL
         </button>
       </NoticeModal>
-      <SuccessModal
-        isOpen={isEnrollModalOpen}
-        setIsOpen={setIsEnrollModalOpen}
-        message='You have successfully enrolled New Hire to YAHSHUA Payroll.'
-      />
+      {isEnrollRedirectModalOpen && (
+        <EnrollRedirectModal
+          isOpen={isEnrollRedirectModalOpen}
+          setIsOpen={setIsEnrollRedirectModalOpen}
+          jobPostingId={String(params.position)}
+        />
+      )}
       {isLocationDepartmentModalOpen && (
         <LocationDepartmentModal
           selectedOrientId={selectedOrientId}
@@ -826,10 +825,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSuccessLocationDepartmentModalOpen}
         message='You have successfully assigned location and department.'
       />
-      {/* Updated warning modal for location/department assignment */}
+      {/* Updated warning modal for employment status, location/department assignment */}
       <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Please assign location and department first.
+          Please assign <span className='text-red-600 font-bold'>EMPLOYMENT STATUS, LOCATION AND DEPARTMENT</span> first.
           <br />
           <br />
           You need to complete this step before enrolling the applicant.
@@ -843,7 +842,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLocationDepartmentModalOpen(true);
             }}
           >
-            ASSIGN LOCATION & DEPARTMENT
+            ASSIGN
           </button>
           <button
             type='button'

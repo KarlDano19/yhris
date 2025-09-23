@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import CheckIcon from "@/svg/CheckIcon";
 import { useRouter } from "next/navigation";
 
-export default function NavigationModal({
+export default function EnrollRedirectModal({
   isOpen,
   setIsOpen,
   jobPostingId,
@@ -15,9 +15,9 @@ export default function NavigationModal({
   const cancelButtonRef = useRef(null);
   const router = useRouter();
 
-  const handleGoToOrient = () => {
+  const handleGoToEmployeeList = () => {
     setIsOpen(false);
-    router.push(`/orient/${jobPostingId}`);
+    router.push('/manage/employees');
   };
 
   const handleStayHere = () => {
@@ -64,19 +64,19 @@ export default function NavigationModal({
                   </div>
                   
                   <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-                    Applicant hired successfully!
+                    Employee enrolled successfully!
                     <br />
                     <br />
-                    Would you like to navigate to the Orient page or stay on the current page?
+                    Would you like to navigate to the Employee List or stay on the current page?
                   </h5>
                   
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
                     <button
                       type='button'
                       className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
-                      onClick={handleGoToOrient}
+                      onClick={handleGoToEmployeeList}
                     >
-                      GO TO ORIENT
+                      GO TO EMPLOYEE LIST
                     </button>
                     <button
                       ref={cancelButtonRef}
