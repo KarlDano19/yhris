@@ -1,6 +1,7 @@
-import { Dispatch, Fragment, useRef } from "react";
+import { Dispatch, Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import CheckIcon from "@/svg/CheckIcon";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { useRouter } from "next/navigation";
 
 export default function EnrollRedirectModal({
@@ -14,10 +15,19 @@ export default function EnrollRedirectModal({
 }) {
   const cancelButtonRef = useRef(null);
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleGoToEmployeeList = () => {
-    setIsOpen(false);
+    setIsNavigating(true);
+    
+    // Navigate immediately
     router.push('/manage/employees');
+    
+    // Set a timeout to hide loading after navigation
+    // This ensures loading persists during page transition
+    setTimeout(() => {
+      setIsNavigating(false);
+    }, 2500); // 2.5-second timeout
   };
 
   const handleStayHere = () => {
@@ -26,6 +36,12 @@ export default function EnrollRedirectModal({
 
   return (
     <>
+      {isNavigating && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+          <LoadingSpinner size="xl" color="yellow" />
+          <span className="text-yellow-600 font-semibold text-xl mt-4">Navigating to Employee List...</span>
+        </div>
+      )}
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog
           as="div"
@@ -73,10 +89,18 @@ export default function EnrollRedirectModal({
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
                     <button
                       type='button'
-                      className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
+                      className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all disabled:opacity-50'
                       onClick={handleGoToEmployeeList}
+                      disabled={isNavigating}
                     >
-                      GO TO EMPLOYEE LIST
+                      {isNavigating ? (
+                        <>
+                          <LoadingSpinner size="sm" color="white" className="mr-2 inline-block" />
+                          Navigating...
+                        </>
+                      ) : (
+                        'GO TO EMPLOYEE LIST'
+                      )}
                     </button>
                     <button
                       ref={cancelButtonRef}

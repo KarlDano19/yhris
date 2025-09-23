@@ -1,7 +1,12 @@
-import { Dispatch, Fragment, useRef } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import CheckIcon from "@/svg/CheckIcon";
+import { Dispatch, Fragment, useRef, useState } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { Dialog, Transition } from "@headlessui/react";
+
+import LoadingSpinner from "@/components/LoadingSpinner";
+
+import CheckIcon from "@/svg/CheckIcon";
 
 export default function NavigationModal({
   isOpen,
@@ -14,10 +19,19 @@ export default function NavigationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const handleGoToOrient = () => {
-    setIsOpen(false);
+  const handleGoToOnboarding = () => {
+    setIsNavigating(true);
+    
+    // Navigate immediately
     router.push(`/orient/${jobPostingId}`);
+    
+    // Set a timeout to hide loading after navigation
+    // This ensures loading persists during page transition
+    setTimeout(() => {
+      setIsNavigating(false);
+    }, 2500); // 2.5-second timeout
   };
 
   const handleStayHere = () => {
@@ -26,6 +40,12 @@ export default function NavigationModal({
 
   return (
     <>
+      {isNavigating && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+          <LoadingSpinner size="xl" color="yellow" />
+          <span className="text-yellow-600 font-semibold text-xl mt-4">Navigating to Onboarding page...</span>
+        </div>
+      )}
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog
           as="div"
@@ -67,16 +87,24 @@ export default function NavigationModal({
                     Applicant hired successfully!
                     <br />
                     <br />
-                    Would you like to navigate to the Orient page or stay on the current page?
+                    Would you like to navigate to the Onboarding page or stay on the current page?
                   </h5>
                   
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
                     <button
                       type='button'
-                      className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
-                      onClick={handleGoToOrient}
+                      className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all disabled:opacity-50'
+                      onClick={handleGoToOnboarding}
+                      disabled={isNavigating}
                     >
-                      GO TO ORIENT
+                      {isNavigating ? (
+                        <>
+                          <LoadingSpinner size="sm" color="white" className="mr-2 inline-block" />
+                          Navigating...
+                        </>
+                      ) : (
+                        'GO TO ONBOARDING'
+                      )}
                     </button>
                     <button
                       ref={cancelButtonRef}
