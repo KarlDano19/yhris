@@ -117,8 +117,6 @@ function CreateEvaluationSchedulerModal({
                     <EmployeeAssigneeTab
                       control={control}
                       Controller={Controller}
-                      register={register}
-                      watch={watch}
                       onSubmit={onSubmit}
                       isLoading={isLoading}
                       setSelectedTab={setSelectedTab}

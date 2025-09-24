@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 
-import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import "react-quill/dist/quill.snow.css";
@@ -8,7 +7,6 @@ import Select, { components } from "react-select";
 
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import classNames from "@/helpers/classNames";
 
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
@@ -24,18 +22,26 @@ const CustomOption = (props: any) => {
     <components.Option {...props}>
       <div>
         <div className="font-medium">{data.label}</div>
-        {data.email && (
-          <div className="text-sm text-gray-500">
-            • {data.email}
+        {data.is_department_option ? (
+          <div className="text-sm text-blue-600">
+            • Select all employees from this department
           </div>
-        )}
-        {(data.department || data.position) && (
-          <div className="text-sm text-gray-500">
-             • {data.department && data.position
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
+        ) : (
+          <>
+            {data.email && (
+              <div className="text-sm text-gray-500">
+                • {data.email}
+              </div>
+            )}
+            {(data.department || data.position) && (
+              <div className="text-sm text-gray-500">
+                 • {data.department && data.position
+                  ? `${data.department} | ${data.position}`
+                  : data.department || data.position
+                }
+              </div>
+            )}
+          </>
         )}
       </div>
     </components.Option>
@@ -47,7 +53,7 @@ const CustomMultiValue = (props: any) => {
   const { data } = props;
   return (
     <components.MultiValue {...props}>
-      <span>{data.label}</span>
+      <span>{data.is_department_option ? data.department : data.label}</span>
     </components.MultiValue>
   );
 };
@@ -55,21 +61,18 @@ const CustomMultiValue = (props: any) => {
 function EmployeeAssigneeTab({
   control,
   Controller,
-  register,
-  watch,
   onSubmit,
   isLoading,
   setSelectedTab,
 }: {
   control: any;
   Controller: any;
-  register: any;
-  watch: any;
   onSubmit: any;
   isLoading: boolean;
   setSelectedTab: (tab: number) => void;
 }) {
   const [employeeItems, setEmployeeItems] = useState<any>([]);
+  const [filteredOptions, setFilteredOptions] = useState<any>([]);
   const { data: dataEmployee } = useGetEmployeeItems();
 
   useEffect(() => {
@@ -81,14 +84,12 @@ function EmployeeAssigneeTab({
         department: item.department,
         position: item.position,
         email: item.email,
+        is_department_option: false,
       }));
       setEmployeeItems(employeeItems);
+      setFilteredOptions(employeeItems);
     }
   }, [dataEmployee]);
-
-  const getFilename = (file: string) => {
-    return file.split("/").pop();
-  };
 
   // Move ReactQuill memoization here
   const ReactQuill = useMemo(() => dynamic(() => import("react-quill"), { ssr: false }), []);
@@ -101,7 +102,62 @@ function EmployeeAssigneeTab({
     if (control && control._defaultValues && control._defaultValues.message === undefined) {
       control._defaultValues.message = defaultMessage;
     }
-  }, [control]);
+  }, [control, defaultMessage]);
+
+
+  // Function to get filtered options including department options
+  const getFilteredOptions = (inputValue: string, currentValues: any[] = []) => {
+    if (!inputValue) return employeeItems;
+    
+    const searchValue = inputValue.toLowerCase();
+    const filteredEmployees = employeeItems.filter((employee: any) => {
+      // Search in employee name
+      if (employee.label.toLowerCase().includes(searchValue)) return true;
+      
+      // Search in email
+      if (employee.email && employee.email.toLowerCase().includes(searchValue)) return true;
+      
+      // Search in department
+      if (employee.department && employee.department.toLowerCase().includes(searchValue)) return true;
+      
+      // Search in position
+      if (employee.position && employee.position.toLowerCase().includes(searchValue)) return true;
+      
+      return false;
+    });
+
+    // Check if search matches any department name
+    const matchingDepartments = new Set();
+    employeeItems.forEach((employee: any) => {
+      if (employee.department && employee.department.toLowerCase().includes(searchValue)) {
+        matchingDepartments.add(employee.department);
+      }
+    });
+
+    // Add department options for matching departments (only show if not all employees from that department are selected)
+    const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
+      // Check if all employees from this department are already selected
+      const employeesInDepartment = employeeItems.filter((emp: any) => 
+        emp.department === deptName && emp.value
+      );
+      const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+        currentValues.includes(emp.value)
+      );
+      const allEmployeesSelected = employeesInDepartment.length > 0 && 
+        selectedEmployeesInDepartment.length === employeesInDepartment.length;
+      
+      return {
+        value: `dept:${deptName}`,
+        label: `${deptName} (All Employees)`,
+        department: deptName,
+        is_department_option: true,
+        allEmployeesSelected: allEmployeesSelected
+      };
+    }).filter((deptOption: any) => !deptOption.allEmployeesSelected); // Only show departments where not all employees are selected
+
+    return [...departmentOptions, ...filteredEmployees];
+  };
+
 
   return (
     <form onSubmit={onSubmit}>
@@ -128,13 +184,61 @@ function EmployeeAssigneeTab({
                 <Select
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  options={employeeItems}
+                  options={filteredOptions}
                   value={employeeItems.filter((item: any) =>
                     value?.includes(item.value)
                   )}
-                  onChange={(val) =>
-                    onChange(val ? val.map((item: any) => item.value) : [])
-                  }
+                  onChange={(val) => {
+                    console.log('onChange called with:', val);
+                    if (val) {
+                      // Check if any department options were selected
+                      const departmentOptions = val.filter((item: any) => item.is_department_option);
+                      const regularOptions = val.filter((item: any) => !item.is_department_option);
+                      
+                      if (departmentOptions.length > 0) {
+                        // Handle department selections
+                        let allEmployeeIds = [...(value || [])];
+                        
+                        departmentOptions.forEach((deptOption: any) => {
+                          console.log('Processing department option:', deptOption);
+                          const employeesInDepartment = employeeItems
+                            .filter((employee: any) => !employee.is_department_option && employee.department === deptOption.department)
+                            .map((employee: any) => employee.value);
+                          
+                          console.log('Employees in department:', employeesInDepartment);
+                          allEmployeeIds = [...allEmployeeIds, ...employeesInDepartment];
+                        });
+                        
+                        // Add regular employee selections
+                        const regularEmployeeIds = regularOptions.map((item: any) => item.value);
+                        allEmployeeIds = [...allEmployeeIds, ...regularEmployeeIds];
+                        
+                        // Remove duplicates
+                        const finalValues = Array.from(new Set(allEmployeeIds));
+                        console.log('Final values with departments:', finalValues);
+                        onChange(finalValues);
+                      } else {
+                        // No department options, just regular selections
+                        const newValues = regularOptions.map((item: any) => item.value);
+                        console.log('Final values regular:', newValues);
+                        onChange(newValues);
+                      }
+                    } else {
+                      onChange([]);
+                    }
+                  }}
+                  filterOption={() => true}
+                  onInputChange={(inputValue) => {
+                    if (!inputValue) {
+                      setFilteredOptions(employeeItems);
+                    } else {
+                      const filteredOptions = getFilteredOptions(inputValue, value);
+                      setFilteredOptions(filteredOptions);
+                    }
+                    return inputValue;
+                  }}
+                  isSearchable={true}
+                  placeholder="Search employees or departments..."
                   components={{
                     Option: CustomOption,
                     MultiValue: CustomMultiValue,
@@ -179,13 +283,61 @@ function EmployeeAssigneeTab({
                 <Select
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  options={employeeItems}
+                  options={filteredOptions}
                   value={employeeItems.filter((item: any) =>
                     value?.includes(item.value)
                   )}
-                  onChange={(val) =>
-                    onChange(val ? val.map((item: any) => item.value) : [])
-                  }
+                  onChange={(val) => {
+                    console.log('onChange called with:', val);
+                    if (val) {
+                      // Check if any department options were selected
+                      const departmentOptions = val.filter((item: any) => item.is_department_option);
+                      const regularOptions = val.filter((item: any) => !item.is_department_option);
+                      
+                      if (departmentOptions.length > 0) {
+                        // Handle department selections
+                        let allEmployeeIds = [...(value || [])];
+                        
+                        departmentOptions.forEach((deptOption: any) => {
+                          console.log('Processing department option:', deptOption);
+                          const employeesInDepartment = employeeItems
+                            .filter((employee: any) => !employee.is_department_option && employee.department === deptOption.department)
+                            .map((employee: any) => employee.value);
+                          
+                          console.log('Employees in department:', employeesInDepartment);
+                          allEmployeeIds = [...allEmployeeIds, ...employeesInDepartment];
+                        });
+                        
+                        // Add regular employee selections
+                        const regularEmployeeIds = regularOptions.map((item: any) => item.value);
+                        allEmployeeIds = [...allEmployeeIds, ...regularEmployeeIds];
+                        
+                        // Remove duplicates
+                        const finalValues = Array.from(new Set(allEmployeeIds));
+                        console.log('Final values with departments:', finalValues);
+                        onChange(finalValues);
+                      } else {
+                        // No department options, just regular selections
+                        const newValues = regularOptions.map((item: any) => item.value);
+                        console.log('Final values regular:', newValues);
+                        onChange(newValues);
+                      }
+                    } else {
+                      onChange([]);
+                    }
+                  }}
+                  filterOption={() => true}
+                  onInputChange={(inputValue) => {
+                    if (!inputValue) {
+                      setFilteredOptions(employeeItems);
+                    } else {
+                      const filteredOptions = getFilteredOptions(inputValue, value);
+                      setFilteredOptions(filteredOptions);
+                    }
+                    return inputValue;
+                  }}
+                  isSearchable={true}
+                  placeholder="Search employees or departments..."
                   components={{
                     Option: CustomOption,
                     MultiValue: CustomMultiValue,

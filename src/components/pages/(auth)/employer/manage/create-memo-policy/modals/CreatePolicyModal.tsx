@@ -34,7 +34,22 @@ export default function CreatePolicyModal({
   const [inputTo, setInputTo] = useState('');
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
     useForm<DirectiveData>({
       defaultValues: {
@@ -176,7 +191,7 @@ export default function CreatePolicyModal({
     if (titleValue && titleValue !== "") {
       clearErrors('title');
     }
-  }, [watch('title'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -187,30 +202,117 @@ export default function CreatePolicyModal({
 
   // Filter employees based on input
   useEffect(() => {
-    if (employeeData && inputTo.trim()) {
-      const filtered = employeeData.filter((employee: any) => {
+    if (employeeData) {
+      if (inputTo.trim()) {
         const searchTerm = inputTo.toLowerCase();
-        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
-        const email = employee.email?.toLowerCase() || '';
         
-        return fullName.includes(searchTerm) || email.includes(searchTerm);
-      }).slice(0, 5); // Limit to 5 suggestions
-      
-      setFilteredEmployees(filtered);
-      setShowEmployeeSuggestions(filtered.length > 0);
+        // Filter employees (exclude already selected ones)
+        const filtered = employeeData.filter((employee: any) => {
+          const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+          const email = employee.email?.toLowerCase() || '';
+          const department = employee.department?.toLowerCase() || '';
+          const position = employee.position?.toLowerCase() || '';
+          
+          // Check if employee is already selected
+          const isAlreadySelected = tagsTo.includes(employee.email);
+          
+          return !isAlreadySelected && (
+            fullName.includes(searchTerm) || 
+            email.includes(searchTerm) || 
+            department.includes(searchTerm) || 
+            position.includes(searchTerm)
+          );
+        }).slice(0, 5); // Limit to 5 suggestions
+        
+        // Check if search matches any department name
+        const matchingDepartments = new Set();
+        employeeData.forEach((employee: any) => {
+          if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
+            matchingDepartments.add(employee.department);
+          }
+        });
+        
+        // Create department options (only show if not all employees from that department are selected)
+        const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
+          // Check if all employees from this department are already selected
+          const employeesInDepartment = employeeData.filter((emp: any) => 
+            emp.department === deptName && emp.email
+          );
+          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            tagsTo.includes(emp.email)
+          );
+          const allEmployeesSelected = employeesInDepartment.length > 0 && 
+            selectedEmployeesInDepartment.length === employeesInDepartment.length;
+          
+          return {
+            id: `dept:${deptName}`,
+            firstname: null,
+            lastname: null,
+            email: null,
+            department: deptName,
+            position: null,
+            is_department_option: true,
+            label: `${deptName} (All Employees)`,
+            allEmployeesSelected: allEmployeesSelected
+          };
+        }).filter((deptOption: any) => !deptOption.allEmployeesSelected); // Only show departments where not all employees are selected
+        
+        // Combine department options with filtered employees
+        const combinedOptions = [...departmentOptions, ...filtered];
+        
+        setFilteredEmployees(combinedOptions);
+        setShowEmployeeSuggestions(combinedOptions.length > 0);
+        setSelectedEmployeeIndex(-1); // Reset selection when filtering
+      } else {
+        // When no search input but field is focused, show all employees (no department options)
+        const allEmployees = employeeData.slice(0, 10); // Limit to 10 suggestions for initial load
+        setFilteredEmployees(allEmployees);
+        setShowEmployeeSuggestions(allEmployees.length > 0);
+        setSelectedEmployeeIndex(-1);
+      }
     } else {
       setFilteredEmployees([]);
       setShowEmployeeSuggestions(false);
+      setSelectedEmployeeIndex(-1);
     }
-  }, [inputTo, employeeData]);
+  }, [inputTo, employeeData, tagsTo]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowEmployeeSuggestions(false);
+        setSelectedEmployeeIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleEmployeeSelect = (employee: any) => {
-    if (employee.email && !tagsTo.includes(employee.email)) {
-      // Add the email directly to tagsTo using the setter
+    if (employee.is_department_option) {
+      // Handle department selection - add all employees from that department
+      const employeesInDepartment = employeeData?.filter((emp: any) => 
+        emp.department === employee.department && emp.email
+      ) || [];
+      
+      const newEmails = employeesInDepartment
+        .map((emp: any) => emp.email)
+        .filter((email: string) => !tagsTo.includes(email));
+      
+      if (newEmails.length > 0) {
+        setTagsTo([...tagsTo, ...newEmails]);
+      }
+    } else if (employee.email && !tagsTo.includes(employee.email)) {
+      // Handle individual employee selection
       setTagsTo([...tagsTo, employee.email]);
     }
     setInputTo('');
     setShowEmployeeSuggestions(false);
+    setSelectedEmployeeIndex(-1);
   };
 
   // Reset form when modal closes
@@ -304,9 +406,43 @@ export default function CreatePolicyModal({
                               <input
                                 type='text'
                                 value={inputTo}
-                                onKeyDown={handleKeyDownTo}
-                                onChange={(e) => setInputTo(e.target.value)}
-                                onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    if (showEmployeeSuggestions && filteredEmployees.length > 0) {
+                                      const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
+                                      setSelectedEmployeeIndex(newIndex);
+                                      scrollToSelectedItem(newIndex);
+                                    }
+                                  } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
+                                    setSelectedEmployeeIndex(newIndex);
+                                    if (newIndex >= 0) {
+                                      scrollToSelectedItem(newIndex);
+                                    }
+                                  } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                    e.preventDefault();
+                                    if (selectedEmployeeIndex >= 0 && filteredEmployees[selectedEmployeeIndex]) {
+                                      handleEmployeeSelect(filteredEmployees[selectedEmployeeIndex]);
+                                    } else {
+                                      // Fallback to original handleKeyDownTo for other keys
+                                      handleKeyDownTo(e);
+                                    }
+                                  } else {
+                                    // For other keys, use the original handleKeyDownTo
+                                    handleKeyDownTo(e);
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  setInputTo(e.target.value);
+                                  setSelectedEmployeeIndex(-1); // Reset selection when typing
+                                }}
+                                onFocus={() => {
+                                  if (employeeData && employeeData.length > 0) {
+                                    setShowEmployeeSuggestions(true);
+                                  }
+                                }}
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
                               />
                               <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
@@ -320,19 +456,40 @@ export default function CreatePolicyModal({
                             
                             {/* Employee Suggestions Dropdown */}
                             {showEmployeeSuggestions && (
-                              <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
-                                {filteredEmployees.map((employee: any) => (
+                              <div 
+                                ref={dropdownRef}
+                                className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                              >
+                                {filteredEmployees.map((employee: any, index: number) => (
                                   <div
-                                    key={employee.id}
-                                    className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
+                                    key={employee.id || employee.department}
+                                    className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                      index === selectedEmployeeIndex 
+                                        ? 'bg-blue-100' 
+                                        : 'hover:bg-gray-100'
+                                    }`}
+                                    onMouseEnter={() => setSelectedEmployeeIndex(index)}
                                     onClick={() => handleEmployeeSelect(employee)}
                                   >
-                                    <div className='text-sm font-medium text-gray-900'>
-                                      {employee.firstname} {employee.lastname}
-                                    </div>
-                                    <div className='text-xs text-gray-500'>
-                                      {employee.email}
-                                    </div>
+                                    {employee.is_department_option ? (
+                                      <>
+                                        <div className='text-sm font-medium text-gray-900'>
+                                          {employee.label}
+                                        </div>
+                                        <div className='text-xs text-blue-600'>
+                                          • Select all employees from this department
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div>
+                                        <div className='text-sm font-medium text-gray-900'>
+                                          {employee.firstname} {employee.lastname}
+                                        </div>
+                                        <div className='text-xs text-gray-500'>
+                                          {employee.email}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
