@@ -3,9 +3,10 @@ import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import Select from 'react-select';
 
 import CustomToast from '@/components/CustomToast';
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
@@ -14,6 +15,7 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useGetEmailTemplateItems from '@/components/hooks/useGetEmailTemplateItems';
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
+import CreateEmailTemplateModal from '../../settings/general-settings/email-template/modal/CreateEmailTemplate';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -22,6 +24,11 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
+
+interface Field {
+  onChange: (value: any) => void;
+  value: any;
+}
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
@@ -65,10 +72,11 @@ export default function IntroduceModal({
   const [inputBcc, setInputBcc] = useState('');
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const [isCreateEmailTemplateModalOpen, setIsCreateEmailTemplateModalOpen] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, reset, setValue, watch, trigger, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
+  const { register, handleSubmit, reset, setValue, watch, trigger, control, formState: { errors }, setError, clearErrors } = useForm<FormValues>({
     defaultValues: {
       template: '',
       email: '',
@@ -76,8 +84,78 @@ export default function IntroduceModal({
       subject: '',
     },
   });
-  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+  const { data: dataEmailTemplate, refetch: refetchEmailTemplates } = useGetEmailTemplateItems();
   const { mutate, isLoading } = useUpdateApplicantOrient();
+
+  // Helper function to check if an item was created within 24 hours
+  const isWithin24Hours = (createdAt: string | Date): boolean => {
+    if (!createdAt) return false;
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffInHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24;
+  };
+
+  // Transform email template data for react-select with separation for newly added templates
+  const emailTemplateOptions = useMemo(() => {
+    if (!dataEmailTemplate) return [];
+    
+    const allTemplates = dataEmailTemplate.map((template: any) => ({
+      value: template.id,
+      label: template.subject,
+      createdAt: template.created_at,
+      template: template
+    }));
+    
+    // Filter and sort newly added templates (within 24 hours of creation)
+    const newTemplates = allTemplates
+      .filter((template: any) => isWithin24Hours(template.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular templates alphabetically
+    const regularTemplates = allTemplates
+      .filter((template: any) => !isWithin24Hours(template.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
+    
+    // Create options with separation
+    const options = [];
+    
+    // Add newly added templates at the top with "New" label
+    if (newTemplates.length > 0) {
+      options.push({
+        label: "New Email Templates",
+        options: newTemplates.map((template: any) => ({
+          ...template,
+          label: `${template.label}`
+        })),
+        isDisabled: true
+      });
+    }
+    
+    // Add separator if there are both new and regular templates
+    if (newTemplates.length > 0 && regularTemplates.length > 0) {
+      options.push({
+        label: "───────────────",
+        options: [],
+        isDisabled: true
+      });
+    }
+    
+    // Add regular templates
+    if (regularTemplates.length > 0) {
+      options.push({
+        label: "All Email Templates",
+        options: regularTemplates,
+        isDisabled: true
+      });
+    }
+    
+    return options;
+  }, [dataEmailTemplate]);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -219,6 +297,8 @@ export default function IntroduceModal({
       orientItemCopy[itemIndex].emailType = 'introduce';
       const callbackReq = {
         onSuccess: () => {
+          // Clear newly added items when introduce email is sent
+          handleIntroduceSent();
           // Reset form data before closing modal to prevent unsaved changes detection
           resetFormData();
           reset();
@@ -257,6 +337,20 @@ export default function IntroduceModal({
     });
   };
 
+  const handleAddEmailTemplate = () => {
+    setIsCreateEmailTemplateModalOpen(true);
+  };
+
+  const handleEmailTemplateCreated = () => {
+    // Refresh email templates list to get the updated data with new creation dates
+    refetchEmailTemplates();
+  };
+
+  const handleIntroduceSent = () => {
+    // Clear newly added items when introduce email is sent
+    // This ensures that the "New" grouping is reset after successful introduce sending
+  };
+
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
@@ -292,67 +386,99 @@ export default function IntroduceModal({
                   <form onSubmit={onSubmit}>
                     <div className='px-4 pt-4 pb-6'>
                       <div className='sm:col-span-4'>
-                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Email Template
-                        </label>
+                        <div className='flex items-center justify-between'>
+                          <label htmlFor='template' className='block text-sm font-medium leading-6 text-gray-900'>
+                            Email Template
+                          </label>
+                          <button
+                            type='button'
+                            onClick={handleAddEmailTemplate}
+                            className='text-sm text-savoy-blue hover:text-blue-700 font-medium'
+                          >
+                            + Add New Email Template
+                          </button>
+                        </div>
                         {errors.template && (
                           <p className="text-xs text-red-600 mt-1">
                             {errors.template.message}
                           </p>
                         )}
-                        <div className='relative mt-2'>
-                          <select
-                            id='template'
-                            {...register('template')}
-                            className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                            onChange={(event) => {
-                              setValue('template', event.target.value);
-                              if (event.target.value) {
-                              const template = dataEmailTemplate.find(
-                                (item: any) => item.id === parseInt(event.target.value)
-                              );
-                              if (template) {
-                                if (applicantEmail) {
-                                  // Check if template.to already contains the applicant email to avoid duplicates
-                                  const templateRecipients = template.to || [];
-                                  if (!templateRecipients.includes(applicantEmail)) {
-                                    // Only add applicantEmail if it's not already in the template recipients
-                                    setTagsTo([applicantEmail, ...templateRecipients]);
+                        <div className='mt-2'>
+                          <Controller
+                            name="template"
+                            control={control}
+                            render={({ field: { onChange, value } }: { field: Field }) => (
+                              <Select
+                                className="text-sm"
+                                classNamePrefix="select"
+                                options={emailTemplateOptions}
+                                value={emailTemplateOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
+                                onChange={(val) => {
+                                  onChange(val?.value || '');
+                                  if (val?.template) {
+                                    const template = val.template;
+                                    if (applicantEmail) {
+                                      // Check if template.to already contains the applicant email to avoid duplicates
+                                      const templateRecipients = template.to || [];
+                                      if (!templateRecipients.includes(applicantEmail)) {
+                                        // Only add applicantEmail if it's not already in the template recipients
+                                        setTagsTo([applicantEmail, ...templateRecipients]);
+                                      } else {
+                                        // Use template recipients as is since it already includes the applicant email
+                                        setTagsTo(templateRecipients);
+                                      }
+                                    } else {
+                                      setTagsTo(template.to || []);
+                                    }
+                                    if (template.bcc) {
+                                      setIsBCCOpen(true);
+                                      setTagsBcc(template.bcc);
+                                    } else {
+                                      setTagsBcc([]);
+                                    }
+                                    if (template.cc) {
+                                      setIsCCOPen(true);
+                                      setTagsCc(template.cc);
+                                    } else {
+                                      setTagsCc([]);
+                                    }
+                                    setValue('message', template.body);
+                                    setValue('subject', template.subject);
+                                    clearErrors('message');
+                                    clearErrors('subject');
                                   } else {
-                                    // Use template recipients as is since it already includes the applicant email
-                                    setTagsTo(templateRecipients);
+                                    // Clear template-related fields if no template is selected
+                                    setTagsTo(applicantEmail ? [applicantEmail] : []);
+                                    setTagsCc([]);
+                                    setTagsBcc([]);
+                                    setValue('message', '');
+                                    setValue('subject', '');
                                   }
-                                } else {
-                                  setTagsTo(template.to || []);
-                                }
-                                if (template.bcc) {
-                                  setIsBCCOpen(true);
-                                  setTagsBcc(template.bcc);
-                                }
-                                if (template.cc) {
-                                  setIsCCOPen(true);
-                                  setTagsCc(template.cc);
-                                }
-                                setValue('message', template.body);
-                                  setValue('subject', template.subject);
-                                  clearErrors('message');
-                                  clearErrors('subject');
-                                }
-                              }
-                            }}
-                          >
-                            <option value=''>
-                              Select...
-                            </option>
-                            {(dataEmailTemplate || []).map((item: any) => (
-                              <option key={item.id} value={item.id}>
-                                {item.subject}
-                              </option>
-                            ))}
-                          </select>
-                          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-                            <SelectChevronDown />
-                          </div>
+                                }}
+                                components={{
+                                  DropdownIndicator: () => (
+                                    <div className="pointer-events-none px-2">
+                                      <SelectChevronDown />
+                                    </div>
+                                  ),
+                                  IndicatorSeparator: () => null,
+                                }}
+                                isClearable={false}
+                                noOptionsMessage={() => 'No email templates available'}
+                                placeholder="Select an email template..."
+                                formatGroupLabel={(group) => (
+                                  <div className="text-xs font-semibold text-gray-500 py-1">
+                                    {group.label}
+                                  </div>
+                                )}
+                                menuPortalTarget={document.body}
+                                styles={{
+                                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                                }}
+                              />
+                            )}
+                          />
                         </div>
                       </div>
 
@@ -632,6 +758,17 @@ export default function IntroduceModal({
               </Transition.Child>
             </div>
           </div>
+
+          {/* Create Email Template Modal */}
+          {isCreateEmailTemplateModalOpen && (
+            <CreateEmailTemplateModal
+              isOpen={isCreateEmailTemplateModalOpen}
+              setIsOpen={setIsCreateEmailTemplateModalOpen}
+              refetch={handleEmailTemplateCreated}
+              onSuccess={handleEmailTemplateCreated}
+            />
+          )}
+          
         </Dialog>
       </Transition.Root>
       

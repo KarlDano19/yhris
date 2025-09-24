@@ -1,10 +1,11 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import dynamic from "next/dynamic";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Tooltip } from "react-tooltip";
 import toast from "react-hot-toast";
+import Select from 'react-select';
 
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
@@ -13,31 +14,29 @@ import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItem
 import useTagTo from "@/components/hooks/useTagTo";
 import useTagCc from "@/components/hooks/useTagCc";
 import useTagBcc from "@/components/hooks/useTagBcc";
-import ModalLayout from "./ModalLayout";
+import ModalLayout from "../../../../../ModalLayout";
 import ModalFooterLayout from "../layouts/ModalFooterLayout";
 import StateContext from "../contexts/StateContext";
+import CreateEmailTemplateModal from "../../settings/general-settings/email-template/modal/CreateEmailTemplate";
 
-import { XMarkIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
-import ClipIcon from '@/svg/ClipIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import { ContextTypes, SendEmailPropTypes as PropTypes } from "../types";
 
 import "react-quill/dist/quill.snow.css";
 
+interface Field {
+  onChange: (value: any) => void;
+  value: any;
+}
+
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
   if (!html) return true;
   const trimmed = html.trim();
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
-};
-
-// Helper function to get filename from URL
-const getFilenameFromUrl = (url: string) => {
-  if (!url) return '';
-  const urlParts = url.split('/');
-  return urlParts[urlParts.length - 1];
 };
 
 export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
@@ -59,6 +58,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const [isCreateEmailTemplateModalOpen, setIsCreateEmailTemplateModalOpen] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
     setInputTo
@@ -69,7 +69,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   );
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } =
     useTagBcc(inputBcc, setInputBcc);
-  const { register, handleSubmit, setValue, watch, trigger, formState: { errors }, setError, clearErrors } = useForm({
+  const { register, handleSubmit, setValue, watch, trigger, control, formState: { errors }, setError, clearErrors } = useForm({
     defaultValues: {
       bcc: "",
       cc: "",
@@ -79,7 +79,77 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       message: "",
     },
   });
-  const { data: dataEmailTemplate } = useGetEmailTemplateItems();
+  const { data: dataEmailTemplate, refetch: refetchEmailTemplates } = useGetEmailTemplateItems();
+
+  // Helper function to check if an item was created within 24 hours
+  const isWithin24Hours = (createdAt: string | Date): boolean => {
+    if (!createdAt) return false;
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffInHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24;
+  };
+
+  // Transform email template data for react-select with separation for newly added templates
+  const emailTemplateOptions = useMemo(() => {
+    if (!dataEmailTemplate) return [];
+    
+    const allTemplates = dataEmailTemplate.map((template: any) => ({
+      value: template.id,
+      label: template.subject,
+      createdAt: template.created_at,
+      template: template
+    }));
+    
+    // Filter and sort newly added templates (within 24 hours of creation)
+    const newTemplates = allTemplates
+      .filter((template: any) => isWithin24Hours(template.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular templates alphabetically
+    const regularTemplates = allTemplates
+      .filter((template: any) => !isWithin24Hours(template.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
+    
+    // Create options with separation
+    const options = [];
+    
+    // Add newly added templates at the top with "New" label
+    if (newTemplates.length > 0) {
+      options.push({
+        label: "New Email Templates",
+        options: newTemplates.map((template: any) => ({
+          ...template,
+          label: `${template.label}`
+        })),
+        isDisabled: true
+      });
+    }
+    
+    // Add separator if there are both new and regular templates
+    if (newTemplates.length > 0 && regularTemplates.length > 0) {
+      options.push({
+        label: "───────────────",
+        options: [],
+        isDisabled: true
+      });
+    }
+    
+    // Add regular templates
+    if (regularTemplates.length > 0) {
+      options.push({
+        label: "All Email Templates",
+        options: regularTemplates,
+        isDisabled: true
+      });
+    }
+    
+    return options;
+  }, [dataEmailTemplate]);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -194,7 +264,21 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
     }
   };
 
-  const handleOnSubmit = (data: any) => {
+  const handleAddEmailTemplate = () => {
+    setIsCreateEmailTemplateModalOpen(true);
+  };
+
+  const handleEmailTemplateCreated = () => {
+    // Refresh email templates list to get the updated data with new creation dates
+    refetchEmailTemplates();
+  };
+
+  const handleEmailSent = () => {
+    // Clear newly added items when email is sent
+    // This ensures that the "New" grouping is reset after successful email sending
+  };
+
+  const onSubmit = (data: any) => {
     // Validate "To" field manually since it uses tags
     if (tagsTo.length === 0) {
       setError('email', {
@@ -246,82 +330,128 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
     });
   };
 
+  // Call handleEmailSent when the form is submitted
+  const onSubmitWithCleanup = handleSubmit((data: any) => {
+    handleEmailSent();
+    onSubmit(data);
+  });
+
   return (
     <>
-      <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
-        <form onSubmit={handleSubmit(handleOnSubmit)}>
+      <ModalLayout 
+        title={title} 
+        isOpen={isOpen} 
+        handleClose={handleClose}
+        nestedModals={
+          <>
+            {/* Create Email Template Modal */}
+            {isCreateEmailTemplateModalOpen && (
+              <CreateEmailTemplateModal
+                isOpen={isCreateEmailTemplateModalOpen}
+                setIsOpen={setIsCreateEmailTemplateModalOpen}
+                refetch={handleEmailTemplateCreated}
+                onSuccess={handleEmailTemplateCreated}
+              />
+            )}
+          </>
+        }
+      >
+        <form onSubmit={onSubmitWithCleanup}>
           <div className="px-4 pt-4 pb-6">
             <div className="sm:col-span-4">
-              <label
-                htmlFor="template"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Email Template
-              </label>
-              <div className="relative mt-2">
-                <select
-                  {...register("template")}
-                  id="template"
-                  className="appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                  onChange={(event) => {
-                    const templateId = parseInt(event.target.value);
-                    if (templateId) {
-                      const template = dataEmailTemplate.find(
-                        (item: any) => item.id === templateId
-                      );
-                      if (template) {
-                        if (actionState.email) {
-                          // Check if template.to already contains the applicant email to avoid duplicates
-                          const templateRecipients = template.to || [];
-                          if (!templateRecipients.includes(actionState.email)) {
-                            // Only add applicantEmail if it's not already in the template recipients
-                            setTagsTo([actionState.email, ...templateRecipients]);
-                          } else {
-                            // Use template recipients as is since it already includes the applicant email
-                            setTagsTo(templateRecipients);
-                          }
-                        } else {
-                          setTagsTo(template.to || []);
-                        }
-                        if (template.bcc) {
-                          setIsBCCOpen(true);
-                          setTagsBcc(template.bcc);
-                        } else {
-                          setTagsBcc([]);
-                        }
-                        if (template.cc) {
-                          setIsCCOPen(true);
-                          setTagsCc(template.cc);
-                        } else {
-                          setTagsCc([]);
-                        }
-                        setValue("message", template.body);
-                        setValue("subject", template.subject);
-                        setCustomSubject(template.subject);
-                        clearErrors('subject');
-                        clearErrors('message');
-                      }
-                    } else {
-                      // Clear template-related fields if no template is selected
-                      setTagsTo(actionState.email ? [actionState.email] : []);
-                      setTagsCc([]);
-                      setTagsBcc([]);
-                      setValue("message", "");
-                      setValue("subject", "");
-                      setCustomSubject("");
-                    }
-                  }}
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="template"
+                  className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  <option value="">Select...</option>
-                  {(dataEmailTemplate || []).map((item: any) => (
-                    <option key={item.id} value={item.id}>
-                      {item.subject}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                  <SelectChevronDown />
-                </div>
+                  Email Template
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddEmailTemplate}
+                  className="text-sm text-savoy-blue hover:text-blue-700 font-medium"
+                >
+                  + Add New Email Template
+                </button>
+              </div>
+              <div className="mt-2">
+                <Controller
+                  name="template"
+                  control={control}
+                  render={({ field: { onChange, value } }: { field: Field }) => (
+                    <Select
+                      className="text-sm"
+                      classNamePrefix="select"
+                      options={emailTemplateOptions}
+                      value={emailTemplateOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
+                      onChange={(val) => {
+                        onChange(val?.value || '');
+                        if (val?.template) {
+                          const template = val.template;
+                          if (actionState.email) {
+                            // Check if template.to already contains the applicant email to avoid duplicates
+                            const templateRecipients = template.to || [];
+                            if (!templateRecipients.includes(actionState.email)) {
+                              // Only add applicantEmail if it's not already in the template recipients
+                              setTagsTo([actionState.email, ...templateRecipients]);
+                            } else {
+                              // Use template recipients as is since it already includes the applicant email
+                              setTagsTo(templateRecipients);
+                            }
+                          } else {
+                            setTagsTo(template.to || []);
+                          }
+                          if (template.bcc) {
+                            setIsBCCOpen(true);
+                            setTagsBcc(template.bcc);
+                          } else {
+                            setTagsBcc([]);
+                          }
+                          if (template.cc) {
+                            setIsCCOPen(true);
+                            setTagsCc(template.cc);
+                          } else {
+                            setTagsCc([]);
+                          }
+                          setValue("message", template.body);
+                          setValue("subject", template.subject);
+                          setCustomSubject(template.subject);
+                          clearErrors('subject');
+                          clearErrors('message');
+                        } else {
+                          // Clear template-related fields if no template is selected
+                          setTagsTo(actionState.email ? [actionState.email] : []);
+                          setTagsCc([]);
+                          setTagsBcc([]);
+                          setValue("message", "");
+                          setValue("subject", "");
+                          setCustomSubject("");
+                        }
+                      }}
+                      components={{
+                        DropdownIndicator: () => (
+                          <div className="pointer-events-none px-2">
+                            <SelectChevronDown />
+                          </div>
+                        ),
+                        IndicatorSeparator: () => null,
+                      }}
+                      isClearable={false}
+                      noOptionsMessage={() => 'No email templates available'}
+                      placeholder="Select an email template..."
+                      formatGroupLabel={(group) => (
+                        <div className="text-xs font-semibold text-gray-500 py-1">
+                          {group.label}
+                        </div>
+                      )}
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        menu: (base) => ({ ...base, zIndex: 9999 }),
+                      }}
+                    />
+                  )}
+                />
               </div>
             </div>
             <div className="sm:col-span-4 mt-4 w-full">
