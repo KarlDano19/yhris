@@ -70,28 +70,28 @@ export default function PersonalInfoForm({
   const validateGov = {
     tin: (v: string) => {
       const digits = v.replace(/\D/g, "");
-      if (isEmpty(digits)) return "TIN is required.";
+      if (isEmpty(digits)) return "TIN is missing.";
       if (!/^\d+$/.test(digits)) return "TIN must contain digits only.";
       if (!(digits.length === 9 || digits.length === 12)) return "TIN must be 9 or 12 digits.";
       return null;
     },
     sss: (v: string) => {
       const digits = v.replace(/\D/g, "");
-      if (isEmpty(digits)) return "SSS is required.";
+      if (isEmpty(digits)) return "SSS is missing.";
       if (!/^\d+$/.test(digits)) return "SSS must contain digits only.";
       if (digits.length !== 10) return "SSS must be 10 digits.";
       return null;
     },
     pagibig: (v: string) => {
       const digits = v.replace(/\D/g, "");
-      if (isEmpty(digits)) return "PAG-IBIG is required.";
+      if (isEmpty(digits)) return "PAG-IBIG is missing.";
       if (!/^\d+$/.test(digits)) return "PAG-IBIG must contain digits only.";
       if (digits.length !== 12) return "PAG-IBIG must be 12 digits.";
       return null;
     },
     philhealth: (v: string) => {
       const digits = v.replace(/\D/g, "");
-      if (isEmpty(digits)) return "PhilHealth is required.";
+      if (isEmpty(digits)) return "PhilHealth is missing.";
       if (!/^\d+$/.test(digits)) return "PhilHealth must contain digits only.";
       if (digits.length !== 12) return "PhilHealth must be 12 digits.";
       return null;
@@ -99,10 +99,10 @@ export default function PersonalInfoForm({
   };
 
   const validateEmergency = {
-    name:           (v: string) => (isEmpty(v) ? "Emergency Contact Name is required." : null),
+    name:           (v: string) => (isEmpty(v) ? "Emergency Contact Name is missing." : null),
     relation:       (_: string) => null,
     contact_number: (v: string) => {
-      if (isEmpty(v)) return "Emergency Contact Number is required.";
+      if (isEmpty(v)) return "Emergency Contact Number is missing.";
       if (!/^\d+$/.test(v)) return "Emergency Contact Number must be digits only.";
       if (v.length !== 11) return "Emergency Contact Number must be exactly 11 digits.";
       if (!v.startsWith("09")) return "Emergency Contact Number must start with '09'.";
@@ -173,8 +173,11 @@ export default function PersonalInfoForm({
       setErr(key, validate(digits));
     };
 
+  const isBlockingError = (m?: string | null) =>
+    !!m && !/(missing|required)/i.test(m);
+
   const hasErrors = useMemo(
-    () => Object.values(errors).some((m) => !!m && m.trim().length > 0),
+    () => Object.values(errors).some(isBlockingError),
     [errors]
   );
 

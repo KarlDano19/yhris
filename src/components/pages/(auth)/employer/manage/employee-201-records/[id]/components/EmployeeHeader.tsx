@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import {
@@ -14,10 +13,9 @@ import {
   ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 
-import Tab from "../common/Tab";
 import PlacholderPicture from "@/svg/PlaceholderPicture";
-
 import type { Employee } from "@/types/employee-201-records/employee";
+import Tab from "../common/Tab";
 
 export type TabKey =
   | "personal"
@@ -33,7 +31,8 @@ export default function EmployeeHeader({
   activeTab,
   setActiveTab,
   empPartial,
-  locked
+  locked,
+  onOpenPhotoModal,
 }: {
   employee: {
     name: string;
@@ -48,14 +47,20 @@ export default function EmployeeHeader({
   setActiveTab: (k: TabKey) => void;
   empPartial?: Partial<Employee>;
   locked?: boolean;
+  onOpenPhotoModal?: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
-  const hasPhoto = !!(employee.photo && employee.photo.trim() !== "");
+  const [photoUrl, setPhotoUrl] = useState(employee.photo ?? "");
+
+  useEffect(() => {
+    setPhotoUrl(employee.photo ?? "");
+  }, [employee.photo]);
+
+  const hasPhoto = !!(photoUrl && photoUrl.trim() !== "");
   const showPhoto = hasPhoto && !imgError;
   const placeholderGender: "male" | "female" =
     (employee.gender || "").toLowerCase() === "female" ? "female" : "male";
 
-  // --- minimal: figure out which sections are incomplete
   const missingSections = new Set<string>(
     (empPartial?.incompleteRecords?.missing ?? [])
       .map((s: any) => s?.name)
@@ -64,12 +69,18 @@ export default function EmployeeHeader({
   const personalIncomplete = missingSections.has("Personal Information");
   const employmentIncomplete = missingSections.has("Employment Details");
   const trainingIncomplete = missingSections.has("Training & Development");
-  // ---
+
+  const overlayLabel = showPhoto
+    ? "Update profile photo"
+    : "Upload profile photo";
 
   return (
-    <div data-testid="employee-profile-header" className="rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm">
+    <div
+      data-testid="employee-profile-header"
+      className="relative rounded-[40px] px-2 py-4 bg-[#355fd0]/5 sm:rounded-[110px] sm:px-8 sm:py-8 shadow-sm"
+    >
       <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-center">
-        {/* avatar + header (unchanged) */}
+        {/* Avatar */}
         <div className="flex w-full items-center justify-center gap-4 text-center md:w-auto md:justify-start md:pr-5 md:text-left">
           <div className="relative h-[80px] w-[80px] flex-shrink-0 md:h-[100px] md:w-[100px]">
             <div
@@ -78,26 +89,50 @@ export default function EmployeeHeader({
               }`}
             />
 
-            {showPhoto ? (
-              <div className="absolute inset-0 overflow-hidden rounded-full bg-white">
-                <Image
-                  src={employee.photo as string}
-                  alt={employee.name}
-                  fill
-                  className="object-cover"
-                  onError={() => setImgError(true)}
-                  priority
-                />
+            <button
+              type="button"
+              className={`group absolute inset-0 overflow-hidden rounded-full bg-white outline-none ${
+                locked ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
+              onClick={() => !locked && onOpenPhotoModal?.()}
+              aria-label={overlayLabel}
+              title={overlayLabel}
+              disabled={!!locked}
+            >
+              <div className="absolute inset-0">
+                {showPhoto ? (
+                  <Image
+                    src={photoUrl}
+                    alt={employee.name}
+                    fill
+                    className="object-cover"
+                    onError={() => setImgError(true)}
+                    priority
+                  />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-white">
+                    <PlacholderPicture
+                      gender={placeholderGender}
+                      className="h-14 w-14 md:h-16 md:w-16"
+                      title={employee.name}
+                    />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="absolute inset-0 grid place-items-center rounded-full bg-white">
-                <PlacholderPicture
-                  gender={placeholderGender}
-                  className="h-14 w-14 md:h-16 md:w-16"
-                  title={employee.name}
-                />
+
+              {/* Hover overlay */}
+              <div
+                className={`absolute inset-0 grid place-items-center rounded-full bg-black/40 transition-opacity duration-150 ${
+                  locked
+                    ? "opacity-0"
+                    : "group-hover:opacity-100 group-focus-visible:opacity-100 opacity-0"
+                }`}
+              >
+                <span className="px-3 text-center text-[11px] font-semibold leading-tight text-white md:text-xs">
+                  {overlayLabel}
+                </span>
               </div>
-            )}
+            </button>
           </div>
 
           <div data-testid="employee-details">
@@ -133,7 +168,7 @@ export default function EmployeeHeader({
 
         <div className="hidden h-24 w-[4px] rounded-full bg-gray-500 md:block" />
 
-        {/* Tabs: just add dot=... */}
+        {/* Tabs */}
         <nav
           className="no-scrollbar flex flex-wrap items-center justify-center gap-2 sm:gap-6 md:flex-nowrap md:justify-start md:overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#9ca3af_transparent]"
           role="tablist"
@@ -215,6 +250,7 @@ export default function EmployeeHeader({
         </nav>
       </div>
 
+      {/* Lock overlay */}
       {locked && (
         <div
           data-testid="no-active-sub"
