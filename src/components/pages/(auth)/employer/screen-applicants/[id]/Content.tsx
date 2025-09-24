@@ -22,6 +22,7 @@ import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
+import StageAssignment from '../modals/StageAssignment';
 import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
@@ -215,6 +216,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           requirements: item.stage_requirements,
           applicants: [],
           orderBy: item.order_by,
+          permissions: item.permissions, // Make sure permissions are passed through
         };
         jobStages.push(newData);
       });
@@ -384,6 +386,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       ),
       dispatch: {
         type: SCHEDULE_INTERVIEW,
+        payload: { actionState, setActionState },
+      },
+    },
+    STAGE_ASSIGNMENT: {
+      component: <StageAssignment title={title} handleFormSubmit={handleFormSubmit} />,
+      dispatch: {
+        type: 'STAGE_ASSIGNMENT',
         payload: { actionState, setActionState },
       },
     },
