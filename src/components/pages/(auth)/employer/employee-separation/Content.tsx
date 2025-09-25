@@ -12,9 +12,8 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
-import LetterModal from './modals/LetterModal';
 import SendEmailModal from '@/components/SendEmailModal';
-import { handleEmailSending, updateSeparationItems } from './functions/emailHandlers';
+import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import DeleteSeparationModal from './modals/DeleteSeparationModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparation from './hooks/usePatchSeparation';
@@ -107,6 +106,28 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     };
     mutate(separationItemsCopy[itemIndex], callbackReq);
+  };
+
+  // Handler for Letter email submission  
+  const handleLetterSubmit = (data: LetterData) => {
+    if (isLetterModalOpen && isLetterModalOpen.id) {
+      const updatedItem = handleLetterSending(data, separationItems, isLetterModalOpen.id, isLetterModalOpen.type);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          const updatedSeparationItems = updateSeparationItems(separationItems, updatedItem, isLetterModalOpen.id);
+          setSeparationItems(updatedSeparationItems);
+          setIsLetterModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
   };
 
   // Handler for Sign Documents email submission
@@ -572,13 +593,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsAddSeparationModalOpen} 
         refetch={refetch} 
       />
-      <LetterModal
-        separationItems={separationItems}
-        refetch={refetch}
-        type={isLetterModalOpen?.type}
-        isOpen={isLetterModalOpen}
-        setIsOpen={setIsLetterModalOpen}
-      />
+      {isLetterModalOpen && (
+        <SendEmailModal
+          title={`Letter of ${isLetterModalOpen.type}`}
+          isOpen={!!isLetterModalOpen}
+          onClose={() => setIsLetterModalOpen(null)}
+          onSubmit={handleLetterSubmit}
+          defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          showEmailTemplate={false}
+          showSubject={false}
+          showDateField={true}
+          dateFieldLabel="Date"
+          dateFieldRequired={true}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
       {isDocumentModalOpen && (
         <SendEmailModal
           title="Sign Documents"

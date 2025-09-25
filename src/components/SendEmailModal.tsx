@@ -1,5 +1,7 @@
-import { useContext, useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+
 import dynamic from "next/dynamic";
+
 import { useForm, Controller } from "react-hook-form";
 import { Tooltip } from "react-tooltip";
 import toast from "react-hot-toast";
@@ -8,18 +10,17 @@ import Select from 'react-select';
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
 import ModalLayout from "@/components/ModalLayout";
-import ModalFooterLayout from "@/components/pages/(auth)/employer/screen-applicants/layouts/ModalFooterLayout";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import CreateEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEmailTemplate";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
 import useTagCc from "@/components/hooks/useTagCc";
 import useTagBcc from "@/components/hooks/useTagBcc";
-import CreateEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEmailTemplate";
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-
 import "react-quill/dist/quill.snow.css";
 
 interface Field {
@@ -47,6 +48,11 @@ export interface SendEmailModalProps {
   isLoading?: boolean;
   submitButtonText?: string;
   customFooter?: React.ReactNode;
+  showDateField?: boolean;
+  dateFieldLabel?: string;
+  dateFieldRequired?: boolean;
+  showEmailTemplate?: boolean;
+  showSubject?: boolean;
 }
 
 export default function SendEmailModal({
@@ -61,7 +67,12 @@ export default function SendEmailModal({
   onError,
   isLoading = false,
   submitButtonText = "Send",
-  customFooter
+  customFooter,
+  showDateField = false,
+  dateFieldLabel = "Date",
+  dateFieldRequired = false,
+  showEmailTemplate = true,
+  showSubject = true
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
@@ -103,6 +114,7 @@ export default function SendEmailModal({
       template: "",
       subject: "",
       message: "",
+      date: "",
     },
   });
   
@@ -186,13 +198,14 @@ export default function SendEmailModal({
       (tagsTo.length === defaultRecipients.length && !defaultRecipients.every(email => tagsTo.includes(email)));
     
     return (
-      (formData.template && formData.template !== '') ||
-      (formData.subject && formData.subject.trim() !== '') ||
+      (showEmailTemplate && formData.template && formData.template !== '') ||
+      (showSubject && formData.subject && formData.subject.trim() !== '') ||
       hasAdditionalRecipients ||
       (tagsCc.length > 0) ||
       (tagsBcc.length > 0) ||
       (formData.message && !isHtmlEmpty(formData.message)) ||
-      (shouldManageAttachment && attachmentExist)
+      (shouldManageAttachment && attachmentExist) ||
+      (showDateField && formData.date && formData.date !== '')
     );
   };
 
@@ -219,6 +232,7 @@ export default function SendEmailModal({
     setValue('template', '');
     setValue('subject', '');
     setValue('message', '');
+    setValue('date', '');
     setTagsTo(defaultRecipients);
     setTagsCc([]);
     setTagsBcc([]);
@@ -278,6 +292,14 @@ export default function SendEmailModal({
     }
   }, [watch('message'), clearErrors]);
 
+  // Clear errors when date changes
+  useEffect(() => {
+    const dateValue = watch('date');
+    if (dateValue && dateValue !== '') {
+      clearErrors('date');
+    }
+  }, [watch('date'), clearErrors]);
+
   const handleClose = () => {
     handleModalClose(() => {
       resetFormData();
@@ -328,8 +350,8 @@ export default function SendEmailModal({
       return;
     }
 
-    // Validate subject
-    if (!data.subject && !customSubject) {
+    // Validate subject (only if subject field is shown)
+    if (showSubject && !data.subject && !customSubject) {
       setError('subject', {
         type: 'manual',
         message: 'Subject is required'
@@ -348,6 +370,16 @@ export default function SendEmailModal({
       return;
     }
 
+    // Validate date if required
+    if (showDateField && dateFieldRequired && (!data.date || data.date === '')) {
+      setError('date', {
+        type: 'manual',
+        message: `${dateFieldLabel} is required`
+      });
+      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
+      return;
+    }
+
     const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
     ) : null;
@@ -356,9 +388,10 @@ export default function SendEmailModal({
       email: tagsTo,
       cc: tagsCc,
       bcc: tagsBcc,
-      subject: customSubject || (template?.subject || ''),
+      subject: showSubject ? (customSubject || (template?.subject || '')) : '',
       template: template?.subject || '',
       message: data.message,
+      ...(showDateField && { date: data.date }),
       ...(showAttachment && { attachment: attachment }),
     };
     
@@ -401,130 +434,183 @@ export default function SendEmailModal({
       >
         <form onSubmit={onSubmitWithCleanup}>
           <div className="px-4 pt-4 pb-6">
-            <div className="sm:col-span-4">
-              <div className="flex items-center justify-between">
+            {/* Conditional Email Template Section */}
+            {showEmailTemplate && (
+              <div className="sm:col-span-4">
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="template"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Email Template
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddEmailTemplate}
+                    className="text-sm text-savoy-blue hover:text-blue-700 font-medium"
+                  >
+                    + Add New Email Template
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <Controller
+                    name="template"
+                    control={control}
+                    render={({ field: { onChange, value } }: { field: Field }) => (
+                      <Select
+                        className="text-sm"
+                        classNamePrefix="select"
+                        options={emailTemplateOptions}
+                        value={emailTemplateOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
+                        onChange={(val) => {
+                          onChange(val?.value || '');
+                          if (val?.template) {
+                            const template = val.template;
+                            // Check if template.to already contains the default recipients to avoid duplicates
+                            const templateRecipients = template.to || [];
+                            const newRecipients = [...defaultRecipients];
+                            templateRecipients.forEach((email: string) => {
+                              if (!newRecipients.includes(email)) {
+                                newRecipients.push(email);
+                              }
+                            });
+                            setTagsTo(newRecipients);
+                            
+                            if (template.bcc) {
+                              setIsBCCOpen(true);
+                              setTagsBcc(template.bcc);
+                            } else {
+                              setTagsBcc([]);
+                            }
+                            if (template.cc) {
+                              setIsCCOpen(true);
+                              setTagsCc(template.cc);
+                            } else {
+                              setTagsCc([]);
+                            }
+                            setValue("message", template.body);
+                            setValue("subject", template.subject);
+                            setCustomSubject(template.subject);
+                            clearErrors('subject');
+                            clearErrors('message');
+                          } else {
+                            // Clear template-related fields if no template is selected
+                            setTagsTo(defaultRecipients);
+                            setTagsCc([]);
+                            setTagsBcc([]);
+                            setValue("message", "");
+                            setValue("subject", "");
+                            setCustomSubject("");
+                          }
+                        }}
+                        components={{
+                          DropdownIndicator: () => (
+                            <div className="pointer-events-none px-2">
+                              <SelectChevronDown />
+                            </div>
+                          ),
+                          IndicatorSeparator: () => null,
+                        }}
+                        isClearable={false}
+                        noOptionsMessage={() => 'No email templates available'}
+                        placeholder="Select an email template..."
+                        formatGroupLabel={(group) => (
+                          <div className="text-xs font-semibold text-gray-500 py-1">
+                            {group.label}
+                          </div>
+                        )}
+                        menuPortalTarget={document.body}
+                        styles={{
+                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                          menu: (base) => ({ ...base, zIndex: 9999 }),
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Conditional Subject Section */}
+            {showSubject && (
+              <div className={`sm:col-span-4 w-full ${showEmailTemplate ? 'mt-4' : ''}`}>
                 <label
-                  htmlFor="template"
+                  htmlFor="subject"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Email Template
+                  Subject<span className="text-red-600">*</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={handleAddEmailTemplate}
-                  className="text-sm text-savoy-blue hover:text-blue-700 font-medium"
-                >
-                  + Add New Email Template
-                </button>
-              </div>
-              <div className="mt-2">
-                <Controller
-                  name="template"
-                  control={control}
-                  render={({ field: { onChange, value } }: { field: Field }) => (
-                    <Select
-                      className="text-sm"
-                      classNamePrefix="select"
-                      options={emailTemplateOptions}
-                      value={emailTemplateOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
-                      onChange={(val) => {
-                        onChange(val?.value || '');
-                        if (val?.template) {
-                          const template = val.template;
-                          // Check if template.to already contains the default recipients to avoid duplicates
-                          const templateRecipients = template.to || [];
-                          const newRecipients = [...defaultRecipients];
-                          templateRecipients.forEach((email: string) => {
-                            if (!newRecipients.includes(email)) {
-                              newRecipients.push(email);
-                            }
-                          });
-                          setTagsTo(newRecipients);
-                          
-                          if (template.bcc) {
-                            setIsBCCOpen(true);
-                            setTagsBcc(template.bcc);
-                          } else {
-                            setTagsBcc([]);
-                          }
-                          if (template.cc) {
-                            setIsCCOpen(true);
-                            setTagsCc(template.cc);
-                          } else {
-                            setTagsCc([]);
-                          }
-                          setValue("message", template.body);
-                          setValue("subject", template.subject);
-                          setCustomSubject(template.subject);
-                          clearErrors('subject');
-                          clearErrors('message');
-                        } else {
-                          // Clear template-related fields if no template is selected
-                          setTagsTo(defaultRecipients);
-                          setTagsCc([]);
-                          setTagsBcc([]);
-                          setValue("message", "");
-                          setValue("subject", "");
-                          setCustomSubject("");
-                        }
-                      }}
-                      components={{
-                        DropdownIndicator: () => (
-                          <div className="pointer-events-none px-2">
-                            <SelectChevronDown />
-                          </div>
-                        ),
-                        IndicatorSeparator: () => null,
-                      }}
-                      isClearable={false}
-                      noOptionsMessage={() => 'No email templates available'}
-                      placeholder="Select an email template..."
-                      formatGroupLabel={(group) => (
-                        <div className="text-xs font-semibold text-gray-500 py-1">
-                          {group.label}
-                        </div>
-                      )}
-                      menuPortalTarget={document.body}
-                      styles={{
-                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                        menu: (base) => ({ ...base, zIndex: 9999 }),
-                      }}
-                    />
-                  )}
+                {errors.subject && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.subject.message || 'Subject is required'}
+                  </p>
+                )}
+                <input
+                  id="subject"
+                  type="text"
+                  {...register("subject", { required: 'Subject is required' })}
+                  onChange={(e) => {
+                    setCustomSubject(e.target.value);
+                    setValue('subject', e.target.value);
+                    if (e.target.value.trim() !== '') {
+                      clearErrors('subject');
+                    } else {
+                      setError('subject', {
+                        type: 'manual',
+                        message: 'Subject is required'
+                      });
+                    }
+                  }}
+                  className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
                 />
               </div>
-            </div>
-            <div className="sm:col-span-4 mt-4 w-full">
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Subject<span className="text-red-600">*</span>
-              </label>
-              {errors.subject && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.subject.message || 'Subject is required'}
-                </p>
-              )}
-              <input
-                id="subject"
-                type="text"
-                {...register("subject", { required: 'Subject is required' })}
-                onChange={(e) => {
-                  setCustomSubject(e.target.value);
-                  setValue('subject', e.target.value);
-                  if (e.target.value.trim() !== '') {
-                    clearErrors('subject');
-                  } else {
-                    setError('subject', {
-                      type: 'manual',
-                      message: 'Subject is required'
-                    });
-                  }
-                }}
-                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
-              />
-            </div>
+            )}
+            
+            {/* Conditional Date Field */}
+            {showDateField && (
+              <div className="sm:col-span-4 mt-4">
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  {dateFieldLabel}{dateFieldRequired && <span className="text-red-600">*</span>}
+                </label>
+                {errors.date && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.date.message || `${dateFieldLabel} is required`}
+                  </p>
+                )}
+                <div className="mt-2">
+                  <Controller
+                    control={control}
+                    name="date"
+                    rules={dateFieldRequired ? { required: `${dateFieldLabel} is required` } : {}}
+                    render={({ field }) => (
+                      <CustomDatePicker
+                        id="send-email-datepicker"
+                        placeholder="mm/dd/yyyy"
+                        className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                        selected={field.value}
+                        pickerOnChange={(date: any) => {
+                          field.onChange(date);
+                          if (date) {
+                            clearErrors('date');
+                          }
+                        }}
+                        inputOnChange={(value: any) => {
+                          field.onChange(value);
+                          if (value) {
+                            clearErrors('date');
+                          }
+                        }}
+                        required={dateFieldRequired}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="sm:col-span-4 mt-4">
               <label
                 htmlFor="email"
@@ -773,7 +859,7 @@ export default function SendEmailModal({
           {customFooter ? (
             customFooter
           ) : (
-            <ModalFooterLayout>
+            <div className="flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4">
               <button
                 onClick={handleClose}
                 type="button"
@@ -787,7 +873,16 @@ export default function SendEmailModal({
                 disabled={isLoading}
                 onClick={async (e) => {
                   // Trigger validation for all required fields
-                  const subjectValid = await trigger('subject');
+                  let subjectValid = true;
+                  if (showSubject) {
+                    subjectValid = await trigger('subject');
+                  }
+                  
+                  let dateValid = true;
+                  // Check date validation if required
+                  if (showDateField && dateFieldRequired) {
+                    dateValid = await trigger('date');
+                  }
                   
                   // Check message content specifically for empty HTML
                   const messageContent = watch('message');
@@ -801,7 +896,7 @@ export default function SendEmailModal({
                   }
                   
                   // Check if all validations pass
-                  if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                  if (!subjectValid || !messageValid || !dateValid || tagsTo.length === 0) {
                     e.preventDefault();
                     // Set error for "email" field if no recipients
                     if (tagsTo.length === 0) {
@@ -836,7 +931,7 @@ export default function SendEmailModal({
                   submitButtonText
                 )}
               </button>
-            </ModalFooterLayout>
+            </div>
           )}
         </form>
       </ModalLayout>

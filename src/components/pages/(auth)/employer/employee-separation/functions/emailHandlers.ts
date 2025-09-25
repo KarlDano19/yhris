@@ -1,6 +1,6 @@
 import { T_SeparationEmail } from '@/types/globals';
 
-export type EmailType = 'sign documents' | 'last pay' | 'quit claim';
+export type EmailType = 'letters' | 'sign documents' | 'last pay' | 'quit claim';
 
 export interface EmailData {
   subject: string;
@@ -9,6 +9,12 @@ export interface EmailData {
   cc?: string[];
   bcc?: string[];
   template?: string;
+}
+
+export interface LetterData {
+  date: string;
+  email: string;
+  message: string;
 }
 
 export interface SeparationItem {
@@ -20,6 +26,7 @@ export interface SeparationItem {
     date: string;
     to: string;
     message: string;
+    type?: string;
   };
   signDocuments: {
     template: string;
@@ -45,6 +52,7 @@ export interface SeparationItem {
     cc?: string[];
     bcc?: string[];
   };
+  isLetterSent: boolean;
   isDocumentsSent: boolean;
   isLastPayReleased: boolean;
   isQuitclaimSigned: boolean;
@@ -70,7 +78,10 @@ export const handleEmailSending = (
   const itemIndex = separationItems.findIndex((item: any) => item.id === selectedSeparationId);
   const separationItemCopy = JSON.parse(JSON.stringify(separationItems[itemIndex])); // Deep copy to ensure immutability
 
-  if (emailType === 'sign documents') {
+  if (emailType === 'letters') {
+    // Letters are handled by handleLetterSending function
+    throw new Error('Letters should be handled by handleLetterSending function');
+  } else if (emailType === 'sign documents') {
     separationItemCopy.signDocuments.template = data.template || '';
     separationItemCopy.signDocuments.subject = data.subject;
     separationItemCopy.signDocuments.to = data.email;
@@ -130,4 +141,38 @@ export const updateSeparationItems = (
   return currentSeparationItems.map((item: any) =>
     item.id === selectedSeparationId ? { ...item, ...updatedItem } : item
   );
+};
+
+/**
+ * Handles the logic for preparing letter data for sending, updating the relevant fields
+ * in a copy of the separation item for letter type emails.
+ * @param data The letter form data containing date, email, and message.
+ * @param separationItems The current array of separation items.
+ * @param selectedSeparationId The ID of the currently selected separation item.
+ * @param letterType The type of letter being sent.
+ * @returns The updated separation item ready for mutation.
+ */
+export const handleLetterSending = (
+  data: LetterData,
+  separationItems: SeparationItem[],
+  selectedSeparationId: string | number,
+  letterType?: string
+): T_SeparationEmail => {
+  const itemIndex = separationItems.findIndex((item: any) => item.id === selectedSeparationId);
+  const separationItemCopy = JSON.parse(JSON.stringify(separationItems[itemIndex])); // Deep copy to ensure immutability
+
+  // Update letter-specific fields
+  separationItemCopy.separationLetter.date = data.date;
+  separationItemCopy.separationLetter.to = data.email;
+  separationItemCopy.separationLetter.message = data.message;
+  if (letterType) {
+    separationItemCopy.separationLetter.type = letterType;
+  }
+  separationItemCopy.isLetterSent = true;
+
+  // Set common fields
+  separationItemCopy.actionType = 'sending';
+  separationItemCopy.emailType = 'letters';
+
+  return separationItemCopy;
 };
