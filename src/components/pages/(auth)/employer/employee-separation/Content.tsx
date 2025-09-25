@@ -13,9 +13,8 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import LetterModal from './modals/LetterModal';
-import SignDocumentsModal from './modals/SignDocumentsModal';
-import LastPayModal from './modals/LastPayModal';
-import QuitclaimModal from './modals/QuitclaimModal';
+import SendEmailModal from '@/components/SendEmailModal';
+import { handleEmailSending, updateSeparationItems } from './functions/emailHandlers';
 import DeleteSeparationModal from './modals/DeleteSeparationModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparation from './hooks/usePatchSeparation';
@@ -108,6 +107,68 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     };
     mutate(separationItemsCopy[itemIndex], callbackReq);
+  };
+
+  // Handler for Sign Documents email submission
+  const handleSignDocumentsSubmit = (data: any) => {
+    if (isDocumentModalOpen && isDocumentModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'sign documents', separationItems, isDocumentModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setIsDocumentModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  // Handler for Last Pay email submission
+  const handleLastPaySubmit = (data: any) => {
+    if (isLastPayModalOpen && isLastPayModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'last pay', separationItems, isLastPayModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setSeparationItems(separationItems.map((item: any) => 
+            item.id === isLastPayModalOpen.id ? { ...item, ...updatedItem } : item
+          ));
+          setIsLastPayModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  // Handler for Quitclaim email submission
+  const handleQuitclaimSubmit = (data: any) => {
+    if (isQuitclaimModalOpen && isQuitclaimModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'quit claim', separationItems, isQuitclaimModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
+          setIsQuitclaimModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
   };
 
   const paginationChange = (event: any) => {
@@ -518,24 +579,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isLetterModalOpen}
         setIsOpen={setIsLetterModalOpen}
       />
-      <SignDocumentsModal
-        separationItems={separationItems}
-        refetch={refetch}
-        isOpen={isDocumentModalOpen}
-        setIsOpen={setIsDocumentModalOpen}
-      />
-      <LastPayModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isLastPayModalOpen}
-        setIsOpen={setIsLastPayModalOpen}
-      />
-      <QuitclaimModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isQuitclaimModalOpen}
-        setIsOpen={setIsQuitclaimModalOpen}
-      />
+      {isDocumentModalOpen && (
+        <SendEmailModal
+          title="Sign Documents"
+          isOpen={!!isDocumentModalOpen}
+          onClose={() => setIsDocumentModalOpen(null)}
+          onSubmit={handleSignDocumentsSubmit}
+          defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
+      {isLastPayModalOpen && (
+        <SendEmailModal
+          title="Send Last Pay"
+          isOpen={!!isLastPayModalOpen}
+          onClose={() => setIsLastPayModalOpen(null)}
+          onSubmit={handleLastPaySubmit}
+          defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
+      {isQuitclaimModalOpen && (
+        <SendEmailModal
+          title="Send Quitclaim"
+          isOpen={!!isQuitclaimModalOpen}
+          onClose={() => setIsQuitclaimModalOpen(null)}
+          onSubmit={handleQuitclaimSubmit}
+          defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
       {isDeleteSepartionModalOpen && (
         <DeleteSeparationModal
           refetch={refetch}

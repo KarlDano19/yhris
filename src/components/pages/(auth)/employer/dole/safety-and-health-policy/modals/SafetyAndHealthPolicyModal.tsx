@@ -18,9 +18,11 @@ import "react-quill/dist/quill.snow.css";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";
+import SendEmailModal from "@/components/SendEmailModal";
 import useGetSafetyAndHealthPolicyDetails from "../hooks/useGetSafetyANdHelathPolicyDetails";
 import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
-import SendEmailModal from "./SendEmailModal";
+import useSendEmail from "../hooks/useSendEmail";
+import SafetyAndHealthPolicyAttachmentSection from "../components/SafetyAndHealthPolicyAttachmentSection";
 import { HandlePrint } from "./helper/HandlePrint";
 import { ENHANCED_QUILL_MODULES, ENHANCED_QUILL_FORMATS } from "./helper/CustomQuill";
 import "../styles.css";
@@ -79,6 +81,10 @@ function SafetyAndHealthPolicyModal({
 
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
     useState<T_ModalData | null>(null);
+  
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
 
   useEffect(() => {
     if (isEdit) {
@@ -92,6 +98,7 @@ function SafetyAndHealthPolicyModal({
   } = useGetSafetyAndHealthPolicyDetails();
 
   const { mutateAsync: updateMutate, isLoading } = useUpdateSafetyAndHealthPolicy();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
 
   const statusOptions = [
     { value: 'on-schedule', label: 'On Schedule', color: 'bg-purple-100 text-purple-700' },
@@ -119,6 +126,64 @@ function SafetyAndHealthPolicyModal({
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-600';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.open) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          refetchSafetyAndHealthPolicyDetails();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -359,9 +424,22 @@ function SafetyAndHealthPolicyModal({
           
           {isSendEmailModalOpen && (
             <SendEmailModal
-              refetch={refetchSafetyAndHealthPolicyDetails}
-              isOpen={isSendEmailModalOpen}
-              setIsOpen={setIsSendEmailModalOpen}
+              title="Send Safety and Health Policy"
+              isOpen={!!isSendEmailModalOpen}
+              onClose={() => setIsSendEmailModalOpen(null)}
+              onSubmit={handleEmailSubmit}
+              defaultRecipients={[]}
+              showAttachment={true}
+              customAttachmentSection={
+                <SafetyAndHealthPolicyAttachmentSection
+                  pdfAttachment={safetyAndHealthPolicyDetails?.attachment || null}
+                  onViewAttachment={handleViewAttachment}
+                  onAttachmentUpload={handleAttachmentUpload}
+                  onRemoveAttachment={handleRemoveAttachment}
+                  attachment={attachment}
+                  attachmentExist={attachmentExist}
+                />
+              }
             />
           )}
         </Dialog>

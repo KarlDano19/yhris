@@ -1,7 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-
+import { useContext, useEffect, useMemo, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-
 import { useForm, Controller } from "react-hook-form";
 import { Tooltip } from "react-tooltip";
 import toast from "react-hot-toast";
@@ -9,21 +7,18 @@ import Select from 'react-select';
 
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
-import { initialActionState } from "../lib/initialActionState";
+import ModalLayout from "@/components/ModalLayout";
+import ModalFooterLayout from "@/components/pages/(auth)/employer/screen-applicants/layouts/ModalFooterLayout";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
 import useTagCc from "@/components/hooks/useTagCc";
 import useTagBcc from "@/components/hooks/useTagBcc";
-import ModalLayout from "../../../../../ModalLayout";
-import ModalFooterLayout from "../layouts/ModalFooterLayout";
-import StateContext from "../contexts/StateContext";
-import CreateEmailTemplateModal from "../../settings/general-settings/email-template/modal/CreateEmailTemplate";
+import CreateEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEmailTemplate";
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import { ContextTypes, SendEmailPropTypes as PropTypes } from "../types";
 
 import "react-quill/dist/quill.snow.css";
 
@@ -39,16 +34,41 @@ const isHtmlEmpty = (html: string | null | undefined): boolean => {
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
 
-export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
-  const [isOpen, setIsOpen] = useState(false);
+export interface SendEmailModalProps {
+  title: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+  defaultRecipients?: string[];
+  showAttachment?: boolean;
+  customAttachmentSection?: React.ReactNode;
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+  isLoading?: boolean;
+  submitButtonText?: string;
+  customFooter?: React.ReactNode;
+}
+
+export default function SendEmailModal({
+  title,
+  isOpen,
+  onClose,
+  onSubmit,
+  defaultRecipients = [],
+  showAttachment = true,
+  customAttachmentSection,
+  onSuccess,
+  onError,
+  isLoading = false,
+  submitButtonText = "Send",
+  customFooter
+}: SendEmailModalProps) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
     [isOpen]
   );
-  const { actionState, setActionState }: ContextTypes = useContext(
-    StateContext
-  ) as ContextTypes;
-  const [isCCOpen, setIsCCOPen] = useState(false);
+  
+  const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState("");
   const [inputCc, setInputCc] = useState("");
@@ -56,9 +76,14 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const [customSubject, setCustomSubject] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
+  
+  // Don't manage attachment state when using custom attachment section
+  const shouldManageAttachment = showAttachment && !customAttachmentSection;
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const isInitialized = useRef(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [isCreateEmailTemplateModalOpen, setIsCreateEmailTemplateModalOpen] = useState(false);
+  
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
     setInputTo
@@ -69,6 +94,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   );
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } =
     useTagBcc(inputBcc, setInputBcc);
+    
   const { register, handleSubmit, setValue, watch, trigger, control, formState: { errors }, setError, clearErrors } = useForm({
     defaultValues: {
       bcc: "",
@@ -79,6 +105,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       message: "",
     },
   });
+  
   const { data: dataEmailTemplate, refetch: refetchEmailTemplates } = useGetEmailTemplateItems();
 
   // Helper function to check if an item was created within 24 hours
@@ -154,8 +181,9 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
     const formData = watch();
-    // Check if tagsTo has more than just the default applicant email
-    const hasAdditionalRecipients = tagsTo.length > 1 || (tagsTo.length === 1 && tagsTo[0] !== actionState.email);
+    // Check if tagsTo has more than just the default recipients
+    const hasAdditionalRecipients = tagsTo.length > defaultRecipients.length || 
+      (tagsTo.length === defaultRecipients.length && !defaultRecipients.every(email => tagsTo.includes(email)));
     
     return (
       (formData.template && formData.template !== '') ||
@@ -164,7 +192,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       (tagsCc.length > 0) ||
       (tagsBcc.length > 0) ||
       (formData.message && !isHtmlEmpty(formData.message)) ||
-      attachmentExist
+      (shouldManageAttachment && attachmentExist)
     );
   };
 
@@ -191,17 +219,19 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
     setValue('template', '');
     setValue('subject', '');
     setValue('message', '');
-    setTagsTo([actionState.email]);
+    setTagsTo(defaultRecipients);
     setTagsCc([]);
     setTagsBcc([]);
     setInputTo('');
     setInputCc('');
     setInputBcc('');
     setCustomSubject('');
-    setIsCCOPen(false);
+    setIsCCOpen(false);
     setIsBCCOpen(false);
-    setAttachment(null);
-    setAttachmentExist(false);
+    if (shouldManageAttachment) {
+      setAttachment(null);
+      setAttachmentExist(false);
+    }
   };
 
   // Function to handle modal close with unsaved changes check
@@ -215,9 +245,14 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   };
 
   useEffect(() => {
-    setIsOpen(true);
-    setTagsTo([actionState.email]);
-  }, []);
+    if (isOpen && !isInitialized.current) {
+      setTagsTo(defaultRecipients);
+      isInitialized.current = true;
+    } else if (!isOpen) {
+      // Reset the initialization flag when modal closes
+      isInitialized.current = false;
+    }
+  }, [isOpen, defaultRecipients]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -246,12 +281,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
   const handleClose = () => {
     handleModalClose(() => {
       resetFormData();
-      setIsOpen(false);
-      setTimeout(() => setActionState(initialActionState), 400);
+      onClose();
     });
   };
 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Don't handle attachment upload if using custom attachment section
+    if (!shouldManageAttachment) {
+      return;
+    }
+    
     const file = event.target.files?.[0];
     if (file) {
       // Check file size (5MB limit)
@@ -278,7 +317,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
     // This ensures that the "New" grouping is reset after successful email sending
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmitForm = (data: any) => {
     // Validate "To" field manually since it uses tags
     if (tagsTo.length === 0) {
       setError('email', {
@@ -320,20 +359,24 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
       subject: customSubject || (template?.subject || ''),
       template: template?.subject || '',
       message: data.message,
-      attachment: attachment,
+      ...(showAttachment && { attachment: attachment }),
     };
     
-    handleFormSubmit(formData, () => {
-      // Reset form data before closing modal to prevent unsaved changes detection
+    try {
+      onSubmit(formData);
+      handleEmailSent();
       resetFormData();
-      setIsOpen(false);
-    });
+      onClose();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      if (onError) onError(error);
+    }
   };
 
   // Call handleEmailSent when the form is submitted
   const onSubmitWithCleanup = handleSubmit((data: any) => {
     handleEmailSent();
-    onSubmit(data);
+    onSubmitForm(data);
   });
 
   return (
@@ -388,19 +431,16 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                         onChange(val?.value || '');
                         if (val?.template) {
                           const template = val.template;
-                          if (actionState.email) {
-                            // Check if template.to already contains the applicant email to avoid duplicates
-                            const templateRecipients = template.to || [];
-                            if (!templateRecipients.includes(actionState.email)) {
-                              // Only add applicantEmail if it's not already in the template recipients
-                              setTagsTo([actionState.email, ...templateRecipients]);
-                            } else {
-                              // Use template recipients as is since it already includes the applicant email
-                              setTagsTo(templateRecipients);
+                          // Check if template.to already contains the default recipients to avoid duplicates
+                          const templateRecipients = template.to || [];
+                          const newRecipients = [...defaultRecipients];
+                          templateRecipients.forEach((email: string) => {
+                            if (!newRecipients.includes(email)) {
+                              newRecipients.push(email);
                             }
-                          } else {
-                            setTagsTo(template.to || []);
-                          }
+                          });
+                          setTagsTo(newRecipients);
+                          
                           if (template.bcc) {
                             setIsBCCOpen(true);
                             setTagsBcc(template.bcc);
@@ -408,7 +448,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                             setTagsBcc([]);
                           }
                           if (template.cc) {
-                            setIsCCOPen(true);
+                            setIsCCOpen(true);
                             setTagsCc(template.cc);
                           } else {
                             setTagsCc([]);
@@ -420,7 +460,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                           clearErrors('message');
                         } else {
                           // Clear template-related fields if no template is selected
-                          setTagsTo(actionState.email ? [actionState.email] : []);
+                          setTagsTo(defaultRecipients);
                           setTagsCc([]);
                           setTagsBcc([]);
                           setValue("message", "");
@@ -541,7 +581,7 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
                       ? "bg-savoy-blue text-white hover:bg-blue-700"
                       : "bg-gray-50"
                   }`}
-                  onClick={() => setIsCCOPen(!isCCOpen)}
+                  onClick={() => setIsCCOpen(!isCCOpen)}
                 >
                   CC
                 </button>
@@ -691,90 +731,113 @@ export default function SendEmail({ title, handleFormSubmit }: PropTypes) {
               </div>
             </div>
             
-            {/* Attachment section */}
-            <div className='sm:col-span-4 mt-4'>
-              <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
-                Attachment
-              </label>
-              <div className='mt-2'>
-                {/* File upload for new attachment */}
-                <input
-                  id='attachment'
-                  type='file'
-                  onChange={handleAttachmentUpload}
-                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                />
-                {attachmentExist ? (
-                  <button
-                    type='button'
-                    className='underline text-savoy-blue text-sm mt-1'
-                    onClick={() => {
-                      setAttachment(null);
-                      setAttachmentExist(false);
-                    }}
-                  >
-                    Remove Attachment
-                  </button>
-                ) : null}
+            {/* Conditional Attachment section */}
+            {showAttachment && (
+              <div className='sm:col-span-4 mt-4'>
+                {customAttachmentSection ? (
+                  customAttachmentSection
+                ) : (
+                  <>
+                    <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                      Attachment
+                    </label>
+                    <div className='mt-2'>
+                      {/* File upload for new attachment */}
+                      <input
+                        id='attachment'
+                        type='file'
+                        onChange={handleAttachmentUpload}
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                      />
+                      {attachmentExist ? (
+                        <button
+                          type='button'
+                          className='underline text-savoy-blue text-sm mt-1'
+                          onClick={() => {
+                            setAttachment(null);
+                            setAttachmentExist(false);
+                          }}
+                        >
+                          Remove Attachment
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5MB.</p>
+                  </>
+                )}
               </div>
-              <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5MB.</p>
-            </div>
+            )}
           </div>
 
           <hr />
-          <ModalFooterLayout>
-            <button
-              onClick={handleClose}
-              type="button"
-              className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
-            >
-              Close
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
-              onClick={async (e) => {
-                // Trigger validation for all required fields
-                const subjectValid = await trigger('subject');
-                
-                // Check message content specifically for empty HTML
-                const messageContent = watch('message');
-                let messageValid = !isHtmlEmpty(messageContent);
-                
-                if (!messageValid) {
-                  setError('message', {
-                    type: 'manual',
-                    message: 'Message is required'
-                  });
-                }
-                
-                // Check if all validations pass
-                if (!subjectValid || !messageValid || tagsTo.length === 0) {
-                  e.preventDefault();
-                  // Set error for "email" field if no recipients
-                  if (tagsTo.length === 0) {
-                    setError('email', {
+          {customFooter ? (
+            customFooter
+          ) : (
+            <ModalFooterLayout>
+              <button
+                onClick={handleClose}
+                type="button"
+                className="border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                className="rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]"
+                disabled={isLoading}
+                onClick={async (e) => {
+                  // Trigger validation for all required fields
+                  const subjectValid = await trigger('subject');
+                  
+                  // Check message content specifically for empty HTML
+                  const messageContent = watch('message');
+                  let messageValid = !isHtmlEmpty(messageContent);
+                  
+                  if (!messageValid) {
+                    setError('message', {
                       type: 'manual',
-                      message: 'At least one recipient is required'
+                      message: 'Message is required'
                     });
                   }
-                  toast.custom(
-                    () => (
-                      <CustomToast
-                        message={'You cannot proceed due to incomplete fields. Please review.'}
-                        type='error'
-                      />
-                    ),
-                    {
-                      duration: 2000,
+                  
+                  // Check if all validations pass
+                  if (!subjectValid || !messageValid || tagsTo.length === 0) {
+                    e.preventDefault();
+                    // Set error for "email" field if no recipients
+                    if (tagsTo.length === 0) {
+                      setError('email', {
+                        type: 'manual',
+                        message: 'At least one recipient is required'
+                      });
                     }
-                  );
-                }
-              }}
-            >
-              Send
-            </button>
-          </ModalFooterLayout>
+                    toast.custom(
+                      () => (
+                        <CustomToast
+                          message={'You cannot proceed due to incomplete fields. Please review.'}
+                          type='error'
+                        />
+                      ),
+                      {
+                        duration: 2000,
+                      }
+                    );
+                  }
+                }}
+              >
+                {isLoading ? (
+                  <div
+                    className='animate-spin inline-block w-[20px] h-[20px] border-[2px] border-current border-t-transparent text-white rounded-full'
+                    role='status'
+                    aria-label='loading'
+                  >
+                    <span className='sr-only'>Loading...</span>
+                  </div>
+                ) : (
+                  submitButtonText
+                )}
+              </button>
+            </ModalFooterLayout>
+          )}
         </form>
       </ModalLayout>
       

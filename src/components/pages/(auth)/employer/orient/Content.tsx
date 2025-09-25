@@ -19,13 +19,13 @@ import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
 import OrientOptionModal from './modals/OrientOptionModal';
-import SendContractModal from './modals/SendContractModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SuccessModal from './modals/SuccessModal';
 import NoticeModal from './modals/NoticeModal';
-import IntroduceModal from './modals/IntroduceModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
+import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
@@ -273,6 +273,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       updateOrientationStatus();
     }
   };
+
 
   const setOriented = () => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
@@ -549,13 +550,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       {isSendContractModalOpen && (
-        <SendContractModal
-          selectedOrientId={selectedOrientId}
-          orientItems={orientItems}
-          setOrientItems={setOrientItems}
-          setIsOpen={setIsSendContractModalOpen}
+        <SendEmailModal
+          title="Send Contract"
           isOpen={isSendContractModalOpen}
-          setSuccessModal={setIsSuccessSendContractModalOpen}
+          onClose={() => setIsSendContractModalOpen(false)}
+          onSubmit={(data) => {
+            const updatedItem = handleEmailSending(data, 'contract', orientItems, selectedOrientId);
+            mutate(updatedItem, {
+              onSuccess: () => {
+                setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
+                setIsSendContractModalOpen(false);
+                setIsSuccessSendContractModalOpen(true);
+                toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
+                  duration: 5000,
+                });
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                  duration: 7000,
+                });
+              },
+            });
+          }}
+          defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send Contract"
         />
       )}
       {isOrientOptionModalOpen && (
@@ -770,18 +789,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setNewHireOriented(false);
             }}
           >
-            NO, I HAVEN'T.
+            NO, I HAVEN&apos;T.
           </button>
         </div>
       </NoticeModal>
       {isIntroducedModalOpen && (
-        <IntroduceModal
-          selectedOrientId={selectedOrientId}
-          orientItems={orientItems}
-          setOrientItems={setOrientItems}
-          setIsOpen={setIsIntroducedModalOpen}
+        <SendEmailModal
+          title="Introduce to the team"
           isOpen={isIntroducedModalOpen}
-          setSuccessModal={setSuccessIsIntroducedModalOpen}
+          onClose={() => setIsIntroducedModalOpen(false)}
+          onSubmit={(data) => {
+            const updatedItem = handleEmailSending(data, 'introduce', orientItems, selectedOrientId);
+            mutate(updatedItem, {
+              onSuccess: () => {
+                setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
+                setIsIntroducedModalOpen(false);
+                setSuccessIsIntroducedModalOpen(true);
+                toast.custom(() => <CustomToast message={'Successfully sent introduction email.'} type='success' />, {
+                  duration: 5000,
+                });
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                  duration: 7000,
+                });
+              },
+            });
+          }}
+          defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send Introduction"
         />
       )}
       <SuccessModal

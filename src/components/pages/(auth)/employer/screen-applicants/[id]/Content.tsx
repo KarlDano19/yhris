@@ -16,7 +16,7 @@ import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
-import SendEmail from '../modals/SendEmail';
+import SendEmailModal from '@/components/SendEmailModal';
 import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
@@ -368,7 +368,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       },
     },
     SEND_EMAIL: {
-      component: <SendEmail title={title} handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <SendEmailModal
+          title={title}
+          isOpen={true}
+          onClose={() => setActionState(initialActionState)}
+          onSubmit={(data) => handleFormSubmit(data, () => setActionState(initialActionState))}
+          defaultRecipients={actionState.email ? [actionState.email] : []}
+          showAttachment={true}
+          submitButtonText="Send"
+        />
+      ),
       dispatch: {
         type: SEND_EMAIL,
         payload: { actionState, setActionState },
