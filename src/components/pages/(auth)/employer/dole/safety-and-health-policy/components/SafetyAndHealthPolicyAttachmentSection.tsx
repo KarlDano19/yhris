@@ -1,22 +1,34 @@
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import { TrashIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import ClipIcon from '@/svg/ClipIcon';
+import PrintIcon from '@/svg/PrintIcon';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import classNames from '@/helpers/classNames';
 
 interface SafetyAndHealthPolicyAttachmentSectionProps {
   pdfAttachment: string | null;
+  isDeleting: boolean;
+  canDelete: boolean;
   onViewAttachment: (url: string) => void;
-  onAttachmentUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveAttachment: () => void;
-  attachment: File | null;
-  attachmentExist: boolean;
+  onDeleteAttachment: () => void;
+  onGeneratePDF?: () => void;
+  isGeneratingPDF?: boolean;
+  canGeneratePDF?: boolean;
 }
 
+/**
+ * Custom attachment section for Safety and Health Policy modals
+ * Shows existing PDF attachments with view/delete functionality
+ */
 export default function SafetyAndHealthPolicyAttachmentSection({
   pdfAttachment,
+  isDeleting,
+  canDelete,
   onViewAttachment,
-  onAttachmentUpload,
-  onRemoveAttachment,
-  attachment,
-  attachmentExist
+  onDeleteAttachment,
+  onGeneratePDF,
+  isGeneratingPDF = false,
+  canGeneratePDF = true
 }: SafetyAndHealthPolicyAttachmentSectionProps) {
   // Get filename from attachment URL
   const getFilenameFromUrl = (url: string) => {
@@ -33,48 +45,62 @@ export default function SafetyAndHealthPolicyAttachmentSection({
   };
 
   return (
-    <div className="mt-2">
-      {/* Display existing attachment from backend */}
-      {pdfAttachment && (
-        <div className="mb-3 p-3 bg-gray-50 rounded-md">
-          <div className="flex items-center gap-2">
-            <ClipIcon hasFile={true} />
+    <div className="mt-10 pt-4">
+      <label className='block text-sm font-medium leading-6 text-gray-900'>
+        Attachment
+      </label>
+      <div className="mt-2 flex items-center gap-2 pl-2">
+        {pdfAttachment && (
+          <>
+            <ClipIcon hasFile={!!pdfAttachment} />
             <span className="text-sm text-gray-600">
               {getFilenameFromUrl(pdfAttachment)}
             </span>
-            <ArrowTopRightOnSquareIcon 
-              className="h-5 w-5 text-savoy-blue cursor-pointer ml-2"
+            <button
+              type="button"
               onClick={() => onViewAttachment(pdfAttachment)}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">Current attachment (will be included in email)</p>
-        </div>
-      )}
-      
-      {/* Show message when no attachments available */}
-      {!pdfAttachment && !attachment && (
-        <div className="text-sm text-gray-500">
-          No attachment available
-        </div>
-      )}
-      
-      {/* File upload for new attachment */}
-      <input
-        id='attachment'
-        type='file'
-        onChange={onAttachmentUpload}
-        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-      />
-      {attachmentExist ? (
-        <button
-          type='button'
-          className='underline text-savoy-blue text-sm mt-1'
-          onClick={onRemoveAttachment}
-        >
-          Remove New Attachment
-        </button>
-      ) : null}
-      <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
+              className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
+              title="View attachment"
+            >
+              <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+            </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={onDeleteAttachment}
+                disabled={isDeleting}
+                className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                title="Delete attachment"
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <TrashIcon className="h-4 w-4" />
+                )}
+              </button>
+            )}
+          </>
+        )}
+        {!pdfAttachment && (
+          <>
+            {onGeneratePDF && (
+              <button
+                type="button"
+                onClick={onGeneratePDF}
+                disabled={!canGeneratePDF || isGeneratingPDF}
+                className={classNames(!canGeneratePDF && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
+                title="Generate PDF"
+              >
+                {isGeneratingPDF ? (
+                  <LoadingSpinner size="sm" color="yellow" />
+                ) : (
+                  <PrintIcon />
+                )}
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

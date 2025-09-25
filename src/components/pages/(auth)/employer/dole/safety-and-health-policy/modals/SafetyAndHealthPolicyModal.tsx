@@ -19,11 +19,11 @@ import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";
 import SendEmailModal from "@/components/SendEmailModal";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import useGetSafetyAndHealthPolicyDetails from "../hooks/useGetSafetyANdHelathPolicyDetails";
 import useUpdateSafetyAndHealthPolicy from "../hooks/useUpdateSafetyAndHealthPolicy";
 import useSendEmail from "../hooks/useSendEmail";
 import SafetyAndHealthPolicyAttachmentSection from "../components/SafetyAndHealthPolicyAttachmentSection";
-import { HandlePrint } from "./helper/HandlePrint";
 import { ENHANCED_QUILL_MODULES, ENHANCED_QUILL_FORMATS } from "./helper/CustomQuill";
 import "../styles.css";
 
@@ -63,7 +63,7 @@ function SafetyAndHealthPolicyModal({
   const searchParams = useSearchParams();
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
-    [isOpen]
+    []
   );
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<FormValues>({
@@ -85,17 +85,19 @@ function SafetyAndHealthPolicyModal({
   // Email-specific state
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
-
-  useEffect(() => {
-    if (isEdit) {
-      refetchSafetyAndHealthPolicyDetails();
-    }
-  }, [isEdit]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const {
     data: safetyAndHealthPolicyDetails,
     refetch: refetchSafetyAndHealthPolicyDetails,
   } = useGetSafetyAndHealthPolicyDetails();
+
+  useEffect(() => {
+    if (isEdit) {
+      refetchSafetyAndHealthPolicyDetails();
+    }
+  }, [isEdit, refetchSafetyAndHealthPolicyDetails]);
 
   const { mutateAsync: updateMutate, isLoading } = useUpdateSafetyAndHealthPolicy();
   const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
@@ -151,19 +153,69 @@ function SafetyAndHealthPolicyModal({
     setAttachmentExist(false);
   };
 
+  const handleDeleteAttachment = async () => {
+    setIsDeleting(true);
+    try {
+      // Use the existing updateMutate to delete attachment with explicit null
+      await updateMutate({
+        data: { 
+          id: safetyAndHealthPolicyDetails?.id,
+          attachment: null // This will clear the attachment
+        }
+      });
+      
+      toast.custom(() => <CustomToast message='Attachment deleted successfully.' type='success' />, { duration: 3000 });
+      refetchSafetyAndHealthPolicyDetails();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error?.message || 'Failed to delete attachment.'} type='error' />, { duration: 5000 });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      // Use the existing updateMutate to trigger PDF generation
+      await updateMutate({
+        data: { 
+          id: safetyAndHealthPolicyDetails?.id,
+          regenerate_pdf: true 
+        }
+      });
+      
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+      await refetchSafetyAndHealthPolicyDetails();
+      
+      // If we're not in the send email modal, open it after successful PDF generation
+      if (!isSendEmailModalOpen) {
+        setIsSendEmailModalOpen({
+          open: true,
+        });
+      }
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error?.message || 'Failed to generate PDF.'} type='error' />, { duration: 5000 });
+    } finally {
+      // Add 5-second timeout to prevent spam
+      setTimeout(() => {
+        setIsGeneratingPDF(false);
+      }, 5000);
+    }
+  };
+
   const handleEmailSubmit = (data: any) => {
     if (isSendEmailModalOpen && isSendEmailModalOpen.open) {
       const payload = new FormData();
-      payload.append('to', JSON.stringify(data.to));
+      payload.append('to', JSON.stringify(data.email));
       payload.append('subject', data.subject);
       payload.append('context', data.message);
       if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
       if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
       
       // Include attachment if present
-      if (data.attachment) { // Prioritize attachment from global modal's form data
+      if (data.attachment) {
         payload.append('attachment', data.attachment);
-      } else if (attachment) { // Fallback to local attachment state
+      } else if (attachment) {
         payload.append('attachment', attachment);
       }
 
@@ -171,7 +223,6 @@ function SafetyAndHealthPolicyModal({
         onSuccess: () => {
           setIsSendEmailModalOpen(null);
           refetchSafetyAndHealthPolicyDetails();
-          // Clear attachment state after successful send
           setAttachment(null);
           setAttachmentExist(false);
           toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
@@ -297,9 +348,21 @@ function SafetyAndHealthPolicyModal({
                     >
                       <EditIcon />
                     </button>
-                    <button onClick={HandlePrint} data-print-button disabled={!hasActiveSubscription} className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}>
-                      <PrintIcon />
-                    </button>
+                    {!safetyAndHealthPolicyDetails?.attachment && (
+                      <button 
+                        onClick={handleGeneratePDF} 
+                        data-print-button 
+                        disabled={!hasActiveSubscription || isGeneratingPDF} 
+                        className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
+                        title="Generate PDF"
+                      >
+                        {isGeneratingPDF ? (
+                          <LoadingSpinner size="sm" color="yellow" />
+                        ) : (
+                          <PrintIcon />
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() =>
                         setIsSendEmailModalOpen({
@@ -433,11 +496,13 @@ function SafetyAndHealthPolicyModal({
               customAttachmentSection={
                 <SafetyAndHealthPolicyAttachmentSection
                   pdfAttachment={safetyAndHealthPolicyDetails?.attachment || null}
+                  isDeleting={isDeleting}
+                  canDelete={!!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
                   onViewAttachment={handleViewAttachment}
-                  onAttachmentUpload={handleAttachmentUpload}
-                  onRemoveAttachment={handleRemoveAttachment}
-                  attachment={attachment}
-                  attachmentExist={attachmentExist}
+                  onDeleteAttachment={handleDeleteAttachment}
+                  onGeneratePDF={handleGeneratePDF}
+                  isGeneratingPDF={isGeneratingPDF}
+                  canGeneratePDF={hasActiveSubscription}
                 />
               }
             />
