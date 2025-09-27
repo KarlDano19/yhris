@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import PersonalInformation from './tabs/PersonalInformation';
 import EmploymentDetails from './tabs/EmploymentDetails';
 import InjuryDetails from './tabs/InjuryDetails';
@@ -39,8 +38,6 @@ export default function UpdateWorkAccidentIllnessReportModal({
   setEmployeeSelected: (value: boolean) => void;
 }) {
     const cancelButtonRef = useRef(null);
-    const [employeeItems, setEmployeeItems] = useState<any>([]);
-    const { data: employeeData } = useGetEmployeeItems();
     const {
         data: workAccidentIllnessReportData,
         refetch: refetchWorkAccidentIllnessReport,
@@ -50,17 +47,12 @@ export default function UpdateWorkAccidentIllnessReportModal({
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   useEffect(() => {
     if (isOpen) {
       refetchWorkAccidentIllnessReport();
     }
-  }, [isOpen]);
+  }, [isOpen, refetchWorkAccidentIllnessReport]);
 
   useEffect(() => {
     if (workAccidentIllnessReportData) {
@@ -94,16 +86,13 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
       setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
 
-      // Set employee search state if employee data is available
-      if (workAccidentIllnessReportData.employee && employeeData) {
-        const employee = employeeData.find((emp: any) => emp.id === workAccidentIllnessReportData.employee);
-        if (employee) {
-          setEmployeeSearch(`${employee.firstname} ${employee.lastname}`);
-          setEmployeeSelected(true);
-        }
+      // Set employee search state - EmployeeSelect will handle the data fetching
+      if (workAccidentIllnessReportData.employee) {
+        setEmployeeSearch('Loading employee...');
+        setEmployeeSelected(true);
       }
     }
-  }, [workAccidentIllnessReportData, employeeData]);
+  }, [workAccidentIllnessReportData, setValue, setEmployeeSearch, setEmployeeSelected]);
 
   const customCloseModal = () => {
     reset();
@@ -180,7 +169,6 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
-                    employeeItems={employeeItems || []}
                     employeeSearch={employeeSearch}
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}

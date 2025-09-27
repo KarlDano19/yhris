@@ -1,34 +1,15 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { useState, useRef, useEffect } from "react";
-import Select, { components } from "react-select";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
+import EmployeeSelect from "@/components/common/EmployeeSelect";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import { Tooltip } from 'react-tooltip';
 
-// Custom Option component to display department/position in dropdown
-const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            • {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
 
 function PersonalInformation({
   control,
@@ -36,7 +17,6 @@ function PersonalInformation({
   handleSubmit,
   setSelectedTab,
   setValue,
-  employeeItems,
   employeeSearch,
   setEmployeeSearch,
   employeeSelected,
@@ -47,29 +27,11 @@ function PersonalInformation({
   handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
-  employeeItems: any[];
   employeeSearch: string;
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
 }) {
-  // React Select employee items state
-  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
-
-  // Transform employee items for React Select
-  useEffect(() => {
-    if (employeeItems && employeeItems.length > 0) {
-      const selectItems = employeeItems.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-        address: item.address,
-        gender: item.gender,
-      }));
-      setReactSelectEmployeeItems(selectItems);
-    }
-  }, [employeeItems]);
 
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -162,83 +124,31 @@ function PersonalInformation({
               Name of Injured Worker<span className="text-red-600">*</span>
             </label>
             <div className="relative mt-2">
-              <Controller
-                name="employee"
+              <EmployeeSelect
                 control={control}
-                rules={{ required: "Please select an employee" }}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }: {
-                  field: { onChange: (value: any) => void; value: any };
-                  fieldState: { error?: { message?: string } };
-                }) => (
-                  <>
-                    <Select
-                      className="basic-single-select"
-                      classNamePrefix="select"
-                      options={reactSelectEmployeeItems}
-                      value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
-                      onChange={(selectedOption) => {
-                        onChange(selectedOption ? selectedOption.value : '');
-                        if (selectedOption) {
-                          setValue('address', selectedOption.address);
-                          setValue('sex', selectedOption.gender);
-                          setEmployeeSearch(selectedOption.label);
-                          setEmployeeSelected(true);
-                        } else {
-                          setValue('address', '');
-                          setValue('sex', '');
-                          setEmployeeSearch('');
-                          setEmployeeSelected(false);
-                        }
-                      }}
-                      components={{
-                        Option: CustomOption,
-                        DropdownIndicator: () => (
-                          <div className="pointer-events-none px-2">
-                            <SelectChevronDown />
-                          </div>
-                        ),
-                        IndicatorSeparator: () => null,
-                      }}
-                      isClearable={true}
-                      placeholder="Select employee..."
-                      isSearchable={true}
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          minHeight: '38px',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '6px',
-                          backgroundColor: '#f3f4f6',
-                        }),
-                        menu: (provided) => ({
-                          ...provided,
-                          zIndex: 9999,
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected 
-                            ? '#3b82f6' 
-                            : state.isFocused 
-                              ? '#dbeafe' 
-                              : 'white',
-                          color: state.isSelected ? 'white' : '#374151',
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: '#374151',
-                        }),
-                      }}
-                    />
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1 ml-1">
-                        {error.message}
-                      </p>
-                    )}
-                  </>
-                )}
+                name="employee"
+                label=""
+                required={true}
+                placeholder="Select employee..."
+                isMulti={false}
+                isClearable={true}
+                employeeSearch={employeeSearch}
+                setEmployeeSearch={setEmployeeSearch}
+                setEmployeeSelected={setEmployeeSelected}
+                className=""
+                onChange={(selectedOption: any) => {
+                  if (selectedOption && !selectedOption.isShowMore) {
+                    setValue('address', selectedOption.address);
+                    setValue('sex', selectedOption.gender);
+                    setEmployeeSearch(selectedOption.label);
+                    setEmployeeSelected(true);
+                  } else {
+                    setValue('address', '');
+                    setValue('sex', '');
+                    setEmployeeSearch('');
+                    setEmployeeSelected(false);
+                  }
+                }}
               />
             </div>
           </div>
@@ -300,8 +210,17 @@ function PersonalInformation({
                 {...register("address", { required: true })}
                 id="address"
                 readOnly
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-50"
+                data-tooltip-id="address-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
               />
+              {employeeSelected && (
+                <Tooltip 
+                  id="address-tooltip" 
+                  place="bottom"
+                  style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+                />
+              )}
             </div>
           </div>
           <div>
@@ -335,8 +254,17 @@ function PersonalInformation({
                 {...register("sex", { required: true })}
                 id="sex"
                 readOnly
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-50"
+                data-tooltip-id="gender-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
               />
+              {employeeSelected && (
+                <Tooltip 
+                  id="gender-tooltip" 
+                  place="bottom"
+                  style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+                />
+              )}
             </div>
           </div>
         </div>
