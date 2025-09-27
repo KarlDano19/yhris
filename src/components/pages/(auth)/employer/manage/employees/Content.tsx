@@ -29,10 +29,17 @@ import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 
-
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
+
+// NEW: Smart Permission Imports
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
+import DebugPermissions from '@/components/DebugPermissions';
+
+import RBACTest from '@/components/RBACTest';
 
 type PaginationProps = {
   totalRecords: number;
@@ -71,7 +78,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const cachedRights = useLegacyPermissions();
 
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -124,7 +131,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const autocompleteRef = useRef<HTMLUListElement>(null);
-
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
     if (autocompleteRef.current && index >= 0) {
@@ -146,20 +152,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [
     {
+      id: 'download-template-btn',
       name: 'Download Template',
       action: () => {
         setIsExportTemplateModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
+      id: 'import-employee-btn',
       name: 'Import',
       action: () => {
         setIsImportModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
+      id: 'export-employee-btn',
       name: 'Export',
       action: () => {
         if (!hasAgreed) {
@@ -172,10 +179,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         }
       },
-      disabled: !cachedRigths?.state?.data?.export_employee,
     },
   ];
-
   useEffect(() => {
     // Add proper null/undefined checks
     if (employeeListData && employeeListData.records && Array.isArray(employeeListData.records)) {
@@ -238,7 +243,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setCurrentPage(1);
     setPageSize(value);
   };
-
   const handleColumnToggle = (columnKey: string) => {
     setVisibleColumns(prev => ({
       ...prev,
@@ -283,7 +287,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     setVisibleColumns(allColumns);
   };
-
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
@@ -342,18 +345,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-employee-btn"
                 onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="delete-employee-btn"
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -369,7 +372,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
   };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
@@ -382,7 +384,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center             gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -441,7 +443,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
                       setShowAutocomplete(true);
-                      setSelectedIndex(-1); // Reset selection when typing
+                      setSelectedIndex(-1);
                     }}
                     onFocus={() => {
                       if (pendingFilter.search) setShowAutocomplete(true);
@@ -455,7 +457,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         if (showAutocomplete && selectedIndex >= 0) {
-                          // If an item is selected from autocomplete, use that
                           const filteredItems = employeeItemsAll.filter(
                             (item: any) =>
                               item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
@@ -472,7 +473,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           setShowAutocomplete(false);
                           setSelectedIndex(-1);
                         } else {
-                          // Regular search
                           handleSearch();
                           setShowAutocomplete(false);
                         }
@@ -566,13 +566,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <div className='flex'>
-                <button
+                <SmartButton
+                  id="create-employee-btn"
                   onClick={() => setIsAddEmployeeModalOpen(true)}
                   className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                  disabled={!cachedRigths?.state?.data?.create_employee}
                 >
                   CREATE
-                </button>
+                </SmartButton>
                 <Menu as='div' className='relative'>
                   <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                     <span className='sr-only'>Open options</span>
@@ -594,20 +594,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         {menuOptions.map((item) => (
                           <Menu.Item key={item.name}>
                             {({ active }) => (
-                              <span
+                              <SmartMenuItem
+                                id={item.id}
+                                name={item.name}
+                                action={item.action}
                                 className={classNames(
                                   'block px-4 py-2 text-sm cursor-pointer text-center',
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                  item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
                                 )}
-                                onClick={() => {
-                                  if (!item.disabled) {
-                                    item.action();
-                                  }
-                                }}
-                              >
-                                {item.name}
-                              </span>
+                                disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
+                              />
                             )}
                           </Menu.Item>
                         ))}
@@ -674,7 +670,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </Menu>
             </div>
           </div>
-
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
@@ -826,7 +821,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         positionItems={positionItems}
       />
       <Tooltip id='employee-search-tooltip' />
-
+      <DebugPermissions />
+      <RBACTest />
     </>
   );
 };

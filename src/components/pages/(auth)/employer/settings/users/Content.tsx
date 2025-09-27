@@ -23,6 +23,12 @@ const menus = [
     link: '/settings/users/user-rights',
     isAvailable: true,
   },
+  {
+    icon: <UserLogo />,
+    text: 'Roles',
+    link: '/settings/users/roles',
+    isAvailable: true,
+  },
 ];
 
 const Content = () => {
