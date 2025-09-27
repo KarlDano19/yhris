@@ -2,76 +2,37 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { Controller } from 'react-hook-form';
-import Select, { components } from 'react-select';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddEmployeeCompensationLogbook from '../hooks/useAddEmployeeCompensationLogbook';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
-
-// Custom Option component to display department/position in dropdown
-const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            • {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
 
 export default function CreateEmployeeCompensationLogModal({
   refetch,
   isOpen,
   setIsOpen,
   formMethods,
-  employeeItems,
   employeeSearch,
   setEmployeeSearch,
-  employeeSelected,
   setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   formMethods: any;
-  employeeItems: any[];
   employeeSearch: string;
   setEmployeeSearch: (value: string) => void;
-  employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
   
-  // React Select employee items state
-  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any>([]);
 
-  // Transform employee items for React Select
-  useEffect(() => {
-    if (employeeItems) {
-      const selectItems = employeeItems.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-      }));
-      setReactSelectEmployeeItems(selectItems);
-    }
-  }, [employeeItems]);
   
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -196,82 +157,19 @@ export default function CreateEmployeeCompensationLogModal({
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
                           Employee Name<span className='text-red-600'>*</span>
                         </label>
-                        <div className='relative mt-2'>
-                          <Controller
-                            name="employee"
-                            control={control}
-                            rules={{ required: "Please select an employee" }}
-                            render={({
-                              field: { onChange, value },
-                              fieldState: { error },
-                            }: {
-                              field: { onChange: (value: any) => void; value: any };
-                              fieldState: { error?: { message?: string } };
-                            }) => (
-                              <>
-                                <Select
-                                  className="basic-single-select"
-                                  classNamePrefix="select"
-                                  options={reactSelectEmployeeItems}
-                                  value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
-                                  onChange={(selectedOption) => {
-                                    onChange(selectedOption ? selectedOption.value : '');
-                                    if (selectedOption) {
-                                      setEmployeeSearch(selectedOption.label);
-                                      setEmployeeSelected(true);
-                                    } else {
-                                      setEmployeeSearch('');
-                                      setEmployeeSelected(false);
-                                    }
-                                  }}
-                                  components={{
-                                    Option: CustomOption,
-                                    DropdownIndicator: () => (
-                                      <div className="pointer-events-none px-2">
-                                        <SelectChevronDown />
-                                      </div>
-                                    ),
-                                    IndicatorSeparator: () => null,
-                                  }}
-                                  isClearable={true}
-                                  placeholder="Select employee..."
-                                  isSearchable={true}
-                                  styles={{
-                                    control: (provided) => ({
-                                      ...provided,
-                                      minHeight: '38px',
-                                      border: '1px solid #d1d5db',
-                                      borderRadius: '6px',
-                                      backgroundColor: '#f3f4f6',
-                                    }),
-                                    menu: (provided) => ({
-                                      ...provided,
-                                      zIndex: 9999,
-                                    }),
-                                    option: (provided, state) => ({
-                                      ...provided,
-                                      backgroundColor: state.isSelected 
-                                        ? '#3b82f6' 
-                                        : state.isFocused 
-                                          ? '#dbeafe' 
-                                          : 'white',
-                                      color: state.isSelected ? 'white' : '#374151',
-                                    }),
-                                    singleValue: (provided) => ({
-                                      ...provided,
-                                      color: '#374151',
-                                    }),
-                                  }}
-                                />
-                                {error && (
-                                  <p className="text-red-500 text-sm mt-1 ml-1">
-                                    {error.message}
-                                  </p>
-                                )}
-                              </>
-                            )}
-                          />
-                        </div>
+                        <EmployeeSelect
+                          control={control}
+                          name="employee"
+                          label="Employee Name"
+                          required={true}
+                          placeholder="Select employee..."
+                          isMulti={false}
+                          isClearable={true}
+                          employeeSearch={employeeSearch}
+                          setEmployeeSearch={setEmployeeSearch}
+                          setEmployeeSelected={setEmployeeSelected}
+                          className="mt-2"
+                        />
                       </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>

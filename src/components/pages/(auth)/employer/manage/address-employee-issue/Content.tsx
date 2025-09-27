@@ -11,7 +11,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
@@ -52,7 +51,6 @@ import classNames from '@/helpers/classNames';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -106,7 +104,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { data: dataEmployee, isLoading: isEmployeeLoading } = useGetEmployeeItems();
   const queryClient = useQueryClient();
   const cachedUserRights = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
@@ -180,17 +177,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   useEffect(() => {
-    if (dataEmployee && !isEmployeeLoading) {
-      // Handle different response structures
-      let employeeData = dataEmployee;
-      if (dataEmployee.records && Array.isArray(dataEmployee.records)) {
-        employeeData = dataEmployee.records;
-      } else if (Array.isArray(dataEmployee)) {
-        employeeData = dataEmployee;
-      }
-      
-      setEmployeeItems(employeeData);
-    }
     if (dataEmployeeIssues) {
       let items = [];
       let totalPages = 1;
@@ -340,7 +326,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
 
     }
-  }, [dataEmployeeIssues, dataEmployee, pageSize, isEmployeeLoading]);
+  }, [dataEmployeeIssues, pageSize]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -894,17 +880,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       <IncidentReportModal
-        employeeIssueItems={employeeIssueItems}
-        employeeItems={employeeItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isIncidentReportModalOpen}
         setIsOpen={setIsIncidentReportModalOpen}
         refetch={refetch}
       />
       <EditIncidentReportModal
-        employeeIssueItems={employeeIssueItems}
-        employeeItems={employeeItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isEditIncidentReportModalOpen}
         setIsOpen={setIsEditIncidentReportModalOpen}
         refetch={refetch}

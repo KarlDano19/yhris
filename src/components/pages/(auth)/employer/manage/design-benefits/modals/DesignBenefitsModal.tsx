@@ -9,6 +9,7 @@ import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
+import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useAddBenefitItems from '../hooks/useAddBenefitItems';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -32,11 +33,39 @@ export default function DesignBenefitsModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const { register, handleSubmit, reset, trigger, getValues, setValue, clearErrors, watch, formState: { errors }, setError } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
+  const { data: employeeData } = useGetEmployeeItems();
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
+
+  const handleEmployeeSelect = (employee: any) => {
+    if (employee.email && !tagsTo.includes(employee.email)) {
+      // Add the email directly to tagsTo using the setter
+      setTagsTo([...tagsTo, employee.email]);
+    }
+    setInputTo('');
+    setShowEmployeeSuggestions(false);
+    setSelectedEmployeeIndex(-1);
+  };
 
   const onSubmit = handleSubmit((data) => {
     data.email = tagsTo;
@@ -114,6 +143,27 @@ export default function DesignBenefitsModal({
       setPage(1);
     }
   }, [isOpen]);
+
+  // Filter employees based on input
+  useEffect(() => {
+    if (employeeData && inputTo.trim()) {
+      const filtered = employeeData.filter((employee: any) => {
+        const searchTerm = inputTo.toLowerCase();
+        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+        const email = employee.email?.toLowerCase() || '';
+        
+        return fullName.includes(searchTerm) || email.includes(searchTerm);
+      }).slice(0, 5); // Limit to 5 suggestions
+      
+      setFilteredEmployees(filtered);
+      setShowEmployeeSuggestions(filtered.length > 0);
+      setSelectedEmployeeIndex(-1); // Reset selection when filtering
+    } else {
+      setFilteredEmployees([]);
+      setShowEmployeeSuggestions(false);
+      setSelectedEmployeeIndex(-1);
+    }
+  }, [inputTo, employeeData]);
 
   return (
     <>
@@ -199,18 +249,86 @@ export default function DesignBenefitsModal({
                                 <input
                                   type='text'
                                   value={inputTo}
-                                  onKeyDown={handleKeyDownTo}
-                                  onChange={(e) => setInputTo(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown') {
+                                      e.preventDefault();
+                                      if (showEmployeeSuggestions && filteredEmployees.length > 0) {
+                                        const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
+                                        setSelectedEmployeeIndex(newIndex);
+                                        scrollToSelectedItem(newIndex);
+                                      }
+                                    } else if (e.key === 'ArrowUp') {
+                                      e.preventDefault();
+                                      const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
+                                      setSelectedEmployeeIndex(newIndex);
+                                      if (newIndex >= 0) {
+                                        scrollToSelectedItem(newIndex);
+                                      }
+                                    } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      if (selectedEmployeeIndex >= 0 && filteredEmployees[selectedEmployeeIndex]) {
+                                        handleEmployeeSelect(filteredEmployees[selectedEmployeeIndex]);
+                                      } else {
+                                        handleKeyDownTo(e);
+                                      }
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      setShowEmployeeSuggestions(false);
+                                      setSelectedEmployeeIndex(-1);
+                                    } else {
+                                      // Let other keys pass through to the original handler
+                                      handleKeyDownTo(e);
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    setInputTo(e.target.value);
+                                    setSelectedEmployeeIndex(-1); // Reset selection when typing
+                                  }}
+                                  onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
                                   className='focus:none outline-none px-2 py-1 grow'
+                                  autoComplete='off'
+                                  autoCorrect='off'
+                                  autoCapitalize='off'
+                                  spellCheck='false'
+                                  data-lpignore='true'
+                                  data-form-type='other'
                                 />
                                 <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
                                   <div className='px-1'>
                                     <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
+                                      Add recipients with Tab/Enter. Use arrow keys to navigate.
                                     </h2>
                                   </div>
                                 </Tooltip>
                               </div>
+                              
+                              {/* Employee Suggestions Dropdown */}
+                              {showEmployeeSuggestions && (
+                                <div 
+                                  ref={dropdownRef}
+                                  className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                                >
+                                  {filteredEmployees.map((employee: any, index: number) => (
+                                    <div
+                                      key={employee.id}
+                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                        index === selectedEmployeeIndex 
+                                          ? 'bg-blue-100' 
+                                          : 'hover:bg-gray-100'
+                                      }`}
+                                      onMouseEnter={() => setSelectedEmployeeIndex(index)}
+                                      onClick={() => handleEmployeeSelect(employee)}
+                                    >
+                                      <div className='text-sm font-medium text-gray-900'>
+                                        {employee.firstname} {employee.lastname}
+                                      </div>
+                                      <div className='text-xs text-gray-500'>
+                                        {employee.email}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <button
                               type='button'
