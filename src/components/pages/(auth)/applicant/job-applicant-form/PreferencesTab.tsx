@@ -164,12 +164,20 @@ function PreferencesTab({
           }
         }
 
-        // Normalize date values for API (YYYY-MM-DD)
+        const toLocalYmd = (d: Date) => {
+          const dt = new Date(d);
+          dt.setHours(12, 0, 0, 0);
+          const y = dt.getFullYear();
+          const m = String(dt.getMonth() + 1).padStart(2, '0');
+          const day = String(dt.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        };
+
         if (exp.dateFrom instanceof Date) {
-          data.experiences[idx].dateFrom = exp.dateFrom.toISOString().split('T')[0];
+          data.experiences[idx].dateFrom = toLocalYmd(exp.dateFrom);
         }
         if (exp.dateTo instanceof Date) {
-          data.experiences[idx].dateTo = exp.dateTo.toISOString().split('T')[0];
+          data.experiences[idx].dateTo = toLocalYmd(exp.dateTo);
         }
         if (isCurr) {
           data.experiences[idx].dateTo = '';
