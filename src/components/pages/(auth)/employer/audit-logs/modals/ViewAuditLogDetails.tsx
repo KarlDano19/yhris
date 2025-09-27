@@ -1,14 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
 
-import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type T_ModalData = {
   id: number;

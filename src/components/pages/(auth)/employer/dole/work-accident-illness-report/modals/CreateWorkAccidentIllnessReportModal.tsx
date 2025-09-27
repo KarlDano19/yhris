@@ -4,7 +4,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessReports";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -33,8 +32,6 @@ function CreateWorkAccidentIllnessReportModal({
   setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const {
     mutate: addWorkAccidentIllnessReport,
@@ -67,11 +64,6 @@ function CreateWorkAccidentIllnessReportModal({
     addWorkAccidentIllnessReport(data, callbackReq);
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -121,7 +113,6 @@ function CreateWorkAccidentIllnessReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
-                    employeeItems={employeeItems || []}
                     employeeSearch={employeeSearch}
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
