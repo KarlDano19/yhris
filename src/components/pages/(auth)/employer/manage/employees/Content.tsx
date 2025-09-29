@@ -9,6 +9,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
+
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -34,12 +37,6 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
 
-// NEW: Smart Permission Imports
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
-import DebugPermissions from '@/components/DebugPermissions';
-
-import RBACTest from '@/components/RBACTest';
 
 type PaginationProps = {
   totalRecords: number;
@@ -821,8 +818,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         positionItems={positionItems}
       />
       <Tooltip id='employee-search-tooltip' />
-      <DebugPermissions />
-      <RBACTest />
     </>
   );
 };

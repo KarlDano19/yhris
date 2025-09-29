@@ -13,7 +13,7 @@ import useGetPermissionCategories from '../hooks/useGetPermissionCategories';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-type T_ModalData = {
+type T_PermissionRoleModalData = {
   id: number | null;
   open: boolean;
   mode: 'create' | 'edit';
@@ -25,8 +25,8 @@ export default function CreateEditPermissionModal({
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: T_ModalData;
-  setIsOpen: Dispatch<T_ModalData | null>;
+  isOpen: T_PermissionRoleModalData;
+  setIsOpen: Dispatch<T_PermissionRoleModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
@@ -39,7 +39,7 @@ export default function CreateEditPermissionModal({
   const isLoading = isLoadingCreatePermission || isLoadingUpdatePermission;
 
   useEffect(() => {
-    if (isOpen.open && isEditing && isOpen.id) {
+    if (isOpen.open && isEditing && isOpen.id !== null) {
       refetchPermissionDetails();
     }
   }, [isOpen, refetchPermissionDetails, isEditing]);

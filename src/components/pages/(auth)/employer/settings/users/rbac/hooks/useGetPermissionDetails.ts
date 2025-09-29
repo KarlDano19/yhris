@@ -25,12 +25,16 @@ async function getPermissionDetails(permission_id: number) {
   }
 }
 
-function useGetPermissionDetails(permission_id: number) {
-  const query = useQuery(['permissionDetailsCache'], () => getPermissionDetails(permission_id), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+function useGetPermissionDetails(permission_id: number | null) {
+  const query = useQuery(
+    ['permissionDetailsCache', permission_id], 
+    () => getPermissionDetails(permission_id!), 
+    {
+      enabled: !!permission_id, // Only fetch if permission_id is not null
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
   return query;
 }
 

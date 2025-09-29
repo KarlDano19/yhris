@@ -25,12 +25,16 @@ async function getRoleDetails(role_id: number) {
   }
 }
 
-function useGetRoleDetails(role_id: number) {
-  const query = useQuery(['roleDetailsCache'], () => getRoleDetails(role_id), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+function useGetRoleDetails(role_id: number | null) {
+  const query = useQuery(
+    ['roleDetailsCache', role_id],
+    () => getRoleDetails(role_id!),
+    {
+      enabled: !!role_id, // Only fetch when role_id is not null
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
   return query;
 }
 

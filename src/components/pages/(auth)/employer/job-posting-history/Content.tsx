@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -468,23 +470,26 @@ const Content = () => {
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
-                <button 
+                <SmartButton 
+                  id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
                   disabled={!cachedProfile?.state?.data?.edit_job}
                   data-tooltip-id="edit-tooltip"
                   data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
-                </button>
-                <button 
+                </SmartButton>
+                <SmartButton 
+                  id="delete-job-btn"
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
                   disabled={!cachedProfile?.state?.data?.edit_job}
                   data-tooltip-id="delete-tooltip"
                   data-tooltip-content="Delete Job"
                 >
                   <DeleteIcon />
-                </button>
-                <button 
+                </SmartButton>
+                <SmartButton 
+                  id="assign-job-btn"
                   onClick={() => setAssignUsersModal({ 
                     id: jobPost.id, 
                     open: true 
@@ -494,8 +499,8 @@ const Content = () => {
                   data-tooltip-content="Assign to Users"
                   className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"
                 >
-                  <UserGroupIcon className="h-5 w-5" />
-                </button>
+                  <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
+                </SmartButton>
                 <div className="relative more-menu-container pt-1">
                   <button onClick={() => handleMoreMenuClick(jobPost.id)}>
                     <MoreIconWithBorder />
@@ -503,20 +508,6 @@ const Content = () => {
                   {moreMenuOpen[jobPost.id] && (
                     <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
                       <ul className='py-1 text-left'>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => {
-                            setAssignUsersModal({ 
-                              id: jobPost.id, 
-                              open: true 
-                            });
-                            setMoreMenuOpen(prev => ({ ...prev, [jobPost.id]: false }));
-                          }}
-                          style={{ display: cachedProfile?.state?.data?.manage_job_access_rules ? 'block' : 'none' }}
-                        >
-                          <UserGroupIcon className="inline h-4 w-4 mr-2" />
-                          Assign to Users
-                        </li>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                           onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}

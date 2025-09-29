@@ -43,11 +43,11 @@ async function getPermissionsList(filters: any) {
   }
 }
 
-function useGetPermissionsList(filters: any) {
+function useGetPermissionsList(filters: any, enabled: boolean = true) {
   return useQuery({
     queryKey: ['permissionsList', filters],
     queryFn: () => getPermissionsList(filters),
-    enabled: !!filters,
+    enabled: !!filters && enabled, // Only fetch when filters exist AND enabled is true
   });
 }
 

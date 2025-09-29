@@ -43,11 +43,11 @@ async function getRolesList(filters: any) {
   }
 }
 
-function useGetRolesList(filters: any) {
+function useGetRolesList(filters: any, enabled: boolean = true) {
   return useQuery({
     queryKey: ['rolesList', filters],
     queryFn: () => getRolesList(filters),
-    enabled: !!filters,
+    enabled: !!filters && enabled, // Only fetch when filters exist AND enabled is true
   });
 }
 

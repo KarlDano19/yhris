@@ -39,11 +39,11 @@ async function getUsersWithRoles(filters: any) {
   }
 }
 
-function useGetUsersWithRoles(filters: any) {
+function useGetUsersWithRoles(filters: any, enabled: boolean = true) {
   return useQuery({
     queryKey: ['usersWithRoles', filters],
     queryFn: () => getUsersWithRoles(filters),
-    enabled: !!filters,
+    enabled: !!filters && enabled, // Only fetch when filters exist AND enabled is true
   });
 }
 

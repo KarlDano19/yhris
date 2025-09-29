@@ -49,10 +49,15 @@ type PaginationProps = {
   totalPages: number;
 };
 
-type T_ModalData = {
+type T_PermissionRoleModalData = {
   id: number | null;
   open: boolean;
-  mode?: 'create' | 'edit';
+  mode: 'create' | 'edit';
+};
+
+type T_AssignRoleModalData = {
+  id: number;
+  open: boolean;
   userName?: string;
 };
 
@@ -111,9 +116,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
 
   // Modal States
-  const [permissionModal, setPermissionModal] = useState<T_ModalData | null>(null);
-  const [roleModal, setRoleModal] = useState<T_ModalData | null>(null);
-  const [assignRoleModal, setAssignRoleModal] = useState<T_ModalData | null>(null);
+  const [permissionModal, setPermissionModal] = useState<T_PermissionRoleModalData | null>(null);
+  const [roleModal, setRoleModal] = useState<T_PermissionRoleModalData | null>(null);
+  const [assignRoleModal, setAssignRoleModal] = useState<T_AssignRoleModalData | null>(null);
   const [templateModal, setTemplateModal] = useState<T_SimpleModalData | null>(null);
 
   // Column Visibility
@@ -147,31 +152,40 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     data: permissionsData,
     isLoading: isPermissionsLoading,
     refetch: refetchPermissions,
-  } = useGetPermissionsList({ 
-    ...appliedFilter, 
-    pageSize: pageSize, 
-    currentPage: activeTab === 'permissions' ? currentPage : 1 
-  });
+  } = useGetPermissionsList(
+    { 
+      ...appliedFilter, 
+      pageSize: pageSize, 
+      currentPage: currentPage 
+    },
+    activeTab === 'permissions' // Only fetch when this tab is active
+  );
 
   const {
     data: rolesData,
     isLoading: isRolesLoading,
     refetch: refetchRoles,
-  } = useGetRolesList({ 
-    ...appliedFilter, 
-    pageSize: pageSize, 
-    currentPage: activeTab === 'roles' ? currentPage : 1 
-  });
+  } = useGetRolesList(
+    { 
+      ...appliedFilter, 
+      pageSize: pageSize, 
+      currentPage: currentPage 
+    },
+    activeTab === 'roles' // Only fetch when this tab is active
+  );
 
   const {
     data: usersWithRolesData,
     isLoading: isUsersLoading,
     refetch: refetchUsers,
-  } = useGetUsersWithRoles({ 
-    ...appliedFilter, 
-    pageSize: pageSize, 
-    currentPage: activeTab === 'users' ? currentPage : 1 
-  });
+  } = useGetUsersWithRoles(
+    { 
+      ...appliedFilter, 
+      pageSize: pageSize, 
+      currentPage: currentPage 
+    },
+    activeTab === 'users' // Only fetch when this tab is active
+  );
 
   // Delete Hooks
   const { mutate: deletePermission } = useDeletePermission();
@@ -393,31 +407,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium'>
               <div className='flex items-center'>
                 <UserGroupIcon className='h-4 w-4 text-gray-400 mr-2' />
-                {role.name}
+                {role.display_name}
               </div>
             </td>
           )}
           {visibleRoleColumns.role_type && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                role.role_type === 'system' 
+                role.is_system_role 
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-gray-100 text-gray-800'
               }`}>
-                {role.role_type === 'system' ? 'System' : 'Custom'}
+                {role.is_system_role ? 'System' : 'Custom'}
               </span>
             </td>
           )}
           {visibleRoleColumns.permissions_count && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
               <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
-                {role.permissions_count || 0} permissions
+                {role.permission_count || 0} permissions
               </span>
             </td>
           )}
           {visibleRoleColumns.users_count && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
-              {role.users_count || 0} users
+              {role.user_count || 0} users
             </td>
           )}
           {visibleRoleColumns.description && (
@@ -512,7 +526,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       key={index}
                       className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
                     >
-                      {role.name}
+                      {role.display_name}
                     </span>
                   ))
                 ) : (
@@ -582,15 +596,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ));
   };
 
-  const getTabCount = () => {
-    switch (activeTab) {
-      case 'permissions': return permissionsData?.total_records || 0;
-      case 'roles': return rolesData?.total_records || 0;
-      case 'users': return usersWithRolesData?.total_records || usersWithRolesData?.count || 0;
-      default: return 0;
-    }
-  };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
@@ -639,9 +644,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       )}
                     />
                     {tab.label}
-                    <span className='ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium bg-gray-100 text-gray-900'>
-                      {getTabCount()}
-                    </span>
                   </button>
                 ))}
               </nav>

@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -10,10 +10,10 @@ import useUpdateRole from '../hooks/useUpdateRole';
 import useGetRoleDetails from '../hooks/useGetRoleDetails';
 import useGetPermissionsList from '../hooks/useGetPermissionsList';
 
-import { XCircleIcon, CheckIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, CheckIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
-type T_ModalData = {
+type T_PermissionRoleModalData = {
   id: number | null;
   open: boolean;
   mode: 'create' | 'edit';
@@ -25,8 +25,8 @@ export default function CreateEditRoleModal({
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: T_ModalData;
-  setIsOpen: Dispatch<T_ModalData | null>;
+  isOpen: T_PermissionRoleModalData;
+  setIsOpen: Dispatch<T_PermissionRoleModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm();
@@ -41,14 +41,17 @@ export default function CreateEditRoleModal({
   const isLoading = isLoadingCreateRole || isLoadingUpdateRole;
 
   useEffect(() => {
-    if (isOpen.open && isEditing && isOpen.id) {
+    if (isOpen.open && isEditing && isOpen.id !== null) {
       refetchRoleDetails();
     }
   }, [isOpen, refetchRoleDetails, isEditing]);
 
   const onSubmit = handleSubmit((data) => {
     const formData = {
-      ...data,
+      name: data.name,
+      display_name: data.display_name,
+      description: data.description,
+      is_system_role: data.role_type === 'system', // Convert string to boolean
       permission_ids: selectedPermissions,
     };
 
@@ -79,8 +82,12 @@ export default function CreateEditRoleModal({
       setValue('name', roleDetailsData.name);
       setValue('display_name', roleDetailsData.display_name);
       setValue('description', roleDetailsData.description);
-      setValue('role_type', roleDetailsData.role_type);
-      setSelectedPermissions(roleDetailsData.permissions || []);
+      // Convert is_system_role boolean to role_type string for the dropdown
+      setValue('role_type', roleDetailsData.is_system_role ? 'system' : 'custom');
+      
+      // Extract permission IDs from permission objects
+      const permissionIds = roleDetailsData.permissions?.map((p: any) => p.id) || [];
+      setSelectedPermissions(permissionIds);
     }
   }, [roleDetailsData, setValue, isEditing]);
 
@@ -256,50 +263,133 @@ export default function CreateEditRoleModal({
 
                         {/* Permissions Section */}
                         <div className='mb-8'>
-                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
+                          <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                             Permissions ({selectedPermissions.length} selected)
-                          </h3>
-                          <div className='max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4'>
-                            {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
-                              <div key={category} className='mb-6 last:mb-0'>
-                                <h4 className='text-md font-medium text-gray-800 mb-3 px-2 py-1 bg-gray-50 rounded'>
-                                  {category}
-                                </h4>
-                                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
-                                  {permissions.map((permission: any) => (
-                                    <div
-                                      key={permission.id}
-                                      className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
-                                        selectedPermissions.includes(permission.id)
-                                          ? 'border-savoy-blue bg-blue-50'
-                                          : 'border-gray-200 hover:border-gray-300'
-                                      }`}
-                                      onClick={() => togglePermission(permission.id)}
-                                    >
-                                      <div className='flex-shrink-0 mr-3'>
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                          selectedPermissions.includes(permission.id)
-                                            ? 'bg-savoy-blue border-savoy-blue'
-                                            : 'border-gray-300'
-                                        }`}>
-                                          {selectedPermissions.includes(permission.id) && (
-                                            <CheckIcon className='w-3 h-3 text-white' />
-                                          )}
+                            <span className='text-red-600'>*</span>
+                          </label>
+                          
+                          <Listbox value={selectedPermissions} onChange={setSelectedPermissions} multiple>
+                            {({ open }) => (
+                              <>
+                                <div className='relative'>
+                                  <Listbox.Button className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'>
+                                    <span className='flex flex-wrap gap-1'>
+                                      {selectedPermissions.length === 0 ? (
+                                        <span className='text-gray-400'>Select permissions...</span>
+                                      ) : selectedPermissions.length <= 5 ? (
+                                        selectedPermissions.map((permId) => {
+                                          const perm = permissionsData?.results?.find((p: any) => p.id === permId);
+                                          return perm ? (
+                                            <span
+                                              key={permId}
+                                              className='inline-flex items-center gap-x-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'
+                                            >
+                                              {perm.display_name}
+                                              <button
+                                                type='button'
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  togglePermission(permId);
+                                                }}
+                                                className='group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-blue-600/20'
+                                              >
+                                                <XMarkIcon className='h-3.5 w-3.5' />
+                                              </button>
+                                            </span>
+                                          ) : null;
+                                        })
+                                      ) : (
+                                        <span className='text-gray-900'>
+                                          {selectedPermissions.length} permissions selected
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2'>
+                                      <ChevronUpDownIcon className='h-5 w-5 text-gray-400' aria-hidden='true' />
+                                    </span>
+                                  </Listbox.Button>
+
+                                  <Transition
+                                    show={open}
+                                    as={Fragment}
+                                    leave='transition ease-in duration-100'
+                                    leaveFrom='opacity-100'
+                                    leaveTo='opacity-0'
+                                  >
+                                    <Listbox.Options className='absolute z-10 mt-1 max-h-44 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
+                                      {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
+                                        <div key={category}>
+                                          <div className='bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-900'>
+                                            {category}
+                                          </div>
+                                          {permissions.map((permission: any) => (
+                                            <Listbox.Option
+                                              key={permission.id}
+                                              value={permission.id}
+                                              className={({ active }) =>
+                                                `relative cursor-pointer select-none py-2 pl-3 pr-9 ${
+                                                  active ? 'bg-savoy-blue text-white' : 'text-gray-900'
+                                                }`
+                                              }
+                                            >
+                                              {({ selected, active }) => (
+                                                <>
+                                                  <div className='flex items-center'>
+                                                    <div className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
+                                                      selected
+                                                        ? 'border-savoy-blue bg-savoy-blue'
+                                                        : 'border-gray-300 bg-white'
+                                                    }`}>
+                                                      {selected && (
+                                                        <CheckIcon className='h-3 w-3 text-white' aria-hidden='true' />
+                                                      )}
+                                                    </div>
+                                                    <div className='ml-3 flex-1'>
+                                                      <span className={`block truncate text-sm ${selected ? 'font-semibold' : 'font-normal'}`}>
+                                                        {permission.display_name}
+                                                      </span>
+                                                      {permission.description && (
+                                                        <span className={`block truncate text-xs ${active ? 'text-blue-200' : 'text-gray-500'}`}>
+                                                          {permission.description}
+                                                        </span>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                </>
+                                              )}
+                                            </Listbox.Option>
+                                          ))}
                                         </div>
-                                      </div>
-                                      <div className='flex-1 min-w-0'>
-                                        <div className='text-sm font-medium text-gray-900'>{permission.name}</div>
-                                        <div className='text-xs text-gray-500'>{permission.codename}</div>
-                                        {permission.description && (
-                                          <div className='text-xs text-gray-400 mt-1'>{permission.description}</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
+                                      ))}
+                                    </Listbox.Options>
+                                  </Transition>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
+                              </>
+                            )}
+                          </Listbox>
+                          
+                          {selectedPermissions.length > 5 && (
+                            <div className='mt-3 flex flex-wrap gap-1 max-h-32 overflow-y-auto p-2 border border-gray-200 rounded-md bg-gray-50'>
+                              {selectedPermissions.map((permId) => {
+                                const perm = permissionsData?.results?.find((p: any) => p.id === permId);
+                                return perm ? (
+                                  <span
+                                    key={permId}
+                                    className='inline-flex items-center gap-x-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'
+                                  >
+                                    {perm.display_name}
+                                    <button
+                                      type='button'
+                                      onClick={() => togglePermission(permId)}
+                                      className='group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-blue-600/20'
+                                    >
+                                      <XMarkIcon className='h-3.5 w-3.5' />
+                                    </button>
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <hr />

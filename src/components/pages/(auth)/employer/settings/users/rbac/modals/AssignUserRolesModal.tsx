@@ -1,7 +1,8 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
-import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { Dialog, Transition, Listbox } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -9,9 +10,9 @@ import useAssignUserRoles from '../hooks/useAssignUserRoles';
 import useGetUsersWithRoles from '../hooks/useGetUsersWithRoles';
 import useGetRolesList from '../hooks/useGetRolesList';
 
-import { XCircleIcon, CheckIcon, UserIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, CheckIcon, UserIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-type T_ModalData = {
+type T_AssignRoleModalData = {
   id: number;
   open: boolean;
   userName?: string;
@@ -23,12 +24,14 @@ export default function AssignUserRolesModal({
   setIsOpen,
 }: {
   refetch: any;
-  isOpen: T_ModalData;
-  setIsOpen: Dispatch<T_ModalData | null>;
+  isOpen: T_AssignRoleModalData;
+  setIsOpen: Dispatch<T_AssignRoleModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { handleSubmit, reset, formState: { errors } } = useForm();
   const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
+  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   
   const { data: userRolesData, refetch: refetchUserRoles } = useGetUsersWithRoles({
     userId: isOpen.id,
@@ -89,7 +92,8 @@ export default function AssignUserRolesModal({
 
   // Group roles by type
   const rolesByType = rolesData?.results?.reduce((acc: any, role: any) => {
-    const type = role.role_type || 'custom';
+    // Convert is_system_role boolean to role_type string for grouping
+    const type = role.is_system_role ? 'system' : 'custom';
     if (!acc[type]) {
       acc[type] = [];
     }
@@ -135,7 +139,7 @@ export default function AssignUserRolesModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-3xl'>
+                <Dialog.Panel className='relative transform rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-3xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <UserIcon className='w-6 h-6 text-white mr-2' />
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
@@ -143,7 +147,7 @@ export default function AssignUserRolesModal({
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
-                  <div className='md:mx-6 my-4'>
+                  <div className='md:mx-6 my-4 max-h-[calc(100vh-12rem)] overflow-y-auto'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
                         <div className={`${Object.keys(errors).length > 0 ? 'block' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
@@ -172,60 +176,157 @@ export default function AssignUserRolesModal({
 
                         {/* Roles Section */}
                         <div className='mb-8'>
-                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
-                            Available Roles ({selectedRoles.length} selected)
-                          </h3>
-                          <div className='max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4'>
-                            {Object.entries(rolesByType).map(([type, roles]: [string, any]) => (
-                              <div key={type} className='mb-6 last:mb-0'>
-                                <h4 className='text-md font-medium text-gray-800 mb-3 px-2 py-1 bg-gray-50 rounded'>
-                                  {getRoleTypeLabel(type)}
-                                </h4>
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                                  {roles.map((role: any) => (
-                                    <div
-                                      key={role.id}
-                                      className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
-                                        selectedRoles.includes(role.id)
-                                          ? 'border-savoy-blue bg-blue-50'
-                                          : 'border-gray-200 hover:border-gray-300'
-                                      }`}
-                                      onClick={() => toggleRole(role.id)}
+                          <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                            Roles ({selectedRoles.length} selected)
+                            <span className='text-red-600'>*</span>
+                          </label>
+                          
+                          <Listbox value={selectedRoles} onChange={setSelectedRoles} multiple>
+                            {({ open }) => (
+                              <>
+                                <div className='relative'>
+                                  <Listbox.Button 
+                                    ref={buttonRef}
+                                    onClick={() => {
+                                      if (buttonRef.current) {
+                                        setButtonRect(buttonRef.current.getBoundingClientRect());
+                                      }
+                                    }}
+                                    className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'
+                                  >
+                                    <span className='flex flex-wrap gap-1'>
+                                      {selectedRoles.length === 0 ? (
+                                        <span className='text-gray-400'>Select roles...</span>
+                                      ) : selectedRoles.length <= 5 ? (
+                                        selectedRoles.map((roleId) => {
+                                          const role = rolesData?.results?.find((r: any) => r.id === roleId);
+                                          return role ? (
+                                            <span
+                                              key={roleId}
+                                              className='inline-flex items-center gap-x-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'
+                                            >
+                                              {role.display_name || role.name}
+                                              <button
+                                                type='button'
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  toggleRole(roleId);
+                                                }}
+                                                className='group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-blue-600/20'
+                                              >
+                                                <XMarkIcon className='h-3.5 w-3.5' />
+                                              </button>
+                                            </span>
+                                          ) : null;
+                                        })
+                                      ) : (
+                                        <span className='text-gray-900'>
+                                          {selectedRoles.length} roles selected
+                                        </span>
+                                      )}
+                                    </span>
+                                    <span className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2'>
+                                      <ChevronUpDownIcon className='h-5 w-5 text-gray-400' aria-hidden='true' />
+                                    </span>
+                                  </Listbox.Button>
+
+                                  {open && buttonRect && createPortal(
+                                    <Transition
+                                      show={open}
+                                      as={Fragment}
+                                      leave='transition ease-in duration-100'
+                                      leaveFrom='opacity-100'
+                                      leaveTo='opacity-0'
                                     >
-                                      <div className='flex-shrink-0 mr-3'>
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                          selectedRoles.includes(role.id)
-                                            ? 'bg-savoy-blue border-savoy-blue'
-                                            : 'border-gray-300'
-                                        }`}>
-                                          {selectedRoles.includes(role.id) && (
-                                            <CheckIcon className='w-3 h-3 text-white' />
-                                          )}
+                                      <Listbox.Options 
+                                        className='fixed overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'
+                                        style={{
+                                          top: `${buttonRect.bottom + window.scrollY + 4}px`,
+                                          left: `${buttonRect.left + window.scrollX}px`,
+                                          width: `${buttonRect.width}px`,
+                                          maxHeight: '240px',
+                                          zIndex: 9999,
+                                        }}
+                                      >
+                                      {Object.entries(rolesByType).map(([type, roles]: [string, any]) => (
+                                        <div key={type}>
+                                          {roles.map((role: any) => (
+                                            <Listbox.Option
+                                              key={role.id}
+                                              value={role.id}
+                                              className={({ active }) =>
+                                                `relative cursor-pointer select-none py-2 pl-3 pr-9 ${
+                                                  active ? 'bg-savoy-blue text-white' : 'text-gray-900'
+                                                }`
+                                              }
+                                            >
+                                              {({ selected, active }) => (
+                                                <>
+                                                  <div className='flex items-center'>
+                                                    <div className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
+                                                      selected
+                                                        ? 'border-savoy-blue bg-savoy-blue'
+                                                        : 'border-gray-300 bg-white'
+                                                    }`}>
+                                                      {selected && (
+                                                        <CheckIcon className='h-3 w-3 text-white' aria-hidden='true' />
+                                                      )}
+                                                    </div>
+                                                    <div className='ml-3 flex-1'>
+                                                      <span className={`block truncate text-sm ${selected ? 'font-semibold' : 'font-normal'}`}>
+                                                        {role.display_name || role.name}
+                                                      </span>
+                                                      {role.description && (
+                                                        <span className={`block truncate text-xs ${active ? 'text-blue-200' : 'text-gray-500'}`}>
+                                                          {role.description}
+                                                        </span>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                </>
+                                              )}
+                                            </Listbox.Option>
+                                          ))}
                                         </div>
-                                      </div>
-                                      <div className='flex-1 min-w-0'>
-                                        <div className='text-sm font-medium text-gray-900'>{role.name}</div>
-                                        <div className='text-xs text-gray-500 capitalize'>{role.role_type} Role</div>
-                                        {role.description && (
-                                          <div className='text-xs text-gray-400 mt-1'>{role.description}</div>
-                                        )}
-                                        <div className='text-xs text-blue-600 mt-1'>
-                                          {role.permissions_count || 0} permission{role.permissions_count !== 1 ? 's' : ''}
+                                      ))}
+                                      {Object.keys(rolesByType).length === 0 && (
+                                        <div className='text-center py-8 text-gray-500'>
+                                          <UserIcon className='w-12 h-12 mx-auto mb-3 text-gray-300' />
+                                          <p>No roles available</p>
+                                          <p className='text-sm'>Create roles first to assign them to users</p>
                                         </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                                      )}
+                                    </Listbox.Options>
+                                  </Transition>,
+                                  document.body
+                                )}
                                 </div>
-                              </div>
-                            ))}
-                            {Object.keys(rolesByType).length === 0 && (
-                              <div className='text-center py-8 text-gray-500'>
-                                <UserIcon className='w-12 h-12 mx-auto mb-3 text-gray-300' />
-                                <p>No roles available</p>
-                                <p className='text-sm'>Create roles first to assign them to users</p>
-                              </div>
+                              </>
                             )}
-                          </div>
+                          </Listbox>
+                          
+                          {selectedRoles.length > 5 && (
+                            <div className='mt-3 flex flex-wrap gap-1 max-h-32 overflow-y-auto p-2 border border-gray-200 rounded-md bg-gray-50'>
+                              {selectedRoles.map((roleId) => {
+                                const role = rolesData?.results?.find((r: any) => r.id === roleId);
+                                return role ? (
+                                  <span
+                                    key={roleId}
+                                    className='inline-flex items-center gap-x-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'
+                                  >
+                                    {role.display_name || role.name}
+                                    <button
+                                      type='button'
+                                      onClick={() => toggleRole(roleId)}
+                                      className='group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-blue-600/20'
+                                    >
+                                      <XMarkIcon className='h-3.5 w-3.5' />
+                                    </button>
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <hr />

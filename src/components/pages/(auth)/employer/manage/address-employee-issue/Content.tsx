@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -671,13 +673,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-employee-issue-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
                 disabled={!cachedUserRights?.state?.data?.create_employee_issue}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           

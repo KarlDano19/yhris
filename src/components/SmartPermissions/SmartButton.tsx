@@ -30,15 +30,7 @@ export const SmartButton: React.FC<SmartButtonProps> = ({
   const hasPermission = requiredPermission 
     ? cachedRights?.state?.data?.[requiredPermission] || false
     : true; // If no permission required, allow access
-  
-  // Debug logging
-  console.log(`SmartButton ${id}:`, {
-    requiredPermission,
-    hasPermission,
-    fallbackBehavior,
-    permissionData: cachedRights?.state?.data?.[requiredPermission]
-  });
-  
+    
   // Handle hide behavior
   if (!hasPermission && fallbackBehavior === 'hide') {
     return null;
