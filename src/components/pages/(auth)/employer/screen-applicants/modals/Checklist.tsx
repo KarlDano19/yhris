@@ -7,12 +7,10 @@ import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
 import titleCase from '@/helpers/titleCase';
 import ScreenApplicantGoPremiumModal from '../../modals/SubsriptionModals/ScreenApplicantGoPremiumModal';
-import { 
-  useGetStageRequirements, 
-  useUpdateStageRequirements,
-  useGetStageNotes,
-  useUpdateStageNotes
-} from '../hooks/useStageRequirements';
+import useGetStageRequirements from '../hooks/useGetStageRequirements';
+import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
+import useGetStageNotes from '../hooks/useGetStageNotes';
+import useUpdateStageNotes from '../hooks/useUpdateStageNotes';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StageType } from '../types';
