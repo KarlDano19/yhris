@@ -11,8 +11,7 @@ import {
   useGetStageRequirements, 
   useUpdateStageRequirements,
   useGetStageNotes,
-  useUpdateStageNotes,
-  useGetApplicationAuditHistory
+  useUpdateStageNotes
 } from '../hooks/useStageRequirements';
 
 import { initialActionState } from '../lib/initialActionState';
@@ -77,7 +76,8 @@ export default function Checklist({
   const [currentStageNotes, setCurrentStageNotes] = useState<string>(''); // Notes for the current stage (editable)
   const [stageRequirementsData, setStageRequirementsData] = useState<any>(null); // Store stage requirements data locally
   const [stageNotesData, setStageNotesData] = useState<any>(null); // Store stage notes data locally
-  const [auditHistoryData, setAuditHistoryData] = useState<any>(null); // Store audit history data locally
+  // Remove audit history state since it's not needed
+  // const [auditHistoryData, setAuditHistoryData] = useState<any>(null);
 
   // Get current stage info
   const currentStage = state.find((stage: StageType) => stage.id === actionState.stageId);
@@ -118,11 +118,11 @@ export default function Checklist({
     isOpen && !!applicant?.applicationId
   );
 
-  // Hook to get audit history
-  const { data: fetchedAuditHistoryData, refetch: refetchAuditHistory } = useGetApplicationAuditHistory(
-    applicant?.applicationId || 0,
-    isOpen && !!applicant?.applicationId
-  );
+  // Remove audit history hook entirely since it's not needed
+  // const { data: fetchedAuditHistoryData, refetch: refetchAuditHistory } = useGetApplicationAuditHistory(
+  //   applicant?.applicationId || 0,
+  //   isOpen && !!applicant?.applicationId
+  // );
 
   // Hook to update stage requirements
   const updateStageRequirementsMutation = useUpdateStageRequirements();
@@ -143,11 +143,12 @@ export default function Checklist({
     }
   }, [fetchedStageNotesData]);
 
-  useEffect(() => {
-    if (fetchedAuditHistoryData) {
-      setAuditHistoryData(fetchedAuditHistoryData);
-    }
-  }, [fetchedAuditHistoryData]);
+  // Remove audit history useEffect since it's not needed
+  // useEffect(() => {
+  //   if (fetchedAuditHistoryData) {
+  //     setAuditHistoryData(fetchedAuditHistoryData);
+  //   }
+  // }, [fetchedAuditHistoryData]);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -287,11 +288,11 @@ export default function Checklist({
       // Proceed with normal form submission
       setTimeout(() => {
         handleFormSubmit(data);
-        // Refetch data after successful submission
+        // Refetch data after successful submission - only refetch enabled hooks
         setTimeout(() => {
           refetchStageRequirements();
           refetchStageNotes();
-          refetchAuditHistory();
+          // Remove audit history refetch since it's not needed
         }, 1000);
       }, 400);
     }
@@ -306,11 +307,11 @@ export default function Checklist({
     data.id = applicant?.applicationId;
     setTimeout(() => {
       handleFormSubmit(data);
-      // Refetch data after successful submission
+      // Refetch data after successful submission - only refetch enabled hooks
       setTimeout(() => {
         refetchStageRequirements();
         refetchStageNotes();
-        refetchAuditHistory();
+        // Remove audit history refetch since it's not needed
       }, 1000);
     }, 400);
   };

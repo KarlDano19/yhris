@@ -62,19 +62,8 @@ async function updateStageNotes(appliedJobId: number, stageId: number, notes: st
   return await res.json();
 }
 
-// Get application audit history
-async function getApplicationAuditHistory(appliedJobId: number) {
-  const token = getCookie('token');
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/applicants/audit-history/${appliedJobId}/`, {
-    method: "GET",
-    headers: {
-      "content-type": "application/json",
-      Authorization: `Token ${token}`,
-    },
-  });
-  
-  return await res.json();
-}
+// Remove the audit history functions since they're not needed in the Checklist modal
+// The audit functionality is properly handled in the dedicated Audit Log page
 
 function useGetStageRequirements(appliedJobId: number, stageId: number, enabled: boolean = true) {
   const query = useQuery({
@@ -122,20 +111,9 @@ function useUpdateStageNotes() {
   return mutation;
 }
 
-function useGetApplicationAuditHistory(appliedJobId: number, enabled: boolean = true) {
-  const query = useQuery({
-    queryKey: ['application-audit-history', appliedJobId],
-    queryFn: () => getApplicationAuditHistory(appliedJobId),
-    enabled: enabled && !!appliedJobId,
-  });
-
-  return query;
-}
-
 export { 
   useGetStageRequirements, 
   useUpdateStageRequirements,
   useGetStageNotes,
-  useUpdateStageNotes,
-  useGetApplicationAuditHistory
+  useUpdateStageNotes
 }; 
