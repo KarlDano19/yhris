@@ -513,18 +513,7 @@ export default function Checklist({
                       </div>
                     )}
 
-                    {/* Completion Summary */}
-                    {stageRequirementsData && (
-                      <div className='mt-4 p-3 bg-blue-50 rounded-md'>
-                        <div className='flex items-center justify-between text-sm'>
-                          <span className='text-gray-600'>Completion Progress:</span>
-                          <span className='font-medium text-blue-600'>
-                            {stageRequirementsData.completed_requirements || 0} / {stageRequirementsData.total_requirements || 0} 
-                            ({stageRequirementsData.completion_percentage || 0}%)
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    {/* Remove the Completion Summary section entirely */}
                   </div>
                 )}
 
