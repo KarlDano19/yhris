@@ -207,7 +207,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     if (dataJobPostDetails) {
       dispatch({ type: CLEAR_STAGE });
       let jobStages: any = [];
-      dataJobPostDetails.job_stages.forEach((item: any) => {
+      dataJobPostDetails.job_stages?.forEach((item: any) => {
         let newData = {
           id: item.id,
           title: item.title,
