@@ -1,15 +1,16 @@
-import { Dispatch, Fragment, useState, useRef } from 'react';
+import { Dispatch, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+import { useForm } from 'react-hook-form';
 
-import classNames from '@/helpers/classNames';
-import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import useAddLocation from '../hooks/useAddLocation';
 import CustomToast from '@/components/CustomToast';
+
+import useAddLocation from '../hooks/location/useAddLocation';
 import useAddDepartment from '../hooks/department/useAddDepartment';
 import useAddPosition from '../hooks/position/useAddPosition';
+import useAddEmployeeStatus from '../hooks/employee-status/useAddEmployeeStatus';
 
 export default function CreateLocationModal({
   module,
@@ -27,6 +28,7 @@ export default function CreateLocationModal({
   const { mutate: addLocation, isLoading: isLoadingAddLocation } = useAddLocation();
   const { mutate: addDepartment, isLoading: isLoadingAddDepartment } = useAddDepartment();
   const { mutate: addPosition, isLoading: isLoadingAddPosition } = useAddPosition();
+  const { mutate: addEmployeeStatus, isLoading: isLoadingAddEmployeeStatus } = useAddEmployeeStatus();
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -46,10 +48,12 @@ export default function CreateLocationModal({
     };
     if (module === 'location') {
       addLocation(data, callbackReq);
-    } if (module === 'department') {
+    } else if (module === 'department') {
       addDepartment(data, callbackReq);
-    } if (module === 'position') {
+    } else if (module === 'position') {
       addPosition(data, callbackReq);
+    } else if (module === 'employee-status') {
+      addEmployeeStatus(data, callbackReq);
     }
   });
 
@@ -109,9 +113,9 @@ export default function CreateLocationModal({
                     <button
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                      disabled={isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition}
+                      disabled={isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition || isLoadingAddEmployeeStatus}
                     >
-                      {isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition && (
+                      {(isLoadingAddLocation || isLoadingAddDepartment || isLoadingAddPosition || isLoadingAddEmployeeStatus) && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -132,7 +136,7 @@ export default function CreateLocationModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoadingAddLocation && !isLoadingAddDepartment && !isLoadingAddPosition && 'Save'}
+                      {!isLoadingAddLocation && !isLoadingAddDepartment && !isLoadingAddPosition && !isLoadingAddEmployeeStatus && 'Save'}
                     </button>
                   </div>
                 </form>

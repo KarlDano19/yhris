@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
-import useGetLocationItems from '../hooks/useGetLocationItems';
+import useGetLocationItems from '../hooks/location/useGetLocationItems';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
@@ -164,11 +164,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Location</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -249,7 +249,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
@@ -268,15 +274,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>

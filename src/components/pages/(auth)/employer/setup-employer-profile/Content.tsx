@@ -27,11 +27,15 @@ const Content = () => {
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: async (responseData: any) => {
-        await updateSession({ hasProfile: true });
-        
+        // Update session with profile and subscription status
+        await updateSession({
+          hasProfile: true,
+          hasActiveSubscription: responseData.has_active_subscription || false
+        });
+
         // Update Loops with company profile
         const userEmail = await getUserEmail(responseData, data);
-        
+
         if (userEmail) {
           try {
             // Simple contact sync
@@ -41,10 +45,10 @@ const Content = () => {
               company: data.companyName,
               source: 'employer-profile-setup',
             });
-            
+
             // Company data update
             await syncCompanyViaEvent(userEmail, data);
-            
+
             // Comprehensive contact update
             updateContact({
               email: userEmail,
@@ -56,16 +60,20 @@ const Content = () => {
                 product: 'YHRIS',
               }
             });
-            
+
           } catch (error) {
             if (LOOPS_CONFIG.FEATURES.LOG_ERRORS) {
               console.error('Error updating Loops:', error);
             }
           }
         }
-        
+
         toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 4000 });
-        location.href = '/dashboard';
+
+        // Small delay to ensure session is saved before redirect
+        setTimeout(() => {
+          location.href = '/dashboard';
+        }, 500);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
@@ -145,8 +153,8 @@ const Content = () => {
             <Settings 
               register={register} 
               onSubmit={onSubmit} 
-              setProgressBar={setProgressBar} 
-              isLoading={isLoading} 
+              isLoading={isLoading}
+              onBack={() => setProgressBar(0)}
             />
           </div>
         </div>

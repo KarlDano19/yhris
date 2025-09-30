@@ -37,9 +37,24 @@ export default function CreateMemoModal({
   const [inputTo, setInputTo] = useState('');
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
 
   const onSubmit = handleSubmit((data) => {
     // Check if To field has any entries with valid email format
@@ -139,9 +154,11 @@ export default function CreateMemoModal({
       
       setFilteredEmployees(filtered);
       setShowEmployeeSuggestions(filtered.length > 0);
+      setSelectedEmployeeIndex(-1); // Reset selection when filtering
     } else {
       setFilteredEmployees([]);
       setShowEmployeeSuggestions(false);
+      setSelectedEmployeeIndex(-1);
     }
   }, [inputTo, employeeData]);
 
@@ -152,6 +169,7 @@ export default function CreateMemoModal({
     }
     setInputTo('');
     setShowEmployeeSuggestions(false);
+    setSelectedEmployeeIndex(-1);
   };
 
   useEffect(() => {
@@ -167,6 +185,7 @@ export default function CreateMemoModal({
     // Reset form when modal closes
     if (!isOpen) {
       setAttachmentExist(false);
+      setSelectedEmployeeIndex(-1);
     }
   }, [signatureUrl, setValue, isOpen]);
 
@@ -251,15 +270,54 @@ export default function CreateMemoModal({
                               <input
                                 type='text'
                                 value={inputTo}
-                                onKeyDown={handleKeyDownTo}
-                                onChange={(e) => setInputTo(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    if (showEmployeeSuggestions && filteredEmployees.length > 0) {
+                                      const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
+                                      setSelectedEmployeeIndex(newIndex);
+                                      scrollToSelectedItem(newIndex);
+                                    }
+                                  } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
+                                    setSelectedEmployeeIndex(newIndex);
+                                    if (newIndex >= 0) {
+                                      scrollToSelectedItem(newIndex);
+                                    }
+                                  } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                    e.preventDefault();
+                                    if (selectedEmployeeIndex >= 0 && filteredEmployees[selectedEmployeeIndex]) {
+                                      handleEmployeeSelect(filteredEmployees[selectedEmployeeIndex]);
+                                    } else {
+                                      handleKeyDownTo(e);
+                                    }
+                                  } else if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    setShowEmployeeSuggestions(false);
+                                    setSelectedEmployeeIndex(-1);
+                                  } else {
+                                    // Let other keys pass through to the original handler
+                                    handleKeyDownTo(e);
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  setInputTo(e.target.value);
+                                  setSelectedEmployeeIndex(-1); // Reset selection when typing
+                                }}
                                 onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
                                 className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                autoComplete='off'
+                                autoCorrect='off'
+                                autoCapitalize='off'
+                                spellCheck='false'
+                                data-lpignore='true'
+                                data-form-type='other'
                               />
                               <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
                                 <div className='px-1'>
                                   <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter, or search for employees (case-sensitive).
+                                    Add recipients with Tab/Enter. Use arrow keys to navigate.
                                   </h2>
                                 </div>
                               </Tooltip>
@@ -267,11 +325,19 @@ export default function CreateMemoModal({
                             
                             {/* Employee Suggestions Dropdown */}
                             {showEmployeeSuggestions && (
-                              <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
-                                {filteredEmployees.map((employee: any) => (
+                              <div 
+                                ref={dropdownRef}
+                                className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                              >
+                                {filteredEmployees.map((employee: any, index: number) => (
                                   <div
                                     key={employee.id}
-                                    className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
+                                    className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                      index === selectedEmployeeIndex 
+                                        ? 'bg-blue-100' 
+                                        : 'hover:bg-gray-100'
+                                    }`}
+                                    onMouseEnter={() => setSelectedEmployeeIndex(index)}
                                     onClick={() => handleEmployeeSelect(employee)}
                                   >
                                     <div className='text-sm font-medium text-gray-900'>

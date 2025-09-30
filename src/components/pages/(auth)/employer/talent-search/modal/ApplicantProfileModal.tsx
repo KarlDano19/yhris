@@ -37,7 +37,7 @@ function ApplicantProfileModal({
 
   useEffect(() => {
     if (applicantDetailsData) {
-      console.log(applicantDetailsData);
+      refetch();
     }
   }, [applicantDetailsData]);
 

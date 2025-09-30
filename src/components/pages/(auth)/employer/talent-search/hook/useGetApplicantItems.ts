@@ -105,12 +105,6 @@ async function getApplicantItems(filters: any) {
     };
 
     if (token) {
-      // Debug: Log the search parameters being sent
-      console.log('Talent Search API Parameters:', {
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`,
-        filters: newFilters,
-        searchParams: searchParams.toString()
-      });
       
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/applicants/talent-search/?${searchParams}`,

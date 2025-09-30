@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 
 import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
-import EmployeesModal from './modals/EmployeesModal';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
@@ -27,6 +27,7 @@ import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
@@ -53,6 +54,7 @@ const columnDefinitions = [
   { key: 'location', label: 'Location' },
   { key: 'position', label: 'Position' },
   { key: 'department', label: 'Department' },
+  { key: 'employment_status', label: 'Employment Status' },
   { key: 'email', label: 'Email' },
   { key: 'mobile', label: 'Contact No.' },
   { key: 'gender', label: 'Gender' },
@@ -89,6 +91,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     location: true,
     position: true,
     department: true,
+    employment_status: true,
     email: true,
     mobile: false,
     gender: false,
@@ -109,18 +112,43 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
   } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
-  const { data: employeeItemsAll } = useGetEmployeeItems();
+  const { data: employeeItemsAll, refetch: employeeItemsAllRefetch } = useGetEmployeeItems();
   const { data: locationItems } = useGetLocationItems();
   const { data: departmentItems } = useGetDepartmentItems();
   const { data: positionItems } = useGetPositionItems();
+  const { data: employeeStatusItems } = useGetEmployeeStatusItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
+
+  // Combined refetch function to refresh both main list and autocomplete data
+  const refetchAllEmployeeData = async () => {
+    await Promise.all([
+      employeeListRefetch(),
+      employeeItemsAllRefetch()
+    ]);
+  };
 
   const cachedData: any = cachedProfile?.state?.data;
   const hasAgreed = cachedData?.is_export_agreed;
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [autocompleteLimit, setAutocompleteLimit] = useState(10);
+  const autocompleteRef = useRef<HTMLUListElement>(null);
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (autocompleteRef.current && index >= 0) {
+      const selectedElement = autocompleteRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (!hasAgreed) {
@@ -241,12 +269,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       location: true,
       position: true,
       department: true,
+      employment_status: true,
       email: true,
       mobile: false,
       gender: false,
       address: false,
     };
     setVisibleColumns(defaultColumns);
+  };
+
+  const handleShowAll = () => {
+    const allColumns: Record<string, boolean> = {
+      date_hired: true,
+      system_id: true,
+      employee_id: true,
+      firstname: true,
+      middlename: true,
+      lastname: true,
+      location: true,
+      position: true,
+      department: true,
+      employment_status: true,
+      email: true,
+      mobile: true,
+      gender: true,
+      address: true,
+    };
+    setVisibleColumns(allColumns);
   };
 
   const renderRows = () => {
@@ -290,6 +339,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           {visibleColumns.department && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+          )}
+          {visibleColumns.employment_status && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employment_status || 'N/A'}</td>
           )}
           {visibleColumns.email && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -337,7 +389,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -347,7 +399,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center             gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -390,61 +442,305 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     type='text'
                     name='search'
                     id='search'
+                    {...(pendingFilter.search === '' && {
+                      'data-tooltip-id': 'employee-search-tooltip',
+                      'data-tooltip-content': 'Search for Employee: First Name, Last Name, Position, Department',
+                      'data-tooltip-place': 'bottom'
+                    })}
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                    autoComplete='off'
+                    autoCorrect='off'
+                    autoCapitalize='off'
+                    spellCheck='false'
+                    data-lpignore='true'
+                    data-form-type='other'
                     value={pendingFilter.search}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
+                      // Only show autocomplete for 2+ characters to improve performance
+                      if (e.target.value.length >= 2) {
                       setShowAutocomplete(true);
+                        setAutocompleteLimit(10); // Reset limit when typing
+                      } else {
+                        setShowAutocomplete(false);
+                      }
+                      setSelectedIndex(-1); // Reset selection when typing
                     }}
                     onFocus={() => {
-                      if (pendingFilter.search) setShowAutocomplete(true);
+                      if (pendingFilter.search && pendingFilter.search.length >= 2) setShowAutocomplete(true);
                     }}
                     onBlur={() => {
-                      setTimeout(() => setShowAutocomplete(false), 100);
+                      setTimeout(() => {
+                        setShowAutocomplete(false);
+                        setSelectedIndex(-1);
+                        setAutocompleteLimit(10); // Reset limit when dropdown closes
+                      }, 100);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleSearch();
+                        if (showAutocomplete && selectedIndex >= 0) {
+                          // If an item is selected from autocomplete, use that
+                        const searchTerm = pendingFilter.search.toLowerCase().trim();
+                        const searchParts = searchTerm.split(' ').filter((part: string) => part.length > 0);
+                        
+                        const filteredItems = employeeItemsAll.filter((item: any) => {
+                          const firstName = item.firstname?.toLowerCase() || '';
+                          const lastName = item.lastname?.toLowerCase() || '';
+                          const position = item.position?.toLowerCase() || '';
+                          const department = item.department?.toLowerCase() || '';
+                          
+                          // If search term is a single word, search across all fields
+                          if (searchParts.length === 1) {
+                            const singleTerm = searchParts[0];
+                            return firstName.includes(singleTerm) ||
+                                   lastName.includes(singleTerm) ||
+                                   position.includes(singleTerm) ||
+                                   department.includes(singleTerm);
+                          }
+                          
+                          // For multi-word searches, try different combinations
+                          if (searchParts.length >= 2) {
+                            // Try exact phrase matching first for names
+                            const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
+                            const reverseName = `${lastName} ${firstName}`.replace(/\s+/g, ' ').trim();
+                            
+                            if (fullName.includes(searchTerm) || reverseName.includes(searchTerm)) {
+                              return true;
+                            }
+                            
+                            // Try individual word matching across name fields
+                            const allNameParts = [firstName, lastName].filter((part: string) => part.length > 0);
+                            const matchedNameParts = searchParts.filter((searchPart: string) => 
+                              allNameParts.some((namePart: string) => namePart.includes(searchPart))
+                            );
+                            
+                            // Try position and department matching
+                            const matchedPositionDepartment = searchParts.some((searchPart: string) =>
+                              position.includes(searchPart) || department.includes(searchPart)
+                            );
+                            
+                            // If most name parts match OR if position/department matches, include the result
+                            return matchedNameParts.length >= Math.min(searchParts.length, 2) || matchedPositionDepartment;
+                          }
+                          
+                          return false;
+                        });
+                        const displayItems = filteredItems.slice(0, autocompleteLimit);
+                        const hasMoreResults = filteredItems.length > autocompleteLimit;
+                        
+                        // Check if "Show more" option is selected (last item when there are more results)
+                        if (selectedIndex === displayItems.length && hasMoreResults) {
+                          e.preventDefault();
+                          // Show 10 more results in the dropdown
+                          setAutocompleteLimit(prev => prev + 10);
+                          // Keep the selection on the "Show more" option
+                          setSelectedIndex(displayItems.length + 10);
+                        } else if (displayItems[selectedIndex]) {
+                          const item = displayItems[selectedIndex];
+                            const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                            setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+                            setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
+                          }
+                          setShowAutocomplete(false);
+                          setSelectedIndex(-1);
+                        } else {
+                          // Regular search
+                          handleSearch();
+                          setShowAutocomplete(false);
+                        }
+                      } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (showAutocomplete) {
+                          const searchTerm = pendingFilter.search.toLowerCase().trim();
+                          const searchParts = searchTerm.split(' ').filter((part: string) => part.length > 0);
+                          
+                          const filteredItems = employeeItemsAll.filter((item: any) => {
+                            const firstName = item.firstname?.toLowerCase() || '';
+                            const lastName = item.lastname?.toLowerCase() || '';
+                            const position = item.position?.toLowerCase() || '';
+                            const department = item.department?.toLowerCase() || '';
+                            
+                            // If search term is a single word, search across all fields
+                            if (searchParts.length === 1) {
+                              const singleTerm = searchParts[0];
+                              return firstName.includes(singleTerm) ||
+                                     lastName.includes(singleTerm) ||
+                                     position.includes(singleTerm) ||
+                                     department.includes(singleTerm);
+                            }
+                            
+                            // For multi-word searches, try different combinations
+                            if (searchParts.length >= 2) {
+                              // Try exact phrase matching first for names
+                              const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
+                              const reverseName = `${lastName} ${firstName}`.replace(/\s+/g, ' ').trim();
+                              
+                              if (fullName.includes(searchTerm) || reverseName.includes(searchTerm)) {
+                                return true;
+                              }
+                              
+                              // Try individual word matching across name fields
+                              const allNameParts = [firstName, lastName].filter((part: string) => part.length > 0);
+                              const matchedNameParts = searchParts.filter((searchPart: string) => 
+                                allNameParts.some((namePart: string) => namePart.includes(searchPart))
+                              );
+                              
+                              // Try position and department matching
+                              const matchedPositionDepartment = searchParts.some((searchPart: string) =>
+                                position.includes(searchPart) || department.includes(searchPart)
+                              );
+                              
+                              // If most name parts match OR if position/department matches, include the result
+                              return matchedNameParts.length >= Math.min(searchParts.length, 2) || matchedPositionDepartment;
+                            }
+                            
+                            return false;
+                          });
+                          const displayItems = filteredItems.slice(0, autocompleteLimit);
+                          const hasMoreResults = filteredItems.length > autocompleteLimit;
+                          const maxIndex = displayItems.length + (hasMoreResults ? 1 : 0) - 1; // Include "Show more" option
+                          const newIndex = selectedIndex < maxIndex ? selectedIndex + 1 : selectedIndex;
+                          setSelectedIndex(newIndex);
+                          scrollToSelectedItem(newIndex);
+                        }
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (showAutocomplete) {
+                          const newIndex = selectedIndex > 0 ? selectedIndex - 1 : -1;
+                          setSelectedIndex(newIndex);
+                          if (newIndex >= 0) {
+                            scrollToSelectedItem(newIndex);
+                          }
+                        }
+                      } else if (e.key === 'Escape') {
                         setShowAutocomplete(false);
+                        setSelectedIndex(-1);
                       }
                     }}
                     placeholder='Search ...'
                   />
-                  {pendingFilter.search && showAutocomplete && (
-                    <ul className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'>
-                      {employeeItemsAll
-                        .filter(
-                          (item: any) =>
-                            item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
-                        )
-                        .map((item: any) => (
+                  {pendingFilter.search && showAutocomplete && (() => {
+                    const searchTerm = pendingFilter.search.toLowerCase().trim();
+                    const searchParts = searchTerm.split(' ').filter((part: string) => part.length > 0);
+                    
+                    const filteredItems = employeeItemsAll.filter((item: any) => {
+                      const firstName = item.firstname?.toLowerCase() || '';
+                      const lastName = item.lastname?.toLowerCase() || '';
+                      const position = item.position?.toLowerCase() || '';
+                      const department = item.department?.toLowerCase() || '';
+                      
+                      // If search term is a single word, search across all fields
+                      if (searchParts.length === 1) {
+                        const singleTerm = searchParts[0];
+                        return firstName.includes(singleTerm) ||
+                               lastName.includes(singleTerm) ||
+                               position.includes(singleTerm) ||
+                               department.includes(singleTerm);
+                      }
+                      
+                      // For multi-word searches, try different combinations
+                      if (searchParts.length >= 2) {
+                        // Try exact phrase matching first for names
+                        const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
+                        const reverseName = `${lastName} ${firstName}`.replace(/\s+/g, ' ').trim();
+                        
+                        if (fullName.includes(searchTerm) || reverseName.includes(searchTerm)) {
+                          return true;
+                        }
+                        
+                        // Try individual word matching across name fields
+                        const allNameParts = [firstName, lastName].filter((part: string) => part.length > 0);
+                        const matchedNameParts = searchParts.filter((searchPart: string) => 
+                          allNameParts.some((namePart: string) => namePart.includes(searchPart))
+                        );
+                        
+                        // Try position and department matching
+                        const matchedPositionDepartment = searchParts.some((searchPart: string) =>
+                          position.includes(searchPart) || department.includes(searchPart)
+                        );
+                        
+                        // If most name parts match OR if position/department matches, include the result
+                        return matchedNameParts.length >= Math.min(searchParts.length, 2) || matchedPositionDepartment;
+                      }
+                      
+                      return false;
+                    });
+                    const hasMoreResults = filteredItems.length > autocompleteLimit;
+                    const displayItems = filteredItems.slice(0, autocompleteLimit);
+                    
+                    return (
+                    <ul 
+                      ref={autocompleteRef}
+                      className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                        onMouseDown={(e) => e.preventDefault()}
+                      >
+                        {displayItems.map((item: any, index: number) => (
                           <li
                             key={item.id}
-                            className='px-3 py-2 hover:bg-gray-200 cursor-pointer'
+                            className={`px-3 py-2 cursor-pointer ${
+                              index === selectedIndex 
+                                ? 'bg-blue-100' 
+                                : 'hover:bg-blue-100'
+                            }`}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                            }}
+                            onMouseEnter={() => setSelectedIndex(index)}
                             onClick={() => {
-                              setPendingFilter({ ...pendingFilter, search: item.firstname });
+                              const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                              setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+                              setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
                               setShowAutocomplete(false);
+                              setSelectedIndex(-1);
                               document.getElementById('search')?.blur();
                             }}
                           >
                             <div className='flex flex-col'>
                               <span className='font-medium'>{item.firstname} {item.lastname}</span>
-                              {(item.position || item.department) && (
+                              {(item.department || item.position) && (
                                 <span className='text-xs text-gray-500'>
-                                  {item.position && item.department 
-                                    ? `${item.position} | ${item.department}`
-                                    : item.position || item.department
+                                  • {item.department && item.position 
+                                    ? `${item.department} | ${item.position}`
+                                    : item.department || item.position
                                   }
                                 </span>
                               )}
                             </div>
                           </li>
                         ))}
-                    </ul>
-                  )}
+                        {hasMoreResults && (
+                          <li
+                            className={`px-3 py-2 cursor-pointer border-t border-gray-200 ${
+                              selectedIndex === displayItems.length 
+                                ? 'bg-blue-100' 
+                                : 'bg-gray-50 hover:bg-gray-100'
+                            }`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // Show 10 more results in the dropdown
+                              setAutocompleteLimit(prev => prev + 10);
+                              // Keep the selection on the "Show more" option after expansion
+                              setSelectedIndex(displayItems.length + 10);
+                            }}
+                            onMouseEnter={() => setSelectedIndex(displayItems.length)}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                            }}
+                          >
+                            <div className='flex items-center justify-between'>
+                              <span className='text-sm text-gray-600'>
+                                Show 10 more results
+                              </span>
+                              <span className='text-xs text-gray-500'>
+                                {filteredItems.length - autocompleteLimit} remaining
+                              </span>
+                            </div>
+                          </li>
+                        )}
+                      </ul>
+                    );
+                  })()}
                 </div>
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
@@ -551,6 +847,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         >
                           Reset
                         </button>
+                        <button
+                          onClick={handleShowAll}
+                          className='flex-1 bg-savoy-blue text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-blue-700'
+                        >
+                          Show All
+                        </button>
                       </div>
                     </div>
                   </Menu.Items>
@@ -560,10 +862,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
-              <div className='py-2 sm:px-6 lg:px-8'>
-                <div className='overflow-x-auto'>
-                  <table className='divide-y divide-gray-300 text-center min-w-full'>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
                       <tr>
                         {visibleColumns.date_hired && (
@@ -611,6 +918,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             Department
                           </th>
                         )}
+                        {visibleColumns.employment_status && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Employment Status
+                          </th>
+                        )}
                         {visibleColumns.email && (
                           <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Email
@@ -638,17 +950,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </thead>
                     <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                   </table>
+                  <hr />
                 </div>
-                <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
-              </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
@@ -671,7 +982,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isImportModalOpen && (
-        <ImportModal refetch={employeeListRefetch} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
+        <ImportModal refetch={refetchAllEmployeeData} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
       )}
       {isExportTemplateModalOpen && (
         <ExportTemplateModal
@@ -682,7 +993,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isEmployeesDeleteModalOpen && (
         <DeleteEmployeeDetailModal
-          refetch={employeeListRefetch}
+          refetch={refetchAllEmployeeData}
           isOpen={isEmployeesDeleteModalOpen}
           setIsOpen={setIsEmployeesDeleteModalOpen}
         />
@@ -691,21 +1002,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <EditEmployeeDetailsModal
           isOpen={isEmployeesEditModalOpen}
           setIsOpen={setIsEmployeesEditModalOpen}
-          refetch={employeeListRefetch}
+          refetch={refetchAllEmployeeData}
           locationItems={locationItems}
           departmentItems={departmentItems}
           positionItems={positionItems}
+          employeeStatusItems={employeeStatusItems}
         />
       )}
-      <AddEmployeeModal
-        refetch={employeeListRefetch}
-        isOpen={isAddEmployeeModalOpen}
-        setIsOpen={setIsAddEmployeeModalOpen}
-        locationItems={locationItems}
-        departmentItems={departmentItems}
-        positionItems={positionItems}
-      />
 
+      {isAddEmployeeModalOpen && (
+        <AddEmployeeModal
+          refetch={refetchAllEmployeeData}
+          isOpen={isAddEmployeeModalOpen}
+          setIsOpen={setIsAddEmployeeModalOpen}
+          locationItems={locationItems}
+          departmentItems={departmentItems}
+          positionItems={positionItems}
+          employeeStatusItems={employeeStatusItems}
+        />
+      )}
+
+      <Tooltip id='employee-search-tooltip' />
     </>
   );
 };

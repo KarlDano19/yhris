@@ -21,6 +21,7 @@ const SendNTE = ({
   setReleased,
   isLoading,
   setIsRedirectingToDocumentGenerator,
+  userRights,
 }: {
   id: number;
   isNTESent: boolean;
@@ -33,6 +34,7 @@ const SendNTE = ({
   setReleased: any;
   isLoading: boolean;
   setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
+  userRights?: any;
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
@@ -46,6 +48,12 @@ const SendNTE = ({
 
   const handleSendClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if status is approved before proceeding
+    if (employeeIssueDetails?.status !== 'approved') {
+      return; // Do nothing if status is not approved
+    }
+    
     setCheckingAttachment(true);
     try {
       // Check if there's an attachment
@@ -76,20 +84,24 @@ const SendNTE = ({
   }
 
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
       <div>
         <button
           className={classNames(
             employeeIssueDetails && employeeIssueDetails.nte_attachment
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
               : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
-            'items-center rounded-md px-2 py-1 focus:z-10 w-24'
+            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
-          disabled={checkingAttachment}
+          disabled={checkingAttachment || !userRights?.generate_employee_issue_nte || employeeIssueDetails?.status !== 'approved'}
           onClick={handleSendClick}
-          title={employeeIssueDetails && employeeIssueDetails.nte_attachment
-            ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
-            : 'Click to Generate NTE'}
+          title={!userRights?.generate_employee_issue_nte 
+            ? 'No permission to generate NTE'
+            : employeeIssueDetails?.status !== 'approved'
+            ? 'NTE can only be generated when status is approved'
+            : (employeeIssueDetails && employeeIssueDetails.nte_attachment
+              ? (isNTESent ? 'Resend Notice to Explain' : 'Send Notice to Explain')
+              : 'Click to Generate NTE')}
         >
           {checkingAttachment
             ? 'Checking...'
@@ -135,32 +147,30 @@ const SendNTE = ({
         </button>
       </div>
       {isNTEReceived && (
-        <div>
-          <div className='flex gap-1 items-center justify-center'>
-            <div className='relative'>
-              <div
-                className='cursor-pointer'
-                data-tooltip-id='nte-clip-tooltip'
-                data-tooltip-content='Click to view NTE attachment'
-                data-tooltip-place='bottom'
-                onClick={() =>
-                  setNTEAttachmentViewModalOpen({
-                    isOpen: true,
-                    id,
-                  })
-                }
-              >
-                <ClipIcon hasFile={true} />
-              </div>
-              {/* Notification badge for response */}
-              {employeeIssueDetails && employeeIssueDetails.is_responded && employeeIssueDetails.response && (
-                <div className="absolute -top-2 -right-2.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  !
-                </div>
-              )}
+        <div className='flex gap-1 items-center justify-center'>
+          <div className='relative'>
+            <div
+              className='cursor-pointer'
+              data-tooltip-id='nte-clip-tooltip'
+              data-tooltip-content='Click to view NTE attachment'
+              data-tooltip-place='bottom'
+              onClick={() =>
+                setNTEAttachmentViewModalOpen({
+                  isOpen: true,
+                  id,
+                })
+              }
+            >
+              <ClipIcon hasFile={true} />
             </div>
-            <p className='ml-2 text-xs'>{formattedReceivedDate}</p>
+            {/* Notification badge for response */}
+            {employeeIssueDetails && employeeIssueDetails.is_responded && employeeIssueDetails.response && (
+              <div className="absolute -top-2 -right-2.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                !
+              </div>
+            )}
           </div>
+          <p className='text-xs ml-1'>{formattedReceivedDate}</p>
         </div>
       )}
 

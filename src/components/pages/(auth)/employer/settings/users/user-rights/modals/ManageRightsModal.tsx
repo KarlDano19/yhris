@@ -34,7 +34,7 @@ export default function ManageRightsModal({
     if (isOpen) {
       refetchUserRightDetails();
     }
-  }, [isOpen]);
+  }, [isOpen, refetchUserRightDetails]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -58,10 +58,20 @@ export default function ManageRightsModal({
     if (userRightDetailsData) {
         setValue('create_employee_issue', userRightDetailsData.create_employee_issue);
         setValue('edit_employee_issue', userRightDetailsData.edit_employee_issue);
+        setValue('generate_employee_issue_nte', userRightDetailsData.generate_employee_issue_nte);
+        setValue('investigate_employee_issue', userRightDetailsData.investigate_employee_issue);
+        setValue('decide_employee_issue', userRightDetailsData.decide_employee_issue);
+        setValue('update_employee_issue_status', userRightDetailsData.update_employee_issue_status);
         setValue('create_memo', userRightDetailsData.create_memo);
         setValue('edit_memo', userRightDetailsData.edit_memo);
+        setValue('create_orientation', userRightDetailsData.create_orientation);
+        setValue('edit_orientation', userRightDetailsData.edit_orientation);
+        setValue('create_employee', userRightDetailsData.create_employee);
+        setValue('edit_employee', userRightDetailsData.edit_employee);
+        setValue('import_employee', userRightDetailsData.import_employee);
+        setValue('export_employee', userRightDetailsData.export_employee);
     }
-  }, [userRightDetailsData]);
+  }, [userRightDetailsData, setValue]);
 
   const customCloseModal = () => {
     reset();
@@ -97,7 +107,7 @@ export default function ManageRightsModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-2xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Manage Rights</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Manage User Rights</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen({ id: 0, open: false })} />
                   </div>
                   <div className='md:mx-6 my-4'>
@@ -115,9 +125,13 @@ export default function ManageRightsModal({
                             </div>
                           </div>
                         </div>
-                        <div className='grid lg:grid-cols-6 gap-x-8 mt-2'>
-                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5'>
-                            <div className='grid-item'>
+                        {/* Address Employee Issue Section */}
+                        <div className='mb-8'>
+                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
+                            Address Employee Issue
+                          </h3>
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4'>
+                            <div>
                               <label
                                 htmlFor='create_employee_issue'
                                 className='block text-sm font-medium leading-6 text-gray-900'
@@ -128,7 +142,7 @@ export default function ManageRightsModal({
                               <div className='relative mt-2'>
                                 <select
                                   id='create_employee_issue'
-                                  {...register('create_employee_issue', { required: true })}
+                                  {...register('create_employee_issue')}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>
@@ -139,7 +153,7 @@ export default function ManageRightsModal({
                                 </div>
                               </div>
                             </div>
-                            <div className='grid-item'>
+                            <div>
                               <label
                                 htmlFor='edit_employee_issue'
                                 className='block text-sm font-medium leading-6 text-gray-900'
@@ -150,7 +164,7 @@ export default function ManageRightsModal({
                               <div className='relative mt-2'>
                                 <select
                                   id='edit_employee_issue'
-                                  {...register('edit_employee_issue', { required: true })}
+                                  {...register('edit_employee_issue')}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>
@@ -161,7 +175,104 @@ export default function ManageRightsModal({
                                 </div>
                               </div>
                             </div>
-                            <div className='grid-item'>
+                            <div>
+                              <label
+                                htmlFor='generate_employee_issue_nte'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Generate NTE
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='generate_employee_issue_nte'
+                                  {...register('generate_employee_issue_nte')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='investigate_employee_issue'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Investigate Issue
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='investigate_employee_issue'
+                                  {...register('investigate_employee_issue')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='decide_employee_issue'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Decide Issue
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='decide_employee_issue'
+                                  {...register('decide_employee_issue')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='update_employee_issue_status'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Update Issue Status
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='update_employee_issue_status'
+                                  {...register('update_employee_issue_status')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Create Memo/Policy Section */}
+                        <div className='mb-8'>
+                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
+                            Create Memo/Policy
+                          </h3>
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4'>
+                            <div>
                               <label
                                 htmlFor='create_memo'
                                 className='block text-sm font-medium leading-6 text-gray-900'
@@ -172,7 +283,7 @@ export default function ManageRightsModal({
                               <div className='relative mt-2'>
                                 <select
                                   id='create_memo'
-                                  {...register('create_memo', { required: true })}
+                                  {...register('create_memo')}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>
@@ -183,7 +294,7 @@ export default function ManageRightsModal({
                                 </div>
                               </div>
                             </div>
-                            <div className='grid-item'>
+                            <div>
                               <label
                                 htmlFor='edit_memo'
                                 className='block text-sm font-medium leading-6 text-gray-900'
@@ -194,7 +305,157 @@ export default function ManageRightsModal({
                               <div className='relative mt-2'>
                                 <select
                                   id='edit_memo'
-                                  {...register('edit_memo', { required: true })}
+                                  {...register('edit_memo')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Benefits Section */}
+                        <div className='mb-8'>
+                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
+                            Benefits
+                          </h3>
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4'>
+                            <div>
+                              <label
+                                htmlFor='create_orientation'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Create Benefits
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='create_orientation'
+                                  {...register('create_orientation')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='edit_orientation'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Edit Benefits
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='edit_orientation'
+                                  {...register('edit_orientation')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Employee Section */}
+                        <div className='mb-8'>
+                          <h3 className='text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200'>
+                            Employee
+                          </h3>
+                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4'>
+                            <div>
+                              <label
+                                htmlFor='create_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Create Employee
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='create_employee'
+                                  {...register('create_employee')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='edit_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Edit Employee
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='edit_employee'
+                                  {...register('edit_employee')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='import_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Import Employee
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='import_employee'
+                                  {...register('import_employee')}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                htmlFor='export_employee'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Export Employee
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='export_employee'
+                                  {...register('export_employee')}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>

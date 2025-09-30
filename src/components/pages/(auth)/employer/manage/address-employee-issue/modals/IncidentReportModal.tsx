@@ -1,14 +1,15 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddEmployeeIssueItems from '../hooks/useAddEmployeeIssueItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -21,22 +22,16 @@ interface Field {
   value: any;
 }
 
+
 export default function IncidentReportModal({
-  employeeIssueItems,
-  employeeItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
 }: {
-  employeeIssueItems: any;
-  employeeItems: any;
-  setEmployeeIssueItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
 }) {
-  const queryClient = useQueryClient();
   const { mutate, isLoading } = useAddEmployeeIssueItems();
   const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
@@ -44,7 +39,6 @@ export default function IncidentReportModal({
       incidentDate: new Date().toISOString(), 
     },
   });
-  const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   
   // Character limit state for brief background
@@ -52,22 +46,8 @@ export default function IncidentReportModal({
   const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
-  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
   const briefBackgroundValue = watch('briefBackground') || '';
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Function to scroll selected item into view
-  const scrollToSelectedItem = (index: number) => {
-    if (dropdownRef.current && index >= 0) {
-      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-        });
-      }
-    }
-  };
+  
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -86,7 +66,6 @@ export default function IncidentReportModal({
         setValue('position', ''); // Ensure position is cleared
         setEmployeeSearch('');
         setEmployeeSelected(false);
-        setSelectedEmployeeIndex(-1);
         refetch();
       },
       onError: (err: any) => {
@@ -100,7 +79,14 @@ export default function IncidentReportModal({
 
   // Handle brief background input change with character limit
   const handleBriefBackgroundChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    
+    // Prevent excessive consecutive line breaks (more than 2)
+    // Replace 3 or more consecutive line breaks with just 2
+    value = value.replace(/\n{3,}/g, '\n\n');
+    
+    // Also prevent excessive spaces (more than 2 consecutive spaces)
+    value = value.replace(/ {3,}/g, '  ');
     
     if (value.length <= maxLength) {
       // Reset the toast flag when back under the limit
@@ -168,154 +154,38 @@ export default function IncidentReportModal({
                           Employee Name<span className='text-red-600'>*</span>
                         </label>
                         <div className='relative mt-2'>
-                          <input
-                            id='name'
-                            type='text'
-                            placeholder='Select...'
-                            value={employeeSearch}
-                            onChange={e => {
-                              setEmployeeSearch(e.target.value);
-                              setSelectedEmployeeIndex(-1); // Reset selection when typing
-                            }}
-                            className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                            onClick={() => {
-                              if (!employeeSelected) {
-                                const dropdown = document.getElementById('employee-dropdown');
-                                if (dropdown) {
-                                  dropdown.classList.toggle('hidden');
+                          <EmployeeSelect
+                            control={control}
+                            name="name"
+                            label=""
+                            required={true}
+                            placeholder="Select employee..."
+                            isMulti={false}
+                            isClearable={true}
+                            employeeSearch={employeeSearch}
+                            setEmployeeSearch={setEmployeeSearch}
+                            setEmployeeSelected={setEmployeeSelected}
+                            className=""
+                            onChange={(selectedOption: any) => {
+                              if (selectedOption && !selectedOption.isShowMore) {
+                                setEmployeeSearch(selectedOption.label);
+                                setEmployeeSelected(true);
+                                // Auto-fill department from employee data
+                                if (selectedOption.department) {
+                                  setValue('department', selectedOption.department);
                                 }
-                              }
-                            }}
-                            readOnly={employeeSelected}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (selectedEmployeeIndex >= 0) {
-                                  // Select the highlighted employee
-                                  const filteredEmployees = employeeItems.filter((item: any) => 
-                                    `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase())
-                                  );
-                                  if (filteredEmployees[selectedEmployeeIndex]) {
-                                    const item = filteredEmployees[selectedEmployeeIndex];
-                                    setValue('name', item.id);
-                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                                    setEmployeeSelected(true);
-                                    if (item.department) {
-                                      setValue('department', item.department);
-                                    }
-                                    if (item.position) {
-                                      setValue('position', item.position);
-                                    }
-                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
-                                  }
+                                // Auto-fill position from employee data
+                                if (selectedOption.position) {
+                                  setValue('position', selectedOption.position);
                                 }
-                              } else if (e.key === 'ArrowDown') {
-                                e.preventDefault();
-                                const dropdown = document.getElementById('employee-dropdown');
-                                if (dropdown && !dropdown.classList.contains('hidden')) {
-                                  const filteredEmployees = employeeItems.filter((item: any) => 
-                                    `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase())
-                                  );
-                                  const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
-                                  setSelectedEmployeeIndex(newIndex);
-                                  scrollToSelectedItem(newIndex);
-                                }
-                              } else if (e.key === 'ArrowUp') {
-                                e.preventDefault();
-                                const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
-                                setSelectedEmployeeIndex(newIndex);
-                                if (newIndex >= 0) {
-                                  scrollToSelectedItem(newIndex);
-                                }
-                              } else if (e.key === 'Escape') {
-                                document.getElementById('employee-dropdown')?.classList.add('hidden');
-                                setSelectedEmployeeIndex(-1);
+                              } else {
+                                setEmployeeSearch('');
+                                setEmployeeSelected(false);
+                                setValue('department', '');
+                                setValue('position', '');
                               }
                             }}
                           />
-                          <input
-                            type='hidden'
-                            {...register('name', { required: true })}
-                          />
-                          <div
-                            className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
-                            onClick={() => {
-                              if (!employeeSelected) {
-                                const dropdown = document.getElementById('employee-dropdown');
-                                if (dropdown) {
-                                  dropdown.classList.toggle('hidden');
-                                }
-                              }
-                            }}
-                          >
-                            {!employeeSelected ? (
-                              <span>
-                                <SelectChevronDown />
-                              </span>
-                            ) : (
-                              <button
-                                type='button'
-                                className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
-                                onClick={() => {
-                                  setValue('name', '');
-                                  setEmployeeSearch('');
-                                  setEmployeeSelected(false);
-                                  setSelectedEmployeeIndex(-1);
-                                  setValue('department', ''); // Clear department when employee is cleared
-                                  setValue('position', ''); // Clear position when employee is cleared
-                                }}
-                                tabIndex={-1}
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                          <div 
-                            id='employee-dropdown' 
-                            ref={dropdownRef}
-                            className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'
-                          >
-                            {employeeItems
-                              .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                              .map((item: any, index: number) => (
-                                <div
-                                  key={item.id}
-                                  className={`px-3 py-2 text-sm cursor-pointer ${
-                                    index === selectedEmployeeIndex 
-                                      ? 'bg-blue-100' 
-                                      : 'bg-[#eeefee] text-gray-900 hover:bg-blue-100'
-                                  }`}
-                                  onMouseEnter={() => setSelectedEmployeeIndex(index)}
-                                  onClick={() => {
-                                    setValue('name', item.id);
-                                    setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                                    setEmployeeSelected(true);
-                                    // Auto-fill department from employee data
-                                    if (item.department) {
-                                      setValue('department', item.department);
-                                    }
-                                    // Auto-fill position from employee data
-                                    if (item.position) {
-                                      setValue('position', item.position);
-                                    }
-                                    document.getElementById('employee-dropdown')?.classList.add('hidden');
-                                    setSelectedEmployeeIndex(-1);
-                                  }}
-                                >
-                                  <div className='flex flex-col'>
-                                    <span className='font-medium'>{`${item.firstname} ${item.lastname}`}</span>
-                                    {(item.department || item.position) && (
-                                      <span className='text-xs text-gray-500'>
-                                        {item.department && item.position 
-                                          ? `${item.department} | ${item.position}`
-                                          : item.department || item.position
-                                        }
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
                         </div>
                       </div>
                       <div>
@@ -328,7 +198,14 @@ export default function IncidentReportModal({
                             {...register('position', { required: true })}
                             type='text'
                             readOnly
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                            data-tooltip-id="position-tooltip"
+                            data-tooltip-content="Auto-populated from selected employee"
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                          />
+                          <Tooltip 
+                            id="position-tooltip" 
+                            place="bottom"
+                            style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
                       </div>
@@ -344,7 +221,14 @@ export default function IncidentReportModal({
                             {...register('department', { required: true })}
                             type='text'
                             readOnly
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                            data-tooltip-id="department-tooltip"
+                            data-tooltip-content="Auto-populated from selected employee"
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                          />
+                          <Tooltip 
+                            id="department-tooltip" 
+                            place="bottom"
+                            style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
                       </div>
@@ -434,13 +318,13 @@ export default function IncidentReportModal({
                       </label>
                       <div className='mt-2'>
                         <textarea
-                          rows={4}
+                          rows={Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
                           {...register('briefBackground', { required: true })}
                           id='briefBackground'
                           value={briefBackgroundValue}
                           onChange={handleBriefBackgroundChange}
                           maxLength={maxLength + 1}
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 resize-none sm:text-sm sm:leading-6'
                         />
                         <div className='text-xs text-gray-500 text-right mt-1'>
                           {briefBackgroundValue.length}/{maxLength} characters

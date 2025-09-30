@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
+import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
 import StateContext from '../contexts/StateContext';
 
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
@@ -23,7 +24,9 @@ export default function ApplicantForm({ title }: PropTypes) {
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
+  const { mutate: generateSummary, isLoading: isGeneratingMutation } = useGenerateApplicantSummary();
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -49,6 +52,45 @@ export default function ApplicantForm({ title }: PropTypes) {
     setTimeout(() => setActionState(initialActionState), 400);
   };
 
+  const handleGenerateSummary = () => {
+    if (!applicantProfile?.id) {
+      toast.custom(() => <CustomToast message="Unable to identify applicant" type="error" />, {
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsGeneratingSummary(true);
+
+    generateSummary(applicantProfile.id, {
+      onSuccess: (response) => {
+        setIsGeneratingSummary(false);
+        
+        // Update the applicant profile with the new summary
+        setApplicantProfile((prev: any) => ({
+          ...prev,
+          resume_summary: response.summary
+        }));
+
+        const message = response.was_cached 
+          ? 'Resume summary already exists!' 
+          : 'Resume summary generated successfully!';
+          
+        toast.custom(() => <CustomToast message={message} type="success" />, {
+          duration: 4000,
+        });
+      },
+      onError: (error: any) => {
+        setIsGeneratingSummary(false);
+        
+        const errorMessage = error?.message || 'Failed to generate summary. Please try again.';
+        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
+          duration: 6000,
+        });
+      }
+    });
+  };
+
   const renderProfileTab = () => {
     return (
       <>
@@ -57,7 +99,7 @@ export default function ApplicantForm({ title }: PropTypes) {
             <div
               className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
               style={{
-                backgroundImage: `url(${applicantProfile.photo})`,
+                backgroundImage: `url(${applicantProfile.photo_url})`,
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -83,18 +125,14 @@ export default function ApplicantForm({ title }: PropTypes) {
         {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
           <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
             <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
-            <div className='space-y-4'>
+            <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
               {applicant.stage_notes.map((stageNote, index) => (
                 <div key={index} className='border-l-4 border-blue-400 pl-4'>
                   <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title}</h5>
+                    <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
                   </div>
                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
-                  {stageNote.created_at && (
-                    <p className='text-xs text-gray-400 mt-2'>
-                      Added: {new Date(stageNote.created_at).toLocaleDateString()}
-                    </p>
-                  )}
+                  
                 </div>
               ))}
             </div>
@@ -169,6 +207,84 @@ export default function ApplicantForm({ title }: PropTypes) {
     );
   };
 
+  const renderSummaryTab = () => {
+    const hasSummary = applicantProfile.resume_summary && applicantProfile.resume_summary.trim() !== '';
+    
+    return (
+      <>
+        {hasSummary ? (
+          <div className='mt-6'>
+            <div className='bg-blue-50 rounded-lg p-6 border border-blue-200'>
+              <div className='flex items-start'>
+                <div className='mr-3'>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-700 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className='flex-1'>
+                  <h4 className='font-semibold text-blue-900 mb-3 flex items-center justify-between'>
+                    <span className='flex items-center'>
+                      AI-Generated Resume Summary
+                    </span>
+                    <button
+                      onClick={handleGenerateSummary}
+                      disabled={isGeneratingSummary || isGeneratingMutation}
+                      className='ml-4 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                      title="Regenerate summary"
+                    >
+                      {isGeneratingSummary || isGeneratingMutation ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          Updating...
+                        </div>
+                      ) : (
+                        'Regenerate'
+                      )}
+                    </button>
+                  </h4>
+                  <div className='text-gray-700 leading-relaxed whitespace-pre-wrap'>
+                    {applicantProfile.resume_summary}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className='mt-8 text-center'>
+            <div className='bg-gray-50 rounded-lg p-8 border border-gray-200'>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h4 className='text-gray-600 font-medium mb-4'>No Resume Summary Available</h4>
+              <p className='text-gray-500 text-sm mb-6'>
+                Generate an AI-powered summary from the uploaded resume to quickly understand this candidate&apos;s background and qualifications.
+              </p>
+              <button
+                onClick={handleGenerateSummary}
+                disabled={isGeneratingSummary || isGeneratingMutation}
+                className='inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              >
+                {isGeneratingSummary || isGeneratingMutation ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Generating Summary...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate Summary
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   const renderResumeView = () => {
     return (
       <>
@@ -214,7 +330,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full grid grid-cols-3'>
+                    <div className='w-full grid grid-cols-4'>
                       <div className='mr-2'>
                         <button
                           className={classNames(
@@ -223,7 +339,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                           )}
                           onClick={() => setCurrentTab(1)}
                         >
-                          Applicant Profile
+                          Profile
                         </button>
                       </div>
                       <div className='mx-2'>
@@ -237,13 +353,24 @@ export default function ApplicantForm({ title }: PropTypes) {
                           Job Experience
                         </button>
                       </div>
-                      <div className='ml-2'>
+                      <div className='mx-2'>
                         <button
                           className={classNames(
                             'px-4 py-2 font-bold rounded-md w-full',
                             currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
                           )}
                           onClick={() => setCurrentTab(3)}
+                        >
+                          Summary
+                        </button>
+                      </div>
+                      <div className='ml-2'>
+                        <button
+                          className={classNames(
+                            'px-4 py-2 font-bold rounded-md w-full',
+                            currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                          )}
+                          onClick={() => setCurrentTab(4)}
                         >
                           Answers
                         </button>
@@ -255,6 +382,9 @@ export default function ApplicantForm({ title }: PropTypes) {
                     <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>
                   )}
                   {!viewCV && currentTab == 3 && (
+                    <div className='h-[28rem] overflow-y-auto'>{renderSummaryTab()}</div>
+                  )}
+                  {!viewCV && currentTab == 4 && (
                     <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>
                   )}
                   {viewCV && renderResumeView()}

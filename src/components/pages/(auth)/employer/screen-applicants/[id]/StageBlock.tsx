@@ -36,10 +36,9 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
         isNotFit = applicant.screeningFit === 'bad';
       } else {
         // Fall back to status-based logic
-        isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing';
+        // Fall back to status-based logic
+        isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
         isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-        
-        // Hired status is handled separately through the status filter
       }
       
       // Check if the applicant matches the active tab
@@ -47,10 +46,6 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
       if (filters.rating.includes('Good Fit') && isGoodFit) {
         matchesRating = true;
       } else if (filters.rating.includes('Not Fit') && isNotFit) {
-        matchesRating = true;
-      } else if (applicant.status === 'hired' && filters.status.includes('Hired')) {
-        // Special case for hired applicants - show them if Hired status is selected
-        // regardless of Good Fit/Not Fit tab
         matchesRating = true;
       }
       

@@ -1,13 +1,13 @@
 "use client";
 
-import {  useEffect, useState } from "react";
+import {  useEffect } from "react";
 
 import {  Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
-import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function ExposureData({
   control,
@@ -26,7 +26,6 @@ function ExposureData({
     setSelectedTab(2);
   });
 
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const { data: employeeData } = useGetEmployeeItems();
 
   useEffect(() => {

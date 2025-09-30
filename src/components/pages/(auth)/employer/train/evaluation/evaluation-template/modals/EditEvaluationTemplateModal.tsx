@@ -241,6 +241,7 @@ export default function EditEvaluationModal({
                       setValue,
                       handleSubmit,
                       setSelectedTab,
+                      getValues,
                     }}
                   />
                 )}
