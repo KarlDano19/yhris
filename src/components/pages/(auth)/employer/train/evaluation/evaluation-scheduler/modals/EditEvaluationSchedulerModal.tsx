@@ -196,6 +196,8 @@ function EditEvaluationSchedulerModal({
                       onSubmit={onSubmit}
                       isLoading={isLoading}
                       setSelectedTab={setSelectedTab}
+                      recipientNames={dataEvaluationSchedulerDetails?.recipient_names}
+                      employeeNames={dataEvaluationSchedulerDetails?.employee_names}
                     />
                   )}
                 </Dialog.Panel>

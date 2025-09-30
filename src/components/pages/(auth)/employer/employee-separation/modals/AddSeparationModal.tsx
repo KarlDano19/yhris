@@ -33,7 +33,6 @@ export default function AddSeparationModal({
     },
   });
   const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   
   const { mutate, isLoading } = useAddSeparation();
 
@@ -46,7 +45,6 @@ export default function AddSeparationModal({
       reason: '',
     });
     setEmployeeSearch('');
-    setEmployeeSelected(false);
     setValue('department', '');
     setValue('position', '');
     setValue('name', ''); // Clear the name field
@@ -144,12 +142,10 @@ export default function AddSeparationModal({
                           isClearable={true}
                           employeeSearch={employeeSearch}
                           setEmployeeSearch={setEmployeeSearch}
-                          setEmployeeSelected={setEmployeeSelected}
                           className=""
                           onChange={(selectedOption: any) => {
                             if (selectedOption && !selectedOption.isShowMore) {
                               setEmployeeSearch(selectedOption.label);
-                              setEmployeeSelected(true);
                               // Auto-fill department from employee data
                               if (selectedOption.department) {
                                 setValue('department', selectedOption.department);
@@ -160,7 +156,6 @@ export default function AddSeparationModal({
                               }
                             } else {
                               setEmployeeSearch('');
-                              setEmployeeSelected(false);
                               setValue('department', '');
                               setValue('position', '');
                             }

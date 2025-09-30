@@ -4,7 +4,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import MeetingInfo from "./tabs/MeetingInfo";
@@ -30,8 +29,6 @@ function UpdateShcMinutesMeetingModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {data: minutesMeetingData, remove: removeMinutesMeeting, refetch: refetchMinutesMeeting} = useGetMinutesMeetingDetails(isOpen.id);
   const {
@@ -63,11 +60,6 @@ function UpdateShcMinutesMeetingModal({
     updateShcMinutesMeeting({ data, shc_meeting_minutes_id: isOpen.id }, callbackReq);
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   useEffect(() => {
     if (minutesMeetingData) {
@@ -140,6 +132,8 @@ function UpdateShcMinutesMeetingModal({
                     setError={setError}
                     clearErrors={clearErrors}
                     watch={watch}
+                    attendeeNames={minutesMeetingData?.attendee_names}
+                    absenteeNames={minutesMeetingData?.absentee_names}
                   />
                 )}
                 {selectedTab === 2 && (

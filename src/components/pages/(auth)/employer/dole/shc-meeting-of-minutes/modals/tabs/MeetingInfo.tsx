@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import EmployeeSelect from "@/components/common/EmployeeSelect";
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
@@ -18,6 +18,8 @@ export default function MeetingInfo({
   setError,
   clearErrors,
   watch,
+  attendeeNames,
+  absenteeNames,
 }: {
   control: any;
   register: any;
@@ -26,6 +28,8 @@ export default function MeetingInfo({
   setError: any;
   clearErrors: any;
   watch: any;
+  attendeeNames?: string[];
+  absenteeNames?: string[];
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
@@ -197,6 +201,7 @@ export default function MeetingInfo({
               employeeSearch={employeeSearch}
               setEmployeeSearch={setEmployeeSearch}
               excludeValues={selectedAbsentees}
+              employeeNames={attendeeNames}
               className=""
               onChange={(selectedOptions: any) => {
                 clearErrors("attendees");
@@ -221,6 +226,7 @@ export default function MeetingInfo({
               employeeSearch={employeeSearch}
               setEmployeeSearch={setEmployeeSearch}
               excludeValues={selectedAttendees}
+              employeeNames={absenteeNames}
               className=""
             />
           </div>

@@ -36,6 +36,8 @@ function useGetEvaluationSchedulerDetails(evaluation_scheduler_id: number | null
     enabled: false,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 5 * 60 * 1000,
   });
 
   return query;

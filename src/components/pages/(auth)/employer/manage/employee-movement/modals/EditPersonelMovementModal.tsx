@@ -227,6 +227,7 @@ function PrintPersonelMovementModal({
                     setCurrentEmploymentStatus={setCurrentEmploymentStatus}
                     newEmploymentStatus={newEmploymentStatus}
                     setNewEmploymentStatus={setNewEmploymentStatus}
+                    employeeName={personelMovementData?.employee_name}
                     errors={errors}
                   />
                 )}

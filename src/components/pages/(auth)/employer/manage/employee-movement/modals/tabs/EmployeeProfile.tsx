@@ -8,7 +8,6 @@ import { Tooltip } from 'react-tooltip';
 
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
-import useGetEmployeeDetails from '@/components/pages/(auth)/employer/manage/employees/hooks/useGetEmployeeDetails';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -34,6 +33,7 @@ function EmployeeProfile({
   setCurrentEmploymentStatus,
   newEmploymentStatus,
   setNewEmploymentStatus,
+  employeeName,
   errors,
 }: {
   control: any;
@@ -53,20 +53,14 @@ function EmployeeProfile({
   setCurrentEmploymentStatus: (v: string) => void;
   newEmploymentStatus: string;
   setNewEmploymentStatus: (v: string) => void;
+  employeeName?: string;
   errors: any;
 }) {
-  const queryClient = useQueryClient();
   const [positionItems, setPositionItems] = useState<any>([]);
   const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
   const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   const { data: positionData } = useGetPositionItems();
   const { data: employeeStatusData } = useGetEmployeeStatusItems();
-  const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
-
-  // Fetch employee details when employee is selected
-  const { data: selectedEmployeeDetails, isLoading: isLoadingEmployeeDetails } = useGetEmployeeDetails(watchedEmployeeId);
-
 
   useEffect(() => {
     if (positionData) {
@@ -80,38 +74,7 @@ function EmployeeProfile({
     }
   }, [employeeStatusData]);
 
-  useEffect(() => {
-    const subscription = watch((value: any) => {
-      const id = value.employee;
-      setWatchedEmployeeId(id ? String(id) : '');
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
 
-  // Auto-populate current position and employment status when employee is selected
-  useEffect(() => {
-    if (selectedEmployeeDetails && !isEdit && positionItems.length > 0 && employeeStatusItems.length > 0) {
-      // Find the position ID that matches the employee's current position
-      const matchingPosition = positionItems.find((pos: any) => 
-        pos.name === selectedEmployeeDetails.position
-      );
-      
-      if (matchingPosition) {
-        setCurrentPosition(matchingPosition.id);
-        setValue('current_position', matchingPosition.id);
-      }
-
-      // Find the employment status ID that matches the employee's current employment status
-      const matchingEmploymentStatus = employeeStatusItems.find((status: any) => 
-        status.name === selectedEmployeeDetails.employment_status
-      );
-      
-      if (matchingEmploymentStatus) {
-        setCurrentEmploymentStatus(matchingEmploymentStatus.id);
-        setValue('current_employment_status', matchingEmploymentStatus.id);
-      }
-    }
-  }, [selectedEmployeeDetails, positionItems, employeeStatusItems, setCurrentPosition, setCurrentEmploymentStatus, setValue, isEdit]);
 
   useEffect(() => {
     if (isEdit) {
@@ -198,17 +161,16 @@ function EmployeeProfile({
                 placeholder="Select employee..."
                 isMulti={false}
                 isClearable={!isEdit}
+                disabled={isEdit}
                 employeeSearch={employeeSearch}
                 setEmployeeSearch={setEmployeeSearch}
-                setEmployeeSelected={setEmployeeSelected}
+                employeeName={employeeName}
                 className=""
                 onChange={(selectedOption: any) => {
                   if (!isEdit && selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
-                    setEmployeeSelected(true);
                   } else if (!isEdit) {
                     setEmployeeSearch('');
-                    setEmployeeSelected(false);
                     // Clear current position and employment status when employee is unselected
                     setCurrentPosition('');
                     setCurrentEmploymentStatus('');

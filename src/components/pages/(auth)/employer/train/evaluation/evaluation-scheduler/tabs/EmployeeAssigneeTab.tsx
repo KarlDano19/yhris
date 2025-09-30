@@ -6,8 +6,7 @@ import "react-quill/dist/quill.snow.css";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
-import EmployeeSelect from "@/components/common/EmployeeSelect";
-
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 
 function EmployeeAssigneeTab({
   control,
@@ -16,6 +15,8 @@ function EmployeeAssigneeTab({
   onSubmit,
   isLoading,
   setSelectedTab,
+  recipientNames,
+  employeeNames,
 }: {
   control: any;
   Controller: any;
@@ -23,6 +24,8 @@ function EmployeeAssigneeTab({
   onSubmit: any;
   isLoading: boolean;
   setSelectedTab: (tab: number) => void;
+  recipientNames?: string[];
+  employeeNames?: string[];
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
@@ -66,6 +69,7 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             excludeValues={selectedEmployees}
+            employeeNames={recipientNames}
             className=""
           />
         </div>
@@ -87,6 +91,7 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             excludeValues={selectedRecipients}
+            employeeNames={employeeNames}
             className=""
           />
         </div>
