@@ -217,6 +217,7 @@ export default function EditIncidentReportModal({
                             setEmployeeSearch={setEmployeeSearch}
                             setEmployeeSelected={setEmployeeSelected}
                             className=""
+                            disabled={!canEdit}
                             onChange={(selectedOption: any) => {
                               if (canEdit && selectedOption && !selectedOption.isShowMore) {
                                 setEmployeeSearch(selectedOption.label);
