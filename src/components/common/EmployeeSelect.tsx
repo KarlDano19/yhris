@@ -379,6 +379,34 @@ export default function EmployeeSelect({
                 // Reset limit when searching
                 setEmployeeLimit(50);
               }}
+              noOptionsMessage={({ inputValue }) => {
+                if (inputValue && inputValue.length >= 2) {
+                  return (
+                    <div className="px-3 py-4 text-center">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-sm text-gray-600">
+                          <p className="font-medium">No employees found for &quot;{inputValue}&quot;</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Try searching by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="px-3 py-4 text-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium">Type to search employees</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Search by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
               onChange={(selectedOption: any) => {
                 if (isMulti) {
                   if (selectedOption?.some((item: any) => item.value === 'show_more')) return;
