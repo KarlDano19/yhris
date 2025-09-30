@@ -111,8 +111,6 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
         return 'Stage where applicant was archived';
       case 'Previously progressed through':
         return 'Applicant has progressed through this stage';
-      case 'First stage (fallback)':
-        return 'First stage (always available)';
       default:
         return reason;
     }
@@ -124,11 +122,19 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
         return 'text-blue-600 bg-blue-100';
       case 'Previously progressed through':
         return 'text-green-600 bg-green-100';
-      case 'First stage (fallback)':
-        return 'text-gray-600 bg-gray-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }
+  };
+
+  // Add this to the modal to show checklist inheritance info
+  const getStageInheritanceInfo = (stage: any) => {
+    if (stage.reason === 'Archived stage') {
+      return 'Will inherit original checklist data';
+    } else if (stage.reason === 'Previously progressed through') {
+      return 'Will inherit existing checklist data';
+    }
+    return '';
   };
 
   return (
@@ -227,7 +233,14 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                                   </div>
                                   <div className="text-xs text-gray-500">
                                     {!isMultiple && stage.reason ? (
-                                      getStageReasonText(stage.reason)
+                                      <>
+                                        {getStageReasonText(stage.reason)}
+                                        {getStageInheritanceInfo(stage) && (
+                                          <div className="mt-1 text-blue-600 text-xs">
+                                            {getStageInheritanceInfo(stage)}
+                                          </div>
+                                        )}
+                                      </>
                                     ) : (
                                       `Order: ${stage.order_by + 1}`
                                     )}
