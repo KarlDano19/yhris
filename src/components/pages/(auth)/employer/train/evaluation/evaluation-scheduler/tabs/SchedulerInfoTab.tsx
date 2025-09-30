@@ -14,6 +14,7 @@ function SchedulerInfoTab({
   watch,
   setValue,
   setIsCustomModalOpen,
+  onCustomFrequencySelect,
 }: {
   register: any;
   handleSubmit: any;
@@ -21,10 +22,13 @@ function SchedulerInfoTab({
   watch: any;
   setValue: any;
   setIsCustomModalOpen: (isOpen: boolean) => void;
+  onCustomFrequencySelect?: (frequency: string, months?: number[], day?: number) => void;
 }) {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const {
     data: dataEvaluation,
+    isLoading: isGetEvaluationLoading,
+    refetch: refetchEvaluation,
   } = useGetEvaluationTemplateItems();
 
   const selectedFrequencyUnit = watch('frequency_unit');
