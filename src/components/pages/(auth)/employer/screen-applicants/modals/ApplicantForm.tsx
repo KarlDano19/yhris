@@ -225,9 +225,6 @@ export default function ApplicantForm({ title }: PropTypes) {
                   <h4 className='font-semibold text-blue-900 mb-3 flex items-center justify-between'>
                     <span className='flex items-center'>
                       AI-Generated Resume Summary
-                      <span className='ml-2 px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full'>
-                        Affinda AI
-                      </span>
                     </span>
                     <button
                       onClick={handleGenerateSummary}
@@ -281,9 +278,6 @@ export default function ApplicantForm({ title }: PropTypes) {
                   </>
                 )}
               </button>
-              <p className='text-xs text-gray-400 mt-3'>
-                Powered by Affinda AI • Requires uploaded resume file
-              </p>
             </div>
           </div>
         )}
