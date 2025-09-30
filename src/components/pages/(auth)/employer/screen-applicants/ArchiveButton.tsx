@@ -105,6 +105,7 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
         applicantName={applicantName}
         jobPostingId={jobPostingId}
         isLoading={isUnarchiving}
+        appliedJobId={appliedJobId} // Pass the appliedJobId here
       />
     </>
   );

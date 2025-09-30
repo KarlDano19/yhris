@@ -1,8 +1,9 @@
-import React, { useState, Fragment, useRef } from 'react';
+import React, { useState, Fragment, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
+import useGetValidStagesForRestoration, { ValidStage } from '../hooks/useGetValidStagesForRestoration';
 import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
 
 import classNames from '@/helpers/classNames';
@@ -19,6 +20,7 @@ interface RestoreApplicationModalProps {
   isMultiple?: boolean;
   selectedApplicantIds?: number[];
   onSuccess?: () => void;
+  appliedJobId?: number; // Add this prop to identify the specific applicant
 }
 
 const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
@@ -30,7 +32,8 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
   isLoading = false,
   isMultiple = false,
   selectedApplicantIds = [],
-  onSuccess
+  onSuccess,
+  appliedJobId
 }) => {
   const { data: jobPostDetails } = useGetJobPostDetails(jobPostingId);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
@@ -41,7 +44,17 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
   
   const { mutate: unarchiveBatch, isLoading: isUnarchiving } = useBatchUnarchiveApplications();
 
-  const availableStages = jobPostDetails?.job_stages?.filter((stage: any) => stage.is_active) || [];
+  // Get valid stages for restoration (only for single applicant)
+  const { data: validStagesData, isLoading: isLoadingValidStages } = useGetValidStagesForRestoration(
+    appliedJobId || 0,
+    isOpen && !isMultiple && !!appliedJobId
+  );
+
+  // For multiple applicants, use all active stages (fallback behavior)
+  // For single applicant, use validated stages
+  const availableStages = isMultiple 
+    ? jobPostDetails?.job_stages?.filter((stage: any) => stage.is_active) || []
+    : validStagesData?.valid_stages || [];
 
   const handleClose = () => {
     setSelectedStageId(null);
@@ -90,6 +103,32 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
       return "Restore Multiple Applications";
     }
     return "Restore Application";
+  };
+
+  const getStageReasonText = (reason: string) => {
+    switch (reason) {
+      case 'Archived stage':
+        return 'Stage where applicant was archived';
+      case 'Previously progressed through':
+        return 'Applicant has progressed through this stage';
+      case 'First stage (fallback)':
+        return 'First stage (always available)';
+      default:
+        return reason;
+    }
+  };
+
+  const getStageReasonColor = (reason: string) => {
+    switch (reason) {
+      case 'Archived stage':
+        return 'text-blue-600 bg-blue-100';
+      case 'Previously progressed through':
+        return 'text-green-600 bg-green-100';
+      case 'First stage (fallback)':
+        return 'text-gray-600 bg-gray-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
   };
 
   return (
@@ -149,40 +188,59 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Select Stage:
                         </label>
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {availableStages.map((stage: any) => (
-                            <label
-                              key={stage.id}
-                              className={classNames(
-                                'flex items-center p-3 border rounded-lg cursor-pointer transition-colors',
-                                selectedStageId === stage.id
-                                  ? 'border-blue-500 bg-blue-50'
-                                  : 'border-gray-200 hover:bg-gray-50'
-                              )}
-                            >
-                              <input
-                                type="radio"
-                                name="stage"
-                                value={stage.id}
-                                checked={selectedStageId === stage.id}
-                                onChange={() => setSelectedStageId(stage.id)}
-                                className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                              />
-                              <div className="ml-3">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {stage.title}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  Order: {stage.order_by + 1}
-                                </div>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
                         
-                        {availableStages.length === 0 && (
+                        {isLoadingValidStages ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-2 text-gray-600">Loading available stages...</span>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {availableStages.map((stage: any) => (
+                              <label
+                                key={stage.id}
+                                className={classNames(
+                                  'flex items-start p-3 border rounded-lg cursor-pointer transition-colors',
+                                  selectedStageId === stage.id
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:bg-gray-50'
+                                )}
+                              >
+                                <input
+                                  type="radio"
+                                  name="stage"
+                                  value={stage.id}
+                                  checked={selectedStageId === stage.id}
+                                  onChange={() => setSelectedStageId(stage.id)}
+                                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                />
+                                <div className="ml-3 flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {stage.title}
+                                    </div>
+                                    {!isMultiple && stage.reason && (
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStageReasonColor(stage.reason)}`}>
+                                        {stage.reason}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {!isMultiple && stage.reason ? (
+                                      getStageReasonText(stage.reason)
+                                    ) : (
+                                      `Order: ${stage.order_by + 1}`
+                                    )}
+                                  </div>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {availableStages.length === 0 && !isLoadingValidStages && (
                           <div className="text-center py-4 text-gray-500">
-                            No active stages available
+                            {isMultiple ? 'No active stages available' : 'No valid stages available for restoration'}
                           </div>
                         )}
                       </div>
@@ -220,10 +278,10 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                 <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                   <button
                     type="button"
-                    disabled={!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0}
+                    disabled={!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingValidStages}
                     className={classNames(
                       'inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm sm:ml-3 sm:w-auto',
-                      (!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0)
+                      (!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingValidStages)
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
                     )}
