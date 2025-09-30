@@ -184,7 +184,6 @@ function EditEvaluationSchedulerModal({
                       watch={watch}
                       setValue={setValue}
                       setIsCustomModalOpen={setIsCustomModalOpen}
-                      onCustomFrequencySelect={handleCustomFrequencySelectFromTab}
                       key={refreshKey} // Add a key prop to force re-render when refreshKey changes
                     />
                   )}
@@ -193,6 +192,7 @@ function EditEvaluationSchedulerModal({
                     <EmployeeAssigneeTab
                       control={control}
                       Controller={Controller}
+                      watch={watch}
                       onSubmit={onSubmit}
                       isLoading={isLoading}
                       setSelectedTab={setSelectedTab}

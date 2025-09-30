@@ -8,6 +8,11 @@ async function updateStatus(data: any) {
       "stage_notes": data.stage_notes
     }
     
+    // Include checklist data if provided
+    if (data.checklists) {
+      finalData.checklists = data.checklists;
+    }
+    
     // Include personalized feedback if provided (for rejections)
     if (data.status === 'rejected' && data.feedback) {
       finalData.personalized_feedback = data.feedback;

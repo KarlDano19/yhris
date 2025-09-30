@@ -7,6 +7,10 @@ import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
 import titleCase from '@/helpers/titleCase';
 import ScreenApplicantGoPremiumModal from '../../modals/SubsriptionModals/ScreenApplicantGoPremiumModal';
+import useGetStageRequirements from '../hooks/useGetStageRequirements';
+import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
+import useGetStageNotes from '../hooks/useGetStageNotes';
+import useUpdateStageNotes from '../hooks/useUpdateStageNotes';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StageType } from '../types';
@@ -68,9 +72,18 @@ export default function Checklist({
 
   const [checks, setChecks] = useState<string[]>([]);
   const [currentStageNotes, setCurrentStageNotes] = useState<string>(''); // Notes for the current stage (editable)
+  const [stageRequirementsData, setStageRequirementsData] = useState<any>(null); // Store stage requirements data locally
+  const [stageNotesData, setStageNotesData] = useState<any>(null); // Store stage notes data locally
+  // Remove audit history state since it's not needed
+  // const [auditHistoryData, setAuditHistoryData] = useState<any>(null);
 
-  // Get all stages for tabs
-  const allStages = state
+  // Get current stage info
+  const currentStage = state.find((stage: StageType) => stage.id === actionState.stageId);
+  const currentStageOrder = currentStage?.orderBy || 0;
+
+  // Get only previous stages (stages with orderBy less than current stage)
+  const previousStages = state
+    .filter((stage: StageType) => stage.orderBy < currentStageOrder)
     .map((stage: StageType) => ({
       id: stage.id,
       title: stage.title,
@@ -78,13 +91,68 @@ export default function Checklist({
     }))
     .sort((a, b) => a.orderBy - b.orderBy);
 
+  // Include current stage in the tabs
+  const allStages = [
+    ...previousStages,
+    {
+      id: currentStage?.id || 0,
+      title: currentStage?.title || '',
+      orderBy: currentStageOrder,
+    }
+  ];
+
   const currentStatus = watch('status');
+
+  // Hook to get stage requirements - only fetch when viewing previous stages
+  const { data: fetchedStageRequirementsData, refetch: refetchStageRequirements } = useGetStageRequirements(
+    applicant?.applicationId || 0,
+    activeTab || 0,
+    isOpen && !!applicant?.applicationId && activeTab !== actionState.stageId && activeTab !== null
+  );
+
+  // Hook to get stage notes
+  const { data: fetchedStageNotesData, refetch: refetchStageNotes } = useGetStageNotes(
+    applicant?.applicationId || 0,
+    isOpen && !!applicant?.applicationId
+  );
+
+  // Remove audit history hook entirely since it's not needed
+  // const { data: fetchedAuditHistoryData, refetch: refetchAuditHistory } = useGetApplicationAuditHistory(
+  //   applicant?.applicationId || 0,
+  //   isOpen && !!applicant?.applicationId
+  // );
+
+  // Hook to update stage requirements
+  const updateStageRequirementsMutation = useUpdateStageRequirements();
+  
+  // Hook to update stage notes
+  const updateStageNotesMutation = useUpdateStageNotes();
+
+  // Update local state when fetched data changes
+  useEffect(() => {
+    if (fetchedStageRequirementsData) {
+      setStageRequirementsData(fetchedStageRequirementsData);
+    }
+  }, [fetchedStageRequirementsData]);
+
+  useEffect(() => {
+    if (fetchedStageNotesData) {
+      setStageNotesData(fetchedStageNotesData);
+    }
+  }, [fetchedStageNotesData]);
+
+  // Remove audit history useEffect since it's not needed
+  // useEffect(() => {
+  //   if (fetchedAuditHistoryData) {
+  //     setAuditHistoryData(fetchedAuditHistoryData);
+  //   }
+  // }, [fetchedAuditHistoryData]);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
     const formData = getValues();
     const originalStatus = applicant?.status;
-    const originalStageNotes = applicant?.stage_notes?.find((note) => note.job_stage === actionState.stageId)?.notes || '';
+    const originalStageNotes = getCurrentStageNote()?.notes || '';
     
     return (
       (formData.status && formData.status !== originalStatus) ||
@@ -129,6 +197,22 @@ export default function Checklist({
     }
   };
 
+  // Get current stage note from the new separated structure
+  const getCurrentStageNote = () => {
+    if (stageNotesData?.stage_notes) {
+      return stageNotesData.stage_notes.find((note: any) => note.job_stage === actionState.stageId);
+    }
+    return null;
+  };
+
+  // Get stage note for a specific stage
+  const getStageNote = (stageId: number) => {
+    if (stageNotesData?.stage_notes) {
+      return stageNotesData.stage_notes.find((note: any) => note.job_stage === stageId);
+    }
+    return null;
+  };
+
   // Set the initial status based on the applicant's screening fit
   useEffect(() => {
     if (applicant) {
@@ -162,17 +246,13 @@ export default function Checklist({
     setActiveTab(actionState.stageId);
 
     // Load existing stage notes for the current stage only
-    if (applicant?.stage_notes && applicant.stage_notes.length > 0) {
-      const currentStageNote = applicant.stage_notes.find((note) => note.job_stage === actionState.stageId);
-      if (currentStageNote) {
-        setCurrentStageNotes(currentStageNote.notes);
-      } else {
-        setCurrentStageNotes('');
-      }
+    const currentStageNote = getCurrentStageNote();
+    if (currentStageNote) {
+      setCurrentStageNotes(currentStageNote.notes || '');
     } else {
       setCurrentStageNotes('');
     }
-  }, [applicant?.stage_notes, actionState.stageId]);
+  }, [stageNotesData, actionState.stageId]);
 
   const handleClose = () => {
     handleModalClose(() => {
@@ -188,7 +268,7 @@ export default function Checklist({
     data.checklists = checks;
     data.status = getValues('status') || applicant?.status;
     data.stage_notes = {
-      notes: currentStageNotes, // Always save the current stage notes
+      notes: currentStageNotes,
     };
     data.id = applicant?.applicationId;
 
@@ -204,7 +284,15 @@ export default function Checklist({
       setIsGoPremiumModalOpen(true);
     } else {
       // Proceed with normal form submission
-      setTimeout(() => handleFormSubmit(data), 400);
+      setTimeout(() => {
+        handleFormSubmit(data);
+        // Refetch data after successful submission - only refetch enabled hooks
+        setTimeout(() => {
+          refetchStageRequirements();
+          refetchStageNotes();
+          // Remove audit history refetch since it's not needed
+        }, 1000);
+      }, 400);
     }
   };
 
@@ -215,7 +303,15 @@ export default function Checklist({
     data.checklists = checks;
     data.status = getValues('status') || applicant?.status;
     data.id = applicant?.applicationId;
-    setTimeout(() => handleFormSubmit(data), 400);
+    setTimeout(() => {
+      handleFormSubmit(data);
+      // Refetch data after successful submission - only refetch enabled hooks
+      setTimeout(() => {
+        refetchStageRequirements();
+        refetchStageNotes();
+        // Remove audit history refetch since it's not needed
+      }, 1000);
+    }, 400);
   };
 
   const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
@@ -229,15 +325,12 @@ export default function Checklist({
 
   const handleTabClick = (stageId: number) => {
     setActiveTab(stageId);
-    // Don't change currentStageNotes when switching tabs - only for viewing
+    // Clear previous stage requirements data when switching tabs
+    setStageRequirementsData(null);
   };
 
-  const getStageNote = (stageId: number) => {
-    if (applicant?.stage_notes && applicant.stage_notes.length > 0) {
-      return applicant.stage_notes.find((note) => note.job_stage === stageId);
-    }
-    return null;
-  };
+  // Check if current tab is a previous stage (not the current stage)
+  const isPreviousStage = activeTab !== actionState.stageId;
 
   return (
     <>
@@ -289,15 +382,15 @@ export default function Checklist({
                 );
               })}
               {/* Stage Notes Tabs */}
-              <div className='grid gap-4 mb-8'>
+              <div className='grid gap-4 mb-8 '>
                 <p className='font-medium'>Stage Notes</p>
 
-                {/* Tabs */}
+                {/* Tabs - Only show previous stages and current stage */}
                 <div className='flex border-b border-gray-200'>
                   {allStages.map((stage) => {
                     const stageNote = getStageNote(stage.id);
                     const isActive = activeTab === stage.id;
-                    const hasNotes = stageNote && stageNote.notes.trim() !== '';
+                    const hasNotes = stageNote && stageNote.notes && stageNote.notes.trim() !== '';
 
                     return (
                       <button
@@ -325,19 +418,24 @@ export default function Checklist({
                     <div>
                       {activeTab === actionState.stageId ? (
                         // Current stage - editable
-                        <textarea
-                          value={currentStageNotes}
-                          onChange={(e) => setCurrentStageNotes(e.target.value)}
-                          placeholder='Add your notes for this specific stage...'
-                          className='w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
-                          rows={4}
-                        />
+                        <div>
+                          <label className='block text-sm font-medium text-gray-700 mb-2'>
+                            Interviewer Notes
+                          </label>
+                          <textarea
+                            value={currentStageNotes}
+                            onChange={(e) => setCurrentStageNotes(e.target.value)}
+                            placeholder='Add your notes for this specific stage...'
+                            className='w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                            rows={4}
+                          />
+                        </div>
                       ) : (
                         // Previous stages - read-only
                         <div className='p-3 border border-gray-300 rounded-lg bg-gray-50 min-h-[100px]'>
                           {(() => {
                             const stageNote = getStageNote(activeTab);
-                            if (stageNote && stageNote.notes.trim() !== '') {
+                            if (stageNote && stageNote.notes && stageNote.notes.trim() !== '') {
                               return (
                                 <div>
                                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
@@ -357,6 +455,96 @@ export default function Checklist({
                     </div>
                   )}
                 </div>
+
+                {/* Previous Stage Checklist Results - Only show for previous stages */}
+                {isPreviousStage && stageRequirementsData && (
+                  <div className='mt-6'>
+                    <p className='font-medium mb-4'>Previous Stage Checklist Results</p>
+                    
+                    {/* Checked Requirements */}
+                    {Object.entries(stageRequirementsData.requirement_statuses || {})
+                      .filter(([_, isChecked]) => isChecked)
+                      .length > 0 && (
+                      <div className='mb-4'>
+                        <div className='bg-green-100 text-green-800 px-3 py-1 rounded-md text-sm font-medium mb-2 inline-block'>
+                          Checked
+                        </div>
+                        <div className='bg-gray-50 border border-gray-200 rounded-md'>
+                          {Object.entries(stageRequirementsData.requirement_statuses || {})
+                            .filter(([_, isChecked]) => isChecked)
+                            .map(([requirement, _], index, array) => (
+                              <div key={requirement}>
+                                <div className='px-3 py-2'>
+                                  <span className='text-sm text-gray-800'>{titleCase(requirement)}</span>
+                                </div>
+                                {index < array.length - 1 && (
+                                  <hr className='border-gray-200' />
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Unchecked Requirements */}
+                    {Object.entries(stageRequirementsData.requirement_statuses || {})
+                      .filter(([_, isChecked]) => !isChecked)
+                      .length > 0 && (
+                      <div>
+                        <div className='bg-red-100 text-red-800 px-3 py-1 rounded-md text-sm font-medium mb-2 inline-block'>
+                          Unchecked
+                        </div>
+                        <div className='bg-gray-50 border border-gray-200 rounded-md'>
+                          {Object.entries(stageRequirementsData.requirement_statuses || {})
+                            .filter(([_, isChecked]) => !isChecked)
+                            .map(([requirement, _], index, array) => (
+                              <div key={requirement}>
+                                <div className='px-3 py-2'>
+                                  <span className='text-sm text-gray-800'>{titleCase(requirement)}</span>
+                                </div>
+                                {index < array.length - 1 && (
+                                  <hr className='border-gray-200' />
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Remove the Completion Summary section entirely */}
+                  </div>
+                )}
+
+                {/* Application History Section - HIDDEN */}
+                {/* 
+                {auditHistoryData?.audit_history && auditHistoryData.audit_history.length > 0 && (
+                  <div className='mt-6'>
+                    <p className='font-medium mb-4'>Application History</p>
+                    <div className='bg-gray-50 border border-gray-200 rounded-md max-h-40 overflow-y-auto'>
+                      {auditHistoryData.audit_history
+                        .filter((audit: any) => 
+                          // Hide archive and unarchive events from the checklist modal
+                          audit.action !== 'archive' && 
+                          audit.action !== 'unarchive' && 
+                          audit.action !== 'batch_unarchive'
+                        )
+                        .map((audit: any, index: number) => (
+                        <div key={audit.id} className='px-3 py-2 border-b border-gray-200 last:border-b-0'>
+                          <div className='flex justify-between items-start'>
+                            <div>
+                              <p className='text-sm text-gray-800'>{audit.action} - {audit.model_name}</p>
+                              <p className='text-xs text-gray-500'>{audit.user}</p>
+                            </div>
+                            <p className='text-xs text-gray-400'>
+                              {new Date(audit.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                */}
               </div>
             </div>
           </div>

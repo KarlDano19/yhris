@@ -3,93 +3,34 @@ import { useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 import "react-quill/dist/quill.snow.css";
-import Select, { components } from "react-select";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
-import SelectChevronDown from "@/svg/SelectChevronDown";
+import EmployeeSelect from "@/components/common/EmployeeSelect";
 
-interface Field {
-  onChange: (value: any) => void;
-  value: any;
-}
-
-// Custom Option component to display department, position, and email in dropdown
-const CustomOption = (props: any) => {
-  const { data } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {data.is_department_option ? (
-          <div className="text-sm text-blue-600">
-            • Select all employees from this department
-          </div>
-        ) : (
-          <>
-            {data.email && (
-              <div className="text-sm text-gray-500">
-                • {data.email}
-              </div>
-            )}
-            {(data.department || data.position) && (
-              <div className="text-sm text-gray-500">
-                 • {data.department && data.position
-                  ? `${data.department} | ${data.position}`
-                  : data.department || data.position
-                }
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </components.Option>
-  );
-};
-
-// Custom MultiValue component to show only name when selected
-const CustomMultiValue = (props: any) => {
-  const { data } = props;
-  return (
-    <components.MultiValue {...props}>
-      <span>{data.is_department_option ? data.department : data.label}</span>
-    </components.MultiValue>
-  );
-};
 
 function EmployeeAssigneeTab({
   control,
   Controller,
+  watch,
   onSubmit,
   isLoading,
   setSelectedTab,
 }: {
   control: any;
   Controller: any;
+  watch: any;
   onSubmit: any;
   isLoading: boolean;
   setSelectedTab: (tab: number) => void;
 }) {
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const [filteredOptions, setFilteredOptions] = useState<any>([]);
-  const { data: dataEmployee } = useGetEmployeeItems();
-
-  useEffect(() => {
-    if (dataEmployee) {
-      const employeeItems = dataEmployee.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        displayLabel: item.position ? `${item.firstname} ${item.lastname} | ${item.position}` : `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-        email: item.email,
-        is_department_option: false,
-      }));
-      setEmployeeItems(employeeItems);
-      setFilteredOptions(employeeItems);
-    }
-  }, [dataEmployee]);
+  const [employeeSearch, setEmployeeSearch] = useState<string>('');
+  
+  // Watch the form values for recipients and employees
+  const recipientsValue = watch("recipient");
+  const employeesValue = watch("employees");
+  const selectedRecipients = useMemo(() => recipientsValue || [], [recipientsValue]);
+  const selectedEmployees = useMemo(() => employeesValue || [], [employeesValue]);
 
   // Move ReactQuill memoization here
   const ReactQuill = useMemo(() => dynamic(() => import("react-quill"), { ssr: false }), []);
@@ -104,61 +45,6 @@ function EmployeeAssigneeTab({
     }
   }, [control, defaultMessage]);
 
-
-  // Function to get filtered options including department options
-  const getFilteredOptions = (inputValue: string, currentValues: any[] = []) => {
-    if (!inputValue) return employeeItems;
-    
-    const searchValue = inputValue.toLowerCase();
-    const filteredEmployees = employeeItems.filter((employee: any) => {
-      // Search in employee name
-      if (employee.label.toLowerCase().includes(searchValue)) return true;
-      
-      // Search in email
-      if (employee.email && employee.email.toLowerCase().includes(searchValue)) return true;
-      
-      // Search in department
-      if (employee.department && employee.department.toLowerCase().includes(searchValue)) return true;
-      
-      // Search in position
-      if (employee.position && employee.position.toLowerCase().includes(searchValue)) return true;
-      
-      return false;
-    });
-
-    // Check if search matches any department name
-    const matchingDepartments = new Set();
-    employeeItems.forEach((employee: any) => {
-      if (employee.department && employee.department.toLowerCase().includes(searchValue)) {
-        matchingDepartments.add(employee.department);
-      }
-    });
-
-    // Add department options for matching departments (only show if not all employees from that department are selected)
-    const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
-      // Check if all employees from this department are already selected
-      const employeesInDepartment = employeeItems.filter((emp: any) => 
-        emp.department === deptName && emp.value
-      );
-      const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-        currentValues.includes(emp.value)
-      );
-      const allEmployeesSelected = employeesInDepartment.length > 0 && 
-        selectedEmployeesInDepartment.length === employeesInDepartment.length;
-      
-      return {
-        value: `dept:${deptName}`,
-        label: `${deptName} (All Employees)`,
-        department: deptName,
-        is_department_option: true,
-        allEmployeesSelected: allEmployeesSelected
-      };
-    }).filter((deptOption: any) => !deptOption.allEmployeesSelected); // Only show departments where not all employees are selected
-
-    return [...departmentOptions, ...filteredEmployees];
-  };
-
-
   return (
     <form onSubmit={onSubmit}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8">
@@ -169,195 +55,39 @@ function EmployeeAssigneeTab({
           >
             Recipient<span className="text-red-600">*</span>
           </label>
-          <Controller
-            name="recipient"
+          <EmployeeSelect
             control={control}
-            rules={{ required: "Please select a recipient" }}
-            render={({
-              field: { onChange, value },
-              fieldState: { error },
-            }: {
-              field: Field;
-              fieldState: { error?: { message?: string } };
-            }) => (
-              <>
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={filteredOptions}
-                  value={employeeItems.filter((item: any) =>
-                    value?.includes(item.value)
-                  )}
-                  onChange={(val) => {
-                    console.log('onChange called with:', val);
-                    if (val) {
-                      // Check if any department options were selected
-                      const departmentOptions = val.filter((item: any) => item.is_department_option);
-                      const regularOptions = val.filter((item: any) => !item.is_department_option);
-                      
-                      if (departmentOptions.length > 0) {
-                        // Handle department selections
-                        let allEmployeeIds = [...(value || [])];
-                        
-                        departmentOptions.forEach((deptOption: any) => {
-                          console.log('Processing department option:', deptOption);
-                          const employeesInDepartment = employeeItems
-                            .filter((employee: any) => !employee.is_department_option && employee.department === deptOption.department)
-                            .map((employee: any) => employee.value);
-                          
-                          console.log('Employees in department:', employeesInDepartment);
-                          allEmployeeIds = [...allEmployeeIds, ...employeesInDepartment];
-                        });
-                        
-                        // Add regular employee selections
-                        const regularEmployeeIds = regularOptions.map((item: any) => item.value);
-                        allEmployeeIds = [...allEmployeeIds, ...regularEmployeeIds];
-                        
-                        // Remove duplicates
-                        const finalValues = Array.from(new Set(allEmployeeIds));
-                        console.log('Final values with departments:', finalValues);
-                        onChange(finalValues);
-                      } else {
-                        // No department options, just regular selections
-                        const newValues = regularOptions.map((item: any) => item.value);
-                        console.log('Final values regular:', newValues);
-                        onChange(newValues);
-                      }
-                    } else {
-                      onChange([]);
-                    }
-                  }}
-                  filterOption={() => true}
-                  onInputChange={(inputValue) => {
-                    if (!inputValue) {
-                      setFilteredOptions(employeeItems);
-                    } else {
-                      const filteredOptions = getFilteredOptions(inputValue, value);
-                      setFilteredOptions(filteredOptions);
-                    }
-                    return inputValue;
-                  }}
-                  isSearchable={true}
-                  placeholder="Search employees or departments..."
-                  components={{
-                    Option: CustomOption,
-                    MultiValue: CustomMultiValue,
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1 ml-1">
-                    {error.message}
-                  </p>
-                )}
-              </>
-            )}
+            name="recipient"
+            label=""
+            required={true}
+            placeholder="Select recipients..."
+            isMulti={true}
+            isClearable={false}
+            employeeSearch={employeeSearch}
+            setEmployeeSearch={setEmployeeSearch}
+            excludeValues={selectedEmployees}
+            className=""
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
           <label
-            htmlFor="reason"
+            htmlFor="employees"
             className="block text-sm font-medium leading-6 text-gray-900"
           >
             Person to be Evaluated<span className="text-red-600">*</span>
           </label>
-          <Controller
-            name="employees"
+          <EmployeeSelect
             control={control}
-            rules={{ required: "Please select at least one employee" }}
-            render={({
-              field: { onChange, value },
-              fieldState: { error },
-            }: {
-              field: Field;
-              fieldState: { error?: { message?: string } };
-            }) => (
-              <>
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={filteredOptions}
-                  value={employeeItems.filter((item: any) =>
-                    value?.includes(item.value)
-                  )}
-                  onChange={(val) => {
-                    console.log('onChange called with:', val);
-                    if (val) {
-                      // Check if any department options were selected
-                      const departmentOptions = val.filter((item: any) => item.is_department_option);
-                      const regularOptions = val.filter((item: any) => !item.is_department_option);
-                      
-                      if (departmentOptions.length > 0) {
-                        // Handle department selections
-                        let allEmployeeIds = [...(value || [])];
-                        
-                        departmentOptions.forEach((deptOption: any) => {
-                          console.log('Processing department option:', deptOption);
-                          const employeesInDepartment = employeeItems
-                            .filter((employee: any) => !employee.is_department_option && employee.department === deptOption.department)
-                            .map((employee: any) => employee.value);
-                          
-                          console.log('Employees in department:', employeesInDepartment);
-                          allEmployeeIds = [...allEmployeeIds, ...employeesInDepartment];
-                        });
-                        
-                        // Add regular employee selections
-                        const regularEmployeeIds = regularOptions.map((item: any) => item.value);
-                        allEmployeeIds = [...allEmployeeIds, ...regularEmployeeIds];
-                        
-                        // Remove duplicates
-                        const finalValues = Array.from(new Set(allEmployeeIds));
-                        console.log('Final values with departments:', finalValues);
-                        onChange(finalValues);
-                      } else {
-                        // No department options, just regular selections
-                        const newValues = regularOptions.map((item: any) => item.value);
-                        console.log('Final values regular:', newValues);
-                        onChange(newValues);
-                      }
-                    } else {
-                      onChange([]);
-                    }
-                  }}
-                  filterOption={() => true}
-                  onInputChange={(inputValue) => {
-                    if (!inputValue) {
-                      setFilteredOptions(employeeItems);
-                    } else {
-                      const filteredOptions = getFilteredOptions(inputValue, value);
-                      setFilteredOptions(filteredOptions);
-                    }
-                    return inputValue;
-                  }}
-                  isSearchable={true}
-                  placeholder="Search employees or departments..."
-                  components={{
-                    Option: CustomOption,
-                    MultiValue: CustomMultiValue,
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1 ml-1">
-                    {error.message}
-                  </p>
-                )}
-              </>
-            )}
+            name="employees"
+            label=""
+            required={true}
+            placeholder="Select employees to be evaluated..."
+            isMulti={true}
+            isClearable={false}
+            employeeSearch={employeeSearch}
+            setEmployeeSearch={setEmployeeSearch}
+            excludeValues={selectedRecipients}
+            className=""
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
