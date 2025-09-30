@@ -184,7 +184,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const timer = setTimeout(() => {
       setDebouncedSearch(pendingFilter.search);
       setIsDebouncing(false); // Clear debouncing state when delay is done
-    }, 3000); // 3000ms delay (3 seconds)
+    }, 2000); // 2000ms delay (2 seconds)
 
     return () => {
       clearTimeout(timer);

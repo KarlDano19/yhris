@@ -5,11 +5,26 @@ import Select, { components } from 'react-select';
 import { useQueryClient } from '@tanstack/react-query';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 
 {/* Custom option component */}
 const CustomOption = (props: any) => {
   const { data, isSelected } = props;
+  
+  if (data.isLoading) {
+    return (
+      <div className="px-3 py-4 text-center">
+        <LoadingSpinner 
+          size="sm" 
+          color="yellow" 
+          text="Searching employees..." 
+          showText={true}
+          className="py-2"
+        />
+      </div>
+    );
+  }
   
   if (data.isShowMore) {
     return (
@@ -94,13 +109,28 @@ export default function EmployeeSelect({
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [cachedEmployeeItems, setCachedEmployeeItems] = useState<any[]>([]);
   const [persistentSelections, setPersistentSelections] = useState<any[]>([]);
+  const [isDebouncing, setIsDebouncing] = useState(false);
   
   const formValue = useWatch({ control, name });
 
   {/* Debounce search */}
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(employeeSearch), 300);
-    return () => clearTimeout(timer);
+    // Set debouncing state when user is typing
+    if (employeeSearch && employeeSearch.length >= 2) {
+      setIsDebouncing(true);
+    } else {
+      setIsDebouncing(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedSearch(employeeSearch);
+      setIsDebouncing(false); // Clear debouncing state when delay is done
+    }, 2000); // 2000ms delay (2 seconds)
+
+    return () => {
+      clearTimeout(timer);
+      // Don't clear debouncing state immediately on cleanup
+    };
   }, [employeeSearch]);
 
   {/* Fetch employees */}
@@ -251,6 +281,15 @@ export default function EmployeeSelect({
 
   {/* Create select options */}
   const selectOptions = useMemo(() => {
+    // Show loading option when debouncing
+    if (employeeSearch && employeeSearch.length >= 2 && isDebouncing) {
+      return [{
+        value: 'loading',
+        label: 'Searching employees...',
+        isLoading: true,
+      } as any];
+    }
+
     if (!employeeItems?.length) return [];
 
     const filtered = employeeItems.filter((item: any) => !excludeValues.includes(item.id));
@@ -274,7 +313,7 @@ export default function EmployeeSelect({
     }
 
     return options;
-  }, [employeeItems, excludeValues, employeeLimit]);
+  }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing]);
 
   {/* Show more handler */}
   useEffect(() => {
@@ -380,6 +419,21 @@ export default function EmployeeSelect({
                 setEmployeeLimit(50);
               }}
               noOptionsMessage={({ inputValue }) => {
+                // Show loading state while debouncing
+                if (inputValue && inputValue.length >= 2 && isDebouncing) {
+                  return (
+                    <div className="px-3 py-4 text-center">
+                      <LoadingSpinner 
+                        size="sm" 
+                        color="yellow" 
+                        text="Searching employees..." 
+                        showText={true}
+                        className="py-2"
+                      />
+                    </div>
+                  );
+                }
+                
                 if (inputValue && inputValue.length >= 2) {
                   return (
                     <div className="px-3 py-4 text-center">
@@ -409,7 +463,7 @@ export default function EmployeeSelect({
               }}
               onChange={(selectedOption: any) => {
                 if (isMulti) {
-                  if (selectedOption?.some((item: any) => item.value === 'show_more')) return;
+                  if (selectedOption?.some((item: any) => item.value === 'show_more' || item.value === 'loading')) return;
                   
                   const isClearAction = !selectedOption || selectedOption.length === 0;
                   
@@ -458,7 +512,7 @@ export default function EmployeeSelect({
                   onChange?.(selectedOption);
                   field.onChange(fieldOnChange);
                 } else {
-                  if (selectedOption?.value === 'show_more') return;
+                  if (selectedOption?.value === 'show_more' || selectedOption?.value === 'loading') return;
                   
                   if (selectedOption) {
                     const employee = employeeItems.find((item: any) => item.id === selectedOption.value);
