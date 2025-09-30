@@ -6,6 +6,7 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -36,6 +37,8 @@ export default function DesignBenefitsModal({
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
@@ -43,6 +46,54 @@ export default function DesignBenefitsModal({
   const { register, handleSubmit, reset, trigger, getValues, setValue, clearErrors, watch, formState: { errors }, setError } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
   const { data: employeeData } = useGetEmployeeItems();
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const title = watch('title');
+    const purpose = watch('purpose');
+    const benefits = watch('benefits');
+    const coverage = watch('coverage');
+    const eligibility = watch('eligibility');
+    
+    return (
+      (title && title.trim() !== '') ||
+      (purpose && purpose.trim() !== '') ||
+      (benefits && benefits.trim() !== '') ||
+      (coverage && coverage.trim() !== '') ||
+      (eligibility && eligibility.trim() !== '') ||
+      tagsTo.length > 0 ||
+      tagsCc.length > 0 ||
+      tagsBcc.length > 0
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -168,7 +219,12 @@ export default function DesignBenefitsModal({
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          handleModalClose(() => {
+            reset();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -195,7 +251,12 @@ export default function DesignBenefitsModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Design Benefits</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      handleModalClose(() => {
+                        reset();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   <form onSubmit={onSubmit}>
                     {page === 1 ? (
@@ -699,6 +760,18 @@ export default function DesignBenefitsModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="benefit"
+        />
+      )}
     </>
   );
 }
