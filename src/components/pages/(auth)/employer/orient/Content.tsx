@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 
@@ -27,11 +27,15 @@ import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
+import LocationDepartment from './LocationDepartment';
+import LocationDepartmentModal from './modals/LocationDepartmentModal';
+import EnrollRedirectModal from './modals/EnrollRedirectModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
+  const router = useRouter();
   const [orientItems, setOrientItems] = useState<any>([]);
   const [selectedOrientId, setSelectedOrientId] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -80,6 +84,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
+  const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
+  const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
+  const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
@@ -118,6 +126,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             bcc: '',
           };
           item['isEnrolled'] = item.is_enrolled;
+          item['isLocationDepartmentAssigned'] = item.is_location_department_assigned;
           return item;
         });
         totalPages = applicationOrient.total_pages || 1;
@@ -147,6 +156,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             bcc: '',
           };
           item['isEnrolled'] = item.is_enrolled;
+          item['isLocationDepartmentAssigned'] = item.is_location_department_assigned;
           return item;
         });
         totalRecords = items.length;
@@ -198,20 +208,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(orientItemCopy[itemIndex], callbackReq);
   };
 
-  const setEnrolled = (id: any) => {
+  const setEnrolled = (id: any, isLocationDepartmentAssigned: boolean) => {
+    if (!isLocationDepartmentAssigned) {
+      setSelectedOrientId(id); // Set the selected ID for the assignment modal
+      setIsLocationDepartmentWarningModalOpen(true);
+      return;
+    }
+
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
     const updateOrientationStatus = () => {
       orientItemCopy[itemIndex].id = id;
-      orientItemCopy[itemIndex].actionType = 'update_status';
-      orientItemCopy[itemIndex].emailType = 'enrolled';
+      orientItemCopy[itemIndex].actionType = 'enrolled';
       orientItemCopy[itemIndex].isEnrolled = true;
       
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
-          setIsEnrollModalOpen(true);
+          setIsEnrollRedirectModalOpen(true);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
@@ -262,8 +277,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const setOriented = () => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
-    orientItemCopy[itemIndex].actionType = 'update_status';
-    orientItemCopy[itemIndex].emailType = 'orient';
+    orientItemCopy[itemIndex].actionType = 'completed';
     orientItemCopy[itemIndex].isOriented = true;
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -355,6 +369,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center'>
+              <LocationDepartment
+                isAssigned={item.isLocationDepartmentAssigned}
+                setIsLocationDepartmentModalOpen={(e) => {
+                  setSelectedOrientId(item.id);
+                  setIsLocationDepartmentModalOpen(e);
+                }}
+              />
+            </div>
+          </td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex justify-center'>
               <IntroduceToTeam
                 isIntroduced={item.isIntroduced}
                 setIsIntroducedModalOpen={(e) => {
@@ -370,9 +395,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id={String(item.id)}
                 isEnrolled={item.isEnrolled}
                 setEnrolled={() => {
-                  setEnrolled(item.id);
+                  setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
                 isLoading={isLoading}
+                isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>
           </td>
@@ -381,7 +407,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={8}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm'>Please click create to add separtion of employee.</h4>
           </td>
@@ -392,9 +418,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
-          <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Positions</h4>
           </Link>
@@ -402,7 +428,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -468,7 +494,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table
                   className={classNames(
@@ -489,6 +521,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Orient
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Location, Department & Employment Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Introduce to the team
@@ -533,11 +568,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsNewHireOrientedOpen={setNewHireOriented}
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessSendContractModalOpen}
-        setIsOpen={setIsSuccessSendContractModalOpen}
-        message='You have successfully sent an email.'
-      />
       <NoticeModal isOpen={isDoloNewHire} setIsOpen={setIsDoloNewHire}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
           Do you have an account in YAHSHUA Dolo to orient the New Hire?
@@ -721,7 +751,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         message='You have successfully sent orientation link to the New Hire.'
       />
       <NoticeModal isOpen={newHireOriented} setIsOpen={setNewHireOriented}>
-        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already oriented the New Hire?</h5>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already ORIENTED the NEW HIRE?</h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
           <button
             type='button'
@@ -740,7 +770,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setNewHireOriented(false);
             }}
           >
-            NO, I DON&apos;T.
+            NO, I HAVEN'T.
           </button>
         </div>
       </NoticeModal>
@@ -773,11 +803,58 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           SIGN IN TO YAHSHUA PAYROLL
         </button>
       </NoticeModal>
+      {isEnrollRedirectModalOpen && (
+        <EnrollRedirectModal
+          isOpen={isEnrollRedirectModalOpen}
+          setIsOpen={setIsEnrollRedirectModalOpen}
+          jobPostingId={String(params.position)}
+        />
+      )}
+      {isLocationDepartmentModalOpen && (
+        <LocationDepartmentModal
+          selectedOrientId={selectedOrientId}
+          orientItems={orientItems}
+          setOrientItems={setOrientItems}
+          setIsOpen={setIsLocationDepartmentModalOpen}
+          isOpen={isLocationDepartmentModalOpen}
+          setSuccessModal={setIsSuccessLocationDepartmentModalOpen}
+        />
+      )}
       <SuccessModal
-        isOpen={isEnrollModalOpen}
-        setIsOpen={setIsEnrollModalOpen}
-        message='You have successfully enrolled New Hire to YAHSHUA Payroll.'
+        isOpen={isSuccessLocationDepartmentModalOpen}
+        setIsOpen={setIsSuccessLocationDepartmentModalOpen}
+        message='You have successfully assigned location and department.'
       />
+      {/* Updated warning modal for employment status, location/department assignment */}
+      <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
+          Please assign <span className='text-red-600 font-bold'>EMPLOYMENT STATUS, LOCATION AND DEPARTMENT</span> first.
+          <br />
+          <br />
+          You need to complete this step before enrolling the applicant.
+        </h5>
+        <div className='mt-5 sm:mt-4 sm:flex sm:flex-col sm:gap-3'>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all'
+            onClick={() => {
+              setIsLocationDepartmentWarningModalOpen(false);
+              setIsLocationDepartmentModalOpen(true);
+            }}
+          >
+            ASSIGN
+          </button>
+          <button
+            type='button'
+            className='text-lg text-center block w-full font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all'
+            onClick={() => {
+              setIsLocationDepartmentWarningModalOpen(false);
+            }}
+          >
+            CANCEL
+          </button>
+        </div>
+      </NoticeModal>
       <Tooltip id='search-tooltip'/>
     </>
   );

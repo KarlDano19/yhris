@@ -72,6 +72,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       color: string;
     }>;
     employeeRecords?: Array<{
+      id?: string;
       name: string;
       department: string;
       score: string;
@@ -85,6 +86,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       color: string;
     }>;
     employeeIssueRecords?: Array<{
+      id?: string;
       name: string;
       department: string;
       issueType: string;
@@ -387,7 +389,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 />
               </div>
             </div>
-            <div className='flex gap-2 w-full sm:w-auto justify-center sm:justify-start'>
+            <div className='flex gap-2 w-full sm:w-auto justify-end sm:justify-start'>
               <button
                 className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
                 onClick={() => {

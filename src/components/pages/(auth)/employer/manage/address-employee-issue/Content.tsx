@@ -11,7 +11,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
@@ -19,6 +18,8 @@ import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
 import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
 import DecisionAttachmentViewModal from './modals/DecisionSummaryViewModal';
 import IncidentReportModal from './modals/IncidentReportModal';
+import EditIncidentReportModal from './modals/EditIncidentReportModal';
+import UpdateStatusModal from './modals/UpdateStatusModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
 import SendNTEModal from './modals/SendNTEModal';
 import SendNTE from './SendNTE';
@@ -38,23 +39,27 @@ import {
 } from '@/types/globals';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
+import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 
 import classNames from '@/helpers/classNames';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
+    status: 'all', // all, pending, approved, disapproved
   });
   const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
+    status: 'all', // all, pending, approved, disapproved
+    status_sort: 'asc', // asc, desc, null - default to asc to show pending first
   });
   const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
@@ -67,6 +72,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isIncidentReportModalOpen, setIsIncidentReportModalOpen] = useState(false);
+  const [isEditIncidentReportModalOpen, setIsEditIncidentReportModalOpen] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState<any>(null);
   const [isSendNTEModalOpen, setIsSendNTEModalOpen] = useState<T_SendNTEModal | null>(null);
   const [isInvestigateModalOpen, setIsInvestigateModalOpen] = useState<T_InvestigationModal | null>(null);
   const [isInvestigationReportDetailsModalOpen, setInvestigationReportDetailsModalOpen] =
@@ -79,6 +86,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     useState<T_DecisionAttachmentViewModal | null>(null);
   const [isUploadDecisionAttachmentModalOpen, setIsUploadDecisionAttachmentModalOpen] =
     useState<T_DecisionAttachmentViewModal | null>(null);
+  const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
+  const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const {
     data: dataEmployeeIssues,
@@ -89,11 +98,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const { data: dataEmployee } = useGetEmployeeItems();
   const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const cachedUserRights = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
   const [isRedirectingToDocumentGenerator, setIsRedirectingToDocumentGenerator] = useState(false);
+  const [statusSortOrder, setStatusSortOrder] = useState<'asc' | 'desc' | null>('asc');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -151,9 +160,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   useEffect(() => {
-    if (dataEmployee) {
-      setEmployeeItems(dataEmployee);
-    }
     if (dataEmployeeIssues) {
       let items = [];
       let totalPages = 1;
@@ -212,6 +218,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             message: '',
           };
           employeeIssue['is_responded'] = employeeIssue.is_responded;
+          
+          // Map employee data for edit functionality
+          employeeIssue['employee_id'] = employeeIssue.employee_id || employeeIssue.employee?.id;
+          employeeIssue['employee_name'] = employeeIssue.name || `${employeeIssue.employee?.firstname || ''} ${employeeIssue.employee?.lastname || ''}`.trim();
+          employeeIssue['employee_position'] = employeeIssue.position || employeeIssue.employee?.position;
+          employeeIssue['employee_department'] = employeeIssue.department || employeeIssue.employee?.department;
+          employeeIssue['incident_place'] = employeeIssue.place_of_incident || employeeIssue.incident_place;
+          
           return employeeIssue;
         });
         totalPages = dataEmployeeIssues.total_pages || 1;
@@ -271,6 +285,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             message: '',
           };
           employeeIssue['is_responded'] = employeeIssue.is_responded;
+          
+          // Map employee data for edit functionality
+          employeeIssue['employee_id'] = employeeIssue.employee_id || employeeIssue.employee?.id;
+          employeeIssue['employee_name'] = employeeIssue.name || `${employeeIssue.employee?.firstname || ''} ${employeeIssue.employee?.lastname || ''}`.trim();
+          employeeIssue['employee_position'] = employeeIssue.position || employeeIssue.employee?.position;
+          employeeIssue['employee_department'] = employeeIssue.department || employeeIssue.employee?.department;
+          employeeIssue['incident_place'] = employeeIssue.place_of_incident || employeeIssue.incident_place;
+          
           return employeeIssue;
         });
         
@@ -287,7 +309,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
 
     }
-  }, [dataEmployeeIssues, dataEmployee, pageSize]);
+  }, [dataEmployeeIssues, pageSize]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -329,11 +351,88 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
+  const handleStatusFilter = (status: string) => {
+    setItemsFilter({ ...itemsFilter, status });
+    setAppliedFilter({ ...appliedFilter, status, status_sort: null });
+    setStatusSortOrder(null); // Reset sort order when changing status filter
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleStatusSort = () => {
+    let newSortOrder: 'asc' | 'desc' | null = null;
+    
+    if (statusSortOrder === null) {
+      newSortOrder = 'asc';
+    } else if (statusSortOrder === 'asc') {
+      newSortOrder = 'desc';
+    } else {
+      newSortOrder = null;
+    }
+    
+    setStatusSortOrder(newSortOrder);
+    
+    // Update the applied filter with the new sort order
+    setAppliedFilter({ ...appliedFilter, status_sort: newSortOrder });
+    setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
   useEffect(() => {
     if (!isGetEmployeeIssuesLoading && isSearching) {
       setIsSearching(false);
     }
   }, [isGetEmployeeIssuesLoading, isSearching]);
+
+  // Add click outside handler to close menus
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (Object.keys(moreMenuOpen).some(id => moreMenuOpen[parseInt(id)])) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.more-menu-container')) {
+          setMoreMenuOpen({});
+        }
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreMenuOpen]);
+
+  // Close all menus when changing pages
+  useEffect(() => {
+    setMoreMenuOpen({});
+  }, [currentPage]);
+
+
+  const handleEdit = (issueId: number) => {
+    const issue = employeeIssueItems.find((item: any) => item.id === issueId);
+    if (issue) {
+      setSelectedIssue(issue);
+      setIsEditIncidentReportModalOpen(true);
+      setMoreMenuOpen({}); // Close the menu
+    }
+  };
+
+  const handleMoreMenuClick = (issueId: number) => {
+    // Close all other menus first
+    const newMoreMenuOpen: { [key: number]: boolean } = {};
+    
+    // Toggle the clicked menu
+    newMoreMenuOpen[issueId] = !moreMenuOpen[issueId];
+    
+    setMoreMenuOpen(newMoreMenuOpen);
+  };
+
+  const handleUpdateStatus = (issueId: number) => {
+    const issue = employeeIssueItems.find((item: any) => item.id === issueId);
+    if (issue) {
+      setSelectedIssue(issue);
+      setIsUpdateStatusModalOpen({ id: issueId, open: true });
+      setMoreMenuOpen({}); // Close the menu
+    }
+  };
+
 
   const renderRows = () => {
     if (isSearching || isGetEmployeeIssuesLoading) {
@@ -366,7 +465,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
               <span>{item.name}</span>
             </td>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
               <SendNTE
                 id={item.id}
                 isNTESent={item.isNTESent}
@@ -379,9 +478,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
+                userRights={cachedUserRights?.state?.data}
               />
             </td>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
               <Investigation
                 id={item.id}
                 investigatedDate={item.investigatedDate}
@@ -389,9 +489,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsInvestigateModalOpen={setIsInvestigateModalOpen}
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
+                userRights={cachedUserRights?.state?.data}
               />
             </td>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
               <SendDecision
                 id={item.id}
                 isDecisionSent={item.isDecisionSent}
@@ -404,7 +505,55 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 hasInvestigationReport={hasInvestigationReport}
+                userRights={cachedUserRights?.state?.data}
               />
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span>{item.prepared_by || '—'}</span>
+            </td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <span className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-pre-line text-center ${
+                item.status === 'approved' 
+                  ? 'bg-green-100 text-green-700' 
+                  : item.status === 'disapproved'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-yellow-100 text-orange-600'
+              }`}>
+                {item.status === 'approved' ? 'Approved' : 
+                 item.status === 'disapproved' ? 'Disapproved' : 'Pending'}
+              </span>
+            </td>
+            <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+              <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
+                <div className='flex space-x-2'>
+                  <div className="relative more-menu-container pt-1">
+                    <button onClick={() => handleMoreMenuClick(item.id)}>
+                      <MoreIconWithBorder />
+                    </button>
+                    {moreMenuOpen[item.id] && (
+                      <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
+                        <ul className='py-1 text-left'>
+                          <li
+                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status ? 'border-b' : ''}`}
+                            onClick={() => handleEdit(item.id)}
+                          >
+                            {/* Hide Edit Report when NTE attachment exists and status is not pending, or when user doesn't have edit rights */}
+                            {cachedUserRights?.state?.data?.edit_employee_issue && item.status === 'pending' && !item.nte_attachment ? 'Edit Report' : 'View Report'}
+                          </li>
+                          {item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status && (
+                            <li
+                              className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                              onClick={() => handleUpdateStatus(item.id)}
+                            >
+                              Update Status
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
         );
@@ -412,7 +561,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add incident report.</h4>
           </td>
@@ -428,7 +577,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <span className="text-yellow-600 font-semibold text-xl">Redirecting to document generator...</span>
         </div>
       )}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -438,7 +587,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Address Employee Issue</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -511,14 +660,57 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
-                disabled={!cachedProfile?.state?.data?.create_employee_issue}
+                disabled={!cachedUserRights?.state?.data?.create_employee_issue}
               >
                 CREATE
               </button>
             </div>
           </div>
+          
+          {/* Status Filter Tabs */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 mb-5 gap-2">
+              <div
+                onClick={() => handleStatusFilter('all')}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'all'
+                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
+                All Issues
+              </div>
+              <div
+                onClick={() => handleStatusFilter('approved')}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'approved'
+                    ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
+                Approved
+              </div>
+              <div
+                onClick={() => handleStatusFilter('disapproved')}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                  appliedFilter.status === 'disapproved'
+                    ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                }`}
+              >
+                Disapproved
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1'
+              }}
+            >
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
@@ -541,31 +733,68 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Send Decision
                       </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Prepared by
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 text-center'>
+                        <button
+                          onClick={handleStatusSort}
+                          className='flex items-center justify-center gap-1 hover:text-gray-700 transition-colors mx-auto'
+                        >
+                          Status
+                          <div className='flex flex-col'>
+                            <ChevronUpIcon 
+                              className={`h-3 w-3 ${statusSortOrder === 'asc' ? 'text-gray-900' : 'text-gray-400'}`} 
+                            />
+                            <ChevronDownIcon 
+                              className={`h-3 w-3 ${statusSortOrder === 'desc' ? 'text-gray-900' : 'text-gray-400'}`} 
+                            />
+                          </div>
+                        </button>
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={pageSizeChange}
-                  onPageChange={paginationChange}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
           </div>
         </div>
       </div>
       <IncidentReportModal
-        employeeIssueItems={employeeIssueItems}
-        employeeItems={employeeItems}
-        setEmployeeIssueItems={setEmployeeIssueItems}
         isOpen={isIncidentReportModalOpen}
         setIsOpen={setIsIncidentReportModalOpen}
         refetch={refetch}
       />
+      <EditIncidentReportModal
+        isOpen={isEditIncidentReportModalOpen}
+        setIsOpen={setIsEditIncidentReportModalOpen}
+        refetch={refetch}
+        selectedIssue={selectedIssue}
+        cachedUserRights={cachedUserRights}
+      />
+      {isUpdateStatusModalOpen && (
+        <UpdateStatusModal
+          employeeIssueItems={employeeIssueItems}
+          setEmployeeIssueItems={setEmployeeIssueItems}
+          isOpen={isUpdateStatusModalOpen}
+          setIsOpen={setIsUpdateStatusModalOpen}
+          refetch={refetch}
+          selectedIssue={selectedIssue}
+          cachedUserRights={cachedUserRights}
+        />
+      )}
       <SendNTEModal
         isOpen={isSendNTEModalOpen}
         setIsOpen={setIsSendNTEModalOpen}

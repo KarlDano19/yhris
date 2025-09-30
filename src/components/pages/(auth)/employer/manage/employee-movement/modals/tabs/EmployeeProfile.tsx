@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react';
 
 import { Controller } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
 
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
+import useGetEmployeeDetails from '@/components/pages/(auth)/employer/manage/employees/hooks/useGetEmployeeDetails';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
 
 function EmployeeProfile({
   control,
@@ -22,14 +26,14 @@ function EmployeeProfile({
   isLoading,
   watch,
   isEdit,
-  employeeSearch,
-  setEmployeeSearch,
-  employeeSelected,
-  setEmployeeSelected,
   currentPosition,
   setCurrentPosition,
   newPosition,
   setNewPosition,
+  currentEmploymentStatus,
+  setCurrentEmploymentStatus,
+  newEmploymentStatus,
+  setNewEmploymentStatus,
   errors,
 }: {
   control: any;
@@ -41,28 +45,28 @@ function EmployeeProfile({
   isLoading: boolean;
   watch: any;
   isEdit: boolean;
-  employeeSearch: string;
-  setEmployeeSearch: (v: string) => void;
-  employeeSelected: boolean;
-  setEmployeeSelected: (v: boolean) => void;
   currentPosition: string;
   setCurrentPosition: (v: string) => void;
   newPosition: string;
   setNewPosition: (v: string) => void;
+  currentEmploymentStatus: string;
+  setCurrentEmploymentStatus: (v: string) => void;
+  newEmploymentStatus: string;
+  setNewEmploymentStatus: (v: string) => void;
   errors: any;
 }) {
   const queryClient = useQueryClient();
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
+  const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
   const { data: positionData } = useGetPositionItems();
+  const { data: employeeStatusData } = useGetEmployeeStatusItems();
   const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
+  // Fetch employee details when employee is selected
+  const { data: selectedEmployeeDetails, isLoading: isLoadingEmployeeDetails } = useGetEmployeeDetails(watchedEmployeeId);
+
 
   useEffect(() => {
     if (positionData) {
@@ -71,42 +75,68 @@ function EmployeeProfile({
   }, [positionData]);
 
   useEffect(() => {
-    const id = watch('employee');
-    setWatchedEmployeeId(id ? String(id) : '');
-  }, [watch, watch('employee')]);
+    if (employeeStatusData) {
+      setEmployeeStatusItems(employeeStatusData);
+    }
+  }, [employeeStatusData]);
 
   useEffect(() => {
-    if (isEdit && employeeItems.length > 0 && watchedEmployeeId) {
-      const selectedEmployee = employeeItems.find(
-        (item: any) => String(item.id) === watchedEmployeeId
+    const subscription = watch((value: any) => {
+      const id = value.employee;
+      setWatchedEmployeeId(id ? String(id) : '');
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  // Auto-populate current position and employment status when employee is selected
+  useEffect(() => {
+    if (selectedEmployeeDetails && !isEdit && positionItems.length > 0 && employeeStatusItems.length > 0) {
+      // Find the position ID that matches the employee's current position
+      const matchingPosition = positionItems.find((pos: any) => 
+        pos.name === selectedEmployeeDetails.position
       );
-      if (selectedEmployee) {
-        setEmployeeSearch(`${selectedEmployee.firstname} ${selectedEmployee.lastname}`);
-        setEmployeeSelected(true);
-      } else {
-        setEmployeeSearch('');
-        setEmployeeSelected(false);
+      
+      if (matchingPosition) {
+        setCurrentPosition(matchingPosition.id);
+        setValue('current_position', matchingPosition.id);
+      }
+
+      // Find the employment status ID that matches the employee's current employment status
+      const matchingEmploymentStatus = employeeStatusItems.find((status: any) => 
+        status.name === selectedEmployeeDetails.employment_status
+      );
+      
+      if (matchingEmploymentStatus) {
+        setCurrentEmploymentStatus(matchingEmploymentStatus.id);
+        setValue('current_employment_status', matchingEmploymentStatus.id);
       }
     }
-    if (isEdit && (!watchedEmployeeId || employeeItems.length === 0)) {
-      setEmployeeSearch('');
-      setEmployeeSelected(false);
-    }
-  }, [employeeItems, isEdit, watchedEmployeeId, setEmployeeSearch, setEmployeeSelected]);
+  }, [selectedEmployeeDetails, positionItems, employeeStatusItems, setCurrentPosition, setCurrentEmploymentStatus, setValue, isEdit]);
 
   useEffect(() => {
     if (isEdit) {
-      const currentPositionValue = watch('current_position');
-      const newPositionValue = watch('new_position');
-      
-      if (currentPositionValue) {
-        setCurrentPosition(String(currentPositionValue));
-      }
-      if (newPositionValue) {
-        setNewPosition(String(newPositionValue));
-      }
+      const subscription = watch((value: any) => {
+        const currentPositionValue = value.current_position;
+        const newPositionValue = value.new_position;
+        const currentEmploymentStatusValue = value.current_employment_status;
+        const newEmploymentStatusValue = value.new_employment_status;
+        
+        if (currentPositionValue) {
+          setCurrentPosition(String(currentPositionValue));
+        }
+        if (newPositionValue) {
+          setNewPosition(String(newPositionValue));
+        }
+        if (currentEmploymentStatusValue) {
+          setCurrentEmploymentStatus(String(currentEmploymentStatusValue));
+        }
+        if (newEmploymentStatusValue) {
+          setNewEmploymentStatus(String(newEmploymentStatusValue));
+        }
+      });
+      return () => subscription.unsubscribe();
     }
-  }, [isEdit, watch('current_position'), watch('new_position'), setCurrentPosition, setNewPosition]);
+  }, [isEdit, watch, setCurrentPosition, setNewPosition, setCurrentEmploymentStatus, setNewEmploymentStatus]);
 
   const onSubmit = (data: any) => {
     if (isEdit) {
@@ -160,81 +190,37 @@ function EmployeeProfile({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <input
-                id='employee-search'
-                type='text'
-                placeholder='Select...'
-                value={employeeSearch}
-                onChange={e => setEmployeeSearch(e.target.value)}
-                className={`appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6${isEdit ? ' opacity-60' : ''}`}
-                onClick={() => {
-                  if (!employeeSelected && !isEdit) {
-                    const dropdown = document.getElementById('employee-dropdown');
-                    if (dropdown) {
-                      dropdown.classList.toggle('hidden');
-                    }
+              <EmployeeSelect
+                control={control}
+                name="employee"
+                label=""
+                required={true}
+                placeholder="Select employee..."
+                isMulti={false}
+                isClearable={!isEdit}
+                employeeSearch={employeeSearch}
+                setEmployeeSearch={setEmployeeSearch}
+                setEmployeeSelected={setEmployeeSelected}
+                className=""
+                onChange={(selectedOption: any) => {
+                  if (!isEdit && selectedOption && !selectedOption.isShowMore) {
+                    setEmployeeSearch(selectedOption.label);
+                    setEmployeeSelected(true);
+                  } else if (!isEdit) {
+                    setEmployeeSearch('');
+                    setEmployeeSelected(false);
+                    // Clear current position and employment status when employee is unselected
+                    setCurrentPosition('');
+                    setCurrentEmploymentStatus('');
+                    setValue('current_position', '');
+                    setValue('current_employment_status', '');
                   }
                 }}
-                readOnly={employeeSelected || isEdit}
-                disabled={isEdit}
               />
-              <div
-                className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'
-                onClick={() => {
-                  if (!employeeSelected && !isEdit) {
-                    const dropdown = document.getElementById('employee-dropdown');
-                    if (dropdown) {
-                      dropdown.classList.toggle('hidden');
-                    }
-                  }
-                }}
-              >
-                {!employeeSelected ? (
-                  <span>
-                    <SelectChevronDown />
-                  </span>
-                ) : !isEdit ? (
-                  <button
-                    type='button'
-                    className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl pointer-events-auto'
-                    onClick={() => {
-                      setValue('employee', '');
-                      setEmployeeSearch('');
-                      setEmployeeSelected(false);
-                    }}
-                    tabIndex={-1}
-                  >
-                    ×
-                  </button>
-                ) : (
-                  <span>
-                    <SelectChevronDown />
-                  </span>
-                )}
-              </div>
-              <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
-                {employeeItems
-                  .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                  .map((item: any) => (
-                    <div
-                      key={item.id}
-                      className='px-3 py-2 bg-[#eeefee] text-sm text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
-                      onClick={() => {
-                        setValue('employee', item.id);
-                        setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                        setEmployeeSelected(true);
-                        document.getElementById('employee-dropdown')?.classList.add('hidden');
-                      }}
-                    >
-                      {`${item.firstname} ${item.lastname}`}
-                    </div>
-                  ))}
-              </div>
-              <input type="hidden" {...register('employee', { required: true })} />
             </div>
           </div>
           <div>
-            <label htmlFor='total_non_disabling_injuries' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='current_position' className='block text-sm font-medium leading-6 text-gray-900'>
               Current Position
               <span className='text-red-600'>*</span>
             </label>
@@ -246,8 +232,10 @@ function EmployeeProfile({
                   setCurrentPosition(e.target.value);
                   setValue('current_position', e.target.value);
                 }}
-                disabled={isEdit}
-                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                disabled={true} // Disabled since it's auto-populated
+                data-tooltip-id="current-position-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
               >
                 <option value=''>Select...</option>
                 {positionItems.map((item: any) => {
@@ -261,10 +249,15 @@ function EmployeeProfile({
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
               </div>
+              <Tooltip 
+                id="current-position-tooltip" 
+                place="bottom"
+                style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+              />
             </div>
           </div>
           <div>
-            <label htmlFor='frequency_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='new_position' className='block text-sm font-medium leading-6 text-gray-900'>
               New Position
               <span className='text-red-600'>*</span>
             </label>
@@ -292,6 +285,99 @@ function EmployeeProfile({
                 <SelectChevronDown />
               </div>
             </div>
+          </div>
+          <div>
+            <label htmlFor='current_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              Current Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='current_employment_status'
+                value={currentEmploymentStatus}
+                onChange={e => {
+                  setCurrentEmploymentStatus(e.target.value);
+                  setValue('current_employment_status', e.target.value);
+                }}
+                disabled={true} // Disabled since it's auto-populated
+                data-tooltip-id="current-employment-status-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+              <Tooltip 
+                id="current-employment-status-tooltip" 
+                place="bottom"
+                style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor='new_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              New Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='new_employment_status'
+                value={newEmploymentStatus}
+                onChange={e => {
+                  setNewEmploymentStatus(e.target.value);
+                  setValue('new_employment_status', e.target.value);
+                }}
+                disabled={isEdit}
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label htmlFor='start_date' className='block text-sm font-medium leading-6 text-gray-900'>
+              Start Date
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="start_date"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
+                      disabled={isEdit}
+                    />
+                  )}
+                />
+              </div>
           </div>
           <div>
             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -340,7 +426,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='proposed_rate' className='block text-sm font-medium leading-6 text-gray-900'>
               Proposed Rate
               <span className='text-red-600'>*</span>
             </label>
@@ -387,43 +473,10 @@ function EmployeeProfile({
               </div>
             </div>
           </div>
-          <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
-              Start Date
-              <span className='text-red-600'>*</span>
-            </label>
-            <div className="relative mt-2">
-                <Controller
-                  control={control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <CustomDatePicker
-                      id="start_date"
-                      placeholder={"mm/dd/yyyy"}
-                      className={
-                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                      }
-                      selected={field.value ? new Date(field.value) : null}
-                      pickerOnChange={(date: any) => field.onChange(date)}
-                      inputOnChange={(value: any) => field.onChange(value)}
-                      required={true}
-                      disabled={isEdit}
-                    />
-                  )}
-                />
-              </div>
-          </div>
         </div>
       </div>
       <hr />
-      <div className='flex justify-between py-4 px-4'>
-        <button
-          type='button'
-          className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setSelectedTab(1)}
-        >
-          Back
-        </button>
+      <div className='flex justify-end py-4 px-4'>
         <button
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'

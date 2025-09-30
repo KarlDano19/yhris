@@ -574,82 +574,80 @@ export default function CreateJobPageJobSettings({
 
   return (
     <>
-      <div className="px-4 pb-6">
+      <div className="px-2 sm:px-4 pb-6">
         <div className="sm:col-span-4 mt-4">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Job settings</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">Job settings</h2>
           <p className="text-sm text-gray-400 mb-6">
             Your settings control how you screen and collect applicants.
           </p>
 
           {/* Screening Questions Section */}
-          <div className="flex items-start justify-between border-b border-gray-200 py-4">
-            <div className="flex-grow">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-medium font-semibold text-gray-900">
-                  Screening questions
-                  <span className="ml-2 text-sm font-normal text-gray-500">
-                    ({screeningQuestions.length} configured)
-                  </span>
-                </div>
-                <button 
-                  type="button" 
-                  className="ml-4 p-1 rounded hover:bg-gray-100"
-                  onClick={toggleScreeningSection}
-                >
-                  {/* Edit Icon / Back Icon */}
-                  <span className="sr-only">{isScreeningOpen ? 'Back' : 'Edit'}</span>
-                  {isScreeningOpen ? <MinusIconWithBorder /> : <EditIcon />}
-                </button>
+          <div className="border-b border-gray-200 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base sm:text-medium font-semibold text-gray-900">
+                Screening questions
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({screeningQuestions.length} configured)
+                </span>
               </div>
-
-              {/* Show Questions in Collapsed View - SCROLLABLE */}
-              {!isScreeningOpen && screeningQuestions.length > 0 && (
-                <div className="ml-5 text-sm text-gray-900">
-                  <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
-                    <ol className="list-decimal space-y-3 pl-6">
-                      {screeningQuestions.map((question, index) => (
-                        <li key={question.id} className="text-sm leading-relaxed">
-                          <div className="font-medium text-gray-900 mb-1">{question.question}</div>
-                          <div className="text-sm text-gray-500 ml-0">
-                            {question.responseType === 'Text' ? (
-                              <span className="text-gray-500">No ideal answer required</span>
-                            ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
-                              question.idealAnswer.length > 0 ? (
-                                <span>
-                                  Ideal answers: <span className="font-semibold text-green-600 text-base">{question.idealAnswer.join(', ')}</span>
-                                </span>
-                              ) : (
-                                <span className="text-gray-500">No ideal answers selected</span>
-                              )
-                            ) : (
-                              <span>
-                                Ideal answer: <span className={`font-semibold text-base ${question.idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
-                                  {question.idealAnswer}
-                                </span>
-                              </span>
-                            )}
-                            {question.showToCandidates !== undefined && (
-                              <span className="ml-2">
-                                | Show to candidates: <span className={`font-semibold text-base ${question.showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
-                                  {question.showToCandidates ? 'Yes' : 'No'}
-                                </span>
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                </div>
-              )}
-              
-              {/* No questions message when collapsed */}
-              {!isScreeningOpen && screeningQuestions.length === 0 && (
-                <div className="text-sm text-gray-500">
-                  No screening questions added. Click edit to add questions.
-                </div>
-              )}
+              <button 
+                type="button" 
+                className="p-1 rounded hover:bg-gray-100 flex-shrink-0"
+                onClick={toggleScreeningSection}
+              >
+                {/* Edit Icon / Back Icon */}
+                <span className="sr-only">{isScreeningOpen ? 'Back' : 'Edit'}</span>
+                {isScreeningOpen ? <MinusIconWithBorder /> : <EditIcon />}
+              </button>
             </div>
+
+            {/* Show Questions in Collapsed View - SCROLLABLE */}
+            {!isScreeningOpen && screeningQuestions.length > 0 && (
+              <div className="mt-2 sm:ml-5 text-sm text-gray-900">
+                <div className="max-h-60 sm:max-h-80 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
+                  <ol className="list-decimal space-y-3 pl-4 sm:pl-6">
+                    {screeningQuestions.map((question, index) => (
+                      <li key={question.id} className="text-sm leading-relaxed">
+                        <div className="font-medium text-gray-900 mb-1 break-words">{question.question}</div>
+                        <div className="text-sm text-gray-500 ml-0">
+                          {question.responseType === 'Text' ? (
+                            <span className="text-gray-500">No ideal answer required</span>
+                          ) : question.responseType === 'Multiple Choice' && Array.isArray(question.idealAnswer) ? (
+                            question.idealAnswer.length > 0 ? (
+                              <span>
+                                Ideal answers: <span className="font-semibold text-green-600 text-sm sm:text-base">{question.idealAnswer.join(', ')}</span>
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">No ideal answers selected</span>
+                            )
+                          ) : (
+                            <span>
+                              Ideal answer: <span className={`font-semibold text-sm sm:text-base ${question.idealAnswer === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                                {question.idealAnswer}
+                              </span>
+                            </span>
+                          )}
+                          {question.showToCandidates !== undefined && (
+                            <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0">
+                              Show to candidates: <span className={`font-semibold text-sm sm:text-base ${question.showToCandidates ? 'text-green-600' : 'text-red-600'}`}>
+                                {question.showToCandidates ? 'Yes' : 'No'}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            )}
+            
+            {/* No questions message when collapsed */}
+            {!isScreeningOpen && screeningQuestions.length === 0 && (
+              <div className="text-sm text-gray-500 mt-2">
+                No screening questions added. Click edit to add questions.
+              </div>
+            )}
           </div>
 
           {/* Expanded Screening Questions Section */}
@@ -663,7 +661,7 @@ export default function CreateJobPageJobSettings({
               )}
 
               {/* Question Count Indicator */}
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div className="text-sm text-gray-600">
                   {screeningQuestions.length} screening questions configured
                 </div>
@@ -673,7 +671,7 @@ export default function CreateJobPageJobSettings({
               </div>
 
               {/* Scrollable List of Current Questions */}
-              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50 mb-4">
+              <div className="max-h-80 sm:max-h-96 overflow-y-auto border border-gray-200 rounded-md p-3 sm:p-4 bg-gray-50 mb-4">
                 {screeningQuestions.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <p>No screening questions yet.</p>
@@ -735,28 +733,29 @@ export default function CreateJobPageJobSettings({
           )}
 
           {/* Rejection Settings */}
-          <div className="flex items-start justify-between border-b border-gray-200 py-4">
-            <div>
-              <div className="text-medium font-semibold text-gray-900 mb-1">Rejection settings</div>
-              <div className="text-xs text-gray-500 max-w-md">
-              Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected.              </div>
+          <div className="border-b border-gray-200 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base sm:text-medium font-semibold text-gray-900">
+                Rejection settings
+              </div>
+              <button 
+                type="button" 
+                className="p-1 rounded hover:bg-gray-100 flex-shrink-0"
+                onClick={toggleRejectionSettings}
+              >
+                <span className="sr-only">{isRejectionSettingsOpen ? 'Back' : 'Edit'}</span>
+                {isRejectionSettingsOpen ? <MinusIconWithBorder /> : <EditIcon />}
+              </button>
             </div>
-            <button 
-              type="button" 
-              className="ml-4 p-1 rounded hover:bg-gray-100"
-              onClick={toggleRejectionSettings}
-            >
-              <span className="sr-only">{isRejectionSettingsOpen ? 'Back' : 'Edit'}</span>
-              {isRejectionSettingsOpen ? <MinusIconWithBorder /> : <EditIcon />}
-            </button>
+            <div className="text-xs text-gray-500 max-w-md">
+              Applicants who don't provide ideal answers to must-have screening questions will be automatically rejected.
+            </div>
           </div>
 
           {/* Expanded Rejection Settings */}
           {isRejectionSettingsOpen && (
             <div className="py-4 border-b border-gray-200">
-              <div className="bg-white p-4 rounded-md border border-gray-200">
-
-                
+              <div className="bg-white p-3 sm:p-4 rounded-md border border-gray-200">
                 {/* Personalized Feedback Section */}
                 <div className="mt-1">
                   <label htmlFor="rejectionFeedback" className="block mb-2 text-sm font-medium text-gray-900">
@@ -768,7 +767,7 @@ export default function CreateJobPageJobSettings({
                     onChange={(e) => setRejectionFeedback(e.target.value)}
                     rows={4}
                     placeholder="Provide default feedback for rejected candidates (optional)"
-                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm resize-none"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     This feedback will be included in rejection emails sent to applicants who don't meet the screening criteria.
@@ -780,11 +779,11 @@ export default function CreateJobPageJobSettings({
         </div>
       </div>
       <hr />
-      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4">
+      <div className="mt-5 sm:mt-4 flex flex-col sm:flex-row-reverse sm:justify-between gap-3 px-2 sm:px-4">
         <button
           id="pageJobSettingsNextBtn"
           type="button"
-          className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
+          className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto"
           onClick={handleSubmit}
         >
           Next
@@ -792,7 +791,7 @@ export default function CreateJobPageJobSettings({
         <button
           id="pageJobSettingsBackBtn"
           type="button"
-          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto"
+          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto"
           onClick={() => setPageNumber(4)}
         >
           Back

@@ -24,20 +24,21 @@ function CreatePersonelMovementModal({
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addPersonnelMovement, isLoading: isLoadingAddPersonnelMovement } = useAddPersonnelMovement();
 
-  // Local state for employee search and selection, lifted up from EmployeeProfile
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   // Local state for current and new position
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
 
+  // Local state for employment status
+  const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
+  const [newEmploymentStatus, setNewEmploymentStatus] = useState('');
+
   // Reset form and local state only after successful submit
   const resetForm = () => {
     reset();
-    setEmployeeSearch('');
-    setEmployeeSelected(false);
     setCurrentPosition('');
     setNewPosition('');
+    setCurrentEmploymentStatus('');
+    setNewEmploymentStatus('');
     setSelectedTab(1);
   };
 
@@ -105,14 +106,14 @@ function CreatePersonelMovementModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingAddPersonnelMovement}
                     isEdit={false}
-                    employeeSearch={employeeSearch}
-                    setEmployeeSearch={setEmployeeSearch}
-                    employeeSelected={employeeSelected}
-                    setEmployeeSelected={setEmployeeSelected}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}
                     setNewPosition={setNewPosition}
+                    currentEmploymentStatus={currentEmploymentStatus}
+                    setCurrentEmploymentStatus={setCurrentEmploymentStatus}
+                    newEmploymentStatus={newEmploymentStatus}
+                    setNewEmploymentStatus={setNewEmploymentStatus}
                     errors={errors}
                   />
                 )}

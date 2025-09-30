@@ -3,16 +3,19 @@ import { Dispatch, Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddSeparation from '../hooks/useAddSeparation';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import { T_Separation } from '@/types/globals';
+
+
 
 export default function AddSeparationModal({
   isOpen,
@@ -29,11 +32,11 @@ export default function AddSeparationModal({
       date: new Date().toISOString(),
     },
   });
-  const { data: dataEmployee } = useGetEmployeeItems();
-  const { mutate, isLoading } = useAddSeparation();
-  
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
+  
+  const { mutate, isLoading } = useAddSeparation();
+
 
   const resetForm = () => {
     reset({
@@ -46,6 +49,7 @@ export default function AddSeparationModal({
     setEmployeeSelected(false);
     setValue('department', '');
     setValue('position', '');
+    setValue('name', ''); // Clear the name field
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -130,81 +134,38 @@ export default function AddSeparationModal({
                         Employee Name<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <input
-                          id='name'
-                          type='text'
-                          placeholder='Select...'
-                          value={employeeSearch}
-                          onChange={e => setEmployeeSearch(e.target.value)}
-                          className='appearance-none bg-[#eeefee] block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                          onClick={() => {
-                            if (!employeeSelected) {
-                              const dropdown = document.getElementById('employee-dropdown');
-                              if (dropdown) {
-                                dropdown.classList.toggle('hidden');
+                        <EmployeeSelect
+                          control={control}
+                          name="name"
+                          label=""
+                          required={true}
+                          placeholder="Select employee..."
+                          isMulti={false}
+                          isClearable={true}
+                          employeeSearch={employeeSearch}
+                          setEmployeeSearch={setEmployeeSearch}
+                          setEmployeeSelected={setEmployeeSelected}
+                          className=""
+                          onChange={(selectedOption: any) => {
+                            if (selectedOption && !selectedOption.isShowMore) {
+                              setEmployeeSearch(selectedOption.label);
+                              setEmployeeSelected(true);
+                              // Auto-fill department from employee data
+                              if (selectedOption.department) {
+                                setValue('department', selectedOption.department);
                               }
+                              // Auto-fill position from employee data
+                              if (selectedOption.position) {
+                                setValue('position', selectedOption.position);
+                              }
+                            } else {
+                              setEmployeeSearch('');
+                              setEmployeeSelected(false);
+                              setValue('department', '');
+                              setValue('position', '');
                             }
                           }}
-                          readOnly={employeeSelected}
                         />
-                        <div
-                          className='absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer'
-                          onClick={() => {
-                            if (!employeeSelected) {
-                              const dropdown = document.getElementById('employee-dropdown');
-                              if (dropdown) {
-                                dropdown.classList.toggle('hidden');
-                              }
-                            }
-                          }}
-                        >
-                          {!employeeSelected ? (
-                            <span>
-                              <SelectChevronDown />
-                            </span>
-                          ) : (
-                            <button
-                              type='button'
-                              className='text-savoy-blue hover:text-red-500 focus:outline-none text-3xl'
-                              onClick={() => {
-                                setValue('name', '');
-                                setEmployeeSearch('');
-                                setEmployeeSelected(false);
-                                setValue('department', '');
-                                setValue('position', '');
-                              }}
-                              tabIndex={-1}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                        <div id='employee-dropdown' className='hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
-                          {(dataEmployee || [])
-                            .filter((item: any) => `${item.firstname} ${item.lastname}`.toLowerCase().includes(employeeSearch.toLowerCase()))
-                            .map((item: any) => (
-                              <div
-                                key={item.id}
-                                className='px-3 py-2 text-sm bg-[#eeefee] text-gray-900 cursor-pointer hover:bg-savoy-blue hover:text-white'
-                                onClick={() => {
-                                  setValue('name', item.id);
-                                  setEmployeeSearch(`${item.firstname} ${item.lastname}`);
-                                  setEmployeeSelected(true);
-                                  // Auto-fill department from employee data
-                                  if (item.department) {
-                                    setValue('department', item.department);
-                                  }
-                                  // Auto-fill position from employee data
-                                  if (item.position) {
-                                    setValue('position', item.position);
-                                  }
-                                  document.getElementById('employee-dropdown')?.classList.add('hidden');
-                                }}
-                              >
-                                {`${item.firstname} ${item.lastname}`}
-                              </div>
-                            ))}
-                        </div>
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -234,7 +195,14 @@ export default function AddSeparationModal({
                           {...register('position', { required: true })}
                           type='text'
                           readOnly
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                          data-tooltip-id="position-tooltip"
+                          data-tooltip-content="Auto-populated from selected employee"
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                        />
+                        <Tooltip 
+                          id="position-tooltip" 
+                          place="bottom"
+                          style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
                       </div>
                     </div>
@@ -265,7 +233,14 @@ export default function AddSeparationModal({
                           {...register('department', { required: true })}
                           type='text'
                           readOnly
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                          data-tooltip-id="department-tooltip"
+                          data-tooltip-content="Auto-populated from selected employee"
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                        />
+                        <Tooltip 
+                          id="department-tooltip" 
+                          place="bottom"
+                          style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
                       </div>
                     </div>

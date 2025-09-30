@@ -3,19 +3,16 @@
 import { useEffect, useState, useMemo } from "react";
 
 import { Controller } from "react-hook-form";
-import Select from 'react-select';
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import EmployeeSelect from "@/components/common/EmployeeSelect";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 export default function MeetingInfo({
   control,
   register, 
-  handleSubmit, // not used
   setSelectedTab,
   errors,
   setError,
@@ -24,44 +21,20 @@ export default function MeetingInfo({
 }: {
   control: any;
   register: any;
-  handleSubmit: any;
   setSelectedTab: any;
   errors: any;
   setError: any;
   clearErrors: any;
   watch: any;
 }) {
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
+  const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
   // Watch the form values for attendees and absentees
-  const selectedAttendees = watch("attendees") || [];
-  const selectedAbsentees = watch("absentees") || [];
+  const attendeesValue = watch("attendees");
+  const absenteesValue = watch("absentees");
+  const selectedAttendees = useMemo(() => attendeesValue || [], [attendeesValue]);
+  const selectedAbsentees = useMemo(() => absenteesValue || [], [absenteesValue]);
 
-  useEffect(() => {
-    if (employeeData) {
-      const formattedEmployees = employeeData.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-      }));
-      setEmployeeItems(formattedEmployees);
-    }
-  }, [employeeData]);
-
-  // Memoize the filtered options
-  const attendeeOptions = useMemo(() => {
-    if (employeeItems.length > 0) {
-      return employeeItems.filter((item: any) => !selectedAbsentees.includes(item.value));
-    }
-    return [];
-  }, [employeeItems, selectedAbsentees]);
-
-  const absenteeOptions = useMemo(() => {
-    if (employeeItems.length > 0) {
-      return employeeItems.filter((item: any) => !selectedAttendees.includes(item.value));
-    }
-    return [];
-  }, [employeeItems, selectedAttendees]);
 
   useEffect(() => {
     if (selectedAttendees && Array.isArray(selectedAttendees) && selectedAttendees.length > 0) {
@@ -74,6 +47,7 @@ export default function MeetingInfo({
       clearErrors("absentees");
     }
   }, [selectedAbsentees, clearErrors]);
+
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,32 +186,21 @@ export default function MeetingInfo({
                 {errors.attendees.message || "Please select at least one Attendee."}
               </p>
             )}
-            <Controller
-              name="attendees"
+            <EmployeeSelect
               control={control}
-              rules={{ required: true }}
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={attendeeOptions}
-                  value={employeeItems.filter((item: any) => value?.includes(item.value))}
-                  onChange={(val: any) => {
-                    clearErrors("attendees");
-                    onChange(val ? val.map((item: any) => item.value) : []);
-                  }}
-                  components={{
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-              )}
+              name="attendees"
+              label=""
+              required={true}
+              placeholder="Select attendees..."
+              isMulti={true}
+              isClearable={false}
+              employeeSearch={employeeSearch}
+              setEmployeeSearch={setEmployeeSearch}
+              excludeValues={selectedAbsentees}
+              className=""
+              onChange={(selectedOptions: any) => {
+                clearErrors("attendees");
+              }}
             />
           </div>
           <div>
@@ -247,31 +210,18 @@ export default function MeetingInfo({
             >
               Absentees
             </label>
-            <Controller
-              name="absentees"
+            <EmployeeSelect
               control={control}
-              defaultValue={[]}
-              render={({ field: { onChange, value } }) => (
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={absenteeOptions}
-                  value={employeeItems.filter((item: any) => (value || [])?.includes(item.value))}
-                  onChange={(val: any) => {
-                    onChange(val ? val.map((item: any) => item.value) : []);
-                  }}
-                  components={{
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-              )}
+              name="absentees"
+              label=""
+              required={false}
+              placeholder="Select absentees..."
+              isMulti={true}
+              isClearable={false}
+              employeeSearch={employeeSearch}
+              setEmployeeSearch={setEmployeeSearch}
+              excludeValues={selectedAttendees}
+              className=""
             />
           </div>
         </div>

@@ -22,7 +22,7 @@ type Props = {
   onPatchChange?: (patch: Record<string, any>) => void;
   onErrorsChange?: (hasErrors: boolean) => void;
   refetch?: () => void | Promise<void>;
-  editing?: boolean;                
+  editing?: boolean;
 };
 
 const uniq = (xs: (string | undefined | null)[]) =>
@@ -35,7 +35,7 @@ export default function EmploymentDetailsForm({
   onPatchChange,
   onErrorsChange,
   refetch,
-  editing = false,                 
+  editing = false,
 }: Props) {
   const emit = (patch: Record<string, any>) => onPatchChange?.(patch);
   const router = useRouter();
@@ -127,7 +127,9 @@ export default function EmploymentDetailsForm({
   useEffect(() => {
     const v = employment_status;
     if (v && !employmentStatusOptions.includes(v)) {
-      setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
+      setExtraEmploymentStatuses((opts) =>
+        opts.includes(v) ? opts : [...opts, v]
+      );
     }
   }, [employmentStatusOptions, employment_status]);
 
@@ -137,22 +139,72 @@ export default function EmploymentDetailsForm({
 
     const base = (emp?.employment_status_list as string[] | undefined) ?? [];
     if (v && !base.includes(v)) {
-      setExtraEmploymentStatuses((opts) => (opts.includes(v) ? opts : [...opts, v]));
+      setExtraEmploymentStatuses((opts) =>
+        opts.includes(v) ? opts : [...opts, v]
+      );
     }
 
     setErr("employment_status", validate.employment_status(v));
   }, [emp?.employment_status]);
 
+  // ---- LOCATION ----
   useEffect(() => {
-    setLocation(s(emp?.location ?? ""));
+    const v = location;
+    if (v && !locations.includes(v)) {
+      setExtraLocations((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+  }, [locations, location]);
+
+  useEffect(() => {
+    const v = s(emp?.location ?? "");
+    setLocation(v);
+
+    const base = (emp?.locations_list as string[] | undefined) ?? [];
+    if (v && !base.includes(v)) {
+      setExtraLocations((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+
+    setErr("location", validate.location(v));
   }, [emp?.location]);
 
+  // ---- POSITION ----
   useEffect(() => {
-    setPosition(s(emp?.position ?? ""));
-  }, [emp?.position]);
+    const v = position;
+    if (v && !positionOptions.includes(v)) {
+      setExtraPositions((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+  }, [positionOptions, position]);
 
   useEffect(() => {
-    setDepartment(s(emp?.department ?? ""));
+    const v = s(emp?.position ?? "");
+    setPosition(v);
+
+    const base = (emp?.positions_list as string[] | undefined) ?? [];
+    if (v && !base.includes(v)) {
+      setExtraPositions((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+
+    setErr("position", validate.position(v));
+  }, [emp?.position]);
+
+  // ---- DEPARTMENT ----
+  useEffect(() => {
+    const v = department;
+    if (v && !departmentOptions.includes(v)) {
+      setExtraDepartments((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+  }, [departmentOptions, department]);
+
+  useEffect(() => {
+    const v = s(emp?.department ?? "");
+    setDepartment(v);
+
+    const base = (emp?.departments_list as string[] | undefined) ?? [];
+    if (v && !base.includes(v)) {
+      setExtraDepartments((opts) => (opts.includes(v) ? opts : [...opts, v]));
+    }
+
+    setErr("department", validate.department(v));
   }, [emp?.department]);
 
   useEffect(() => {
@@ -174,7 +226,7 @@ export default function EmploymentDetailsForm({
 
   const validate = {
     date_hired: (d?: Date) => {
-      if (!d || isNaN(d.getTime())) return "Date Hired is required.";
+      if (!d || isNaN(d.getTime())) return "Date Hired is missing.";
       const today = new Date();
       const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       const tOnly = new Date(
@@ -186,10 +238,10 @@ export default function EmploymentDetailsForm({
       return null;
     },
     employment_status: (v: string) =>
-      isEmpty(v) ? "Employment Status is required." : null,
-    location: (v: string) => (isEmpty(v) ? "Location is required." : null),
-    position: (v: string) => (isEmpty(v) ? "Position is required." : null),
-    department: (v: string) => (isEmpty(v) ? "Department is required." : null),
+      isEmpty(v) ? "Employment Status is missing." : null,
+    location: (v: string) => (isEmpty(v) ? "Location is missing." : null),
+    position: (v: string) => (isEmpty(v) ? "Position is missing." : null),
+    department: (v: string) => (isEmpty(v) ? "Department is missing." : null),
   };
 
   const buildInitialErrors = (): Record<string, string | null> => ({
@@ -207,8 +259,11 @@ export default function EmploymentDetailsForm({
   const setErr = (key: string, msg: string | null) =>
     setErrors((e) => ({ ...e, [key]: msg }));
 
+  const isBlockingError = (m?: string | null) =>
+    !!m && !/(missing|required)/i.test(m);
+
   const hasErrors = useMemo(
-    () => Object.values(errors).some((m) => !!m && m.trim().length > 0),
+    () => Object.values(errors).some(isBlockingError),
     [errors]
   );
 
@@ -264,7 +319,7 @@ export default function EmploymentDetailsForm({
                 : undefined
             }
             placeholder="MM/DD/YYYY"
-            disabled={!editing}  // forward if supported by the component
+            disabled={!editing} // forward if supported by the component
             className={[
               "w-full rounded-md px-3 py-2 text-sm",
               !editing
@@ -293,9 +348,12 @@ export default function EmploymentDetailsForm({
             editing
               ? (newOpt) => {
                   setExtraEmploymentStatuses((opts) => {
-                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const next = opts.includes(newOpt)
+                      ? opts
+                      : [...opts, newOpt];
                     const merged = mergeUniq(
-                      (emp?.employment_status_list as string[] | undefined) ?? [],
+                      (emp?.employment_status_list as string[] | undefined) ??
+                        [],
                       next
                     );
                     emit({ employment_status_list: merged });
@@ -303,7 +361,10 @@ export default function EmploymentDetailsForm({
                   });
                   setEmploymentStatus(newOpt);
                   emit({ employment_status: newOpt });
-                  setErr("employment_status", validate.employment_status(newOpt));
+                  setErr(
+                    "employment_status",
+                    validate.employment_status(newOpt)
+                  );
                 }
               : undefined
           }
@@ -317,8 +378,8 @@ export default function EmploymentDetailsForm({
               : undefined
           }
           error={showErr("employment_status")}
-          disabled={!editing}     // 👈 ensure AddableSelect supports this
-          showErrors={editing}    // 👈 gate inline error display
+          disabled={!editing} // 👈 ensure AddableSelect supports this
+          showErrors={editing} // 👈 gate inline error display
         />
 
         {/* Location */}
@@ -331,7 +392,9 @@ export default function EmploymentDetailsForm({
             editing
               ? (newOpt) => {
                   setExtraLocations((opts) => {
-                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const next = opts.includes(newOpt)
+                      ? opts
+                      : [...opts, newOpt];
                     const merged = mergeUniq(
                       (emp?.locations_list as string[] | undefined) ?? [],
                       next
@@ -371,7 +434,9 @@ export default function EmploymentDetailsForm({
             editing
               ? (newOpt) => {
                   setExtraPositions((opts) => {
-                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const next = opts.includes(newOpt)
+                      ? opts
+                      : [...opts, newOpt];
                     const merged = mergeUniq(
                       (emp?.positions_list as string[] | undefined) ?? [],
                       next
@@ -408,7 +473,9 @@ export default function EmploymentDetailsForm({
             editing
               ? (newOpt) => {
                   setExtraDepartments((opts) => {
-                    const next = opts.includes(newOpt) ? opts : [...opts, newOpt];
+                    const next = opts.includes(newOpt)
+                      ? opts
+                      : [...opts, newOpt];
                     const merged = mergeUniq(
                       (emp?.departments_list as string[] | undefined) ?? [],
                       next
@@ -468,7 +535,10 @@ export default function EmploymentDetailsForm({
       {showSalaryModal && (
         <SalaryHistoryModal
           isOpen
-          onClose={() => { setShowSalaryModal(false); setSalaryModalParam(false); }}
+          onClose={() => {
+            setShowSalaryModal(false);
+            setSalaryModalParam(false);
+          }}
           employeeName={employeeName}
           employeeId={emp?.id as string | number}
           onRefetch={refetch}

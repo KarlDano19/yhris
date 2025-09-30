@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useRef, useState, useEffect, useCallback, Fragment } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
@@ -22,6 +22,7 @@ import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
+import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
 import Filter, { FilterOptions } from './Filter';
@@ -33,9 +34,11 @@ import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, EllipsisVerticalIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { Menu, Transition } from '@headlessui/react';
+import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
-
+import PlusIconGreen from '@/svg/PlusIconGreen';
 import '../styles.css';
 
 type ModalSelectedTypes = {
@@ -80,6 +83,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
+  const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed'],
@@ -87,12 +91,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   
   const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
   
-
-
   // Get screening questions and ideal answers from the job posting
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [processedApplicants, setProcessedApplicants] = useState<any[]>([]);
-
 
   /**
    * Check if status update should trigger archived modal refresh
@@ -101,6 +102,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     // Only trigger if status is rejected or withdrawn (archived statuses)
     return status === 'rejected' || status === 'withdrawn';
   }, []);
+
+  /**
+   * Check if status update should trigger navigation modal
+   * Only show navigation modal when applicant is hired (passed) AND it's the final stage
+   */
+  const shouldTriggerNavigationModal = useCallback((status: string) => {
+    // Only trigger if status is passed (hired) AND it's the final stage
+    return status === 'passed' && actionState.isFinalStage;
+  }, [actionState.isFinalStage]);
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -197,7 +207,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     if (dataJobPostDetails) {
       dispatch({ type: CLEAR_STAGE });
       let jobStages: any = [];
-      dataJobPostDetails.job_stages.forEach((item: any) => {
+      dataJobPostDetails.job_stages?.forEach((item: any) => {
         let newData = {
           id: item.id,
           title: item.title,
@@ -280,6 +290,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             // ============================================================================
             if (shouldTriggerArchivedRefresh(data.status)) {
               archivedApplicantRefetch();
+            }
+            
+            // ============================================================================
+            // SHOW NAVIGATION MODAL ON SUCCESSFUL HIRING FROM FINAL STAGE
+            // ============================================================================
+            if (shouldTriggerNavigationModal(data.status)) {
+              setIsNavigationModalOpen(true);
             }
             
             // Reset actionState after successful submission to allow modal to be reopened
@@ -425,7 +442,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     <>
       {!isGetJobPostDetailsLoading && (
         <StateContext.Provider value={{ state, dispatch, actionState, setActionState }}>
-          <div className='min-h-screen'>
+          <div className='min-h-screen mb-24 md:mb-0'>
             <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
               <div className='flex px-4 pt-4 pb-2'>
                 <Link href='/screen-applicants' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
@@ -439,36 +456,118 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </h2>
                 {whichModal && modals[whichModal].component}
 
-                <div className='flex justify-end items-center gap-4 my-6'>
+                {/* Desktop Layout */}
+                <div className='hidden md:flex justify-start items-center gap-4 my-6'>
                   <button
                     onClick={handleOpenBatchUpload}
-                    className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 text-sm font-medium'
+                    className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                    Batch Upload Resumes
+                    <UploadIcon />
+                    Upload Resumes
                   </button>
-                  <div className='flex-1 flex justify-start lg:justify-between gap-2'>
-                    <button
-                      onClick={() => setIsAddApplicantModalOpen(true)}
-                      className='rounded-lg bg-[#65c979] hover:bg-[#5cb86f] text-white py-2 px-6 font-bold text-[15px] my-6'
-                    >
-                      ADD APPLICANT
-                    </button>
-                    
-                    <AddStageBtn handleAddStage={handleAddStage} />
-                  </div>
+
                   <button
-                    onClick={() => {
-                      setIsArchivedApplicantsModalOpen(true);
-                    }}
-                    className="rounded-lg py-2 px-6 font-bold text-[15px] my-6 flex items-center gap-2 transition-colors bg-gray-600 hover:bg-gray-700 text-white"
-                    >
+                    onClick={() => setIsAddApplicantModalOpen(true)}
+                    className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 transition-colors"
+                  >
+                    <PlusIconGreen />
+                    Add Applicant
+                  </button>
+
+                  <div className='border-l-2 border-gray-300 h-12'></div>
+
+                  <button
+                    onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                    className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
+                  >
                     <ArchiveIcon />
-                      ARCHIVED
-                    </button>
+                  </button>
+
                   <Filter onFilterChange={handleFilterChange} />
+                  
+                  <AddStageBtn handleAddStage={handleAddStage} />
+                </div>
+
+                {/* Mobile Layout */}
+                <div className='md:hidden flex justify-between items-center gap-4 my-6'>
+                  <div className='flex items-center gap-2'>
+                    {/* Empty space on left */}
+                  </div>
+                  
+                  <div className='flex items-center gap-2'>
+                    <button
+                      onClick={handleOpenBatchUpload}
+                      className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
+                    >
+                      <UploadIcon />
+                      Upload Resumes
+                    </button>
+
+                    <Filter onFilterChange={handleFilterChange} />
+
+                    {/* Mobile Dropdown Menu */}
+                    <Menu as="div" className="relative">
+                      <Menu.Button className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white p-2 flex items-center justify-center h-12 w-12">
+                        <EllipsisVerticalIcon className="h-5 w-5" />
+                      </Menu.Button>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="py-1">
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => setIsAddApplicantModalOpen(true)}
+                                  className={`${
+                                    active ? 'bg-green-50' : 'hover:bg-green-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#65c979' }}
+                                >
+                                  <PlusIconGreen />
+                                  <span className="ml-1">Add Applicant</span>
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                                  className={`${
+                                    active ? 'bg-gray-50' : 'hover:bg-gray-50'
+                                  } group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#6b7280' }}
+                                >
+                                  <ArchiveIcon />
+                                  Archived
+                                </button>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+                                  onClick={handleAddStage}
+                                  className={`${
+                                    active ? 'bg-green-50' : 'hover:bg-green-50'
+                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  style={{ color: '#65c979' }}
+                                >
+                                  <PlusIconGreen />
+                                  <span className="ml-1">Add Stage</span>
+                                </button>
+                              )}
+                            </Menu.Item>
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
                 </div>
 
                 <BatchResumeUpload
@@ -507,6 +606,11 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           setIsArchivedApplicantsModalOpen(false);
         }}
         onRefresh={archivedApplicantRefetch}
+      />
+      <NavigationModal
+        isOpen={isNavigationModalOpen}
+        setIsOpen={setIsNavigationModalOpen}
+        jobPostingId={params.id as string}
       />
     </>
   );

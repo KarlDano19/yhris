@@ -401,7 +401,13 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
         </div>
 
         {/* Mobile tabs - horizontal scrollable */}
-        <div className="md:hidden overflow-x-auto">
+        <div
+          className="md:hidden overflow-x-auto"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#2d3e58 #f1f1f1'
+          }}
+        >
           <div className="flex space-x-4 min-w-max px-4">
             {subTabs.map((tab) => (
               <div 

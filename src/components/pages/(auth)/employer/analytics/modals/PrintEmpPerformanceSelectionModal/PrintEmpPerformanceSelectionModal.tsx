@@ -16,7 +16,7 @@ interface DepartmentRecord {
 }
 
 interface EmployeeRecord {
-  id: string;
+  id?: string;
   name: string;
   department: string;
   score: string;
@@ -32,7 +32,7 @@ interface IssueTypeRecord {
 }
 
 interface EmployeeIssueRecord {
-  id: string;
+  id?: string;
   name: string;
   department: string;
   issueType: string;
@@ -123,7 +123,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step1.selectedRecords);
       
     const employeeSelections = allSelections.step2.selectedOption === 'all'
-      ? employeeRecords.map(record => record.id)
+      ? employeeRecords.map(record => record.id || `emp_${record.name}`)
       : Array.from(allSelections.step2.selectedRecords);
       
     const issueTypeSelections = allSelections.step3.selectedOption === 'all'
@@ -131,7 +131,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
       : Array.from(allSelections.step3.selectedRecords);
       
     const employeeIssueSelections = allSelections.step4.selectedOption === 'all'
-      ? employeeIssueRecords.map(record => record.id)
+      ? employeeIssueRecords.map(record => record.id || `issue_${record.name}`)
       : Array.from(allSelections.step4.selectedRecords);
     
 

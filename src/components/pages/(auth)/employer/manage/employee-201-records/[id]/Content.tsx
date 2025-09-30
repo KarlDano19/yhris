@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
@@ -15,6 +21,7 @@ import EmployeeHeaderSkeleton from "./components/EmployeeHeaderSkeleton";
 import EmployeeHeader, { TabKey } from "./components/EmployeeHeader";
 import ConfirmModal from "./modals/ConfirmModal";
 import LeaveConfirmModal from "./modals/LeaveConfirmModal";
+import UpdatePhotoModal from "./modals/UpdatePhotoModal";
 
 import PersonalInfoForm from "./components/PersonalInfoForm";
 import EmploymentDetailsForm from "./components/EmploymentDetailsForm";
@@ -35,6 +42,7 @@ import { useEmploymentDetailsPatch } from "./hooks/useEmploymentDetailsPatch";
 import { useCreateTrainingRecord } from "./hooks/useCreateTrainingRecord";
 import { usePatchTrainingRecord } from "./hooks/usePatchTrainingRecord";
 import { useDeleteTrainingRecord } from "./hooks/useDeleteTrainingRecord";
+import { useEmployeePhotoPatch } from "./hooks/useEmployeePhotoPatch";
 
 export interface ContentProps {
   params: { id: string };
@@ -42,7 +50,11 @@ export interface ContentProps {
   hasActiveSubscription: boolean;
 }
 
-export default function Employee201Content({ params, emp, hasActiveSubscription }: ContentProps) {
+export default function Employee201Content({
+  params,
+  emp,
+  hasActiveSubscription,
+}: ContentProps) {
   const router = useRouter();
 
   // ------------------------ State ------------------------
@@ -88,7 +100,10 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     [sections]
   );
 
-  const [editMode, setEditMode] = useState<{ personal: boolean; employment: boolean }>({
+  const [editMode, setEditMode] = useState<{
+    personal: boolean;
+    employment: boolean;
+  }>({
     personal: false,
     employment: false,
   });
@@ -96,12 +111,17 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   // helpers
   const requiresEdit = TABS_REQUIRE_EDIT.includes(activeTab);
   const isEditingTab =
-    activeTab === "personal" ? editMode.personal :
-    activeTab === "employment" ? editMode.employment : false;
+    activeTab === "personal"
+      ? editMode.personal
+      : activeTab === "employment"
+      ? editMode.employment
+      : false;
   // ------------------------ Data hooks ------------------------
   const { data, isLoading, refetch } = useEmployee(params?.id);
   const employee = toDisplayEmployee(data, emp);
-  const [employeeDetails, setEmployeeDetails] = useState<Partial<Employee> | undefined>(data ?? emp);
+  const [employeeDetails, setEmployeeDetails] = useState<
+    Partial<Employee> | undefined
+  >(data ?? emp);
 
   // PATCH hooks (sim mode by default; configure when backend is ready)
   const { save: savePersonal } = usePersonalDetailsPatch(params?.id);
@@ -114,6 +134,75 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
 
   // Section loader with race guard
   const { loadSection } = useSectionLoader(setSections);
+
+  // --- Photo modal & preview state (parent-owned) ---
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
+
+  // Keep a local preview URL so UI updates immediately after Update.
+  // We sync it anytime the server value changes.
+  const [localPhotoUrl, setLocalPhotoUrl] = useState<string | null>(
+    employee?.photo ?? null
+  );
+  useEffect(() => {
+    setLocalPhotoUrl(employee?.photo ?? null);
+  }, [employee?.photo]);
+
+  // Use the hook you already have
+  const {
+    isSaving: isUploading,
+    upload,
+    remove,
+  } = useEmployeePhotoPatch(params?.id);
+
+  // Confirm = upload selected file
+  const handleConfirmPhoto = useCallback(
+    async (file: File) => {
+      const ok = await notify.promise(upload(file), {
+        success: "Profile photo updated successfully.",
+        error: "Failed to update profile photo.",
+      });
+      if (ok) {
+        // optimistic UI, then refresh real URL
+        const blobUrl = URL.createObjectURL(file);
+        setLocalPhotoUrl((prev) => {
+          if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+          return blobUrl;
+        });
+        await refetch();
+      }
+      setPhotoModalOpen(false);
+    },
+    [upload, refetch]
+  );
+
+  // Remove = delete on server
+  const handleRemovePhoto = useCallback(async () => {
+    const ok = await notify.promise(remove(), {
+      success: "Profile photo removed.",
+      error: "Failed to remove profile photo.",
+    });
+    if (ok) {
+      if (localPhotoUrl && localPhotoUrl.startsWith("blob:"))
+        URL.revokeObjectURL(localPhotoUrl);
+      setLocalPhotoUrl(null);
+      await refetch();
+    }
+    setPhotoModalOpen(false);
+  }, [remove, localPhotoUrl, refetch]);
+
+  // with your notify helper:
+  const onPhotoSelect = (file: File) =>
+    notify.promise(upload(file), {
+      success: "Profile photo updated successfully.",
+      error: "Failed to update profile photo.",
+    });
+
+  // for removal:
+  const onRemovePhoto = () =>
+    notify.promise(remove(), {
+      success: "Profile photo removed.",
+      error: "Failed to remove profile photo.",
+    });
 
   // ------------------------ Derived flags ------------------------
   const canSave = !!(
@@ -136,16 +225,18 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     return `You have unsaved changes in ${tabLabel}. What would you like to do?`;
   }, [activeTab, isEditingTab, isDirty]);
 
-
-  const attemptNavigate = useCallback((href: string | "back") => {
-    if (isDirty || isEditingTab) {
-      setPendingHref(href);
-      setLeaveMessage(buildLeaveMessage());
-      setShowLeaveConfirm(true);
-    } else {
-      href === "back" ? router.back() : router.push(href);
-    }
-  }, [isDirty, isEditingTab, router, buildLeaveMessage]);
+  const attemptNavigate = useCallback(
+    (href: string | "back") => {
+      if (isDirty || isEditingTab) {
+        setPendingHref(href);
+        setLeaveMessage(buildLeaveMessage());
+        setShowLeaveConfirm(true);
+      } else {
+        href === "back" ? router.back() : router.push(href);
+      }
+    },
+    [isDirty, isEditingTab, router, buildLeaveMessage]
+  );
 
   const proceedAfterLeave = useCallback(() => {
     if (pendingTab) {
@@ -195,23 +286,27 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
   }, [isLoading]);
 
   // Wrapper change → mark dirty (guards inputs only; still keep per-form emit)
-  const handleWrapperChange: React.FormEventHandler<HTMLDivElement> = useCallback((e) => {
-    if (activeTab === "training") return; // training dirty comes from child
-    const t = e.target as HTMLElement;
+  const handleWrapperChange: React.FormEventHandler<HTMLDivElement> =
+    useCallback(
+      (e) => {
+        if (activeTab === "training") return; // training dirty comes from child
+        const t = e.target as HTMLElement;
 
-    if (t.closest('[role="dialog"], [data-no-dirty]')) return;
-    
-    if (
-      t instanceof HTMLInputElement ||
-      t instanceof HTMLSelectElement ||
-      t instanceof HTMLTextAreaElement
-    ) {
-      setSections((prev) => ({
-        ...prev,
-        [activeTab]: { ...prev[activeTab], dirty: true },
-      }));
-    }
-  }, [activeTab]);
+        if (t.closest('[role="dialog"], [data-no-dirty]')) return;
+
+        if (
+          t instanceof HTMLInputElement ||
+          t instanceof HTMLSelectElement ||
+          t instanceof HTMLTextAreaElement
+        ) {
+          setSections((prev) => ({
+            ...prev,
+            [activeTab]: { ...prev[activeTab], dirty: true },
+          }));
+        }
+      },
+      [activeTab]
+    );
 
   // ------------------------ Save helpers ------------------------
 
@@ -219,16 +314,15 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     // shallow-merge is fine because patch only includes changed leaf fields
     // (if you ever include nested objects like emergency_contact, you're already
     // emitting the full object, so shallow merge still works).
-    setEmployeeDetails(prev => ({ ...(prev || {}), ...patch }));
+    setEmployeeDetails((prev) => ({ ...(prev || {}), ...patch }));
   }, []);
-
 
   const savePersonalTab = useCallback(async () => {
     const payload = personalPatchRef.current || {};
     const res = await savePersonal(payload);
     if (!res.ok) throw res.error;
 
-    applyLocalPatch(payload)
+    applyLocalPatch(payload);
     personalPatchRef.current = {};
     await refetch();
 
@@ -240,7 +334,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     const res = await saveEmployment(payload);
     if (!res.ok) throw res.error;
 
-    applyLocalPatch(payload)
+    applyLocalPatch(payload);
     employmentPatchRef.current = {}; // clear after success
     await refetch();
 
@@ -252,7 +346,8 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
     if (!collect) return { ok: true }; // nothing registered; no-op
 
     const { creates, updates, deletes, hasErrors } = collect();
-    if (hasErrors) throw new Error("Please fix validation errors before saving.");
+    if (hasErrors)
+      throw new Error("Please fix validation errors before saving.");
 
     // Run creates → updates → deletes
     for (const c of creates) {
@@ -268,7 +363,9 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
         training_title: u.training_title,
         date_completed: u.date_completed,
         training_provider: u.training_provider,
-        ...(u.proof_of_completion !== undefined ? { proof_of_completion: u.proof_of_completion } : {}),
+        ...(u.proof_of_completion !== undefined
+          ? { proof_of_completion: u.proof_of_completion }
+          : {}),
         clear_file: !!u.clear_file,
       });
     }
@@ -328,17 +425,24 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
 
     setConfirmBusy(false);
     if (ok) {
-      if (activeTab === "personal")   setEditMode((m) => ({ ...m, personal: false }));
-      if (activeTab === "employment") setEditMode((m) => ({ ...m, employment: false }));
+      if (activeTab === "personal")
+        setEditMode((m) => ({ ...m, personal: false }));
+      if (activeTab === "employment")
+        setEditMode((m) => ({ ...m, employment: false }));
       setShowConfirm(false); // harmless if not shown
-    }
-    else {
-        setSections((prev) => ({
+    } else {
+      setSections((prev) => ({
         ...prev,
         [key]: { ...prev[key], saving: false },
       }));
     }
-  }, [activeTab, sections, savePersonalTab, saveEmploymentTab, saveTrainingTab]);
+  }, [
+    activeTab,
+    sections,
+    savePersonalTab,
+    saveEmploymentTab,
+    saveTrainingTab,
+  ]);
 
   // ------------------------ Tab click ------------------------
   const handleTabClick = useCallback(
@@ -408,9 +512,14 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
             editing={editMode.personal}
             onPatchChange={(patch) => {
               Object.assign(personalPatchRef.current, patch);
-              setSections((p) => ({ ...p, personal: { ...p.personal, dirty: true } }));
+              setSections((p) => ({
+                ...p,
+                personal: { ...p.personal, dirty: true },
+              }));
             }}
-            onErrorsChange={(hasErrors) => markSectionErrors("personal", hasErrors)}
+            onErrorsChange={(hasErrors) =>
+              markSectionErrors("personal", hasErrors)
+            }
           />
         );
 
@@ -422,9 +531,14 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
             editing={editMode.employment}
             onPatchChange={(patch) => {
               Object.assign(employmentPatchRef.current, patch);
-              setSections((p) => ({ ...p, employment: { ...p.employment, dirty: true } }));
+              setSections((p) => ({
+                ...p,
+                employment: { ...p.employment, dirty: true },
+              }));
             }}
-            onErrorsChange={(hasErrors) => markSectionErrors("employment", hasErrors)}
+            onErrorsChange={(hasErrors) =>
+              markSectionErrors("employment", hasErrors)
+            }
             refetch={refetch}
           />
         );
@@ -434,9 +548,9 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           <TrainingDevelopmentForm
             key={`training-${resetKey.training}`}
             employeeId={employeeDetails?.id as number | string}
-            onErrorsChange={handleTrainingErrorsChange}   
-            onDirtyChange={handleTrainingDirtyChange}     
-            registerCollector={setTrainingCollector}      
+            onErrorsChange={handleTrainingErrorsChange}
+            onDirtyChange={handleTrainingDirtyChange}
+            registerCollector={setTrainingCollector}
             refreshKey={trainingRefreshKey}
           />
         );
@@ -482,28 +596,36 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
             </h4>
           </a>
 
-        <button
-          data-testid="save-btn"
-          onClick={() => {
-            if (requiresEdit && !isEditingTab) {
-              // EDIT: enable fields
-              setEditMode((m) => ({ ...m, [activeTab]: true }));
-              return;
+          <button
+            data-testid="save-btn"
+            onClick={() => {
+              if (requiresEdit && !isEditingTab) {
+                // EDIT: enable fields
+                setEditMode((m) => ({ ...m, [activeTab]: true }));
+                return;
+              }
+              // SAVE: open confirm modal (do NOT save immediately)
+              setShowConfirm(true);
+            }}
+            disabled={
+              requiresEdit
+                ? isEditingTab
+                  ? !canSave
+                  : false // Edit is always enabled; Save requires valid+dirty
+                : !canSave // other tabs: Save only when valid+dirty
             }
-            // SAVE: open confirm modal (do NOT save immediately)
-            setShowConfirm(true);
-          }}
-          disabled={
-            requiresEdit
-              ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
-              : !canSave                            // other tabs: Save only when valid+dirty
-          }
-          className="rounded-md bg-[#355fd0] px-5 py-2 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-50"
-        >
-          {requiresEdit
-            ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
-            : (saving ? "Saving…" : "Save")}
-        </button>
+            className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
+          >
+            {requiresEdit
+              ? isEditingTab
+                ? saving
+                  ? "Saving…"
+                  : "Save"
+                : "Edit"
+              : saving
+              ? "Saving…"
+              : "Save"}
+          </button>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">
@@ -521,6 +643,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
               setActiveTab={handleTabClick}
               empPartial={employeeDetails}
               locked={!hasActiveSubscription}
+              onOpenPhotoModal={() => setPhotoModalOpen(true)}
             />
           )}
         </div>
@@ -637,6 +760,17 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
                 [key]: { ...prev[key], saving: false },
               }));
           }}
+        />
+      )}
+
+      {photoModalOpen && (
+        <UpdatePhotoModal
+          open={photoModalOpen}
+          onOpenChange={setPhotoModalOpen}
+          currentPhotoUrl={localPhotoUrl}
+          onConfirm={handleConfirmPhoto} // called when user clicks Update with a file
+          onRemove={handleRemovePhoto} // called when user clicks Update with removal staged
+          isProcessing={isUploading}
         />
       )}
     </>

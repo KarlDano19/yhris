@@ -218,6 +218,8 @@ export type T_IncidentReportEmail = {
   issueNTEForm: T_NTEForm;
   sendDecisionForm: any;
   dateReceived: any;
+  // Status update
+  status?: string;
   // NTE
   nte_subject: string;
   nte_to: string;

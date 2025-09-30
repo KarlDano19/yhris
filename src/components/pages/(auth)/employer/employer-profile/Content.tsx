@@ -215,7 +215,8 @@ function Content() {
               <Settings 
                 register={register} 
                 onSubmit={openConfirmModal} 
-                isLoading={isLoading} 
+                isLoading={isLoading}
+                onBack={() => setProgressBar(0)}
               />
             </div>
           </>

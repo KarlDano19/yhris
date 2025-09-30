@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { useState, useRef, useEffect } from 'react';
+
+import FilterIcon from '@/svg/FilterIcon';
 
 type FilterProps = {
   onFilterChange: (filters: FilterOptions) => void;
@@ -18,6 +19,15 @@ export default function Filter({ onFilterChange }: FilterProps) {
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed', 'Rejected'],
   });
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => 
+      filterRef.current?.contains(e.target as Node) || setIsOpen(false);
+    
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const toggleFilter = () => {
     setIsOpen(!isOpen);
@@ -58,13 +68,12 @@ export default function Filter({ onFilterChange }: FilterProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={filterRef}>
       <button
         onClick={toggleFilter}
-        className="rounded-lg bg-white border border-gray-300 hover:bg-gray-100 text-indigo-dye py-2 px-6 font-medium text-[15px] flex items-center gap-2"
+        className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
       >
-        <AdjustmentsHorizontalIcon className="h-5 w-5" />
-        Filter
+        <FilterIcon />
       </button>
 
       {isOpen && (
@@ -114,7 +123,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                 />
                 <span className="text-sm text-gray-800">Passed</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              {/* <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   className="rounded text-blue-500 focus:ring-blue-500"
@@ -131,7 +140,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                   onChange={() => handleStatusChange('Rejected')}
                 />
                 <span className="text-sm text-gray-800">Rejected</span>
-              </label>
+              </label> */}
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"

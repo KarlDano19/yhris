@@ -29,10 +29,10 @@ function PrintPersonelMovementModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
+  const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
+  const [newEmploymentStatus, setNewEmploymentStatus] = useState('');
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } =
     useForm();
   const [selectedTab, setSelectedTab] = useState(1);
@@ -62,6 +62,8 @@ function PrintPersonelMovementModal({
       setValue("employee", personelMovementData.employee);
       setValue("current_position", personelMovementData.current_position);
       setValue("new_position", personelMovementData.new_position);
+      setValue("current_employment_status", personelMovementData.current_employment_status);
+      setValue("new_employment_status", personelMovementData.new_employment_status);
       setValue("reason", personelMovementData.reason);
       setValue("status", personelMovementData.status);
       setValue("processed_by", personelMovementData.processed_by);
@@ -153,6 +155,8 @@ function PrintPersonelMovementModal({
             employee: data.employee,
             current_position: data.current_position,
             new_position: data.new_position,
+            current_employment_status: data.current_employment_status,
+            new_employment_status: data.new_employment_status,
             reason: data.reason,
             start_date: data.start_date,
             proposed_rate: data.proposed_rate
@@ -215,14 +219,14 @@ function PrintPersonelMovementModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingEditPersonelMovement}
                     isEdit={true}
-                    employeeSearch={employeeSearch}
-                    setEmployeeSearch={setEmployeeSearch}
-                    employeeSelected={employeeSelected}
-                    setEmployeeSelected={setEmployeeSelected}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}
                     setNewPosition={setNewPosition}
+                    currentEmploymentStatus={currentEmploymentStatus}
+                    setCurrentEmploymentStatus={setCurrentEmploymentStatus}
+                    newEmploymentStatus={newEmploymentStatus}
+                    setNewEmploymentStatus={setNewEmploymentStatus}
                     errors={errors}
                   />
                 )}
