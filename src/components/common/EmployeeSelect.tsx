@@ -66,6 +66,7 @@ interface EmployeeSelectProps {
   className?: string;
   rules?: any;
   onChange?: (selectedOption: any) => void;
+  disabled?: boolean;
 }
 
 export default function EmployeeSelect({
@@ -83,6 +84,7 @@ export default function EmployeeSelect({
   className = "",
   rules = {},
   onChange,
+  disabled = false,
 }: EmployeeSelectProps) {
   const [employeeLimit, setEmployeeLimit] = useState(10);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -317,6 +319,7 @@ export default function EmployeeSelect({
               placeholder={placeholder}
               isSearchable={true}
               isMulti={isMulti}
+              isDisabled={disabled}
             />
           );
         }}

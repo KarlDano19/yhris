@@ -202,6 +202,7 @@ function EmployeeProfile({
                 setEmployeeSearch={setEmployeeSearch}
                 setEmployeeSelected={setEmployeeSelected}
                 className=""
+                disabled={isEdit}
                 onChange={(selectedOption: any) => {
                   if (!isEdit && selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
