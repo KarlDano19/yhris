@@ -32,7 +32,7 @@ interface Field {
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
-  if (!html) return true;
+  if (!html) return true;                 
   const trimmed = html.trim();
   return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
 };
@@ -867,7 +867,7 @@ export default function SendEmailModal({
                 >
                   To<span className="text-red-600">*</span>
                 </label>
-                {tagsTo.length > 0 && (
+                {tagsTo.length > 1 && (
                   <button
                     type="button"
                     className="text-xs text-red-600 hover:text-red-800 hover:underline"
@@ -976,7 +976,7 @@ export default function SendEmailModal({
                   >
                     CC
                   </label>
-                  {tagsCc.length > 0 && (
+                  {tagsCc.length > 1 && (
                     <button
                       type="button"
                       className="text-xs text-red-600 hover:text-red-800 hover:underline"
@@ -1056,7 +1056,7 @@ export default function SendEmailModal({
                   >
                     BCC
                   </label>
-                  {tagsBcc.length > 0 && (
+                  {tagsBcc.length > 1 && (
                     <button
                       type="button"
                       className="text-xs text-red-600 hover:text-red-800 hover:underline"

@@ -369,7 +369,7 @@ export default function EmailTemplateModal({
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'> *</span>
                           </label>
-                          {tagsTo.length > 0 && (
+                          {tagsTo.length > 1 && (
                             <button
                               type='button'
                               className='text-xs text-red-600 hover:text-red-800 hover:underline'
@@ -466,7 +466,7 @@ export default function EmailTemplateModal({
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                               CC
                             </label>
-                            {tagsCc.length > 0 && (
+                            {tagsCc.length > 1 && (
                               <button
                                 type='button'
                                 className='text-xs text-red-600 hover:text-red-800 hover:underline'
@@ -543,7 +543,7 @@ export default function EmailTemplateModal({
                             <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                               BCC
                             </label>
-                            {tagsBcc.length > 0 && (
+                            {tagsBcc.length > 1 && (
                               <button
                                 type='button'
                                 className='text-xs text-red-600 hover:text-red-800 hover:underline'
