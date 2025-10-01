@@ -18,6 +18,7 @@ function EmployeeAssigneeTab({
   setSelectedTab,
   recipientNames,
   employeeNames,
+  setValue,
 }: {
   control: any;
   Controller: any;
@@ -27,6 +28,7 @@ function EmployeeAssigneeTab({
   setSelectedTab: (tab: number) => void;
   recipientNames?: string[];
   employeeNames?: string[];
+  setValue?: any;
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
@@ -53,12 +55,28 @@ function EmployeeAssigneeTab({
     <form onSubmit={onSubmit}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8">
         <div className="sm:col-span-4 mt-2 w-full">
-          <label
-            htmlFor="recipient"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Recipient<span className="text-red-600">*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="recipient"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Recipient<span className="text-red-600">*</span>
+            </label>
+            {selectedRecipients && selectedRecipients.length > 0 && (
+              <button
+                type="button"
+                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                onClick={() => {
+                  // Clear all selected recipients using setValue
+                  if (setValue) {
+                    setValue("recipient", []);
+                  }
+                }}
+              >
+                Unselect All
+              </button>
+            )}
+          </div>
           <EmployeeSelect
             control={control}
             name="recipient"
@@ -70,16 +88,33 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             excludeValues={selectedEmployees}
+            employeeNames={recipientNames}
             className=""
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
-          <label
-            htmlFor="employees"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Person to be Evaluated<span className="text-red-600">*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="employees"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Person to be Evaluated<span className="text-red-600">*</span>
+            </label>
+            {selectedEmployees && selectedEmployees.length > 0 && (
+              <button
+                type="button"
+                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                onClick={() => {
+                  // Clear all selected employees using setValue
+                  if (setValue) {
+                    setValue("employees", []);
+                  }
+                }}
+              >
+                Unselect All
+              </button>
+            )}
+          </div>
           <EmployeeSelect
             control={control}
             name="employees"
@@ -91,6 +126,7 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             excludeValues={selectedRecipients}
+            employeeNames={employeeNames}
             className=""
           />
         </div>

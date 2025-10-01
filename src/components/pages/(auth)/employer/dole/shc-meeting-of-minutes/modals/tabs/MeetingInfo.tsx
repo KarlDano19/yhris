@@ -20,6 +20,7 @@ export default function MeetingInfo({
   watch,
   attendeeNames,
   absenteeNames,
+  setValue,
 }: {
   control: any;
   register: any;
@@ -30,6 +31,7 @@ export default function MeetingInfo({
   watch: any;
   attendeeNames?: string[];
   absenteeNames?: string[];
+  setValue?: any;
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
@@ -179,12 +181,28 @@ export default function MeetingInfo({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
           <div>
-            <label
-              htmlFor="attendees"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Attendees<span className="text-red-600">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="attendees"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Attendees<span className="text-red-600">*</span>
+              </label>
+              {selectedAttendees && selectedAttendees.length > 0 && (
+                <button
+                  type="button"
+                  className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                  onClick={() => {
+                    // Clear all selected attendees using setValue
+                    if (setValue) {
+                      setValue("attendees", []);
+                    }
+                  }}
+                >
+                  Unselect All
+                </button>
+              )}
+            </div>
             {errors.attendees && (
               <p className="text-xs text-red-600 mt-1">
                 {errors.attendees.message || "Please select at least one Attendee."}
@@ -209,12 +227,28 @@ export default function MeetingInfo({
             />
           </div>
           <div>
-            <label
-              htmlFor="absentees"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Absentees
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="absentees"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Absentees
+              </label>
+              {selectedAbsentees && selectedAbsentees.length > 0 && (
+                <button
+                  type="button"
+                  className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                  onClick={() => {
+                    // Clear all selected absentees using setValue
+                    if (setValue) {
+                      setValue("absentees", []);
+                    }
+                  }}
+                >
+                  Unselect All
+                </button>
+              )}
+            </div>
             <EmployeeSelect
               control={control}
               name="absentees"

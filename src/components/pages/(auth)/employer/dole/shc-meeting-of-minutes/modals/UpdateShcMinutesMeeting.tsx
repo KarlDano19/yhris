@@ -134,6 +134,7 @@ function UpdateShcMinutesMeetingModal({
                     watch={watch}
                     attendeeNames={minutesMeetingData?.attendee_names}
                     absenteeNames={minutesMeetingData?.absentee_names}
+                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 2 && (

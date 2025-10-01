@@ -120,6 +120,7 @@ function CreateEvaluationSchedulerModal({
                       onSubmit={onSubmit}
                       isLoading={isLoading}
                       setSelectedTab={setSelectedTab}
+                      setValue={setValue}
                     />
                   )}
                 </Dialog.Panel>

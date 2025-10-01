@@ -45,6 +45,21 @@ const CustomOption = (props: any) => {
       </div>
     );
   }
+
+  if (data.is_department_option) {
+    return (
+      <components.Option {...props}>
+        <div className='flex flex-col'>
+          <div className='text-sm font-medium text-gray-900'>
+            {data.label}
+          </div>
+          <div className={`text-xs ${data.is_remove_option ? 'text-red-600' : 'text-blue-600'}`}>
+            • {data.is_remove_option ? 'Remove all employees from this department' : 'Select all employees from this department'}
+          </div>
+        </div>
+      </components.Option>
+    );
+  }
   
   return (
     <components.Option {...props}>
@@ -172,6 +187,7 @@ export default function EmployeeSelect({
       lastname: nameParts.slice(1).join(' ') || '',
       department: '',
       position: '',
+      employment_status: '',
       address: '',
       gender: ''
     };
@@ -295,14 +311,56 @@ export default function EmployeeSelect({
     const filtered = employeeItems.filter((item: any) => !excludeValues.includes(item.id));
       const limitedItems = filtered.slice(0, employeeLimit);
     
-      const options = limitedItems.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-        address: item.address,
-        gender: item.gender,
-      }));
+    const options = limitedItems.map((item: any) => ({
+      value: item.id,
+      label: `${item.firstname} ${item.lastname}`,
+      department: item.department,
+      position: item.position,
+      employment_status: item.employment_status,
+      address: item.address,
+      gender: item.gender,
+    }));
+
+    // Add department options if search term matches department names
+    if (employeeSearch && employeeSearch.length >= 2) {
+      const searchTerm = employeeSearch.toLowerCase();
+      const matchingDepartments = new Set();
+      
+      employeeItems.forEach((employee: any) => {
+        if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
+          matchingDepartments.add(employee.department);
+        }
+      });
+
+      // Create department options
+      const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
+        // Check if all employees from this department are already selected
+        const employeesInDepartment = employeeItems.filter((emp: any) => 
+          emp.department === deptName && emp.email
+        );
+        const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+          formValue && (isMulti ? formValue.includes(emp.id) : formValue === emp.id)
+        );
+        const allEmployeesSelected = employeesInDepartment.length > 0 && 
+          selectedEmployeesInDepartment.length === employeesInDepartment.length;
+        
+        return {
+          value: `dept:${deptName}`,
+          label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
+          department: deptName,
+          position: '',
+          employment_status: '',
+          address: '',
+          gender: '',
+          is_department_option: true,
+          is_remove_option: allEmployeesSelected,
+          allEmployeesSelected: allEmployeesSelected
+        };
+      });
+
+      // Combine department options with filtered employees
+      options.unshift(...departmentOptions);
+    }
 
       if (filtered.length > employeeLimit) {
         options.push({
@@ -312,8 +370,8 @@ export default function EmployeeSelect({
         } as any);
       }
 
-      return options;
-  }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing]);
+    return options;
+  }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing, formValue, isMulti]);
 
   {/* Show more handler */}
   useEffect(() => {
@@ -364,6 +422,7 @@ export default function EmployeeSelect({
                       label: `${employee.firstname} ${employee.lastname}`,
                       department: employee.department,
                       position: employee.position,
+                      employment_status: employee.employment_status,
                       address: employee.address,
                       gender: employee.gender,
         } : null;
@@ -385,6 +444,7 @@ export default function EmployeeSelect({
             label: `${employee.firstname} ${employee.lastname}`,
             department: employee.department,
             position: employee.position,
+            employment_status: employee.employment_status,
             address: employee.address,
             gender: employee.gender,
           };
@@ -470,20 +530,47 @@ export default function EmployeeSelect({
                     setPersistentSelections([]);
                   } else {
                     const filteredOptions = selectedOption.filter((option: any) => option.value !== 'show_more');
-                    const selectedIds = filteredOptions.map((option: any) => option.value);
                     
-                    // Use the same logic as initial load - prioritize employeeNames if available
+                    // Handle department selection/removal
+                    const departmentOptions = filteredOptions.filter((option: any) => option.is_department_option);
+                    const employeeOptions = filteredOptions.filter((option: any) => !option.is_department_option);
+                    
+                    let newSelections = [...persistentSelections];
+                    
+                    // Process department options
+                    departmentOptions.forEach((deptOption: any) => {
+                      const employeesInDepartment = employeeItems.filter((emp: any) => 
+                        emp.department === deptOption.department && emp.email
+                      );
+                      
+                      if (deptOption.is_remove_option) {
+                        // Remove all employees from this department
+                        const employeeIdsToRemove = employeesInDepartment.map((emp: any) => emp.id);
+                        newSelections = newSelections.filter((emp: any) => !employeeIdsToRemove.includes(emp.id));
+                      } else {
+                        // Add all employees from this department
+                        employeesInDepartment.forEach((emp: any) => {
+                          if (!newSelections.some((existing: any) => existing.id === emp.id)) {
+                            newSelections.push(emp);
+                          }
+                        });
+                      }
+                    });
+                    
+                    // Process individual employee selections
                     const hasNames = (isMulti && employeeNames && employeeNames.length > 0) || (!isMulti && employeeName);
                     
-                    // Always use the same logic for both cases to ensure consistency
-                    const newSelections = filteredOptions.map((option: any) => {
+                    employeeOptions.forEach((option: any) => {
                       // First try to find in existing persistent selections to maintain names
-                      const existingPersistent = persistentSelections.find((emp: any) => emp.id === option.value);
-                      if (existingPersistent) return existingPersistent;
+                      const existingPersistent = newSelections.find((emp: any) => emp.id === option.value);
+                      if (existingPersistent) return;
                       
                       // Then try to find in current employee items
                       const employee = employeeItems.find((item: any) => item.id === option.value);
-                      if (employee) return employee;
+                      if (employee) {
+                        newSelections.push(employee);
+                        return;
+                      }
                       
                       // If we have employeeNames and this is a new selection, try to get the name
                       if (hasNames) {
@@ -491,23 +578,37 @@ export default function EmployeeSelect({
                           const formValueArray = isMulti ? formValue : [formValue];
                           const idIndex = formValueArray.findIndex((id: any) => id === option.value);
                           if (idIndex >= 0 && employeeNames && employeeNames[idIndex]) {
-                            return createEmployeeFromName(option.value, employeeNames[idIndex]);
+                            newSelections.push(createEmployeeFromName(option.value, employeeNames[idIndex]));
+                            return;
                           }
                         } else {
                           // For single select, use employeeName directly
                           if (employeeName) {
-                            return createEmployeeFromName(option.value, employeeName);
+                            newSelections.push(createEmployeeFromName(option.value, employeeName));
+                            return;
                           }
                         }
                       }
                       
                       // Fallback to generic name
-                      return createEmployeeFromName(option.value, `Employee ${option.value}`);
+                      newSelections.push(createEmployeeFromName(option.value, `Employee ${option.value}`));
                     });
+                    
                     setPersistentSelections(newSelections);
                   }
                   
-                  const fieldOnChange = selectedOption ? selectedOption.map((item: any) => item.value) : [];
+                  // For department options, we need to create a special field value that includes the department selection
+                  const fieldOnChange = selectedOption ? selectedOption.map((item: any) => {
+                    if (item.is_department_option) {
+                      // For department options, we need to return the actual employee IDs
+                      const employeesInDepartment = employeeItems.filter((emp: any) => 
+                        emp.department === item.department && emp.email
+                      );
+                      return employeesInDepartment.map((emp: any) => emp.id);
+                    }
+                    return item.value;
+                  }).flat() : [];
+                  
                   onChange?.(selectedOption);
                   field.onChange(fieldOnChange);
                 } else {

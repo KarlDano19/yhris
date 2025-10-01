@@ -198,6 +198,7 @@ function EditEvaluationSchedulerModal({
                       setSelectedTab={setSelectedTab}
                       recipientNames={dataEvaluationSchedulerDetails?.recipient_names}
                       employeeNames={dataEvaluationSchedulerDetails?.employee_names}
+                      setValue={setValue}
                     />
                   )}
                 </Dialog.Panel>

@@ -166,10 +166,33 @@ function EmployeeProfile({
                 setEmployeeSearch={setEmployeeSearch}
                 employeeName={employeeName}
                 className=""
-                disabled={isEdit}
                 onChange={(selectedOption: any) => {
                   if (!isEdit && selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
+                    
+                    // Auto-fill current position from employee data
+                    if (selectedOption.position) {
+                      // Find the position ID by matching the position name
+                      const matchingPosition = positionItems.find(
+                        (item: any) => item.name === selectedOption.position
+                      );
+                      if (matchingPosition) {
+                        setCurrentPosition(String(matchingPosition.id));
+                        setValue('current_position', matchingPosition.id);
+                      }
+                    }
+                    
+                    // Auto-fill current employment status from employee data
+                    if (selectedOption.employment_status) {
+                      // Find the employment status ID by matching the status name
+                      const matchingStatus = employeeStatusItems.find(
+                        (item: any) => item.name === selectedOption.employment_status
+                      );
+                      if (matchingStatus) {
+                        setCurrentEmploymentStatus(String(matchingStatus.id));
+                        setValue('current_employment_status', matchingStatus.id);
+                      }
+                    }
                   } else if (!isEdit) {
                     setEmployeeSearch('');
                     // Clear current position and employment status when employee is unselected

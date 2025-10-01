@@ -108,6 +108,7 @@ function CreateShcMettingMinutesModal({
                     setError={setError}
                     clearErrors={clearErrors}
                     watch={watch}
+                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 2 && (
