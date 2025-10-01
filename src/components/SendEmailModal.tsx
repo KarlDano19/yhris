@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 
 import { useForm, Controller } from "react-hook-form";
-import { Tooltip } from "react-tooltip";
 import toast from "react-hot-toast";
 import Select from 'react-select';
 
@@ -19,7 +18,6 @@ import useTagTo from "@/components/hooks/useTagTo";
 import useTagCc from "@/components/hooks/useTagCc";
 import useTagBcc from "@/components/hooks/useTagBcc";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
