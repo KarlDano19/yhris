@@ -334,10 +334,19 @@ export default function EditEmailTemplateModal({
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                       />
                       <div className='w-full mt-4'>
-                        <div className='flex items-center gap-2'>
+                        <div className='flex items-center justify-between'>
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
+                          {tagsTo.length > 0 && (
+                            <button
+                              type='button'
+                              className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                              onClick={() => setTagsTo([])}
+                            >
+                              Unselect All
+                            </button>
+                          )}
                         </div>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
@@ -421,9 +430,20 @@ export default function EditEmailTemplateModal({
                       </div>
                       {isCCOpen && (
                         <div className='w-full mt-4'>
-                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                            CC
-                          </label>
+                          <div className='flex items-center justify-between'>
+                            <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                              CC
+                            </label>
+                            {tagsCc.length > 0 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsCc([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           <div className='mt-2'>
                             <EmailField
                                 tags={tagsCc}
@@ -486,9 +506,20 @@ export default function EditEmailTemplateModal({
                       )}
                       {isBCCOpen && (
                         <div className='w-full mt-4'>
-                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
-                            BCC
-                          </label>
+                          <div className='flex items-center justify-between'>
+                            <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
+                              BCC
+                            </label>
+                            {tagsBcc.length > 0 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsBcc([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           <div className='mt-2'>
                             <EmailField
                                 tags={tagsBcc}
