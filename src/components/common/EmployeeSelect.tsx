@@ -293,26 +293,26 @@ export default function EmployeeSelect({
     if (!employeeItems?.length) return [];
 
     const filtered = employeeItems.filter((item: any) => !excludeValues.includes(item.id));
-    const limitedItems = filtered.slice(0, employeeLimit);
+      const limitedItems = filtered.slice(0, employeeLimit);
     
-    const options = limitedItems.map((item: any) => ({
-      value: item.id,
-      label: `${item.firstname} ${item.lastname}`,
-      department: item.department,
-      position: item.position,
-      address: item.address,
-      gender: item.gender,
-    }));
+      const options = limitedItems.map((item: any) => ({
+        value: item.id,
+        label: `${item.firstname} ${item.lastname}`,
+        department: item.department,
+        position: item.position,
+        address: item.address,
+        gender: item.gender,
+      }));
 
-    if (filtered.length > employeeLimit) {
-      options.push({
-        value: 'show_more',
+      if (filtered.length > employeeLimit) {
+        options.push({
+          value: 'show_more',
         label: `${filtered.length - employeeLimit} remaining`,
-        isShowMore: true,
-      } as any);
-    }
+          isShowMore: true,
+        } as any);
+      }
 
-    return options;
+      return options;
   }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing]);
 
   {/* Show more handler */}
@@ -356,20 +356,20 @@ export default function EmployeeSelect({
     
     const selectedOptions = selectOptions.filter((option: any) => fieldValue.includes(option.value));
     const missingOptions = fieldValue
-      .filter((id: any) => !selectOptions.some((option: any) => option.value === id))
-      .map((id: any) => {
-        const employee = employeeItems?.find((item: any) => item.id === id);
+                .filter((id: any) => !selectOptions.some((option: any) => option.value === id))
+                .map((id: any) => {
+                  const employee = employeeItems?.find((item: any) => item.id === id);
         return employee ? {
-          value: employee.id,
-          label: `${employee.firstname} ${employee.lastname}`,
-          department: employee.department,
-          position: employee.position,
-          address: employee.address,
-          gender: employee.gender,
+                      value: employee.id,
+                      label: `${employee.firstname} ${employee.lastname}`,
+                      department: employee.department,
+                      position: employee.position,
+                      address: employee.address,
+                      gender: employee.gender,
         } : null;
-      })
-      .filter(Boolean);
-    
+                })
+                .filter(Boolean);
+              
     return [...selectedOptions, ...missingOptions];
   };
 
@@ -379,17 +379,17 @@ export default function EmployeeSelect({
     
     if (fieldValue && employeeItems) {
       const employee = employeeItems.find((item: any) => item.id === fieldValue);
-      if (employee) {
-        return {
-          value: employee.id,
-          label: `${employee.firstname} ${employee.lastname}`,
-          department: employee.department,
-          position: employee.position,
-          address: employee.address,
-          gender: employee.gender,
-        };
+        if (employee) {
+          return {
+            value: employee.id,
+            label: `${employee.firstname} ${employee.lastname}`,
+            department: employee.department,
+            position: employee.position,
+            address: employee.address,
+            gender: employee.gender,
+          };
+        }
       }
-    }
     return null;
   };
 
@@ -411,7 +411,6 @@ export default function EmployeeSelect({
               menuIsOpen={isMenuOpen}
               onMenuOpen={() => setIsMenuOpen(true)}
               onMenuClose={() => setIsMenuOpen(false)}
-              isDisabled={disabled}
               onInputChange={(inputValue) => {
                 // Update search term when user types
                 setEmployeeSearch(inputValue);
