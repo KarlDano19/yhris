@@ -549,6 +549,7 @@ export default function EmployeeSelect({
               placeholder={placeholder}
               isSearchable={true}
               isMulti={isMulti}
+              isDisabled={disabled}
             />
           );
         }}
