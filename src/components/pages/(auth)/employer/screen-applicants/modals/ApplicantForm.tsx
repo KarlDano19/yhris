@@ -53,7 +53,8 @@ export default function ApplicantForm({ title }: PropTypes) {
   };
 
   const handleGenerateSummary = () => {
-    if (!applicantProfile?.id) {
+    // Use the applicant.id from the state, which is the correct applicant_form_id
+    if (!applicant?.id) {
       toast.custom(() => <CustomToast message="Unable to identify applicant" type="error" />, {
         duration: 4000,
       });
@@ -61,9 +62,9 @@ export default function ApplicantForm({ title }: PropTypes) {
     }
 
     setIsGeneratingSummary(true);
-
+    
     generateSummary({ 
-      applicantId: applicantProfile.id, 
+      applicantId: applicant.id, // Use applicant.id (applicant_form_id) instead of applicantProfile.id
       options: { force_regenerate: true } 
     }, {
       onSuccess: (response) => {
