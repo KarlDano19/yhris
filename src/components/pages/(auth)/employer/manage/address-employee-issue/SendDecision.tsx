@@ -33,8 +33,8 @@ const SendDecision = ({
   hasInvestigationReport?: boolean;
   userRights?: any;
 }) => {
-  // Disable send decision button if there is no investigation report
-  const shouldDisableSendDecision = hasInvestigationReport === false;
+  // Disable send decision button if there is no investigation report or status is not approved
+  const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';
   
   // Format decision_received_date as MM/DD/YYYY
   let formattedReceivedDate = '';
@@ -55,7 +55,7 @@ const SendDecision = ({
             isDecisionSent
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
               : 'border-[1px] border-red-500 text-red-500',
-            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
+            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
           disabled={isDecisionSent || shouldDisableSendDecision || !userRights?.decide_employee_issue}
           onClick={(e) => {
@@ -70,6 +70,8 @@ const SendDecision = ({
           title={
             !userRights?.decide_employee_issue 
               ? 'No permission to send decision'
+              : employeeIssueDetails?.status !== 'approved'
+              ? 'Decision can only be sent when status is approved'
               : (shouldDisableSendDecision ? 'Investigation report is required before sending decision' : '')
           }
         >
