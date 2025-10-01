@@ -14,6 +14,7 @@ const Investigation = ({
   setIsInvestigateModalOpen,
   setInvestigationReportDetailsModalOpen,
   isResponded,
+  employeeIssueDetails,
   userRights,
 }: {
   id: number;
@@ -22,10 +23,11 @@ const Investigation = ({
   setIsInvestigateModalOpen: Dispatch<T_InvestigationModal>;
   setInvestigationReportDetailsModalOpen: Dispatch<T_InvestigationReportDetailsModal>;
   isResponded?: boolean;
+  employeeIssueDetails?: any;
   userRights?: any;
 }) => {
-  // Disable investigate button if employee has not responded (is_responded: false)
-  const shouldDisableInvestigate = isResponded === false;
+  // Disable investigate button if employee has not responded (is_responded: false) or status is not approved
+  const shouldDisableInvestigate = isResponded === false || employeeIssueDetails?.status !== 'approved';
   
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
@@ -35,7 +37,7 @@ const Investigation = ({
             isInvestigated
               ? 'bg-red-500 border-[1px] border-red-500 text-white cursor-pointer'
               : 'border-[1px] border-red-500 text-red-500',
-            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
+            'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
           disabled={isInvestigated || shouldDisableInvestigate || !userRights?.investigate_employee_issue}
           onClick={(e) => {
@@ -50,6 +52,8 @@ const Investigation = ({
           title={
             !userRights?.investigate_employee_issue 
               ? 'No permission to investigate'
+              : employeeIssueDetails?.status !== 'approved'
+              ? 'Investigation can only be done when status is approved'
               : (shouldDisableInvestigate ? 'Employee has not responded yet' : '')
           }
         >

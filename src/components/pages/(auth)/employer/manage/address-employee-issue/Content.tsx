@@ -478,6 +478,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
+                isInvestigated={item.isInvestigated}
                 userRights={cachedUserRights?.state?.data}
               />
             </td>
@@ -489,6 +490,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsInvestigateModalOpen={setIsInvestigateModalOpen}
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
+                employeeIssueDetails={item}
                 userRights={cachedUserRights?.state?.data}
               />
             </td>
