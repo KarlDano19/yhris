@@ -16,7 +16,9 @@ import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
+import BulkDeleteEvaluationTemplateModal from './modals/BulkDeleteEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
+import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -30,6 +32,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState(false);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  
+  // Bulk delete states
+  const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -59,6 +67,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const bulkDeleteMutation = useBulkDeleteEvaluationTemplates();
   const [isSearching, setIsSearching] = useState(false);
 
   // Persisted form state for CreateEvaluationTemplateModal
@@ -120,6 +129,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [dataEvaluation, pageSize]);
+
+  // Update select all state when evaluation templates change
+  useEffect(() => {
+    if (evaluationItems) {
+      const allEvaluationIds = new Set(evaluationItems.map((e: any) => e.id));
+      const allSelected = allEvaluationIds.size > 0 && 
+        Array.from(allEvaluationIds).every((id: any) => selectedEvaluationTemplates.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEvaluationTemplates, evaluationItems]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -188,6 +207,53 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isGetEvaluationLoading, isSearching]);
 
+  // Handle individual evaluation template selection
+  const handleEvaluationTemplateSelect = (evaluationTemplateId: number) => {
+    setSelectedEvaluationTemplates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(evaluationTemplateId)) {
+        newSet.delete(evaluationTemplateId);
+      } else {
+        newSet.add(evaluationTemplateId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!evaluationItems) return;
+    
+    if (selectAll) {
+      setSelectedEvaluationTemplates(new Set());
+    } else {
+      const allIds = evaluationItems.map((e: any) => e.id);
+      setSelectedEvaluationTemplates(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedEvaluationTemplates.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const evaluationTemplateIds = Array.from(selectedEvaluationTemplates);
+      await bulkDeleteMutation.mutateAsync(evaluationTemplateIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedEvaluationTemplates.size} evaluation template(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedEvaluationTemplates(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetchEvaluation();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete evaluation templates';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isGetEvaluationLoading) {
       return (
@@ -203,6 +269,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (evaluationItems && evaluationItems?.length > 0) {
       return evaluationItems?.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEvaluationTemplates.has(item.id)}
+              onChange={() => handleEvaluationTemplateSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_type}</td>
@@ -212,7 +286,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button onClick={() => openEditEvaluationModal(item)}>
                 <EditIcon />
               </button>
-              <button onClick={() => openDeleteEvaluationModal(item)}>
+              <button 
+                onClick={() => openDeleteEvaluationModal(item)}
+                className={selectedEvaluationTemplates.size > 1 ? 'invisible' : ''}
+              >
                 <DeleteIcon />
               </button>
             </div>
@@ -325,6 +402,38 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
           </div>
+          
+          {/* Bulk Actions - Below Date Filters */}
+          {selectedEvaluationTemplates.size > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedEvaluationTemplates(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEvaluationTemplates.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -337,6 +446,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!evaluationItems || evaluationItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date Created
                       </th>
@@ -394,6 +512,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvalationTemplateName={evaluationItems.find((item: any) => item.id === selectedEvaluationTemplateId)?.name}
         />
       )}
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteEvaluationTemplateModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedEvaluationTemplates.size}
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
 
       <Tooltip id='search-tooltip'/>
     </>

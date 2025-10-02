@@ -17,8 +17,10 @@ import SignDocumentsModal from './modals/SignDocumentsModal';
 import LastPayModal from './modals/LastPayModal';
 import QuitclaimModal from './modals/QuitclaimModal';
 import DeleteSeparationModal from './modals/DeleteSeparationModal';
+import BulkDeleteSeparationModal from './modals/BulkDeleteSeparationModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparation from './hooks/usePatchSeparation';
+import useBulkDeleteSeparations from './hooks/useBulkDeleteSeparations';
 import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
@@ -66,7 +68,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const [isDeleteSepartionModalOpen, setIsDeleteSepartionModalOpen] = useState<T_DeleteSepartionModal | null>(null);
+  
+  // Bulk delete states
+  const [selectedSeparations, setSelectedSeparations] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   const { mutate, isLoading } = usePatchSeparation();
+  const bulkDeleteMutation = useBulkDeleteSeparations();
+  
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems({
     ...appliedFilter,
     pageSize: pageSize,
@@ -273,6 +283,63 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataSeparation, pageSize]);
 
+  // Update select all state when separations change
+  useEffect(() => {
+    if (separationItems) {
+      const allSeparationIds = new Set(separationItems.map((s: any) => s.id));
+      const allSelected = allSeparationIds.size > 0 && 
+        Array.from(allSeparationIds).every((id: any) => selectedSeparations.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedSeparations, separationItems]);
+
+  // Handle individual separation selection
+  const handleSeparationSelect = (separationId: number) => {
+    setSelectedSeparations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(separationId)) {
+        newSet.delete(separationId);
+      } else {
+        newSet.add(separationId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!separationItems) return;
+    
+    if (selectAll) {
+      setSelectedSeparations(new Set());
+    } else {
+      const allIds = separationItems.map((s: any) => s.id);
+      setSelectedSeparations(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedSeparations.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const separationIds = Array.from(selectedSeparations);
+      await bulkDeleteMutation.mutateAsync(separationIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedSeparations.size} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedSeparations(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete separations';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isGetSeparationLoading) {
       return (
@@ -288,6 +355,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (separationItems && separationItems.length > 0) {
       return separationItems.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedSeparations.has(item.id)}
+              onChange={() => handleSeparationSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.separationDate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex gap-2'>
@@ -341,6 +416,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button 
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
                 disabled={!cachedProfile?.state?.data?.edit_separation}
+                className={selectedSeparations.size > 1 ? 'invisible' : ''}
               >
                 <DeleteIcon />
               </button>
@@ -351,7 +427,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add separation of employee.
@@ -373,6 +449,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
+
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
@@ -453,6 +530,38 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
           </div>
+          
+          {/* Bulk Actions - Below Date Filters */}
+          {selectedSeparations.size > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !cachedProfile?.state?.data?.edit_separation}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedSeparations(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedSeparations.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 '
@@ -465,6 +574,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!separationItems || separationItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Resignation/Separation
                       </th>
@@ -543,6 +661,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteSepartionModalOpen}
         />
       )}
+      
+      {/* Bulk Delete Modal */}
+      <BulkDeleteSeparationModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedSeparations.size}
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
 
       <Tooltip id='search-tooltip'/>
     </>
