@@ -203,7 +203,7 @@ export default function Form({
       const certData = formData as EmployeeCertificateFormData;
       
       // Check required fields
-      if (!certData.companyName || !certData.startDate || !certData.dateOfIssuance) {
+      if (!certData.companyName || !certData.startDate || !certData.dateOfIssuance || !certData.signatoryName || !certData.signatoryPosition) {
         toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
         return false;
       }
@@ -222,7 +222,7 @@ export default function Form({
       const agreementData = formData as EmploymentAgreementFormData;
       
       // Check required fields
-      if (!agreementData.companyName || !agreementData.startDate || !agreementData.dateOfIssuance) {
+      if (!agreementData.companyName || !agreementData.startDate || !agreementData.dateOfIssuance || !agreementData.signatoryName || !agreementData.signatoryPosition) {
         toast.custom(() => <CustomToast message="Please fill in all required fields" type="error" />);
         return false;
       }

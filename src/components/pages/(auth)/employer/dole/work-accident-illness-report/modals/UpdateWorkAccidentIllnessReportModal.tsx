@@ -86,8 +86,11 @@ export default function UpdateWorkAccidentIllnessReportModal({
       setValue('date_returned_to_work_illness', workAccidentIllnessReportData.date_returned_to_work_illness);
       setValue('disabling_injury', workAccidentIllnessReportData.disabling_injury ? 'yes' : 'no');
 
-      // Set employee search state - EmployeeSelect will handle the data fetching
-      if (workAccidentIllnessReportData.employee) {
+      // Set employee search to show selected employee name from the API response
+      if (workAccidentIllnessReportData.employee_name) {
+        setEmployeeSearch(workAccidentIllnessReportData.employee_name);
+        setEmployeeSelected(true);
+      } else if (workAccidentIllnessReportData.employee) {
         setEmployeeSearch('Loading employee...');
         setEmployeeSelected(true);
       }
@@ -173,6 +176,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    employeeName={workAccidentIllnessReportData?.employee_name}
                   />
                 )}
                 {selectedTab === 2 && (

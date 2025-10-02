@@ -1,9 +1,9 @@
 import { Fragment, useRef } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { XCircleIcon } from "@heroicons/react/24/solid"
-import { ModalLayoutTypes as PropTypes } from "../types"
+import { ModalLayoutTypes as PropTypes } from "./pages/(auth)/employer/screen-applicants/types"
 
-export default function ModalLayout({ children, title, isOpen, handleClose }: PropTypes) {
+export default function ModalLayout({ children, title, isOpen, handleClose, nestedModals }: PropTypes) {
   const cancelButtonRef = useRef(null)
 
   return (
@@ -51,6 +51,9 @@ export default function ModalLayout({ children, title, isOpen, handleClose }: Pr
             </Transition.Child>
           </div>
         </div>
+        
+        {/* Nested Modals */}
+        {nestedModals}
       </Dialog>
     </Transition.Root>
   )

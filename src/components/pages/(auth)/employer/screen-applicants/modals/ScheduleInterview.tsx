@@ -14,7 +14,7 @@ import useGetThirdPartyIntegrationItems from '@/components/hooks/useGetThirdPart
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import useTagInput from '../hooks/useTagInput';
 import StateContext from '../contexts/StateContext';
-import ModalLayout from './ModalLayout';
+import ModalLayout from '../../../../../ModalLayout';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { LocationIcon, WhiteLocationIcon } from '@/svg/LocationIcon';

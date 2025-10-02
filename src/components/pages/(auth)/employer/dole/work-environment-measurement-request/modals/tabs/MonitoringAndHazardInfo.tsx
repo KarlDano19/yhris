@@ -1,15 +1,10 @@
 "use client";
 
-import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
-
-import { Dialog, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
 function MonitoringAndHazardInfo({
   control,
@@ -20,7 +15,6 @@ function MonitoringAndHazardInfo({
   watch,
   errors,
   setError,
-  clearErrors,
 }: {
   control: any;
   register: any;
@@ -30,7 +24,6 @@ function MonitoringAndHazardInfo({
   watch: any;
   errors: any;
   setError: any;
-  clearErrors: any;
 }) {
   const onValid = (data: any) => {
     if (!data.conducting_internal_wem) {
@@ -70,17 +63,8 @@ function MonitoringAndHazardInfo({
     setSelectedTab(4);
   };
 
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-
   // Watch chemical hazards for conditional rendering
   const chemicalHazards = watch("chemical_hazards");
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <form onSubmit={handleSubmit(onValid)}>
