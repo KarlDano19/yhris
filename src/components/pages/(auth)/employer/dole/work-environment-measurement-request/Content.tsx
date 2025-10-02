@@ -35,6 +35,8 @@ import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteWorkEnvironmentRequest from "./hooks/useBulkDeleteWorkEnvironmentRequest";
+import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
 
 
 type PaginationProps = {
@@ -71,6 +73,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
+  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const bulkDeleteMutation = useBulkDeleteWorkEnvironmentRequest();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     onSuccess: () => {
@@ -308,6 +315,63 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     );
   };
 
+  // Handle individual request selection
+  const handleRequestSelect = (requestId: number) => {
+    setSelectedRequests(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!workEnvironmentRequestItems) return;
+    
+    if (selectAll) {
+      setSelectedRequests(new Set());
+    } else {
+      const allIds = workEnvironmentRequestItems.map((item: any) => item.id);
+      setSelectedRequests(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedRequests.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const requestIds = Array.from(selectedRequests);
+      await bulkDeleteMutation.mutateAsync(requestIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedRequests.size} request(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedRequests(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      workEnvironmentRequestItemsRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete requests';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  // Update select all state when requests change
+  useEffect(() => {
+    if (workEnvironmentRequestItems) {
+      const allRequestIds = new Set(workEnvironmentRequestItems.map((item: any) => item.id));
+      const allSelected = allRequestIds.size > 0 && 
+        Array.from(allRequestIds).every((id: any) => selectedRequests.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedRequests, workEnvironmentRequestItems]);
+
   const renderRows = () => {
     if (isSearching || isWorkEnvironmentRequestItemsLoading) {
       return (
@@ -323,6 +387,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workEnvironmentRequestItems && workEnvironmentRequestItems.length > 0) {
       return workEnvironmentRequestItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedRequests.has(item.id)}
+              onChange={() => handleRequestSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_application}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.number_of_workers_total}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -569,6 +641,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedRequests.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedRequests(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedRequests.size} selected
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -581,6 +687,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!workEnvironmentRequestItems || workEnvironmentRequestItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Application
                       </th>
@@ -657,6 +772,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={workEnvironmentRequestItemsRefetch}
           isOpen={isSendEmailModalOpen}
           setIsOpen={setIsSendEmailModalOpen}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedRequests.size}
+          moduleName="Work Environment Request"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       {/* Print Section

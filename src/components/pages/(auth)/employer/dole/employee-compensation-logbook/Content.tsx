@@ -29,6 +29,9 @@ import ExportProgressModal from './modals/ExportProgressModal';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
+import useBulkDeleteEmployeeCompensationLogbook from "./hooks/useBulkDeleteEmployeeCompensationLogbook";
+import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
+
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
@@ -105,6 +108,56 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     },
   ];
 
+  const [selectedLogbooks, setSelectedLogbooks] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const bulkDeleteMutation = useBulkDeleteEmployeeCompensationLogbook();
+
+  const handleLogbookSelect = (logbookId: number) => {
+    setSelectedLogbooks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(logbookId)) {
+        newSet.delete(logbookId);
+      } else {
+        newSet.add(logbookId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (!employeeCompensationLogbookItems) return;
+    
+    if (selectAll) {
+      setSelectedLogbooks(new Set());
+    } else {
+      const allIds = employeeCompensationLogbookItems.map((item: any) => item.id);
+      setSelectedLogbooks(new Set(allIds));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedLogbooks.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const logbookIds = Array.from(selectedLogbooks);
+      await bulkDeleteMutation.mutateAsync(logbookIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedLogbooks.size} logbook(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedLogbooks(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      employeeCompensationLogbookListRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete logbooks';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   useEffect(() => {
     if (employeeCompensationLogbookData) {
       employeeCompensationLogbookData.records.map((item: any) => {
@@ -131,6 +184,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     employeeCompensationLogbookListRefetch();
   }, [currentPage, pageSize, employeeCompensationLogbookListRefetch]);
+
+  useEffect(() => {
+    if (employeeCompensationLogbookItems) {
+      const allLogbookIds = new Set(employeeCompensationLogbookItems.map((item: any) => item.id));
+      const allSelected = allLogbookIds.size > 0 && 
+        Array.from(allLogbookIds).every((id: any) => selectedLogbooks.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedLogbooks, employeeCompensationLogbookItems]);
 
   const handlePrint = (items: any) => {
     // Create a new div element
@@ -226,6 +288,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeCompensationLogbookItems && employeeCompensationLogbookItems.length > 0) {
       return employeeCompensationLogbookItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedLogbooks.has(item.id)}
+              onChange={() => handleLogbookSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_entry}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_notification}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
@@ -408,6 +478,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!employeeCompensationLogbookItems || employeeCompensationLogbookItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Entry
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -495,6 +574,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setSelectedBranch(branch);
             handlePrintWithBranch();
           }}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedLogbooks.size}
+          moduleName="Employee Compensation Logbook"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       {/* Print Section */}
