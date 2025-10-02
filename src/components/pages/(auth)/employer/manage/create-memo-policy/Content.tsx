@@ -21,7 +21,7 @@ import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
-import BulkDeleteDirectivesModal from './modals/BulkDeleteDirectivesModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
@@ -581,10 +581,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         // isLoading={false}
         isLoading={isLoading}
       />
-      <BulkDeleteDirectivesModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedDirectives.size}
-        moduleName="directive"
+        moduleName="directives"
         onConfirm={confirmBulkDelete}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         isLoading={bulkDeleteMutation.isLoading}

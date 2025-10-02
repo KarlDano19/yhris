@@ -24,7 +24,6 @@ import useBulkDeleteShcMinutesMeeting from './hooks/useBulkDeleteShcMinutesMeeti
 import CreateShcMettingMinutesModal from './modals/CreateShcMettingMinutesModal';
 import UpdateShcMinutesMeetingModal from './modals/UpdateShcMinutesMeeting';
 import DeleteShcMinutesMeetingModal from './modals/DeleteShcMinutesMeetingModal';
-import BulkDeleteShcMinutesMeetingModal from './modals/BulkDeleteShcMinutesMeetingModal';
 import ExportProgressModal from './modals/ExportProgressModals';
 import SendEmailModal from './modals/SendEmailModal';
 
@@ -32,6 +31,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 import DeleteIcon from '@/svg/DeleteIcon';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 
 type PaginationProps = {
@@ -674,7 +674,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteShcMinutesMeetingModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedShcMinutesMeeting.size}
         moduleName="SHC minutes of meeting"
