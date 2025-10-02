@@ -16,14 +16,15 @@ import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
-import BulkDeleteEvaluationTemplateModal from './modals/BulkDeleteEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
+
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
@@ -514,9 +515,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       {/* Bulk Delete Modal */}
-      <BulkDeleteEvaluationTemplateModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedEvaluationTemplates.size}
+        moduleName="evaluation templates"
         onConfirm={confirmBulkDelete}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         isLoading={bulkDeleteMutation.isLoading}

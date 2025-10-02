@@ -12,7 +12,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 import useBulkDeleteDepartments from '../hooks/department/useBulkDeleteDepartments';
-import BulkDeleteModal from '../modals/BulkDeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';

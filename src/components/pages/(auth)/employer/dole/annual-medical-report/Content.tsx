@@ -32,7 +32,7 @@ import ExportProgressModal from "./modals/ExportProgressModal";
 import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportModal";
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
-import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";

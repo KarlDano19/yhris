@@ -16,8 +16,7 @@ import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
 import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
 import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
 import SuccessModal from './modal/SuccessModal';
-import BulkDeleteEmailTemplateModal from './modal/BulkDeleteEmailTemplateModal';
-
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -441,9 +440,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       {/* Bulk Delete Modal */}
-      <BulkDeleteEmailTemplateModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedEmailTemplates.size}
+        moduleName="email templates"
         onConfirm={confirmBulkDelete}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         isLoading={bulkDeleteMutation.isLoading}

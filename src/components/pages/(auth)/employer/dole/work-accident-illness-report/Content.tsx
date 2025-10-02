@@ -26,7 +26,7 @@ import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIll
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import { useBulkDeleteWorkAccidentIllnessReport } from './hooks/useBulkDeleteWorkAccidentIllnessReport';
-import BulkDeleteModal from '@/components/pages/(auth)/employer/settings/general-settings/employees/modals/BulkDeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import EditIcon from '@/svg/EditIcon';
 import PrintIcon from "@/svg/PrintIcon";

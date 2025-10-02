@@ -20,7 +20,7 @@ import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
 import DeleteJobModal from './modals/DeleteModal';
-import BulkDeleteJobPostingModal from './modals/BulkDeleteJobPostingModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
@@ -918,9 +918,10 @@ const Content = () => {
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteJobPostingModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedJobPostings.size}
+        moduleName="job postings"
         onConfirm={confirmBulkDelete}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         isLoading={bulkDeleteMutation.isLoading}

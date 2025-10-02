@@ -12,7 +12,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
-import BulkDeleteModal from '../modals/BulkDeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
 import useBulkDeletePositions from '../hooks/position/useBulkDeletePositions';

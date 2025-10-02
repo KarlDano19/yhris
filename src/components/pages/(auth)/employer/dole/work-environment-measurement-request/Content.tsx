@@ -36,7 +36,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
 import useBulkDeleteWorkEnvironmentRequest from "./hooks/useBulkDeleteWorkEnvironmentRequest";
-import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 
 type PaginationProps = {

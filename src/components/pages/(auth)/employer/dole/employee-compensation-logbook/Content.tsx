@@ -30,7 +30,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import useBulkDeleteEmployeeCompensationLogbook from "./hooks/useBulkDeleteEmployeeCompensationLogbook";
-import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 type PaginationProps = {
   totalRecords: number;

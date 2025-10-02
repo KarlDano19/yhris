@@ -17,7 +17,7 @@ import SignDocumentsModal from './modals/SignDocumentsModal';
 import LastPayModal from './modals/LastPayModal';
 import QuitclaimModal from './modals/QuitclaimModal';
 import DeleteSeparationModal from './modals/DeleteSeparationModal';
-import BulkDeleteSeparationModal from './modals/BulkDeleteSeparationModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import usePatchSeparation from './hooks/usePatchSeparation';
 import useBulkDeleteSeparations from './hooks/useBulkDeleteSeparations';
@@ -663,9 +663,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteSeparationModal
+      <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         selectedCount={selectedSeparations.size}
+        moduleName="separations"
         onConfirm={confirmBulkDelete}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         isLoading={bulkDeleteMutation.isLoading}

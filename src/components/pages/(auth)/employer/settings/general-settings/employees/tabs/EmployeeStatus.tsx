@@ -12,7 +12,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetEmployeeStatusItems from '../hooks/employee-status/useGetEmployeeStatusItems';
 import useBulkDeleteEmployeeStatuses from '../hooks/employee-status/useBulkDeleteEmployeeStatuses';
-import BulkDeleteModal from '../modals/BulkDeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';

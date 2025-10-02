@@ -11,7 +11,7 @@ import useBulkDeleteLocations from '../hooks/location/useBulkDeleteLocations';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
-import BulkDeleteModal from '../modals/BulkDeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';

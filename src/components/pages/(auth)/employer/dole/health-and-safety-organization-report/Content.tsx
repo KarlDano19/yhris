@@ -37,7 +37,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
 import useBulkDeleteHealthAndSafetyReport from "./hooks/useBulkDeleteHealthAndSafetyReport";
-import BulkDeleteModal from "@/components/modals/BulkDeleteModal";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 type PaginationProps = {
   totalRecords: number;
