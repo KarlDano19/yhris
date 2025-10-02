@@ -20,11 +20,13 @@ export default function CreatePolicyModal({
   setIsOpen,
   refetch,
   employeeData,
+  onSearchChange,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
-  employeeData?: any[];
+  employeeData?: any;
+  onSearchChange: (searchTerm: string) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
@@ -35,6 +37,7 @@ export default function CreatePolicyModal({
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
+  const [showTooltip, setShowTooltip] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
@@ -200,14 +203,14 @@ export default function CreatePolicyModal({
     }
   }, [tagsTo, clearErrors]);
 
-  // Filter employees based on input
+  // Filter employees based on input using passed data
   useEffect(() => {
-    if (employeeData) {
+    if (employeeData?.records) {
       if (inputTo.trim()) {
         const searchTerm = inputTo.toLowerCase();
         
         // Filter employees (exclude already selected ones)
-        const filtered = employeeData.filter((employee: any) => {
+        const filtered = employeeData.records.filter((employee: any) => {
           const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
           const email = employee.email?.toLowerCase() || '';
           const department = employee.department?.toLowerCase() || '';
@@ -226,7 +229,7 @@ export default function CreatePolicyModal({
         
         // Check if search matches any department name
         const matchingDepartments = new Set();
-        employeeData.forEach((employee: any) => {
+        employeeData.records.forEach((employee: any) => {
           if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
             matchingDepartments.add(employee.department);
           }
@@ -235,7 +238,7 @@ export default function CreatePolicyModal({
         // Create department options (only show if not all employees from that department are selected)
         const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
           // Check if all employees from this department are already selected
-          const employeesInDepartment = employeeData.filter((emp: any) => 
+          const employeesInDepartment = employeeData.records.filter((emp: any) => 
             emp.department === deptName && emp.email
           );
           const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
@@ -264,10 +267,9 @@ export default function CreatePolicyModal({
         setShowEmployeeSuggestions(combinedOptions.length > 0);
         setSelectedEmployeeIndex(-1); // Reset selection when filtering
       } else {
-        // When no search input but field is focused, show all employees (no department options)
-        const allEmployees = employeeData.slice(0, 10); // Limit to 10 suggestions for initial load
-        setFilteredEmployees(allEmployees);
-        setShowEmployeeSuggestions(allEmployees.length > 0);
+        // When no search input, show no suggestions (no department options in default list)
+        setFilteredEmployees([]);
+        setShowEmployeeSuggestions(false);
         setSelectedEmployeeIndex(-1);
       }
     } else {
@@ -295,7 +297,7 @@ export default function CreatePolicyModal({
   const handleEmployeeSelect = (employee: any) => {
     if (employee.is_department_option) {
       // Handle department selection - add all employees from that department
-      const employeesInDepartment = employeeData?.filter((emp: any) => 
+      const employeesInDepartment = employeeData?.records?.filter((emp: any) => 
         emp.department === employee.department && emp.email
       ) || [];
       
@@ -377,9 +379,20 @@ export default function CreatePolicyModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          To<span className='text-red-600'>*</span>
-                        </label>
+                        <div className='flex items-center justify-between'>
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            To<span className='text-red-600'>*</span>
+                          </label>
+                          {tagsTo.length > 1 && (
+                            <button
+                              type='button'
+                              className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                              onClick={() => setTagsTo([])}
+                            >
+                              Unselect All
+                            </button>
+                          )}
+                        </div>
                         {errors.to && (
                           <p className='text-xs text-red-600 mt-1'>
                             {errors.to.message || 'To field is required.'}
@@ -388,14 +401,15 @@ export default function CreatePolicyModal({
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                             <div 
-                              className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
+                              className='relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md'
                               data-tooltip-id='to-section-tooltip'
                               data-tooltip-place='bottom'
+                              style={{ width: '100%' }}
                             >
                               {tagsTo.map((tagTo: string) => (
                                 <div
                                   key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm mr-1'
+                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
                                 >
                                   <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
                                     <XMarkIcon className='w-4 h-4' />
@@ -436,22 +450,45 @@ export default function CreatePolicyModal({
                                 }}
                                 onChange={(e) => {
                                   setInputTo(e.target.value);
+                                  onSearchChange(e.target.value);
                                   setSelectedEmployeeIndex(-1); // Reset selection when typing
                                 }}
                                 onFocus={() => {
-                                  if (employeeData && employeeData.length > 0) {
+                                  if (employeeData?.records && employeeData.records.length > 0) {
                                     setShowEmployeeSuggestions(true);
                                   }
+                                  setShowTooltip(false);
                                 }}
-                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                onBlur={() => {
+                                  if (!inputTo.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                                }}
+                                className='focus:none outline-none px-2 py-1 flex-1 min-w-0'
+                                style={{ width: '100%' }}
                               />
-                              <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                <div className='px-1'>
-                                  <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter, or search for employees.
-                                  </h2>
-                                </div>
-                              </Tooltip>
+                              {showTooltip && (
+                                <Tooltip 
+                                  id='to-section-tooltip' 
+                                  opacity={1} 
+                                  style={{ 
+                                    fontSize: '13px', 
+                                    borderRadius: '8px', 
+                                    backgroundColor: '#222C3B', 
+                                    maxWidth: '330px',
+                                    whiteSpace: 'normal',
+                                    wordWrap: 'break-word',
+                                    zIndex: 9999
+                                  }}
+                                >
+                                  <div className='px-2 py-1'>
+                                    <div className='text-[13px] font-medium leading-relaxed'>
+                                      Add multiple recipients by pressing Tab or Enter,<br />
+                                      or search for employees and departments.
+                                    </div>
+                                  </div>
+                                </Tooltip>
+                              )}
                             </div>
                             
                             {/* Employee Suggestions Dropdown */}

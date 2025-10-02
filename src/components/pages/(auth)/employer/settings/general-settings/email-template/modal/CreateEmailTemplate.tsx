@@ -10,7 +10,6 @@ import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
-import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
 import EmailField from '../components/EmailField';
 
@@ -25,11 +24,15 @@ export default function EmailTemplateModal({
   setIsOpen,
   refetch,
   onSuccess,
+  employeeData,
+  onSearchChange,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
   onSuccess: any;
+  employeeData?: any;
+  onSearchChange: (searchTerm: string) => void;
 }) {
   const inputRef = useRef(null);
   const cancelButtonRef = useRef(null);
@@ -40,14 +43,6 @@ export default function EmailTemplateModal({
   const [inputBcc, setInputBcc] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
   
-  // Paginated search state
-  const [toSearchTerm, setToSearchTerm] = useState('');
-  const [ccSearchTerm, setCcSearchTerm] = useState('');
-  const [bccSearchTerm, setBccSearchTerm] = useState('');
-  const [debouncedToSearch, setDebouncedToSearch] = useState('');
-  const [debouncedCcSearch, setDebouncedCcSearch] = useState('');
-  const [debouncedBccSearch, setDebouncedBccSearch] = useState('');
-
   // Generic employee field state management
   const toDropdownRef = useRef<HTMLDivElement>(null);
   const ccDropdownRef = useRef<HTMLDivElement>(null);
@@ -75,48 +70,9 @@ export default function EmailTemplateModal({
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { register, handleSubmit, reset, setValue, getValues } = useForm<any>();
   
-  // Paginated employee data fetching
-  const { data: toEmployeeData } = useGetEmployeePaginatedSelect(
-    debouncedToSearch && debouncedToSearch.length >= 2 ? {
-      search: debouncedToSearch,
-      current_page: 1,
-      page_size: 500
-    } : null
-  );
-  
-  const { data: ccEmployeeData } = useGetEmployeePaginatedSelect(
-    debouncedCcSearch && debouncedCcSearch.length >= 2 ? {
-      search: debouncedCcSearch,
-      current_page: 1,
-      page_size: 500
-    } : null
-  );
-  
-  const { data: bccEmployeeData } = useGetEmployeePaginatedSelect(
-    debouncedBccSearch && debouncedBccSearch.length >= 2 ? {
-      search: debouncedBccSearch,
-      current_page: 1,
-      page_size: 500
-    } : null
-  );
   
   const { mutate, isLoading } = useAddEmailTemplate();
 
-  // Debouncing effects for each field
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedToSearch(toSearchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [toSearchTerm]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedCcSearch(ccSearchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [ccSearchTerm]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedBccSearch(bccSearchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [bccSearchTerm]);
 
   // Generic function to scroll selected item into view
   const scrollToSelectedItem = (dropdownRef: React.RefObject<HTMLDivElement>, index: number) => {
@@ -209,18 +165,18 @@ export default function EmailTemplateModal({
 
   // Filter employees for TO field
   useEffect(() => {
-    filterEmployees(inputTo, tagsTo, setFilteredTOEmployees, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData);
-  }, [inputTo, toEmployeeData, tagsTo, filterEmployees]);
+    filterEmployees(inputTo, tagsTo, setFilteredTOEmployees, setShowTOSuggestions, setSelectedTOIndex, employeeData);
+  }, [inputTo, employeeData, tagsTo, filterEmployees]);
 
   // Filter employees for CC field
   useEffect(() => {
-    filterEmployees(inputCc, tagsCc, setFilteredCCEmployees, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData);
-  }, [inputCc, ccEmployeeData, tagsCc, filterEmployees]);
+    filterEmployees(inputCc, tagsCc, setFilteredCCEmployees, setShowCCSuggestions, setSelectedCCIndex, employeeData);
+  }, [inputCc, employeeData, tagsCc, filterEmployees]);
 
   // Filter employees for BCC field
   useEffect(() => {
-    filterEmployees(inputBcc, tagsBcc, setFilteredBCCEmployees, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData);
-  }, [inputBcc, bccEmployeeData, tagsBcc, filterEmployees]);
+    filterEmployees(inputBcc, tagsBcc, setFilteredBCCEmployees, setShowBCCSuggestions, setSelectedBCCIndex, employeeData);
+  }, [inputBcc, employeeData, tagsBcc, filterEmployees]);
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -392,12 +348,14 @@ export default function EmailTemplateModal({
                               tooltipId="to-section-tooltip"
                               onInputChange={(value) => {
                                 setInputTo(value);
-                                setToSearchTerm(value);
+                                onSearchChange(value);
                                 setSelectedTOIndex(-1);
                                 setShowTooltip(false);
                               }}
                               onInputFocus={() => {
-                                setShowTOSuggestions(inputTo.trim().length > 0);
+                                if (employeeData?.records && employeeData.records.length > 0) {
+                                  setShowTOSuggestions(true);
+                                }
                                 setShowTooltip(false);
                               }}
                               onInputBlur={() => {
@@ -423,7 +381,7 @@ export default function EmailTemplateModal({
                                   } else if (e.key === 'Enter' || e.key === 'Tab') {
                                     e.preventDefault();
                                   if (selectedTOIndex >= 0 && filteredTOEmployees[selectedTOIndex]) {
-                                    handleEmployeeSelect(filteredTOEmployees[selectedTOIndex], tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData);
+                                    handleEmployeeSelect(filteredTOEmployees[selectedTOIndex], tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, employeeData);
                                     } else {
                                       handleKeyDownTo(e);
                                     }
@@ -435,7 +393,7 @@ export default function EmailTemplateModal({
                                     handleKeyDownTo(e);
                                   }
                                 }}
-                              onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData)}
+                              onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, employeeData)}
                               onMouseEnter={(index) => setSelectedTOIndex(index)}
                               onRemoveTag={handleRemoveTagTo}
                             />
@@ -488,11 +446,13 @@ export default function EmailTemplateModal({
                                 tooltipId="cc-section-tooltip"
                                 onInputChange={(value) => {
                                   setInputCc(value);
-                                  setCcSearchTerm(value);
+                                  onSearchChange(value);
                                   setSelectedCCIndex(-1);
                                 }}
                                 onInputFocus={() => {
-                                  setShowCCSuggestions(inputCc.trim().length > 0);
+                                  if (employeeData?.records && employeeData.records.length > 0) {
+                                    setShowCCSuggestions(true);
+                                  }
                                   setShowTooltip(false);
                                 }}
                                 onInputBlur={() => {
@@ -518,7 +478,7 @@ export default function EmailTemplateModal({
                                     } else if (e.key === 'Enter' || e.key === 'Tab') {
                                       e.preventDefault();
                                     if (selectedCCIndex >= 0 && filteredCCEmployees[selectedCCIndex]) {
-                                      handleEmployeeSelect(filteredCCEmployees[selectedCCIndex], tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData);
+                                      handleEmployeeSelect(filteredCCEmployees[selectedCCIndex], tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, employeeData);
                                       } else {
                                         handleKeyDown(e);
                                       }
@@ -530,7 +490,7 @@ export default function EmailTemplateModal({
                                       handleKeyDown(e);
                                     }
                                   }}
-                                onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData)}
+                                onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, employeeData)}
                                 onMouseEnter={(index) => setSelectedCCIndex(index)}
                                 onRemoveTag={handleRemoveTag}
                               />
@@ -565,11 +525,13 @@ export default function EmailTemplateModal({
                                 tooltipId="bcc-section-tooltip"
                                 onInputChange={(value) => {
                                   setInputBcc(value);
-                                  setBccSearchTerm(value);
+                                  onSearchChange(value);
                                   setSelectedBCCIndex(-1);
                                 }}
                                 onInputFocus={() => {
-                                  setShowBCCSuggestions(inputBcc.trim().length > 0);
+                                  if (employeeData?.records && employeeData.records.length > 0) {
+                                    setShowBCCSuggestions(true);
+                                  }
                                   setShowTooltip(false);
                                 }}
                                 onInputBlur={() => {
@@ -595,7 +557,7 @@ export default function EmailTemplateModal({
                                     } else if (e.key === 'Enter' || e.key === 'Tab') {
                                       e.preventDefault();
                                     if (selectedBCCIndex >= 0 && filteredBCCEmployees[selectedBCCIndex]) {
-                                      handleEmployeeSelect(filteredBCCEmployees[selectedBCCIndex], tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData);
+                                      handleEmployeeSelect(filteredBCCEmployees[selectedBCCIndex], tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, employeeData);
                                       } else {
                                         handleKeyDownBcc(e);
                                       }
@@ -607,7 +569,7 @@ export default function EmailTemplateModal({
                                       handleKeyDownBcc(e);
                                     }
                                   }}
-                                onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData)}
+                                onEmployeeSelect={(employee) => handleEmployeeSelect(employee, tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, employeeData)}
                                 onMouseEnter={(index) => setSelectedBCCIndex(index)}
                                 onRemoveTag={handleRemoveTagBcc}
                               />
