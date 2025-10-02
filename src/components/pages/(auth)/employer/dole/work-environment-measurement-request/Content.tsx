@@ -25,7 +25,7 @@ import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentReq
 import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -37,6 +37,9 @@ import DeleteIcon from '@/svg/DeleteIcon';
 import { handlePrintPDF } from './PrintData';
 import useBulkDeleteWorkEnvironmentRequest from "./hooks/useBulkDeleteWorkEnvironmentRequest";
 import BulkDeleteModal from "@/components/BulkDeleteModal";
+import WemAttachmentSection from './components/WemAttachmentSection';
+import useGetWorkEnvironmentRequestDetails from './hooks/useGetWorkEnvironmentRequestDetails';
+import useSendEmail from './hooks/useSendEmail';
 
 
 type PaginationProps = {
@@ -65,6 +68,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isUpdateWorkEnvironmentRequestModalOpen, setIsUpdateWorkEnvironmentRequestModalOpen] =
     useState<T_ModalData | null>(null);
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,6 +84,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const bulkDeleteMutation = useBulkDeleteWorkEnvironmentRequest();
+  const { mutate: sendEmail, isLoading: isSendingEmail } = useSendEmail();
+  const { data: workEnvironmentRequestDetails } = useGetWorkEnvironmentRequestDetails(
+    isSendEmailModalOpen?.id || null
+  );
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     onSuccess: () => {
@@ -160,6 +170,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
 
+  // Handle PDF attachment from work environment request details
+  useEffect(() => {
+    if (workEnvironmentRequestDetails && isSendEmailModalOpen) {
+      if (workEnvironmentRequestDetails.attachment) {
+        setPdfAttachment(workEnvironmentRequestDetails.attachment);
+      } else {
+        setPdfAttachment(null);
+      }
+    }
+  }, [workEnvironmentRequestDetails, isSendEmailModalOpen]);
+
   const handleStatusChange = async (itemId: number, newStatus: string) => {
     try {
       await updateWorkEnvironmentRequestStatus.mutateAsync({
@@ -210,6 +231,81 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } catch (error) {
       setGeneratingItemId(null);
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
+    }
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.email));
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      payload.append('subject', data.subject);
+      
+      // Add attachment if provided (prioritize form data attachment, then local attachment)
+      if (data.attachment) {
+        payload.append('attachment', data.attachment);
+      } else if (attachment) {
+        payload.append('attachment', attachment);
+      }
+      
+      // Add work_environment_measure_id
+      payload.append('work_environment_measure_id', isSendEmailModalOpen.id.toString());
+      
+      const callbackReq = {
+        onSuccess: (data: any) => {
+          setIsSendEmailModalOpen(null);
+          setPdfAttachment(null);
+          setAttachment(null);
+          setAttachmentExist(false);
+          const successMessage = data?.message || 'Email sent successfully';
+          toast.custom(() => <CustomToast message={successMessage} type='success' />, { duration: 5000 });
+          if (workEnvironmentRequestItemsRefetch) {
+            workEnvironmentRequestItemsRefetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to send email';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 7000,
+          });
+        },
+      };
+      sendEmail(payload, callbackReq);
     }
   };
 
@@ -769,9 +865,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isSendEmailModalOpen && (
         <SendEmailModal
-          refetch={workEnvironmentRequestItemsRefetch}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
+          title="Send Work Environment Measure"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={workEnvironmentRequestDetails?.email ? [workEnvironmentRequestDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <WemAttachmentSection
+              pdfAttachment={pdfAttachment}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+          submitButtonText="Send"
+          isLoading={isSendingEmail}
         />
       )}
       {isBulkDeleteModalOpen && (

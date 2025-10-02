@@ -81,15 +81,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
-  
-  // Employee Search
-    // For create modal
-    const [createEmployeeSearch, setCreateEmployeeSearch] = useState('');
-    const [createEmployeeSelected, setCreateEmployeeSelected] = useState(false);
-
-    // For edit modal
-    const [editEmployeeSearch, setEditEmployeeSearch] = useState('');
-    const [editEmployeeSelected, setEditEmployeeSelected] = useState(false);
 
   const menuOptions = [
     {
@@ -543,9 +534,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesCompensationLogbookCreateModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookCreateModalOpen}
           formMethods={createFormMethods}
-          employeeSearch={createEmployeeSearch}
-          setEmployeeSearch={setCreateEmployeeSearch}
-          setEmployeeSelected={setCreateEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookEditModalOpen && (
@@ -554,9 +542,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEmployeesCompensationLogbookEditModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookEditModalOpen}
           formMethods={editFormMethods}
-          employeeSearch={editEmployeeSearch}
-          setEmployeeSearch={setEditEmployeeSearch}
-          setEmployeeSelected={setEditEmployeeSelected}
         />
       )}
       {isEmployeesCompensationLogbookDeleteModalOpen && (

@@ -16,23 +16,18 @@ export default function CreateEmployeeCompensationLogModal({
   isOpen,
   setIsOpen,
   formMethods,
-  employeeSearch,
-  setEmployeeSearch,
-  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   formMethods: any;
-  employeeSearch: string;
-  setEmployeeSearch: (value: string) => void;
-  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
   
-
+  // Internal employee search state
+  const [employeeSearch, setEmployeeSearch] = useState('');
   
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -43,7 +38,6 @@ export default function CreateEmployeeCompensationLogModal({
         setIsOpen(false);
         reset();
         setEmployeeSearch('');
-        setEmployeeSelected(false);
         refetch();
       },
       onError: (err: any) => {
@@ -167,7 +161,6 @@ export default function CreateEmployeeCompensationLogModal({
                           isClearable={true}
                           employeeSearch={employeeSearch}
                           setEmployeeSearch={setEmployeeSearch}
-                          setEmployeeSelected={setEmployeeSelected}
                           className="mt-2"
                         />
                       </div>

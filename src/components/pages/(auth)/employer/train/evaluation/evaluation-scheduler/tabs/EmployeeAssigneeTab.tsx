@@ -1,94 +1,42 @@
 import { useEffect, useState, useMemo } from "react";
 
-import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import "react-quill/dist/quill.snow.css";
-import Select, { components } from "react-select";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import classNames from "@/helpers/classNames";
 
-import SelectChevronDown from "@/svg/SelectChevronDown";
+import EmployeeSelect from "@/components/common/EmployeeSelect";
 
-interface Field {
-  onChange: (value: any) => void;
-  value: any;
-}
-
-// Custom Option component to display department, position, and email in dropdown
-const CustomOption = (props: any) => {
-  const { data } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {data.email && (
-          <div className="text-sm text-gray-500">
-            • {data.email}
-          </div>
-        )}
-        {(data.department || data.position) && (
-          <div className="text-sm text-gray-500">
-             • {data.department && data.position
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
-
-// Custom MultiValue component to show only name when selected
-const CustomMultiValue = (props: any) => {
-  const { data } = props;
-  return (
-    <components.MultiValue {...props}>
-      <span>{data.label}</span>
-    </components.MultiValue>
-  );
-};
 
 function EmployeeAssigneeTab({
   control,
   Controller,
-  register,
   watch,
   onSubmit,
   isLoading,
   setSelectedTab,
+  recipientNames,
+  employeeNames,
+  setValue,
 }: {
   control: any;
   Controller: any;
-  register: any;
   watch: any;
   onSubmit: any;
   isLoading: boolean;
   setSelectedTab: (tab: number) => void;
+  recipientNames?: string[];
+  employeeNames?: string[];
+  setValue?: any;
 }) {
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: dataEmployee } = useGetEmployeeItems();
-
-  useEffect(() => {
-    if (dataEmployee) {
-      const employeeItems = dataEmployee.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        displayLabel: item.position ? `${item.firstname} ${item.lastname} | ${item.position}` : `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-        email: item.email,
-      }));
-      setEmployeeItems(employeeItems);
-    }
-  }, [dataEmployee]);
-
-  const getFilename = (file: string) => {
-    return file.split("/").pop();
-  };
+  const [employeeSearch, setEmployeeSearch] = useState<string>('');
+  
+  // Watch the form values for recipients and employees
+  const recipientsValue = watch("recipient");
+  const employeesValue = watch("employees");
+  const selectedRecipients = useMemo(() => recipientsValue || [], [recipientsValue]);
+  const selectedEmployees = useMemo(() => employeesValue || [], [employeesValue]);
 
   // Move ReactQuill memoization here
   const ReactQuill = useMemo(() => dynamic(() => import("react-quill"), { ssr: false }), []);
@@ -101,111 +49,85 @@ function EmployeeAssigneeTab({
     if (control && control._defaultValues && control._defaultValues.message === undefined) {
       control._defaultValues.message = defaultMessage;
     }
-  }, [control]);
+  }, [control, defaultMessage]);
 
   return (
     <form onSubmit={onSubmit}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-6 pt-6 pb-8">
         <div className="sm:col-span-4 mt-2 w-full">
-          <label
-            htmlFor="recipient"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Recipient<span className="text-red-600">*</span>
-          </label>
-          <Controller
-            name="recipient"
-            control={control}
-            rules={{ required: "Please select a recipient" }}
-            render={({
-              field: { onChange, value },
-              fieldState: { error },
-            }: {
-              field: Field;
-              fieldState: { error?: { message?: string } };
-            }) => (
-              <>
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={employeeItems}
-                  value={employeeItems.filter((item: any) =>
-                    value?.includes(item.value)
-                  )}
-                  onChange={(val) =>
-                    onChange(val ? val.map((item: any) => item.value) : [])
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="recipient"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Recipient<span className="text-red-600">*</span>
+            </label>
+            {selectedRecipients && selectedRecipients.length > 0 && (
+              <button
+                type="button"
+                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                onClick={() => {
+                  // Clear all selected recipients using setValue
+                  if (setValue) {
+                    setValue("recipient", []);
                   }
-                  components={{
-                    Option: CustomOption,
-                    MultiValue: CustomMultiValue,
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1 ml-1">
-                    {error.message}
-                  </p>
-                )}
-              </>
+                }}
+              >
+                Unselect All
+              </button>
             )}
+          </div>
+          <EmployeeSelect
+            control={control}
+            name="recipient"
+            label=""
+            required={true}
+            placeholder="Select recipients..."
+            isMulti={true}
+            isClearable={false}
+            employeeSearch={employeeSearch}
+            setEmployeeSearch={setEmployeeSearch}
+            excludeValues={selectedEmployees}
+            employeeNames={recipientNames}
+            className=""
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
-          <label
-            htmlFor="reason"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Person to be Evaluated<span className="text-red-600">*</span>
-          </label>
-          <Controller
-            name="employees"
-            control={control}
-            rules={{ required: "Please select at least one employee" }}
-            render={({
-              field: { onChange, value },
-              fieldState: { error },
-            }: {
-              field: Field;
-              fieldState: { error?: { message?: string } };
-            }) => (
-              <>
-                <Select
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  options={employeeItems}
-                  value={employeeItems.filter((item: any) =>
-                    value?.includes(item.value)
-                  )}
-                  onChange={(val) =>
-                    onChange(val ? val.map((item: any) => item.value) : [])
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="employees"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
+              Person to be Evaluated<span className="text-red-600">*</span>
+            </label>
+            {selectedEmployees && selectedEmployees.length > 0 && (
+              <button
+                type="button"
+                className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                onClick={() => {
+                  // Clear all selected employees using setValue
+                  if (setValue) {
+                    setValue("employees", []);
                   }
-                  components={{
-                    Option: CustomOption,
-                    MultiValue: CustomMultiValue,
-                    DropdownIndicator: () => (
-                      <div className="pointer-events-none px-2">
-                        <SelectChevronDown />
-                      </div>
-                    ),
-                    IndicatorSeparator: () => null,
-                  }}
-                  isClearable={false}
-                  isMulti
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1 ml-1">
-                    {error.message}
-                  </p>
-                )}
-              </>
+                }}
+              >
+                Unselect All
+              </button>
             )}
+          </div>
+          <EmployeeSelect
+            control={control}
+            name="employees"
+            label=""
+            required={true}
+            placeholder="Select employees to be evaluated..."
+            isMulti={true}
+            isClearable={false}
+            employeeSearch={employeeSearch}
+            setEmployeeSearch={setEmployeeSearch}
+            excludeValues={selectedRecipients}
+            employeeNames={employeeNames}
+            className=""
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">

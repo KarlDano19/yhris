@@ -53,7 +53,8 @@ export default function ApplicantForm({ title }: PropTypes) {
   };
 
   const handleGenerateSummary = () => {
-    if (!applicantProfile?.id) {
+    // Use the applicant.id from the state, which is the correct applicant_form_id
+    if (!applicant?.id) {
       toast.custom(() => <CustomToast message="Unable to identify applicant" type="error" />, {
         duration: 4000,
       });
@@ -61,8 +62,11 @@ export default function ApplicantForm({ title }: PropTypes) {
     }
 
     setIsGeneratingSummary(true);
-
-    generateSummary(applicantProfile.id, {
+    
+    generateSummary({ 
+      applicantId: applicant.id, // Use applicant.id (applicant_form_id) instead of applicantProfile.id
+      options: { force_regenerate: true } 
+    }, {
       onSuccess: (response) => {
         setIsGeneratingSummary(false);
         
@@ -74,7 +78,7 @@ export default function ApplicantForm({ title }: PropTypes) {
 
         const message = response.was_cached 
           ? 'Resume summary already exists!' 
-          : 'Resume summary generated successfully!';
+          : 'Resume summary generated successfully with Claude AI!';
           
         toast.custom(() => <CustomToast message={message} type="success" />, {
           duration: 4000,
@@ -229,8 +233,8 @@ export default function ApplicantForm({ title }: PropTypes) {
                     <button
                       onClick={handleGenerateSummary}
                       disabled={isGeneratingSummary || isGeneratingMutation}
-                      className='ml-4 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-                      title="Regenerate summary"
+                      className='ml-4 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                      title="Regenerate summary with Claude AI"
                     >
                       {isGeneratingSummary || isGeneratingMutation ? (
                         <div className="flex items-center">
@@ -238,13 +242,27 @@ export default function ApplicantForm({ title }: PropTypes) {
                           Updating...
                         </div>
                       ) : (
-                        'Regenerate'
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Regenerate
+                        </>
                       )}
                     </button>
                   </h4>
                   <div className='text-gray-700 leading-relaxed whitespace-pre-wrap'>
                     {applicantProfile.resume_summary}
                   </div>
+                  
+                  {/* Optional: Show last updated timestamp if available */}
+                  {applicantProfile.summary_updated_at && (
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <p className="text-xs text-blue-600">
+                        Last updated: {new Date(applicantProfile.summary_updated_at).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -257,7 +275,7 @@ export default function ApplicantForm({ title }: PropTypes) {
               </svg>
               <h4 className='text-gray-600 font-medium mb-4'>No Resume Summary Available</h4>
               <p className='text-gray-500 text-sm mb-6'>
-                Generate an AI-powered summary from the uploaded resume to quickly understand this candidate&apos;s background and qualifications.
+                Generate an AI-powered summary from the uploaded resume using Claude AI to quickly understand this candidate&apos;s background and qualifications.
               </p>
               <button
                 onClick={handleGenerateSummary}
@@ -274,7 +292,7 @@ export default function ApplicantForm({ title }: PropTypes) {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    Generate Summary
+                    Generate Summary with Claude AI
                   </>
                 )}
               </button>

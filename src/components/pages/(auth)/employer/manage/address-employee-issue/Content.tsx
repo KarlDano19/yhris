@@ -21,7 +21,10 @@ import IncidentReportModal from './modals/IncidentReportModal';
 import EditIncidentReportModal from './modals/EditIncidentReportModal';
 import UpdateStatusModal from './modals/UpdateStatusModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
-import SendNTEModal from './modals/SendNTEModal';
+import SendEmailModal from '@/components/SendEmailModal';
+import NTEAttachmentSection from './components/NTEAttachmentSection';
+import { useDeleteNTEAttachment } from './hooks/useDeleteNTEAttachment';
+import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
@@ -88,7 +91,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     useState<T_DecisionAttachmentViewModal | null>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
@@ -120,6 +126,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       router.replace(`/manage/address-employee-issue${newParams.toString() ? '?' + newParams.toString() : ''}`);
     }
   }, [searchParams, router]);
+
+  // Handle PDF attachment from employee issue details
+  useEffect(() => {
+    if (employeeIssueDetails && isSendNTEModalOpen) {
+      if (employeeIssueDetails.nte_attachment) {
+        setPdfAttachment(employeeIssueDetails.nte_attachment);
+      } else {
+        setPdfAttachment(null);
+      }
+    }
+  }, [employeeIssueDetails, isSendNTEModalOpen]);
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -433,6 +450,96 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // NTE-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleDeleteAttachment = () => {
+    if (isSendNTEModalOpen?.id) {
+      deleteNTEAttachment(isSendNTEModalOpen.id, {
+        onSuccess: (data: any) => {
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message || 'Attachment deleted successfully'} type='success' />, { duration: 3000 });
+          setIsSendNTEModalOpen(null);
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to delete attachment';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 5000,
+          });
+        },
+      });
+    }
+  };
+
+  const handleNTESubmit = (data: any) => {
+    if (isSendNTEModalOpen && isSendNTEModalOpen.id) {
+      const payload = {
+        id: isSendNTEModalOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'nte',
+        nte_subject: data.subject,
+        nte_to: JSON.stringify(data.email),
+        nte_cc: JSON.stringify(data.cc),
+        nte_bcc: JSON.stringify(data.bcc),
+        nte_message: data.message,
+        issueNTEForm: {
+          template: data.template,
+          subject: data.subject,
+          to: data.email,
+          cc: data.cc,
+          bcc: data.bcc,
+          message: data.message,
+          attachment: pdfAttachment || null
+        },
+        sendDecisionForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        dateReceived: null,
+        decision_subject: '',
+        decision_to: '',
+        decision_cc: '',
+        decision_bcc: '',
+        decision_message: ''
+      };
+      
+      mutate(payload, {
+        onSuccess: (data: any) => {
+          setIsSendNTEModalOpen(null);
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
 
   const renderRows = () => {
     if (isSearching || isGetEmployeeIssuesLoading) {
@@ -478,6 +585,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
+                isInvestigated={item.isInvestigated}
                 userRights={cachedUserRights?.state?.data}
               />
             </td>
@@ -489,6 +597,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsInvestigateModalOpen={setIsInvestigateModalOpen}
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
+                employeeIssueDetails={item}
                 userRights={cachedUserRights?.state?.data}
               />
             </td>
@@ -795,11 +904,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           cachedUserRights={cachedUserRights}
         />
       )}
-      <SendNTEModal
-        isOpen={isSendNTEModalOpen}
-        setIsOpen={setIsSendNTEModalOpen}
-        refetch={refetch}
-      />
+      {isSendNTEModalOpen && (
+        <SendEmailModal
+          title="Send NTE"
+          isOpen={!!isSendNTEModalOpen}
+          onClose={() => setIsSendNTEModalOpen(null)}
+          onSubmit={handleNTESubmit}
+          defaultRecipients={employeeIssueDetails?.email ? [employeeIssueDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <NTEAttachmentSection
+              pdfAttachment={pdfAttachment}
+              isDeleting={isDeleting}
+              canDelete={!employeeIssueDetails?.is_nte_sent}
+              onViewAttachment={handleViewAttachment}
+              onDeleteAttachment={handleDeleteAttachment}
+            />
+          }
+          submitButtonText="Send & Mark as Sent"
+          isLoading={isLoading}
+        />
+      )}
       <InvestigationModal
         employeeIssueItems={employeeIssueItems}
         setEmployeeIssueItems={setEmployeeIssueItems}

@@ -25,9 +25,12 @@ import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyRepo
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import HealthAndSafetyOrganizationAttachmentSection from './components/HealthAndSafetyOrganizationAttachmentSection';
+import useSendEmail from './hooks/useSendEmail';
+import useGetHealthAndSafetyReportDetails from './hooks/useGetHealthAndSafetyReportDetails';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -70,6 +73,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
+  
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -119,6 +127,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   //   },
   // ];
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
+  
+  // Get the current report details for attachment
+  const { data: currentReportDetails } = useGetHealthAndSafetyReportDetails(
+    isSendEmailModalOpen?.id || null
+  );
   const bulkDeleteMutation = useBulkDeleteHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
@@ -199,6 +213,67 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      // Add health_and_safety_report_id
+      payload.append('health_and_safety_report_id', isSendEmailModalOpen.id.toString());
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          healthAndSafetyReportItemsRefetch();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const handlePrintPDFLocal = async (item: any) => {
@@ -694,7 +769,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isSendEmailModalOpen && (
-        <SendEmailModal refetch={healthAndSafetyReportItemsRefetch} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+        <SendEmailModal
+          title="Send Health and Safety Organization Report"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={[]}
+          showAttachment={true}
+          customAttachmentSection={
+            <HealthAndSafetyOrganizationAttachmentSection
+              pdfAttachment={currentReportDetails?.attachment || null}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+        />
       )}
       {isExportProgressModalOpen && (
         <ExportProgressModal

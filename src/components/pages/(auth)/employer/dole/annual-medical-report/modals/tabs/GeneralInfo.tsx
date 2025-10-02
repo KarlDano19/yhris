@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import useGetEmployeeCount from "@/components/hooks/useGetEmployeeCount";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -25,13 +25,13 @@ function GeneralInfo({
     setSelectedTab(2);
   });
 
-  const { data: employeeData } = useGetEmployeeItems();
+  const { data: employeeCount } = useGetEmployeeCount();
 
   useEffect(() => {
-    if (employeeData) {
-      setValue("total_number_of_employees", employeeData.length);
+    if (employeeCount !== undefined) {
+      setValue("total_number_of_employees", employeeCount);
     }
-  }, [employeeData, setValue]);
+  }, [employeeCount, setValue]);
 
   // Auto-calculate totals
   const male_office_workers = watch('male_office_workers');

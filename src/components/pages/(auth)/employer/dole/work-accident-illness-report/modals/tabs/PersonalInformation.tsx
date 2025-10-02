@@ -3,7 +3,7 @@
 import { Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import EmployeeSelect from "@/components/common/EmployeeSelect";
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
@@ -21,6 +21,7 @@ function PersonalInformation({
   setEmployeeSearch,
   employeeSelected,
   setEmployeeSelected,
+  employeeName,
 }: {
   control: any;
   register: any;
@@ -31,6 +32,7 @@ function PersonalInformation({
   setEmployeeSearch: (value: string) => void;
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
+  employeeName?: string;
 }) {
 
   const onSubmit = handleSubmit(() => {
@@ -135,6 +137,7 @@ function PersonalInformation({
                 employeeSearch={employeeSearch}
                 setEmployeeSearch={setEmployeeSearch}
                 setEmployeeSelected={setEmployeeSelected}
+                employeeName={employeeName}
                 className=""
                 onChange={(selectedOption: any) => {
                   if (selectedOption && !selectedOption.isShowMore) {
@@ -212,7 +215,7 @@ function PersonalInformation({
                 readOnly
                 data-tooltip-id="address-tooltip"
                 data-tooltip-content="Auto-populated from selected employee"
-                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
+                className="truncate rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 bg-gray-100"
               />
               {employeeSelected && (
                 <Tooltip 
