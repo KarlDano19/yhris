@@ -38,20 +38,40 @@ export const SmartMenuItem: React.FC<SmartMenuItemProps> = ({
   
   const isDisabled = !hasPermission && fallbackBehavior === 'disable';
   
+  // Create a safe action that only executes if user has permission
+  const safeAction = () => {
+    if (hasPermission && !isDisabled) {
+      action();
+    }
+  };
+  
   return (
-    <span
+    <div
       className={`${className} ${isDisabled ? disabledClassName : ''}`}
-      onClick={() => {
-        if (!isDisabled) {
-          action();
+      onClick={(e) => {
+        if (isDisabled) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        safeAction();
+      }}
+      onMouseDown={(e) => {
+        if (isDisabled) {
+          e.preventDefault();
+          e.stopPropagation();
         }
       }}
+      style={isDisabled ? { 
+        pointerEvents: 'none',
+        userSelect: 'none'
+      } : {}}
       data-permission-id={id}
       data-required-permission={requiredPermission}
       data-has-permission={hasPermission}
       data-is-disabled={isDisabled}
     >
       {name}
-    </span>
+    </div>
   );
 };

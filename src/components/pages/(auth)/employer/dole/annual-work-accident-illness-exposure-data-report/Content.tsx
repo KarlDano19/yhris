@@ -38,6 +38,7 @@ import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
 type PaginationProps = {
@@ -94,7 +95,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
 
@@ -315,6 +315,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     },
   ];
 
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
+
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
       return (
@@ -342,7 +344,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -373,7 +374,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EditIcon />
               </SmartButton>
@@ -384,13 +384,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EmailLogo />
               </button>
               <button
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_awair}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -407,7 +405,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <DeleteIcon />
               </button>
@@ -516,19 +513,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <SmartMenuItem
-                              id={item.id}
-                              name={item.name}
-                              action={item.action}
+                            <span
                               className={classNames(
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : '',
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
-                            />
+                              onClick={(e) => {
+                                if (item.disabled) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  return false;
+                                }
+                                item.action();
+                              }}
+                              data-permission-id={item.id}
+                              data-has-permission={item.hasPermission}
+                              data-is-disabled={item.disabled}
+                            >
+                              {item.name}
+                            </span>
                           )}
                         </Menu.Item>
                       ))}

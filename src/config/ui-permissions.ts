@@ -149,6 +149,11 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'assign-user-roles-btn', permission: 'assign_user_roles', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'manage-roles-btn', permission: 'manage_roles', type: 'button', fallbackBehavior: 'disable' },
 
+  // Sub Accounts
+  { elementId: 'create-sub-account-btn', permission: 'create_sub_user', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'edit-sub-account-btn', permission: 'edit_sub_user', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'delete-sub-account-btn', permission: 'delete_sub_user', type: 'button', fallbackBehavior: 'disable' },
+
   // General Settings - Positions
   { elementId: 'create-position-btn', permission: 'create_position', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'edit-position-btn', permission: 'edit_position', type: 'button', fallbackBehavior: 'disable' },

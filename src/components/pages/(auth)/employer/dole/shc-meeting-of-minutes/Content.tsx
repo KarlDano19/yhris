@@ -64,8 +64,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateShcMinutesMeeting = useUpdateShcMinutesMeeting();
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -260,7 +258,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -291,27 +288,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EditIcon />
               </SmartButton>
-              <button
-                // className='opacity-50'
+              <SmartButton
+                id="send-email-dole-shc-minute-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
-                // disabled={true}
-                // data-tooltip-id='email-tooltip'
-                // data-tooltip-content='Not available'
-                // data-tooltip-place='bottom'
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EmailLogo />
-              </button>
+              </SmartButton>
               <SmartButton
                 id="edit-dole-shc-minute-btn"
                 onClick={() =>
@@ -420,7 +410,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id="create-dole-shc-minute-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
               </SmartButton>

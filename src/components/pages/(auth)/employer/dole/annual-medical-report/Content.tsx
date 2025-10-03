@@ -151,25 +151,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-
-
-  // const menuOptions = [
-  //   {
-  //     name: "Export",
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_annual_medical_report,
-  //   },
-  //   {
-  //     name: "Generate Report",
-  //     action: () => {
-  //       handlePrint();
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_annual_medical_report,
-  //   },
-  // ];
-
   useEffect(() => {
     if (annualMedicalReportData) {
       const sortedRecords = [...annualMedicalReportData.records]
@@ -192,43 +173,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     annualMedicalReportRefetch();
   }, [currentPage, pageSize]);
-
-  // const handlePrint = () => {
-  //   // Create a new div element
-  //   const printDiv = document.createElement("div");
-
-  //   // Copy the content of the original printSection
-  //   const originalPrintSection = document.getElementById("printSection");
-  //   if (originalPrintSection) {
-  //     printDiv.innerHTML = originalPrintSection.innerHTML;
-  //   }
-
-  //   // Style the new div to be off-screen
-  //   printDiv.style.width = "1980px";
-  //   printDiv.style.height = "100%";
-  //   printDiv.style.position = "absolute";
-  //   printDiv.style.left = "-9999px";
-  //   printDiv.style.top = "-9999px";
-
-  //   // Add the new div to the body
-  //   document.body.appendChild(printDiv);
-
-  //   // Use html2canvas on the new div
-  //   html2canvas(printDiv).then((canvas) => {
-  //     // Remove the temporary div
-  //     document.body.removeChild(printDiv);
-
-  //     const imgData = canvas.toDataURL("image/png");
-  //     const newWindow = window.open("", "_blank");
-  //     newWindow?.document.write(
-  //       `<img src="${imgData}" style="width:100%;height:auto;">`
-  //     );
-  //     newWindow?.document.close();
-  //     setTimeout(() => {
-  //       newWindow?.print();
-  //     }, 500);
-  //   });
-  // };
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -464,53 +408,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 CREATE
               </SmartButton>
-              {/* <Menu as="div" className="relative">
-                <Menu.Button className="bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50">
-                  <span className="sr-only">Open options</span>
-                  <div className="flex gap-4">
-                    <ChevronDownIcon
-                      className="flex-none h-5 w-5"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div className="py-1">
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                "block px-4 py-2 text-sm cursor-pointer text-center",
-                                active
-                                  ? "bg-gray-100 text-gray-900"
-                                  : "text-gray-700",
-                                item.disabled ? "bg-gray-200 cursor-not-allowed opacity-50" : ""
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu> */}
             </div>
           </div>
 

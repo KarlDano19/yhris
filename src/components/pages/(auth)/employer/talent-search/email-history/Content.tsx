@@ -32,8 +32,7 @@ const Content = () => {
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -207,7 +206,6 @@ const Content = () => {
             <div>
               <button
                 onClick={() => setIsDeleteModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <DeleteIcon />
               </button>
@@ -337,23 +335,7 @@ const Content = () => {
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
-              {/* <button
-                className='bg-gray-500 border border-gray-500 rounded-md p-2 ml-1 hover:bg-gray-600 text-white text-sm'
-                onClick={handleResetFilters}
-                title="Reset filters"
-              >
-                Reset
-              </button> */}
             </div>
-            {/* <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                // onClick={() => setIsAddEmailModalOpen(true)}
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!cachedRigths?.state?.data?.create_employee}
-              >
-                SEND EMAIL
-              </button>
-            </div> */}
           </div>
 
           <div className='mt-8 flow-root'>

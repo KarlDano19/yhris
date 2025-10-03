@@ -35,6 +35,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } fr
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
 type PaginationProps = {
@@ -177,6 +178,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     },
   ];
+
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
+
   useEffect(() => {
     // Add proper null/undefined checks
     if (employeeListData && employeeListData.records && Array.isArray(employeeListData.records)) {
@@ -587,19 +591,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   >
                     <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                       <div className='py-1'>
-                        {menuOptions.map((item) => (
+                        {smartMenuOptions.map((item) => (
                           <Menu.Item key={item.name}>
                             {({ active }) => (
-                              <SmartMenuItem
+                              <span
                                 id={item.id}
-                                name={item.name}
-                                action={item.action}
+                                onClick={() => {
+                                  item.action();
+                                }}
                                 className={classNames(
                                   'block px-4 py-2 text-sm cursor-pointer text-center',
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                                 )}
-                                disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
-                              />
+                              >
+                                {item.name}
+                              </span>
                             )}
                           </Menu.Item>
                         ))}

@@ -6,9 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -77,8 +76,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const { data: employeeItems } = useGetEmployeeItems();
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   // Form Methods
   const createFormMethods = useForm();
@@ -109,6 +106,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     },
   ];
+
+  // Use the smart menu options hook to handle permissions
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   useEffect(() => {
     if (employeeCompensationLogbookData) {
@@ -351,7 +351,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id="create-dole-employee-compensation-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsEmployeesCompensationLogbookCreateModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_employee_compensation}
               >
                 CREATE
               </SmartButton>
@@ -373,19 +372,29 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <SmartMenuItem
-                              id={item.id}
-                              name={item.name}
-                              action={item.action}
+                            <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
-                            />
+                              onClick={(e) => {
+                                if (item.disabled) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  return false;
+                                }
+                                item.action();
+                              }}
+                              data-permission-id={item.id}
+                              data-has-permission={item.hasPermission}
+                              data-is-disabled={item.disabled}
+                            >
+                              {item.name}
+                            </span>
                           )}
                         </Menu.Item>
                       ))}

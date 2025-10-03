@@ -340,6 +340,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <Menu as='div' className='relative inline-block'>
                 <div>
                   <Menu.Button
+                    as = {SmartButton}
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                    >
@@ -360,34 +361,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <div className='py-1'>
                       <Menu.Item>
                         {({ active }) => (
-                          <SmartMenuItem
+                          <span
                             id="create-memo-btn"
-                            name="Create Memo"
                             className={classNames(
                               active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                               'block px-4 py-2 text-sm cursor-pointer'
                             )}
-                            action={() => {
+                            onClick={() => {
                               setIsCreateMemoModalOpen(true);
                               setIsOpen(!isOpen);
                             }}
-                         />
+                         >
+                            Create Memo
+                          </span>
                         )}
                       </Menu.Item>
                       <Menu.Item>
                         {({ active }) => (
-                          <SmartMenuItem
+                          <span
                             id="create-memo-btn"
-                            name="Create Policy"
                             className={classNames(
                               active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                               'block px-4 py-2 text-sm cursor-pointer'
                             )}
-                            action={() => {
+                            onClick={() => {
                               setIsCreatePolicyModalOpen(true);
                               setIsOpen(!isOpen);
                             }}
-                         />
+                         >
+                            Create Policy
+                          </span>
                         )}
                       </Menu.Item>
                     </div>

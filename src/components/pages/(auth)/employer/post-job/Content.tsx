@@ -4,7 +4,6 @@ import { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -67,9 +66,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
   const [isSocialShareModalClosed, setIsSocialShareModalClosed] = useState(false);
   const isSocialShareModalClosedRef = useRef(isSocialShareModalClosed);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   useEffect(() => {
     isSocialShareModalClosedRef.current = isSocialShareModalClosed;
   }, [isSocialShareModalClosed]);

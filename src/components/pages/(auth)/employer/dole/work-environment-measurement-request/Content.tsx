@@ -69,8 +69,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
@@ -292,7 +290,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -323,7 +320,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EditIcon />
               </SmartButton>
@@ -334,14 +330,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EmailLogo />
               </button>
               <SmartButton
                 id="generate-dole-work-environment-request-btn"
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
+                disabled={generatingItemId === item.id}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -359,7 +354,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -462,7 +456,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id="create-dole-work-environment-request-btn"
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
               >
                 CREATE
               </SmartButton>
@@ -559,173 +552,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSendEmailModalOpen}
         />
       )}
-      {/* Print Section
-      <div className='container mx-auto p-4 hidden'>
-        <div id='printSection'>
-          <div className='overflow-x-auto'>
-            <table className='w-full border-collapse border border-gray-800 table-fixed'>
-              <thead>
-                <tr>
-                  <th
-                    colSpan={6}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Basic Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1'
-                  >
-                    Risk and Safety Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    WEM Details Request
-                  </th>
-                  <th
-                    colSpan={4}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Monitoring Capability
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Hazards
-                  </th>
-                </tr>
-                <tr>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Date of Application
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Company Name
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Type of Industry
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Male
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Female
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Total
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Risk Classification
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Name of Safety Officer
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Safety Officer Level
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Purpose of WEM Request
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Conducted by
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Last WEM Date
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Internal Monitoring Capability
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Equipment Owned by Company
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Conducting Internal WEM
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Date of Internal Monitoring
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Purpose of WEM Request
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Chemical Hazards
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Ventilation
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {workEnvironmentRequestItems.map((item: any, rowIndex: number) => (
-                  <tr key={rowIndex}>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.date_of_application}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.company_name}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.type_of_industry}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_male}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_female}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_total}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.risk_classification}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.name_of_safety_officer}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.safety_officer_levels}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.purpose_of_wem_request}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_conducted_by}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.last_wem_date}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_internal_monitoring_capability}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_equipment_owned_by_company}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.conducting_internal_wem ? 'Yes' : 'No'}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.date_of_internal_monitoring}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.hazards_purpose_of_wem_request}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.chemical_hazards}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.ventilation}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
-        </div>
-      </div> */}
-
       <Tooltip id='search-tooltip'/>
     </>
   );

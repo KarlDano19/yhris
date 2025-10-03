@@ -32,6 +32,7 @@ import ExportProgressModal from './modals/ExportProgressModal';
 import EditIcon from '@/svg/EditIcon';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 type PaginationProps = {
   totalRecords: number;
@@ -56,9 +57,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
@@ -106,9 +105,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       action: () => {
         setIsSelectBranchModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
+
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   const [isSearching, setIsSearching] = useState(false);
 
@@ -282,7 +282,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <EditIcon />
               </SmartButton>
@@ -294,7 +293,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -395,7 +393,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 id="create-dole-wair-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_wair}
               >
                 CREATE
               </SmartButton>
@@ -417,19 +414,29 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <SmartMenuItem
-                              id={item.id}
-                              name={item.name}
-                              action={item.action}
+                            <span
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
-                            />
+                              onClick={(e) => {
+                                if (item.disabled) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  return false;
+                                }
+                                item.action();
+                              }}
+                              data-permission-id={item.id}
+                              data-has-permission={item.hasPermission}
+                              data-is-disabled={item.disabled}
+                            >
+                              {item.name}
+                            </span>
                           )}
                         </Menu.Item>
                       ))}

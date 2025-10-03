@@ -41,6 +41,8 @@ import {
   DocumentDuplicateIcon
 } from '@heroicons/react/24/solid';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
@@ -348,18 +350,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <SmartButton
                   id="edit-permission-btn"
                   onClick={() => setPermissionModal({ id: permission.id, open: true, mode: 'edit' })}
-                  className='text-indigo-600 hover:text-indigo-900'
-                  title='Edit Permission'
                 >
-                  <PencilIcon className='h-4 w-4' />
+                  <EditIcon />
                 </SmartButton>
                 <SmartButton
                   id="delete-permission-btn"
                   onClick={() => handleDelete('permission', permission.id, permission.display_name)}
-                  className='text-red-600 hover:text-red-900'
-                  title='Delete Permission'
                 >
-                  <TrashIcon className='h-4 w-4' />
+                  <DeleteIcon />
                 </SmartButton>
               </div>
             </td>
@@ -449,18 +447,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <SmartButton
                   id="edit-role-btn"
                   onClick={() => setRoleModal({ id: role.id, open: true, mode: 'edit' })}
-                  className='text-indigo-600 hover:text-indigo-900'
-                  title='Edit Role'
                 >
-                  <PencilIcon className='h-4 w-4' />
+                  <EditIcon />
                 </SmartButton>
                 <SmartButton
                   id="delete-role-btn"
                   onClick={() => handleDelete('role', role.id, role.name)}
-                  className='text-red-600 hover:text-red-900'
-                  title='Delete Role'
                 >
-                  <TrashIcon className='h-4 w-4' />
+                  <DeleteIcon />
                 </SmartButton>
               </div>
             </td>
@@ -558,10 +552,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true, 
                     userName: user.name 
                   })}
-                  className='text-indigo-600 hover:text-indigo-900'
+                  className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"
                   title='Assign Roles'
                 >
-                  <UserGroupIcon className='h-4 w-4' />
+                  <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
                 </SmartButton>
               </div>
             </td>

@@ -32,9 +32,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isConfirmSendEmailEvaluationSchedulerModalOpen, setIsConfirmSendEmailEvaluationSchedulerModalOpen] =
     useState(false);
   const [isCreateEvaluationSchedulerOpen, setIsCreateEvaluationSchedulerOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
@@ -269,7 +267,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
               <button
                 onClick={() => openEditEvaluationModal(item)}
-                disabled={!cachedRigths?.state?.data?.edit_training}
               >
                 <EditIcon />
               </button>
@@ -340,7 +337,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_training}
               >
                 CREATE
               </button>
