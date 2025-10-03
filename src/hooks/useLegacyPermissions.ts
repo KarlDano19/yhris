@@ -97,6 +97,9 @@ export const useLegacyPermissions = () => {
       'create_employee_status', 'edit_employee_status', 'delete_employee_status',
       'create_movement_settings', 'edit_movement_settings', 'delete_movement_settings',
       'create_email_template', 'edit_email_template', 'delete_email_template',
+
+      // test
+      'use_filter_screen_applicants',
     ];
 
     // Set all permissions to false by default, then enable those the user has

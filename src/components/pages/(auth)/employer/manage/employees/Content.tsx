@@ -10,7 +10,6 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';

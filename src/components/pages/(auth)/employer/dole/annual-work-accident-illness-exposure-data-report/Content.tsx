@@ -13,7 +13,6 @@ import { useForm } from 'react-hook-form';
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';

@@ -473,7 +473,6 @@ const Content = () => {
                 <SmartButton 
                   id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
                   data-tooltip-id="edit-tooltip"
                   data-tooltip-content="Edit Job"
                 >
@@ -482,7 +481,6 @@ const Content = () => {
                 <SmartButton 
                   id="delete-job-btn"
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
                   data-tooltip-id="delete-tooltip"
                   data-tooltip-content="Delete Job"
                 >
@@ -494,7 +492,6 @@ const Content = () => {
                     id: jobPost.id, 
                     open: true 
                   })}
-                  disabled={!cachedProfile?.state?.data?.manage_job_access_rules}
                   data-tooltip-id="assign-tooltip"
                   data-tooltip-content="Assign to Users"
                   className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"

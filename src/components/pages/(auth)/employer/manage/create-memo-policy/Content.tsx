@@ -9,8 +9,6 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
-
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';

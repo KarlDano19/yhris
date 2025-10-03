@@ -4,14 +4,12 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';

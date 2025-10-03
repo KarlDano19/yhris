@@ -12,7 +12,6 @@ import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';

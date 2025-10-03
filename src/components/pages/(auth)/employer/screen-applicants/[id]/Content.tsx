@@ -12,7 +12,6 @@ import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import CustomToast from '@/components/CustomToast';
 import AddApplicantModal from '../modals/AddApplicantModal';

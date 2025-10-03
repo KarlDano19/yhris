@@ -31,6 +31,10 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
     is_visible: true
   }
   
+  // DEBUG: Log permissions to see what's being received
+  console.log(`DEBUG - Stage "${stage.title}" permissions:`, permissions)
+  console.log(`DEBUG - Stage "${stage.title}" isDisabled:`, !permissions.can_view && !permissions.can_move && !permissions.can_update)
+  
   const isStageDisabled = !permissions.can_view && !permissions.can_move && !permissions.can_update
   const canInteract = permissions.can_move || permissions.can_update
 
