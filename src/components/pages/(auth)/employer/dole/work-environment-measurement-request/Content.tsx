@@ -6,11 +6,12 @@ import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
@@ -106,25 +107,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  
-
-
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       handlePrint();
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
-  //   },
-  // ];
 
   useEffect(() => {
     if (workEnvironmentRequestItemsData) {
@@ -205,41 +187,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
     }
   };
-
-  // const handlePrint = () => {
-  //   // Create a new div element
-  //   const printDiv = document.createElement('div');
-
-  //   // Copy the content of the original printSection
-  //   const originalPrintSection = document.getElementById('printSection');
-  //   if (originalPrintSection) {
-  //     printDiv.innerHTML = originalPrintSection.innerHTML;
-  //   }
-
-  //   // Style the new div to be off-screen
-  //   printDiv.style.width = '1980px';
-  //   printDiv.style.height = '100%';
-  //   printDiv.style.position = 'absolute';
-  //   printDiv.style.left = '-9999px';
-  //   printDiv.style.top = '-9999px';
-
-  //   // Add the new div to the body
-  //   document.body.appendChild(printDiv);
-
-  //   // Use html2canvas on the new div
-  //   html2canvas(printDiv).then((canvas) => {
-  //     // Remove the temporary div
-  //     document.body.removeChild(printDiv);
-
-  //     const imgData = canvas.toDataURL('image/png');
-  //     const newWindow = window.open('', '_blank');
-  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
-  //     newWindow?.document.close();
-  //     setTimeout(() => {
-  //       newWindow?.print();
-  //     }, 500);
-  //   });
-  // };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -368,7 +315,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-work-environment-request-btn"
                 onClick={() =>
                   setIsUpdateWorkEnvironmentRequestModalOpen({
                     id: item.id,
@@ -378,7 +326,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EditIcon />
-              </button>
+              </SmartButton>
               <button
                 onClick={() =>
                   setIsSendEmailModalOpen({
@@ -390,7 +338,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <button
+              <SmartButton
+                id="generate-dole-work-environment-request-btn"
                 onClick={() => handlePrintPDFLocal(item)}
                 disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
@@ -401,8 +350,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-work-environment-request-btn"
                 onClick={() =>
                   setIsWorkEnvironmentRequestDeleteModalOpen({
                     id: item.id,
@@ -412,7 +362,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -507,65 +457,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
             </div>
             </div>
-            {/* <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_work_environment_request}
-              >
-                CREATE
-              </button>
-              <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
-                  </div>
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter='transition ease-out duration-100'
-                  enterFrom='transform opacity-0 scale-95'
-                  enterTo='transform opacity-100 scale-100'
-                  leave='transition ease-in duration-75'
-                  leaveFrom='transform opacity-100 scale-100'
-                  leaveTo='transform opacity-0 scale-95'
-                >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='py-1'>
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
-            </div> */}
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-work-environment-request-btn"
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
                 disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 

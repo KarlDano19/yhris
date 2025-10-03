@@ -5,12 +5,14 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -97,22 +99,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const createFormMethods = useForm();
   const editFormMethods = useForm();
 
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-  //   },
-  // ];
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
@@ -131,23 +117,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     }
   });
-
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-  //   },
-  // ];
 
   useEffect(() => {
     if (healthAndSafetyReportItemsData) {
@@ -336,7 +305,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-health-safety-organization-btn"
                 onClick={() =>
                   setIsEditHealthAndSafetyReportModalOpen({
                     id: item.id,
@@ -346,7 +316,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EditIcon />
-              </button>
+              </SmartButton>
               <button
                 onClick={() =>
                   setIsSendEmailModalOpen({
@@ -358,7 +328,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <button
+              <SmartButton
+                id="generate-dole-health-safety-organization-btn"
                 onClick={() => handlePrintPDFLocal(item)}
                 disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_health_safety_organization}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
@@ -369,8 +340,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-health-safety-organization-btn"
                 onClick={() =>
                   setIsDeleteHealthAndSafetyReportModalOpen({
                     id: item.id,
@@ -380,7 +352,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -527,13 +499,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </Menu>
             </div> */}
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-health-safety-organization-btn"
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
                 disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 

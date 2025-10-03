@@ -10,6 +10,7 @@ interface SmartButtonProps {
   className?: string;
   disabled?: boolean; 
   type?: 'button' | 'submit' | 'reset';
+  title?: string;
 }
 
 export const SmartButton: React.FC<SmartButtonProps> = ({
@@ -19,6 +20,7 @@ export const SmartButton: React.FC<SmartButtonProps> = ({
   className = '',
   disabled = false,
   type = 'button',
+  title = '',
 }) => {
   const cachedRights = useLegacyPermissions();
   
@@ -49,6 +51,7 @@ export const SmartButton: React.FC<SmartButtonProps> = ({
       data-required-permission={requiredPermission}
       data-has-permission={hasPermission}
       data-is-disabled={isDisabled}
+      title={title}
     >
       {children}
     </button>

@@ -12,6 +12,9 @@ import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -91,11 +94,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [ 
     {
+      id: 'export-dole-shc-minute-btn',
       name: 'Export',
       action: () => {
         setIsExportProgressModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.export_dole_SHC_minute,
     },
   ];
 
@@ -280,7 +283,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
                     id: item.id,
@@ -290,7 +294,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EditIcon />
-              </button>
+              </SmartButton>
               <button
                 // className='opacity-50'
                 onClick={() =>
@@ -308,7 +312,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EmailLogo />
               </button>
-              <button
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsShcMinutesMeetingDeleteModalOpen({
                     id: item.id,
@@ -317,7 +322,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -411,13 +416,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-shc-minute-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
                 disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
-              </button>
+              </SmartButton>
               <Menu as='div' className='relative'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
@@ -439,20 +445,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       {menuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <span
+                            <SmartMenuItem
+                              id={item.id}
+                              name={item.name}
+                              action={item.action}
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
+                              disabledClassName='bg-gray-200 cursor-not-allowed opacity-50'
+                            />
                           )}
                         </Menu.Item>
                       ))}

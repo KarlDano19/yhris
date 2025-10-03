@@ -28,27 +28,46 @@ export const useLegacyPermissions = () => {
     
     // Map all possible permissions to boolean values (ALL your UserRights permissions)
     const allPermissions = [
+      // Dashboard Pages
+      'view_post_job_page', 'view_talent_search_page', 'view_screen_applicant_page', 
+      'view_onboarding_page', 'view_manage_page', 'view_train_page', 
+      'view_employee_separation_page', 'view_dole_page', 'view_analytics_page', 
+      'view_settings_page', 'view_audit_log_page',
+      
       // Employee Management
-      'create_employee', 'edit_employee', 'import_employee', 'export_employee',
+      'create_employee', 'edit_employee', 'import_employee', 'export_employee', 'delete_employee',
       
       // Job Management
-      'create_job', 'edit_job', 'view_applicant', 'schedule_interview',
+      'create_job', 'edit_job', 'delete_job', 'assign_job', 'view_all_job_history', 'schedule_interview',
       
-      // Orientation
-      'create_orientation', 'edit_orientation',
+      // Screen Applicants
+      'assign_job_stage', 'create_job_stage', 'delete_job_stage', 'edit_job_stage', 
+      'move_job_stage', 'unarchive_applicant', 'upload_resume',
+      
+      // Onboarding
+      'allow_onboarding',
       
       // Employee Issues
       'create_employee_issue', 'edit_employee_issue', 'generate_employee_issue_nte',
       'investigate_employee_issue', 'decide_employee_issue', 'update_employee_issue_status',
       
       // Memo & Training
-      'create_memo', 'edit_memo', 'create_training', 'edit_training',
+      'create_memo', 'edit_memo',
       
-      // Payroll
-      'create_payroll', 'edit_payroll',
+      // Designed Benefits
+      'create_benefit',
+      
+      // Employee Movement
+      'create_employee_movement',
+      
+      // Generate Documents
+      'generate_documents',
+      
+      // Employee 201
+      'view_employee_201', 'edit_employee_201',
       
       // Separation & Employee Kit
-      'create_separation', 'edit_separation', 'create_employee_kit', 'edit_employee_kit',
+      'create_separation', 'edit_separation',
       
       // All DOLE permissions
       'create_dole_employee_compensation', 'edit_dole_employee_compensation', 
@@ -66,8 +85,18 @@ export const useLegacyPermissions = () => {
       'export_dole_work_environment_request', 'generate_dole_work_environment_request',
       'create_dole_osh_program', 'edit_dole_osh_program',
       
-      // System Settings
-      'settings_access', 'audit_log_access', 'manage_job_access_rules', 'view_all_job_history',
+      // Settings
+      'create_sub_account', 'edit_sub_account', 'delete_sub_account',
+      'create_permission', 'edit_permission', 'delete_permission',
+      'create_role', 'edit_role', 'delete_role', 'assign_user_roles', 'manage_roles',
+      
+      // General Settings
+      'create_position', 'edit_position', 'delete_position',
+      'create_department', 'edit_department', 'delete_department',
+      'create_location', 'edit_location', 'delete_location',
+      'create_employee_status', 'edit_employee_status', 'delete_employee_status',
+      'create_movement_settings', 'edit_movement_settings', 'delete_movement_settings',
+      'create_email_template', 'edit_email_template', 'delete_email_template',
     ];
 
     // Set all permissions to false by default, then enable those the user has

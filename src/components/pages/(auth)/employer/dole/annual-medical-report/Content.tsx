@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
 
-import { Menu, Transition } from "@headlessui/react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
-import html2canvas from "html2canvas";
-import { Tooltip } from "react-tooltip";
 import { useForm } from "react-hook-form";
+
+import { SmartButton } from "@/components/SmartPermissions/SmartButton";
 
 import { handlePrintPDF } from './PrintData';
 import { getPrintAnnualMedicalReportDetails } from './hooks/useGetPrintAnnualMedicalReportDetails';
@@ -27,7 +24,6 @@ import classNames from "@/helpers/classNames";
 
 import useGetAnnualMedicalReportItems from "./hooks/useGetAnnualMedicalReportItems";
 import useUpdateAnnualMedicalReport from "./hooks/useUpdateAnnualMedicalReport";
-import ExportProgressModal from "./modals/ExportProgressModal";
 import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportModal";
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
@@ -36,6 +32,7 @@ import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from "@/svg/DeleteIcon";
+import RBACTest from "@/components/RBACTest";
 
 
 type PaginationProps = {
@@ -61,8 +58,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isCreateAnnualMedicalReportModalOpen,
     setIsCreateAnnualMedicalReportModalOpen,
   ] = useState<boolean>(false);
-  const [isExportProgressModalOpen, setIsExportProgressModalOpen] =
-    useState<boolean>(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const [annualMedicalReportItems, setAnnualMedicalReportItems] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
@@ -89,9 +84,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
-
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
 
   const updateAnnualMedicalReport = useUpdateAnnualMedicalReport();
 
@@ -316,7 +308,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_annual_medical_report}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -339,21 +330,22 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center">
             <div className="flex items-center justify-center space-x-2">
-              <button
+              <SmartButton
+                id="edit-dole-annual-medical-report-btn"
                 onClick={() =>
                   setIsEditAnnualMedicalReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_annual_medical_report}
               >
                 <EditIcon />
-              </button>
+              </SmartButton>
 
-              <button
+              <SmartButton
+                id="print-annual-medical-report-btn"
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_annual_medical_report}
+                disabled={generatingItemId === item.id}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -362,18 +354,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-annual-medical-report-btn"
                 onClick={() =>
                   setIsDeleteAnnualMedicalReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_annual_medical_report}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -465,13 +457,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className="flex-1 flex justify-start lg:justify-end">
-              <button
+              <SmartButton
+                id="create-dole-annual-medical-report-btn"
                 className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
                 onClick={() => setIsCreateAnnualMedicalReportModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_annual_medical_report}
               >
                 CREATE
-              </button>
+              </SmartButton>
               {/* <Menu as="div" className="relative">
                 <Menu.Button className="bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50">
                   <span className="sr-only">Open options</span>
@@ -606,13 +598,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualMedicalReportModalOpen}
         />
       )}
-      {/* {isExportProgressModalOpen && (
-        <ExportProgressModal
-          isOpen={isExportProgressModalOpen}
-          setIsOpen={setIsExportProgressModalOpen}
-          itemsFilter={itemsFilter}
-        />
-      )} */}
     </>
   );
 }

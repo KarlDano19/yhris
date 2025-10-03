@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import StateContext from '../contexts/StateContext';
 import CustomToast from '@/components/CustomToast';
 import useAddStage from '../hooks/useAddStage';
@@ -171,7 +173,8 @@ export default function StageHeader({
     <div className={`flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative ${
       isDisabled ? 'opacity-60' : ''
     }`}>
-      <button 
+      <SmartButton 
+        id="edit-job-stage-btn"
         type='button' 
         className={`p-4 ${!canEdit || stage.isNewStage ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-50'}`}
         onClick={() => canEdit && setIsEditing((prev) => !prev)} 
@@ -179,7 +182,7 @@ export default function StageHeader({
         title={!canEdit ? 'No permission to edit' : 'Edit stage title'}
       >
         <PencilIcon className='w-5' />
-      </button>
+      </SmartButton>
       
       <textarea
         rows={stageTitle.length <= 21 ? 1 : 2}
@@ -240,7 +243,8 @@ export default function StageHeader({
           </button>
           
           {/* NEW: Assign Users option */}
-          <button
+          <SmartButton
+            id="assign-job-stage-btn"
             onClick={() => {
               setStageDropdownId(null);
               setActionState({
@@ -258,9 +262,10 @@ export default function StageHeader({
             disabled={stage.isNewStage || !permissions.can_update}
           >
             Assign Users
-          </button>
+          </SmartButton>
           
-          <button
+          <SmartButton
+            id="delete-job-stage-btn"
             onClick={() => {
               setStageDropdownId(null);
               setActionState({
@@ -279,7 +284,7 @@ export default function StageHeader({
             disabled={!permissions.can_update}
           >
             Remove Stage
-          </button>
+          </SmartButton>
         </div>
       )}
 

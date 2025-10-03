@@ -5,6 +5,8 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import type { Employee } from "@/types/employee-201-records/employee";
 import type { TrainingChangeSet } from "./components/TrainingDevelopmentForm";
 
@@ -482,7 +484,8 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
             </h4>
           </a>
 
-        <button
+        <SmartButton
+          id="edit-employee-201-btn"
           data-testid="save-btn"
           onClick={() => {
             if (requiresEdit && !isEditingTab) {
@@ -503,7 +506,7 @@ export default function Employee201Content({ params, emp, hasActiveSubscription 
           {requiresEdit
             ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
             : (saving ? "Saving…" : "Save")}
-        </button>
+        </SmartButton>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">

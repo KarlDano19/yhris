@@ -10,6 +10,7 @@ import { Menu, Transition } from '@headlessui/react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 // RBAC Hooks
 import useGetPermissionsList from './hooks/useGetPermissionsList';
@@ -344,20 +345,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {visiblePermissionColumns.actions && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
               <div className='flex items-center space-x-2'>
-                <button
+                <SmartButton
+                  id="edit-permission-btn"
                   onClick={() => setPermissionModal({ id: permission.id, open: true, mode: 'edit' })}
                   className='text-indigo-600 hover:text-indigo-900'
                   title='Edit Permission'
                 >
                   <PencilIcon className='h-4 w-4' />
-                </button>
-                <button
+                </SmartButton>
+                <SmartButton
+                  id="delete-permission-btn"
                   onClick={() => handleDelete('permission', permission.id, permission.display_name)}
                   className='text-red-600 hover:text-red-900'
                   title='Delete Permission'
                 >
                   <TrashIcon className='h-4 w-4' />
-                </button>
+                </SmartButton>
               </div>
             </td>
           )}
@@ -372,13 +375,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <h3 className='mt-2 text-sm font-medium text-gray-900'>No permissions found</h3>
               <p className='mt-1 text-sm text-gray-500'>Get started by creating a new permission.</p>
               <div className='mt-6'>
-                <button
+                <SmartButton
+                  id="create-permission-btn"
                   onClick={() => setPermissionModal({ id: null, open: true, mode: 'create' })}
                   className='inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-savoy-blue hover:bg-blue-700'
                 >
                   <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                   Create Permission
-                </button>
+                </SmartButton>
               </div>
             </div>
           </td>
@@ -442,20 +446,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {visibleRoleColumns.actions && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
               <div className='flex items-center space-x-2'>
-                <button
+                <SmartButton
+                  id="edit-role-btn"
                   onClick={() => setRoleModal({ id: role.id, open: true, mode: 'edit' })}
                   className='text-indigo-600 hover:text-indigo-900'
                   title='Edit Role'
                 >
                   <PencilIcon className='h-4 w-4' />
-                </button>
-                <button
+                </SmartButton>
+                <SmartButton
+                  id="delete-role-btn"
                   onClick={() => handleDelete('role', role.id, role.name)}
                   className='text-red-600 hover:text-red-900'
                   title='Delete Role'
                 >
                   <TrashIcon className='h-4 w-4' />
-                </button>
+                </SmartButton>
               </div>
             </td>
           )}
@@ -470,20 +476,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <h3 className='mt-2 text-sm font-medium text-gray-900'>No roles found</h3>
               <p className='mt-1 text-sm text-gray-500'>Get started by creating a new role or using templates.</p>
               <div className='mt-6 space-x-3'>
-                <button
+                <SmartButton
+                  id="create-role-btn"
                   onClick={() => setRoleModal({ id: null, open: true, mode: 'create' })}
                   className='inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-savoy-blue hover:bg-blue-700'
                 >
                   <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                   Create Role
-                </button>
-                <button
+                </SmartButton>
+                <SmartButton
+                  id="create-role-btn"
                   onClick={() => setTemplateModal({ open: true })}
                   className='inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'
                 >
                   <DocumentDuplicateIcon className='-ml-1 mr-2 h-5 w-5' />
                   Use Template
-                </button>
+                </SmartButton>
               </div>
             </div>
           </td>
@@ -543,7 +551,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {visibleUserRoleColumns.actions && (
             <td className='whitespace-nowrap px-3 py-4 text-sm text-gray-500'>
               <div className='flex items-center space-x-2'>
-                <button
+                <SmartButton
+                  id="assign-user-roles-btn"
                   onClick={() => setAssignRoleModal({ 
                     id: user.id, 
                     open: true, 
@@ -553,7 +562,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   title='Assign Roles'
                 >
                   <UserGroupIcon className='h-4 w-4' />
-                </button>
+                </SmartButton>
               </div>
             </td>
           )}
@@ -685,31 +694,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end gap-3'>
               {/* Action Buttons */}
               {activeTab === 'permissions' && (
-                <button
+                <SmartButton
+                  id="create-permission-btn"
                   onClick={() => setPermissionModal({ id: null, open: true, mode: 'create' })}
                   className='inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-savoy-blue hover:bg-blue-700'
                 >
                   <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                   Create Permission
-                </button>
+                </SmartButton>
               )}
 
               {activeTab === 'roles' && (
                 <>
-                  <button
+                  <SmartButton
+                    id="create-role-btn"
                     onClick={() => setRoleModal({ id: null, open: true, mode: 'create' })}
                     className='inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-savoy-blue hover:bg-blue-700'
                   >
                     <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                     Create Role
-                  </button>
-                  <button
+                  </SmartButton>
+                  <SmartButton
+                    id="create-role-btn"
                     onClick={() => setTemplateModal({ open: true })}
                     className='inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'
                   >
                     <DocumentDuplicateIcon className='-ml-1 mr-2 h-5 w-5' />
                     Use Template
-                  </button>
+                  </SmartButton>
                 </>
               )}
 

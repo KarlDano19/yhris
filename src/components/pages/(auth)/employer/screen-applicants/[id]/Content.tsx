@@ -11,6 +11,9 @@ import { initialActionState } from '../lib/initialActionState';
 import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
+
 import CustomToast from '@/components/CustomToast';
 import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
@@ -467,13 +470,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                 {/* Desktop Layout */}
                 <div className='hidden md:flex justify-start items-center gap-4 my-6'>
-                  <button
+                  <SmartButton
+                    id="upload-resumes-btn"
                     onClick={handleOpenBatchUpload}
                     className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
                   >
                     <UploadIcon />
                     Upload Resumes
-                  </button>
+                  </SmartButton>
 
                   <button
                     onClick={() => setIsAddApplicantModalOpen(true)}
@@ -504,13 +508,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   </div>
                   
                   <div className='flex items-center gap-2'>
-                    <button
+                    <SmartButton
+                      id="upload-resumes-btn"
                       onClick={handleOpenBatchUpload}
                       className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
                     >
                       <UploadIcon />
                       Upload Resumes
-                    </button>
+                    </SmartButton>
 
                     <Filter onFilterChange={handleFilterChange} />
 
@@ -560,16 +565,16 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                             </Menu.Item>
                             <Menu.Item>
                               {({ active }) => (
-                                <button
+                                <SmartButton
+                                  id="create-job-stage-btn"
                                   onClick={handleAddStage}
                                   className={`${
                                     active ? 'bg-green-50' : 'hover:bg-green-50'
                                   } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
-                                  style={{ color: '#65c979' }}
                                 >
                                   <PlusIconGreen />
                                   <span className="ml-1">Add Stage</span>
-                                </button>
+                                </SmartButton>
                               )}
                             </Menu.Item>
                           </div>

@@ -17,7 +17,6 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
-import EmployeesModal from './modals/EmployeesModal';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';

@@ -9,7 +9,7 @@ import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { SmartMenuItem } from '@/components/SmartPermissions/SmartMenuItem';
 
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -28,6 +28,7 @@ import ClipIcon from '@/svg/ClipIcon';
 import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
 
 import classNames from '@/helpers/classNames';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 type PaginationProps = {
   totalRecords: number;
@@ -227,15 +228,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </p>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <button
+                  <SmartButton
+                    id="edit-memo-btn"
                     onClick={() => {
                       setIdToDelete(item.id);
                       setIsConfirmModalOpen(true);
                     }}
-                    // disabled={!cachedProfile?.state?.data?.edit_memo}
                   >
                     <DeleteMemoLogo />
-                  </button>
+                  </SmartButton>
                 </td>
               </tr>
             )
@@ -338,11 +339,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
                 <div>
-                  <Menu.Button as={SmartButton}
+                  <Menu.Button
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                    // disabled={!hasActiveSubscription || !cachedProfile?.state?.data?.create_memo}
-                  >
+                   >
                     CREATE
                   </Menu.Button>
                 </div>
@@ -360,34 +360,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <div className='py-1'>
                       <Menu.Item>
                         {({ active }) => (
-                          <span
+                          <SmartMenuItem
+                            id="create-memo-btn"
+                            name="Create Memo"
                             className={classNames(
                               active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                               'block px-4 py-2 text-sm cursor-pointer'
                             )}
-                            onClick={() => {
+                            action={() => {
                               setIsCreateMemoModalOpen(true);
                               setIsOpen(!isOpen);
                             }}
-                          >
-                            Create Memo
-                          </span>
+                         />
                         )}
                       </Menu.Item>
                       <Menu.Item>
                         {({ active }) => (
-                          <span
+                          <SmartMenuItem
+                            id="create-memo-btn"
+                            name="Create Policy"
                             className={classNames(
                               active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                               'block px-4 py-2 text-sm cursor-pointer'
                             )}
-                            onClick={() => {
+                            action={() => {
                               setIsCreatePolicyModalOpen(true);
                               setIsOpen(!isOpen);
                             }}
-                          >
-                            Create Policy
-                          </span>
+                         />
                         )}
                       </Menu.Item>
                     </div>

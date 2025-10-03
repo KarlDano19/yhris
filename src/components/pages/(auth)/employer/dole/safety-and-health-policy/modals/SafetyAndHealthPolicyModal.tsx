@@ -31,6 +31,7 @@ import PrintIcon from "@/svg/PrintIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import classNames from "@/helpers/classNames";
+import { SmartButton } from "@/components/SmartPermissions/SmartButton";
 
 interface cachedRigthsData {
   name: string;
@@ -224,14 +225,13 @@ function SafetyAndHealthPolicyModal({
                         <SelectChevronDown />
                       </div>
                     </div>
-                    <button
+                    <SmartButton
+                      id="edit-dole-safety-health-policy-btn"
                       onClick={() => onEditClick()} // Pass the specific policy ID
-                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy || !hasActiveSubscription}
-                      data-edit-button
                       className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EditIcon />
-                    </button>
+                    </SmartButton>
                     <button onClick={HandlePrint} data-print-button disabled={!hasActiveSubscription} className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}>
                       <PrintIcon />
                     </button>

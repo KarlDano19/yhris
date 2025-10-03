@@ -246,7 +246,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <SmartButton
-                id="create_benefits-btn"
+                id="create-benefit-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsDesignBenefitsModalOpen(true)}
                 disabled={!cachedRigths?.state?.data?.create_orientation}
