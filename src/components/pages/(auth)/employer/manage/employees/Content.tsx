@@ -28,6 +28,8 @@ import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
+import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
@@ -141,6 +143,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: employeeStatusItems } = useGetEmployeeStatusItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
+  const bulkDeleteMutation = useBulkDeleteEmployees();
 
   // Combined refetch function to refresh both main list and autocomplete data
   const refetchAllEmployeeData = async () => {
@@ -152,6 +155,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const cachedData: any = cachedProfile?.state?.data;
   const hasAgreed = cachedData?.is_export_agreed;
+
+  const [selectedEmployees, setSelectedEmployees] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -376,6 +383,63 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setVisibleColumns(allColumns);
   };
 
+  // Handle individual employee selection
+  const handleEmployeeSelect = (employeeId: number) => {
+    setSelectedEmployees(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(employeeId)) {
+        newSet.delete(employeeId);
+      } else {
+        newSet.add(employeeId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!employeeItems) return;
+    
+    if (selectAll) {
+      setSelectedEmployees(new Set());
+    } else {
+      const allIds = employeeItems.map((e: any) => e.id);
+      setSelectedEmployees(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedEmployees.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const employeeIds = Array.from(selectedEmployees);
+      await bulkDeleteMutation.mutateAsync(employeeIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedEmployees.size} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedEmployees(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetchAllEmployeeData();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete employees';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  // Update select all state when employees change
+  useEffect(() => {
+    if (employeeItems) {
+      const allEmployeeIds = new Set(employeeItems.map((e: any) => e.id));
+      const allSelected = allEmployeeIds.size > 0 && 
+        Array.from(allEmployeeIds).every((id: any) => selectedEmployees.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEmployees, employeeItems]);
+
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
@@ -391,6 +455,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEmployees.has(item.id)}
+              onChange={() => handleEmployeeSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           {visibleColumns.date_hired && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
           )}
@@ -446,6 +518,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
                 disabled={!cachedRigths?.state?.data?.edit_employee}
+                className={selectedEmployees.size > 1 ? 'invisible' : ''}
               >
                 <DeleteIcon />
               </button>
@@ -876,6 +949,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions - Below Search/Filter Row */}
+          {selectedEmployees.size > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !cachedRigths?.state?.data?.edit_employee}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedEmployees(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEmployees.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -888,6 +992,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
                       <tr>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          <input
+                            type="checkbox"
+                            checked={selectAll}
+                            onChange={handleSelectAll}
+                            disabled={!employeeItems || employeeItems.length === 0}
+                            className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                          />
+                        </th>
                         {visibleColumns.date_hired && (
                           <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Date Hired
@@ -1034,6 +1147,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           departmentItems={departmentItems}
           positionItems={positionItems}
           employeeStatusItems={employeeStatusItems}
+        />
+      )}
+
+      {selectedEmployees.size > 0 && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedEmployees.size}
+          moduleName="employees"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
 

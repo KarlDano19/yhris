@@ -252,6 +252,9 @@ export default function Checklist({
     } else {
       setCurrentStageNotes('');
     }
+
+    // Load inherited checklist data for the current stage
+    loadInheritedChecklistData();
   }, [stageNotesData, actionState.stageId]);
 
   const handleClose = () => {
@@ -332,6 +335,32 @@ export default function Checklist({
   // Check if current tab is a previous stage (not the current stage)
   const isPreviousStage = activeTab !== actionState.stageId;
 
+  // Load inherited checklist data for the current stage
+  const loadInheritedChecklistData = () => {
+    if (stageNotesData?.stage_notes) {
+      const currentStageNote = stageNotesData.stage_notes.find(
+        (note: any) => note.job_stage === actionState.stageId
+      );
+      
+      if (currentStageNote && currentStageNote.stage_requirements_checklist) {
+        try {
+          const checklistData = currentStageNote.stage_requirements_checklist;
+          if (checklistData.checklist) {
+            // Extract checked requirements from the inherited data
+            const checkedRequirements = Object.entries(checklistData.checklist)
+              .filter(([_, isChecked]) => isChecked)
+              .map(([requirement, _]) => requirement);
+            
+            // Set the checked requirements in the form
+            setChecks(checkedRequirements);
+          }
+        } catch (error) {
+          console.error('Error loading inherited checklist data:', error);
+        }
+      }
+    }
+  };
+
   return (
     <>
       <ModalLayout title={title} isOpen={isOpen} handleClose={handleClose}>
@@ -340,6 +369,7 @@ export default function Checklist({
             {requirements?.length > 0 && (
               <div className='grid gap-4 mb-8'>
                 {requirements.map((requirement, index) => {
+                  const isInherited = checks.includes(requirement);
                   return (
                     <div key={index} className='flex items-center gap-4 text-indigo-dye text-[15px]'>
                       <input
@@ -349,7 +379,14 @@ export default function Checklist({
                         type='checkbox'
                         className='w-5 h-5'
                       />
-                      <label htmlFor={requirement}>{titleCase(requirement)}</label>
+                      <label htmlFor={requirement} className="flex items-center gap-2">
+                        {titleCase(requirement)}
+                        {/* {isInherited && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            Inherited
+                          </span>
+                        )} */}
+                      </label>
                     </div>
                   );
                 })}

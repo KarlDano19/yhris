@@ -39,6 +39,8 @@ import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteHealthAndSafetyReport from "./hooks/useBulkDeleteHealthAndSafetyReport";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -85,6 +87,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const {
     data: healthAndSafetyReportItemsData,
@@ -128,6 +133,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: currentReportDetails } = useGetHealthAndSafetyReportDetails(
     isSendEmailModalOpen?.id || null
   );
+  const bulkDeleteMutation = useBulkDeleteHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -362,6 +368,59 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (!healthAndSafetyReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = healthAndSafetyReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedReports(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      healthAndSafetyReportItemsRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  useEffect(() => {
+    if (healthAndSafetyReportItems) {
+      const allReportIds = new Set(healthAndSafetyReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, healthAndSafetyReportItems]);
+
   const renderRows = () => {
     if (isSearching || isHealthAndSafetyReportItemsLoading) {
       return (
@@ -377,6 +436,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (healthAndSafetyReportItems && healthAndSafetyReportItems.length > 0) {
       return healthAndSafetyReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {Number(item.total_employees_male || 0) + Number(item.total_employees_female || 0)}
@@ -625,6 +692,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <thead>
                     <tr>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!healthAndSafetyReportItems || healthAndSafetyReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Report
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -717,6 +793,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedReports.size}
+          moduleName="Health and Safety Report"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       {/* Print Section */}

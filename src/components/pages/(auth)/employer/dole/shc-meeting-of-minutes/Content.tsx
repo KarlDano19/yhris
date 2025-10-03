@@ -20,6 +20,7 @@ import classNames from '@/helpers/classNames';
 
 import useGetShcMinutesMeetingItems from './hooks/useGetShcMinutesMettingItems';
 import useUpdateShcMinutesMeeting from './hooks/useUpdateShcMinutesMeeting';
+import useBulkDeleteShcMinutesMeeting from './hooks/useBulkDeleteShcMinutesMeeting';
 import CreateShcMettingMinutesModal from './modals/CreateShcMettingMinutesModal';
 import UpdateShcMinutesMeetingModal from './modals/UpdateShcMinutesMeeting';
 import DeleteShcMinutesMeetingModal from './modals/DeleteShcMinutesMeetingModal';
@@ -33,6 +34,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 import DeleteIcon from '@/svg/DeleteIcon';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 
 type PaginationProps = {
@@ -68,6 +70,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Email-specific state
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
+  
+  // Bulk delete states
+  const [selectedShcMinutesMeeting, setSelectedShcMinutesMeeting] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  
   const queryClient = useQueryClient();
   const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateShcMinutesMeeting = useUpdateShcMinutesMeeting();
@@ -78,6 +86,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isSendEmailModalOpen?.id || null
   );
   
+  const bulkDeleteMutation = useBulkDeleteShcMinutesMeeting();
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -156,6 +165,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isShcMinutesMeetingLoading, isSearching]);
 
+  // Update select all state when SHC minutes meeting items change
+  useEffect(() => {
+    if (shcMinutesMeetingItems) {
+      const allShcMinutesMeetingIds = new Set(shcMinutesMeetingItems.map((s: any) => s.id));
+      const allSelected = allShcMinutesMeetingIds.size > 0 && 
+        Array.from(allShcMinutesMeetingIds).every((id: any) => selectedShcMinutesMeeting.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedShcMinutesMeeting, shcMinutesMeetingItems]);
+
   const handleStatusChange = async (itemId: number, newStatus: string) => {
     try {
       await updateShcMinutesMeeting.mutateAsync({
@@ -233,6 +252,53 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
       
       sendEmailMutate(payload, callbackReq);
+    }
+  };
+
+  // Handle individual SHC minutes meeting selection
+  const handleShcMinutesMeetingSelect = (shcMinutesMeetingId: number) => {
+    setSelectedShcMinutesMeeting(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(shcMinutesMeetingId)) {
+        newSet.delete(shcMinutesMeetingId);
+      } else {
+        newSet.add(shcMinutesMeetingId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!shcMinutesMeetingItems) return;
+    
+    if (selectAll) {
+      setSelectedShcMinutesMeeting(new Set());
+    } else {
+      const allIds = shcMinutesMeetingItems.map((item: any) => item.id);
+      setSelectedShcMinutesMeeting(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedShcMinutesMeeting.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const shcMinutesMeetingIds = Array.from(selectedShcMinutesMeeting);
+      await bulkDeleteMutation.mutateAsync(shcMinutesMeetingIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedShcMinutesMeeting.size} SHC minutes of meeting deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedShcMinutesMeeting(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      shcMinutesMeetingRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete SHC minutes of meeting';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
     }
   };
 
@@ -322,6 +388,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (shcMinutesMeetingItems && shcMinutesMeetingItems.length > 0) {
       return shcMinutesMeetingItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedShcMinutesMeeting.has(item.id)}
+              onChange={() => handleShcMinutesMeetingSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.venue}</td>
@@ -538,6 +612,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section - Left Side */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedShcMinutesMeeting.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedShcMinutesMeeting(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedShcMinutesMeeting.size} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -550,6 +663,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!shcMinutesMeetingItems || shcMinutesMeetingItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Meeting
                       </th>
@@ -638,6 +760,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
         />
       )}
+      
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedShcMinutesMeeting.size}
+        moduleName="SHC minutes of meeting"
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
 
       <Tooltip id='search-tooltip' />
       <Tooltip id='email-tooltip' />
