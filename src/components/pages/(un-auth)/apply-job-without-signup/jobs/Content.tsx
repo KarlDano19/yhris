@@ -8,6 +8,7 @@ import Link from 'next/link';
 import JobDetails from './JobDetails';
 import JobDetailsModal from './modals/JobDetailsModal';
 import useFindJobs from './hooks/useFindJobs';
+import JobSearchAutocomplete from '@/components/common/JobSearchAutocomplete';
 
 import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -26,7 +27,8 @@ const Content = () => {
   });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [jobsItems, setJobsItems] = useState<any>([]);
-  const { data: dataJobs, isLoading: isGetJobsLoading, refetch } = useFindJobs(itemsFilter);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const { data: dataJobs, isLoading: isGetJobsLoading, refetch, searchWithFilter } = useFindJobs(itemsFilter);
 
   useEffect(() => {
     if (dataJobs && dataJobs.length !== 0) {
@@ -71,19 +73,63 @@ const Content = () => {
               }}
             >
               <div className='lg:flex lg:px-4 lg:justify-between md:mt-4'>
-                <div className='flex items-center justify-around rounded-md p-3 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-black w-full lg:w-[39%]'>
-                  <label htmlFor='what' className='font-semibold text-indigo-dye text-sm'>
-                    What
-                  </label>
-                  <input
-                    type='text'
-                    name='what'
-                    id='what'
-                    className=' w-56 mx-3 md:px-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[23px]'
+                <div className='w-full lg:w-[39%]'>
+                  <JobSearchAutocomplete
+                    value={itemsFilter.job_title}
+                    onChange={(value) => setItemsFilter({ ...itemsFilter, job_title: value })}
                     placeholder='Enter job title, company, or keywords'
-                    onChange={(e) => setItemsFilter({ ...itemsFilter, job_title: e.target.value })}
+                    isLoading={false}
+                    onSearch={async (searchValue?: string) => {
+                      setShowAutocomplete(false);
+                      try {
+                        // Use the searchValue if provided (from suggestion click), otherwise use current filter
+                        const searchFilter = searchValue ? { ...itemsFilter, job_title: searchValue } : itemsFilter;
+                        const results = await searchWithFilter(searchFilter);
+                        // Update the jobs list with search results
+                        if (results && results.length !== 0) {
+                          setJob(true);
+                          setJobsItems(results);
+                          setSelectedJobId(results[0].id);
+                          setIsJobView(true);
+                          setJobModal(true);
+                        } else {
+                          setJobsItems([]);
+                          setIsJobView(false);
+                          setJobModal(false);
+                        }
+                      } catch (error) {
+                        console.error('Search error:', error);
+                      }
+                    }}
+                    onShowAutocomplete={() => setShowAutocomplete(true)}
+                    suggestions={showAutocomplete ? (() => {
+                      if (!dataJobs || dataJobs.length === 0) return [];
+                      
+                      const suggestions = new Set();
+                      
+                      // Add job titles only
+                      dataJobs.forEach((job: any) => {
+                        if (job.title) suggestions.add(job.title);
+                      });
+                      
+                      // Add job types
+                      dataJobs.forEach((job: any) => {
+                        if (job.job_type) suggestions.add(job.job_type);
+                      });
+                      
+                      // Add work setup
+                      dataJobs.forEach((job: any) => {
+                        if (job.work_setup) suggestions.add(job.work_setup);
+                      });
+                      
+                      // Add schedule if available
+                      dataJobs.forEach((job: any) => {
+                        if (job.schedule) suggestions.add(job.schedule);
+                      });
+                      
+                      return Array.from(suggestions).filter((suggestion): suggestion is string => typeof suggestion === 'string');
+                    })() : []}
                   />
-                  <MagnifyingGlassIcon className='w-5 h-5 text-gray-400' />
                 </div>
                 <div className='flex items-center justify-around rounded-md p-3 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-black w-full lg:w-[39%] mt-3 lg:mt-0'>
                   <label htmlFor='where' className='font-semibold text-indigo-dye text-sm'>

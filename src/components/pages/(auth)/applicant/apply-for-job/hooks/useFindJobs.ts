@@ -2,18 +2,27 @@ import { useQuery } from '@tanstack/react-query';
 
 async function findJobs(itemsFilter: any) {
   try {
-    const jobTitle = itemsFilter.job_title;
-    const location = itemsFilter.location;
+    const searchParams = new URLSearchParams();
+    
+    // Only add parameters if they have values
+    if (itemsFilter.job_title) {
+      searchParams.append('job_title', itemsFilter.job_title);
+    }
+    if (itemsFilter.location) {
+      searchParams.append('location', itemsFilter.location);
+    }
+    
     const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
       },
     };
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/?job_title=${jobTitle}&location=${location}`,
-      config
-    );
+    
+    const queryString = searchParams.toString();
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${queryString ? `?${queryString}` : ''}`;
+    
+    const res = await fetch(url, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -28,12 +37,25 @@ async function findJobs(itemsFilter: any) {
 }
 
 function useFindJobs(itemsFilter: any) {
-  const query = useQuery(['findJobsPublicCache'], () => findJobs(itemsFilter), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['findJobsPublicCache'], 
+    () => findJobs(itemsFilter), 
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: true, // Enable initial fetch to show jobs on page load
+    }
+  );
 
-  return query;
+  // Create a manual search function that uses current filter
+  const searchWithFilter = (currentFilter: any) => {
+    return findJobs(currentFilter);
+  };
+
+  return {
+    ...query,
+    searchWithFilter
+  };
 }
 
 export default useFindJobs;
