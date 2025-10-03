@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
-import { PermissionDebugger } from '@/components/PermissionDebugger';
 import FloatingProgress from '../../../FloatingProgress';
 
 import AddPostLogo from '@/svg/AddPostLogo';
