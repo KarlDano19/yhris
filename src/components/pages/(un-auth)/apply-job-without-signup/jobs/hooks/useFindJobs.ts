@@ -37,12 +37,25 @@ async function findJobs(itemsFilter: any) {
 }
 
 function useFindJobs(itemsFilter: any) {
-  const query = useQuery(['findJobsPublicCache', itemsFilter], () => findJobs(itemsFilter), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    ['findJobsPublicCache'], 
+    () => findJobs(itemsFilter), 
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: true, // Enable initial fetch to show jobs on page load
+    }
+  );
 
-  return query;
+  // Create a manual search function that uses current filter
+  const searchWithFilter = (currentFilter: any) => {
+    return findJobs(currentFilter);
+  };
+
+  return {
+    ...query,
+    searchWithFilter
+  };
 }
 
 export default useFindJobs;

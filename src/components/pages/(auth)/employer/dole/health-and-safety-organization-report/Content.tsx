@@ -679,6 +679,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section - Left Side */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedReports.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedReports(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedReports.size} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'

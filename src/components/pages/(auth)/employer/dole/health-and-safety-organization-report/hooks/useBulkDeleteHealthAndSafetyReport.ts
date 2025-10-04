@@ -14,7 +14,7 @@ async function bulkDeleteHealthAndSafetyReport(health_and_safety_report_ids: num
                 health_and_safety_report_ids: health_and_safety_report_ids
             })
         };
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health-and-safety-reports/`, config);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health-and-safety-organization-reports/`, config);
         if (!res.ok) {
             throw res.json();
         }
@@ -33,4 +33,4 @@ function useBulkDeleteHealthAndSafetyReport() {
     return query;
 }
 
-export default useBulkDeleteHealthAndSafetyReport; 
+export default useBulkDeleteHealthAndSafetyReport;

@@ -56,7 +56,7 @@ export default function BulkDeleteModal({
                 <div className='text-xl px-20 text-center'>
                   <p className='text-xl text-gray-600 font-bold'>
                     Are you sure you want to <span className='text-red-500'>delete</span> {selectedCount} {moduleName}
-                    {selectedCount > 1 ? 's' : ''}?
+                    {selectedCount > 1}?
                   </p>
                 </div>
                 <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
