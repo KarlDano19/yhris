@@ -9,8 +9,9 @@ import JobDetails from './JobDetails';
 import JobDetailsModal from './modals/JobDetailsModal';
 import useFindJobs from './hooks/useFindJobs';
 import JobSearchAutocomplete from '@/components/common/JobSearchAutocomplete';
+import LocationSearchAutocomplete from '@/components/common/LocationSearchAutocomplete';
 
-import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import jobIllustration from '@/assets/find-job-illustration.svg';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -131,19 +132,70 @@ const Content = () => {
                     })() : []}
                   />
                 </div>
-                <div className='flex items-center justify-around rounded-md p-3 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-black w-full lg:w-[39%] mt-3 lg:mt-0'>
-                  <label htmlFor='where' className='font-semibold text-indigo-dye text-sm'>
-                    Where
-                  </label>
-                  <input
-                    type='text'
-                    name='where'
-                    id='where'
-                    className=' w-56 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-xs leading-[23px] ml-3 md:ml-0'
+                <div className='w-full lg:w-[39%] mt-3 lg:mt-0'>
+                  <LocationSearchAutocomplete
+                    value={itemsFilter.location}
+                    onChange={(value) => setItemsFilter({ ...itemsFilter, location: value })}
                     placeholder='Town, City, Province, Country'
-                    onChange={(e) => setItemsFilter({ ...itemsFilter, location: e.target.value })}
+                    isLoading={false}
+                    onSearch={async (searchValue?: string) => {
+                      setShowAutocomplete(false);
+                      try {
+                        // Use the searchValue if provided (from suggestion click), otherwise use current filter
+                        const searchFilter = searchValue ? { ...itemsFilter, location: searchValue } : itemsFilter;
+                        const results = await searchWithFilter(searchFilter);
+                        // Update the jobs list with search results
+                        if (results && results.length !== 0) {
+                          setJob(true);
+                          setJobsItems(results);
+                          setSelectedJobId(results[0].id);
+                          setIsJobView(true);
+                          setJobModal(true);
+                        } else {
+                          setJobsItems([]);
+                          setIsJobView(false);
+                          setJobModal(false);
+                        }
+                      } catch (error) {
+                        console.error('Search error:', error);
+                      }
+                    }}
+                    onShowAutocomplete={() => setShowAutocomplete(true)}
+                    suggestions={showAutocomplete ? (() => {
+                      if (!dataJobs || dataJobs.length === 0) return [];
+                      
+                      const suggestions = new Set();
+                      
+                      // Add job locations (general location)
+                      dataJobs.forEach((job: any) => {
+                        if (job.location) suggestions.add(job.location);
+                      });
+                      
+                      // Add specific advertise_to locations for more granular search
+                      dataJobs.forEach((job: any) => {
+                        if (job.advertise_to) suggestions.add(job.advertise_to);
+                      });
+                      
+                      // Add common Philippine cities and provinces for better coverage
+                      const commonLocations = [
+                        'Metro Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig', 'Mandaluyong', 'San Juan', 'Marikina',
+                        'Cebu City', 'Davao City', 'Iloilo City', 'Bacolod', 'Cagayan de Oro', 'Zamboanga City',
+                        'Baguio', 'Dagupan', 'Angeles City', 'Olongapo', 'Batangas City', 'Lucena', 'Naga',
+                        'Legazpi', 'Puerto Princesa', 'Iloilo', 'Roxas City', 'Kalibo', 'Boracay',
+                        'Tacloban', 'Ormoc', 'Calbayog', 'Catbalogan', 'Dumaguete', 'Tagbilaran',
+                        'Butuan', 'Surigao', 'Tandag', 'Cotabato', 'General Santos', 'Koronadal',
+                        'Dipolog', 'Pagadian', 'Ozamiz', 'Iligan', 'Valencia', 'Malaybalay',
+                        'Kidapawan', 'Isulan', 'Tacurong', 'Sultan Kudarat', 'South Cotabato',
+                        'North Cotabato', 'Maguindanao', 'Lanao del Sur', 'Lanao del Norte',
+                        'Misamis Oriental', 'Misamis Occidental', 'Zamboanga del Norte',
+                        'Zamboanga del Sur', 'Zamboanga Sibugay', 'Basilan', 'Sulu', 'Tawi-Tawi'
+                      ];
+                      
+                      commonLocations.forEach(location => suggestions.add(location));
+                      
+                      return Array.from(suggestions).filter((suggestion): suggestion is string => typeof suggestion === 'string');
+                    })() : []}
                   />
-                  <MapPinIcon className='w-5 h-5 text-gray-400' />
                 </div>
                 <div className='flex justify-center lg:block mt-5 lg:mt-0'>
                   <button
