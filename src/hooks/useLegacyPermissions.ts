@@ -48,8 +48,7 @@ export const useLegacyPermissions = () => {
       'allow_onboarding',
       
       // Employee Issues
-      'create_employee_issue', 'edit_employee_issue', 'generate_employee_issue_nte',
-      'investigate_employee_issue', 'decide_employee_issue', 'update_employee_issue_status',
+      'create_employee_issue', 'edit_employee_issue', 'generate_employee_issue_nte', 'update_employee_issue_status',
       
       // Memo & Training
       'create_memo', 'edit_memo',
@@ -95,7 +94,7 @@ export const useLegacyPermissions = () => {
       'create_department', 'edit_department', 'delete_department',
       'create_location', 'edit_location', 'delete_location',
       'create_employee_status', 'edit_employee_status', 'delete_employee_status',
-      'create_movement_settings', 'edit_movement_settings', 'delete_movement_settings',
+      'create_movement_settings', 
       'create_email_template', 'edit_email_template', 'delete_email_template',
 
       // test

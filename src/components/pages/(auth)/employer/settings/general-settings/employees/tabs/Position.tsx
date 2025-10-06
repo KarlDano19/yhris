@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -141,16 +143,18 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
-              <button
+              <SmartButton
+                id="edit-position-btn"
                 onClick={() => setIsPositionEditModalOpen({ id: item.id, open: true })}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="delete-position-btn"
                 onClick={() => setIsPositionDeleteModalOpen({ id: item.id, open: true })}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -243,13 +247,13 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-position-btn"
                 onClick={() => setIsAddPositionModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!hasActiveSubscription}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 

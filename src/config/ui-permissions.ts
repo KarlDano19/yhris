@@ -54,8 +54,6 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'create-employee-issue-btn', permission: 'create_employee_issue', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'edit-employee-issue-btn', permission: 'edit_employee_issue', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'generate-employee-issue-nte-btn', permission: 'generate_employee_issue_nte', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'investigate-employee-issue-btn', permission: 'investigate_employee_issue', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'decide-employee-issue-btn', permission: 'decide_employee_issue', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'update-employee-issue-status-btn', permission: 'update_employee_issue_status', type: 'button', fallbackBehavior: 'disable' },
 
   // Memo & Training
@@ -171,8 +169,6 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
 
   // General Settings - Movement Settings
   { elementId: 'create-movement-settings-btn', permission: 'create_movement_settings', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'edit-movement-settings-btn', permission: 'edit_movement_settings', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'delete-movement-settings-btn', permission: 'delete_movement_settings', type: 'button', fallbackBehavior: 'disable' },
 
   // General Settings - Email Templates
   { elementId: 'create-email-template-btn', permission: 'create_email_template', type: 'button', fallbackBehavior: 'disable' },

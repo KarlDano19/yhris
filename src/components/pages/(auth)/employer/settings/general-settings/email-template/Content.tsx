@@ -6,6 +6,8 @@ import Link from 'next/link';
 
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
@@ -170,12 +172,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button onClick={() => openEditEvaluationModal(item)}>
+              <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
                 <EditIcon />
-              </button>
-              <button onClick={() => openDeleteEvaluationModal(item)}>
+              </SmartButton>
+              <SmartButton id="delete-email-template-btn" onClick={() => openDeleteEvaluationModal(item)}>
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -233,13 +235,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
-                // disabled={!hasActiveSubscription}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>

@@ -6,6 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import useGetLocationItems from '../hooks/location/useGetLocationItems';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
@@ -140,12 +142,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
-              <button onClick={() => setIsLocationEditModalOpen({ id: item.id, open: true })}>
+              <SmartButton id="edit-location-btn" onClick={() => setIsLocationEditModalOpen({ id: item.id, open: true })}>
                 <EditIcon />
-              </button>
-              <button onClick={() => setIsLocationDeleteModalOpen({ id: item.id, open: true })}>
+              </SmartButton>
+              <SmartButton id="delete-location-btn" onClick={() => setIsLocationDeleteModalOpen({ id: item.id, open: true })}>
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -238,13 +240,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-location-btn"
                 onClick={() => setIsAddLocationModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!hasActiveSubscription}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 
