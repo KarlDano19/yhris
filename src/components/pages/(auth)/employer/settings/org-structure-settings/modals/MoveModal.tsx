@@ -109,37 +109,40 @@ export default function MoveModal({
                   )}
                   
                   <div className='space-y-4'>
-                    <div className='p-4 border border-gray-200 rounded-lg'>
-                      <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
-                        <ArrowPathIcon className='w-5 h-5 mr-2 text-blue-600' />
-                        Swap Positions
-                      </h3>
-                      <p className='text-sm text-gray-600 mb-3'>
-                        Exchange the positions of these two items within the same level
-                      </p>
-                      <button
-                        onClick={handleSwap}
-                        disabled={isLoading}
-                        className='w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors'
-                      >
-                        Swap Positions
-                      </button>
-                    </div>
+                    {/* Only show swap option if both positions have the same parent */}
+                    {draggedPosition && targetPosition && draggedPosition.parent === targetPosition.parent && (
+                      <div className='p-4 border border-gray-200 rounded-lg'>
+                        <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
+                          <ArrowPathIcon className='w-5 h-5 mr-2 text-blue-600' />
+                          Swap Positions
+                        </h3>
+                        <p className='text-sm text-gray-600 mb-3'>
+                          Swap the placement of these two positions
+                        </p>
+                        <button
+                          onClick={handleSwap}
+                          disabled={isLoading}
+                          className='w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors'
+                        >
+                          Swap Positions
+                        </button>
+                      </div>
+                    )}
                     
                     <div className='p-4 border border-gray-200 rounded-lg'>
                       <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
                         <ArrowDownIcon className='w-5 h-5 mr-2 text-green-600' />
-                        Move as Child
+                        Move Under
                       </h3>
                       <p className='text-sm text-gray-600 mb-3'>
-                        Move the dragged position to become a child of the target position
+                        Move the position to be under the target position
                       </p>
                       <button
                         onClick={handleMove}
                         disabled={isLoading}
                         className='w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors'
                       >
-                        Move as Child
+                        Move Under
                       </button>
                     </div>
                   </div>
