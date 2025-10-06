@@ -221,30 +221,50 @@ export default function ApplicantForm({ title }: PropTypes) {
             <div className='bg-blue-50 rounded-lg p-6 border border-blue-200'>
               <div className='flex items-start'>
                 <div className='mr-3'>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-700 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-6 w-6 text-blue-700 mt-1'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                    />
                   </svg>
                 </div>
                 <div className='flex-1'>
                   <h4 className='font-semibold text-blue-900 mb-3 flex items-center justify-between'>
-                    <span className='flex items-center'>
-                      AI-Generated Resume Summary
-                    </span>
+                    <span className='flex items-center'>AI-Generated Resume Summary</span>
                     <button
                       onClick={handleGenerateSummary}
                       disabled={isGeneratingSummary || isGeneratingMutation}
                       className='ml-4 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                      title="Regenerate summary with Claude AI"
+                      title='Regenerate summary with Claude AI'
                     >
                       {isGeneratingSummary || isGeneratingMutation ? (
-                        <div className="flex items-center">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                        <div className='flex items-center'>
+                          <div className='animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1'></div>
                           Updating...
                         </div>
                       ) : (
                         <>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='h-3 w-3 mr-1 inline'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                            />
                           </svg>
                           Regenerate
                         </>
@@ -254,11 +274,11 @@ export default function ApplicantForm({ title }: PropTypes) {
                   <div className='text-gray-700 leading-relaxed whitespace-pre-wrap'>
                     {applicantProfile.resume_summary}
                   </div>
-                  
+
                   {/* Optional: Show last updated timestamp if available */}
                   {applicantProfile.summary_updated_at && (
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <p className="text-xs text-blue-600">
+                    <div className='mt-3 pt-3 border-t border-blue-200'>
+                      <p className='text-xs text-blue-600'>
                         Last updated: {new Date(applicantProfile.summary_updated_at).toLocaleString()}
                       </p>
                     </div>
@@ -270,32 +290,63 @@ export default function ApplicantForm({ title }: PropTypes) {
         ) : (
           <div className='mt-8 text-center'>
             <div className='bg-gray-50 rounded-lg p-8 border border-gray-200'>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                className='h-12 w-12 text-gray-400 mx-auto mb-4'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                />
               </svg>
               <h4 className='text-gray-600 font-medium mb-4'>No Resume Summary Available</h4>
+              {applicantProfile.cv_url ? (
               <p className='text-gray-500 text-sm mb-6'>
-                Generate an AI-powered summary from the uploaded resume using Claude AI to quickly understand this candidate&apos;s background and qualifications.
+                Generate an AI-powered summary from the uploaded resume to quickly understand this candidate&apos;s
+                background and qualifications.
               </p>
-              <button
-                onClick={handleGenerateSummary}
-                disabled={isGeneratingSummary || isGeneratingMutation}
-                className='inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-              >
-                {isGeneratingSummary || isGeneratingMutation ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Generating Summary...
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Generate Summary with Claude AI
-                  </>
-                )}
-              </button>
+              ) : (
+                <p className='text-gray-500 text-sm mb-6'>
+                  No resume uploaded for this candidate.
+                </p>
+              )}
+              {applicantProfile.cv_url && (
+                <button
+                  onClick={handleGenerateSummary}
+                  disabled={isGeneratingSummary || isGeneratingMutation}
+                  className='inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                >
+                  {isGeneratingSummary || isGeneratingMutation ? (
+                    <>
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
+                      Generating Summary...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='h-4 w-4 mr-2'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M13 10V3L4 14h7v7l9-11h-7z'
+                        />
+                      </svg>
+                      Generate Summary with AI
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         )}
