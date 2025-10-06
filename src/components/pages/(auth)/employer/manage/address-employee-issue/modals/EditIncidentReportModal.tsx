@@ -1,14 +1,16 @@
 import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
-import Select, { components } from 'react-select';
+import Select from 'react-select';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import usePatchEmployeeIssueItems, { EmployeeIssueUpdateData } from '../hooks/usePatchEmployeeIssueItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -21,30 +23,8 @@ interface Field {
   value: any;
 }
 
-// Custom Option component to display department/position in dropdown
-const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
 
 interface EditIncidentReportModalProps {
-  employeeIssueItems: any;
-  employeeItems: any;
-  setEmployeeIssueItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
@@ -53,9 +33,6 @@ interface EditIncidentReportModalProps {
 }
 
 export default function EditIncidentReportModal({
-  employeeIssueItems,
-  employeeItems,
-  setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
@@ -64,8 +41,14 @@ export default function EditIncidentReportModal({
 }: EditIncidentReportModalProps) {
   const hasEditRights = cachedUserRights?.state?.data?.edit_employee_issue;
   const canEdit = hasEditRights && selectedIssue?.status === 'pending' && !selectedIssue?.nte_attachment;
-  const queryClient = useQueryClient();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  
+  // Add data fetching hook similar to UpdateWorkAccidentIllnessReportModal
+  const {
+    data: employeeIssueDetailsData,
+    refetch: refetchEmployeeIssueDetails,
+    remove: removeEmployeeIssueDetails,
+  } = useGetEmployeeIssueDetails(selectedIssue?.id || null);
   const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
       name: '',
@@ -77,85 +60,55 @@ export default function EditIncidentReportModal({
       briefBackground: '',
     },
   });
-  const dateInputRef = useRef(null);
   const cancelButtonRef = useRef(null);
   
   // Character limit state for brief background
   const maxLength = 430;
   const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   const briefBackgroundValue = watch('briefBackground') || '';
   
-  // React Select employee items state
-  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
-
-  // Transform employee items for React Select
+  // Refetch data when modal opens
   useEffect(() => {
-    if (employeeItems && employeeItems.length > 0) {
-      const selectItems = employeeItems.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-      }));
-      setReactSelectEmployeeItems(selectItems);
+    if (isOpen && selectedIssue?.id) {
+      refetchEmployeeIssueDetails();
     }
-  }, [employeeItems]);
+  }, [isOpen, selectedIssue?.id, refetchEmployeeIssueDetails]);
 
-  // Populate form when selectedIssue changes
+  // Populate form when employeeIssueDetailsData is available (similar to UpdateWorkAccidentIllnessReportModal)
   useEffect(() => {
-    if (selectedIssue && isOpen) {
-      // Use the employee name directly from the selectedIssue (from backend)
-      if (selectedIssue.name) {
-        setEmployeeSearch(selectedIssue.name);
-        setEmployeeSelected(true);
-        
-        // Try to find the employee ID from the employeeItems list for form submission
-        if (Array.isArray(employeeItems) && employeeItems.length > 0) {
-          const employee = employeeItems.find((emp: any) => 
-            `${emp.firstname} ${emp.lastname}` === selectedIssue.name
-          );
-          if (employee) {
-            setValue('name', employee.id);
-          } else {
-            // If employee not found in list, use the employee_id from selectedIssue
-            setValue('name', selectedIssue.employee_id || '');
-          }
-        } else {
-          // If employeeItems is not loaded yet, use the employee_id from selectedIssue
-          setValue('name', selectedIssue.employee_id || '');
-        }
+    if (employeeIssueDetailsData && isOpen) {
+      // Set employee search to show selected employee name from the API response
+      if (employeeIssueDetailsData.employee_name) {
+        setEmployeeSearch(employeeIssueDetailsData.employee_name);
+        setValue('name', employeeIssueDetailsData.employee);
+      } else if (employeeIssueDetailsData.employee) {
+        setEmployeeSearch('Loading employee...');
+        setValue('name', employeeIssueDetailsData.employee);
       }
       
-      // Set form values using the mapped data
-      setValue('position', selectedIssue.employee_position || selectedIssue.position || '');
-      setValue('department', selectedIssue.employee_department || selectedIssue.department || '');
-      setValue('incidentDate', selectedIssue.incident_date ? new Date(selectedIssue.incident_date).toISOString() : new Date().toISOString());
-      setValue('incidentPlace', selectedIssue.incident_place || selectedIssue.place_of_incident || '');
-      setValue('issueType', selectedIssue.issue_type || '');
-      setValue('briefBackground', selectedIssue.brief_background || '');
+      // Set form values using the fetched data - matching the API response structure
+      setValue('position', employeeIssueDetailsData.position || '');
+      setValue('department', employeeIssueDetailsData.department || '');
+      setValue('incidentDate', employeeIssueDetailsData.incident_date ? new Date(employeeIssueDetailsData.incident_date).toISOString() : new Date().toISOString());
+      setValue('incidentPlace', employeeIssueDetailsData.place_of_incident || '');
+      setValue('issueType', employeeIssueDetailsData.issue_type || '');
+      setValue('briefBackground', employeeIssueDetailsData.brief_background || '');
     }
-  }, [selectedIssue, isOpen, employeeItems, setValue]);
+  }, [employeeIssueDetailsData, isOpen, setValue, setEmployeeSearch]);
+
+  const customCloseModal = () => {
+    reset();
+    setEmployeeSearch('');
+    removeEmployeeIssueDetails();
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully updated the incident report."} type='success' />, { duration: 5000 });
-        setIsOpen(false);
-        reset({
-          name: '',
-          incidentDate: new Date().toISOString(),
-          position: '',
-          department: '',
-          incidentPlace: '',
-          issueType: '',
-          briefBackground: ''
-        });
-        setValue('department', '');
-        setValue('position', '');
-        setEmployeeSearch('');
-        setEmployeeSelected(false);
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -208,7 +161,7 @@ export default function EditIncidentReportModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -237,7 +190,7 @@ export default function EditIncidentReportModal({
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     {canEdit ? 'Edit Incident Report' : 'View Incident Report'}
                   </h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
@@ -259,94 +212,47 @@ export default function EditIncidentReportModal({
                           Employee Name{canEdit && <span className='text-red-600'>*</span>}
                         </label>
                         <div className='relative mt-2'>
-                          <Controller
-                            name="name"
-                            control={control}
-                            rules={{ required: "Please select an employee" }}
-                            render={({
-                              field: { onChange, value },
-                              fieldState: { error },
-                            }: {
-                              field: { onChange: (value: any) => void; value: any };
-                              fieldState: { error?: { message?: string } };
-                            }) => (
-                              <>
-                                <Select
-                                  className="basic-single-select"
-                                  classNamePrefix="select"
-                                  options={reactSelectEmployeeItems}
-                                  value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
-                                  onChange={(selectedOption) => {
-                                    if (canEdit) {
-                                      onChange(selectedOption ? selectedOption.value : '');
-                                      if (selectedOption) {
-                                        setEmployeeSearch(selectedOption.label);
-                                        setEmployeeSelected(true);
-                                        // Auto-fill department from employee data
-                                        if (selectedOption.department) {
-                                          setValue('department', selectedOption.department);
-                                        }
-                                        // Auto-fill position from employee data
-                                        if (selectedOption.position) {
-                                          setValue('position', selectedOption.position);
-                                        }
-                                      } else {
-                                        setEmployeeSearch('');
-                                        setEmployeeSelected(false);
-                                        setValue('department', '');
-                                        setValue('position', '');
-                                      }
-                                    }
-                                  }}
-                                  components={{
-                                    Option: CustomOption,
-                                    DropdownIndicator: () => (
-                                      <div className="pointer-events-none px-2">
-                                        <SelectChevronDown />
-                                      </div>
-                                    ),
-                                    IndicatorSeparator: () => null,
-                                  }}
-                                  isClearable={canEdit}
-                                  placeholder="Select employee..."
-                                  isSearchable={canEdit}
-                                  isDisabled={!canEdit}
-                                  styles={{
-                                    control: (provided) => ({
-                                      ...provided,
-                                      minHeight: '38px',
-                                      border: '1px solid #d1d5db',
-                                      borderRadius: '6px',
-                                      backgroundColor: canEdit ? '#f3f4f6' : '#f3f4f6',
-                                      opacity: canEdit ? 1 : 0.7,
-                                    }),
-                                    menu: (provided) => ({
-                                      ...provided,
-                                      zIndex: 9999,
-                                    }),
-                                    option: (provided, state) => ({
-                                      ...provided,
-                                      backgroundColor: state.isSelected 
-                                        ? '#3b82f6' 
-                                        : state.isFocused 
-                                          ? '#dbeafe' 
-                                          : 'white',
-                                      color: state.isSelected ? 'white' : '#374151',
-                                    }),
-                                    singleValue: (provided) => ({
-                                      ...provided,
-                                      color: '#374151',
-                                    }),
-                                  }}
-                                />
-                                {error && canEdit && (
-                                  <p className="text-red-500 text-sm mt-1 ml-1">
-                                    {error.message}
-                                  </p>
-                                )}
-                              </>
-                            )}
-                          />
+                          {employeeIssueDetailsData && !canEdit ? (
+                            // Show simple input in view mode
+                            <input
+                              type="text"
+                              value={employeeIssueDetailsData.employee_name}
+                              readOnly
+                              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6"
+                            />
+                          ) : (
+                            // Show EmployeeSelect in edit mode or when no data
+                            <EmployeeSelect
+                              control={control}
+                              name="name"
+                              label=""
+                              required={true}
+                              placeholder="Select employee..."
+                              isMulti={false}
+                              isClearable={canEdit}
+                              employeeSearch={employeeSearch}
+                              setEmployeeSearch={setEmployeeSearch}
+                              employeeName={employeeIssueDetailsData?.employee_name}
+                              className=""
+                              onChange={(selectedOption: any) => {
+                                if (canEdit && selectedOption && !selectedOption.isShowMore) {
+                                  setEmployeeSearch(selectedOption.label);
+                                  // Auto-fill department from employee data
+                                  if (selectedOption.department) {
+                                    setValue('department', selectedOption.department);
+                                  }
+                                  // Auto-fill position from employee data
+                                  if (selectedOption.position) {
+                                    setValue('position', selectedOption.position);
+                                  }
+                                } else if (canEdit) {
+                                  setEmployeeSearch('');
+                                  setValue('department', '');
+                                  setValue('position', '');
+                                }
+                              }}
+                            />
+                          )}
                         </div>
                       </div>
                       <div>
@@ -360,7 +266,14 @@ export default function EditIncidentReportModal({
                             type='text'
                             readOnly
                             disabled={!canEdit}
-                            className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 ${canEdit ? 'bg-gray-50' : 'bg-gray-100'} sm:text-sm sm:leading-6`}
+                            data-tooltip-id="position-tooltip"
+                            data-tooltip-content="Auto-populated from selected employee"
+                            className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6`}
+                          />
+                          <Tooltip 
+                            id="position-tooltip" 
+                            place="bottom"
+                            style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
                       </div>
@@ -377,7 +290,14 @@ export default function EditIncidentReportModal({
                             type='text'
                             readOnly
                             disabled={!canEdit}
-                            className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 ${canEdit ? 'bg-gray-50' : 'bg-gray-100'} sm:text-sm sm:leading-6`}
+                            data-tooltip-id="department-tooltip"
+                            data-tooltip-content="Auto-populated from selected employee"
+                            className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6`}
+                          />
+                          <Tooltip 
+                            id="department-tooltip" 
+                            place="bottom"
+                            style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
                       </div>
@@ -546,7 +466,7 @@ export default function EditIncidentReportModal({
                       <button
                         type='button'
                         className={`inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 ${canEdit ? 'mt-3 w-full sm:mt-0 sm:w-auto' : 'w-auto'}`}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => customCloseModal()}
                         ref={cancelButtonRef}
                       >
                         Close

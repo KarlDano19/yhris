@@ -1,14 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
 
-import CustomDatePicker from '@/components/CustomDatePicker';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type T_ModalData = {
   id: number;
@@ -54,6 +50,67 @@ export default function EditEmployeeCompensationLogModal({
   const customCloseModal = () => {
     removeAuditLog();
     setIsOpen(null);
+  };
+
+  const renderAuditData = (data: any) => {
+    if (!data) return null;
+
+    const renderValue = (val: any): React.ReactNode => {
+      try {
+        if (val === null || val === undefined) return "N/A";
+
+        if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+          return String(val);
+        }
+
+        if (Array.isArray(val)) {
+          return (
+            <ul className="list-disc ml-4">
+              {val.map((item, idx) => (
+                <li key={idx}>{renderValue(item)}</li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (typeof val === "object") {
+          return (
+            <div className="ml-4">
+              {Object.entries(val).map(([k, v]) => (
+                <div key={k}>
+                  <span className="font-semibold">
+                    {k.charAt(0).toUpperCase() + k.slice(1)}:
+                  </span>{" "}
+                  {renderValue(v)}
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        return String(val);
+      } catch (err) {
+        console.error("renderValue error:", err);
+        return JSON.stringify(val) ?? "[object Object]";
+      }
+    };
+
+    try {
+      return Object.entries(data).map(([key, value]) => {
+        if (key === "id") return null;
+        return (
+          <div key={key} className="text-sm font-medium break-words whitespace-pre-line">
+            <span className="font-semibold">
+              {key.charAt(0).toUpperCase() + key.slice(1)}:
+            </span>{" "}
+            {renderValue(value)}
+          </div>
+        );
+      });
+    } catch (err) {
+      console.error("renderAuditData error:", err);
+      return <div>{JSON.stringify(data) ?? "[object Object]"}</div>;
+    }
   };
 
   return (
@@ -105,25 +162,9 @@ export default function EditEmployeeCompensationLogModal({
                         </h3>
                         <h3 className='text-sm font-medium'>Activity Id: {auditLogDetails.id}</h3>
                         <h3 className='text-sm font-medium'>Previous Data:</h3>
-                        <div className='flex flex-col gap-2 border border-gray-300 rounded-md p-2'>
-                          {auditLogDetails.old_data &&
-                            Object.entries(auditLogDetails.old_data).map(
-                              ([key, value]) =>
-                                key !== 'id' && (
-                                  key === 'qualifications' || key === 'job_description' ? (
-                                    <div key={key} className='text-sm font-medium break-words whitespace-pre-line'>
-                                      <span>{key.charAt(0).toUpperCase() + key.slice(1)}: </span>
-                                      <span
-                                        dangerouslySetInnerHTML={{ __html: value != null ? String(value) : 'N/A' }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <h3 key={key} className='text-sm font-medium break-words whitespace-pre-line'>
-                                      {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
-                                    </h3>
-                                  )
-                                )
-                            )}
+                        {/* Previous Data */}
+                        <div className="flex flex-col gap-2 border border-gray-300 rounded-md p-2">
+                          {renderAuditData(auditLogDetails.old_data)}
                         </div>
                       </div>
                     </div>
@@ -135,25 +176,9 @@ export default function EditEmployeeCompensationLogModal({
                         <h3 className='text-sm font-medium'>Action: {auditLogDetails.action}</h3>
                         <h3 className='text-sm font-medium'>Module: {auditLogDetails.model_name}</h3>
                         <h3 className='text-sm font-medium'>Created Data:</h3>
-                        <div className='flex flex-col gap-2 border border-gray-300 rounded-md p-2'>
-                          {auditLogDetails.new_data &&
-                            Object.entries(auditLogDetails.new_data).map(
-                              ([key, value]) =>
-                                key !== 'id' && (
-                                  key === 'qualifications' || key === 'job_description' ? (
-                                    <div key={key} className='text-sm font-medium break-words whitespace-pre-line'>
-                                      <span>{key.charAt(0).toUpperCase() + key.slice(1)}: </span>
-                                      <span
-                                        dangerouslySetInnerHTML={{ __html: value != null ? String(value) : 'N/A' }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <h3 key={key} className='text-sm font-medium break-words whitespace-pre-line'>
-                                      {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value !== null ? value : 'N/A'}`}
-                                    </h3>
-                                  )
-                                )
-                            )}
+                        {/* Created Data */}
+                        <div className="flex flex-col gap-2 border border-gray-300 rounded-md p-2">
+                          {renderAuditData(auditLogDetails.new_data)}
                         </div>
                       </div>
                     </div>

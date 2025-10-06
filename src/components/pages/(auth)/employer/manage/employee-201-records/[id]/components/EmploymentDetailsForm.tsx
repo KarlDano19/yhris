@@ -226,7 +226,7 @@ export default function EmploymentDetailsForm({
 
   const validate = {
     date_hired: (d?: Date) => {
-      if (!d || isNaN(d.getTime())) return "Date Hired is required.";
+      if (!d || isNaN(d.getTime())) return "Date Hired is missing.";
       const today = new Date();
       const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       const tOnly = new Date(
@@ -238,10 +238,10 @@ export default function EmploymentDetailsForm({
       return null;
     },
     employment_status: (v: string) =>
-      isEmpty(v) ? "Employment Status is required." : null,
-    location: (v: string) => (isEmpty(v) ? "Location is required." : null),
-    position: (v: string) => (isEmpty(v) ? "Position is required." : null),
-    department: (v: string) => (isEmpty(v) ? "Department is required." : null),
+      isEmpty(v) ? "Employment Status is missing." : null,
+    location: (v: string) => (isEmpty(v) ? "Location is missing." : null),
+    position: (v: string) => (isEmpty(v) ? "Position is missing." : null),
+    department: (v: string) => (isEmpty(v) ? "Department is missing." : null),
   };
 
   const buildInitialErrors = (): Record<string, string | null> => ({
@@ -259,8 +259,11 @@ export default function EmploymentDetailsForm({
   const setErr = (key: string, msg: string | null) =>
     setErrors((e) => ({ ...e, [key]: msg }));
 
+  const isBlockingError = (m?: string | null) =>
+    !!m && !/(missing|required)/i.test(m);
+
   const hasErrors = useMemo(
-    () => Object.values(errors).some((m) => !!m && m.trim().length > 0),
+    () => Object.values(errors).some(isBlockingError),
     [errors]
   );
 

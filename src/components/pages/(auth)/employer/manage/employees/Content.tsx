@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment, useRef } from 'react';
+import React, { useEffect, useState, Fragment, useRef, useMemo } from 'react';
 
 import Link from 'next/link';
 
@@ -20,7 +20,7 @@ import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
@@ -29,6 +29,9 @@ import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
+import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -57,6 +60,7 @@ const columnDefinitions = [
   { key: 'location', label: 'Location' },
   { key: 'position', label: 'Position' },
   { key: 'department', label: 'Department' },
+  { key: 'employment_status', label: 'Employment Status' },
   { key: 'email', label: 'Email' },
   { key: 'mobile', label: 'Contact No.' },
   { key: 'gender', label: 'Gender' },
@@ -93,6 +97,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     location: true,
     position: true,
     department: true,
+    employment_status: true,
     email: true,
     mobile: false,
     gender: false,
@@ -108,25 +113,57 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+  const [isDebouncing, setIsDebouncing] = useState<boolean>(false);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [autocompleteLimit, setAutocompleteLimit] = useState(50);
+  const [shouldShowAutocomplete, setShouldShowAutocomplete] = useState(false);
+  const [hideTooltip, setHideTooltip] = useState(false);
+  const autocompleteRef = useRef<HTMLUListElement>(null);
+
   const {
     data: employeeListData,
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
   } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
-  const { data: employeeItemsAll } = useGetEmployeeItems();
+  
+  // Memoize the search parameters to prevent unnecessary re-renders
+  const searchParams = useMemo(() => {
+    if (debouncedSearch && debouncedSearch.length >= 2 && shouldShowAutocomplete) {
+      return {
+        search: debouncedSearch,
+        current_page: 1
+      };
+    }
+    return null;
+  }, [debouncedSearch, shouldShowAutocomplete]);
+
+  const { data: autocompleteResults, refetch: autocompleteRefetch, isLoading: isAutocompleteLoading } = useGetEmployeePaginatedSelect(searchParams);
   const { data: locationItems } = useGetLocationItems();
   const { data: departmentItems } = useGetDepartmentItems();
   const { data: positionItems } = useGetPositionItems();
+  const { data: employeeStatusItems } = useGetEmployeeStatusItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
+  const bulkDeleteMutation = useBulkDeleteEmployees();
+
+  // Combined refetch function to refresh both main list and autocomplete data
+  const refetchAllEmployeeData = async () => {
+    await Promise.all([
+      employeeListRefetch(),
+      autocompleteRefetch()
+    ]);
+  };
 
   const cachedData: any = cachedProfile?.state?.data;
   const hasAgreed = cachedData?.is_export_agreed;
 
-  const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const autocompleteRef = useRef<HTMLUListElement>(null);
+  const [selectedEmployees, setSelectedEmployees] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
     if (autocompleteRef.current && index >= 0) {
@@ -145,6 +182,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsAgreementAccepted(true);
     }
   }, [hasAgreed]);
+
+  // Debounce search input to prevent multiple API calls
+  useEffect(() => {
+    // Set debouncing state when user is typing
+    if (pendingFilter.search && pendingFilter.search.length >= 2) {
+      setIsDebouncing(true);
+    } else {
+      setIsDebouncing(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedSearch(pendingFilter.search);
+      setIsDebouncing(false); // Clear debouncing state when delay is done
+    }, 2000); // 2000ms delay (2 seconds)
+
+    return () => {
+      clearTimeout(timer);
+      // Don't clear debouncing state immediately on cleanup
+    };
+  }, [pendingFilter.search]);
 
   const menuOptions = [
     {
@@ -227,6 +284,48 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setAppliedFilter({ ...pendingFilter });
   };
 
+  const handleMagnifyingGlassClick = () => {
+    if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
+      // Handle autocomplete selection (2nd click with selection)
+      const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
+      const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
+      
+      // Check if "Show more" option is selected (last item when there are more results)
+      if (selectedIndex === displayItems.length && hasMoreResults) {
+        // Show 50 more results in the dropdown
+        setAutocompleteLimit(prev => prev + 50);
+        // Keep the selection on the "Show more" option
+        setSelectedIndex(displayItems.length + 50);
+      } else if (displayItems[selectedIndex]) {
+        const item = displayItems[selectedIndex];
+        const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+        setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+        setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
+      }
+      setShowAutocomplete(false);
+      setShouldShowAutocomplete(false);
+      setSelectedIndex(-1);
+    } else if (showAutocomplete && selectedIndex === -1) {
+      // 2nd click: No selection made, perform main search
+      handleSearch();
+      setShowAutocomplete(false);
+      setShouldShowAutocomplete(false);
+    } else if (pendingFilter.search && pendingFilter.search.length >= 2) {
+      // 1st click: Show autocomplete dropdown when clicked with valid search
+      setShowAutocomplete(true);
+      setShouldShowAutocomplete(true);
+      setHideTooltip(true); // Hide tooltip after search button is clicked
+      // Prevent the input from losing focus to avoid onBlur closing the dropdown
+      setTimeout(() => {
+        document.getElementById('search')?.focus();
+      }, 0);
+    } else {
+      // Regular search (when search is too short)
+      handleSearch();
+      setShowAutocomplete(false);
+    }
+  };
+
   useEffect(() => {
     if (!isEmployeeListLoading && isSearching) {
       setIsSearching(false);
@@ -260,6 +359,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       location: true,
       position: true,
       department: true,
+      employment_status: true,
       email: true,
       mobile: false,
       gender: false,
@@ -279,6 +379,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       location: true,
       position: true,
       department: true,
+      employment_status: true,
       email: true,
       mobile: true,
       gender: true,
@@ -286,6 +387,64 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
     setVisibleColumns(allColumns);
   };
+
+  // Handle individual employee selection
+  const handleEmployeeSelect = (employeeId: number) => {
+    setSelectedEmployees(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(employeeId)) {
+        newSet.delete(employeeId);
+      } else {
+        newSet.add(employeeId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!employeeItems) return;
+    
+    if (selectAll) {
+      setSelectedEmployees(new Set());
+    } else {
+      const allIds = employeeItems.map((e: any) => e.id);
+      setSelectedEmployees(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedEmployees.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const employeeIds = Array.from(selectedEmployees);
+      await bulkDeleteMutation.mutateAsync(employeeIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedEmployees.size} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedEmployees(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetchAllEmployeeData();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete employees';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  // Update select all state when employees change
+  useEffect(() => {
+    if (employeeItems) {
+      const allEmployeeIds = new Set(employeeItems.map((e: any) => e.id));
+      const allSelected = allEmployeeIds.size > 0 && 
+        Array.from(allEmployeeIds).every((id: any) => selectedEmployees.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEmployees, employeeItems]);
+
   const renderRows = () => {
     if (isSearching || isEmployeeListLoading) {
       return (
@@ -301,6 +460,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEmployees.has(item.id)}
+              onChange={() => handleEmployeeSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           {visibleColumns.date_hired && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_hired}</td>
           )}
@@ -327,6 +494,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           {visibleColumns.department && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.department || 'N/A'}</td>
+          )}
+          {visibleColumns.employment_status && (
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employment_status || 'N/A'}</td>
           )}
           {visibleColumns.email && (
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -426,11 +596,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     type='text'
                     name='search'
                     id='search'
-                    {...(pendingFilter.search === '' && {
-                      'data-tooltip-id': 'employee-search-tooltip',
-                      'data-tooltip-content': 'Search for Employee: Name, Position, Department',
-                      'data-tooltip-place': 'bottom'
-                    })}
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                     autoComplete='off'
                     autoCorrect='off'
@@ -439,53 +604,72 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     data-lpignore='true'
                     data-form-type='other'
                     value={pendingFilter.search}
+                    {...(pendingFilter.search === '' && {
+                      'data-tooltip-id': 'employee-search-tooltip',
+                      'data-tooltip-content': 'Search for Employee: First Name, Last Name, Position, Department',
+                      'data-tooltip-place': 'bottom'
+                    })}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
                       setShowAutocomplete(true);
                       setSelectedIndex(-1);
                     }}
                     onFocus={() => {
-                      if (pendingFilter.search) setShowAutocomplete(true);
+                      // Don't automatically show autocomplete on focus
                     }}
                     onBlur={() => {
                       setTimeout(() => {
                         setShowAutocomplete(false);
+                        setShouldShowAutocomplete(false);
                         setSelectedIndex(-1);
+                        setAutocompleteLimit(50); // Reset limit when dropdown closes
                       }, 100);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        if (showAutocomplete && selectedIndex >= 0) {
-                          const filteredItems = employeeItemsAll.filter(
-                            (item: any) =>
-                              item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
-                          );
-                          if (filteredItems[selectedIndex]) {
-                            const item = filteredItems[selectedIndex];
+                        if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
+                          // Handle autocomplete selection (1st Enter with selection)
+                          const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
+                          const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
+                          
+                          // Check if "Show more" option is selected (last item when there are more results)
+                          if (selectedIndex === displayItems.length && hasMoreResults) {
+                            e.preventDefault();
+                            // Show 50 more results in the dropdown
+                            setAutocompleteLimit(prev => prev + 50);
+                            // Keep the selection on the "Show more" option
+                            setSelectedIndex(displayItems.length + 50);
+                          } else if (displayItems[selectedIndex]) {
+                            const item = displayItems[selectedIndex];
                             const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
                             setPendingFilter({ ...pendingFilter, search: newSearchTerm });
                             setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
                           }
                           setShowAutocomplete(false);
+                          setShouldShowAutocomplete(false);
                           setSelectedIndex(-1);
+                        } else if (showAutocomplete && selectedIndex === -1) {
+                          // 2nd Enter: No selection made, perform main search
+                          handleSearch();
+                          setShowAutocomplete(false);
+                          setShouldShowAutocomplete(false);
+                        } else if (pendingFilter.search && pendingFilter.search.length >= 2) {
+                          // 1st Enter: Show autocomplete dropdown when Enter is pressed with valid search
+                          setShowAutocomplete(true);
+                          setShouldShowAutocomplete(true);
+                          setHideTooltip(true); // Hide tooltip after Enter is pressed
                         } else {
+                          // Regular search (when search is too short)
                           handleSearch();
                           setShowAutocomplete(false);
                         }
                       } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        if (showAutocomplete) {
-                          const filteredItems = employeeItemsAll.filter(
-                            (item: any) =>
-                              item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                              item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
-                          );
-                          const newIndex = selectedIndex < filteredItems.length - 1 ? selectedIndex + 1 : selectedIndex;
+                        if (showAutocomplete && autocompleteResults?.records) {
+                          const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
+                          const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
+                          const maxIndex = displayItems.length + (hasMoreResults ? 1 : 0) - 1; // Include "Show more" option
+                          const newIndex = selectedIndex < maxIndex ? selectedIndex + 1 : selectedIndex;
                           setSelectedIndex(newIndex);
                           scrollToSelectedItem(newIndex);
                         }
@@ -505,59 +689,152 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     }}
                     placeholder='Search ...'
                   />
-                  {pendingFilter.search && showAutocomplete && (
-                    <ul 
-                      ref={autocompleteRef}
-                      className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
-                    >
-                      {employeeItemsAll
-                        .filter(
-                          (item: any) =>
-                            item.firstname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.lastname?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.position?.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-                            item.department?.toLowerCase().includes(pendingFilter.search.toLowerCase())
-                        )
-                        .map((item: any, index: number) => (
-                          <li
-                            key={item.id}
-                            className={`px-3 py-2 cursor-pointer ${
-                              index === selectedIndex 
-                                ? 'bg-blue-100' 
-                                : 'hover:bg-blue-100'
-                            }`}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                            }}
-                            onMouseEnter={() => setSelectedIndex(index)}
-                            onClick={() => {
-                              const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
-                              setPendingFilter({ ...pendingFilter, search: newSearchTerm });
-                              setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
-                              setShowAutocomplete(false);
-                              setSelectedIndex(-1);
-                              document.getElementById('search')?.blur();
-                            }}
-                          >
-                            <div className='flex flex-col'>
-                              <span className='font-medium'>{item.firstname} {item.lastname}</span>
-                              {(item.position || item.department) && (
-                                <span className='text-xs text-gray-500'>
-                                  {item.position && item.department 
-                                    ? `${item.position} | ${item.department}`
-                                    : item.position || item.department
-                                  }
-                                </span>
-                              )}
+                  {/* Show autocomplete reminder text when user has typed 2+ characters */}
+                  {pendingFilter.search && pendingFilter.search.length >= 2 && !hideTooltip && !showAutocomplete && (
+                    <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 text-center w-full">
+                      Press <span className="font-bold">Enter</span> or click <span className="font-bold">search button</span> to show autocomplete suggestions
+                    </div>
+                  )}
+                  {showAutocomplete && shouldShowAutocomplete && (() => {
+                    // Show loading state while debouncing or API loading
+                    if (pendingFilter.search && pendingFilter.search.length >= 2 && (isDebouncing || isAutocompleteLoading)) {
+                      return (
+                        <ul 
+                          ref={autocompleteRef}
+                          className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <li className='px-3 py-4 text-center'>
+                            <LoadingSpinner 
+                              size="sm" 
+                              color="yellow" 
+                              text="Searching employees..." 
+                              showText={true}
+                              className="py-2"
+                            />
+                          </li>
+                        </ul>
+                      );
+                    }
+
+                    // Show no results state
+                    if (debouncedSearch && debouncedSearch.length >= 2 && autocompleteResults?.records?.length === 0) {
+                      return (
+                        <ul 
+                          ref={autocompleteRef}
+                          className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <li className='px-3 py-4 text-center'>
+                            <div className='flex flex-col items-center space-y-2'>
+                              <div className='text-sm text-gray-600'>
+                                <p className='font-medium'>No employees found</p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  Try searching with different keywords
+                                </p>
+                              </div>
                             </div>
                           </li>
-                        ))}
-                    </ul>
-                  )}
+                        </ul>
+                      );
+                    }
+
+                    // Show results if available
+                    if (autocompleteResults?.records && autocompleteResults.records.length > 0) {
+                      const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
+                      const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
+                      
+                      return (
+                        <ul 
+                          ref={autocompleteRef}
+                          className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          {displayItems.map((item: any, index: number) => (
+                            <li
+                              key={item.id}
+                              className={`px-3 py-2 cursor-pointer ${
+                                index === selectedIndex 
+                                  ? 'bg-blue-100' 
+                                  : 'hover:bg-blue-100'
+                              }`}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                              }}
+                              onMouseEnter={() => setSelectedIndex(index)}
+                              onClick={() => {
+                                const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                                setPendingFilter({ ...pendingFilter, search: newSearchTerm });
+                                setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
+                                setShowAutocomplete(false);
+                                setSelectedIndex(-1);
+                                document.getElementById('search')?.blur();
+                              }}
+                            >
+                              <div className='flex flex-col'>
+                                <span className='font-medium'>{item.firstname} {item.lastname}</span>
+                                {(item.department || item.position) && (
+                                  <span className='text-xs text-gray-500'>
+                                    • {item.department && item.position 
+                                      ? `${item.department} | ${item.position}`
+                                      : item.department || item.position
+                                    }
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                          {hasMoreResults && (
+                            <li
+                              className={`px-3 py-2 cursor-pointer border-t border-gray-200 ${
+                                selectedIndex === displayItems.length 
+                                  ? 'bg-blue-100' 
+                                  : 'bg-gray-50 hover:bg-gray-100'
+                              }`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Show 50 more results in the dropdown
+                                setAutocompleteLimit(prev => prev + 50);
+                                // Keep the selection on the "Show more" option after expansion
+                                setSelectedIndex(displayItems.length + 50);
+                              }}
+                              onMouseEnter={() => setSelectedIndex(displayItems.length)}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              <div className='flex items-center justify-between'>
+                                <span className='text-sm text-gray-600'>
+                                  Show 50 more results
+                                </span>
+                                <span className='text-sm text-gray-600 font-medium'>
+                                  Click to load more
+                                </span>
+                              </div>
+                            </li>
+                          )}
+                        </ul>
+                      );
+                    }
+
+                    // Don't show anything when no search yet
+                    if (!debouncedSearch || debouncedSearch.length < 2) {
+                      return null;
+                    }
+
+                    return null;
+                  })()}
                 </div>
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100'
-                  onClick={handleSearch}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMagnifyingGlassClick();
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                  }}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
@@ -672,9 +949,40 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </Menu>
             </div>
           </div>
+
+          {/* Bulk Actions - Below Search/Filter Row */}
+          {selectedEmployees.size > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedEmployees(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEmployees.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
-              className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
               style={{
                 scrollbarWidth: 'thin',
                 scrollbarColor: '#2d3e58 #f1f1f1'
@@ -684,6 +992,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                     <thead>
                       <tr>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          <input
+                            type="checkbox"
+                            checked={selectAll}
+                            onChange={handleSelectAll}
+                            disabled={!employeeItems || employeeItems.length === 0}
+                            className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                          />
+                        </th>
                         {visibleColumns.date_hired && (
                           <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Date Hired
@@ -727,6 +1044,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         {visibleColumns.department && (
                           <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                             Department
+                          </th>
+                        )}
+                        {visibleColumns.employment_status && (
+                          <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                            Employment Status
                           </th>
                         )}
                         {visibleColumns.email && (
@@ -788,7 +1110,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isImportModalOpen && (
-        <ImportModal refetch={employeeListRefetch} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
+        <ImportModal refetch={refetchAllEmployeeData} isOpen={isImportModalOpen} setIsOpen={setIsImportModalOpen} />
       )}
       {isExportTemplateModalOpen && (
         <ExportTemplateModal
@@ -799,7 +1121,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isEmployeesDeleteModalOpen && (
         <DeleteEmployeeDetailModal
-          refetch={employeeListRefetch}
+          refetch={refetchAllEmployeeData}
           isOpen={isEmployeesDeleteModalOpen}
           setIsOpen={setIsEmployeesDeleteModalOpen}
         />
@@ -808,20 +1130,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <EditEmployeeDetailsModal
           isOpen={isEmployeesEditModalOpen}
           setIsOpen={setIsEmployeesEditModalOpen}
-          refetch={employeeListRefetch}
+          refetch={refetchAllEmployeeData}
           locationItems={locationItems}
           departmentItems={departmentItems}
           positionItems={positionItems}
+          employeeStatusItems={employeeStatusItems}
         />
       )}
-      <AddEmployeeModal
-        refetch={employeeListRefetch}
-        isOpen={isAddEmployeeModalOpen}
-        setIsOpen={setIsAddEmployeeModalOpen}
-        locationItems={locationItems}
-        departmentItems={departmentItems}
-        positionItems={positionItems}
-      />
+
+      {isAddEmployeeModalOpen && (
+        <AddEmployeeModal
+          refetch={refetchAllEmployeeData}
+          isOpen={isAddEmployeeModalOpen}
+          setIsOpen={setIsAddEmployeeModalOpen}
+          locationItems={locationItems}
+          departmentItems={departmentItems}
+          positionItems={positionItems}
+          employeeStatusItems={employeeStatusItems}
+        />
+      )}
+
+      {selectedEmployees.size > 0 && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedEmployees.size}
+          moduleName="employees"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
+        />
+      )}
+
       <Tooltip id='employee-search-tooltip' />
     </>
   );

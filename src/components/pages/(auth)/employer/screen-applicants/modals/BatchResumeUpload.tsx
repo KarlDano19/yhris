@@ -4,8 +4,9 @@ import React, { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { CloudArrowUpIcon, DocumentIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-import ModalLayout from './ModalLayout';
+import ModalLayout from '../../../../../ModalLayout';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useBatchUploadResumes from '../hooks/useBatchUploadResumes';
 
 interface BatchUploadProps {
@@ -33,6 +34,7 @@ interface ProcessingResult {
     name: string;
     email: string;
     filename: string;
+    parsing_source?: string;
   }>;
   errors: Array<{
     filename: string;
@@ -290,7 +292,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
                   
                   <div className="flex items-center space-x-2">
                     {file.status === 'uploading' && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <LoadingSpinner size="xs" color="yellow" />
                     )}
                     {file.status === 'success' && (
                       <div className="h-4 w-4 bg-green-600 rounded-full flex items-center justify-center">
@@ -360,7 +362,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
                             {applicant.name}
                           </span>
                           <span className="px-2 py-1 text-xs bg-green-200 text-green-800 rounded-full">
-                            Affinda AI
+                            {applicant.parsing_source || 'Claude AI'}
                           </span>
                         </div>
                         <div className="text-xs text-green-700 mt-1">
@@ -427,7 +429,7 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
               >
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                    <LoadingSpinner size="xs" color="yellow" className="mr-2 inline-block" />
                     Processing...
                   </>
                 ) : (
@@ -452,34 +454,12 @@ const BatchResumeUpload: React.FC<BatchUploadProps> = ({
         {isProcessing && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <LoadingSpinner size="sm" color="yellow" className="mr-3" />
               <div>
-                <p className="text-sm font-medium text-blue-800">
-                  🤖 Processing resumes with dual Affinda AI calls...
-                </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  Making two API calls per resume: contact info extraction + AI summary generation.
+                  Extracting contact information and generating AI-powered summaries.
                 </p>
               </div>
-            </div>
-            
-            <div className="mt-3 bg-blue-100 rounded p-2">
-              <p className="text-xs text-blue-600">
-                <strong>Dual API Processing:</strong>
-              </p>
-              <ul className="text-xs text-blue-600 mt-1 list-disc list-inside space-y-1">
-                <li>👤 API Call 1: Contact info & work experience</li>
-                <li>📝 API Call 2: AI-generated resume summaries</li>
-                <li>🔄 Parallel processing for optimal speed</li>
-                <li>✅ Creating comprehensive applicant profiles</li>
-              </ul>
-            </div>
-            
-            <div className="mt-2 p-2 bg-green-100 rounded">
-              <p className="text-xs text-green-700">
-                <strong>✨ Enhanced Extraction:</strong> Using specialized document types for 
-                maximum accuracy in both contact extraction and summary generation.
-              </p>
             </div>
           </div>
         )}

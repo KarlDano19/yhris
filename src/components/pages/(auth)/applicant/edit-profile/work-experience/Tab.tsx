@@ -62,6 +62,7 @@ function WorkExperienceTab({
     if (fields.length !== 0) {
       data.experiences.map((experience: any, index: number) => {
         const isCurrentlyEmployed = currentlyEmployed[index];
+        data.experiences[index].currentlyEmployed = isCurrentlyEmployed;
         const requiredFields = [
           experience.position,
           experience.companyOrg,
@@ -107,6 +108,7 @@ function WorkExperienceTab({
       dateFrom: '',
       dateTo: '',
       responsibilities: '',
+      currentlyEmployed: false,
     };
     append(newExperience);
     // Initialize currently employed state for new experience
@@ -125,6 +127,8 @@ function WorkExperienceTab({
       newState[index] = checked;
       return newState;
     });
+
+     setValue(`experiences.${index}.currentlyEmployed`, checked);
     
     // If checked, clear the dateTo field
     if (checked) {

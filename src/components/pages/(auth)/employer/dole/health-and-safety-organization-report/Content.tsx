@@ -26,9 +26,12 @@ import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyRepo
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
 import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import HealthAndSafetyOrganizationAttachmentSection from './components/HealthAndSafetyOrganizationAttachmentSection';
+import useSendEmail from './hooks/useSendEmail';
+import useGetHealthAndSafetyReportDetails from './hooks/useGetHealthAndSafetyReportDetails';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -37,6 +40,8 @@ import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteHealthAndSafetyReport from "./hooks/useBulkDeleteHealthAndSafetyReport";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -69,6 +74,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
+  
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -78,6 +88,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const {
     data: healthAndSafetyReportItemsData,
@@ -97,6 +110,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const editFormMethods = useForm();
 
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
+  
+  // Get the current report details for attachment
+  const { data: currentReportDetails } = useGetHealthAndSafetyReportDetails(
+    isSendEmailModalOpen?.id || null
+  );
+  const bulkDeleteMutation = useBulkDeleteHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -159,6 +179,67 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      // Add health_and_safety_report_id
+      payload.append('health_and_safety_report_id', isSendEmailModalOpen.id.toString());
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          healthAndSafetyReportItemsRefetch();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const handlePrintPDFLocal = async (item: any) => {
@@ -253,6 +334,59 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (!healthAndSafetyReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = healthAndSafetyReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedReports(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      healthAndSafetyReportItemsRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  useEffect(() => {
+    if (healthAndSafetyReportItems) {
+      const allReportIds = new Set(healthAndSafetyReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, healthAndSafetyReportItems]);
+
   const renderRows = () => {
     if (isSearching || isHealthAndSafetyReportItemsLoading) {
       return (
@@ -268,6 +402,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (healthAndSafetyReportItems && healthAndSafetyReportItems.length > 0) {
       return healthAndSafetyReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {Number(item.total_employees_male || 0) + Number(item.total_employees_female || 0)}
@@ -452,6 +594,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section - Left Side */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedReports.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedReports(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedReports.size} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -464,6 +645,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!healthAndSafetyReportItems || healthAndSafetyReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Report
                       </th>
@@ -533,13 +723,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isSendEmailModalOpen && (
-        <SendEmailModal refetch={healthAndSafetyReportItemsRefetch} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+        <SendEmailModal
+          title="Send Health and Safety Organization Report"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={[]}
+          showAttachment={true}
+          customAttachmentSection={
+            <HealthAndSafetyOrganizationAttachmentSection
+              pdfAttachment={currentReportDetails?.attachment || null}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+        />
       )}
       {isExportProgressModalOpen && (
         <ExportProgressModal
           isOpen={isExportProgressModalOpen}
           setIsOpen={setIsExportProgressModalOpen}
           itemsFilter={itemsFilter}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedReports.size}
+          moduleName="Health and Safety Report"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       <Tooltip id='search-tooltip' />

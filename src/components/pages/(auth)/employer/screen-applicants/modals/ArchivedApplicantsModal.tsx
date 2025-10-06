@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
-import ModalLayout from './ModalLayout';
+import ModalLayout from '../../../../../ModalLayout';
 import ArchiveButton from '../ArchiveButton';
 import RestoreApplicationModal from './RestoreApplicationModal';
 import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';

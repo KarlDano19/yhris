@@ -26,11 +26,16 @@ import { getPrintAnnualAccidentIllnessReportDetails } from './hooks/useGetPrintA
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
 import DeleteReportModal from './modals/DeleteReportModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
+import AnnualAccidentIllnessAttachmentSection from './components/AnnualAccidentIllnessAttachmentSection';
+import useSendEmail from './hooks/useSendEmail';
+import useGetAnnualAccidentIllnessReportDetails from './hooks/useGetAnnualAccidentIllnessReportDetails';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import useFileforge from '@/components/hooks/useFileforge';
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteAnnualWorkAccidentIllnessReport from './hooks/useBulkDeleteAnnualWorkAccidentIllnessReport';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -97,6 +102,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
 
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  
+  // Bulk delete states
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
@@ -104,6 +118,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
+  
+  // Get the current report details for attachment
+  const { data: currentReportDetails } = useGetAnnualAccidentIllnessReportDetails(
+    isSendEmailModalOpen?.id || null
+  );
+  
+  const bulkDeleteMutation = useBulkDeleteAnnualWorkAccidentIllnessReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -173,6 +195,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setOpenMenuId(null);
   }, [currentPage]);
 
+  // Update select all state when reports change
+  useEffect(() => {
+    if (annualAccidentIllnessReportItems) {
+      const allReportIds = new Set(annualAccidentIllnessReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, annualAccidentIllnessReportItems]);
+
   // New function to handle menu clicks
   const handleMenuClick = (event: React.MouseEvent, id: number) => {
     event.stopPropagation();
@@ -196,6 +228,67 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      // Add annual_work_accident_illness_report_id
+      payload.append('annual_work_accident_illness_report_id', isSendEmailModalOpen.id.toString());
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          annualAccidentIllnessReportRefetch();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const handlePrintPDFLocal = async (item: any) => {
@@ -304,6 +397,54 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  // Handle individual report selection
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!annualAccidentIllnessReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = annualAccidentIllnessReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedReports(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      annualAccidentIllnessReportRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  // Menu options for Export and Generate Report
   const menuOptions = [
     {
       id: 'generate-dole-awair-btn',
@@ -331,6 +472,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (annualAccidentIllnessReportItems && annualAccidentIllnessReportItems.length > 0) {
       return annualAccidentIllnessReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.number_of_employees}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.total_hours_worked}</td>
@@ -414,7 +563,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={100}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add data.</h4>
           </td>
@@ -546,6 +695,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section - Left Side */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedReports.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedReports(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedReports.size} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -558,6 +746,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!annualAccidentIllnessReportItems || annualAccidentIllnessReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Report
                       </th>
@@ -644,9 +841,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isSendEmailModalOpen && (
         <SendEmailModal
-          refetch={annualAccidentIllnessReportRefetch}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
+          title="Send Annual Work Accident Illness Report"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={[]}
+          showAttachment={true}
+          customAttachmentSection={
+            <AnnualAccidentIllnessAttachmentSection
+              pdfAttachment={currentReportDetails?.attachment || null}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedReports.size}
+          moduleName="Annual Work Accident Illness Report"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       <Tooltip id='email-tooltip'/>

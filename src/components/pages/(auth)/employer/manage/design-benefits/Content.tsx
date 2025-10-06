@@ -290,11 +290,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
-      <DesignBenefitsModal
-        isOpen={isDesignBenefitsModalOpen}
-        setIsOpen={setIsDesignBenefitsModalOpen}
-        refetch={refetch}
-      />
+      {isDesignBenefitsModalOpen && (
+        <DesignBenefitsModal
+          isOpen={isDesignBenefitsModalOpen}
+          setIsOpen={setIsDesignBenefitsModalOpen}
+          refetch={refetch}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

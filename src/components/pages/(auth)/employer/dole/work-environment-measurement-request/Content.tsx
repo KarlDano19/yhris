@@ -24,7 +24,7 @@ import useUpdateWorkEnvironmentRequest from './hooks/useUpdateWorkEnvironmentReq
 import CreateWemRequestModal from './modals/CreateWemRequestModal';
 import DeleteWemRequestModal from './modals/DeleteWemRequestModal';
 import EditWemRequestModal from './modals/EditWemRequestModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import ExportProgressModal from '../employee-compensation-logbook/modals/ExportProgressModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -34,6 +34,11 @@ import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteWorkEnvironmentRequest from "./hooks/useBulkDeleteWorkEnvironmentRequest";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
+import WemAttachmentSection from './components/WemAttachmentSection';
+import useGetWorkEnvironmentRequestDetails from './hooks/useGetWorkEnvironmentRequestDetails';
+import useSendEmail from './hooks/useSendEmail';
 
 
 type PaginationProps = {
@@ -62,12 +67,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isUpdateWorkEnvironmentRequestModalOpen, setIsUpdateWorkEnvironmentRequestModalOpen] =
     useState<T_ModalData | null>(null);
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState<T_ModalData | null>(null);
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
+  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const bulkDeleteMutation = useBulkDeleteWorkEnvironmentRequest();
+  const { mutate: sendEmail, isLoading: isSendingEmail } = useSendEmail();
+  const { data: workEnvironmentRequestDetails } = useGetWorkEnvironmentRequestDetails(
+    isSendEmailModalOpen?.id || null
+  );
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     onSuccess: () => {
@@ -131,6 +148,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isWorkEnvironmentRequestItemsLoading, isSearching]);
 
+  // Handle PDF attachment from work environment request details
+  useEffect(() => {
+    if (workEnvironmentRequestDetails && isSendEmailModalOpen) {
+      if (workEnvironmentRequestDetails.attachment) {
+        setPdfAttachment(workEnvironmentRequestDetails.attachment);
+      } else {
+        setPdfAttachment(null);
+      }
+    }
+  }, [workEnvironmentRequestDetails, isSendEmailModalOpen]);
+
   const handleStatusChange = async (itemId: number, newStatus: string) => {
     try {
       await updateWorkEnvironmentRequestStatus.mutateAsync({
@@ -183,6 +211,116 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error}`} type='error' />, { duration: 5000 });
     }
   };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.email));
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      payload.append('subject', data.subject);
+      
+      // Add attachment if provided (prioritize form data attachment, then local attachment)
+      if (data.attachment) {
+        payload.append('attachment', data.attachment);
+      } else if (attachment) {
+        payload.append('attachment', attachment);
+      }
+      
+      // Add work_environment_measure_id
+      payload.append('work_environment_measure_id', isSendEmailModalOpen.id.toString());
+      
+      const callbackReq = {
+        onSuccess: (data: any) => {
+          setIsSendEmailModalOpen(null);
+          setPdfAttachment(null);
+          setAttachment(null);
+          setAttachmentExist(false);
+          const successMessage = data?.message || 'Email sent successfully';
+          toast.custom(() => <CustomToast message={successMessage} type='success' />, { duration: 5000 });
+          if (workEnvironmentRequestItemsRefetch) {
+            workEnvironmentRequestItemsRefetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to send email';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 7000,
+          });
+        },
+      };
+      sendEmail(payload, callbackReq);
+    }
+  };
+
+  // const handlePrint = () => {
+  //   // Create a new div element
+  //   const printDiv = document.createElement('div');
+
+  //   // Copy the content of the original printSection
+  //   const originalPrintSection = document.getElementById('printSection');
+  //   if (originalPrintSection) {
+  //     printDiv.innerHTML = originalPrintSection.innerHTML;
+  //   }
+
+  //   // Style the new div to be off-screen
+  //   printDiv.style.width = '1980px';
+  //   printDiv.style.height = '100%';
+  //   printDiv.style.position = 'absolute';
+  //   printDiv.style.left = '-9999px';
+  //   printDiv.style.top = '-9999px';
+
+  //   // Add the new div to the body
+  //   document.body.appendChild(printDiv);
+
+  //   // Use html2canvas on the new div
+  //   html2canvas(printDiv).then((canvas) => {
+  //     // Remove the temporary div
+  //     document.body.removeChild(printDiv);
+
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const newWindow = window.open('', '_blank');
+  //     newWindow?.document.write(`<img src="${imgData}" style="width:100%;height:auto;">`);
+  //     newWindow?.document.close();
+  //     setTimeout(() => {
+  //       newWindow?.print();
+  //     }, 500);
+  //   });
+  // };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -251,6 +389,63 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     );
   };
 
+  // Handle individual request selection
+  const handleRequestSelect = (requestId: number) => {
+    setSelectedRequests(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!workEnvironmentRequestItems) return;
+    
+    if (selectAll) {
+      setSelectedRequests(new Set());
+    } else {
+      const allIds = workEnvironmentRequestItems.map((item: any) => item.id);
+      setSelectedRequests(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedRequests.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const requestIds = Array.from(selectedRequests);
+      await bulkDeleteMutation.mutateAsync(requestIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedRequests.size} request(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedRequests(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      workEnvironmentRequestItemsRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete requests';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
+  // Update select all state when requests change
+  useEffect(() => {
+    if (workEnvironmentRequestItems) {
+      const allRequestIds = new Set(workEnvironmentRequestItems.map((item: any) => item.id));
+      const allSelected = allRequestIds.size > 0 && 
+        Array.from(allRequestIds).every((id: any) => selectedRequests.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedRequests, workEnvironmentRequestItems]);
+
   const renderRows = () => {
     if (isSearching || isWorkEnvironmentRequestItemsLoading) {
       return (
@@ -266,6 +461,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workEnvironmentRequestItems && workEnvironmentRequestItems.length > 0) {
       return workEnvironmentRequestItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedRequests.has(item.id)}
+              onChange={() => handleRequestSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_application}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.number_of_workers_total}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -460,6 +663,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedRequests.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedRequests(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedRequests.size} selected
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -472,6 +709,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!workEnvironmentRequestItems || workEnvironmentRequestItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Application
                       </th>
@@ -545,9 +791,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isSendEmailModalOpen && (
         <SendEmailModal
-          refetch={workEnvironmentRequestItemsRefetch}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
+          title="Send Work Environment Measure"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={workEnvironmentRequestDetails?.email ? [workEnvironmentRequestDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <WemAttachmentSection
+              pdfAttachment={pdfAttachment}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+          submitButtonText="Send"
+          isLoading={isSendingEmail}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          selectedCount={selectedRequests.size}
+          moduleName="Work Environment Request"
+          onConfirm={confirmBulkDelete}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          isLoading={bulkDeleteMutation.isLoading}
         />
       )}
       <Tooltip id='search-tooltip'/>

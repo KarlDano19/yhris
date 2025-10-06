@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import { initialActionState } from '../lib/initialActionState';
-import ModalLayout from './ModalLayout';
+import ModalLayout from '../../../../../ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import useTagInput from '../hooks/useTagInput';
 import StateContext from '../contexts/StateContext';

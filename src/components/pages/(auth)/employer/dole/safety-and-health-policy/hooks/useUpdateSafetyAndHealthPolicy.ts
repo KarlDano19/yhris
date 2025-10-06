@@ -11,12 +11,18 @@ async function updateSafetyAndHealthPolicy(data: any) {
 
         // Append all fields to formData, but skip attachment fields for status-only updates
         for (const key in data) {
-            if (data[key] !== undefined && data[key] !== null) {
+            if (data[key] !== undefined) {
                 // Skip attachment fields for status-only updates
                 if (isStatusOnlyUpdate && (key === 'attachment' || key === 'attachments')) {
                     continue;
                 }
-                formData.append(key, data[key]);
+                
+                // Handle null values explicitly (especially for attachment deletion)
+                if (data[key] === null) {
+                    formData.append(key, ''); // Send empty string instead of null
+                } else {
+                    formData.append(key, data[key]);
+                }
             }
         }
 

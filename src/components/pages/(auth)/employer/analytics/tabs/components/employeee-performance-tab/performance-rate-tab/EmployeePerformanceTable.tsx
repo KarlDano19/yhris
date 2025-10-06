@@ -78,7 +78,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
       </div>
       <div className="p-6">
         <div 
-          className='-mx-4 -my-2 overflow-x-auto md:overflow-visible sm:-mx-6 lg:-mx-8'
+          className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#2d3e58 #f1f1f1'

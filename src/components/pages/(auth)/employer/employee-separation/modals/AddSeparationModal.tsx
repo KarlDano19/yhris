@@ -1,13 +1,13 @@
-import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
-import Select, { components } from 'react-select';
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useAddSeparation from '../hooks/useAddSeparation';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -15,25 +15,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 
 import { T_Separation } from '@/types/globals';
 
-// Custom Option component to display department/position in dropdown
-const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
+
 
 export default function AddSeparationModal({
   isOpen,
@@ -50,27 +32,10 @@ export default function AddSeparationModal({
       date: new Date().toISOString(),
     },
   });
-  const { data: dataEmployee } = useGetEmployeeItems();
-  const { mutate, isLoading } = useAddSeparation();
-  
   const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   
-  // React Select employee items state
-  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
+  const { mutate, isLoading } = useAddSeparation();
 
-  // Transform employee items for React Select
-  useEffect(() => {
-    if (dataEmployee && dataEmployee.length > 0) {
-      const selectItems = dataEmployee.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-      }));
-      setReactSelectEmployeeItems(selectItems);
-    }
-  }, [dataEmployee]);
 
   const resetForm = () => {
     reset({
@@ -80,9 +45,9 @@ export default function AddSeparationModal({
       reason: '',
     });
     setEmployeeSearch('');
-    setEmployeeSelected(false);
     setValue('department', '');
     setValue('position', '');
+    setValue('name', ''); // Clear the name field
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -167,89 +132,34 @@ export default function AddSeparationModal({
                         Employee Name<span className='text-red-600'>*</span>
                       </label>
                       <div className='relative mt-2'>
-                        <Controller
-                          name="name"
+                        <EmployeeSelect
                           control={control}
-                          rules={{ required: "Please select an employee" }}
-                          render={({
-                            field: { onChange, value },
-                            fieldState: { error },
-                          }: {
-                            field: { onChange: (value: any) => void; value: any };
-                            fieldState: { error?: { message?: string } };
-                          }) => (
-                            <>
-                              <Select
-                                className="basic-single-select"
-                                classNamePrefix="select"
-                                options={reactSelectEmployeeItems}
-                                value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
-                                onChange={(selectedOption) => {
-                                  onChange(selectedOption ? selectedOption.value : '');
-                                  if (selectedOption) {
-                                    setEmployeeSearch(selectedOption.label);
-                                    setEmployeeSelected(true);
-                                    // Auto-fill department from employee data
-                                    if (selectedOption.department) {
-                                      setValue('department', selectedOption.department);
-                                    }
-                                    // Auto-fill position from employee data
-                                    if (selectedOption.position) {
-                                      setValue('position', selectedOption.position);
-                                    }
-                                  } else {
-                                    setEmployeeSearch('');
-                                    setEmployeeSelected(false);
-                                    setValue('department', '');
-                                    setValue('position', '');
-                                  }
-                                }}
-                                components={{
-                                  Option: CustomOption,
-                                  DropdownIndicator: () => (
-                                    <div className="pointer-events-none px-2">
-                                      <SelectChevronDown />
-                                    </div>
-                                  ),
-                                  IndicatorSeparator: () => null,
-                                }}
-                                isClearable={true}
-                                placeholder="Select employee..."
-                                isSearchable={true}
-                                styles={{
-                                  control: (provided) => ({
-                                    ...provided,
-                                    minHeight: '38px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '6px',
-                                    backgroundColor: '#f3f4f6',
-                                  }),
-                                  menu: (provided) => ({
-                                    ...provided,
-                                    zIndex: 9999,
-                                  }),
-                                  option: (provided, state) => ({
-                                    ...provided,
-                                    backgroundColor: state.isSelected 
-                                      ? '#3b82f6' 
-                                      : state.isFocused 
-                                        ? '#dbeafe' 
-                                        : 'white',
-                                    color: state.isSelected ? 'white' : '#374151',
-                                  }),
-                                  singleValue: (provided) => ({
-                                    ...provided,
-                                    color: '#374151',
-                                  }),
-                                }}
-                              />
-                              {error && (
-                                <p className="text-red-500 text-sm mt-1 ml-1">
-                                  {error.message}
-                                </p>
-                              )}
-                            </>
-                          )}
+                          name="name"
+                          label=""
+                          required={true}
+                          placeholder="Select employee..."
+                          isMulti={false}
+                          isClearable={true}
+                          employeeSearch={employeeSearch}
+                          setEmployeeSearch={setEmployeeSearch}
+                          className=""
+                          onChange={(selectedOption: any) => {
+                            if (selectedOption && !selectedOption.isShowMore) {
+                              setEmployeeSearch(selectedOption.label);
+                              // Auto-fill department from employee data
+                              if (selectedOption.department) {
+                                setValue('department', selectedOption.department);
+                              }
+                              // Auto-fill position from employee data
+                              if (selectedOption.position) {
+                                setValue('position', selectedOption.position);
+                              }
+                            } else {
+                              setEmployeeSearch('');
+                              setValue('department', '');
+                              setValue('position', '');
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -280,7 +190,14 @@ export default function AddSeparationModal({
                           {...register('position', { required: true })}
                           type='text'
                           readOnly
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                          data-tooltip-id="position-tooltip"
+                          data-tooltip-content="Auto-populated from selected employee"
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                        />
+                        <Tooltip 
+                          id="position-tooltip" 
+                          place="bottom"
+                          style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
                       </div>
                     </div>
@@ -311,7 +228,14 @@ export default function AddSeparationModal({
                           {...register('department', { required: true })}
                           type='text'
                           readOnly
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-50 sm:text-sm sm:leading-6'
+                          data-tooltip-id="department-tooltip"
+                          data-tooltip-content="Auto-populated from selected employee"
+                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                        />
+                        <Tooltip 
+                          id="department-tooltip" 
+                          place="bottom"
+                          style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
                       </div>
                     </div>

@@ -24,9 +24,12 @@ import classNames from "@/helpers/classNames";
 
 import useGetAnnualMedicalReportItems from "./hooks/useGetAnnualMedicalReportItems";
 import useUpdateAnnualMedicalReport from "./hooks/useUpdateAnnualMedicalReport";
+import useBulkDeleteAnnualMedicalReport from "./hooks/useBulkDeleteAnnualMedicalReport";
+import ExportProgressModal from "./modals/ExportProgressModal";
 import CreateAnnualMedicalReportModal from "./modals/CreateAnnualMedicalReportModal";
 import EditAnnualMedicalReportModal from "./modals/EditAnnualMedicalReportModal";
 import DeleteAnnualMedicalReportModal from "./modals/DeleteAnnualMedicalReportModal";
+import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 import SelectChevronDown from "@/svg/SelectChevronDown";
 import EditIcon from "@/svg/EditIcon";
@@ -71,6 +74,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: "",
     search: "",
   });
+  
+  // Bulk delete states
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  
   const {
     data: annualMedicalReportData,
     isLoading: isAnnualMedicalReportLoading,
@@ -86,6 +95,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const editFormMethods = useForm();
 
   const updateAnnualMedicalReport = useUpdateAnnualMedicalReport();
+  const bulkDeleteMutation = useBulkDeleteAnnualMedicalReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -151,6 +161,53 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // Handle individual report selection
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!annualMedicalReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = annualMedicalReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedReports(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      annualMedicalReportRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   useEffect(() => {
     if (annualMedicalReportData) {
       const sortedRecords = [...annualMedicalReportData.records]
@@ -169,6 +226,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [annualMedicalReportData]);
+
+  // Update select all state when reports change
+  useEffect(() => {
+    if (annualMedicalReportItems) {
+      const allReportIds = new Set(annualMedicalReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, annualMedicalReportItems]);
 
   useEffect(() => {
     annualMedicalReportRefetch();
@@ -238,6 +305,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ) {
       return annualMedicalReportItems.map((item: any) => (
         <tr key={item.id} className="cursor-pointer">
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
             {item.date_of_report}
           </td>
@@ -411,6 +486,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedReports.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedReports(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedReports.size} selected
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className={classNames("mt-8 flow-root", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8"
@@ -423,6 +532,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className="min-w-full divide-y divide-gray-300 text-center">
                   <thead>
                     <tr>
+                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!annualMedicalReportItems || annualMedicalReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-sm font-semibold text-gray-900"
@@ -495,6 +613,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsDeleteAnnualMedicalReportModalOpen}
         />
       )}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedReports.size}
+        moduleName="Annual Medical Report"
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
     </>
   );
 }

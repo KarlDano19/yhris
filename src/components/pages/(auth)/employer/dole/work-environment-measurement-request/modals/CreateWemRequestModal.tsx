@@ -176,7 +176,6 @@ function CreateWemRequestModal({
                     watch={watch}
                     errors={errors}
                     setError={setError}
-                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (

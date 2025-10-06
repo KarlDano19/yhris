@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -21,6 +21,15 @@ export default function Filter({ onFilterChange }: FilterProps) {
     rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Passed', 'Rejected'],
   });
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => 
+      filterRef.current?.contains(e.target as Node) || setIsOpen(false);
+    
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const toggleFilter = () => {
     setIsOpen(!isOpen);

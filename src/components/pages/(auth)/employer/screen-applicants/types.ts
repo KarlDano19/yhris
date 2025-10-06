@@ -33,6 +33,7 @@ export type ModalLayoutTypes = {
   title: string;
   isOpen: boolean;
   handleClose: any;
+  nestedModals?: React.ReactNode;
 };
 
 export type StageRequirementsTypes = {

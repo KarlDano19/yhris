@@ -19,16 +19,17 @@ import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
 import OrientOptionModal from './modals/OrientOptionModal';
-import SendContractModal from './modals/SendContractModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SuccessModal from './modals/SuccessModal';
 import NoticeModal from './modals/NoticeModal';
-import IntroduceModal from './modals/IntroduceModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
+import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
 import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
+import EnrollRedirectModal from './modals/EnrollRedirectModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -86,6 +87,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
+  const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
@@ -224,7 +226,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
-          setIsEnrollModalOpen(true);
+          setIsEnrollRedirectModalOpen(true);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
@@ -271,6 +273,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       updateOrientationStatus();
     }
   };
+
 
   const setOriented = () => {
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
@@ -521,7 +524,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Orient
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Location & Department
+                        Location, Department & Employment Status
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Introduce to the team
@@ -547,13 +550,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       {isSendContractModalOpen && (
-        <SendContractModal
-          selectedOrientId={selectedOrientId}
-          orientItems={orientItems}
-          setOrientItems={setOrientItems}
-          setIsOpen={setIsSendContractModalOpen}
+        <SendEmailModal
+          title="Send Contract"
           isOpen={isSendContractModalOpen}
-          setSuccessModal={setIsSuccessSendContractModalOpen}
+          onClose={() => setIsSendContractModalOpen(false)}
+          onSubmit={(data) => {
+            const updatedItem = handleEmailSending(data, 'contract', orientItems, selectedOrientId);
+            mutate(updatedItem, {
+              onSuccess: () => {
+                setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
+                setIsSendContractModalOpen(false);
+                setIsSuccessSendContractModalOpen(true);
+                toast.custom(() => <CustomToast message={'Successfully sent contract email.'} type='success' />, {
+                  duration: 5000,
+                });
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                  duration: 7000,
+                });
+              },
+            });
+          }}
+          defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send Contract"
         />
       )}
       {isOrientOptionModalOpen && (
@@ -566,11 +587,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsNewHireOrientedOpen={setNewHireOriented}
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessSendContractModalOpen}
-        setIsOpen={setIsSuccessSendContractModalOpen}
-        message='You have successfully sent an email.'
-      />
       <NoticeModal isOpen={isDoloNewHire} setIsOpen={setIsDoloNewHire}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
           Do you have an account in YAHSHUA Dolo to orient the New Hire?
@@ -754,7 +770,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         message='You have successfully sent orientation link to the New Hire.'
       />
       <NoticeModal isOpen={newHireOriented} setIsOpen={setNewHireOriented}>
-        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already oriented the New Hire?</h5>
+        <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already ORIENTED the NEW HIRE?</h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
           <button
             type='button'
@@ -773,18 +789,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setNewHireOriented(false);
             }}
           >
-            NO, I DON&apos;T.
+            NO, I HAVEN&apos;T.
           </button>
         </div>
       </NoticeModal>
       {isIntroducedModalOpen && (
-        <IntroduceModal
-          selectedOrientId={selectedOrientId}
-          orientItems={orientItems}
-          setOrientItems={setOrientItems}
-          setIsOpen={setIsIntroducedModalOpen}
+        <SendEmailModal
+          title="Introduce to the team"
           isOpen={isIntroducedModalOpen}
-          setSuccessModal={setSuccessIsIntroducedModalOpen}
+          onClose={() => setIsIntroducedModalOpen(false)}
+          onSubmit={(data) => {
+            const updatedItem = handleEmailSending(data, 'introduce', orientItems, selectedOrientId);
+            mutate(updatedItem, {
+              onSuccess: () => {
+                setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
+                setIsIntroducedModalOpen(false);
+                setSuccessIsIntroducedModalOpen(true);
+                toast.custom(() => <CustomToast message={'Successfully sent introduction email.'} type='success' />, {
+                  duration: 5000,
+                });
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, {
+                  duration: 7000,
+                });
+              },
+            });
+          }}
+          defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send Introduction"
         />
       )}
       <SuccessModal
@@ -806,11 +840,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           SIGN IN TO YAHSHUA PAYROLL
         </button>
       </NoticeModal>
-      <SuccessModal
-        isOpen={isEnrollModalOpen}
-        setIsOpen={setIsEnrollModalOpen}
-        message='You have successfully enrolled New Hire to YAHSHUA Payroll.'
-      />
+      {isEnrollRedirectModalOpen && (
+        <EnrollRedirectModal
+          isOpen={isEnrollRedirectModalOpen}
+          setIsOpen={setIsEnrollRedirectModalOpen}
+          jobPostingId={String(params.position)}
+        />
+      )}
       {isLocationDepartmentModalOpen && (
         <LocationDepartmentModal
           selectedOrientId={selectedOrientId}
@@ -826,10 +862,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsSuccessLocationDepartmentModalOpen}
         message='You have successfully assigned location and department.'
       />
-      {/* Updated warning modal for location/department assignment */}
+      {/* Updated warning modal for employment status, location/department assignment */}
       <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
-          Please assign location and department first.
+          Please assign <span className='text-red-600 font-bold'>EMPLOYMENT STATUS, LOCATION AND DEPARTMENT</span> first.
           <br />
           <br />
           You need to complete this step before enrolling the applicant.
@@ -843,7 +879,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLocationDepartmentModalOpen(true);
             }}
           >
-            ASSIGN LOCATION & DEPARTMENT
+            ASSIGN
           </button>
           <button
             type='button'

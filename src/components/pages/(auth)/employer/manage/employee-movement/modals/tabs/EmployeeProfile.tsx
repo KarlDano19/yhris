@@ -1,37 +1,19 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Controller } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
-import Select, { components } from 'react-select';
+import { Tooltip } from 'react-tooltip';
 
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
-// Custom Option component to display department/position in dropdown
-const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
-  return (
-    <components.Option {...props}>
-      <div>
-        <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
-      </div>
-    </components.Option>
-  );
-};
 
 function EmployeeProfile({
   control,
@@ -47,6 +29,11 @@ function EmployeeProfile({
   setCurrentPosition,
   newPosition,
   setNewPosition,
+  currentEmploymentStatus,
+  setCurrentEmploymentStatus,
+  newEmploymentStatus,
+  setNewEmploymentStatus,
+  employeeName,
   errors,
 }: {
   control: any;
@@ -62,29 +49,18 @@ function EmployeeProfile({
   setCurrentPosition: (v: string) => void;
   newPosition: string;
   setNewPosition: (v: string) => void;
+  currentEmploymentStatus: string;
+  setCurrentEmploymentStatus: (v: string) => void;
+  newEmploymentStatus: string;
+  setNewEmploymentStatus: (v: string) => void;
+  employeeName?: string;
   errors: any;
 }) {
-  const queryClient = useQueryClient();
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [positionItems, setPositionItems] = useState<any>([]);
-  const [reactSelectEmployeeItems, setReactSelectEmployeeItems] = useState<any[]>([]);
-  const { data: employeeData } = useGetEmployeeItems();
+  const [employeeStatusItems, setEmployeeStatusItems] = useState<any>([]);
+  const [employeeSearch, setEmployeeSearch] = useState('');
   const { data: positionData } = useGetPositionItems();
-  const [watchedEmployeeId, setWatchedEmployeeId] = useState('');
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-      // Transform employee items for React Select
-      const selectItems = employeeData.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-      }));
-      setReactSelectEmployeeItems(selectItems);
-    }
-  }, [employeeData]);
+  const { data: employeeStatusData } = useGetEmployeeStatusItems();
 
   useEffect(() => {
     if (positionData) {
@@ -93,12 +69,11 @@ function EmployeeProfile({
   }, [positionData]);
 
   useEffect(() => {
-    const subscription = watch((value: any) => {
-      const id = value.employee;
-      setWatchedEmployeeId(id ? String(id) : '');
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
+    if (employeeStatusData) {
+      setEmployeeStatusItems(employeeStatusData);
+    }
+  }, [employeeStatusData]);
+
 
 
   useEffect(() => {
@@ -106,6 +81,8 @@ function EmployeeProfile({
       const subscription = watch((value: any) => {
         const currentPositionValue = value.current_position;
         const newPositionValue = value.new_position;
+        const currentEmploymentStatusValue = value.current_employment_status;
+        const newEmploymentStatusValue = value.new_employment_status;
         
         if (currentPositionValue) {
           setCurrentPosition(String(currentPositionValue));
@@ -113,10 +90,16 @@ function EmployeeProfile({
         if (newPositionValue) {
           setNewPosition(String(newPositionValue));
         }
+        if (currentEmploymentStatusValue) {
+          setCurrentEmploymentStatus(String(currentEmploymentStatusValue));
+        }
+        if (newEmploymentStatusValue) {
+          setNewEmploymentStatus(String(newEmploymentStatusValue));
+        }
       });
       return () => subscription.unsubscribe();
     }
-  }, [isEdit, watch, setCurrentPosition, setNewPosition]);
+  }, [isEdit, watch, setCurrentPosition, setNewPosition, setCurrentEmploymentStatus, setNewEmploymentStatus]);
 
   const onSubmit = (data: any) => {
     if (isEdit) {
@@ -170,81 +153,60 @@ function EmployeeProfile({
               <span className='text-red-600'>*</span>
             </label>
             <div className='relative mt-2'>
-              <Controller
-                name="employee"
+              <EmployeeSelect
                 control={control}
-                rules={{ required: "Please select an employee" }}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }: {
-                  field: { onChange: (value: any) => void; value: any };
-                  fieldState: { error?: { message?: string } };
-                }) => (
-                  <>
-                    <Select
-                      className="basic-single-select"
-                      classNamePrefix="select"
-                      options={reactSelectEmployeeItems}
-                      value={reactSelectEmployeeItems.find((item: any) => item.value === value)}
-                      onChange={(selectedOption) => {
-                        if (!isEdit) {
-                          onChange(selectedOption ? selectedOption.value : '');
-                        }
-                      }}
-                      components={{
-                        Option: CustomOption,
-                        DropdownIndicator: () => (
-                          <div className="pointer-events-none px-2">
-                            <SelectChevronDown />
-                          </div>
-                        ),
-                        IndicatorSeparator: () => null,
-                      }}
-                      isClearable={!isEdit}
-                      placeholder="Select employee..."
-                      isSearchable={!isEdit}
-                      isDisabled={isEdit}
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          minHeight: '38px',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '6px',
-                          backgroundColor: '#f3f4f6',
-                          opacity: isEdit ? 0.6 : 1,
-                        }),
-                        menu: (provided) => ({
-                          ...provided,
-                          zIndex: 9999,
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected 
-                            ? '#3b82f6' 
-                            : state.isFocused 
-                              ? '#dbeafe' 
-                              : 'white',
-                          color: state.isSelected ? 'white' : '#374151',
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: '#374151',
-                        }),
-                      }}
-                    />
-                    {error && !isEdit && (
-                      <p className="text-red-500 text-sm mt-1 ml-1">
-                        {error.message}
-                      </p>
-                    )}
-                  </>
-                )}
+                name="employee"
+                label=""
+                required={true}
+                placeholder="Select employee..."
+                isMulti={false}
+                isClearable={!isEdit}
+                disabled={isEdit}
+                employeeSearch={employeeSearch}
+                setEmployeeSearch={setEmployeeSearch}
+                employeeName={employeeName}
+                className=""
+                onChange={(selectedOption: any) => {
+                  if (!isEdit && selectedOption && !selectedOption.isShowMore) {
+                    setEmployeeSearch(selectedOption.label);
+                    
+                    // Auto-fill current position from employee data
+                    if (selectedOption.position) {
+                      // Find the position ID by matching the position name
+                      const matchingPosition = positionItems.find(
+                        (item: any) => item.name === selectedOption.position
+                      );
+                      if (matchingPosition) {
+                        setCurrentPosition(String(matchingPosition.id));
+                        setValue('current_position', matchingPosition.id);
+                      }
+                    }
+                    
+                    // Auto-fill current employment status from employee data
+                    if (selectedOption.employment_status) {
+                      // Find the employment status ID by matching the status name
+                      const matchingStatus = employeeStatusItems.find(
+                        (item: any) => item.name === selectedOption.employment_status
+                      );
+                      if (matchingStatus) {
+                        setCurrentEmploymentStatus(String(matchingStatus.id));
+                        setValue('current_employment_status', matchingStatus.id);
+                      }
+                    }
+                  } else if (!isEdit) {
+                    setEmployeeSearch('');
+                    // Clear current position and employment status when employee is unselected
+                    setCurrentPosition('');
+                    setCurrentEmploymentStatus('');
+                    setValue('current_position', '');
+                    setValue('current_employment_status', '');
+                  }
+                }}
               />
             </div>
           </div>
           <div>
-            <label htmlFor='total_non_disabling_injuries' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='current_position' className='block text-sm font-medium leading-6 text-gray-900'>
               Current Position
               <span className='text-red-600'>*</span>
             </label>
@@ -256,8 +218,10 @@ function EmployeeProfile({
                   setCurrentPosition(e.target.value);
                   setValue('current_position', e.target.value);
                 }}
-                disabled={isEdit}
-                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                disabled={true} // Disabled since it's auto-populated
+                data-tooltip-id="current-position-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
               >
                 <option value=''>Select...</option>
                 {positionItems.map((item: any) => {
@@ -271,10 +235,15 @@ function EmployeeProfile({
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
               </div>
+              <Tooltip 
+                id="current-position-tooltip" 
+                place="bottom"
+                style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+              />
             </div>
           </div>
           <div>
-            <label htmlFor='frequency_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='new_position' className='block text-sm font-medium leading-6 text-gray-900'>
               New Position
               <span className='text-red-600'>*</span>
             </label>
@@ -302,6 +271,99 @@ function EmployeeProfile({
                 <SelectChevronDown />
               </div>
             </div>
+          </div>
+          <div>
+            <label htmlFor='current_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              Current Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='current_employment_status'
+                value={currentEmploymentStatus}
+                onChange={e => {
+                  setCurrentEmploymentStatus(e.target.value);
+                  setValue('current_employment_status', e.target.value);
+                }}
+                disabled={true} // Disabled since it's auto-populated
+                data-tooltip-id="current-employment-status-tooltip"
+                data-tooltip-content="Auto-populated from selected employee"
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+              <Tooltip 
+                id="current-employment-status-tooltip" 
+                place="bottom"
+                style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor='new_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+              New Employment Status
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className='relative mt-2'>
+              <select
+                id='new_employment_status'
+                value={newEmploymentStatus}
+                onChange={e => {
+                  setNewEmploymentStatus(e.target.value);
+                  setValue('new_employment_status', e.target.value);
+                }}
+                disabled={isEdit}
+                className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              >
+                <option value=''>Select...</option>
+                {employeeStatusItems.map((item: any) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                <SelectChevronDown />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label htmlFor='start_date' className='block text-sm font-medium leading-6 text-gray-900'>
+              Start Date
+              <span className='text-red-600'>*</span>
+            </label>
+            <div className="relative mt-2">
+                <Controller
+                  control={control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="start_date"
+                      placeholder={"mm/dd/yyyy"}
+                      className={
+                        "block w-full rounded-md py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
+                      }
+                      selected={field.value ? new Date(field.value) : null}
+                      pickerOnChange={(date: any) => field.onChange(date)}
+                      inputOnChange={(value: any) => field.onChange(value)}
+                      required={true}
+                      disabled={isEdit}
+                    />
+                  )}
+                />
+              </div>
           </div>
           <div>
             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -350,7 +412,7 @@ function EmployeeProfile({
             </div>
           </div>
           <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
+            <label htmlFor='proposed_rate' className='block text-sm font-medium leading-6 text-gray-900'>
               Proposed Rate
               <span className='text-red-600'>*</span>
             </label>
@@ -397,43 +459,10 @@ function EmployeeProfile({
               </div>
             </div>
           </div>
-          <div>
-            <label htmlFor='severity_rate' className='block text-sm font-medium leading-6 text-gray-900'>
-              Start Date
-              <span className='text-red-600'>*</span>
-            </label>
-            <div className="relative mt-2">
-                <Controller
-                  control={control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <CustomDatePicker
-                      id="start_date"
-                      placeholder={"mm/dd/yyyy"}
-                      className={
-                        "block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                      }
-                      selected={field.value ? new Date(field.value) : null}
-                      pickerOnChange={(date: any) => field.onChange(date)}
-                      inputOnChange={(value: any) => field.onChange(value)}
-                      required={true}
-                      disabled={isEdit}
-                    />
-                  )}
-                />
-              </div>
-          </div>
         </div>
       </div>
       <hr />
-      <div className='flex justify-between py-4 px-4'>
-        <button
-          type='button'
-          className='w-auto rounded-md bg-white border border-savoy-blue px-14 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          onClick={() => setSelectedTab(1)}
-        >
-          Back
-        </button>
+      <div className='flex justify-end py-4 px-4'>
         <button
           type='submit'
           className='w-auto rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'

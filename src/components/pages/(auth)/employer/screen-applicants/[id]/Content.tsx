@@ -18,7 +18,7 @@ import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
-import SendEmail from '../modals/SendEmail';
+import SendEmailModal from '@/components/SendEmailModal';
 import Confirmation from '../modals/Confirmation';
 import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
@@ -210,7 +210,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     if (dataJobPostDetails) {
       dispatch({ type: CLEAR_STAGE });
       let jobStages: any = [];
-      dataJobPostDetails.job_stages.forEach((item: any) => {
+      dataJobPostDetails.job_stages?.forEach((item: any) => {
         let newData = {
           id: item.id,
           title: item.title,
@@ -372,7 +372,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       },
     },
     SEND_EMAIL: {
-      component: <SendEmail title={title} handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <SendEmailModal
+          title={title}
+          isOpen={true}
+          onClose={() => setActionState(initialActionState)}
+          onSubmit={(data) => handleFormSubmit(data, () => setActionState(initialActionState))}
+          defaultRecipients={actionState.email ? [actionState.email] : []}
+          showAttachment={true}
+          submitButtonText="Send"
+        />
+      ),
       dispatch: {
         type: SEND_EMAIL,
         payload: { actionState, setActionState },
@@ -478,13 +488,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     Upload Resumes
                   </SmartButton>
 
-                  <button
+                  {/* <button
                     onClick={() => setIsAddApplicantModalOpen(true)}
                     className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 transition-colors"
                   >
                     <PlusIconGreen />
                     Add Applicant
-                  </button>
+                  </button> */}
 
                   <div className='border-l-2 border-gray-300 h-12'></div>
 

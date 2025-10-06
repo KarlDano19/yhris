@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import React from "react";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -18,15 +16,6 @@ function EmploymentDetails({
   const onSubmit = handleSubmit(() => {
     setSelectedTab(3);
   });
-
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <form onSubmit={onSubmit}>

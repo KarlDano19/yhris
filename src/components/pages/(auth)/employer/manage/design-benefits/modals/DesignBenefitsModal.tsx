@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useRef, useState, useCallback } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
@@ -6,9 +6,11 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
+import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useAddBenefitItems from '../hooks/useAddBenefitItems';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -32,11 +34,166 @@ export default function DesignBenefitsModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
-  const { tagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
-  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const [showTooltip, setShowTooltip] = useState(true);
+  
+  // Paginated search state
+  const [toSearchTerm, setToSearchTerm] = useState('');
+  const [ccSearchTerm, setCcSearchTerm] = useState('');
+  const [bccSearchTerm, setBccSearchTerm] = useState('');
+  const [debouncedToSearch, setDebouncedToSearch] = useState('');
+  const [debouncedCcSearch, setDebouncedCcSearch] = useState('');
+  const [debouncedBccSearch, setDebouncedBccSearch] = useState('');
+
+  // Generic employee field state management
+  const toDropdownRef = useRef<HTMLDivElement>(null);
+  const ccDropdownRef = useRef<HTMLDivElement>(null);
+  const bccDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // TO field state
+  const [showTOSuggestions, setShowTOSuggestions] = useState(false);
+  const [filteredTOEmployees, setFilteredTOEmployees] = useState<any[]>([]);
+  const [selectedTOIndex, setSelectedTOIndex] = useState(-1);
+  
+  // CC field state
+  const [showCCSuggestions, setShowCCSuggestions] = useState(false);
+  const [filteredCCEmployees, setFilteredCCEmployees] = useState<any[]>([]);
+  const [selectedCCIndex, setSelectedCCIndex] = useState(-1);
+  
+  // BCC field state
+  const [showBCCSuggestions, setShowBCCSuggestions] = useState(false);
+  const [filteredBCCEmployees, setFilteredBCCEmployees] = useState<any[]>([]);
+  const [selectedBCCIndex, setSelectedBCCIndex] = useState(-1);
+  
+  // Modal state
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const { register, handleSubmit, reset, trigger, getValues, setValue, clearErrors, watch, formState: { errors }, setError } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
+
+  // Paginated employee data fetching
+  const { data: toEmployeeData } = useGetEmployeePaginatedSelect(
+    debouncedToSearch && debouncedToSearch.length >= 2 ? {
+      search: debouncedToSearch,
+      current_page: 1,
+      page_size: 500
+    } : null
+  );
+  
+  const { data: ccEmployeeData } = useGetEmployeePaginatedSelect(
+    debouncedCcSearch && debouncedCcSearch.length >= 2 ? {
+      search: debouncedCcSearch,
+      current_page: 1,
+      page_size: 500
+    } : null
+  );
+  
+  const { data: bccEmployeeData } = useGetEmployeePaginatedSelect(
+    debouncedBccSearch && debouncedBccSearch.length >= 2 ? {
+      search: debouncedBccSearch,
+      current_page: 1,
+      page_size: 500
+    } : null
+  );
+
+  // Debouncing effects for each field
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedToSearch(toSearchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [toSearchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedCcSearch(ccSearchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [ccSearchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedBccSearch(bccSearchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [bccSearchTerm]);
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const title = watch('title');
+    const purpose = watch('purpose');
+    const benefits = watch('benefits');
+    const coverage = watch('coverage');
+    const eligibility = watch('eligibility');
+    
+    return (
+      (title && title.trim() !== '') ||
+      (purpose && purpose.trim() !== '') ||
+      (benefits && benefits.trim() !== '') ||
+      (coverage && coverage.trim() !== '') ||
+      (eligibility && eligibility.trim() !== '') ||
+      tagsTo.length > 0 ||
+      tagsCc.length > 0 ||
+      tagsBcc.length > 0
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (dropdownRef: React.RefObject<HTMLDivElement>, index: number) => {
+    if (dropdownRef.current && index >= 0) {
+      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
+
+  // Generic function to handle employee selection
+  const handleEmployeeSelect = (employee: any, selectedTags: string[], setSelectedTags: (tags: string[]) => void, setInputValue: (value: string) => void, setShowSuggestions: (show: boolean) => void, setSelectedIndex: (index: number) => void, employeeData: any) => {
+    if (employee.is_department_option) {
+      // Handle department selection - add all employees from that department
+      if (employeeData?.records) {
+        const employeesInDepartment = employeeData.records.filter((emp: any) => 
+          emp.department === employee.department && emp.email && !selectedTags.includes(emp.email)
+        );
+        const newEmails = employeesInDepartment.map((emp: any) => emp.email);
+        setSelectedTags([...selectedTags, ...newEmails]);
+      }
+    } else if (employee.email && !selectedTags.includes(employee.email)) {
+      // Add the email directly to selected tags
+      setSelectedTags([...selectedTags, employee.email]);
+    }
+    setInputValue('');
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+  };
 
   const onSubmit = handleSubmit((data) => {
     data.email = tagsTo;
@@ -68,7 +225,7 @@ export default function DesignBenefitsModal({
     if (titleValue && titleValue !== "") {
       clearErrors('title');
     }
-  }, [watch('title'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -83,15 +240,15 @@ export default function DesignBenefitsModal({
     if (purposeValue && purposeValue !== "") {
       clearErrors('purpose');
     }
-  }, [watch('purpose'), clearErrors]);
+  }, [watch, clearErrors]);
 
-  // Clear errors when purpose changes
+  // Clear errors when benefits changes
   useEffect(() => {
     const benefitsValue = watch('benefits');
     if (benefitsValue && benefitsValue !== "") {
       clearErrors('benefits');
     }
-  }, [watch('benefits'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when coverage changes
   useEffect(() => {
@@ -99,7 +256,7 @@ export default function DesignBenefitsModal({
     if (coverageValue && coverageValue !== "") {
       clearErrors('coverage');
     }
-  }, [watch('coverage'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when eligibility changes
   useEffect(() => {
@@ -107,7 +264,7 @@ export default function DesignBenefitsModal({
     if (eligibilityValue && eligibilityValue !== "") {
       clearErrors('eligibility');
     }
-  }, [watch('eligibility'), clearErrors]);
+  }, [watch, clearErrors]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -115,10 +272,129 @@ export default function DesignBenefitsModal({
     }
   }, [isOpen]);
 
+  // Generic function to filter employees using paginated data
+  const filterEmployees = useCallback((inputValue: string, selectedTags: string[], setFilteredEmployees: (employees: any[]) => void, setShowSuggestions: (show: boolean) => void, setSelectedIndex: (index: number) => void, employeeData: any) => {
+    if (employeeData?.records) {
+      if (inputValue.trim()) {
+        const searchTerm = inputValue.toLowerCase();
+        
+        // Filter employees (exclude already selected ones)
+        const filtered = employeeData.records.filter((employee: any) => {
+        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+        const email = employee.email?.toLowerCase() || '';
+          const department = employee.department?.toLowerCase() || '';
+          const position = employee.position?.toLowerCase() || '';
+          
+          // Check if employee is already selected
+          const isAlreadySelected = selectedTags.includes(employee.email);
+          
+          return !isAlreadySelected && (
+            fullName.includes(searchTerm) || 
+            email.includes(searchTerm) || 
+            department.includes(searchTerm) || 
+            position.includes(searchTerm)
+          );
+      }).slice(0, 5); // Limit to 5 suggestions
+      
+        // Check if search matches any department name
+        const matchingDepartments = new Set();
+        employeeData.records.forEach((employee: any) => {
+          if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
+            matchingDepartments.add(employee.department);
+          }
+        });
+        
+        // Create department options (only show if not all employees from that department are selected)
+        const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
+          // Check if all employees from this department are already selected
+          const employeesInDepartment = employeeData.records.filter((emp: any) => 
+            emp.department === deptName && emp.email
+          );
+          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            selectedTags.includes(emp.email)
+          );
+          const allEmployeesSelected = employeesInDepartment.length > 0 && 
+            selectedEmployeesInDepartment.length === employeesInDepartment.length;
+          
+          return {
+            id: `dept:${deptName}`,
+            firstname: null,
+            lastname: null,
+            email: null,
+            department: deptName,
+            position: null,
+            is_department_option: true,
+            label: `${deptName} (All Employees)`,
+            allEmployeesSelected: allEmployeesSelected
+          };
+        }).filter((deptOption: any) => !deptOption.allEmployeesSelected); // Only show departments where not all employees are selected
+        
+        // Combine department options with filtered employees
+        const combinedOptions = [...departmentOptions, ...filtered];
+        
+        setFilteredEmployees(combinedOptions);
+        setShowSuggestions(combinedOptions.length > 0);
+        setSelectedIndex(-1); // Reset selection when filtering
+    } else {
+        // When no search input, show no suggestions
+      setFilteredEmployees([]);
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+      }
+    } else {
+      setFilteredEmployees([]);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
+  }, []);
+
+  // Filter employees for TO field
+  useEffect(() => {
+    filterEmployees(inputTo, tagsTo, setFilteredTOEmployees, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData);
+  }, [inputTo, toEmployeeData, tagsTo, filterEmployees]);
+
+  // Filter employees for CC field
+  useEffect(() => {
+    filterEmployees(inputCc, tagsCc, setFilteredCCEmployees, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData);
+  }, [inputCc, ccEmployeeData, tagsCc, filterEmployees]);
+
+  // Filter employees for BCC field
+  useEffect(() => {
+    filterEmployees(inputBcc, tagsBcc, setFilteredBCCEmployees, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData);
+  }, [inputBcc, bccEmployeeData, tagsBcc, filterEmployees]);
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (toDropdownRef.current && !toDropdownRef.current.contains(event.target as Node)) {
+        setShowTOSuggestions(false);
+        setSelectedTOIndex(-1);
+      }
+      if (ccDropdownRef.current && !ccDropdownRef.current.contains(event.target as Node)) {
+        setShowCCSuggestions(false);
+        setSelectedCCIndex(-1);
+      }
+      if (bccDropdownRef.current && !bccDropdownRef.current.contains(event.target as Node)) {
+        setShowBCCSuggestions(false);
+        setSelectedBCCIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          handleModalClose(() => {
+            reset();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -145,7 +421,12 @@ export default function DesignBenefitsModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Design Benefits</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      handleModalClose(() => {
+                        reset();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   <form onSubmit={onSubmit}>
                     {page === 1 ? (
@@ -170,9 +451,20 @@ export default function DesignBenefitsModal({
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
+                          <div className='flex items-center justify-between'>
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
+                            {tagsTo.length > 1 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsTo([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           {errors.email && (
                             <p className='text-xs text-red-600 mt-1'>
                               {errors.email.message || 'To field is required.'}
@@ -181,9 +473,10 @@ export default function DesignBenefitsModal({
                           <div className='mt-2 flex rounded-md shadow-sm'>
                             <div className='relative flex flex-grow items-stretch focus-within:z-10'>
                               <div 
-                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                className='relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md'
                                 data-tooltip-id='to-section-tooltip'
                                 data-tooltip-place='bottom'
+                                style={{ width: '100%' }}
                               >
                                 {tagsTo.map((tagTo: string) => (
                                   <div
@@ -199,18 +492,126 @@ export default function DesignBenefitsModal({
                                 <input
                                   type='text'
                                   value={inputTo}
-                                  onKeyDown={handleKeyDownTo}
-                                  onChange={(e) => setInputTo(e.target.value)}
-                                  className='focus:none outline-none px-2 py-1 grow'
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown') {
+                                      e.preventDefault();
+                                      if (showTOSuggestions && filteredTOEmployees.length > 0) {
+                                        const newIndex = selectedTOIndex < filteredTOEmployees.length - 1 ? selectedTOIndex + 1 : selectedTOIndex;
+                                        setSelectedTOIndex(newIndex);
+                                        scrollToSelectedItem(toDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'ArrowUp') {
+                                      e.preventDefault();
+                                      const newIndex = selectedTOIndex > 0 ? selectedTOIndex - 1 : -1;
+                                      setSelectedTOIndex(newIndex);
+                                      if (newIndex >= 0) {
+                                        scrollToSelectedItem(toDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      if (selectedTOIndex >= 0 && filteredTOEmployees[selectedTOIndex]) {
+                                        handleEmployeeSelect(filteredTOEmployees[selectedTOIndex], tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData);
+                                      } else {
+                                        handleKeyDownTo(e);
+                                      }
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      setShowTOSuggestions(false);
+                                      setSelectedTOIndex(-1);
+                                    } else {
+                                      // Let other keys pass through to the original handler
+                                      handleKeyDownTo(e);
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    setInputTo(e.target.value);
+                                    setToSearchTerm(e.target.value);
+                                    setSelectedTOIndex(-1); // Reset selection when typing
+                                  }}
+                                  onFocus={() => {
+                                    if (toEmployeeData?.records && toEmployeeData.records.length > 0) {
+                                      setShowTOSuggestions(true);
+                                    }
+                                    setShowTooltip(false);
+                                  }}
+                                  onBlur={() => {
+                                    if (!inputTo.trim()) {
+                                      setShowTooltip(true);
+                                    }
+                                  }}
+                                  className='focus:none outline-none px-2 py-1 flex-1 min-w-0'
+                                  style={{ width: '100%' }}
+                                  autoComplete='off'
+                                  autoCorrect='off'
+                                  autoCapitalize='off'
+                                  spellCheck='false'
+                                  data-lpignore='true'
+                                  data-form-type='other'
                                 />
-                                <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
-                                    </h2>
+                                {showTooltip && (
+                                  <Tooltip 
+                                    id='to-section-tooltip' 
+                                    opacity={1} 
+                                    style={{ 
+                                      fontSize: '13px', 
+                                      borderRadius: '8px', 
+                                      backgroundColor: '#222C3B', 
+                                      maxWidth: '330px',
+                                      whiteSpace: 'normal',
+                                      wordWrap: 'break-word',
+                                      zIndex: 9999
+                                    }}
+                                  >
+                                    <div className='px-2 py-1'>
+                                      <div className='text-[13px] font-medium leading-relaxed'>
+                                        Add multiple recipients by pressing Tab or Enter,<br />
+                                        or search for employees and departments.
+                                      </div>
                                   </div>
                                 </Tooltip>
+                                )}
                               </div>
+                              
+                              {/* Employee Suggestions Dropdown */}
+                              {showTOSuggestions && (
+                                <div 
+                                  ref={toDropdownRef}
+                                  className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                                >
+                                  {filteredTOEmployees.map((employee: any, index: number) => (
+                                    <div
+                                      key={employee.id || employee.department}
+                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                        index === selectedTOIndex 
+                                          ? 'bg-blue-100' 
+                                          : 'hover:bg-gray-100'
+                                      }`}
+                                      onMouseEnter={() => setSelectedTOIndex(index)}
+                                      onClick={() => handleEmployeeSelect(employee, tagsTo, setTagsTo, setInputTo, setShowTOSuggestions, setSelectedTOIndex, toEmployeeData)}
+                                    >
+                                      {employee.is_department_option ? (
+                                        <>
+                                          <div className='text-sm font-medium text-gray-900'>
+                                            {employee.label}
+                                          </div>
+                                          <div className='text-xs text-blue-600'>
+                                            • Select all employees from this department
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div>
+                                      <div className='text-sm font-medium text-gray-900'>
+                                        {employee.firstname} {employee.lastname}
+                                      </div>
+                                      <div className='text-xs text-gray-500'>
+                                        {employee.email}
+                                      </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <button
                               type='button'
@@ -234,9 +635,20 @@ export default function DesignBenefitsModal({
                         </div>
                         {isCCOpen && (
                           <div className='sm:col-span-4 mt-4'>
+                            <div className='flex items-center justify-between'>
                             <label htmlFor='cc' className='block text-sm font-medium leading-6 text-gray-900'>
                               CC
                             </label>
+                              {tagsCc.length > 1 && (
+                                <button
+                                  type='button'
+                                  className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                  onClick={() => setTagsCc([])}
+                                >
+                                  Unselect All
+                                </button>
+                              )}
+                            </div>
                             {errors.cc && (
                               <p className='text-xs text-red-600 mt-1'>
                                 {errors.cc.message}
@@ -244,9 +656,10 @@ export default function DesignBenefitsModal({
                             )}
                             <div className='mt-2'>
                               <div 
-                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
+                                className='relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md'
                                 data-tooltip-id='cc-section-tooltip'
                                 data-tooltip-place='bottom'
+                                style={{ width: '100%' }}
                               >
                                 {tagsCc.map((tag: string) => (
                                   <div
@@ -262,26 +675,138 @@ export default function DesignBenefitsModal({
                                 <input
                                   type='text'
                                   value={inputCc}
-                                  onKeyDown={handleKeyDown}
-                                  onChange={(e) => setInputCc(e.target.value)}
-                                  className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown') {
+                                      e.preventDefault();
+                                      if (showCCSuggestions && filteredCCEmployees.length > 0) {
+                                        const newIndex = selectedCCIndex < filteredCCEmployees.length - 1 ? selectedCCIndex + 1 : selectedCCIndex;
+                                        setSelectedCCIndex(newIndex);
+                                        scrollToSelectedItem(ccDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'ArrowUp') {
+                                      e.preventDefault();
+                                      const newIndex = selectedCCIndex > 0 ? selectedCCIndex - 1 : -1;
+                                      setSelectedCCIndex(newIndex);
+                                      if (newIndex >= 0) {
+                                        scrollToSelectedItem(ccDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      if (selectedCCIndex >= 0 && filteredCCEmployees[selectedCCIndex]) {
+                                        handleEmployeeSelect(filteredCCEmployees[selectedCCIndex], tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData);
+                                      } else {
+                                        handleKeyDown(e);
+                                      }
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      setShowCCSuggestions(false);
+                                      setSelectedCCIndex(-1);
+                                    } else {
+                                      handleKeyDown(e);
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    setInputCc(e.target.value);
+                                    setCcSearchTerm(e.target.value);
+                                    setSelectedCCIndex(-1);
+                                  }}
+                                  onFocus={() => {
+                                    if (ccEmployeeData?.records && ccEmployeeData.records.length > 0) {
+                                      setShowCCSuggestions(true);
+                                    }
+                                    setShowTooltip(false);
+                                  }}
+                                  onBlur={() => {
+                                    if (!inputCc.trim()) {
+                                      setShowTooltip(true);
+                                    }
+                                  }}
+                                  className='focus:none outline-none px-2 py-1 flex-1 min-w-0'
+                                  style={{ width: '100%' }}
                                 />
-                                <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
-                                    </h2>
+                                {showTooltip && (
+                                  <Tooltip 
+                                    id='cc-section-tooltip' 
+                                    opacity={1} 
+                                    style={{ 
+                                      fontSize: '13px', 
+                                      borderRadius: '8px', 
+                                      backgroundColor: '#222C3B', 
+                                      maxWidth: '330px',
+                                      whiteSpace: 'normal',
+                                      wordWrap: 'break-word',
+                                      zIndex: 9999
+                                    }}
+                                  >
+                                    <div className='px-2 py-1'>
+                                      <div className='text-[13px] font-medium leading-relaxed'>
+                                        Add multiple recipients by pressing Tab or Enter,<br />
+                                        or search for employees and departments.
+                                      </div>
                                   </div>
                                 </Tooltip>
+                                )}
+                                
+                                {/* CC Employee Suggestions Dropdown */}
+                                {showCCSuggestions && (
+                                  <div 
+                                    ref={ccDropdownRef}
+                                    className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                                  >
+                                    {filteredCCEmployees.map((employee: any, index: number) => (
+                                      <div
+                                        key={employee.id || employee.department}
+                                        className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                          index === selectedCCIndex 
+                                            ? 'bg-blue-100' 
+                                            : 'hover:bg-gray-100'
+                                        }`}
+                                        onMouseEnter={() => setSelectedCCIndex(index)}
+                                        onClick={() => handleEmployeeSelect(employee, tagsCc, setTagsCc, setInputCc, setShowCCSuggestions, setSelectedCCIndex, ccEmployeeData)}
+                                      >
+                                        {employee.is_department_option ? (
+                                          <>
+                                            <div className='text-sm font-medium text-gray-900'>
+                                              {employee.label}
+                              </div>
+                                            <div className='text-xs text-blue-600'>
+                                              • Select all employees from this department
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <div>
+                                            <div className='text-sm font-medium text-gray-900'>
+                                              {employee.firstname} {employee.lastname}
+                                            </div>
+                                            <div className='text-xs text-gray-500'>
+                                              {employee.email}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
                         )}
                         {isBCCOpen && (
                           <div className='sm:col-span-4 mt-4'>
+                            <div className='flex items-center justify-between'>
                             <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                               BCC
                             </label>
+                              {tagsBcc.length > 1 && (
+                                <button
+                                  type='button'
+                                  className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                  onClick={() => setTagsBcc([])}
+                                >
+                                  Unselect All
+                                </button>
+                              )}
+                            </div>
                             {errors.bcc && (
                               <p className='text-xs text-red-600 mt-1'>
                                 {errors.bcc.message}
@@ -289,9 +814,10 @@ export default function DesignBenefitsModal({
                             )}
                             <div className='mt-2'>
                               <div 
-                                className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'
+                                className='relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md'
                                 data-tooltip-id='bcc-section-tooltip'
                                 data-tooltip-place='bottom'
+                                style={{ width: '100%' }}
                               >
                                 {tagsBcc.map((tagBcc: string) => (
                                   <div
@@ -307,17 +833,118 @@ export default function DesignBenefitsModal({
                                 <input
                                   type='text'
                                   value={inputBcc}
-                                  onKeyDown={handleKeyDownBcc}
-                                  onChange={(e) => setInputBcc(e.target.value)}
-                                  className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown') {
+                                      e.preventDefault();
+                                      if (showBCCSuggestions && filteredBCCEmployees.length > 0) {
+                                        const newIndex = selectedBCCIndex < filteredBCCEmployees.length - 1 ? selectedBCCIndex + 1 : selectedBCCIndex;
+                                        setSelectedBCCIndex(newIndex);
+                                        scrollToSelectedItem(bccDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'ArrowUp') {
+                                      e.preventDefault();
+                                      const newIndex = selectedBCCIndex > 0 ? selectedBCCIndex - 1 : -1;
+                                      setSelectedBCCIndex(newIndex);
+                                      if (newIndex >= 0) {
+                                        scrollToSelectedItem(bccDropdownRef, newIndex);
+                                      }
+                                    } else if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      if (selectedBCCIndex >= 0 && filteredBCCEmployees[selectedBCCIndex]) {
+                                        handleEmployeeSelect(filteredBCCEmployees[selectedBCCIndex], tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData);
+                                      } else {
+                                        handleKeyDownBcc(e);
+                                      }
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      setShowBCCSuggestions(false);
+                                      setSelectedBCCIndex(-1);
+                                    } else {
+                                      handleKeyDownBcc(e);
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    setInputBcc(e.target.value);
+                                    setBccSearchTerm(e.target.value);
+                                    setSelectedBCCIndex(-1);
+                                  }}
+                                  onFocus={() => {
+                                    if (bccEmployeeData?.records && bccEmployeeData.records.length > 0) {
+                                      setShowBCCSuggestions(true);
+                                    }
+                                    setShowTooltip(false);
+                                  }}
+                                  onBlur={() => {
+                                    if (!inputBcc.trim()) {
+                                      setShowTooltip(true);
+                                    }
+                                  }}
+                                  className='focus:none outline-none px-2 py-1 flex-1 min-w-0'
+                                  style={{ width: '100%' }}
                                 />
-                                <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
-                                    </h2>
+                                {showTooltip && (
+                                  <Tooltip 
+                                    id='bcc-section-tooltip' 
+                                    opacity={1} 
+                                    style={{ 
+                                      fontSize: '13px', 
+                                      borderRadius: '8px', 
+                                      backgroundColor: '#222C3B', 
+                                      maxWidth: '330px',
+                                      whiteSpace: 'normal',
+                                      wordWrap: 'break-word',
+                                      zIndex: 9999
+                                    }}
+                                  >
+                                    <div className='px-2 py-1'>
+                                      <div className='text-[13px] font-medium leading-relaxed'>
+                                        Add multiple recipients by pressing Tab or Enter,<br />
+                                        or search for employees and departments.
+                                      </div>
                                   </div>
                                 </Tooltip>
+                                )}
+                                
+                                {/* BCC Employee Suggestions Dropdown */}
+                                {showBCCSuggestions && (
+                                  <div 
+                                    ref={bccDropdownRef}
+                                    className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
+                                  >
+                                    {filteredBCCEmployees.map((employee: any, index: number) => (
+                                      <div
+                                        key={employee.id || employee.department}
+                                        className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                                          index === selectedBCCIndex 
+                                            ? 'bg-blue-100' 
+                                            : 'hover:bg-gray-100'
+                                        }`}
+                                        onMouseEnter={() => setSelectedBCCIndex(index)}
+                                        onClick={() => handleEmployeeSelect(employee, tagsBcc, setTagsBcc, setInputBcc, setShowBCCSuggestions, setSelectedBCCIndex, bccEmployeeData)}
+                                      >
+                                        {employee.is_department_option ? (
+                                          <>
+                                            <div className='text-sm font-medium text-gray-900'>
+                                              {employee.label}
+                              </div>
+                                            <div className='text-xs text-blue-600'>
+                                              • Select all employees from this department
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <div>
+                                            <div className='text-sm font-medium text-gray-900'>
+                                              {employee.firstname} {employee.lastname}
+                                            </div>
+                                            <div className='text-xs text-gray-500'>
+                                              {employee.email}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -581,6 +1208,18 @@ export default function DesignBenefitsModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="benefit"
+        />
+      )}
     </>
   );
 }

@@ -62,9 +62,10 @@ function useGetOshProgramVersionHistory(params: VersionHistoryParams = {}) {
     const query = useQuery({
         queryKey: ["oshProgramVersionHistory", params],
         queryFn: () => getOshProgramVersionHistory(params),
-        staleTime: 1 * 60 * 1000, // 1 minute - shorter stale time for version count
-        refetchOnWindowFocus: true,
-        refetchOnMount: true,
+        staleTime: 2 * 60 * 1000, // 2 minutes - reasonable for version history
+        cacheTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false, // Remove aggressive refetching
+        refetchOnMount: false, // Remove aggressive refetching
     });
     
     return query;

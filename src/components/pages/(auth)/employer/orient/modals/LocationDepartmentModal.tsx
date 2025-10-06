@@ -8,6 +8,7 @@ import Select from 'react-select';
 import CustomToast from '@/components/CustomToast';
 import useGetLocationItems from '../../settings/general-settings/employees/hooks/location/useGetLocationItems';
 import useGetDepartmentItems from '../../settings/general-settings/employees/hooks/department/useGetDepartmentItems';
+import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
 import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
 
@@ -20,6 +21,7 @@ interface Field {
 }
 
 type FormValues = {
+  employment_status: string;
   location: string;
   department: string;
 };
@@ -44,10 +46,13 @@ export default function LocationDepartmentModal({
   const { mutate, isLoading } = useUpdateApplicantOrient();
   
   // State for modals
+  const [isAddEmploymentStatusModalOpen, setIsAddEmploymentStatusModalOpen] = useState(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] = useState(false);
   const [isAddDepartmentModalOpen, setIsAddDepartmentModalOpen] = useState(false);
   
-  // Fetch locations and departments with parameters like the Position hook
+  // Fetch employment statuses, locations and departments with parameters
+  const { data: employmentStatusData, refetch: refetchEmploymentStatuses } = useGetEmployeeStatusItems();
+  
   const { data: locationData, refetch: refetchLocations } = useGetLocationItems({ 
     pageSize: 1000,  // Large page size to get all locations
     currentPage: 1
@@ -66,6 +71,66 @@ export default function LocationDepartmentModal({
     const diffInHours = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
     return diffInHours < 24;
   };
+  
+  // Transform employment status data for react-select with separation for newly added statuses
+  const employmentStatusOptions = useMemo(() => {
+    if (!employmentStatusData) return [];
+    
+    const allStatuses = employmentStatusData.map((status: any) => ({
+      value: status.id,
+      label: status.name,
+      createdAt: status.created_at
+    }));
+    
+    // Filter and sort newly added statuses (within 24 hours of creation)
+    const newStatuses = allStatuses
+      .filter((status: any) => isWithin24Hours(status.createdAt))
+      .sort((a: any, b: any) => {
+        const aDate = new Date(a.createdAt);
+        const bDate = new Date(b.createdAt);
+        return bDate.getTime() - aDate.getTime(); // Most recent first
+      });
+    
+    // Filter and sort regular statuses alphabetically
+    const regularStatuses = allStatuses
+      .filter((status: any) => !isWithin24Hours(status.createdAt))
+      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
+    
+    // Create options with separation
+    const options = [];
+    
+    // Add newly added statuses at the top with "New" label
+    if (newStatuses.length > 0) {
+      options.push({
+        label: "New Employment Statuses",
+        options: newStatuses.map((status: any) => ({
+          ...status,
+          label: `${status.label}`
+        })),
+        isDisabled: true
+      });
+    }
+    
+    // Add separator if there are both new and regular statuses
+    if (newStatuses.length > 0 && regularStatuses.length > 0) {
+      options.push({
+        label: "───────────────",
+        options: [],
+        isDisabled: true
+      });
+    }
+    
+    // Add regular statuses
+    if (regularStatuses.length > 0) {
+      options.push({
+        label: "All Employment Statuses",
+        options: regularStatuses,
+        isDisabled: true
+      });
+    }
+    
+    return options;
+  }, [employmentStatusData]);
   
   // Transform location data for react-select with separation for newly added locations
   const locationOptions = useMemo(() => {
@@ -191,7 +256,9 @@ export default function LocationDepartmentModal({
     const itemIndex = orientItems.findIndex((item: any) => item.id === selectedOrientId);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
-    // Find the selected location and department names for display
+    // Find the selected employment status, location and department names for display
+    const selectedEmploymentStatus = employmentStatusOptions.flatMap(group => group.options)
+      .find((item: any) => item.value === parseInt(data.employment_status));
     const selectedLocation = locationOptions.flatMap(group => group.options)
       .find((item: any) => item.value === parseInt(data.location));
     const selectedDepartment = departmentOptions.flatMap(group => group.options)
@@ -202,6 +269,8 @@ export default function LocationDepartmentModal({
     orientItemCopy[itemIndex].actionType = 'update_status';
     orientItemCopy[itemIndex].emailType = 'location_department';
     
+    // Send employment status ID as number (for ForeignKey)
+    orientItemCopy[itemIndex].employment_status_id = parseInt(data.employment_status);
     // Send location name as string (for CharField)
     orientItemCopy[itemIndex].location_name = selectedLocation?.label.replace(' (New)', '') || '';
     // Send department ID as number (for ForeignKey)
@@ -209,6 +278,7 @@ export default function LocationDepartmentModal({
     
     // Update local state for UI
     orientItemCopy[itemIndex].isLocationDepartmentAssigned = true;
+    orientItemCopy[itemIndex].employment_status_name_display = selectedEmploymentStatus?.label || '';
     orientItemCopy[itemIndex].location_name_display = selectedLocation?.label || '';
     orientItemCopy[itemIndex].department_name_display = selectedDepartment?.label || '';
     
@@ -218,7 +288,7 @@ export default function LocationDepartmentModal({
         setIsOpen(false);
         setSuccessModal(true);
         reset();
-        toast.custom(() => <CustomToast message={'Location and Department successfully assigned.'} type='success' />, {
+        toast.custom(() => <CustomToast message={'Employment Status, Location and Department successfully assigned.'} type='success' />, {
           duration: 5000,
         });
       },
@@ -232,12 +302,21 @@ export default function LocationDepartmentModal({
     mutate(orientItemCopy[itemIndex], callbackReq);
   });
 
+  const handleAddEmploymentStatus = () => {
+    setIsAddEmploymentStatusModalOpen(true);
+  };
+
   const handleAddLocation = () => {
     setIsAddLocationModalOpen(true);
   };
 
   const handleAddDepartment = () => {
     setIsAddDepartmentModalOpen(true);
+  };
+
+  const handleEmploymentStatusCreated = () => {
+    // Refresh employment statuses list to get the updated data with new creation dates
+    refetchEmploymentStatuses();
   };
 
   const handleLocationCreated = () => {
@@ -251,9 +330,7 @@ export default function LocationDepartmentModal({
   };
 
   const handleAssignmentCompleted = () => {
-    // Clear newly added locations and departments when assignment is completed
-    // setNewlyAddedLocations([]); // This state is no longer needed
-    // setNewlyAddedDepartments([]); // This state is no longer needed
+    // Clear newly added items when assignment is completed
   };
 
   // Call handleAssignmentCompleted when the form is submitted
@@ -291,12 +368,79 @@ export default function LocationDepartmentModal({
               >
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[600px] max-h-[90vh] overflow-y-auto'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Assign Location & Department</h3>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>
+                      Assign - {(() => {
+                        const selectedItem = orientItems.find((item: any) => item.id === selectedOrientId);
+                        return selectedItem ? `${selectedItem.firstname} ${selectedItem.lastname}` : 'Unknown Person';
+                      })()}
+                    </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   <form onSubmit={onSubmitWithCleanup}>      
                     <div className='px-6 pt-6 pb-6'>
+                      {/* Employment Status Field - Added at the top */}
                       <div className='sm:col-span-4 mt-4'>
+                        <div>
+                          <div className='flex items-center justify-between'>
+                            <label htmlFor='employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
+                              Employment Status
+                              <span className='text-red-600'>*</span>
+                            </label>
+                            <button
+                              type='button'
+                              onClick={handleAddEmploymentStatus}
+                              className='text-sm text-savoy-blue hover:text-blue-700 font-medium'
+                            >
+                              + Add New Employment Status
+                            </button>
+                          </div>
+                          <div className='mt-2'>
+                            <Controller
+                              name='employment_status'
+                              control={control}
+                              rules={{ required: "Please select an employment status" }}
+                              render={({ field: { onChange, value } }: { field: Field }) => (
+                                <Select
+                                  className='text-sm'
+                                  classNamePrefix='select'
+                                  options={employmentStatusOptions}
+                                  value={employmentStatusOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
+                                  onChange={(val) => onChange(val?.value || '')}
+                                  components={{
+                                    DropdownIndicator: () => (
+                                      <div className='pointer-events-none px-2'>
+                                        <SelectChevronDown />
+                                      </div>
+                                    ),
+                                    IndicatorSeparator: () => null,
+                                  }}
+                                  isClearable={false}
+                                  noOptionsMessage={() => 'No employment statuses available'}
+                                  placeholder='Select an employment status...'
+                                  formatGroupLabel={(group) => (
+                                    <div className="text-xs font-semibold text-gray-500 py-1">
+                                      {group.label}
+                                    </div>
+                                  )}
+                                  menuPortalTarget={document.body}
+                                  styles={{
+                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                    menu: (base) => ({ ...base, zIndex: 9999 }),
+                                  }}
+                                />
+                              )}
+                            />
+                            {errors.employment_status && (
+                              <p className='text-xs text-red-600 mt-1'>
+                                {errors.employment_status.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location Field */}
+                      <div className='sm:col-span-4 mt-6'>
                         <div>
                           <div className='flex items-center justify-between'>
                             <label htmlFor='location' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -356,6 +500,7 @@ export default function LocationDepartmentModal({
                         </div>
                       </div>
                       
+                      {/* Department Field */}
                       <div className='sm:col-span-4 mt-6'>
                         <div>
                           <div className='flex items-center justify-between'>
@@ -460,21 +605,29 @@ export default function LocationDepartmentModal({
               </Transition.Child>
             </div>
           </div>
+          {/* Employment Status Creation Modal */}
+          <CreateModal
+            module='employee-status'
+            isOpen={isAddEmploymentStatusModalOpen}
+            setIsOpen={setIsAddEmploymentStatusModalOpen}
+            refetch={handleEmploymentStatusCreated}
+          />
+
           {/* Location Creation Modal */}
-        <CreateModal
+          <CreateModal
             module='location'
             isOpen={isAddLocationModalOpen}
             setIsOpen={setIsAddLocationModalOpen}
             refetch={handleLocationCreated}
-        />
+          />
 
-        {/* Department Creation Modal */}
-        <CreateModal
+          {/* Department Creation Modal */}
+          <CreateModal
             module='department'
             isOpen={isAddDepartmentModalOpen}
             setIsOpen={setIsAddDepartmentModalOpen}
             refetch={handleDepartmentCreated}
-      />
+          />
         </Dialog>
       </Transition.Root>
 

@@ -26,6 +26,8 @@ import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIll
 import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import { useBulkDeleteWorkAccidentIllnessReport } from './hooks/useBulkDeleteWorkAccidentIllnessReport';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import EditIcon from '@/svg/EditIcon';
 import PrintIcon from "@/svg/PrintIcon";
@@ -109,6 +111,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const { mutate: bulkDeleteWorkAccidentIllnessReports, isLoading: isBulkDeleting } = useBulkDeleteWorkAccidentIllnessReport();
 
   useEffect(() => {
     if (workAccidentIlnessReportsData) {
@@ -224,6 +230,44 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) {
+      toast.custom(() => <CustomToast message="Please select items to delete" type='error' />, { duration: 4000 });
+      return;
+    }
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const handleConfirmBulkDelete = () => {
+    bulkDeleteWorkAccidentIllnessReports(selectedItems, {
+      onSuccess: (data) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        setSelectedItems([]);
+        setIsBulkDeleteModalOpen(false);
+        workAccidentIlnessReportsRefetch();
+      },
+      onError: (error: any) => {
+        toast.custom(() => <CustomToast message={error.message} type='error' />, { duration: 4000 });
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.length === workAccidentIlnessReportsItems.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(workAccidentIlnessReportsItems.map((item: any) => item.id));
+    }
+  };
+
+  const handleSelectItem = (itemId: number) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } else {
+      setSelectedItems([...selectedItems, itemId]);
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isWorkAccidentIlnessReportsLoading) {
       return (
@@ -239,6 +283,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workAccidentIlnessReportsItems && workAccidentIlnessReportsItems.length > 0) {
       return workAccidentIlnessReportsItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedItems.includes(item.id)}
+              onChange={() => handleSelectItem(item.id)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
@@ -445,6 +497,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedItems.length > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={isBulkDeleting || !cachedRigths?.state?.data?.edit_dole_wair}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isBulkDeleting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedItems([])}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedItems.length} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
+            </div>
+          </div>
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -457,6 +548,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === workAccidentIlnessReportsItems.length && workAccidentIlnessReportsItems.length > 0}
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Accident
                       </th>
@@ -759,6 +858,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          onConfirm={handleConfirmBulkDelete}
+          selectedCount={selectedItems.length}
+          moduleName="work accident illness report"
+          isLoading={isBulkDeleting}
+        />
+      )}
     </>
   );
 }
