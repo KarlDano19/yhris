@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -11,7 +11,6 @@ import useGetPermissionDetails from '../hooks/useGetPermissionDetails';
 import useGetPermissionCategories from '../hooks/useGetPermissionCategories';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type T_PermissionRoleModalData = {
   id: number | null;

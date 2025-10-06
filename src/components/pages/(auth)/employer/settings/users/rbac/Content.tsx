@@ -8,9 +8,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 // RBAC Hooks
 import useGetPermissionsList from './hooks/useGetPermissionsList';
@@ -29,13 +30,9 @@ import {
 
 import { 
   ArrowLeftIcon, 
-  MagnifyingGlassIcon, 
-  ChevronDownIcon, 
+  MagnifyingGlassIcon,
   Cog6ToothIcon,
   PlusIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
   UserGroupIcon,
   ShieldCheckIcon,
   DocumentDuplicateIcon
