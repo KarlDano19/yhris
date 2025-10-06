@@ -4,13 +4,15 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
@@ -76,8 +78,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectAll, setSelectAll] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateShcMinutesMeeting = useUpdateShcMinutesMeeting();
   const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
   
@@ -114,13 +114,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [ 
     {
+      id: 'export-dole-shc-minute-btn',
       name: 'Export',
       action: () => {
         setIsExportProgressModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.export_dole_SHC_minute,
     },
   ];
+
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   useEffect(() => {
     if (shcMinutesMeetingData) {
@@ -406,7 +408,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -429,35 +430,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EditIcon />
-              </button>
-              <button
-                // className='opacity-50'
+              </SmartButton>
+              <SmartButton
+                id="send-email-dole-shc-minute-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
-                // disabled={true}
-                // data-tooltip-id='email-tooltip'
-                // data-tooltip-content='Not available'
-                // data-tooltip-place='bottom'
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EmailLogo />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsShcMinutesMeetingDeleteModalOpen({
                     id: item.id,
@@ -466,7 +462,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -560,13 +556,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-shc-minute-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
-              </button>
+              </SmartButton>
               <Menu as='div' className='relative'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
@@ -585,20 +581,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <span
+                              onClick={() => item.action()}
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                 item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
                             >
                               {item.name}
                             </span>

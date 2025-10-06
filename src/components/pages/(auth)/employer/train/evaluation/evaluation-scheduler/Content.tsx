@@ -346,7 +346,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
               <button
                 onClick={() => openEditEvaluationModal(item)}
-                disabled={!cachedRigths?.state?.data?.edit_training}
               >
                 <EditIcon />
               </button>
@@ -423,7 +422,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_training}
               >
                 CREATE
               </button>

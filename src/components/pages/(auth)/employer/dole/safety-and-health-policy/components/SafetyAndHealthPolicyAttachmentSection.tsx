@@ -8,7 +8,6 @@ import classNames from '@/helpers/classNames';
 interface SafetyAndHealthPolicyAttachmentSectionProps {
   pdfAttachment: string | null;
   isDeleting: boolean;
-  canDelete: boolean;
   onViewAttachment: (url: string) => void;
   onDeleteAttachment: () => void;
   onGeneratePDF?: () => void;
@@ -23,7 +22,6 @@ interface SafetyAndHealthPolicyAttachmentSectionProps {
 export default function SafetyAndHealthPolicyAttachmentSection({
   pdfAttachment,
   isDeleting,
-  canDelete,
   onViewAttachment,
   onDeleteAttachment,
   onGeneratePDF,
@@ -64,7 +62,6 @@ export default function SafetyAndHealthPolicyAttachmentSection({
             >
               <ArrowTopRightOnSquareIcon className="h-5 w-5" />
             </button>
-            {canDelete && (
               <button
                 type="button"
                 onClick={onDeleteAttachment}
@@ -78,7 +75,6 @@ export default function SafetyAndHealthPolicyAttachmentSection({
                   <TrashIcon className="h-4 w-4" />
                 )}
               </button>
-            )}
           </>
         )}
         {!pdfAttachment && (

@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from "@/components/LoadingSpinner";
 import CustomToast from "@/components/CustomToast";
 import VersionHistoryModal from "./modals/VersionHistoryModal";
@@ -623,7 +625,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 )}
               </button>
             </div>
-            <button
+            <SmartButton
+              id="edit-dole-osh-program-btn"
               className="bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2"
               onClick={submitCurrentTab}
               disabled={!hasActiveSubscription || isSaving}
@@ -636,7 +639,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               ) : (
                 'Save'
               )}
-            </button>
+            </SmartButton>
           </div>
         </div>
             

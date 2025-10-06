@@ -78,13 +78,32 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
   );
 };
 
-export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: PropTypes) {
+export default function Person({ 
+  applicant, 
+  isOpenMenu, 
+  setOpenMenuId, 
+  stage,
+  permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
+  isStageDisabled = false 
+}: PropTypes & {
+  permissions?: {
+    can_view: boolean;
+    can_move: boolean;
+    can_update: boolean;
+    is_visible: boolean;
+  };
+  isStageDisabled?: boolean;
+}) {
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const menuRef = useRef<HTMLDivElement>(null);
   const { photo_url, name, id } = applicant;
   const params = useParams();
 
   const isPassedFinalInterview = applicant.status === 'hired';
+  
+  // Determine if this applicant card should be interactive
+  const canInteract = permissions.can_update && !isStageDisabled;
+  const canViewDetails = permissions.can_view && !isStageDisabled;
 
   // Handle clicks outside the menu
   useEffect(() => {
@@ -104,6 +123,9 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
   }, [isOpenMenu, setOpenMenuId]);
 
   const handleOpenMenu = () => {
+    if (!canInteract) {
+      return; // Don't open menu if user can't interact
+    }
     // Close if already open, otherwise open this one and close others
     setOpenMenuId(isOpenMenu ? null : applicant.id);
   };
@@ -127,7 +149,10 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
           : '',
         isPassedFinalInterview
           ? 'border-b border-b-yellow-100 bg-yellow-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
-          : ''
+          : '',
+        !canViewDetails || isStageDisabled
+          ? 'opacity-60 cursor-not-allowed'
+          : 'cursor-pointer hover:bg-gray-50'
       )}
     >
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
@@ -136,6 +161,9 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
       <div className='flex-1'>
         <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
           {name}
+          {!canViewDetails && (
+            <span className="text-gray-400 text-xs ml-2">🔒</span>
+          )}
           {isPassedFinalInterview && (
             <span>
               <br />
@@ -155,24 +183,28 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
             </span>
           )}
         </p>
-        {applicant.stage_notes && applicant.stage_notes.length > 0 && (
+        {canViewDetails && applicant.stage_notes && applicant.stage_notes.length > 0 && (
           <div className='flex items-center mt-1'>
             <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
             <span className='text-xs text-gray-500'>Has stage notes</span>
           </div>
         )}
+        {!canViewDetails && (
+          <div className='flex items-center mt-1'>
+            <span className='text-xs text-gray-400'>Access restricted</span>
+          </div>
+        )}
       </div>
       
-      {/* Archive Button - only show for rejected or withdrawn applicants */}
-      {(isRejected || isWithdrawn) && (
+      {/* Archive Button - only show for rejected or withdrawn applicants and if user has permissions */}
+      {(isRejected || isWithdrawn) && canInteract && (
         <div className='mr-2'>
           <ArchiveButton
             appliedJobId={applicant.applicationId}
-            isArchived={false} // These are not archived yet, they're just rejected/withdrawn
+            isArchived={false}
             status={applicant.status || 'rejected'}
             onSuccess={() => {
-              // Refresh the applicants list after archiving
-              // This will be handled by the parent component
+              // Refresh will be handled by parent
             }}
             applicantName={name || 'Applicant'}
             jobPostingId={params.id as string}
@@ -180,15 +212,38 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
         </div>
       )}
       
-      <button onClick={handleOpenMenu} type='button' className='text-indigo-dye disabled:text-gray-400' data-testid="elipsis-btn">
+      {/* Menu button - only show if user can interact */}
+      <button 
+        onClick={handleOpenMenu} 
+        type='button' 
+        className={`${canInteract ? 'text-indigo-dye hover:text-indigo-800' : 'text-gray-300 cursor-not-allowed'}`}
+        disabled={!canInteract}
+        data-testid="elipsis-btn"
+        title={!canInteract ? 'No permission to manage this applicant' : 'Applicant actions'}
+      >
         <EllipsisVerticalIcon className='w-7 h-7' />
       </button>
 
-      {isOpenMenu && (
+      {/* Menu dropdown - only show if user can interact */}
+      {isOpenMenu && canInteract && (
         <div ref={menuRef}>
           <ul className='absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md'>
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
+              
+              // Check if user has permission for specific actions
+              const canPerformAction = () => {
+                if (whichModal === 'APPLICANT_FORM') return permissions.can_view;
+                if (whichModal === 'CHECKLIST') return permissions.can_update;
+                if (whichModal === 'SEND_EMAIL') return permissions.can_update;
+                if (whichModal === 'SCHEDULE_INTERVIEW') return permissions.can_update;
+                return true;
+              };
+
+              if (!canPerformAction()) {
+                return null; // Don't show action if user doesn't have permission
+              }
+
               return (
                 <React.Fragment key={id}>
                   {isPassedFinalInterview && name !== 'Checklist' && (
@@ -203,7 +258,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
                             modal: { whichModal, isOpen: true, title: modalTitle },
                           })
                         }
-                        className='flex items-center gap-3 w-full'
+                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
                       >
                         <span>{icon}</span>
                         <p>{name}</p>
@@ -228,7 +283,7 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
                             isFinalStage: isFinalStage,
                           });
                         }}
-                        className='flex items-center gap-3 w-full'
+                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
                       >
                         <span>{icon}</span>
                         <p>{name}</p>
@@ -239,6 +294,15 @@ export default function Person({ applicant, isOpenMenu, setOpenMenuId, stage }: 
               );
             })}
           </ul>
+        </div>
+      )}
+
+      {/* Restricted access overlay for completely disabled applicants */}
+      {!canViewDetails && !canInteract && (
+        <div className="absolute inset-0 bg-gray-200 bg-opacity-30 rounded-lg flex items-center justify-center">
+          <div className="text-gray-500 text-xs font-medium">
+            🔒 Restricted
+          </div>
         </div>
       )}
     </div>

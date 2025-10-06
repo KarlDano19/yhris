@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -29,12 +31,13 @@ import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
 import useUpdateJobBenefitStatus from './hooks/useUpdateJobBenefitStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import AssignUsersModal from './modals/AssignUsersModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
 import { useQueryClient } from '@tanstack/react-query';
@@ -69,6 +72,7 @@ const Content = () => {
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
   
   // Bulk delete states
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
@@ -531,22 +535,44 @@ const Content = () => {
           >
             {jobPost.workSetup}
           </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.assignments_count || 0} users
+          </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
-                <button 
+                <SmartButton 
+                  id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
+                  data-tooltip-id="edit-tooltip"
+                  data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
-                </button>
-                <button 
+                </SmartButton>
+                <SmartButton 
+                  id="delete-job-btn"
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
-                  className={selectedJobPostings.size > 1 ? 'invisible' : ''}
+                  data-tooltip-id="delete-tooltip"
+                  data-tooltip-content="Delete Job"
                 >
                   <DeleteIcon />
-                </button>
+                </SmartButton>
+                <SmartButton 
+                  id="assign-job-btn"
+                  onClick={() => setAssignUsersModal({ 
+                    id: jobPost.id, 
+                    open: true 
+                  })}
+                  data-tooltip-id="assign-tooltip"
+                  data-tooltip-content="Assign to Users"
+                  className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"
+                >
+                  <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
+                </SmartButton>
                 <div className="relative more-menu-container pt-1">
                   <button onClick={() => handleMoreMenuClick(jobPost.id)}>
                     <MoreIconWithBorder />
@@ -875,6 +901,9 @@ const Content = () => {
                         Work Setup
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Assigned Users
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
                       </th>
                     </tr>
@@ -916,6 +945,15 @@ const Content = () => {
       {isDeleteModalOpen?.open && (
         <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
+      {assignUsersModal && assignUsersModal.id && (
+        <AssignUsersModal
+          isOpen={assignUsersModal}
+          setIsOpen={setAssignUsersModal}
+          onAssignmentComplete={() => {
+            refetch(); // Refresh the job postings list
+          }}
+        />
+      )}
       
       {/* Bulk Delete Modal */}
       <BulkDeleteModal
@@ -928,6 +966,9 @@ const Content = () => {
       />
 
       <Tooltip id='search-tooltip' />
+      <Tooltip id="edit-tooltip" />
+      <Tooltip id="delete-tooltip" />
+      <Tooltip id="assign-tooltip" />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { Dispatch } from 'react';
 import classNames from '@/helpers/classNames';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 export default function LocationDepartment({
   isAssigned,
@@ -12,7 +13,8 @@ export default function LocationDepartment({
     <>
       <div className='flex gap-2 mt-2 justify-center'>
         <div>
-          <button
+          <SmartButton
+            id="allow-onboarding-btn"
             className={classNames(
               isAssigned
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
@@ -23,7 +25,7 @@ export default function LocationDepartment({
             disabled={isAssigned ? true : false}
           >
             {isAssigned ? 'Assigned' : 'Assign'}
-          </button>
+          </SmartButton>
         </div>
       </div>
     </>

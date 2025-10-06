@@ -4,13 +4,12 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
@@ -76,8 +75,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -123,25 +120,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  
-
-
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_work_environment_request,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       handlePrint();
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_work_environment_request,
-  //   },
-  // ];
 
   useEffect(() => {
     if (workEnvironmentRequestItemsData) {
@@ -513,7 +491,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -536,17 +513,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-work-environment-request-btn"
                 onClick={() =>
                   setIsUpdateWorkEnvironmentRequestModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EditIcon />
-              </button>
+              </SmartButton>
               <button
                 onClick={() =>
                   setIsSendEmailModalOpen({
@@ -554,13 +531,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <EmailLogo />
               </button>
-              <button
+              <SmartButton
+                id="generate-dole-work-environment-request-btn"
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_work_environment_request}
+                disabled={generatingItemId === item.id}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -569,18 +546,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-work-environment-request-btn"
                 onClick={() =>
                   setIsWorkEnvironmentRequestDeleteModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_work_environment_request}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -675,65 +652,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
             </div>
             </div>
-            {/* <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_work_environment_request}
-              >
-                CREATE
-              </button>
-              <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
-                  </div>
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter='transition ease-out duration-100'
-                  enterFrom='transform opacity-0 scale-95'
-                  enterTo='transform opacity-100 scale-100'
-                  leave='transition ease-in duration-75'
-                  leaveFrom='transform opacity-100 scale-100'
-                  leaveTo='transform opacity-0 scale-95'
-                >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='py-1'>
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
-            </div> */}
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-work-environment-request-btn"
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkEnvironmentRequestModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_work_environment_request}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 
@@ -895,173 +821,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isLoading={bulkDeleteMutation.isLoading}
         />
       )}
-      {/* Print Section
-      <div className='container mx-auto p-4 hidden'>
-        <div id='printSection'>
-          <div className='overflow-x-auto'>
-            <table className='w-full border-collapse border border-gray-800 table-fixed'>
-              <thead>
-                <tr>
-                  <th
-                    colSpan={6}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Basic Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1'
-                  >
-                    Risk and Safety Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    WEM Details Request
-                  </th>
-                  <th
-                    colSpan={4}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Monitoring Capability
-                  </th>
-                  <th
-                    colSpan={3}
-                    className='border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center'
-                  >
-                    Hazards
-                  </th>
-                </tr>
-                <tr>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Date of Application
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Company Name
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Type of Industry
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Male
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Female
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Number of Workers Total
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Risk Classification
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Name of Safety Officer
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Safety Officer Level
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Purpose of WEM Request
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Conducted by
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Last WEM Date
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Internal Monitoring Capability
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    WEM Equipment Owned by Company
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Conducting Internal WEM
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Date of Internal Monitoring
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Purpose of WEM Request
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Chemical Hazards
-                  </th>
-                  <th className='border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal'>
-                    Ventilation
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {workEnvironmentRequestItems.map((item: any, rowIndex: number) => (
-                  <tr key={rowIndex}>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.date_of_application}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.company_name}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.type_of_industry}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_male}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_female}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.number_of_workers_total}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.risk_classification}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.name_of_safety_officer}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.safety_officer_levels}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.purpose_of_wem_request}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_conducted_by}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.last_wem_date}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_internal_monitoring_capability}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.wem_equipment_owned_by_company}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.conducting_internal_wem ? 'Yes' : 'No'}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.date_of_internal_monitoring}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.hazards_purpose_of_wem_request}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.chemical_hazards}
-                    </td>
-                    <td className='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>
-                      {item.ventilation}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className='mt-4 text-xl text-center'>-- Nothing follows --</p>
-        </div>
-      </div> */}
-
       <Tooltip id='search-tooltip'/>
     </>
   );

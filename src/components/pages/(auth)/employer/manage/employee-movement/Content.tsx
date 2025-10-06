@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -271,12 +273,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-employee-movement-btn"
                 onClick={() => setIsOpenCreatePersonelMovementModal(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
               >
                 Create PMF
-              </button>
+              </SmartButton>
             </div>
           </div>
 

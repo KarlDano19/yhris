@@ -9,6 +9,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -31,10 +33,12 @@ import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusIt
 import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 
-
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
+
 
 type PaginationProps = {
   totalRecords: number;
@@ -74,7 +78,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  const cachedRights = useLegacyPermissions();
 
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -201,20 +205,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [
     {
+      id: 'download-template-btn',
       name: 'Download Template',
       action: () => {
         setIsExportTemplateModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
+      id: 'import-employee-btn',
       name: 'Import',
       action: () => {
         setIsImportModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.import_employee,
     },
     {
+      id: 'export-employee-btn',
       name: 'Export',
       action: () => {
         if (!hasAgreed) {
@@ -227,9 +232,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         }
       },
-      disabled: !cachedRigths?.state?.data?.export_employee,
     },
   ];
+
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   useEffect(() => {
     // Add proper null/undefined checks
@@ -335,7 +341,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setCurrentPage(1);
     setPageSize(value);
   };
-
   const handleColumnToggle = (columnKey: string) => {
     setVisibleColumns(prev => ({
       ...prev,
@@ -509,19 +514,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-employee-btn"
                 onClick={() => setIsEmployeesEditModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="delete-employee-btn"
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
-                disabled={!cachedRigths?.state?.data?.edit_employee}
-                className={selectedEmployees.size > 1 ? 'invisible' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -537,7 +541,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
   };
-
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
@@ -550,7 +553,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center             gap-2'>
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
@@ -608,9 +611,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     })}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
-                      // Don't automatically show autocomplete - only show when Enter is pressed
-                      setSelectedIndex(-1); // Reset selection when typing
-                      setHideTooltip(false); // Reset tooltip when user types again
+                      setShowAutocomplete(true);
+                      setSelectedIndex(-1);
                     }}
                     onFocus={() => {
                       // Don't automatically show autocomplete on focus
@@ -840,13 +842,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <div className='flex'>
-                <button
+                <SmartButton
+                  id="create-employee-btn"
                   onClick={() => setIsAddEmployeeModalOpen(true)}
                   className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                  disabled={!cachedRigths?.state?.data?.create_employee}
                 >
                   CREATE
-                </button>
+                </SmartButton>
                 <Menu as='div' className='relative'>
                   <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                     <span className='sr-only'>Open options</span>
@@ -865,20 +867,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   >
                     <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                       <div className='py-1'>
-                        {menuOptions.map((item) => (
+                        {smartMenuOptions.map((item) => (
                           <Menu.Item key={item.name}>
                             {({ active }) => (
                               <span
+                                id={item.id}
+                                onClick={() => {
+                                  item.action();
+                                }}
                                 className={classNames(
                                   'block px-4 py-2 text-sm cursor-pointer text-center',
                                   active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                   item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                                 )}
-                                onClick={() => {
-                                  if (!item.disabled) {
-                                    item.action();
-                                  }
-                                }}
                               >
                                 {item.name}
                               </span>
@@ -955,7 +956,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}
-                  disabled={bulkDeleteMutation.isLoading || !cachedRigths?.state?.data?.edit_employee}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {bulkDeleteMutation.isLoading ? (
