@@ -12,6 +12,7 @@ import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
 import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
+import OrgStructureLogo from '@/svg/OrgStructureLogo';
 import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
 import TileBadge from "@/components/TileBadge"; // adjust path if your folder differs
@@ -56,6 +57,11 @@ const menus = [
     icon: <Employee201RecordsLogo />,
     text: 'Employee 201 Records',
     link: '/manage/employee-201-records',
+  },
+  {
+    icon: <OrgStructureLogo />,
+    text: 'Org Structure',
+    link: '/manage/org-structure',
   },
 ];
 
