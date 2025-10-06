@@ -28,8 +28,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'import-employee-btn', permission: 'import_employee', type: 'menu', fallbackBehavior: 'disable' },
   { elementId: 'export-employee-btn', permission: 'export_employee', type: 'menu', fallbackBehavior: 'disable' },
   { elementId: 'delete-employee-btn', permission: 'delete_employee', type: 'action', fallbackBehavior: 'disable' },
-  { elementId: 'download-template-btn', permission: 'import_employee', type: 'menu', fallbackBehavior: 'disable' },
-
+  
   // Job Management
   { elementId: 'create-job-btn', permission: 'create_job', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'edit-job-btn', permission: 'edit_job', type: 'button', fallbackBehavior: 'disable' },
@@ -100,7 +99,6 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
 
   // DOLE Establishment Registration
   { elementId: 'create-dole-establishment-registration-btn', permission: 'create_dole_establishment_registration', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'edit-dole-establishment-registration-btn', permission: 'edit_dole_establishment_registration', type: 'button', fallbackBehavior: 'disable' },
 
   // DOLE SHC Minutes (Safety and Health Committee)
   { elementId: 'create-dole-shc-minute-btn', permission: 'create_dole_SHC_minute', type: 'button', fallbackBehavior: 'disable' },
@@ -118,8 +116,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'edit-dole-annual-medical-report-btn', permission: 'edit_dole_annual_medical_report', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'export-dole-annual-medical-report-btn', permission: 'export_dole_annual_medical_report', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'generate-dole-annual-medical-report-btn', permission: 'generate_dole_annual_medical_report', type: 'button', fallbackBehavior: 'disable' },
-  { elementId: 'print-annual-medical-report-btn', permission: 'generate_dole_annual_medical_report', type: 'button', fallbackBehavior: 'disable' },
-
+  
   // DOLE Work Environment Request
   { elementId: 'create-dole-work-environment-request-btn', permission: 'create_dole_work_environment_request', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'edit-dole-work-environment-request-btn', permission: 'edit_dole_work_environment_request', type: 'button', fallbackBehavior: 'disable' },
@@ -175,12 +172,6 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'edit-email-template-btn', permission: 'edit_email_template', type: 'button', fallbackBehavior: 'disable' },
   { elementId: 'delete-email-template-btn', permission: 'delete_email_template', type: 'button', fallbackBehavior: 'disable' },
 
-  // Settings & Admin sections
-  { elementId: 'settings-section', permission: 'view_settings_page', type: 'section', fallbackBehavior: 'hide' },
-  { elementId: 'audit-log-access', permission: 'view_audit_log_page', type: 'section', fallbackBehavior: 'hide' },
-
-  // test
-  { elementId: 'use-filter-screen-applicants-btn', permission: 'use_filter_screen_applicants', type: 'button', fallbackBehavior: 'disable' },
 ];
 
 // Helper functions
