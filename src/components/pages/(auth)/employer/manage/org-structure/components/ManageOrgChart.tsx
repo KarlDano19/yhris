@@ -7,6 +7,7 @@ import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ZoomControls from './ZoomControls';
+import PositionDetailsTooltip from '../modals/PositionDetailsTooltip';
 
 // Types for our organizational data with employee information
 interface Employee {
@@ -83,7 +84,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({ data, clickedNodeId, setClicked
     >
       {/* Main Position Node with Employee Info */}
       <div 
-        className="text-center cursor-pointer px-4 flex flex-col items-center justify-center"
+        className="text-center cursor-pointer px-10 mb-2 flex flex-col items-center justify-center"
         onClick={(e) => {
           e.stopPropagation(); // Prevent event bubbling
           setClickedNodeId(isClicked ? null : data.id); // Toggle tooltip on click
@@ -94,14 +95,32 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({ data, clickedNodeId, setClicked
       >
         {/* Avatar */}
         <div className="flex justify-center mb-2">
-          <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center border-2 border-savoy-blue">
-            <PlaceholderPicture 
-              gender={avatarType} 
-              fillColor="#3B82F6" 
-              width={32} 
-              height={32}
-              style={{ opacity: 0.5 }}
-            />
+          <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden">
+            {primaryEmployee?.photo ? (
+              <img
+                src={primaryEmployee.photo}
+                alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const placeholder = target.nextElementSibling as HTMLElement;
+                  if (placeholder) placeholder.style.display = 'block';
+                }}
+              />
+            ) : null}
+            <div 
+              className={`w-full h-full flex items-center justify-center ${primaryEmployee?.photo ? 'hidden' : 'block'}`}
+            >
+              <PlaceholderPicture 
+                gender={avatarType} 
+                fillColor="#3B82F6" 
+                width={32} 
+                height={32}
+                style={{ opacity: 0.5 }}
+              />
+            </div>
           </div>
         </div>
 
@@ -119,57 +138,11 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({ data, clickedNodeId, setClicked
       </div>
 
       {/* Click Tooltip */}
-      {isClicked && data.description && (
-        <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-4 max-w-xs min-w-64 transform -translate-x-1/2 left-1/2 -top-2 pointer-events-none">
-          {/* Tooltip Arrow */}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
-          
-          {/* Tooltip Content */}
-          <div className="space-y-3">
-            {/* Header */}
-            <div className="text-left border-b border-gray-100 pb-2">
-              <h3 className="font-bold text-sm text-gray-800">
-                {primaryEmployee ? `${primaryEmployee.firstname} ${primaryEmployee.lastname}` : 'No Employee'}
-                {data.employees && data.employees.length > 1 && (
-                  <span className="text-xs text-gray-500 ml-1">
-                    (+{data.employees.length - 1} more)
-                  </span>
-                )}
-              </h3>
-              <p className="text-xs text-gray-600 font-semibold">{data.position_name}</p>
-            </div>
-
-            {/* All Employees */}
-            {data.employees && data.employees.length > 0 && (
-              <div className="text-left">
-                <h4 className="font-semibold text-xs text-gray-700 mb-2">
-                  {data.employees.length === 1 ? 'Employee' : 'Employees'}
-                </h4>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {data.employees.map((employee, index) => (
-                    <div key={employee.id} className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">
-                        {employee.firstname} {employee.lastname}
-                      </span>
-                      {index === 0 && (
-                        <span className="text-blue-600 text-xs font-medium">Primary</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Description */}
-            <div className="text-left">
-              <h4 className="font-semibold text-xs text-gray-700 mb-2">Overview</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                {data.description}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <PositionDetailsTooltip 
+        data={data}
+        primaryEmployee={primaryEmployee}
+        isVisible={isClicked}
+      />
       
       {/* Tooltip for this node */}
       <Tooltip 
