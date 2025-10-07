@@ -53,6 +53,8 @@ interface SettingsOrgChartProps {
   isLoading?: boolean;
   error?: any;
   refetch?: () => void;
+  onEditMode?: () => void;
+  onCancel?: () => void;
 }
 
 // Tree manipulation utilities
@@ -121,7 +123,9 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   orgStructureData, 
   isLoading, 
   error, 
-  refetch 
+  refetch,
+  onEditMode,
+  onCancel
 }, ref) => {
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -440,7 +444,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <LoadingSpinner 
           size="lg" 
           color="yellow" 
@@ -455,7 +459,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   // Error state
   if (error) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <div className="flex flex-col items-center justify-center h-full">
           <p className="text-red-600 text-center">Error loading organizational structure</p>
           <button 
@@ -472,7 +476,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   // Initial empty state
   if (!orgData) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <div className="flex flex-col items-center justify-center h-full">
           <div
             className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer shadow-lg transition-colors mb-4"
@@ -533,6 +537,8 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         onWheel={handleWheel}
         renderTree={renderTree}
         chartContainerRef={chartContainerRef}
+        onEditMode={onEditMode}
+        onCancel={onCancel}
       />, 
       document.body
     );
@@ -540,7 +546,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
 
   return (
     <div 
-      className={`w-full bg-gray-50 p-8 rounded-lg overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -603,45 +609,51 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
       />
 
       {/* Position Modal */}
-      <PositionModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setSelectedParentId(null);
-          setEditingPosition(null);
-        }}
-        onSave={(positionName: string, description: string, positionId: number) => 
-          handleSavePosition(positionName, description, positionId)
-        }
-        editingPosition={editingPosition || undefined}
-        orgData={orgData}
-      />
+      {showModal && (
+        <PositionModal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedParentId(null);
+            setEditingPosition(null);
+          }}
+          onSave={(positionName: string, description: string, positionId: number) => 
+            handleSavePosition(positionName, description, positionId)
+          }
+          editingPosition={editingPosition || undefined}
+          orgData={orgData}
+        />
+      )}
 
       {/* Delete Modal */}
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setDeletingPosition(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        deletingPosition={deletingPosition}
-        isLoading={isDeleting}
-      />
+      {showDeleteModal && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setDeletingPosition(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          deletingPosition={deletingPosition}
+          isLoading={isDeleting}
+          />
+      )}
 
       {/* Move Modal */}
-      <MoveModal
-        isOpen={showMoveModal}
-        onClose={() => {
-          setShowMoveModal(false);
-          setDraggedPosition(null);
-          setTargetPosition(null);
-        }}
-        onConfirm={handleMoveConfirm}
-        draggedPosition={draggedPosition}
-        targetPosition={targetPosition}
-        isLoading={isMoving}
-      />
+      {showMoveModal && (
+        <MoveModal
+          isOpen={showMoveModal}
+          onClose={() => {
+            setShowMoveModal(false);
+            setDraggedPosition(null);
+            setTargetPosition(null);
+          }}
+          onConfirm={handleMoveConfirm}
+          draggedPosition={draggedPosition}
+          targetPosition={targetPosition}
+          isLoading={isMoving}
+          />
+      )}
     </div>
   );
 });

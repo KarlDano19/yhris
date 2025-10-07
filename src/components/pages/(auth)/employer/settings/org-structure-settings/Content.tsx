@@ -69,7 +69,7 @@ const Content = () => {
 
       {/* Main Content */}
       <div className='flex-1 flex flex-col'>
-        <div className='bg-white shadow-sm p-6 flex-1 flex flex-col'>     
+        <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <SettingsOrgChart 
             ref={chartRef}
@@ -78,6 +78,8 @@ const Content = () => {
             isLoading={isLoading}
             error={error}
             refetch={refetch}
+            onEditMode={handleEditMode}
+            onCancel={handleCancel}
           />
         </div>
       </div>

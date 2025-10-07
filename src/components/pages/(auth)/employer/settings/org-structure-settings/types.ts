@@ -1,4 +1,3 @@
-// Types for our organizational data - matching backend structure
 export interface OrgStructure {
   id: number | string; // Allow string for shadow buttons
   description: string;

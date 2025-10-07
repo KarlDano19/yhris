@@ -123,6 +123,21 @@ export const createWheelHandler = (
   calculateZoomIn: (currentZoom: number) => number,
   calculateZoomOut: (currentZoom: number) => number
 ) => (e: React.WheelEvent) => {
+  const target = e.target as HTMLElement;
+  
+  // Don't zoom if we're inside specific interactive elements
+  if (target.closest('[role="dialog"]') || 
+      target.closest('.modal') || 
+      target.closest('[data-headlessui-state]') ||
+      target.closest('.ql-editor') ||
+      target.closest('.ql-toolbar') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
+      target.closest('select') ||
+      target.closest('[data-radix-popper-content-wrapper]')) {
+    return; // Let the modal handle the scroll
+  }
+  
   e.preventDefault();
   
   // Zoom in on wheel up, zoom out on wheel down

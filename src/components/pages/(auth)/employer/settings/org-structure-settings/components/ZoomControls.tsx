@@ -12,14 +12,15 @@ interface ZoomControlsProps {
 
 const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, isFullscreen, zoomLevel }) => {
   return (
-    <div className="absolute bottom-8 left-8 z-10 flex flex-col items-start gap-3">
-      {/* Zoom Percentage Display */}
-      <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg">
-        <div className="text-white text-sm font-medium text-center">
-          {Math.round(zoomLevel * 100)}%
-        </div>
+    <>
+    {/* Zoom Percentage Display */}
+    <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg absolute top-8 left-10 z-10">
+      <div className="text-white text-sm font-medium text-center">
+        {Math.round(zoomLevel * 100)}%
       </div>
-      
+    </div>
+    
+    <div className="absolute bottom-8 left-10 z-10 flex flex-col items-start gap-3">
       {/* Zoom Controls */}
       <div className="bg-gray-800 rounded-full p-1 flex flex-col shadow-lg">
         <button
@@ -51,6 +52,7 @@ const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFull
         </button>
       </div>
     </div>
+    </>
   );
 };
 
