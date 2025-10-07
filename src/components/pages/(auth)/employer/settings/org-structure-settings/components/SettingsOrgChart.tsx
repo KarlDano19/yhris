@@ -18,6 +18,7 @@ import useAddOrgStructure from '../hooks/useAddOrgStructure';
 import useUpdateOrgStructure from '../hooks/useUpdateOrgStructure';
 import useDeleteOrgStructure from '../hooks/useDeleteOrgStructure';
 import useMoveOrgStructure from '../hooks/useMoveOrgStructure';
+import useSwapOrgStructure from '../hooks/useSwapOrgStructure';
 
 // Types for our organizational data - matching backend structure
 interface OrgStructure {
@@ -152,7 +153,14 @@ const OrgNode: React.FC<OrgNodeProps> = ({
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    onDragLeave?.();
+    // Only trigger drag leave if we're actually leaving the node
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      onDragLeave?.();
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -173,9 +181,7 @@ const OrgNode: React.FC<OrgNodeProps> = ({
   // Render Position Node
   return (
     <div 
-      className={`relative pointer-events-auto ${
-        isDragOver ? 'ring-4 ring-blue-400 ring-opacity-75 scale-105' : ''
-      }`}
+      className="relative pointer-events-auto"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseDown={(e) => e.stopPropagation()} // Prevent drag when clicking on node
@@ -187,9 +193,9 @@ const OrgNode: React.FC<OrgNodeProps> = ({
       onDrop={handleDrop}
     >
       {/* Main Position Node - Adaptive Width */}
-      <div className={`bg-white border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-200 min-w-36 max-w-52 text-center mx-2 ${
+      <div className={`bg-white border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out min-w-36 max-w-52 text-center mx-2 ${
         isDragOver
-          ? 'border-blue-500 bg-blue-100 shadow-lg'
+          ? 'border-blue-500 bg-blue-100 shadow-lg ring-4 ring-blue-400 ring-opacity-75 scale-105'
           : isDragging
           ? 'opacity-50 scale-95'
           : 'border-gray-200'
@@ -250,6 +256,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({ isEditM
   const [isModeChanging, setIsModeChanging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
   // API hooks
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureSettings();
@@ -257,6 +264,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({ isEditM
   const updateMutation = useUpdateOrgStructure();
   const deleteMutation = useDeleteOrgStructure();
   const moveMutation = useMoveOrgStructure();
+  const swapMutation = useSwapOrgStructure();
   
   // Load data from API
   useEffect(() => {
@@ -297,6 +305,15 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({ isEditM
       return () => document.removeEventListener('keydown', handleEscapeKey);
     }
   }, [isFullscreen]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dragOverTimeoutRef.current) {
+        clearTimeout(dragOverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Function to refresh the chart
   const refreshChart = () => {
@@ -423,16 +440,39 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({ isEditM
   };
 
   const handleDragEnd = () => {
+    // Clear any pending timeout
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+      dragOverTimeoutRef.current = null;
+    }
     setDraggedNodeId(null);
     setDragOverNodeId(null);
   };
 
   const handleDragOver = (nodeId: number | string) => {
-    setDragOverNodeId(nodeId);
+    // Clear any existing timeout
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+      dragOverTimeoutRef.current = null;
+    }
+    
+    // Only update if the node is different to prevent flickering
+    if (dragOverNodeId !== nodeId) {
+      setDragOverNodeId(nodeId);
+    }
   };
 
   const handleDragLeave = () => {
-    setDragOverNodeId(null);
+    // Clear any existing timeout
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+    }
+    
+    // Add a small delay to prevent flickering when moving between nodes
+    dragOverTimeoutRef.current = setTimeout(() => {
+      setDragOverNodeId(null);
+      dragOverTimeoutRef.current = null;
+    }, 100);
   };
 
   const handleDrop = (draggedNode: OrgStructure, targetNode: OrgStructure) => {
@@ -448,41 +488,32 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({ isEditM
     
     try {
       if (action === 'swap') {
-        // Swap positions - both positions keep their parents but swap orders
-        const draggedOrder = draggedPosition.order;
-        const targetOrder = targetPosition.order;
-        
-        // First, move dragged position to a temporary order (max + 1)
-        const tempOrder = Math.max(draggedOrder, targetOrder) + 1;
-        
-        await moveMutation.mutateAsync({
-          orgStructureId: draggedPosition.id,
-          data: {
-            new_order: tempOrder
-          }
-        });
-        
-        // Then move target to dragged's original order
-        if (typeof targetPosition.id === 'number') {
-          await moveMutation.mutateAsync({
-            orgStructureId: targetPosition.id,
+        // Swap positions - only if they have the same parent
+        if (draggedPosition.parent === targetPosition.parent) {
+          // Use the swap mutation hook for proper position swapping
+          await swapMutation.mutateAsync({
+            orgStructureId: draggedPosition.id,
             data: {
-              new_order: draggedOrder
+              swap_with_id: typeof targetPosition.id === 'number' ? targetPosition.id : parseInt(targetPosition.id.toString())
             }
           });
+          
+          toast.custom(() => <CustomToast message='Positions swapped successfully!' type='success' />, {
+            duration: 3000,
+          });
+        } else {
+          // If different parents, treat as move operation
+          await moveMutation.mutateAsync({
+            orgStructureId: draggedPosition.id,
+            data: {
+              new_parent_id: typeof targetPosition.id === 'number' ? targetPosition.id : null
+            }
+          });
+          
+          toast.custom(() => <CustomToast message='Position moved successfully!' type='success' />, {
+            duration: 3000,
+          });
         }
-        
-        // Finally, move dragged to target's original order
-        await moveMutation.mutateAsync({
-          orgStructureId: draggedPosition.id,
-          data: {
-            new_order: targetOrder
-          }
-        });
-        
-        toast.custom(() => <CustomToast message='Positions swapped successfully!' type='success' />, {
-          duration: 3000,
-        });
         
       } else {
         // Move as child - dragged becomes child of target

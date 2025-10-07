@@ -4,12 +4,13 @@ import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import dynamic from 'next/dynamic';
-
 import { XCircleIcon } from '@heroicons/react/24/solid';
+
 import CustomToast from '@/components/CustomToast';
-import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import CreateModal from '../../general-settings/employees/modals/CreateModal';
+
+import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import 'react-quill/dist/quill.snow.css';
