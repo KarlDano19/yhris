@@ -1,4 +1,5 @@
 import React from 'react';
+import 'react-quill/dist/quill.snow.css';
 
 // Types for employee data
 interface Employee {
@@ -85,7 +86,7 @@ const PositionDetailsTooltip: React.FC<PositionDetailsTooltipProps> = ({
         {/* Description */}
         <div className="text-left">
           <div 
-            className="text-xs text-gray-600 leading-relaxed prose prose-xs max-w-none"
+            className="text-xs text-gray-600 leading-relaxed ql-editor !p-0"
             dangerouslySetInnerHTML={{ __html: data.description }}
           />
         </div>

@@ -4,7 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
 
-import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/24/solid';
+import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
+
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
@@ -13,7 +15,6 @@ import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
-import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
 import TileBadge from "@/components/TileBadge"; // adjust path if your folder differs
 

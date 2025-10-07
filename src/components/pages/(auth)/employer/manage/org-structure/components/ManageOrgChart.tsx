@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+
 import { createPortal } from 'react-dom';
 import { Tree, TreeNode } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
-import useGetOrgStructureManage from '../hooks/useGetOrgStructureManage';
-import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
-import PlaceholderPicture from '@/svg/PlaceholderPicture';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ZoomControls from './ZoomControls';
-import PositionDetailsTooltip from '../modals/PositionDetailsTooltip';
+import PositionDetailsModal from '../modals/PositionDetailsModal';
+import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
+import useGetOrgStructureManage from '../hooks/useGetOrgStructureManage';
+
+import PlaceholderPicture from '@/svg/PlaceholderPicture';
 
 // Types for our organizational data with employee information
 interface Employee {
@@ -138,7 +141,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({ data, clickedNodeId, setClicked
       </div>
 
       {/* Click Tooltip */}
-      <PositionDetailsTooltip 
+      <PositionDetailsModal 
         data={data}
         primaryEmployee={primaryEmployee}
         isVisible={isClicked}
