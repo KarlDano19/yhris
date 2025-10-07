@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
+import PipelineInfoModal from './PipelineInfoModal';
 
 import { 
   RolePipelineData, 
@@ -39,6 +40,31 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
   onPageSizeChange,
   pipelineData = {}
 }) => {
+  const [selectedRole, setSelectedRole] = useState<{
+    role: string;
+    pipelineInfo: string;
+    numberOfApplicants: number;
+    pipelineData?: { [stageTitle: string]: number };
+  } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handlePipelineClick = (role: RolePipelineData) => {
+    const pipelineInfo = formatPipelineInfo(role.currentPipeline, role.numberOfApplicants, role.jobId, pipelineData);
+    const rolePipelineData = pipelineData[role.jobId!] || {};
+    
+    setSelectedRole({
+      role: role.role,
+      pipelineInfo,
+      numberOfApplicants: role.numberOfApplicants,
+      pipelineData: rolePipelineData
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRole(null);
+  };
 
   if (isLoading) {
     return (
@@ -134,8 +160,12 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                       <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center whitespace-nowrap">
                         <span className="font-medium">{formatTurnaroundTime(role.turnaroundTime)}</span>
                       </td>
-                      <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center">
-                        <div className="whitespace-nowrap">
+                      <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center max-w-xs">
+                        <div 
+                          className="truncate cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium" 
+                          title="Click to view detailed pipeline information"
+                          onClick={() => handlePipelineClick(role)}
+                        >
                           {formatPipelineInfo(role.currentPipeline, role.numberOfApplicants, role.jobId, pipelineData)}
                         </div>
                       </td>
@@ -164,7 +194,17 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
         </div>
       </div>
 
-
+      {/* Pipeline Info Modal */}
+      {selectedRole && (
+        <PipelineInfoModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          role={selectedRole.role}
+          pipelineInfo={selectedRole.pipelineInfo}
+          numberOfApplicants={selectedRole.numberOfApplicants}
+          pipelineData={selectedRole.pipelineData}
+        />
+      )}
     </>
   );
 };
