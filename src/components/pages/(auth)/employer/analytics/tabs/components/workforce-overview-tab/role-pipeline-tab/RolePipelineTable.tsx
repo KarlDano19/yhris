@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
-import PipelineInfoModal from './PipelineInfoModal';
+import PipelineInfoModal from '../../../../modals/PipelineInfoModal';
 
 import { 
   RolePipelineData, 
