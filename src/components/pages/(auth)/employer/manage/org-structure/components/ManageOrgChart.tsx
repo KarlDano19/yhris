@@ -293,7 +293,7 @@ const ManageOrgChart: React.FC = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <LoadingSpinner 
           size="lg" 
           color="yellow" 
@@ -308,7 +308,7 @@ const ManageOrgChart: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <div className="flex flex-col items-center justify-center h-full">
           <p className="text-red-600 text-center">Error loading organizational structure</p>
           <button 
@@ -325,7 +325,7 @@ const ManageOrgChart: React.FC = () => {
   // Initial empty state
   if (!orgData) {
     return (
-      <div className="w-full bg-gray-50 p-8 rounded-lg overflow-auto flex-1 h-full">
+      <div className="w-full bg-gray-50 overflow-auto flex-1 h-full">
         <div className="flex flex-col items-center justify-center h-full">
           <div className="text-center">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 mx-auto">
@@ -430,7 +430,7 @@ const ManageOrgChart: React.FC = () => {
 
   return (
     <div 
-      className={`w-full bg-gray-50 p-8 rounded-lg overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

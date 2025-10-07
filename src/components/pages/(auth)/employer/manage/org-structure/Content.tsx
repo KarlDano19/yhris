@@ -96,8 +96,8 @@ const Content = () => {
       </div>
 
       {/* Main Content */}
-      <div className='px-2 md:px-8 lg:px-4 pb-8 flex-1 flex flex-col'>
-        <div className='bg-white rounded-lg shadow-sm p-6 flex-1 flex flex-col'>     
+      <div className='flex-1 flex flex-col'>
+        <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <ManageOrgChart />
         </div>
