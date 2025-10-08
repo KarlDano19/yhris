@@ -30,7 +30,6 @@ function Content() {
       };
       const callbackRequest = {
         onSuccess: (data: any) => {
-          console.log(data);
           const postMessageData: any = {
             isGranted: data.is_granted,
             provider: params?.provider,
@@ -50,7 +49,6 @@ function Content() {
           }, 500);
         },
         onError: (err: any) => {
-          console.log(err)
           setErrorMessage(err);
           setTimeout(() => {
             window.close();
