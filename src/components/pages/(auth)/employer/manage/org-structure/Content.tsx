@@ -1,16 +1,34 @@
 'use client';
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 
 import ManageOrgChart from './components/ManageOrgChart';
+import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
+import { OrgStructure } from './types';
 
 const Content = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [orgData, setOrgData] = useState<OrgStructure | null>(null);
+
+  // API hooks
+  const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
+
+  // Load data from API
+  useEffect(() => {
+    if (orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0) {
+      setOrgData(orgStructureData[0]);
+    } else {
+      setOrgData(null);
+    }
+  }, [orgStructureData]);
 
   // Export menu options
   const exportOptions = [
@@ -54,12 +72,13 @@ const Content = () => {
           <h4>Manage | Organizational Structure</h4>
         </Link>
         
-        {/* Export Dropdown */}
-        <Menu as='div' className='relative'>
-          <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50' disabled={isExporting}>
-            <span>{isExporting ? 'Exporting...' : 'Export'}</span>
-            <ChevronDownIcon className='h-4 w-4' />
-          </Menu.Button>
+        {/* Export Dropdown - Only show if org data exists */}
+        {orgData && (
+          <Menu as='div' className='relative'>
+            <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50' disabled={isExporting}>
+              <span>{isExporting ? 'Exporting...' : 'Export'}</span>
+              <ChevronDownIcon className='h-4 w-4' />
+            </Menu.Button>
           <Transition
             as={Fragment}
             enter='transition ease-out duration-100'
@@ -92,14 +111,21 @@ const Content = () => {
               </div>
             </Menu.Items>
           </Transition>
-        </Menu>
+          </Menu>
+        )}
       </div>
 
       {/* Main Content */}
       <div className='flex-1 flex flex-col'>
         <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
-          <ManageOrgChart />
+          <ManageOrgChart 
+            orgData={orgData}
+            profileData={cachedProfile?.state?.data}
+            isLoading={isLoading}
+            error={error}
+            refetch={refetch}
+          />
         </div>
       </div>
     </div>

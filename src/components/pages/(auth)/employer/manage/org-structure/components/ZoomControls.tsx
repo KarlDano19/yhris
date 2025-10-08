@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import { PlusIcon, MinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
@@ -9,11 +7,21 @@ interface ZoomControlsProps {
   onZoomOut: () => void;
   onFullscreenToggle: () => void;
   isFullscreen: boolean;
+  zoomLevel: number;
 }
 
-const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, isFullscreen }) => {
+const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, isFullscreen, zoomLevel }) => {
   return (
-    <div className="absolute bottom-8 left-8 z-10">
+    <>
+    {/* Zoom Percentage Display */}
+    <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg absolute bottom-8 right-10 z-10">
+      <div className="text-white text-sm font-medium text-center">
+        {Math.round(zoomLevel * 100)}%
+      </div>
+    </div>
+    
+    <div className="absolute bottom-8 left-10 z-10 flex flex-col items-start gap-3">
+      {/* Zoom Controls */}
       <div className="bg-gray-800 rounded-full p-1 flex flex-col shadow-lg">
         <button
           onClick={onZoomIn}
@@ -44,6 +52,7 @@ const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFull
         </button>
       </div>
     </div>
+    </>
   );
 };
 

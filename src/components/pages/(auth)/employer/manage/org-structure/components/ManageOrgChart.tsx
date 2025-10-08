@@ -6,160 +6,44 @@ import { Tooltip } from 'react-tooltip';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ZoomControls from './ZoomControls';
-import PositionDetailsModal from '../modals/PositionDetailsModal';
-import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
-import useGetOrgStructureManage from '../hooks/useGetOrgStructureManage';
+import ManageOrgNode from './ManageOrgNode';
+import ManageFullscreenChart from './ManageFullscreenChart';
+import { OrgStructure } from '../types';
+import { 
+  calculateZoomIn, 
+  calculateZoomOut, 
+  createRefreshChart, 
+  createFullscreenToggle, 
+  createEscapeKeyHandler 
+} from '../functions/chartUtils';
+import { 
+  createMouseDownHandler, 
+  createMouseMoveHandler, 
+  createMouseUpHandler, 
+  createMouseLeaveHandler, 
+  createTouchStartHandler, 
+  createTouchMoveHandler, 
+  createTouchEndHandler,
+  createWheelHandler
+} from '../functions/eventUtils';
 
-import PlaceholderPicture from '@/svg/PlaceholderPicture';
-
-// Types for our organizational data with employee information
-interface Employee {
-  id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  mobile: string;
-  photo?: string;
-  gender?: string;
+// Props interface for ManageOrgChart
+interface ManageOrgChartProps {
+  orgData: OrgStructure | null;
+  profileData: any;
+  isLoading: boolean;
+  error: any;
+  refetch: () => void;
 }
-
-interface OrgStructure {
-  id: number | string;
-  description: string;
-  position_name: string;
-  position: number;
-  parent?: number | null;
-  parent_position_name?: string;
-  order: number;
-  is_active: boolean;
-  children?: OrgStructure[];
-  employees?: Employee[];
-  primary_employee?: Employee;
-}
-
-interface OrgNodeProps {
-  data: OrgStructure;
-  clickedNodeId: number | string | null;
-  setClickedNodeId: (id: number | string | null) => void;
-}
-
-// Custom Node Component for Manage Page
-const ManageOrgNode: React.FC<OrgNodeProps> = ({ data, clickedNodeId, setClickedNodeId }) => {
-  const isClicked = clickedNodeId === data.id;
-  
-  // Get the primary employee or first employee
-  const primaryEmployee = data.primary_employee || (data.employees && data.employees[0]);
-
-  // Close tooltip when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isClicked) {
-        setClickedNodeId(null);
-      }
-    };
-
-    if (isClicked) {
-      document.addEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isClicked, setClickedNodeId]);
-  
-  // Determine avatar type (male/female) - use gender field if available
-  const getAvatarType = (employee: Employee | undefined) => {
-    if (!employee) return 'male'; // Default
-    // Use gender field if available, otherwise fallback to name-based logic
-    if (employee.gender) {
-      return employee.gender.toLowerCase() === 'female' ? 'female' : 'male';
-    }
-    // Simple logic based on name as fallback
-    return employee.firstname.toLowerCase().includes('a') ? 'female' : 'male';
-  };
-
-  const avatarType = getAvatarType(primaryEmployee);
-
-  return (
-    <div 
-      className="relative pointer-events-auto"
-      onMouseDown={(e) => e.stopPropagation()} // Prevent drag when clicking on node
-    >
-      {/* Main Position Node with Employee Info */}
-      <div 
-        className="text-center cursor-pointer px-10 mb-2 flex flex-col items-center justify-center"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent event bubbling
-          setClickedNodeId(isClicked ? null : data.id); // Toggle tooltip on click
-        }}
-        data-tooltip-id={!clickedNodeId ? `org-node-tooltip-${data.id}` : undefined}
-        data-tooltip-content={!clickedNodeId ? 'Click to view details' : undefined}
-        data-tooltip-place={!clickedNodeId ? 'bottom' : undefined}
-      >
-        {/* Avatar */}
-        <div className="flex justify-center mb-2">
-          <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden">
-            {primaryEmployee?.photo ? (
-              <img
-                src={primaryEmployee.photo}
-                alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
-                className="w-full h-full object-cover rounded-full"
-                onError={(e) => {
-                  // Fallback to placeholder if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const placeholder = target.nextElementSibling as HTMLElement;
-                  if (placeholder) placeholder.style.display = 'block';
-                }}
-              />
-            ) : null}
-            <div 
-              className={`w-full h-full flex items-center justify-center ${primaryEmployee?.photo ? 'hidden' : 'block'}`}
-            >
-              <PlaceholderPicture 
-                gender={avatarType} 
-                fillColor="#3B82F6" 
-                width={32} 
-                height={32}
-                style={{ opacity: 0.5 }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Employee Name */}
-        {primaryEmployee && (
-          <h3 className="font-bold text-sm text-gray-800 mb-1">
-            {primaryEmployee.firstname} {primaryEmployee.lastname}
-          </h3>
-        )}
-
-        {/* Position Title */}
-        <h4 className="font-semibold text-xs text-gray-700">
-          {data.position_name}
-        </h4>
-      </div>
-
-      {/* Click Tooltip */}
-      <PositionDetailsModal 
-        data={data}
-        primaryEmployee={primaryEmployee}
-        isVisible={isClicked}
-      />
-      
-      {/* Tooltip for this node */}
-      <Tooltip 
-        key={`${data.id}-${clickedNodeId}`}
-        id={`org-node-tooltip-${data.id}`} 
-        style={{ zIndex: 9999 }} 
-      />
-    </div>
-  );
-};
 
 // Main Manage Org Chart Component
-const ManageOrgChart: React.FC = () => {
-  const [orgData, setOrgData] = useState<OrgStructure | null>(null);
+const ManageOrgChart: React.FC<ManageOrgChartProps> = ({ 
+  orgData, 
+  profileData, 
+  isLoading, 
+  error, 
+  refetch 
+}) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
@@ -170,27 +54,10 @@ const ManageOrgChart: React.FC = () => {
   
   // Track which node is currently clicked
   const [clickedNodeId, setClickedNodeId] = useState<number | string | null>(null);
-  
-  // API hooks
-  const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
-  const { data: profileData } = useGetEmployerProfile();
-  
-  // Load data from API
-  useEffect(() => {
-    if (orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0) {
-      setOrgData(orgStructureData[0]);
-    } else {
-      setOrgData(null);
-    }
-  }, [orgStructureData]);
 
   // Handle escape key to exit fullscreen
   useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullscreen) {
-        setIsFullscreen(false);
-      }
-    };
+    const handleEscapeKey = createEscapeKeyHandler(isFullscreen, setIsFullscreen);
 
     if (isFullscreen) {
       document.addEventListener('keydown', handleEscapeKey);
@@ -198,77 +65,33 @@ const ManageOrgChart: React.FC = () => {
     }
   }, [isFullscreen]);
 
+  // Function to refresh the chart
+  const refreshChart = createRefreshChart(refetch);
+
   // Zoom functions
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.25, 2)); // Max zoom 2x
+    setZoomLevel(prev => calculateZoomIn(prev));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.25, 0.5)); // Min zoom 0.5x
+    setZoomLevel(prev => calculateZoomOut(prev));
   };
 
-  const handleFullscreenToggle = () => {
-    setIsFullscreen(prev => !prev);
-  };
+  const handleFullscreenToggle = createFullscreenToggle(setIsFullscreen);
 
   // Drag functions
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Only start dragging if clicking on the background, not on nodes or buttons
-    const target = e.target as HTMLElement;
-    if (e.target === e.currentTarget || 
-        (target.closest('.org-tree-container') && !target.closest('.pointer-events-auto'))) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
-      e.preventDefault();
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      e.preventDefault();
-      setDragOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (isDragging) {
-      e.preventDefault();
-      setIsDragging(false);
-    }
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent) => {
-    // Only stop dragging if leaving the container entirely
-    if (isDragging && !e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragging(false);
-    }
-  };
+  const handleMouseDown = createMouseDownHandler(setIsDragging, setDragStart, dragOffset);
+  const handleMouseMove = createMouseMoveHandler(isDragging, setDragOffset, dragStart);
+  const handleMouseUp = createMouseUpHandler(isDragging, setIsDragging);
+  const handleMouseLeave = createMouseLeaveHandler(isDragging, setIsDragging);
 
   // Handle touch events for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      setIsDragging(true);
-      setDragStart({ x: touch.clientX - dragOffset.x, y: touch.clientY - dragOffset.y });
-    }
-  };
+  const handleTouchStart = createTouchStartHandler(setIsDragging, setDragStart, dragOffset);
+  const handleTouchMove = createTouchMoveHandler(isDragging, setDragOffset, dragStart);
+  const handleTouchEnd = createTouchEndHandler(setIsDragging);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging && e.touches.length === 1) {
-      const touch = e.touches[0];
-      setDragOffset({
-        x: touch.clientX - dragStart.x,
-        y: touch.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
+  // Handle mouse wheel for zoom
+  const handleWheel = createWheelHandler(setZoomLevel, calculateZoomIn, calculateZoomOut);
 
   // Render tree recursively
   const renderTree = (node: OrgStructure): React.ReactNode => {
@@ -355,77 +178,33 @@ const ManageOrgChart: React.FC = () => {
     );
   }
 
-  // Fullscreen chart component
-  const FullscreenChart = () => (
-    <div 
-      className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      data-tooltip-id="chart-area-tooltip"
-      data-tooltip-content="Click and drag to move the chart around"
-      data-tooltip-place="top"
-    >
-      <div 
-        className="min-w-max flex justify-center items-center transition-transform duration-300 ease-in-out"
-        style={{ 
-          transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-          transformOrigin: 'center center',
-          minHeight: '100%'
-        }}
-      >
-        <div className="org-tree-container">
-          <Tree
-            lineWidth="2px"
-            lineColor="#3b82f6"
-            lineBorderRadius="10px"
-            label={
-              <div className="flex justify-center w-full">
-                <ManageOrgNode 
-                  data={orgData} 
-                  clickedNodeId={clickedNodeId}
-                  setClickedNodeId={setClickedNodeId}
-                />
-              </div>
-            }
-          >
-            {orgData.children && orgData.children.map(renderTree)}
-          </Tree>
-        </div>
-      </div>
-
-      {/* Floating Title */}
-      <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-gray-800 leading-tight">
-            {profileData?.name || 'Company'}'s
-          </h2>
-          <h3 className="text-lg font-bold text-gray-800 leading-tight">
-            Organizational Structure
-          </h3>
-        </div>
-      </div>
-
-      {/* Zoom Controls */}
-      <ZoomControls 
-        onZoomIn={handleZoomIn} 
-        onZoomOut={handleZoomOut} 
-        onFullscreenToggle={handleFullscreenToggle}
-        isFullscreen={isFullscreen}
-      />
-
-      {/* Tooltips for chart area */}
-      <Tooltip id="chart-area-tooltip" style={{ zIndex: 9999 }} />
-    </div>
-  );
-
   // Render fullscreen chart in portal if in fullscreen mode
   if (isFullscreen) {
-    return createPortal(<FullscreenChart />, document.body);
+    return createPortal(
+      <ManageFullscreenChart
+        isDragging={isDragging}
+        zoomLevel={zoomLevel}
+        dragOffset={dragOffset}
+        orgData={orgData}
+        profileData={profileData}
+        clickedNodeId={clickedNodeId}
+        isFullscreen={isFullscreen}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFullscreenToggle={handleFullscreenToggle}
+        onWheel={handleWheel}
+        setClickedNodeId={setClickedNodeId}
+        renderTree={renderTree}
+      />,
+      document.body
+    );
   }
 
   return (
@@ -438,6 +217,7 @@ const ManageOrgChart: React.FC = () => {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onWheel={handleWheel}
       data-tooltip-id="chart-area-tooltip"
       data-tooltip-content="Click and drag to move the chart around"
       data-tooltip-place="top"
@@ -487,6 +267,7 @@ const ManageOrgChart: React.FC = () => {
         onZoomOut={handleZoomOut} 
         onFullscreenToggle={handleFullscreenToggle}
         isFullscreen={isFullscreen}
+        zoomLevel={zoomLevel}
       />
 
       {/* Tooltips for chart area */}
