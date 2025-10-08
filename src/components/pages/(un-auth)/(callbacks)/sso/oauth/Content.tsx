@@ -30,6 +30,7 @@ function Content() {
       };
       const callbackRequest = {
         onSuccess: (data: any) => {
+          debugger;
           const postMessageData: any = {
             isGranted: data.is_granted,
             provider: params?.provider,
