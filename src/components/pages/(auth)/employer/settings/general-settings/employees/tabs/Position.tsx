@@ -5,6 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import 'react-quill/dist/quill.snow.css';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -12,6 +13,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
 import DeleteModal from '../modals/DeleteModal';
+import DescriptionModal from '../modals/DescriptionModal';
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
 
@@ -31,6 +33,12 @@ type T_ModalData = {
   open: boolean;
 };
 
+type T_DescriptionModalData = {
+  name: string;
+  description: string;
+  open: boolean;
+};
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
@@ -46,6 +54,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState<boolean>(false);
   const [isPositionEditModalOpen, setIsPositionEditModalOpen] = useState<T_ModalData | null>(null);
   const [isPositionDeleteModalOpen, setIsPositionDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [descriptionModalData, setDescriptionModalData] = useState<T_DescriptionModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -136,9 +145,25 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     }
     if (positionItems && positionItems.length > 0) {
       return positionItems.map((item: any) => (
-        <tr key={item.id} className='cursor-pointer'>
+        <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.description ? (
+              <button
+                onClick={() => setDescriptionModalData({ 
+                  name: item.name, 
+                  description: item.description, 
+                  open: true 
+                })}
+                className='text-blue-600 hover:text-blue-800 hover:underline'
+              >
+                Click to view
+              </button>
+            ) : (
+              '-'
+            )}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
               <button
@@ -272,6 +297,9 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
                         Name
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Description
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Action
                       </th>
                     </tr>
@@ -311,6 +339,14 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           refetch={positionListRefetch}
           isOpen={isPositionDeleteModalOpen}
           setIsOpen={setIsPositionDeleteModalOpen}
+        />
+      )}
+      {descriptionModalData && (
+        <DescriptionModal
+          isOpen={descriptionModalData.open}
+          onClose={() => setDescriptionModalData(null)}
+          title={descriptionModalData.name}
+          description={descriptionModalData.description}
         />
       )}
 

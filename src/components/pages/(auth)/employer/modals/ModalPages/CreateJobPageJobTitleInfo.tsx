@@ -319,6 +319,7 @@ export default function CreateJobPageTitleInfo({
         isOpen={isAddPositionModalOpen}
         setIsOpen={setIsAddPositionModalOpen}
         refetch={handlePositionCreated}
+        hideDescription={true}
       />
     </>
   );

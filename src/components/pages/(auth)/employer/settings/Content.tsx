@@ -27,7 +27,7 @@ const menus = [
   {
     icon: <OrgStructureLogo />,
     text: <>Org Structure<br/>Settings</>,
-    link: '/settings/org-structure-settings',
+    link: '/settings/org-structure',
     isAvailable: true,
   },
 ];

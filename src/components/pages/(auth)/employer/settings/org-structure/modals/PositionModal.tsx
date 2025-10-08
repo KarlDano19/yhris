@@ -3,24 +3,14 @@ import { Fragment, useRef, useState, useEffect, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
-import dynamic from 'next/dynamic';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import 'react-quill/dist/quill.snow.css';
 
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import CreateModal from '../../general-settings/employees/modals/CreateModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
-
-import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill/dist/quill.snow.css';
-
-// Helper function to check if HTML content is empty
-const isHtmlEmpty = (html: string | null | undefined): boolean => {
-  if (!html) return true;                 
-  const trimmed = html.trim();
-  return trimmed === '' || trimmed === '<p><br></p>' || trimmed === '<p></p>';
-};
 
 interface OrgStructure {
   id: number | string; // Match OrgChart interface
@@ -48,16 +38,9 @@ interface PositionModalProps {
 export default function PositionModal({ isOpen, onClose, onSave, editingPosition, orgData }: PositionModalProps) {
   const cancelButtonRef = useRef(null);
   const [positionName, setPositionName] = useState(editingPosition?.position_name || '');
-  const [description, setDescription] = useState(editingPosition?.description || '');
   const [selectedPosition, setSelectedPosition] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
-
-  // Dynamic import for React Quill
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
-    [isOpen]
-  );
 
   // Fetch all positions for the dropdown (no pagination needed for select view type)
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
@@ -97,6 +80,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
         value: position.id,
         label: position.name,
         createdAt: position.created_at,
+        description: position.description,
         id: position.id
       }))
       .filter((position: any) => {
@@ -160,7 +144,6 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   // Reset form when editing position changes
   useEffect(() => {
     setPositionName(editingPosition?.position_name || '');
-    setDescription(editingPosition?.description || '');
     
     // Set selected position if editing
     if (editingPosition) {
@@ -186,19 +169,11 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedPosition) {
-      // Validate description content
-      if (isHtmlEmpty(description)) {
-        toast.custom(() => <CustomToast message='Description is required' type='error' />, {
-          duration: 3000,
-        });
-        return;
-      }
-
       setIsLoading(true);
       try {
-        onSave(selectedPosition.label, description, selectedPosition.value);
+        // Description is now managed in the Position model, so we pass empty string
+        onSave(selectedPosition.label, '', selectedPosition.value);
         setPositionName('');
-        setDescription('');
         setSelectedPosition(null);
         onClose();
       } catch (error) {
@@ -238,7 +213,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'  
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[750px]'>
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
                       {editingPosition ? 'Edit Position' : 'Select Position'}
@@ -284,23 +259,21 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           )}
                         />
                       </div>
+                      
+                      {/* Display Position Description */}
+                      {selectedPosition?.description && (
+                        <div className='mt-4'>
+                          <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                            Position Description
+                          </label>
+                          <div 
+                            className="ql-editor text-sm leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto"
+                            dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
+                          />
+                        </div>
+                      )}
                     </div>
-                    <div className='px-4 pb-6'>
-                      <label htmlFor='description' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Description<span className='text-red-600'> *</span>
-                      </label>
-                      <div className='mt-2 h-48'>
-                        <ReactQuill
-                          value={description}
-                          onChange={setDescription}
-                          formats={QUILL_FORMATS}
-                          modules={QUILL_MODULES}
-                          style={{ height: "100%", padding: "5px 8px !important" }}
-                          placeholder='Enter position description...'
-                        />
-                      </div>
-                    </div>
-                    <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
+                    <div className='flex justify-center w-full px-4 space-x-8 pt-4 pb-7'>
                       <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
                         <button
                           type='button'
