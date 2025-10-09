@@ -14,7 +14,7 @@ const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFull
   return (
     <>
     {/* Zoom Percentage Display */}
-    <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg absolute top-8 left-10 z-10">
+    <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg absolute bottom-8 right-10 z-10">
       <div className="text-white text-sm font-medium text-center">
         {Math.round(zoomLevel * 100)}%
       </div>
