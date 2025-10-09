@@ -29,6 +29,10 @@ export interface OrgNodeProps {
   data: OrgStructure;
   clickedNodeId: number | string | null;
   setClickedNodeId: (id: number | string | null) => void;
+  expandedPositions?: Set<number | string>;
+  setExpandedPositions?: (positions: Set<number | string>) => void;
+  onSetPrimaryEmployee?: (orgStructureId: number | string, employeeId: number) => void;
+  isSettingPrimary?: boolean;
 }
 
 // Props for position details modal/tooltip
@@ -37,4 +41,15 @@ export interface PositionDetailsModalProps {
   primaryEmployee?: Employee;
   isVisible: boolean;
   onClose: () => void;
+}
+
+// Props for position action modal
+export interface PositionActionModalProps {
+  data: OrgStructure;
+  primaryEmployee?: Employee;
+  isVisible: boolean;
+  onClose: () => void;
+  onViewDetails: () => void;
+  onShowEmployees: () => void;
+  isExpanded?: boolean;
 }

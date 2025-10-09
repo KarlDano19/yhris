@@ -28,6 +28,10 @@ interface ManageFullscreenChartProps {
   onFullscreenToggle: () => void;
   onWheel: (e: React.WheelEvent) => void;
   setClickedNodeId: (id: number | string | null) => void;
+  expandedPositions: Set<number | string>;
+  setExpandedPositions: (positions: Set<number | string>) => void;
+  onSetPrimaryEmployee: (orgStructureId: number | string, employeeId: number) => void;
+  isSettingPrimary: boolean;
   renderTree: (node: OrgStructure) => React.ReactNode;
 }
 
@@ -51,6 +55,10 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   onFullscreenToggle,
   onWheel,
   setClickedNodeId,
+  expandedPositions,
+  setExpandedPositions,
+  onSetPrimaryEmployee,
+  isSettingPrimary,
   renderTree
 }) => {
   return (
@@ -87,6 +95,10 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
                   data={orgData} 
                   clickedNodeId={clickedNodeId}
                   setClickedNodeId={setClickedNodeId}
+                  expandedPositions={expandedPositions}
+                  setExpandedPositions={setExpandedPositions}
+                  onSetPrimaryEmployee={onSetPrimaryEmployee}
+                  isSettingPrimary={isSettingPrimary}
                 />
               </div>
             }

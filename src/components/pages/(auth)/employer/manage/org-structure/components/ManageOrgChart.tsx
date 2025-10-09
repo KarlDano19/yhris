@@ -9,6 +9,7 @@ import ZoomControls from './ZoomControls';
 import ManageOrgNode from './ManageOrgNode';
 import ManageFullscreenChart from './ManageFullscreenChart';
 import { OrgStructure } from '../types';
+import useSetPrimaryEmployee from '../hooks/useSetPrimaryEmployee';
 import { 
   calculateZoomIn, 
   calculateZoomOut, 
@@ -54,6 +55,12 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   
   // Track which node is currently clicked
   const [clickedNodeId, setClickedNodeId] = useState<number | string | null>(null);
+  
+  // Track which positions are expanded to show employees
+  const [expandedPositions, setExpandedPositions] = useState<Set<number | string>>(new Set());
+  
+  // Primary employee mutation
+  const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
 
   // Handle escape key to exit fullscreen
   useEffect(() => {
@@ -93,6 +100,22 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   // Handle mouse wheel for zoom
   const handleWheel = createWheelHandler(setZoomLevel, calculateZoomIn, calculateZoomOut);
 
+  // Handle set primary employee
+  const handleSetPrimaryEmployee = async (orgStructureId: number | string, employeeId: number) => {
+    try {
+      const id = typeof orgStructureId === 'string' ? parseInt(orgStructureId, 10) : orgStructureId;
+      await setPrimaryEmployeeMutation.mutateAsync({
+        orgStructureId: id,
+        employeeId: employeeId
+      });
+      
+      // Refresh the chart to show updated data
+      refetch();
+    } catch (error) {
+      console.error('Error setting primary employee:', error);
+    }
+  };
+
   // Render tree recursively
   const renderTree = (node: OrgStructure): React.ReactNode => {
     return (
@@ -103,6 +126,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               data={node} 
               clickedNodeId={clickedNodeId}
               setClickedNodeId={setClickedNodeId}
+              expandedPositions={expandedPositions}
+              setExpandedPositions={setExpandedPositions}
+              onSetPrimaryEmployee={handleSetPrimaryEmployee}
+              isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
             />
           </div>
         }
@@ -201,6 +228,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         onFullscreenToggle={handleFullscreenToggle}
         onWheel={handleWheel}
         setClickedNodeId={setClickedNodeId}
+        expandedPositions={expandedPositions}
+        setExpandedPositions={setExpandedPositions}
+        onSetPrimaryEmployee={handleSetPrimaryEmployee}
+        isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
         renderTree={renderTree}
       />,
       document.body
@@ -252,6 +283,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
                   data={orgData} 
                   clickedNodeId={clickedNodeId}
                   setClickedNodeId={setClickedNodeId}
+                  expandedPositions={expandedPositions}
+                  setExpandedPositions={setExpandedPositions}
+                  onSetPrimaryEmployee={handleSetPrimaryEmployee}
+                  isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
                 />
               </div>
             }
