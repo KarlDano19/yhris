@@ -1,8 +1,8 @@
-import { Dispatch, useState } from 'react';
+import { Dispatch, useState, useEffect } from 'react';
 
 import dynamic from 'next/dynamic';
 
-import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import { QUILL_FORMATS, QUILL_MODULES, CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -14,6 +14,7 @@ export default function CreateJobPageJobDescription({
   onSubmit,
   setFileProps,
   hasSalaryRange,
+  combinedFormData,
 }: {
   register: any;
   setValue: any;
@@ -22,6 +23,7 @@ export default function CreateJobPageJobDescription({
   onSubmit: () => void;
   setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
   hasSalaryRange?: boolean;
+  combinedFormData?: any;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -35,6 +37,21 @@ export default function CreateJobPageJobDescription({
     fileSize?: number;
     file?: File;
   }>({});
+
+  // Effect to populate role field with selected position description
+  useEffect(() => {
+    if (combinedFormData?.positionDescription) {
+      const currentJobDescription = getValues('jobDescription');
+      
+      // Only populate if the field is empty, contains default empty content, or contains the template content
+      if (!currentJobDescription || 
+          currentJobDescription === '<ul><li><br></li></ul>' || 
+          currentJobDescription === '<p><br></p>' ||
+          currentJobDescription === CREATEJOB_TEMPLATE[0]) {
+        setValue('jobDescription', combinedFormData.positionDescription);
+      }
+    }
+  }, [setValue, getValues, combinedFormData]);
 
   return (
     <>
