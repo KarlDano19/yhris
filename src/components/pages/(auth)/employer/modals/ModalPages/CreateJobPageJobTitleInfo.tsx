@@ -5,6 +5,7 @@ import Select from 'react-select';
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import { advertiseOptions } from '@/utils/advertiseOptions';
 import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
+import { CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
 interface Field {
   onChange: (value: any) => void;
@@ -21,6 +22,7 @@ export default function CreateJobPageTitleInfo({
   errors,
   positionData,
   refetchPositions,
+  fourthForm,
 }: {
   control: any;
   Controller: any;
@@ -31,6 +33,7 @@ export default function CreateJobPageTitleInfo({
   errors?: any;
   positionData?: any;
   refetchPositions?: () => void;
+  fourthForm?: any;
 }) {
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
   
@@ -217,6 +220,17 @@ export default function CreateJobPageTitleInfo({
                       )}
                       onChange={(val) => {
                         onChange(val?.value || ''); // This will send the position ID
+                        // Immediately update the position description in the job description form
+                        if (fourthForm) {
+                          // ALWAYS update when position changes, regardless of current content
+                          if (val?.description) {
+                            // Use position description if available
+                            fourthForm.setValue('jobDescription', val.description);
+                          } else {
+                            // If position has no description, use the template placeholder
+                            fourthForm.setValue('jobDescription', CREATEJOB_TEMPLATE[0]);
+                          }
+                        }
                       }}
                       components={{
                         DropdownIndicator: () => (

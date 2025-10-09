@@ -207,6 +207,7 @@ export default function CreateJobModal({
                       errors={firstForm.formState.errors}
                       positionData={positionData}
                       refetchPositions={refetchPositions}
+                      fourthForm={fourthForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
@@ -241,6 +242,8 @@ export default function CreateJobModal({
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}
                       combinedFormData={combinedFormData}
+                      positionData={positionData}
+                      firstForm={firstForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
