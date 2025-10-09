@@ -7,17 +7,38 @@ import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import SettingsOrgChart from './components/SettingsOrgChart';
+import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureSettings from './hooks/useGetOrgStructureSettings';
 
 const Content = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const chartRef = useRef<any>(null);
   
+  // Zoom state
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Drag state for centering
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
   // Get org structure data to determine if we should show View/Edit button
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureSettings();
   
   // Check if there's any org structure data
   const hasOrgData = orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0;
+
+  // Zoom handlers
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.2));
+  };
+
+  const handleFullscreenToggle = () => {
+    setIsFullscreen(prev => !prev);
+  };
 
   const handleEditMode = () => {
     setIsEditMode(true);
@@ -68,7 +89,7 @@ const Content = () => {
       </div>
 
       {/* Main Content */}
-      <div className='flex-1 flex flex-col'>
+      <div className='flex-1 flex flex-col relative'>
         <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <SettingsOrgChart 
@@ -80,8 +101,25 @@ const Content = () => {
             refetch={refetch}
             onEditMode={handleEditMode}
             onCancel={handleCancel}
+            zoomLevel={zoomLevel}
+            setZoomLevel={setZoomLevel}
+            isFullscreen={isFullscreen}
+            setIsFullscreen={setIsFullscreen}
+            dragOffset={dragOffset}
+            setDragOffset={setDragOffset}
           />
         </div>
+
+        {/* Zoom Controls - Positioned within the max-width container */}
+        {hasOrgData && (
+          <ZoomControls 
+            onZoomIn={handleZoomIn} 
+            onZoomOut={handleZoomOut} 
+            onFullscreenToggle={handleFullscreenToggle}
+            isFullscreen={isFullscreen}
+            zoomLevel={zoomLevel}
+          />
+        )}
       </div>
     </div>
   );

@@ -24,8 +24,7 @@ import {
   createMouseLeaveHandler, 
   createTouchStartHandler, 
   createTouchMoveHandler, 
-  createTouchEndHandler,
-  createWheelHandler
+  createTouchEndHandler
 } from '../functions/eventUtils';
 
 // Props interface for ManageOrgChart
@@ -35,6 +34,17 @@ interface ManageOrgChartProps {
   isLoading: boolean;
   error: any;
   refetch: () => void;
+  zoomLevel: number;
+  setZoomLevel: (level: number) => void;
+  isFullscreen: boolean;
+  setIsFullscreen: (fullscreen: boolean) => void;
+  onShowAllEmployees: () => void;
+  hasEmployees: boolean;
+  expandedPositions: Set<number | string>;
+  setExpandedPositions: (positions: Set<number | string>) => void;
+  dragOffset: { x: number; y: number };
+  setDragOffset: (offset: { x: number; y: number }) => void;
+  onExport?: (format: 'pdf' | 'png') => void;
 }
 
 // Main Manage Org Chart Component
@@ -43,21 +53,26 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   profileData, 
   isLoading, 
   error, 
-  refetch 
+  refetch,
+  zoomLevel,
+  setZoomLevel,
+  isFullscreen,
+  setIsFullscreen,
+  onShowAllEmployees,
+  hasEmployees,
+  expandedPositions,
+  setExpandedPositions,
+  dragOffset,
+  setDragOffset,
+  onExport
 }) => {
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
   // Track which node is currently clicked
   const [clickedNodeId, setClickedNodeId] = useState<number | string | null>(null);
-  
-  // Track which positions are expanded to show employees
-  const [expandedPositions, setExpandedPositions] = useState<Set<number | string>>(new Set());
   
   // Primary employee mutation
   const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
@@ -75,17 +90,6 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   // Function to refresh the chart
   const refreshChart = createRefreshChart(refetch);
 
-  // Zoom functions
-  const handleZoomIn = () => {
-    setZoomLevel(prev => calculateZoomIn(prev));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => calculateZoomOut(prev));
-  };
-
-  const handleFullscreenToggle = createFullscreenToggle(setIsFullscreen);
-
   // Drag functions
   const handleMouseDown = createMouseDownHandler(setIsDragging, setDragStart, dragOffset);
   const handleMouseMove = createMouseMoveHandler(isDragging, setDragOffset, dragStart);
@@ -97,8 +101,6 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   const handleTouchMove = createTouchMoveHandler(isDragging, setDragOffset, dragStart);
   const handleTouchEnd = createTouchEndHandler(setIsDragging);
 
-  // Handle mouse wheel for zoom
-  const handleWheel = createWheelHandler(setZoomLevel, calculateZoomIn, calculateZoomOut);
 
   // Handle set primary employee
   const handleSetPrimaryEmployee = async (orgStructureId: number | string, employeeId: number) => {
@@ -115,6 +117,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
       console.error('Error setting primary employee:', error);
     }
   };
+
 
   // Render tree recursively
   const renderTree = (node: OrgStructure): React.ReactNode => {
@@ -223,24 +226,27 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFullscreenToggle={handleFullscreenToggle}
-        onWheel={handleWheel}
+        onZoomIn={() => setZoomLevel(calculateZoomIn(zoomLevel))}
+        onZoomOut={() => setZoomLevel(calculateZoomOut(zoomLevel))}
+        onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
+        onShowAllEmployees={onShowAllEmployees}
         setClickedNodeId={setClickedNodeId}
         expandedPositions={expandedPositions}
         setExpandedPositions={setExpandedPositions}
         onSetPrimaryEmployee={handleSetPrimaryEmployee}
         isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
+        hasEmployees={hasEmployees}
         renderTree={renderTree}
-      />,
+        setDragOffset={setDragOffset}
+        onExport={onExport}
+      />, 
       document.body
     );
   }
 
   return (
     <div 
-      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -248,10 +254,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
       data-tooltip-id="chart-area-tooltip"
       data-tooltip-content="Click and drag to move the chart around"
       data-tooltip-place="top"
+      style={{ touchAction: 'none' }}
     >
       {/* Floating Title Component */}
       <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
@@ -265,11 +271,13 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         </div>
       </div>
       <div 
-        className="min-w-max flex justify-center items-center transition-transform duration-300 ease-in-out"
+        className="min-w-max flex justify-center items-center"
         style={{ 
           transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
           transformOrigin: 'center center',
-          minHeight: '100%'
+          minHeight: '100%',
+          willChange: isDragging ? 'transform' : 'auto',
+          transition: isDragging ? 'none' : 'transform 0.3s ease-in-out'
         }}
       >
         <div className="org-tree-container">
@@ -296,14 +304,6 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         </div>
       </div>
 
-      {/* Zoom Controls */}
-      <ZoomControls 
-        onZoomIn={handleZoomIn} 
-        onZoomOut={handleZoomOut} 
-        onFullscreenToggle={handleFullscreenToggle}
-        isFullscreen={isFullscreen}
-        zoomLevel={zoomLevel}
-      />
 
       {/* Tooltips for chart area */}
       <Tooltip id="chart-area-tooltip" style={{ zIndex: 9999 }} />

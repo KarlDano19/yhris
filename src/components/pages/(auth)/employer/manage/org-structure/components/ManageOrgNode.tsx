@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { Transition } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
 
 import PositionActionModal from '../modals/PositionActionModal';
@@ -165,24 +166,41 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
       </div>
 
       {/* Employee Nodes Display */}
-      {isExpanded && data.employees && data.employees.filter((employee) => employee.id !== primaryEmployee?.id).length > 0 && (
-        <div className="mt-4 flex flex-col items-center">
-          {/* Dashed line connecting to position */}
-          <div className="w-0.5 h-4 border-l-2 border-dashed border-gray-400 mb-2"></div>
-          
-          {/* Employee nodes container */}
-          <div className="flex flex-wrap justify-center gap-4 max-w-xs">
-            {data.employees
-              .filter((employee) => employee.id !== primaryEmployee?.id)
-              .map((employee) => (
+      <Transition
+        show={isExpanded && data.employees && data.employees.filter((employee) => employee.id !== primaryEmployee?.id).length > 0}
+        enter="transition-all ease-out duration-300 transform"
+        enterFrom="opacity-0 -translate-y-2"
+        enterTo="opacity-100 translate-y-0"
+        leave="transition-all ease-in duration-200 transform"
+        leaveFrom="opacity-100 translate-y-0"
+        leaveTo="opacity-0 -translate-y-2"
+        className="mt-4 flex flex-col items-center"
+      >
+        {/* Dashed line connecting to position */}
+        <div className="w-0.5 h-4 border-l-2 border-dashed border-gray-400 mb-2"></div>
+        
+        {/* Employee nodes container */}
+        <div className="flex flex-wrap justify-center gap-4 max-w-xs border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+          {data.employees
+            ?.filter((employee) => employee.id !== primaryEmployee?.id)
+            .map((employee, index) => (
+              <Transition
+                key={employee.id}
+                appear={true}
+                show={isExpanded}
+                enter="transition-all ease-out duration-300 transform"
+                enterFrom="opacity-0 translate-y-2 scale-95"
+                enterTo="opacity-100 translate-y-0 scale-100"
+                className="inline-block"
+                style={{ transitionDelay: `${index * 50}ms` }}
+              >
                 <EmployeeNode
-                  key={employee.id}
                   employee={employee}
                 />
-              ))}
-          </div>
+              </Transition>
+            ))}
         </div>
-      )}
+      </Transition>
 
       {/* Action Modal */}
       <PositionActionModal 

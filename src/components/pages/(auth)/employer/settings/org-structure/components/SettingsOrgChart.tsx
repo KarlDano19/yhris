@@ -43,8 +43,7 @@ import {
   createMouseLeaveHandler, 
   createTouchStartHandler, 
   createTouchMoveHandler, 
-  createTouchEndHandler,
-  createWheelHandler
+  createTouchEndHandler
 } from '../functions/eventUtils';
 
 interface SettingsOrgChartProps {
@@ -55,6 +54,12 @@ interface SettingsOrgChartProps {
   refetch?: () => void;
   onEditMode?: () => void;
   onCancel?: () => void;
+  zoomLevel: number;
+  setZoomLevel: (level: number) => void;
+  isFullscreen: boolean;
+  setIsFullscreen: (fullscreen: boolean) => void;
+  dragOffset: { x: number; y: number };
+  setDragOffset: (offset: { x: number; y: number }) => void;
 }
 
 // Tree manipulation utilities
@@ -125,7 +130,13 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   error, 
   refetch,
   onEditMode,
-  onCancel
+  onCancel,
+  zoomLevel,
+  setZoomLevel,
+  isFullscreen,
+  setIsFullscreen,
+  dragOffset,
+  setDragOffset
 }, ref) => {
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -138,12 +149,10 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   const [draggedPosition, setDraggedPosition] = useState<OrgStructure | null>(null);
   const [targetPosition, setTargetPosition] = useState<OrgStructure | null>(null);
   const [isMoving, setIsMoving] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const [chartKey, setChartKey] = useState(0);
   const [draggedNodeId, setDraggedNodeId] = useState<number | string | null>(null);
   const [dragOverNodeId, setDragOverNodeId] = useState<number | string | null>(null);
   const [isModeChanging, setIsModeChanging] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
@@ -202,7 +211,6 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Function to refresh the chart
   const refreshChart = createRefreshChart(refetch, setChartKey);
@@ -216,16 +224,6 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
     forceRefresh: refreshChart
   }));
 
-  // Zoom functions
-  const handleZoomIn = () => {
-    setZoomLevel(prev => calculateZoomIn(prev));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => calculateZoomOut(prev));
-  };
-
-  const handleFullscreenToggle = createFullscreenToggle(setIsFullscreen);
 
   // Drag functions
   const handleMouseDown = createMouseDownHandler(setIsDragging, setDragStart, dragOffset, draggedNodeId, zoomLevel);
@@ -238,8 +236,6 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   const handleTouchMove = createTouchMoveHandler(isDragging, setDragOffset, dragStart, zoomLevel);
   const handleTouchEnd = createTouchEndHandler(setIsDragging);
 
-  // Handle mouse wheel for zoom
-  const handleWheel = createWheelHandler(setZoomLevel, calculateZoomIn, calculateZoomOut);
 
   // Drag and drop handlers
   const handleDragStart = createDragStartHandler(setDraggedNodeId);
@@ -531,11 +527,11 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFullscreenToggle={handleFullscreenToggle}
-        onWheel={handleWheel}
+        onZoomIn={() => setZoomLevel(calculateZoomIn(zoomLevel))}
+        onZoomOut={() => setZoomLevel(calculateZoomOut(zoomLevel))}
+        onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
         renderTree={renderTree}
+        setDragOffset={setDragOffset}
         chartContainerRef={chartContainerRef}
         onEditMode={onEditMode}
         onCancel={onCancel}
@@ -546,7 +542,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
 
   return (
     <div 
-      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -554,17 +550,19 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
+      style={{ touchAction: 'none' }}
     >
       <div 
         ref={chartContainerRef}
-        className={`min-w-max flex justify-center items-center transition-transform duration-300 ease-in-out ${
+        className={`min-w-max flex justify-center items-center ${
           isModeChanging ? 'pointer-events-none opacity-90' : ''
         }`}
         style={{ 
           transform: `scale(${zoomLevel}) translate(${dragOffset.x / zoomLevel}px, ${dragOffset.y / zoomLevel}px)`,
           transformOrigin: 'center center',
-          minHeight: '100%'
+          minHeight: '100%',
+          willChange: isDragging ? 'transform' : 'auto',
+          transition: isDragging ? 'none' : 'transform 0.3s ease-in-out'
         }}
       >
         <div className="org-tree-container">
@@ -599,14 +597,6 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         </div>
       </div>
 
-      {/* Zoom Controls */}
-      <ZoomControls 
-        onZoomIn={handleZoomIn} 
-        onZoomOut={handleZoomOut} 
-        onFullscreenToggle={handleFullscreenToggle}
-        isFullscreen={isFullscreen}
-        zoomLevel={zoomLevel}
-      />
 
       {/* Position Modal */}
       {showModal && (

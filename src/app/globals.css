@@ -178,3 +178,13 @@ select {
   -moz-appearance: none;
   appearance: none;
 }
+
+/* Performance optimizations for org chart dragging */
+.org-tree-container {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}

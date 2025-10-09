@@ -9,12 +9,23 @@ import { ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 
 import ManageOrgChart from './components/ManageOrgChart';
+import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import { OrgStructure } from './types';
 
 const Content = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
+  
+  // Zoom state
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Drag state for centering
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
+  // Track which positions are expanded to show employees
+  const [expandedPositions, setExpandedPositions] = useState<Set<number | string>>(new Set());
 
   // API hooks
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
@@ -29,6 +40,82 @@ const Content = () => {
       setOrgData(null);
     }
   }, [orgStructureData]);
+
+  // Zoom handlers
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.2));
+  };
+
+  const handleFullscreenToggle = () => {
+    setIsFullscreen(prev => !prev);
+  };
+
+  // Handle show all employees (toggle functionality)
+  const handleShowAllEmployees = () => {
+    if (!orgData) return;
+
+    // Function to collect all position IDs that have employees
+    const collectPositionIds = (node: OrgStructure): (number | string)[] => {
+      const ids: (number | string)[] = [];
+      
+      // Add current node if it has employees
+      if (node.employees && node.employees.length > 0) {
+        ids.push(node.id);
+      }
+      
+      // Recursively collect from children
+      if (node.children) {
+        node.children.forEach(child => {
+          ids.push(...collectPositionIds(child));
+        });
+      }
+      
+      return ids;
+    };
+
+    // Get all position IDs with employees
+    const positionIdsWithEmployees = collectPositionIds(orgData);
+    
+    // Check if all positions are currently expanded
+    const allExpanded = positionIdsWithEmployees.every(id => expandedPositions.has(id));
+    
+    if (allExpanded) {
+      // If all are expanded, hide all employees
+      setExpandedPositions(new Set());
+      // Exit fullscreen and reset zoom and center to normal level
+      setIsFullscreen(false);
+      setTimeout(() => {
+        setZoomLevel(1); // Reset to normal zoom
+        setDragOffset({ x: 0, y: 0 }); // Center the chart
+      }, 300);
+    } else {
+      // If not all are expanded, show all employees
+      setExpandedPositions(new Set(positionIdsWithEmployees));
+      // Enable fullscreen mode
+      setIsFullscreen(true);
+      // After a delay, zoom out and position to show everything nicely
+      setTimeout(() => {
+        setZoomLevel(0.6); // Zoom out to a more readable level
+        setDragOffset({ x: 0, y: -300 }); // Move chart up to show CEO at the top
+      }, 500); // Wait for employee animations to complete
+    }
+  };
+
+  // Check if any positions have employees
+  const hasEmployees = orgData ? (() => {
+    const checkForEmployees = (node: OrgStructure): boolean => {
+      if (node.employees && node.employees.length > 0) return true;
+      if (node.children) {
+        return node.children.some(child => checkForEmployees(child));
+      }
+      return false;
+    };
+    return checkForEmployees(orgData);
+  })() : false;
 
   // Export menu options
   const exportOptions = [
@@ -116,7 +203,7 @@ const Content = () => {
       </div>
 
       {/* Main Content */}
-      <div className='flex-1 flex flex-col'>
+      <div className='flex-1 flex flex-col relative'>
         <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <ManageOrgChart 
@@ -125,8 +212,32 @@ const Content = () => {
             isLoading={isLoading}
             error={error}
             refetch={refetch}
+            zoomLevel={zoomLevel}
+            setZoomLevel={setZoomLevel}
+            isFullscreen={isFullscreen}
+            setIsFullscreen={setIsFullscreen}
+            onShowAllEmployees={handleShowAllEmployees}
+            hasEmployees={hasEmployees}
+            expandedPositions={expandedPositions}
+            setExpandedPositions={setExpandedPositions}
+            dragOffset={dragOffset}
+            setDragOffset={setDragOffset}
+            onExport={handleExport}
           />
         </div>
+
+        {/* Zoom Controls - Positioned within the max-width container */}
+        {orgData && (
+          <ZoomControls 
+            onZoomIn={handleZoomIn} 
+            onZoomOut={handleZoomOut} 
+            onFullscreenToggle={handleFullscreenToggle}
+            onShowAllEmployees={handleShowAllEmployees}
+            isFullscreen={isFullscreen}
+            zoomLevel={zoomLevel}
+            hasEmployees={hasEmployees}
+          />
+        )}
       </div>
     </div>
   );

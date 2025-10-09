@@ -6,11 +6,11 @@ export const calculateCenterOffset = (): number => {
 
 // Zoom utilities
 export const calculateZoomIn = (currentZoom: number): number => {
-  return Math.min(currentZoom + 0.25, 2); // Max zoom 2x
+  return Math.min(currentZoom + 0.1, 2); // Max zoom 2x, smaller increments
 };
 
 export const calculateZoomOut = (currentZoom: number): number => {
-  return Math.max(currentZoom - 0.25, 0.5); // Min zoom 0.5x
+  return Math.max(currentZoom - 0.1, 0.2); // Min zoom 0.2x, smaller increments
 };
 
 // Chart refresh utilities

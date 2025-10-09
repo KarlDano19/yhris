@@ -45,18 +45,32 @@ export const createMouseMoveHandler = (
   setDragOffset: (offset: { x: number; y: number }) => void,
   dragStart: { x: number; y: number },
   zoomLevel: number = 1
-) => (e: React.MouseEvent) => {
-  if (isDragging) {
-    e.preventDefault();
-    // Calculate raw offset first, then apply zoom
-    const rawOffsetX = e.clientX - dragStart.x;
-    const rawOffsetY = e.clientY - dragStart.y;
-    
-    setDragOffset({
-      x: rawOffsetX,
-      y: rawOffsetY
-    });
-  }
+) => {
+  let rafId: number | null = null;
+  
+  return (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.preventDefault();
+      
+      // Cancel any pending animation frame
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      // Use requestAnimationFrame for smooth updates
+      rafId = requestAnimationFrame(() => {
+        // Calculate raw offset first, then apply zoom
+        const rawOffsetX = e.clientX - dragStart.x;
+        const rawOffsetY = e.clientY - dragStart.y;
+        
+        setDragOffset({
+          x: rawOffsetX,
+          y: rawOffsetY
+        });
+        rafId = null;
+      });
+    }
+  };
 };
 
 export const createMouseUpHandler = (
@@ -101,14 +115,30 @@ export const createTouchMoveHandler = (
   setDragOffset: (offset: { x: number; y: number }) => void,
   dragStart: { x: number; y: number },
   zoomLevel: number = 1
-) => (e: React.TouchEvent) => {
-  if (isDragging && e.touches.length === 1) {
-    const touch = e.touches[0];
-    setDragOffset({
-      x: touch.clientX - dragStart.x,
-      y: touch.clientY - dragStart.y
-    });
-  }
+) => {
+  let rafId: number | null = null;
+  
+  return (e: React.TouchEvent) => {
+    if (isDragging && e.touches.length === 1) {
+      e.preventDefault();
+      
+      const touch = e.touches[0];
+      
+      // Cancel any pending animation frame
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      // Use requestAnimationFrame for smooth updates
+      rafId = requestAnimationFrame(() => {
+        setDragOffset({
+          x: touch.clientX - dragStart.x,
+          y: touch.clientY - dragStart.y
+        });
+        rafId = null;
+      });
+    }
+  };
 };
 
 export const createTouchEndHandler = (
@@ -117,35 +147,3 @@ export const createTouchEndHandler = (
   setIsDragging(false);
 };
 
-// Mouse wheel zoom handler
-export const createWheelHandler = (
-  setZoomLevel: (fn: (prev: number) => number) => void,
-  calculateZoomIn: (currentZoom: number) => number,
-  calculateZoomOut: (currentZoom: number) => number
-) => (e: React.WheelEvent) => {
-  const target = e.target as HTMLElement;
-  
-  // Don't zoom if we're inside specific interactive elements
-  if (target.closest('[role="dialog"]') || 
-      target.closest('.modal') || 
-      target.closest('[data-headlessui-state]') ||
-      target.closest('.ql-editor') ||
-      target.closest('.ql-toolbar') ||
-      target.closest('input') ||
-      target.closest('textarea') ||
-      target.closest('select') ||
-      target.closest('[data-radix-popper-content-wrapper]')) {
-    return; // Let the modal handle the scroll
-  }
-  
-  e.preventDefault();
-  
-  // Zoom in on wheel up, zoom out on wheel down
-  if (e.deltaY < 0) {
-    // Wheel up - zoom in
-    setZoomLevel(prev => calculateZoomIn(prev));
-  } else {
-    // Wheel down - zoom out
-    setZoomLevel(prev => calculateZoomOut(prev));
-  }
-};

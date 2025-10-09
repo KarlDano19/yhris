@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { Tree } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import ZoomControls from './ZoomControls';
 import ManageOrgNode from './ManageOrgNode';
@@ -26,13 +28,16 @@ interface ManageFullscreenChartProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFullscreenToggle: () => void;
-  onWheel: (e: React.WheelEvent) => void;
+  onShowAllEmployees: () => void;
   setClickedNodeId: (id: number | string | null) => void;
   expandedPositions: Set<number | string>;
   setExpandedPositions: (positions: Set<number | string>) => void;
   onSetPrimaryEmployee: (orgStructureId: number | string, employeeId: number) => void;
   isSettingPrimary: boolean;
+  hasEmployees: boolean;
   renderTree: (node: OrgStructure) => React.ReactNode;
+  setDragOffset: (offset: { x: number; y: number }) => void;
+  onExport?: (format: 'pdf' | 'png') => void;
 }
 
 const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
@@ -53,17 +58,46 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   onZoomIn,
   onZoomOut,
   onFullscreenToggle,
-  onWheel,
+  onShowAllEmployees,
   setClickedNodeId,
   expandedPositions,
   setExpandedPositions,
   onSetPrimaryEmployee,
   isSettingPrimary,
-  renderTree
+  hasEmployees,
+  renderTree,
+  setDragOffset,
+  onExport
 }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Export menu options
+  const exportOptions = [
+    {
+      name: 'as PDF',
+      action: () => handleExport('pdf'),
+      disabled: false
+    },
+    {
+      name: 'as PNG',
+      action: () => handleExport('png'),
+      disabled: false
+    }
+  ];
+
+  const handleExport = async (format: 'pdf' | 'png') => {
+    if (!onExport) return;
+    
+    setIsExporting(true);
+    try {
+      await onExport(format);
+    } finally {
+      setIsExporting(false);
+    }
+  };
   return (
     <div 
-      className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -71,17 +105,19 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      onWheel={onWheel}
       data-tooltip-id="chart-area-tooltip"
       data-tooltip-content="Click and drag to move the chart around"
       data-tooltip-place="top"
+      style={{ touchAction: 'none' }}
     >
       <div 
-        className="min-w-max flex justify-center items-center transition-transform duration-300 ease-in-out"
+        className="min-w-max flex justify-center items-center"
         style={{ 
           transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
           transformOrigin: 'center center',
-          minHeight: '100%'
+          minHeight: '100%',
+          willChange: isDragging ? 'transform' : 'auto',
+          transition: isDragging ? 'none' : 'transform 0.3s ease-in-out'
         }}
       >
         <div className="org-tree-container">
@@ -120,13 +156,59 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
         </div>
       </div>
 
+      {/* Export Button - Top Right */}
+      {onExport && (
+        <div className="absolute top-8 right-10 z-10">
+          <Menu as='div' className='relative'>
+            <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 shadow-lg' disabled={isExporting}>
+              <span>{isExporting ? 'Exporting...' : 'Export'}</span>
+              <ChevronDownIcon className='h-4 w-4' />
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter='transition ease-out duration-100'
+              enterFrom='transform opacity-0 scale-95'
+              enterTo='transform opacity-100 scale-100'
+              leave='transition ease-in duration-75'
+              leaveFrom='transform opacity-100 scale-100'
+              leaveTo='transform opacity-0 scale-95'
+            >
+              <Menu.Items className='absolute right-0 z-10 mt-2 w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                <div className='py-1'>
+                  {exportOptions.map((item) => (
+                    <Menu.Item key={item.name}>
+                      {({ active }) => (
+                        <span
+                          className={`block px-4 py-2 text-sm cursor-pointer text-left ${
+                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                          } ${item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''}`}
+                          onClick={() => {
+                            if (!item.disabled) {
+                              item.action();
+                            }
+                          }}
+                        >
+                          {item.name}
+                        </span>
+                      )}
+                    </Menu.Item>
+                  ))}
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
+      )}
+
       {/* Zoom Controls */}
       <ZoomControls 
         onZoomIn={onZoomIn} 
         onZoomOut={onZoomOut} 
         onFullscreenToggle={onFullscreenToggle}
+        onShowAllEmployees={onShowAllEmployees}
         isFullscreen={isFullscreen}
         zoomLevel={zoomLevel}
+        hasEmployees={hasEmployees}
       />
 
       {/* Tooltips for chart area */}

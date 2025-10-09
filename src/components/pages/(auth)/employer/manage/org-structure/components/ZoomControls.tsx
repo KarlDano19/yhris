@@ -1,26 +1,28 @@
 import React from 'react';
 
-import { PlusIcon, MinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, MinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 
 interface ZoomControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFullscreenToggle: () => void;
+  onShowAllEmployees: () => void;
   isFullscreen: boolean;
   zoomLevel: number;
+  hasEmployees: boolean;
 }
 
-const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, isFullscreen, zoomLevel }) => {
+const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, onShowAllEmployees, isFullscreen, zoomLevel, hasEmployees }) => {
   return (
     <>
-    {/* Zoom Percentage Display */}
-    <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg absolute bottom-8 right-10 z-10">
-      <div className="text-white text-sm font-medium text-center">
-        {Math.round(zoomLevel * 100)}%
-      </div>
-    </div>
-    
     <div className="absolute bottom-8 left-10 z-10 flex flex-col items-start gap-3">
+      {/* Zoom Percentage Display */}
+      <div className="bg-gray-800 rounded-lg px-3 py-2 shadow-lg">
+        <div className="text-white text-sm font-medium text-center">
+          {Math.round(zoomLevel * 100)}%
+        </div>
+      </div>
+
       {/* Zoom Controls */}
       <div className="bg-gray-800 rounded-full p-1 flex flex-col shadow-lg">
         <button
@@ -39,6 +41,18 @@ const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFull
           <MinusIcon className="w-5 h-5" />
         </button>
         <div className="h-px bg-gray-600 mx-2"></div>
+        {hasEmployees && (
+          <>
+            <button
+              onClick={onShowAllEmployees}
+              className="p-2 text-white hover:bg-gray-700 transition-colors"
+              title="Show All Employees"
+            >
+              <UserGroupIcon className="w-5 h-5" />
+            </button>
+            <div className="h-px bg-gray-600 mx-2"></div>
+          </>
+        )}
         <button
           onClick={onFullscreenToggle}
           className="p-2 text-white hover:bg-gray-700 rounded-b-full transition-colors"

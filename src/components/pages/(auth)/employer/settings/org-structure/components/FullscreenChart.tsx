@@ -36,8 +36,8 @@ interface FullscreenChartProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFullscreenToggle: () => void;
-  onWheel: (e: React.WheelEvent) => void;
   renderTree: (node: any) => React.ReactNode;
+  setDragOffset: (offset: { x: number; y: number }) => void;
   chartContainerRef: React.RefObject<HTMLDivElement>;
   onEditMode?: () => void;
   onCancel?: () => void;
@@ -72,15 +72,15 @@ const FullscreenChart: React.FC<FullscreenChartProps> = ({
   onZoomIn,
   onZoomOut,
   onFullscreenToggle,
-  onWheel,
   renderTree,
+  setDragOffset,
   chartContainerRef,
   onEditMode,
   onCancel
 }) => {
   return (
     <div 
-      className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -88,17 +88,19 @@ const FullscreenChart: React.FC<FullscreenChartProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      onWheel={onWheel}
+      style={{ touchAction: 'none' }}
     >
       <div 
         ref={chartContainerRef}
-        className={`min-w-max flex justify-center items-center transition-transform duration-300 ease-in-out ${
+        className={`min-w-max flex justify-center items-center ${
           isModeChanging ? 'pointer-events-none opacity-90' : ''
         }`}
         style={{ 
           transform: `scale(${zoomLevel}) translate(${dragOffset.x / zoomLevel}px, ${dragOffset.y / zoomLevel}px)`,
           transformOrigin: 'center center',
-          minHeight: '100%'
+          minHeight: '100%',
+          willChange: isDragging ? 'transform' : 'auto',
+          transition: isDragging ? 'none' : 'transform 0.3s ease-in-out'
         }}
       >
         <div className="org-tree-container">
