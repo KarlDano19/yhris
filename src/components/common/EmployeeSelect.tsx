@@ -53,8 +53,8 @@ const CustomOption = (props: any) => {
           <div className='text-sm font-medium text-gray-900'>
             {data.label}
           </div>
-          <div className={`text-xs ${data.is_remove_option ? 'text-red-600' : 'text-blue-600'}`}>
-            • {data.is_remove_option ? 'Remove all employees from this department' : 'Select all employees from this department'}
+          <div className='text-xs text-blue-600'>
+            • Select all employees from this department
           </div>
         </div>
       </components.Option>
@@ -351,24 +351,27 @@ export default function EmployeeSelect({
             return null;
           }
           
-          // Check if all employees from this department are already selected in the current field
-          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+          // Check if all available employees from this department are already selected
+          const selectedEmployeesInDepartment = availableEmployeesInDepartment.filter((emp: any) => 
             formValue && formValue.includes(emp.id)
           );
-          const allEmployeesSelected = employeesInDepartment.length > 0 && 
-            selectedEmployeesInDepartment.length === employeesInDepartment.length;
+          
+          // If all available employees from this department are already selected, don't show the department option
+          if (selectedEmployeesInDepartment.length === availableEmployeesInDepartment.length && availableEmployeesInDepartment.length > 0) {
+            return null;
+          }
           
           return {
             value: `dept:${deptName}`,
-            label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
+            label: `${deptName} (All Employees)`,
             department: deptName,
             position: '',
             employment_status: '',
             address: '',
             gender: '',
             is_department_option: true,
-            is_remove_option: allEmployeesSelected,
-            allEmployeesSelected: allEmployeesSelected
+            is_remove_option: false,
+            allEmployeesSelected: false
           };
         })
         .filter((item): item is NonNullable<typeof item> => item !== null); // Remove null values with type guard
@@ -564,18 +567,12 @@ export default function EmployeeSelect({
                         emp.department === deptOption.department && emp.email
                       );
                       
-                      if (deptOption.is_remove_option) {
-                        // Remove all employees from this department
-                        const employeeIdsToRemove = employeesInDepartment.map((emp: any) => emp.id);
-                        newSelections = newSelections.filter((emp: any) => !employeeIdsToRemove.includes(emp.id));
-                      } else {
-                        // Add all employees from this department
-                        employeesInDepartment.forEach((emp: any) => {
-                          if (!newSelections.some((existing: any) => existing.id === emp.id)) {
-                            newSelections.push(emp);
-                          }
-                        });
-                      }
+                      // Add all employees from this department
+                      employeesInDepartment.forEach((emp: any) => {
+                        if (!newSelections.some((existing: any) => existing.id === emp.id)) {
+                          newSelections.push(emp);
+                        }
+                      });
                     });
                     
                     // Process individual employee selections
