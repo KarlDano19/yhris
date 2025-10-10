@@ -210,7 +210,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderRecipientsRoundPhoto = (recipients: any) => {
     return (
       <div 
-        className='inline-flex w-40 overflow-x-auto overflow-y-visible pb-2.5 isolate'
+        className='inline-flex items-center overflow-x-auto overflow-y-visible pb-2.5 max-w-[200px]'
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#2d3e58 #f1f1f1',
@@ -223,8 +223,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               key={index}
               className='w-[40px] h-[40px] border-2 border-[#fff] rounded-full relative flex-shrink-0'
               style={{ 
-                left: `${4 * index}px`,
-                zIndex: Math.min(recipients.length - index, 5)
+                marginRight: '4px'
               }}
             >
               <RecipientAvatar recipient={recipient} size={40} />

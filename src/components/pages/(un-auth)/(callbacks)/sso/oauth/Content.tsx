@@ -34,7 +34,7 @@ function Content() {
             isGranted: data.is_granted,
             provider: params?.provider,
           };
-          if (['yahshua-payroll'].includes(data.login_type)) {
+          if (['yahshua-payroll', 'yg-payroll'].includes(data.login_type)) {
             postMessageData.token = data.token;
             postMessageData.email = data.email;
             postMessageData.has_pending_transaction = data.has_pending_transaction;
