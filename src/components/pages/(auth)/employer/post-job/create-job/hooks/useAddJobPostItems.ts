@@ -72,7 +72,9 @@ async function addJobPost(jobPost: any) {
       formData.append('rejection_feedback', jobPost.rejectionFeedback);
     }
 
-    if (jobPost.jobDescriptionFile && jobPost.jobDescriptionFile.length) {
+    console.log('Full jobPost object:', jobPost);
+    console.log('jobPost.jobDescriptionFile:', jobPost.jobDescriptionFile);
+    if (jobPost.jobDescriptionFile && jobPost.jobDescriptionFile instanceof File) {
       formData.append('uploaded_job_description', jobPost.jobDescriptionFile);
     }
     if (jobPost.postAs == 'upload' && jobPost.postAsUpload) {
