@@ -11,6 +11,13 @@ export default function addStage(state: any, action: any) {
     requirements: [],
     applicants: [],
     addType: addType,
+    // Add default permissions for new stages
+    permissions: {
+      can_view: true,
+      can_move: true,
+      can_update: true,
+      is_visible: true
+    }
   }
 
   if (addType === "adjacent") {
