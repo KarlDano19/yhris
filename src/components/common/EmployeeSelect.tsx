@@ -316,43 +316,47 @@ export default function EmployeeSelect({
       gender: item.gender,
     }));
 
-    // Always add department options (no need to type to see them)
-    const allDepartments = new Set();
+    // Only add department options for multi-select (not for single select)
+    let finalOptions = [...options];
     
-    employeeItems.forEach((employee: any) => {
-      if (employee.department) {
-        allDepartments.add(employee.department);
-      }
-    });
-
-    // Create department options for all departments
-    const departmentOptions = Array.from(allDepartments).map((deptName: any) => {
-      // Check if all employees from this department are already selected
-      const employeesInDepartment = employeeItems.filter((emp: any) => 
-        emp.department === deptName && emp.email
-      );
-      const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-        formValue && (isMulti ? formValue.includes(emp.id) : formValue === emp.id)
-      );
-      const allEmployeesSelected = employeesInDepartment.length > 0 && 
-        selectedEmployeesInDepartment.length === employeesInDepartment.length;
+    if (isMulti) {
+      const allDepartments = new Set();
       
-      return {
-        value: `dept:${deptName}`,
-        label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
-        department: deptName,
-        position: '',
-        employment_status: '',
-        address: '',
-        gender: '',
-        is_department_option: true,
-        is_remove_option: allEmployeesSelected,
-        allEmployeesSelected: allEmployeesSelected
-      };
-    });
+      employeeItems.forEach((employee: any) => {
+        if (employee.department) {
+          allDepartments.add(employee.department);
+        }
+      });
 
-    // Combine department options with filtered employees - departments first
-    const finalOptions = [...departmentOptions, ...options];
+      // Create department options for all departments
+      const departmentOptions = Array.from(allDepartments).map((deptName: any) => {
+        // Check if all employees from this department are already selected
+        const employeesInDepartment = employeeItems.filter((emp: any) => 
+          emp.department === deptName && emp.email
+        );
+        const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+          formValue && formValue.includes(emp.id)
+        );
+        const allEmployeesSelected = employeesInDepartment.length > 0 && 
+          selectedEmployeesInDepartment.length === employeesInDepartment.length;
+        
+        return {
+          value: `dept:${deptName}`,
+          label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
+          department: deptName,
+          position: '',
+          employment_status: '',
+          address: '',
+          gender: '',
+          is_department_option: true,
+          is_remove_option: allEmployeesSelected,
+          allEmployeesSelected: allEmployeesSelected
+        };
+      });
+
+      // Combine department options with filtered employees - departments first
+      finalOptions = [...departmentOptions, ...options];
+    }
 
     if (filtered.length > employeeLimit) {
       finalOptions.push({
