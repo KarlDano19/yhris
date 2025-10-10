@@ -17,12 +17,14 @@ interface DashboardMenu {
 
 interface SmartDashboardItemProps {
   menu: DashboardMenu;
-  onGrayedOutClick?: (link: string) => void;
+  onGrayedOutClick?: (link: string, reason: 'subscription' | 'permission', featureName?: string) => void;
+  hasActiveSubscription?: boolean;
 }
 
 export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({ 
   menu, 
-  onGrayedOutClick 
+  onGrayedOutClick,
+  hasActiveSubscription 
 }) => {
   const cachedRights = useLegacyPermissions();
   
@@ -34,12 +36,17 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
     ? cachedRights?.state?.data?.[requiredPermission] || false
     : true; // If no permission required, allow access
   
-  // Always gray out instead of hiding - combine original grayed out state with permission-based restrictions
-  const isGrayedOut = menu.isGrayedOut || !hasPermission;
+  // Determine restriction reason and grayed out state
+  const hasSubscriptionIssue = menu.isGrayedOut && hasActiveSubscription !== undefined && !hasActiveSubscription;
+  const hasPermissionIssue = !hasPermission;
+  
+  // Priority: Permission issues take precedence over subscription issues
+  const isGrayedOut = hasPermissionIssue || hasSubscriptionIssue;
+  const restrictionReason: 'subscription' | 'permission' = hasPermissionIssue ? 'permission' : 'subscription';
   
   const handleGrayedOutClick = () => {
     if (onGrayedOutClick && menu.link) {
-      onGrayedOutClick(menu.link);
+      onGrayedOutClick(menu.link, restrictionReason, menu.text);
     }
   };
 
@@ -64,12 +71,13 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
           data-required-permission={requiredPermission}
           data-has-permission={hasPermission}
           data-is-grayed-out={isGrayedOut}
-          {...(isGrayedOut && !hasPermission && {
+          data-restriction-reason={restrictionReason}
+          {...(isGrayedOut && hasPermissionIssue && {
             'data-tooltip-id': `dashboard-permission-tooltip-${menu.permissionId}`,
             'data-tooltip-content': "You don't have permission to access this section",
             'data-tooltip-place': 'top'
           })}
-          {...(isGrayedOut && hasPermission && menu.isGrayedOut && {
+          {...(isGrayedOut && !hasPermissionIssue && hasSubscriptionIssue && {
             'data-tooltip-id': `dashboard-subscription-tooltip-${menu.permissionId}`,
             'data-tooltip-content': "Subscription required to access this section",
             'data-tooltip-place': 'top'
@@ -78,7 +86,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
           {menu.icon}
           <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
         </Link>
-        {isGrayedOut && !hasPermission && (
+        {isGrayedOut && hasPermissionIssue && (
           <Tooltip 
             id={`dashboard-permission-tooltip-${menu.permissionId}`}
             style={{
@@ -93,7 +101,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
             offset={10}
           />
         )}
-        {isGrayedOut && hasPermission && menu.isGrayedOut && (
+        {isGrayedOut && !hasPermissionIssue && hasSubscriptionIssue && (
           <Tooltip 
             id={`dashboard-subscription-tooltip-${menu.permissionId}`}
             style={{
@@ -125,12 +133,13 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
           data-required-permission={requiredPermission}
           data-has-permission={hasPermission}
           data-is-grayed-out={isGrayedOut}
-          {...(isGrayedOut && !hasPermission && {
+          data-restriction-reason={restrictionReason}
+          {...(isGrayedOut && hasPermissionIssue && {
             'data-tooltip-id': `dashboard-permission-tooltip-${menu.permissionId}`,
             'data-tooltip-content': "You don't have permission to access this section",
             'data-tooltip-place': 'top'
           })}
-          {...(isGrayedOut && hasPermission && menu.isGrayedOut && {
+          {...(isGrayedOut && !hasPermissionIssue && hasSubscriptionIssue && {
             'data-tooltip-id': `dashboard-subscription-tooltip-${menu.permissionId}`,
             'data-tooltip-content': "Subscription required to access this section",
             'data-tooltip-place': 'top'
@@ -139,7 +148,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
           {menu.icon}
           <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
         </div>
-        {isGrayedOut && !hasPermission && (
+        {isGrayedOut && hasPermissionIssue && (
           <Tooltip 
             id={`dashboard-permission-tooltip-${menu.permissionId}`}
             style={{
@@ -154,7 +163,7 @@ export const SmartDashboardItem: React.FC<SmartDashboardItemProps> = ({
             offset={10}
           />
         )}
-        {isGrayedOut && hasPermission && menu.isGrayedOut && (
+        {isGrayedOut && !hasPermissionIssue && hasSubscriptionIssue && (
           <Tooltip 
             id={`dashboard-subscription-tooltip-${menu.permissionId}`}
             style={{

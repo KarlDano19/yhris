@@ -20,23 +20,38 @@ import AnalyticsLogo from '@/svg/AnalyticsLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
+import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
+  const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
+  const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
 
-  const handleGrayedOutClick = (link: string) => {
+  const handleGrayedOutClick = (link: string, reason: 'subscription' | 'permission', featureName?: string) => {
     setIntendedRedirectLink(link);
-    setIsGoPremiumModalOpen(true);
+    
+    if (reason === 'permission') {
+      setRestrictedFeatureName(featureName || '');
+      setIsInsufficientPermissionsModalOpen(true);
+    } else if (reason === 'subscription') {
+      setIsGoPremiumModalOpen(true);
+    }
   };
 
-  const handleModalClose = () => {
+  const handleGoPremiumModalClose = () => {
     setIsGoPremiumModalOpen(false);
     // Redirect to the intended page after modal is closed
     if (intendedRedirectLink) {
       window.location.href = intendedRedirectLink;
       setIntendedRedirectLink(null);
     }
+  };
+
+  const handlePermissionModalClose = () => {
+    setIsInsufficientPermissionsModalOpen(false);
+    setIntendedRedirectLink(null);
+    setRestrictedFeatureName('');
   };
 
   const menus = [
@@ -156,13 +171,19 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
                   key={index} 
                   menu={menu} 
                   onGrayedOutClick={handleGrayedOutClick}
+                  hasActiveSubscription={hasActiveSubscription}
                 />
               );
             })}
           </div>
         </div>
       </div>
-      <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleModalClose} />
+      <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleGoPremiumModalClose} />
+      <InsufficientPermissionsModal 
+        isOpen={isInsufficientPermissionsModalOpen} 
+        setIsOpen={handlePermissionModalClose}
+        featureName={restrictedFeatureName}
+      />
     </>
   );
 };
