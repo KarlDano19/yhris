@@ -4,10 +4,11 @@ import { createPortal } from 'react-dom';
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
 import useAssignUserRoles from '../hooks/useAssignUserRoles';
-import useGetUsersWithRoles from '../hooks/useGetUsersWithRoles';
+import useGetUserRoles from '../hooks/useGetUserRoles';
 import useGetRolesList from '../hooks/useGetRolesList';
 
 import { XCircleIcon, CheckIcon, UserIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
@@ -27,16 +28,23 @@ export default function AssignUserRolesModal({
   isOpen: T_AssignRoleModalData;
   setIsOpen: Dispatch<T_AssignRoleModalData | null>;
 }) {
+  const queryClient = useQueryClient();
   const cancelButtonRef = useRef(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { handleSubmit, reset, formState: { errors } } = useForm();
   const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   
-  const { data: userRolesData, refetch: refetchUserRoles } = useGetUsersWithRoles({
-    userId: isOpen.id,
-    pageSize: 1
-  });
+  // Clear selectedRoles when modal opens with a new user
+  useEffect(() => {
+    if (isOpen.open && isOpen.id) {
+      setSelectedRoles([]);
+      // Clear the query cache for this specific user to force fresh data
+      queryClient.removeQueries(['userRoles', isOpen.id]);
+    }
+  }, [isOpen.open, isOpen.id, queryClient]);
+  
+  const { data: userRolesData, refetch: refetchUserRoles } = useGetUserRoles(isOpen.id, isOpen.open);
   const { data: rolesData } = useGetRolesList({ pageSize: 1000 });
   const { mutate: assignUserRoles, isLoading: isLoadingAssignRoles } = useAssignUserRoles();
 
@@ -44,7 +52,7 @@ export default function AssignUserRolesModal({
     if (isOpen.open && isOpen.id) {
       refetchUserRoles();
     }
-  }, [isOpen, refetchUserRoles]);
+  }, [isOpen.id, isOpen.open, refetchUserRoles]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -69,10 +77,15 @@ export default function AssignUserRolesModal({
   });
 
   useEffect(() => {
-    if (userRolesData?.results?.[0]?.roles) {
-      setSelectedRoles(userRolesData.results[0].roles.map((role: any) => role.id));
+    // Always set selectedRoles based on userRolesData, even if empty
+    if (userRolesData?.roles) {
+      const roleIds = userRolesData.roles.map((role: any) => role.id);
+      setSelectedRoles(roleIds);
+    } else if (userRolesData) {
+      // User exists but has no roles
+      setSelectedRoles([]);
     }
-  }, [userRolesData]);
+  }, [userRolesData, isOpen.id]);
 
   const toggleRole = (roleId: number) => {
     setSelectedRoles(prev => {
@@ -87,6 +100,7 @@ export default function AssignUserRolesModal({
   const customCloseModal = () => {
     reset();
     setSelectedRoles([]);
+    setButtonRect(null);
     setIsOpen(null);
   };
 

@@ -44,6 +44,7 @@ function useGetUsersWithRoles(filters: any, enabled: boolean = true) {
     queryKey: ['usersWithRoles', filters],
     queryFn: () => getUsersWithRoles(filters),
     enabled: !!filters && enabled, // Only fetch when filters exist AND enabled is true
+    staleTime: 30000, // 30 seconds
   });
 }
 
