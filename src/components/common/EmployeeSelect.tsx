@@ -149,12 +149,10 @@ export default function EmployeeSelect({
   }, [employeeSearch]);
 
   {/* Fetch employees */}
-  const { data: employeeData } = useGetEmployeePaginatedSelect(
-    debouncedSearch && debouncedSearch.length >= 2 ? {
-      search: debouncedSearch,
-      current_page: 1
-    } : null
-  );
+  const { data: employeeData } = useGetEmployeePaginatedSelect({
+    search: debouncedSearch || '',
+    current_page: 1
+  });
 
   {/* Cache employee data */}
   useEffect(() => {
@@ -165,9 +163,8 @@ export default function EmployeeSelect({
 
   {/* Combine employee data */}
   const employeeItems = useMemo(() => {
-    const currentData = (debouncedSearch && debouncedSearch.length >= 2) 
-      ? (employeeData?.records || []) 
-      : cachedEmployeeItems;
+    // Always use the latest employee data if available
+    const currentData = employeeData?.records || cachedEmployeeItems;
     
     const combinedItems = [...persistentSelections];
     currentData.forEach((emp: any) => {
@@ -176,7 +173,7 @@ export default function EmployeeSelect({
       }
     });
     return combinedItems;
-  }, [debouncedSearch, employeeData?.records, cachedEmployeeItems, persistentSelections]);
+  }, [employeeData?.records, cachedEmployeeItems, persistentSelections]);
 
   {/* Helper functions */}
   const createEmployeeFromName = (id: any, name: string) => {
@@ -234,10 +231,8 @@ export default function EmployeeSelect({
     const idsToFind = isMulti ? formValue : [formValue];
     const hasNames = (isMulti && employeeNames && employeeNames.length > 0) || (!isMulti && employeeName);
 
-    // Use consistent logic for both cases
-    const currentData = (debouncedSearch && debouncedSearch.length >= 2) 
-      ? (employeeData?.records || []) 
-      : cachedEmployeeItems;
+    // Always use the latest employee data if available
+    const currentData = employeeData?.records || cachedEmployeeItems;
     
     const newSelections = idsToFind.map((id: any) => {
       // First try to find in existing persistent selections to maintain names
@@ -321,56 +316,53 @@ export default function EmployeeSelect({
       gender: item.gender,
     }));
 
-    // Add department options if search term matches department names
-    if (employeeSearch && employeeSearch.length >= 2) {
-      const searchTerm = employeeSearch.toLowerCase();
-      const matchingDepartments = new Set();
+    // Always add department options (no need to type to see them)
+    const allDepartments = new Set();
+    
+    employeeItems.forEach((employee: any) => {
+      if (employee.department) {
+        allDepartments.add(employee.department);
+      }
+    });
+
+    // Create department options for all departments
+    const departmentOptions = Array.from(allDepartments).map((deptName: any) => {
+      // Check if all employees from this department are already selected
+      const employeesInDepartment = employeeItems.filter((emp: any) => 
+        emp.department === deptName && emp.email
+      );
+      const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+        formValue && (isMulti ? formValue.includes(emp.id) : formValue === emp.id)
+      );
+      const allEmployeesSelected = employeesInDepartment.length > 0 && 
+        selectedEmployeesInDepartment.length === employeesInDepartment.length;
       
-      employeeItems.forEach((employee: any) => {
-        if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
-          matchingDepartments.add(employee.department);
-        }
-      });
+      return {
+        value: `dept:${deptName}`,
+        label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
+        department: deptName,
+        position: '',
+        employment_status: '',
+        address: '',
+        gender: '',
+        is_department_option: true,
+        is_remove_option: allEmployeesSelected,
+        allEmployeesSelected: allEmployeesSelected
+      };
+    });
 
-      // Create department options
-      const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
-        // Check if all employees from this department are already selected
-        const employeesInDepartment = employeeItems.filter((emp: any) => 
-          emp.department === deptName && emp.email
-        );
-        const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-          formValue && (isMulti ? formValue.includes(emp.id) : formValue === emp.id)
-        );
-        const allEmployeesSelected = employeesInDepartment.length > 0 && 
-          selectedEmployeesInDepartment.length === employeesInDepartment.length;
-        
-        return {
-          value: `dept:${deptName}`,
-          label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
-          department: deptName,
-          position: '',
-          employment_status: '',
-          address: '',
-          gender: '',
-          is_department_option: true,
-          is_remove_option: allEmployeesSelected,
-          allEmployeesSelected: allEmployeesSelected
-        };
-      });
+    // Combine department options with filtered employees - departments first
+    const finalOptions = [...departmentOptions, ...options];
 
-      // Combine department options with filtered employees
-      options.unshift(...departmentOptions);
+    if (filtered.length > employeeLimit) {
+      finalOptions.push({
+        value: 'show_more',
+        label: `${filtered.length - employeeLimit} remaining`,
+        isShowMore: true,
+      } as any);
     }
 
-      if (filtered.length > employeeLimit) {
-        options.push({
-          value: 'show_more',
-        label: `${filtered.length - employeeLimit} remaining`,
-          isShowMore: true,
-        } as any);
-      }
-
-    return options;
+    return finalOptions;
   }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing, formValue, isMulti]);
 
   {/* Show more handler */}
@@ -511,9 +503,9 @@ export default function EmployeeSelect({
                   <div className="px-3 py-4 text-center">
                     <div className="flex flex-col items-center space-y-2">
                       <div className="text-sm text-gray-600">
-                        <p className="font-medium">Type to search employees</p>
+                        <p className="font-medium">No employees found</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Search by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
+                          Type to search by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
                         </p>
                       </div>
                     </div>
