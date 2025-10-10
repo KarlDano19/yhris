@@ -39,10 +39,10 @@ const Investigation = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
-          disabled={isInvestigated || shouldDisableInvestigate || !userRights?.investigate_employee_issue}
+          disabled={isInvestigated || shouldDisableInvestigate}
           onClick={(e) => {
             e.stopPropagation();
-            if (!isInvestigated && !shouldDisableInvestigate && userRights?.investigate_employee_issue) {
+            if (!isInvestigated && !shouldDisableInvestigate) {
               setIsInvestigateModalOpen({
                 isOpen: true,
                 id,
@@ -50,9 +50,7 @@ const Investigation = ({
             }
           }}
           title={
-            !userRights?.investigate_employee_issue 
-              ? 'No permission to investigate'
-              : employeeIssueDetails?.status !== 'approved'
+            employeeIssueDetails?.status !== 'approved'
               ? 'Investigation can only be done when status is approved'
               : (shouldDisableInvestigate ? 'Employee has not responded yet' : '')
           }

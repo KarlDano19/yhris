@@ -95,11 +95,9 @@ const SendNTE = ({
               : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
-          disabled={checkingAttachment || !userRights?.generate_employee_issue_nte || employeeIssueDetails?.status !== 'approved' || isInvestigated}
+          disabled={checkingAttachment || employeeIssueDetails?.status !== 'approved' || isInvestigated}
           onClick={handleSendClick}
-          title={!userRights?.generate_employee_issue_nte 
-            ? 'No permission to generate NTE'
-            : employeeIssueDetails?.status !== 'approved'
+          title={employeeIssueDetails?.status !== 'approved'
             ? 'NTE can only be generated when status is approved'
             : isInvestigated
             ? 'Cannot resend NTE after investigation'
