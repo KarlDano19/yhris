@@ -43,6 +43,7 @@ interface ManageOrgChartProps {
   dragOffset: { x: number; y: number };
   setDragOffset: (offset: { x: number; y: number }) => void;
   onExport?: (format: 'pdf' | 'png') => void;
+  disableTooltips?: boolean;
 }
 
 // Main Manage Org Chart Component
@@ -62,7 +63,8 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   setExpandedPositions,
   dragOffset,
   setDragOffset,
-  onExport
+  onExport,
+  disableTooltips = false
 }) => {
   
   // Drag state
@@ -130,7 +132,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               expandedPositions={expandedPositions}
               setExpandedPositions={setExpandedPositions}
               onSetPrimaryEmployee={handleSetPrimaryEmployee}
-              isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
+              disableTooltips={disableTooltips}
             />
           </div>
         }
@@ -252,9 +254,9 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      data-tooltip-id="chart-area-tooltip"
-      data-tooltip-content="Click and drag to move the chart around"
-      data-tooltip-place="top"
+      data-tooltip-id={!disableTooltips ? "chart-area-tooltip" : undefined}
+      data-tooltip-content={!disableTooltips ? "Click and drag to move the chart around" : undefined}
+      data-tooltip-place={!disableTooltips ? "top" : undefined}
       style={{ touchAction: 'none' }}
     >
       <div 
@@ -281,7 +283,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
                   expandedPositions={expandedPositions}
                   setExpandedPositions={setExpandedPositions}
                   onSetPrimaryEmployee={handleSetPrimaryEmployee}
-                  isSettingPrimary={setPrimaryEmployeeMutation.isLoading}
+                  disableTooltips={disableTooltips}
                 />
               </div>
             }

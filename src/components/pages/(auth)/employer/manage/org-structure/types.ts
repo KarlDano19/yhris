@@ -32,7 +32,7 @@ export interface OrgNodeProps {
   expandedPositions?: Set<number | string>;
   setExpandedPositions?: (positions: Set<number | string>) => void;
   onSetPrimaryEmployee?: (orgStructureId: number | string, employeeId: number) => void;
-  isSettingPrimary?: boolean;
+  disableTooltips?: boolean;
 }
 
 // Props for position details modal/tooltip

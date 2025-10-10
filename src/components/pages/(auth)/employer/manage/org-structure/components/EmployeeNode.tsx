@@ -9,11 +9,13 @@ import { Employee } from '../types';
 interface EmployeeNodeProps {
   employee: Employee;
   onClick?: () => void;
+  disableTooltips?: boolean;
 }
 
 const EmployeeNode: React.FC<EmployeeNodeProps> = ({ 
   employee, 
-  onClick
+  onClick,
+  disableTooltips = false
 }) => {
   // Determine avatar type (male/female) - use gender field if available
   const getAvatarType = (employee: Employee) => {
@@ -37,9 +39,9 @@ const EmployeeNode: React.FC<EmployeeNodeProps> = ({
       <div 
         className="text-center cursor-pointer px-6 mb-2 flex flex-col items-center justify-center transition-all duration-200 hover:scale-105"
         onClick={onClick}
-        data-tooltip-id={!onClick ? `employee-node-tooltip-${employee.id}` : undefined}
-        data-tooltip-content={!onClick ? `${employee.firstname} ${employee.lastname}` : undefined}
-        data-tooltip-place={!onClick ? 'bottom' : undefined}
+        data-tooltip-id={!onClick && !disableTooltips ? `employee-node-tooltip-${employee.id}` : undefined}
+        data-tooltip-content={!onClick && !disableTooltips ? `${employee.firstname} ${employee.lastname}` : undefined}
+        data-tooltip-place={!onClick && !disableTooltips ? 'bottom' : undefined}
       >
         {/* Avatar */}
         <div className="flex justify-center mb-2 relative">
@@ -73,7 +75,7 @@ const EmployeeNode: React.FC<EmployeeNodeProps> = ({
         </div>
 
         {/* Employee Name */}
-        <h3 className="font-bold text-xs text-gray-800 mb-1 max-w-20 truncate">
+        <h3 className="font-bold text-xs text-gray-800 mb-2 max-w-20 leading-tight text-center">
           {employee.firstname} {employee.lastname}
         </h3>
       </div>

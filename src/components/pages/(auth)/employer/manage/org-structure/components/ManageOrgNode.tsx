@@ -18,7 +18,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   expandedPositions = new Set(),
   setExpandedPositions,
   onSetPrimaryEmployee,
-  isSettingPrimary = false
+  disableTooltips = false
 }) => {
   const isClicked = clickedNodeId === data.id;
   const isExpanded = expandedPositions.has(data.id);
@@ -117,9 +117,9 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
       <div 
         className="text-center cursor-pointer px-10 mb-2 flex flex-col items-center justify-center"
         onClick={handlePositionClick}
-        data-tooltip-id={!clickedNodeId ? `org-node-tooltip-${data.id}` : undefined}
-        data-tooltip-content={!clickedNodeId ? 'Click to view options' : undefined}
-        data-tooltip-place={!clickedNodeId ? 'bottom' : undefined}
+        data-tooltip-id={!clickedNodeId && !disableTooltips ? `org-node-tooltip-${data.id}` : undefined}
+        data-tooltip-content={!clickedNodeId && !disableTooltips ? 'Click to view options' : undefined}
+        data-tooltip-place={!clickedNodeId && !disableTooltips ? 'bottom' : undefined}
       >
         {/* Avatar */}
         <div className="flex justify-center mb-2">
@@ -196,6 +196,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
               >
                 <EmployeeNode
                   employee={employee}
+                  disableTooltips={disableTooltips}
                 />
               </Transition>
             ))}

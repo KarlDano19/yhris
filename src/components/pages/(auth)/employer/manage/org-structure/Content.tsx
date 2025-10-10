@@ -10,13 +10,17 @@ import { Menu, Transition } from '@headlessui/react';
 
 import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
+import ExportOptionsModal from './modals/ExportOptionsModal';
 import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 
 import { OrgStructure } from './types';
 
 const Content = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<'pdf' | 'png'>('png');
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
+  const [disableTooltips, setDisableTooltips] = useState(false);
   
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -122,33 +126,185 @@ const Content = () => {
   const exportOptions = [
     {
       name: 'as PDF',
-      action: () => handleExport('pdf'),
+      action: () => {
+        // Store the selected format and show export options modal
+        setSelectedFormat('pdf');
+        setShowExportModal(true);
+      },
       disabled: false
     },
     {
       name: 'as PNG',
-      action: () => handleExport('png'),
+      action: () => {
+        // Store the selected format and show export options modal
+        setSelectedFormat('png');
+        setShowExportModal(true);
+      },
       disabled: false
     }
   ];
 
-  const handleExport = async (format: 'pdf' | 'png') => {
+  const handleExport = async (format: 'pdf' | 'png', employeeOption: 'primary' | 'all') => {
     setIsExporting(true);
+    setShowExportModal(false);
+    setDisableTooltips(true); // Disable tooltips during export
+    
     try {
-      // TODO: Implement actual export functionality
-      console.log(`Exporting organizational structure as ${format.toUpperCase()}`);
+      // Store original state
+      const originalFullscreen = isFullscreen;
+      const originalExpandedPositions = new Set(expandedPositions);
+      const originalZoom = zoomLevel;
+      const originalDragOffset = { ...dragOffset };
+
+      // If "all employees" is selected, we need to show all employees first
+      if (employeeOption === 'all') {
+        // Function to collect all position IDs that have employees
+        const collectPositionIds = (node: OrgStructure): (number | string)[] => {
+          const ids: (number | string)[] = [];
+          
+          // Add current node if it has employees
+          if (node.employees && node.employees.length > 0) {
+            ids.push(node.id);
+          }
+          
+          // Recursively collect from children
+          if (node.children) {
+            node.children.forEach(child => {
+              ids.push(...collectPositionIds(child));
+            });
+          }
+          
+          return ids;
+        };
+
+        if (orgData) {
+          // Get all position IDs with employees
+          const positionIdsWithEmployees = collectPositionIds(orgData);
+          
+          // Show all employees
+          setExpandedPositions(new Set(positionIdsWithEmployees));
+          
+          // Enter fullscreen mode
+          setIsFullscreen(true);
+          
+          // Wait for fullscreen transition and employee animations to complete
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // Additional wait to ensure all employee containers are fully rendered
+          // This helps ensure html2canvas captures the complete visual state
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+      }
+
+      // Small delay to ensure any existing animations are complete
+      if (employeeOption === 'primary') {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+
+      // Dynamically import html2canvas and jsPDF
+      const html2canvas = (await import('html2canvas')).default;
       
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Find the org chart container
+      const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
       
-      // Show success message
-      alert(`Organizational structure exported as ${format.toUpperCase()} successfully!`);
+      if (!chartContainer) {
+        throw new Error('Chart container not found');
+      }
+
+      // Get company name for filename
+      const companyName = cachedProfile?.state?.data?.name || 'Company';
+      const timestamp = new Date().toISOString().split('T')[0];
+      const suffix = employeeOption === 'all' ? '_All_Employees' : '_Primary_Only';
+      const filename = `${companyName}_Org_Structure${suffix}_${timestamp}`;
+
+      // Capture the chart as canvas with high quality
+      const canvas = await html2canvas(chartContainer, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher resolution
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      if (format === 'png') {
+        // Export as PNG
+        const link = document.createElement('a');
+        link.download = `${filename}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } else {
+        // Export as PDF
+        const { jsPDF } = await import('jspdf');
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        
+        // Calculate PDF dimensions (A4 landscape or portrait based on chart dimensions)
+        const pdfWidth = imgWidth > imgHeight ? 297 : 210; // A4 dimensions in mm
+        const pdfHeight = imgWidth > imgHeight ? 210 : 297;
+        const orientation = imgWidth > imgHeight ? 'landscape' : 'portrait';
+        
+        // Create PDF
+        const pdf = new jsPDF({
+          orientation: orientation,
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Calculate scaling to fit page
+        const ratio = Math.min(
+          (pdfWidth - 20) / (imgWidth / 3.78), // Convert px to mm (1mm = 3.78px)
+          (pdfHeight - 20) / (imgHeight / 3.78)
+        );
+        
+        const scaledWidth = (imgWidth / 3.78) * ratio;
+        const scaledHeight = (imgHeight / 3.78) * ratio;
+        
+        // Center the image
+        const x = (pdfWidth - scaledWidth) / 2;
+        const y = (pdfHeight - scaledHeight) / 2;
+        
+        pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
+        pdf.save(`${filename}.pdf`);
+      }
+
+      // Restore original state if we changed it
+      if (employeeOption === 'all') {
+        setIsFullscreen(originalFullscreen);
+        setExpandedPositions(originalExpandedPositions);
+        setZoomLevel(originalZoom);
+        setDragOffset(originalDragOffset);
+      }
+      
+      console.log(`Successfully exported as ${format.toUpperCase()} with ${employeeOption} employees`);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Export failed. Please try again.');
+      
+      // Restore original state on error
+      if (employeeOption === 'all') {
+        setIsFullscreen(false);
+        setExpandedPositions(new Set());
+        setZoomLevel(1);
+        setDragOffset({ x: 0, y: 0 });
+      }
     } finally {
       setIsExporting(false);
+      setDisableTooltips(false); // Re-enable tooltips after export
     }
+  };
+
+  const handleExportWithOptions = (option: 'primary' | 'all') => {
+    handleExport(selectedFormat, option);
+  };
+
+  // Wrapper function for ManageOrgChart's onExport prop
+  const handleExportFormat = (format: 'pdf' | 'png') => {
+    setSelectedFormat(format);
+    setShowExportModal(true);
   };
 
   return (
@@ -237,7 +393,8 @@ const Content = () => {
             setExpandedPositions={setExpandedPositions}
             dragOffset={dragOffset}
             setDragOffset={setDragOffset}
-            onExport={handleExport}
+            onExport={handleExportFormat}
+            disableTooltips={disableTooltips}
           />
         </div>
 
@@ -254,6 +411,15 @@ const Content = () => {
           />
         )}
       </div>
+
+      {/* Export Options Modal */}
+      <ExportOptionsModal
+        isVisible={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportWithOptions}
+        isExporting={isExporting}
+        hasEmployees={hasEmployees}
+      />
     </div>
   );
 };
