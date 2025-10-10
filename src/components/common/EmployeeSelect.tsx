@@ -292,6 +292,11 @@ export default function EmployeeSelect({
 
   {/* Create select options */}
   const selectOptions = useMemo(() => {
+    // For single select, hide options when an employee is already selected
+    if (!isMulti && formValue) {
+      return [];
+    }
+
     // Show loading option when debouncing
     if (employeeSearch && employeeSearch.length >= 2 && isDebouncing) {
       return [{
@@ -329,30 +334,44 @@ export default function EmployeeSelect({
       });
 
       // Create department options for all departments
-      const departmentOptions = Array.from(allDepartments).map((deptName: any) => {
-        // Check if all employees from this department are already selected
-        const employeesInDepartment = employeeItems.filter((emp: any) => 
-          emp.department === deptName && emp.email
-        );
-        const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-          formValue && formValue.includes(emp.id)
-        );
-        const allEmployeesSelected = employeesInDepartment.length > 0 && 
-          selectedEmployeesInDepartment.length === employeesInDepartment.length;
-        
-        return {
-          value: `dept:${deptName}`,
-          label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
-          department: deptName,
-          position: '',
-          employment_status: '',
-          address: '',
-          gender: '',
-          is_department_option: true,
-          is_remove_option: allEmployeesSelected,
-          allEmployeesSelected: allEmployeesSelected
-        };
-      });
+      const departmentOptions = Array.from(allDepartments)
+        .map((deptName: any) => {
+          // Get all employees from this department
+          const employeesInDepartment = employeeItems.filter((emp: any) => 
+            emp.department === deptName && emp.email
+          );
+          
+          // Check if all employees from this department are excluded
+          const availableEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            !excludeValues.includes(emp.id)
+          );
+          
+          // If all employees from this department are excluded, don't show the department option
+          if (availableEmployeesInDepartment.length === 0) {
+            return null;
+          }
+          
+          // Check if all employees from this department are already selected in the current field
+          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            formValue && formValue.includes(emp.id)
+          );
+          const allEmployeesSelected = employeesInDepartment.length > 0 && 
+            selectedEmployeesInDepartment.length === employeesInDepartment.length;
+          
+          return {
+            value: `dept:${deptName}`,
+            label: allEmployeesSelected ? `${deptName} (Remove All)` : `${deptName} (All Employees)`,
+            department: deptName,
+            position: '',
+            employment_status: '',
+            address: '',
+            gender: '',
+            is_department_option: true,
+            is_remove_option: allEmployeesSelected,
+            allEmployeesSelected: allEmployeesSelected
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null); // Remove null values with type guard
 
       // Combine department options with filtered employees - departments first
       finalOptions = [...departmentOptions, ...options];
@@ -465,7 +484,13 @@ export default function EmployeeSelect({
               options={selectOptions}
               value={getValue()}
               menuIsOpen={isMenuOpen}
-              onMenuOpen={() => setIsMenuOpen(true)}
+              onMenuOpen={() => {
+                // For single select, prevent menu from opening if an employee is already selected
+                if (!isMulti && formValue) {
+                  return;
+                }
+                setIsMenuOpen(true);
+              }}
               onMenuClose={() => setIsMenuOpen(false)}
               onInputChange={(inputValue) => {
                 // Update search term when user types
@@ -643,9 +668,10 @@ export default function EmployeeSelect({
               }}
               isClearable={isClearable}
               placeholder={placeholder}
-              isSearchable={true}
+              isSearchable={isMulti ? true : !formValue} // Disable search for single select when employee is selected
               isMulti={isMulti}
               isDisabled={disabled}
+              inputValue={!isMulti && formValue ? "" : undefined} // Clear input value for single select when employee is selected
             />
           );
         }}
