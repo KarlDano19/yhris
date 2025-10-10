@@ -101,6 +101,41 @@ export default function CreateEditRoleModal({
     });
   };
 
+  // Toggle all permissions in a category
+  const toggleCategoryPermissions = (category: string) => {
+    const categoryPermissions = permissionsByCategory[category] || [];
+    const categoryPermissionIds = categoryPermissions.map((p: any) => p.id);
+    
+    // Check if all permissions in this category are selected
+    const allSelected = categoryPermissionIds.every((id: number) => selectedPermissions.includes(id));
+    
+    setSelectedPermissions(prev => {
+      if (allSelected) {
+        // Remove all permissions from this category
+        return prev.filter(id => !categoryPermissionIds.includes(id));
+      } else {
+        // Add all permissions from this category
+        const newIds = categoryPermissionIds.filter((id: number) => !prev.includes(id));
+        return [...prev, ...newIds];
+      }
+    });
+  };
+
+  // Check if all permissions in a category are selected
+  const isCategoryFullySelected = (category: string) => {
+    const categoryPermissions = permissionsByCategory[category] || [];
+    const categoryPermissionIds = categoryPermissions.map((p: any) => p.id);
+    return categoryPermissionIds.length > 0 && categoryPermissionIds.every((id: number) => selectedPermissions.includes(id));
+  };
+
+  // Check if some (but not all) permissions in a category are selected
+  const isCategoryPartiallySelected = (category: string) => {
+    const categoryPermissions = permissionsByCategory[category] || [];
+    const categoryPermissionIds = categoryPermissions.map((p: any) => p.id);
+    const selectedInCategory = categoryPermissionIds.filter((id: number) => selectedPermissions.includes(id));
+    return selectedInCategory.length > 0 && selectedInCategory.length < categoryPermissionIds.length;
+  };
+
   const customCloseModal = () => {
     reset();
     setSelectedPermissions([]);
@@ -268,6 +303,50 @@ export default function CreateEditRoleModal({
                             <span className='text-red-600'>*</span>
                           </label>
                           
+                          {/* Quick Category Selection */}
+                          <div className='mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200'>
+                            <h4 className='text-sm font-medium text-gray-700 mb-3'>Quick Category Selection</h4>
+                            <div className='flex flex-wrap gap-3'>
+                              {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
+                                <div key={category} className='flex items-center space-x-2'>
+                                  <button
+                                    type='button'
+                                    onClick={() => toggleCategoryPermissions(category)}
+                                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                      isCategoryFullySelected(category)
+                                        ? 'bg-savoy-blue text-white'
+                                        : isCategoryPartiallySelected(category)
+                                        ? 'bg-savoy-blue bg-opacity-50 text-white'
+                                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <div className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
+                                      isCategoryFullySelected(category)
+                                        ? 'border-white bg-white bg-opacity-20'
+                                        : isCategoryPartiallySelected(category)
+                                        ? 'border-white bg-white bg-opacity-20'
+                                        : 'border-gray-300 bg-white'
+                                    }`}>
+                                      {isCategoryFullySelected(category) && (
+                                        <CheckIcon className='h-3 w-3 text-savoy-blue' aria-hidden='true' />
+                                      )}
+                                      {isCategoryPartiallySelected(category) && (
+                                        <div className='h-2 w-2 bg-savoy-blue rounded-sm' />
+                                      )}
+                                    </div>
+                                    <span>{category}</span>
+                                    <span className='text-xs opacity-75'>
+                                      ({permissions.filter((p: any) => selectedPermissions.includes(p.id)).length}/{permissions.length})
+                                    </span>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <p className='text-xs text-gray-500 mt-2'>
+                              Click on a category to select/deselect all permissions in that category
+                            </p>
+                          </div>
+                          
                           <Listbox value={selectedPermissions} onChange={setSelectedPermissions} multiple>
                             {({ open }) => (
                               <>
@@ -319,8 +398,37 @@ export default function CreateEditRoleModal({
                                     <Listbox.Options className='absolute z-10 mt-1 max-h-44 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
                                       {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
                                         <div key={category}>
-                                          <div className='bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-900'>
-                                            {category}
+                                          {/* Category Header with Select All/None */}
+                                          <div className='bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200'>
+                                            <div className='flex items-center space-x-2'>
+                                              <button
+                                                type='button'
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  toggleCategoryPermissions(category);
+                                                }}
+                                                className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
+                                                  isCategoryFullySelected(category)
+                                                    ? 'border-savoy-blue bg-savoy-blue'
+                                                    : isCategoryPartiallySelected(category)
+                                                    ? 'border-savoy-blue bg-savoy-blue bg-opacity-50'
+                                                    : 'border-gray-300 bg-white hover:border-savoy-blue'
+                                                }`}
+                                              >
+                                                {isCategoryFullySelected(category) && (
+                                                  <CheckIcon className='h-3 w-3 text-white' aria-hidden='true' />
+                                                )}
+                                                {isCategoryPartiallySelected(category) && (
+                                                  <div className='h-2 w-2 bg-white rounded-sm' />
+                                                )}
+                                              </button>
+                                              <span className='text-xs font-semibold text-gray-900'>
+                                                {category}
+                                              </span>
+                                            </div>
+                                            <span className='text-xs text-gray-500'>
+                                              {permissions.filter((p: any) => selectedPermissions.includes(p.id)).length}/{permissions.length}
+                                            </span>
                                           </div>
                                           {permissions.map((permission: any) => (
                                             <Listbox.Option
