@@ -588,7 +588,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
                 isInvestigated={item.isInvestigated}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -600,7 +599,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
                 employeeIssueDetails={item}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -616,7 +614,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 hasInvestigationReport={hasInvestigationReport}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -896,7 +893,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsEditIncidentReportModalOpen}
         refetch={refetch}
         selectedIssue={selectedIssue}
-        cachedUserRights={cachedUserRights}
       />
       {isUpdateStatusModalOpen && (
         <UpdateStatusModal
@@ -906,7 +902,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsUpdateStatusModalOpen}
           refetch={refetch}
           selectedIssue={selectedIssue}
-          cachedUserRights={cachedUserRights}
         />
       )}
       {isSendNTEModalOpen && (

@@ -22,7 +22,6 @@ const SendNTE = ({
   isLoading,
   setIsRedirectingToDocumentGenerator,
   isInvestigated,
-  userRights,
 }: {
   id: number;
   isNTESent: boolean;
@@ -36,7 +35,6 @@ const SendNTE = ({
   isLoading: boolean;
   setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
   isInvestigated?: boolean;
-  userRights?: any;
 }) => {
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);

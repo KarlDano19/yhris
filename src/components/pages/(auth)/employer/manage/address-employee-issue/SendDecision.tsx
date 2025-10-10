@@ -18,7 +18,6 @@ const SendDecision = ({
   setReleased,
   isLoading,
   hasInvestigationReport,
-  userRights,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -31,7 +30,6 @@ const SendDecision = ({
   setReleased: any;
   isLoading: boolean;
   hasInvestigationReport?: boolean;
-  userRights?: any;
 }) => {
   // Disable send decision button if there is no investigation report or status is not approved
   const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';

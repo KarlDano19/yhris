@@ -4,7 +4,6 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
@@ -17,7 +16,6 @@ import ConfirmModal from '@/components/ConfirmModal';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import useBulkDeleteDirectives from './hooks/useBulkDeleteDirectives';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
@@ -89,9 +87,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       page_size: 500
     } : null
   );
-  
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+
 
   useEffect(() => {
     refetch();

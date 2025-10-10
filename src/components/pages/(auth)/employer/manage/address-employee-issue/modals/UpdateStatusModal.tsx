@@ -16,7 +16,6 @@ interface UpdateStatusModalProps {
   setIsOpen: Dispatch<{ id: number; open: boolean } | null>;
   refetch: any;
   selectedIssue: any;
-  cachedUserRights?: any;
 }
 
 const statusOptions = [

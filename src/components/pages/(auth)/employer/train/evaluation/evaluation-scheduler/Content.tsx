@@ -42,9 +42,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectAll, setSelectAll] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });

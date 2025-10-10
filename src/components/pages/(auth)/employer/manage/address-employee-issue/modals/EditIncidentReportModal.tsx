@@ -12,6 +12,7 @@ import CustomToast from '@/components/CustomToast';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import usePatchEmployeeIssueItems, { EmployeeIssueUpdateData } from '../hooks/usePatchEmployeeIssueItems';
+import { usePermission } from '@/hooks/useLegacyPermissions';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
@@ -29,7 +30,6 @@ interface EditIncidentReportModalProps {
   setIsOpen: Dispatch<boolean>;
   refetch: any;
   selectedIssue: any;
-  cachedUserRights?: any;
 }
 
 export default function EditIncidentReportModal({
@@ -37,10 +37,16 @@ export default function EditIncidentReportModal({
   setIsOpen,
   refetch,
   selectedIssue,
-  cachedUserRights,
 }: EditIncidentReportModalProps) {
-  const hasEditRights = cachedUserRights?.state?.data?.edit_employee_issue;
-  const canEdit = hasEditRights && selectedIssue?.status === 'pending' && !selectedIssue?.nte_attachment;
+  // Use new RBAC hooks
+  const editEmployeeIssue = usePermission('edit_employee_issue');
+  const updateEmployeeIssueStatus = usePermission('update_employee_issue_status');
+  
+  // Can edit when user has both permissions AND issue is pending AND no NTE attachment
+  const canEdit = editEmployeeIssue.hasPermission && 
+                  updateEmployeeIssueStatus.hasPermission && 
+                  selectedIssue?.status === 'pending' && 
+                  !selectedIssue?.nte_attachment;
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   
   // Add data fetching hook similar to UpdateWorkAccidentIllnessReportModal
@@ -186,7 +192,7 @@ export default function EditIncidentReportModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
+                <div className='flex bg-savoy-blue p-2 items-center' data-element-id="update-employee-issue-status-rights">
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     {canEdit ? 'Edit Incident Report' : 'View Incident Report'}
                   </h3>
