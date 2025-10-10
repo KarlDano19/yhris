@@ -5,7 +5,6 @@ import { Tree, TreeNode } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ZoomControls from './ZoomControls';
 import ManageOrgNode from './ManageOrgNode';
 import ManageFullscreenChart from './ManageFullscreenChart';
 import { OrgStructure } from '../types';
@@ -14,7 +13,6 @@ import {
   calculateZoomIn, 
   calculateZoomOut, 
   createRefreshChart, 
-  createFullscreenToggle, 
   createEscapeKeyHandler 
 } from '../functions/chartUtils';
 import { 
@@ -259,17 +257,6 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
       data-tooltip-place="top"
       style={{ touchAction: 'none' }}
     >
-      {/* Floating Title Component */}
-      <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-gray-800 leading-tight">
-            {profileData?.name || 'Company'}'s
-          </h2>
-          <h3 className="text-lg font-bold text-gray-800 leading-tight">
-            Organizational Structure
-          </h3>
-        </div>
-      </div>
       <div 
         className="min-w-max flex justify-center items-center"
         style={{ 

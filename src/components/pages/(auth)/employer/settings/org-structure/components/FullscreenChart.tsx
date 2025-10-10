@@ -39,8 +39,6 @@ interface FullscreenChartProps {
   renderTree: (node: any) => React.ReactNode;
   setDragOffset: (offset: { x: number; y: number }) => void;
   chartContainerRef: React.RefObject<HTMLDivElement>;
-  onEditMode?: () => void;
-  onCancel?: () => void;
 }
 
 const FullscreenChart: React.FC<FullscreenChartProps> = ({
@@ -74,9 +72,7 @@ const FullscreenChart: React.FC<FullscreenChartProps> = ({
   onFullscreenToggle,
   renderTree,
   setDragOffset,
-  chartContainerRef,
-  onEditMode,
-  onCancel
+  chartContainerRef
 }) => {
   return (
     <div 
@@ -135,26 +131,6 @@ const FullscreenChart: React.FC<FullscreenChartProps> = ({
         </div>
       </div>
       
-      {/* Top Right Controls */}
-      {(onEditMode || onCancel) && (
-        <div className="absolute top-8 right-10 z-10">
-          {!isEditMode ? (
-            <button
-              onClick={onEditMode}
-              className="px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              onClick={onCancel}
-              className="px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700 text-white shadow-lg"
-            >
-              View
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Zoom Controls */}
       <ZoomControls 

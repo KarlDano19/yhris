@@ -144,25 +144,26 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
         </div>
       </div>
 
-      {/* Floating Title */}
-      <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-gray-800 leading-tight">
+      {/* Floating Title - Mobile Responsive */}
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-2 sm:px-4 py-2 sm:py-3 pointer-events-none max-w-[calc(100%-1rem)] sm:max-w-none">
+        <div className="text-left">
+          <h2 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 leading-tight">
             {profileData?.name || 'Company'}'s
           </h2>
-          <h3 className="text-lg font-bold text-gray-800 leading-tight">
+          <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 leading-tight">
             Organizational Structure
           </h3>
         </div>
       </div>
 
-      {/* Export Button - Top Right */}
+      {/* Export Button - Top Right - Mobile Responsive */}
       {onExport && (
-        <div className="absolute top-8 right-10 z-10">
+        <div className="absolute top-2 sm:top-8 right-2 sm:right-10 z-10">
           <Menu as='div' className='relative'>
-            <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 shadow-lg' disabled={isExporting}>
-              <span>{isExporting ? 'Exporting...' : 'Export'}</span>
-              <ChevronDownIcon className='h-4 w-4' />
+            <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-6 py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors disabled:opacity-50 shadow-lg text-sm sm:text-base' disabled={isExporting}>
+              <span className='hidden sm:inline'>{isExporting ? 'Exporting...' : 'Export'}</span>
+              <span className='sm:hidden'>{isExporting ? '...' : 'Export'}</span>
+              <ChevronDownIcon className='h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0' />
             </Menu.Button>
             <Transition
               as={Fragment}
@@ -173,13 +174,13 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
               leaveFrom='transform opacity-100 scale-100'
               leaveTo='transform opacity-0 scale-95'
             >
-              <Menu.Items className='absolute right-0 z-10 mt-2 w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+              <Menu.Items className='absolute right-0 z-10 mt-2 w-28 sm:w-full min-w-[120px] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                 <div className='py-1'>
                   {exportOptions.map((item) => (
                     <Menu.Item key={item.name}>
                       {({ active }) => (
                         <span
-                          className={`block px-4 py-2 text-sm cursor-pointer text-left ${
+                          className={`block px-3 sm:px-4 py-2 text-xs sm:text-sm cursor-pointer text-left ${
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
                           } ${item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''}`}
                           onClick={() => {

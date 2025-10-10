@@ -38,6 +38,10 @@ const Content = () => {
 
   const handleFullscreenToggle = () => {
     setIsFullscreen(prev => !prev);
+    // If entering fullscreen, exit edit mode to ensure view-only
+    if (!isFullscreen) {
+      setIsEditMode(false);
+    }
   };
 
   const handleEditMode = () => {
@@ -61,30 +65,32 @@ const Content = () => {
   return (
     <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
-      <div className='flex justify-between items-center p-4 border-b-2 flex-shrink-0'>
-        <div className='flex items-center gap-4'>
-          <Link href='/settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Settings | Org Structure Settings</h4>
+      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border-b-2 flex-shrink-0'>
+        <div className='flex items-center gap-3'>
+          <Link href='/settings' className='flex items-center gap-3 hover:bg-gray-200 rounded-lg p-2 -m-2'>
+            <ArrowLeftIcon className='h-5 w-5 flex-shrink-0' />
+            <h4 className='text-sm sm:text-base truncate'>Settings | Organizational Structure</h4>
           </Link>
         </div>
-        {/* Only show View/Edit button when there's org structure data */}
-        {hasOrgData && !isLoading && (
-          !isEditMode ? (
-            <button
-              onClick={handleEditMode}
-              className="px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              onClick={handleCancel}
-              className="px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700 text-white"
-            >
-              View
-            </button>
-          )
+        {/* Only show View/Edit button when there's org structure data and not in fullscreen */}
+        {hasOrgData && !isLoading && !isFullscreen && (
+          <div className='self-end sm:self-auto'>
+            {!isEditMode ? (
+              <button
+                onClick={handleEditMode}
+                className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base"
+              >
+                Edit
+              </button>
+            ) : (
+              <button
+                onClick={handleCancel}
+                className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
+              >
+                View
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -94,7 +100,7 @@ const Content = () => {
           {/* Organizational Chart */}
           <SettingsOrgChart 
             ref={chartRef}
-            isEditMode={isEditMode}
+            isEditMode={isFullscreen ? false : isEditMode}
             orgStructureData={orgStructureData}
             isLoading={isLoading}
             error={error}

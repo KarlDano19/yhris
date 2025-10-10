@@ -9,7 +9,6 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ZoomControls from './ZoomControls';
 import OrgNode from './OrgNode';
 import FullscreenChart from './FullscreenChart';
 import PositionModal from '../modals/PositionModal';
@@ -26,15 +25,13 @@ import {
   calculateZoomOut, 
   createRefreshChart, 
   createCenterChart, 
-  createFullscreenToggle, 
   createEscapeKeyHandler 
 } from '../functions/chartUtils';
 import { 
   createDragStartHandler, 
   createDragEndHandler, 
   createDragOverHandler, 
-  createDragLeaveHandler, 
-  createDropHandler 
+  createDragLeaveHandler 
 } from '../functions/dragUtils';
 import { 
   createMouseDownHandler, 
@@ -242,7 +239,22 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   const handleDragEnd = createDragEndHandler(setDraggedNodeId, setDragOverNodeId, dragOverTimeoutRef);
   const handleDragOver = createDragOverHandler(setDragOverNodeId, dragOverTimeoutRef, dragOverNodeId);
   const handleDragLeave = createDragLeaveHandler(setDragOverNodeId, dragOverTimeoutRef);
-  const handleDrop = createDropHandler(setDraggedPosition, setTargetPosition, setShowMoveModal);
+  const handleDrop = (draggedNode: any, targetNode: any) => {
+    // If in fullscreen mode, exit fullscreen first
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      // Use setTimeout to ensure fullscreen exits before opening modal
+      setTimeout(() => {
+        setDraggedPosition(draggedNode);
+        setTargetPosition(targetNode);
+        setShowMoveModal(true);
+      }, 100);
+    } else {
+      setDraggedPosition(draggedNode);
+      setTargetPosition(targetNode);
+      setShowMoveModal(true);
+    }
+  };
 
   const handleMoveConfirm = async (action: 'swap' | 'move') => {
     if (!draggedPosition || !targetPosition || typeof draggedPosition.id !== 'number') return;
@@ -311,18 +323,40 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
 
   // Event handlers
   const handleAddChild = (parentId: number) => {
-    setSelectedParentId(parentId);
-    setEditingPosition(null);
-    setShowModal(true);
+    // If in fullscreen mode, exit fullscreen first
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      // Use setTimeout to ensure fullscreen exits before opening modal
+      setTimeout(() => {
+        setSelectedParentId(parentId);
+        setEditingPosition(null);
+        setShowModal(true);
+      }, 100);
+    } else {
+      setSelectedParentId(parentId);
+      setEditingPosition(null);
+      setShowModal(true);
+    }
   };
 
   const handleEdit = (nodeId: number | string) => {
     if (orgData) {
       const nodeToEdit = findNodeByIdGeneric(orgData, nodeId);
       if (nodeToEdit && !nodeToEdit.isAddButton) {
-        setEditingPosition(nodeToEdit);
-        setSelectedParentId(null);
-        setShowModal(true);
+        // If in fullscreen mode, exit fullscreen first
+        if (isFullscreen) {
+          setIsFullscreen(false);
+          // Use setTimeout to ensure fullscreen exits before opening modal
+          setTimeout(() => {
+            setEditingPosition(nodeToEdit);
+            setSelectedParentId(null);
+            setShowModal(true);
+          }, 100);
+        } else {
+          setEditingPosition(nodeToEdit);
+          setSelectedParentId(null);
+          setShowModal(true);
+        }
       }
     }
   };
@@ -331,8 +365,18 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
     if (orgData) {
       const nodeToDelete = findNodeByIdGeneric(orgData, nodeId);
       if (nodeToDelete && !nodeToDelete.isAddButton) {
-        setDeletingPosition(nodeToDelete);
-        setShowDeleteModal(true);
+        // If in fullscreen mode, exit fullscreen first
+        if (isFullscreen) {
+          setIsFullscreen(false);
+          // Use setTimeout to ensure fullscreen exits before opening modal
+          setTimeout(() => {
+            setDeletingPosition(nodeToDelete);
+            setShowDeleteModal(true);
+          }, 100);
+        } else {
+          setDeletingPosition(nodeToDelete);
+          setShowDeleteModal(true);
+        }
       }
     }
   };
@@ -508,7 +552,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         dragOffset={dragOffset}
         chartKey={chartKey}
         orgData={orgData}
-        isEditMode={isEditMode}
+        isEditMode={false}
         draggedNodeId={draggedNodeId}
         dragOverNodeId={dragOverNodeId}
         isFullscreen={isFullscreen}
@@ -533,8 +577,6 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         renderTree={renderTree}
         setDragOffset={setDragOffset}
         chartContainerRef={chartContainerRef}
-        onEditMode={onEditMode}
-        onCancel={onCancel}
       />, 
       document.body
     );

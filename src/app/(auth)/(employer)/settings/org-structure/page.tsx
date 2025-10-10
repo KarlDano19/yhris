@@ -2,7 +2,7 @@ import Content from "@/components/pages/(auth)/employer/settings/org-structure/C
 import React from "react";
 
 export const metadata = {
-  title: "Org Structure Settings - Yahshua HRIS",
+  title: "Org Structure - Yahshua HRIS",
 };
 
 const OrgStructure = async () => {

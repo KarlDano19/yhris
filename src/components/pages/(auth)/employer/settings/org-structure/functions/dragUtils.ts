@@ -1,5 +1,3 @@
-import { OrgStructure } from '../types';
-
 // Drag and drop utilities
 export const createDragStartHandler = (
   setDraggedNodeId: (id: number | string) => void
@@ -54,13 +52,3 @@ export const createDragLeaveHandler = (
   }, 100);
 };
 
-// Drop handler utility
-export const createDropHandler = (
-  setDraggedPosition: (position: OrgStructure | null) => void,
-  setTargetPosition: (position: OrgStructure | null) => void,
-  setShowMoveModal: (show: boolean) => void
-) => (draggedNode: OrgStructure, targetNode: OrgStructure) => {
-  setDraggedPosition(draggedNode);
-  setTargetPosition(targetNode);
-  setShowMoveModal(true);
-};

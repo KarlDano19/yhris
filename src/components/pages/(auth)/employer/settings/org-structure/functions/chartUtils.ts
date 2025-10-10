@@ -49,12 +49,6 @@ export const createCenterChart = (
   }, 500); // Increased delay to prevent spam clicking
 };
 
-// Fullscreen utilities
-export const createFullscreenToggle = (
-  setIsFullscreen: (fn: (prev: boolean) => boolean) => void
-) => () => {
-  setIsFullscreen(prev => !prev);
-};
 
 // Escape key handler for fullscreen
 export const createEscapeKeyHandler = (
