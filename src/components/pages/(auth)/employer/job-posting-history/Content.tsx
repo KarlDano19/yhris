@@ -762,15 +762,6 @@ const Content = () => {
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsSetJobInactiveModalOpen(true)}
-                disabled={!cachedProfile?.state?.data?.edit_job}
-              >
-                CREATE
-              </button>
-            </div>
           </div>
           
           {/* Status Filter Tabs and Bulk Actions */}
