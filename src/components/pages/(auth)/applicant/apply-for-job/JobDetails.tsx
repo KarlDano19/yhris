@@ -178,6 +178,22 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           )}
         </div>
       </div>
+      {!isLoading && jobDetailData?.uploaded_job_description && jobDetailData?.uploaded_job_description.length > 0 && (
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <>
+            <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
+            <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Role
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {renderRoleDescription(jobDetailData?.uploaded_job_description)}
+              </div>
+            </div>
+          </>
+        </div>
+      )}
     </>
   );
 };
