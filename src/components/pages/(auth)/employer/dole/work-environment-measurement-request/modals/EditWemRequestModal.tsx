@@ -208,6 +208,7 @@ export default function EditWemRequestModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingUpdateWorkEnvironmentRequest}
                   />
                 )}
               </Dialog.Panel>
