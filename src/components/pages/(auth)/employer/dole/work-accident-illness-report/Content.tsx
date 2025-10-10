@@ -28,6 +28,7 @@ import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import { useBulkDeleteWorkAccidentIllnessReport } from './hooks/useBulkDeleteWorkAccidentIllnessReport';
 import BulkDeleteModal from '@/components/BulkDeleteModal';
+import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
 
 import EditIcon from '@/svg/EditIcon';
 import PrintIcon from "@/svg/PrintIcon";
@@ -115,6 +116,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const { mutate: bulkDeleteWorkAccidentIllnessReports, isLoading: isBulkDeleting } = useBulkDeleteWorkAccidentIllnessReport();
+  const cachedRigths = useLegacyPermissions();
 
   useEffect(() => {
     if (workAccidentIlnessReportsData) {

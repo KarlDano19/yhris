@@ -120,7 +120,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [autocompleteLimit, setAutocompleteLimit] = useState(50);
   const [shouldShowAutocomplete, setShouldShowAutocomplete] = useState(false);
-  const [hideTooltip, setHideTooltip] = useState(false);
   const autocompleteRef = useRef<HTMLUListElement>(null);
 
   const {
@@ -131,13 +130,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   // Memoize the search parameters to prevent unnecessary re-renders
   const searchParams = useMemo(() => {
-    if (debouncedSearch && debouncedSearch.length >= 2 && shouldShowAutocomplete) {
+    // Always return search params to load 500 employees on initial render
+    // Only filter by search when shouldShowAutocomplete is true
+    if (shouldShowAutocomplete && debouncedSearch && debouncedSearch.length >= 2) {
       return {
         search: debouncedSearch,
         current_page: 1
       };
     }
-    return null;
+    // Return empty search to load all 500 employees
+    return {
+      search: '',
+      current_page: 1
+    };
   }, [debouncedSearch, shouldShowAutocomplete]);
 
   const { data: autocompleteResults, refetch: autocompleteRefetch, isLoading: isAutocompleteLoading } = useGetEmployeePaginatedSelect(searchParams);
@@ -285,45 +290,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleMagnifyingGlassClick = () => {
-    if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
-      // Handle autocomplete selection (2nd click with selection)
-      const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
-      const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
-      
-      // Check if "Show more" option is selected (last item when there are more results)
-      if (selectedIndex === displayItems.length && hasMoreResults) {
-        // Show 50 more results in the dropdown
-        setAutocompleteLimit(prev => prev + 50);
-        // Keep the selection on the "Show more" option
-        setSelectedIndex(displayItems.length + 50);
-      } else if (displayItems[selectedIndex]) {
-        const item = displayItems[selectedIndex];
-        const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
-        setPendingFilter({ ...pendingFilter, search: newSearchTerm });
-        setAppliedFilter({ ...pendingFilter, search: newSearchTerm });
-      }
-      setShowAutocomplete(false);
-      setShouldShowAutocomplete(false);
-      setSelectedIndex(-1);
-    } else if (showAutocomplete && selectedIndex === -1) {
-      // 2nd click: No selection made, perform main search
-      handleSearch();
-      setShowAutocomplete(false);
-      setShouldShowAutocomplete(false);
-    } else if (pendingFilter.search && pendingFilter.search.length >= 2) {
-      // 1st click: Show autocomplete dropdown when clicked with valid search
-      setShowAutocomplete(true);
-      setShouldShowAutocomplete(true);
-      setHideTooltip(true); // Hide tooltip after search button is clicked
-      // Prevent the input from losing focus to avoid onBlur closing the dropdown
-      setTimeout(() => {
-        document.getElementById('search')?.focus();
-      }, 0);
-    } else {
-      // Regular search (when search is too short)
-      handleSearch();
-      setShowAutocomplete(false);
-    }
+    // Search button now just performs the main search
+    handleSearch();
+    setShowAutocomplete(false);
+    setShouldShowAutocomplete(false);
+    setSelectedIndex(-1);
   };
 
   useEffect(() => {
@@ -604,18 +575,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     data-lpignore='true'
                     data-form-type='other'
                     value={pendingFilter.search}
-                    {...(pendingFilter.search === '' && {
-                      'data-tooltip-id': 'employee-search-tooltip',
-                      'data-tooltip-content': 'Search for Employee: First Name, Last Name, Position, Department',
-                      'data-tooltip-place': 'bottom'
-                    })}
                     onChange={(e) => {
                       setPendingFilter({ ...pendingFilter, search: e.target.value });
+                      // Always show autocomplete since we have 500 employees loaded
                       setShowAutocomplete(true);
+                      setShouldShowAutocomplete(true);
                       setSelectedIndex(-1);
                     }}
                     onFocus={() => {
-                      // Don't automatically show autocomplete on focus
+                      // Always show autocomplete when focused since we have 500 employees loaded
+                      setShowAutocomplete(true);
+                      setShouldShowAutocomplete(true);
                     }}
                     onBlur={() => {
                       setTimeout(() => {
@@ -628,7 +598,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         if (showAutocomplete && selectedIndex >= 0 && autocompleteResults?.records) {
-                          // Handle autocomplete selection (1st Enter with selection)
+                          // Handle autocomplete selection with Enter
                           const displayItems = autocompleteResults.records.slice(0, autocompleteLimit);
                           const hasMoreResults = autocompleteResults.total_records > autocompleteLimit;
                           
@@ -648,20 +618,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           setShowAutocomplete(false);
                           setShouldShowAutocomplete(false);
                           setSelectedIndex(-1);
-                        } else if (showAutocomplete && selectedIndex === -1) {
-                          // 2nd Enter: No selection made, perform main search
+                        } else {
+                          // Perform main search
                           handleSearch();
                           setShowAutocomplete(false);
                           setShouldShowAutocomplete(false);
-                        } else if (pendingFilter.search && pendingFilter.search.length >= 2) {
-                          // 1st Enter: Show autocomplete dropdown when Enter is pressed with valid search
-                          setShowAutocomplete(true);
-                          setShouldShowAutocomplete(true);
-                          setHideTooltip(true); // Hide tooltip after Enter is pressed
-                        } else {
-                          // Regular search (when search is too short)
-                          handleSearch();
-                          setShowAutocomplete(false);
                         }
                       } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
@@ -689,12 +650,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     }}
                     placeholder='Search ...'
                   />
-                  {/* Show autocomplete reminder text when user has typed 2+ characters */}
-                  {pendingFilter.search && pendingFilter.search.length >= 2 && !hideTooltip && !showAutocomplete && (
-                    <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 text-center w-full">
-                      Press <span className="font-bold">Enter</span> or click <span className="font-bold">search button</span> to show autocomplete suggestions
-                    </div>
-                  )}
                   {showAutocomplete && shouldShowAutocomplete && (() => {
                     // Show loading state while debouncing or API loading
                     if (pendingFilter.search && pendingFilter.search.length >= 2 && (isDebouncing || isAutocompleteLoading)) {
@@ -712,28 +667,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               showText={true}
                               className="py-2"
                             />
-                          </li>
-                        </ul>
-                      );
-                    }
-
-                    // Show no results state
-                    if (debouncedSearch && debouncedSearch.length >= 2 && autocompleteResults?.records?.length === 0) {
-                      return (
-                        <ul 
-                          ref={autocompleteRef}
-                          className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
-                          onMouseDown={(e) => e.preventDefault()}
-                        >
-                          <li className='px-3 py-4 text-center'>
-                            <div className='flex flex-col items-center space-y-2'>
-                              <div className='text-sm text-gray-600'>
-                                <p className='font-medium'>No employees found</p>
-                                <p className='text-xs text-gray-500 mt-1'>
-                                  Try searching with different keywords
-                                </p>
-                              </div>
-                            </div>
                           </li>
                         </ul>
                       );
@@ -818,9 +751,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       );
                     }
 
-                    // Don't show anything when no search yet
-                    if (!debouncedSearch || debouncedSearch.length < 2) {
-                      return null;
+                    // Show no results state only when searching with 2+ characters
+                    if (pendingFilter.search && pendingFilter.search.length >= 2 && autocompleteResults?.records?.length === 0) {
+                      return (
+                        <ul 
+                          ref={autocompleteRef}
+                          className='absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto'
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <li className='px-3 py-4 text-center'>
+                            <div className='flex flex-col items-center space-y-2'>
+                              <div className='text-sm text-gray-600'>
+                                <p className='font-medium'>No employees found</p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  Try searching with different keywords
+                                </p>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      );
                     }
 
                     return null;
@@ -1161,7 +1111,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
-      <Tooltip id='employee-search-tooltip' />
     </>
   );
 };

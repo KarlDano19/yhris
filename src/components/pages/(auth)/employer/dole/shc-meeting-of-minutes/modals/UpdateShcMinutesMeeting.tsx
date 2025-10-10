@@ -158,6 +158,7 @@ function UpdateShcMinutesMeetingModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingUpdateShcMinutesMeeting}
                   />
                 )}
               </Dialog.Panel>

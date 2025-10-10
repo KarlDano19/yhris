@@ -66,13 +66,14 @@ function useGetEmployeePaginatedSelect(filters: any) {
   const normalizedSearch = filters?.search?.trim();
   const hasValidSearch = normalizedSearch && normalizedSearch.length >= 2;
   
-  // Don't make API call if search is only spaces or empty after trimming
-  const shouldMakeApiCall = filters !== null && hasValidSearch;
+  // Allow API call even without search to load initial 500 employees
+  // Only skip if filters is explicitly null (disabled state)
+  const shouldMakeApiCall = filters !== null;
   
   // Create normalized filters for consistent cache keys
   const normalizedFilters = filters ? {
     ...filters,
-    search: normalizedSearch || filters.search
+    search: hasValidSearch ? normalizedSearch : undefined
   } : filters;
   
   const query = useQuery(['employeePaginatedSelectCache', normalizedFilters], () => getEmployeePaginatedSelect(normalizedFilters), {
