@@ -8,6 +8,7 @@ export interface DirectiveData {
   title: string;
   to?: string | string[]; 
   is_active?: boolean;
+  company_name?: string;
 
   custom_policy_fields?: PolicyField[];
   eligibility?: string;

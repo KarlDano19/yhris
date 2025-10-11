@@ -10,6 +10,7 @@ async function addDirective(directive: DirectiveData) {
     data.append('directive_type', directive.directive_type || '');
     data.append('title', directive.title);
     data.append('to', JSON.stringify(directive.to));
+    data.append('company_name', directive.company_name || '');
     
     // Handle attachments as FileField
     if (directive.attachments) {
