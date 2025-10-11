@@ -72,83 +72,98 @@ export default function MoveModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
-                <div className='flex justify-center py-8 px-2'>
-                  <ArrowPathIcon className='w-16 h-16 text-blue-600' />
-                </div>
-                
-                <div className='text-xl px-20 text-center'>
-                  <p className='text-xl text-gray-600 font-bold mb-4'>
-                    How would you like to move this position?
-                  </p>
-                  
-                  {draggedPosition && targetPosition && (
-                    <div className='mb-6'>
-                      <div className='p-3 bg-blue-50 rounded-lg mb-3'>
-                        <p className='text-lg font-semibold text-blue-800'>
-                          {draggedPosition.position_name}
-                        </p>
-                        <p className='text-sm text-blue-600'>
-                          Moving from: {draggedPosition.parent_position_name || 'Root'}
-                        </p>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[800px]'>
+                <div className='px-8 py-6'>
+                  <div className='grid grid-cols-2 gap-20'>
+                    {/* Column 1: Arrow icon, question, and position info */}
+                    <div className='flex flex-col justify-center'>
+                      <div className='flex justify-center mb-6'>
+                        <ArrowPathIcon className='w-16 h-16 text-blue-600' />
                       </div>
                       
-                      <div className='flex items-center justify-center mb-3'>
-                        <ArrowDownIcon className='w-6 h-6 text-gray-400' />
-                      </div>
-                      
-                      <div className='p-3 bg-green-50 rounded-lg'>
-                        <p className='text-lg font-semibold text-green-800'>
-                          {targetPosition.position_name}
+                      <div className='text-center'>
+                        <p className='text-xl text-gray-600 font-bold mb-4'>
+                          How would you like to move this position?
                         </p>
-                        <p className='text-sm text-green-600'>
-                          Target position
-                        </p>
+                        
+                        {draggedPosition && targetPosition && (
+                          <div>
+                            <div className='p-3 bg-blue-50 rounded-lg mb-3'>
+                              <p className='text-lg font-semibold text-blue-800'>
+                                {draggedPosition.position_name}
+                              </p>
+                              <p className='text-sm text-blue-600'>
+                                Moving from: {draggedPosition.parent_position_name || 'Root'}
+                              </p>
+                            </div>
+                            
+                            <div className='flex items-center justify-center mb-3'>
+                              <ArrowDownIcon className='w-6 h-6 text-gray-400' />
+                            </div>
+                            
+                            <div className='p-3 bg-green-50 rounded-lg'>
+                              <p className='text-lg font-semibold text-green-800'>
+                                {targetPosition.position_name}
+                              </p>
+                              <p className='text-sm text-green-600'>
+                                Target position
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
-                  
-                  <div className='space-y-4'>
-                    {/* Only show swap option if both positions have the same parent */}
-                    {draggedPosition && targetPosition && draggedPosition.parent === targetPosition.parent && (
+                    
+                    {/* Column 2: Action buttons */}
+                    <div className='flex flex-col justify-center space-y-4'>
+                      {/* Only show swap option if both positions have the same parent */}
+                      {draggedPosition && targetPosition && draggedPosition.parent === targetPosition.parent && (
+                        <div className='p-4 border border-gray-200 rounded-lg'>
+                          <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
+                            <ArrowPathIcon className='w-5 h-5 mr-2 text-blue-600' />
+                            Swap Positions
+                          </h3>
+                          <p className='text-sm text-gray-600 mb-3'>
+                            Swap the placement of these two positions
+                          </p>
+                          <button
+                            onClick={handleSwap}
+                            disabled={isLoading}
+                            className='w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors'
+                          >
+                            Swap Positions
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Show "or" between options when both are available */}
+                      {draggedPosition && targetPosition && draggedPosition.parent === targetPosition.parent && (
+                        <div className='text-center'>
+                          <span className='text-gray-500 font-medium'>or</span>
+                        </div>
+                      )}
+                      
                       <div className='p-4 border border-gray-200 rounded-lg'>
                         <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
-                          <ArrowPathIcon className='w-5 h-5 mr-2 text-blue-600' />
-                          Swap Positions
+                          <ArrowDownIcon className='w-5 h-5 mr-2 text-green-600' />
+                          Move Under
                         </h3>
                         <p className='text-sm text-gray-600 mb-3'>
-                          Swap the placement of these two positions
+                          Move the position to be under the target position
                         </p>
                         <button
-                          onClick={handleSwap}
+                          onClick={handleMove}
                           disabled={isLoading}
-                          className='w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors'
+                          className='w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors'
                         >
-                          Swap Positions
+                          Move Under
                         </button>
                       </div>
-                    )}
-                    
-                    <div className='p-4 border border-gray-200 rounded-lg'>
-                      <h3 className='font-semibold text-gray-800 mb-2 flex items-center'>
-                        <ArrowDownIcon className='w-5 h-5 mr-2 text-green-600' />
-                        Move Under
-                      </h3>
-                      <p className='text-sm text-gray-600 mb-3'>
-                        Move the position to be under the target position
-                      </p>
-                      <button
-                        onClick={handleMove}
-                        disabled={isLoading}
-                        className='w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors'
-                      >
-                        Move Under
-                      </button>
                     </div>
                   </div>
                 </div>
                 
-                <div className='flex justify-center w-full px-4 space-x-8 pt-6 pb-7'>
+                <div className='flex justify-center w-full px-4 space-x-8 pt-6'>
                   <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
                     <button
                       type='button'
@@ -157,7 +172,7 @@ export default function MoveModal({
                       onClick={onClose}
                       disabled={isLoading}
                     >
-                      Cancel
+                      Close
                     </button>
                   </span>
                 </div>
