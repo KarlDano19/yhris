@@ -18,7 +18,6 @@ const SendDecision = ({
   setReleased,
   isLoading,
   hasInvestigationReport,
-  userRights,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -31,7 +30,6 @@ const SendDecision = ({
   setReleased: any;
   isLoading: boolean;
   hasInvestigationReport?: boolean;
-  userRights?: any;
 }) => {
   // Disable send decision button if there is no investigation report or status is not approved
   const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';
@@ -57,10 +55,10 @@ const SendDecision = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
-          disabled={isDecisionSent || shouldDisableSendDecision || !userRights?.decide_employee_issue}
+          disabled={isDecisionSent || shouldDisableSendDecision}
           onClick={(e) => {
             e.stopPropagation();
-            if (!isDecisionSent && !shouldDisableSendDecision && userRights?.decide_employee_issue) {
+            if (!isDecisionSent && !shouldDisableSendDecision) {
               setIsSendDecisionModalOpen({
                 isOpen: true,
                 id,
@@ -68,9 +66,7 @@ const SendDecision = ({
             }
           }}
           title={
-            !userRights?.decide_employee_issue 
-              ? 'No permission to send decision'
-              : employeeIssueDetails?.status !== 'approved'
+            employeeIssueDetails?.status !== 'approved'
               ? 'Decision can only be sent when status is approved'
               : (shouldDisableSendDecision ? 'Investigation report is required before sending decision' : '')
           }

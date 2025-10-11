@@ -1,18 +1,17 @@
 'use client';
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
-import CustomToast from '@/components/CustomToast';
 import AddUserAccountModal from '../accounts/modals/AddUserAccountModal';
 import useGetAccountsList from './hooks/useGetAccountsList';
 import UpdateUserAccountModal from './modals/UpdateUserAccountModal';
@@ -34,8 +33,6 @@ type T_ModalData = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [accountsItems, setAccountsItems] = useState<any>([]);
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState<boolean>(false);
   const [isUpdateAccountModalOpen, setIsUpdateAccountModalOpen] = useState<T_ModalData | null>(null);
@@ -118,12 +115,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex space-x-2 justify-center'>
-              <button onClick={() => setIsUpdateAccountModalOpen({ id: item.id, open: true })}>
+              <SmartButton id="edit-sub-account-btn" onClick={() => setIsUpdateAccountModalOpen({ id: item.id, open: true })}>
                 <EditIcon />
-              </button>
-              <button onClick={() => setIsResetPasswordModalOpen({ id: item.id, open: true })}>
+              </SmartButton>
+              <SmartButton id="edit-sub-account-btn" onClick={() => setIsResetPasswordModalOpen({ id: item.id, open: true })}>
                 <ArrowPathIcon className='h-10 w-10 text-gray-800 mx-auto border border-gray-400 p-1.5 rounded-md' />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -181,13 +178,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-sub-account-btn"
                 onClick={() => setIsAddAccountModalOpen(true)}
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                disabled={!cachedRigths?.state?.data?.settings_access}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
 

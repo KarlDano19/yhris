@@ -18,7 +18,6 @@ import Timer from '../../../Timer';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
-import useGetRights from '@/components/hooks/useGetRights';
 import useGetUsers from '@/components/hooks/useGetUsers';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 
@@ -28,7 +27,6 @@ interface ErrorDetail {
 
 const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProfile: boolean; hasActiveSubscription: boolean; firstRoute: string }) => {
   const [profile, setProfile] = useState<any>({});
-  const [userRights, setUserRights] = useState<any>({});
   const [userDetails, setUserDetails] = useState<any>({});
   const {
     data,
@@ -37,8 +35,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProf
   } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
   const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
   const { mutate } = useLogout();
-
-  const { data: userRightsData, isLoading: isUserRightsLoading } = useGetRights() as { data: any; isLoading: boolean };
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -89,12 +85,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProf
       logout(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (userRightsData) {
-      setUserRights(userRightsData);
-    }
-  }, [userRightsData]);
 
   useEffect(() => {
     if (usersData) {

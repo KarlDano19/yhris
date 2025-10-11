@@ -15,13 +15,17 @@ import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerMo
 import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
 import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailEvaluationSchedulerModal';
+import BulkDeleteEvaluationSchedulerModal from './modals/BulkDeleteEvaluationSchedulerModal';
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
+import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [evaluationSchedulerItems, setEvaluationSchedulerItems] = useState<any>([]);
@@ -32,8 +36,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isConfirmSendEmailEvaluationSchedulerModalOpen, setIsConfirmSendEmailEvaluationSchedulerModalOpen] =
     useState(false);
   const [isCreateEvaluationSchedulerOpen, setIsCreateEvaluationSchedulerOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  
+  // Bulk delete states
+  const [selectedEvaluationSchedulers, setSelectedEvaluationSchedulers] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -61,6 +68,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
+  const bulkDeleteMutation = useBulkDeleteEvaluationSchedulers();
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
@@ -135,6 +143,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataEvaluationScheduler, pageSize]);
 
+  // Update select all state when evaluation schedulers change
+  useEffect(() => {
+    if (evaluationSchedulerItems) {
+      const allSchedulerIds = new Set(evaluationSchedulerItems.map((s: any) => s.id));
+      const allSelected = allSchedulerIds.size > 0 && 
+        Array.from(allSchedulerIds).every((id: any) => selectedEvaluationSchedulers.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEvaluationSchedulers, evaluationSchedulerItems]);
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -189,7 +207,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const renderRecipientsRoundPhoto = (recipients: any) => {
     return (
       <div 
-        className='inline-flex w-40 overflow-x-auto overflow-y-visible pb-2.5 isolate'
+        className='inline-flex items-center overflow-x-auto overflow-y-visible pb-2.5 max-w-[200px]'
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#2d3e58 #f1f1f1',
@@ -202,8 +220,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               key={index}
               className='w-[40px] h-[40px] border-2 border-[#fff] rounded-full relative flex-shrink-0'
               style={{ 
-                left: `${4 * index}px`,
-                zIndex: Math.min(recipients.length - index, 5)
+                marginRight: '4px'
               }}
             >
               <RecipientAvatar recipient={recipient} size={40} />
@@ -228,6 +245,53 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isGetEvaluationSchedulerLoading, isSearching]);
 
+  // Handle individual evaluation scheduler selection
+  const handleEvaluationSchedulerSelect = (schedulerId: number) => {
+    setSelectedEvaluationSchedulers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(schedulerId)) {
+        newSet.delete(schedulerId);
+      } else {
+        newSet.add(schedulerId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!evaluationSchedulerItems) return;
+    
+    if (selectAll) {
+      setSelectedEvaluationSchedulers(new Set());
+    } else {
+      const allIds = evaluationSchedulerItems.map((s: any) => s.id);
+      setSelectedEvaluationSchedulers(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedEvaluationSchedulers.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const schedulerIds = Array.from(selectedEvaluationSchedulers);
+      await bulkDeleteMutation.mutateAsync(schedulerIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedEvaluationSchedulers.size} evaluation scheduler(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedEvaluationSchedulers(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetchEvaluationScheduler();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete evaluation schedulers';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isGetEvaluationSchedulerLoading) {
       return (
@@ -243,6 +307,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (evaluationSchedulerItems && evaluationSchedulerItems?.length > 0) {
       return evaluationSchedulerItems?.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEvaluationSchedulers.has(item.id)}
+              onChange={() => handleEvaluationSchedulerSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap text-ellipsis px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap text-ellipsis px-3 py-5 text-sm text-gray-500'>
             {item.evaluation_template}
@@ -270,11 +342,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
               <button
                 onClick={() => openEditEvaluationModal(item)}
-                disabled={!cachedRigths?.state?.data?.edit_training}
               >
                 <EditIcon />
               </button>
-              <button onClick={() => openDeleteEvaluationModal(item)}>
+              <button 
+                onClick={() => openDeleteEvaluationModal(item)}
+                className={selectedEvaluationSchedulers.size > 1 ? 'invisible' : ''}
+              >
                 <DeleteIcon />
               </button>
             </div>
@@ -308,6 +382,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
+          
+          
+
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
@@ -341,12 +418,42 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_training}
               >
                 CREATE
               </button>
             </div>
           </div>
+
+          {selectedEvaluationSchedulers.size > 0 && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedEvaluationSchedulers(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEvaluationSchedulers.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+          
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -359,6 +466,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!evaluationSchedulerItems || evaluationSchedulerItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Schedule Name
                       </th>
@@ -432,6 +548,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
         />
       )}
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteEvaluationSchedulerModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedEvaluationSchedulers.size}
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
 
       <Tooltip id='search-tooltip'/>
     </>

@@ -18,6 +18,7 @@ import DeleteApprovalModal from './modal/DeleteModal';
 import useGetApprovalDetails from './hooks/useGetApprovalDetails';
 import useEditApproval from './hooks/useEditApproval';
 import classNames from '@/helpers/classNames';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 interface User {
   id: number;
@@ -291,12 +292,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </button>
                   </span>
                   <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
-                    <button
+                    <SmartButton
+                      id="create-movement-settings-btn"
                       type='submit'
                       className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                     >
                       Save
-                    </button>
+                    </SmartButton>
                   </span>
                 </div>
               </form>

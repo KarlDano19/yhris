@@ -1,7 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
+
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
+import { setCookie } from 'cookies-next';
+
+import updateSession from '@/helpers/updateSession';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 
@@ -10,6 +16,57 @@ import MainIconOnly from '@/svg/MainIconOnly';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
 function Content() {
+  const broadcastChannel = new BroadcastChannel('integration-channel');
+  const searchParams = useSearchParams();
+
+  const setSession = async (data: any) => {
+    setCookie('token', data.token, {
+      maxAge: 60 * 60 * 3,
+      sameSite: 'strict',
+      httpOnly: false,
+      secure: true,
+    });
+
+    if (data.account_type === 'employer') {
+      if (data.has_profile) {
+        const returnTo = searchParams.get('redirect') || '/dashboard';
+        location.href = returnTo;
+      } else {
+        location.href = '/setup-employer-profile';
+      }
+    } else {
+      if (data.has_profile) {
+        location.href = '/apply-for-a-job';
+      } else {
+        location.href = '/setup-applicant-profile';
+      }
+    }
+  };
+
+  const setSSOSession = async (data: any) => {
+    await updateSession({
+      token: data.token,
+      email: data.email,
+      hasPendingTransaction: data.has_pending_transaction,
+      hasActiveSubscription: data.has_active_subscription,
+      hasProfile: data.has_profile,
+      accountType: data.account_type,
+      loginType: data.login_type,
+      isLoggedIn: true,
+    });
+    setSession(data);
+  };
+
+  useEffect(() => {
+    broadcastChannel.onmessage = (event) => {
+      if (event.data.isGranted) {
+        setSSOSession(event.data);
+      }
+    };
+    return () => {
+      broadcastChannel.close();
+    };
+  }, []);
 
   const loginWithYGPayroll = () => {
     const left = (window.innerWidth - 900) / 2;

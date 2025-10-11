@@ -132,6 +132,7 @@ function CreateShcMettingMinutesModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingAddShcMeetingMinutes}
                   />
                 )}
               </Dialog.Panel>

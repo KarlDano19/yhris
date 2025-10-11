@@ -224,6 +224,7 @@ function EditHealthAndSafetyReportModal({
                     setSelectedTab={setSelectedTab}
                     watch={watch}
                     isCreateModal={false}
+                    isLoading={isLoadingUpdateHealthAndSafetyReport}
                   />
                 )}
               </Dialog.Panel>

@@ -39,6 +39,7 @@ function CreateHealthAndSafetyReportModal({
   const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
+    isLoading: isLoadingAddHealthAndSafetyReport,
     } = useAddHealthAndSafetyReport();
   const [selectedTab, setSelectedTab] = useState(1);
   const queryClient = useQueryClient();
@@ -186,6 +187,7 @@ function CreateHealthAndSafetyReportModal({
                     setSelectedTab={setSelectedTab}
                     watch={watch}
                     isCreateModal={true}
+                    isLoading={isLoadingAddHealthAndSafetyReport}
                   />
                 )}
               </Dialog.Panel>

@@ -189,6 +189,7 @@ function CreateWemRequestModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingAddWorkEnvironmentRequest}
                   />
                 )}
               </Dialog.Panel>

@@ -57,6 +57,8 @@ export default function SettingsRightsModal({
   useEffect(() => {
     if (userRightDetailsData) {
       setValue('settings_access', userRightDetailsData.settings_access);
+      setValue('manage_job_access_rules', userRightDetailsData.manage_job_access_rules);
+      setValue('view_all_job_history', userRightDetailsData.view_all_job_history);
     }
   }, [userRightDetailsData]);
 
@@ -113,7 +115,7 @@ export default function SettingsRightsModal({
                           </div>
                         </div>
                         <div className='grid lg:grid-cols-6 gap-x-8 mt-2'>  
-                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-x-8 gap-y-5'>
+                          <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5'>
                             <div className='grid-item'>
                               <label
                                 htmlFor='settings_access'
@@ -126,6 +128,50 @@ export default function SettingsRightsModal({
                                 <select
                                   id='settings_access'
                                   {...register('settings_access', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='manage_job_access_rules'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                Manage Job Access Rules
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='manage_job_access_rules'
+                                  {...register('manage_job_access_rules', { required: true })}
+                                  className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                >
+                                  <option value='true'>Yes</option>
+                                  <option value='false'>No</option>
+                                </select>
+                                <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
+                                  <SelectChevronDown />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='grid-item'>
+                              <label
+                                htmlFor='view_all_job_history'
+                                className='block text-sm font-medium leading-6 text-gray-900'
+                              >
+                                View All Job History
+                                <span className='text-red-600'>*</span>
+                              </label>
+                              <div className='relative mt-2'>
+                                <select
+                                  id='view_all_job_history'
+                                  {...register('view_all_job_history', { required: true })}
                                   className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                 >
                                   <option value='true'>Yes</option>

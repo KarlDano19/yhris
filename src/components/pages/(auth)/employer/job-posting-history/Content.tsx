@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -20,6 +22,8 @@ import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
 import DeleteJobModal from './modals/DeleteModal';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
+import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
@@ -27,12 +31,13 @@ import useUpdateJobRolesStatus from './hooks/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/useUpdateJobRemarkStatus';
 import useUpdateJobBenefitStatus from './hooks/useUpdateJobBenefitStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import AssignUsersModal from './modals/AssignUsersModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
 import { useQueryClient } from '@tanstack/react-query';
@@ -67,6 +72,13 @@ const Content = () => {
   const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
+  const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
+  
+  // Bulk delete states
+  const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
     to: '',
@@ -101,6 +113,8 @@ const Content = () => {
   const { mutate: mutateRoles } = useUpdateJobRolesStatus();
   const { mutate: mutateRemark } = useUpdateJobRemarkStatus();
   const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
+  const bulkDeleteMutation = useBulkDeleteJobPostings();
+  
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
   const queryClient = useQueryClient();
@@ -314,6 +328,16 @@ const Content = () => {
     setShowShareOptions({});
   }, [currentPage]);
 
+  // Update select all state when job postings change
+  useEffect(() => {
+    if (jobPostHistoryItems) {
+      const allJobPostingIds = new Set(jobPostHistoryItems.map((j: any) => j.id));
+      const allSelected = allJobPostingIds.size > 0 && 
+        Array.from(allJobPostingIds).every((id: any) => selectedJobPostings.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedJobPostings, jobPostHistoryItems]);
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -373,6 +397,53 @@ const Content = () => {
     }
   }, [isGetJobPostLoading, isSearching]);
 
+  // Handle individual job posting selection
+  const handleJobPostingSelect = (jobPostingId: number) => {
+    setSelectedJobPostings(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobPostingId)) {
+        newSet.delete(jobPostingId);
+      } else {
+        newSet.add(jobPostingId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!jobPostHistoryItems) return;
+    
+    if (selectAll) {
+      setSelectedJobPostings(new Set());
+    } else {
+      const allIds = jobPostHistoryItems.map((j: any) => j.id);
+      setSelectedJobPostings(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedJobPostings.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const jobPostingIds = Array.from(selectedJobPostings);
+      await bulkDeleteMutation.mutateAsync(jobPostingIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedJobPostings.size} job posting(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedJobPostings(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      refetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete job postings';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isGetJobPostLoading) {
       return (
@@ -394,6 +465,14 @@ const Content = () => {
           key={jobPost.id}
           className='text-center'
         >
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedJobPostings.has(jobPost.id)}
+              onChange={() => handleJobPostingSelect(jobPost.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
@@ -456,21 +535,44 @@ const Content = () => {
           >
             {jobPost.workSetup}
           </td>
+          <td
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center ${
+              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+            }`}
+          >
+            {jobPost.assignments_count || 0} users
+          </td>
           <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
               <div className='flex space-x-2'>
-                <button 
+                <SmartButton 
+                  id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
+                  data-tooltip-id="edit-tooltip"
+                  data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
-                </button>
-                <button 
+                </SmartButton>
+                <SmartButton 
+                  id="delete-job-btn"
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
-                  disabled={!cachedProfile?.state?.data?.edit_job}
+                  data-tooltip-id="delete-tooltip"
+                  data-tooltip-content="Delete Job"
                 >
                   <DeleteIcon />
-                </button>
+                </SmartButton>
+                <SmartButton 
+                  id="assign-job-btn"
+                  onClick={() => setAssignUsersModal({ 
+                    id: jobPost.id, 
+                    open: true 
+                  })}
+                  data-tooltip-id="assign-tooltip"
+                  data-tooltip-content="Assign to Users"
+                  className="text-blue-600 hover:text-blue-800 p-1 disabled:opacity-50"
+                >
+                  <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
+                </SmartButton>
                 <div className="relative more-menu-container pt-1">
                   <button onClick={() => handleMoreMenuClick(jobPost.id)}>
                     <MoreIconWithBorder />
@@ -553,7 +655,7 @@ const Content = () => {
     } else {
       return (
         <tr>
-          <td colSpan={8}>
+          <td colSpan={10}>
             <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
           </td>
         </tr>
@@ -590,6 +692,7 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
@@ -621,7 +724,10 @@ const Content = () => {
                     setPendingFilter({ ...pendingFilter, to: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setPendingFilter({ ...pendingFilter, to: value });
+                    setPendingFilter({
+                      ...pendingFilter,
+                      to: value,
+                    });
                   }}
                   minDate={pendingFilter.from}
                 />
@@ -658,48 +764,80 @@ const Content = () => {
             </div>
           </div>
           
-          {/* Status Filter Tabs */}
+          {/* Status Filter Tabs and Bulk Actions */}
           <div className="mt-8">
-            <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 mb-5 gap-2">
-              <div
-                onClick={() => {
-                  setPendingFilter({ ...pendingFilter, status: 'all' });
-                  setAppliedFilter({ ...appliedFilter, status: 'all' });
-                }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
-                  appliedFilter.status === 'all'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
-                }`}
-              >
-                All Jobs
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Status Filter Tabs - Left Side */}
+              <div className="flex flex-wrap justify-center md:justify-start md:pl-4 lg:pl-10 gap-2">
+                <div
+                  onClick={() => {
+                    setPendingFilter({ ...pendingFilter, status: 'all' });
+                    setAppliedFilter({ ...appliedFilter, status: 'all' });
+                  }}
+                  className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                    appliedFilter.status === 'all'
+                      ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  All Jobs
+                </div>
+                <div
+                  onClick={() => {
+                    setPendingFilter({ ...pendingFilter, status: 'active' });
+                    setAppliedFilter({ ...appliedFilter, status: 'active' });
+                  }}
+                  className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                    appliedFilter.status === 'active'
+                      ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
+                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Active
+                </div>
+                <div
+                  onClick={() => {
+                    setPendingFilter({ ...pendingFilter, status: 'inactive' });
+                    setAppliedFilter({ ...appliedFilter, status: 'inactive' });
+                  }}
+                  className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
+                    appliedFilter.status === 'inactive'
+                      ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
+                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Inactive
+                </div>
               </div>
-              <div
-                onClick={() => {
-                  setPendingFilter({ ...pendingFilter, status: 'active' });
-                  setAppliedFilter({ ...appliedFilter, status: 'active' });
-                }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
-                  appliedFilter.status === 'active'
-                    ? 'bg-white text-green-600 border-2 border-green-600 shadow-sm'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
-                }`}
-              >
-                Active
-              </div>
-              <div
-                onClick={() => {
-                  setPendingFilter({ ...pendingFilter, status: 'inactive' });
-                  setAppliedFilter({ ...appliedFilter, status: 'inactive' });
-                }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
-                  appliedFilter.status === 'inactive'
-                    ? 'bg-white text-red-600 border-2 border-red-600 shadow-sm'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
-                }`}
-              >
-                Inactive
-              </div>
+
+              {/* Bulk Actions - Right Side */}
+              {selectedJobPostings.size > 0 && (
+                <div className="flex items-center gap-3 md:pr-4 lg:pr-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !cachedProfile?.state?.data?.edit_job}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedJobPostings(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedJobPostings.size} selected
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -720,6 +858,15 @@ const Content = () => {
                 >
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!jobPostHistoryItems || jobPostHistoryItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job No.
                       </th>
@@ -743,6 +890,9 @@ const Content = () => {
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Work Setup
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Assigned Users
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
@@ -786,7 +936,30 @@ const Content = () => {
       {isDeleteModalOpen?.open && (
         <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
       )}
+      {assignUsersModal && assignUsersModal.id && (
+        <AssignUsersModal
+          isOpen={assignUsersModal}
+          setIsOpen={setAssignUsersModal}
+          onAssignmentComplete={() => {
+            refetch(); // Refresh the job postings list
+          }}
+        />
+      )}
+      
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedJobPostings.size}
+        moduleName="job postings"
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
+
       <Tooltip id='search-tooltip' />
+      <Tooltip id="edit-tooltip" />
+      <Tooltip id="delete-tooltip" />
+      <Tooltip id="assign-tooltip" />
     </div>
   );
 };

@@ -5,8 +5,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -48,11 +49,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   const [isDesignBenefitsModalOpen, setIsDesignBenefitsModalOpen] = useState<boolean | null>(null);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
-  const date1InputRef = useRef(null);
-  const date2InputRef = useRef(null);
+  
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -243,13 +240,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-benefit-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsDesignBenefitsModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_orientation}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>

@@ -3,12 +3,12 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import Link from "next/link";
 
+import { useEmployees } from "./hooks/useEmployees";
 import SearchBar from "./components/SearchBar";
 import FilterPopover from "./components/FilterPopover";
 import EmployeeGrid from "./components/EmployeeGrid";
 import SkeletonGrid from "./components/SkeletonGrid";
 import Pagination from "@/components/Pagination";
-import { useEmployees } from "./hooks/useEmployees";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 

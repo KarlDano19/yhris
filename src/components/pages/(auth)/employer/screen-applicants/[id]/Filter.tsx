@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import FilterIcon from '@/svg/FilterIcon';
 
 type FilterProps = {
@@ -68,13 +70,14 @@ export default function Filter({ onFilterChange }: FilterProps) {
   };
 
   return (
-    <div className="relative" ref={filterRef}>
-      <button
+    <div className="relative">
+      <SmartButton
+        id="use-filter-screen-applicants-btn"
         onClick={toggleFilter}
         className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
       >
         <FilterIcon />
-      </button>
+      </SmartButton>
 
       {isOpen && (
         <div className="absolute top-full mt-2 right-0 bg-white shadow-md rounded-md p-4 z-30 w-64 border border-gray-300">

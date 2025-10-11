@@ -4,6 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getHiredApplicants(filters: any) {
   try {
     let newFilters = { ...filters };
+    // Use standard pagination with job assignment filtering
+    newFilters.view_type = 'hired-applicants';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     if (filters.is_active) newFilters.is_active = filters.is_active;

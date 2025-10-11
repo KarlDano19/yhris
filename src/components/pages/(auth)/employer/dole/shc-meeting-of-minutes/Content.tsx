@@ -4,13 +4,15 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { Menu, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
@@ -20,6 +22,7 @@ import classNames from '@/helpers/classNames';
 
 import useGetShcMinutesMeetingItems from './hooks/useGetShcMinutesMettingItems';
 import useUpdateShcMinutesMeeting from './hooks/useUpdateShcMinutesMeeting';
+import useBulkDeleteShcMinutesMeeting from './hooks/useBulkDeleteShcMinutesMeeting';
 import CreateShcMettingMinutesModal from './modals/CreateShcMettingMinutesModal';
 import UpdateShcMinutesMeetingModal from './modals/UpdateShcMinutesMeeting';
 import DeleteShcMinutesMeetingModal from './modals/DeleteShcMinutesMeetingModal';
@@ -33,6 +36,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 import DeleteIcon from '@/svg/DeleteIcon';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 
 type PaginationProps = {
@@ -68,8 +72,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Email-specific state
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
+  
+  // Bulk delete states
+  const [selectedShcMinutesMeeting, setSelectedShcMinutesMeeting] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  
   const updateShcMinutesMeeting = useUpdateShcMinutesMeeting();
   const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
   
@@ -78,6 +86,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isSendEmailModalOpen?.id || null
   );
   
+  const bulkDeleteMutation = useBulkDeleteShcMinutesMeeting();
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -105,13 +114,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const menuOptions = [ 
     {
+      id: 'export-dole-shc-minute-btn',
       name: 'Export',
       action: () => {
         setIsExportProgressModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.export_dole_SHC_minute,
     },
   ];
+
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   useEffect(() => {
     if (shcMinutesMeetingData) {
@@ -155,6 +166,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsSearching(false);
     }
   }, [isShcMinutesMeetingLoading, isSearching]);
+
+  // Update select all state when SHC minutes meeting items change
+  useEffect(() => {
+    if (shcMinutesMeetingItems) {
+      const allShcMinutesMeetingIds = new Set(shcMinutesMeetingItems.map((s: any) => s.id));
+      const allSelected = allShcMinutesMeetingIds.size > 0 && 
+        Array.from(allShcMinutesMeetingIds).every((id: any) => selectedShcMinutesMeeting.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedShcMinutesMeeting, shcMinutesMeetingItems]);
 
   const handleStatusChange = async (itemId: number, newStatus: string) => {
     try {
@@ -233,6 +254,53 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       };
       
       sendEmailMutate(payload, callbackReq);
+    }
+  };
+
+  // Handle individual SHC minutes meeting selection
+  const handleShcMinutesMeetingSelect = (shcMinutesMeetingId: number) => {
+    setSelectedShcMinutesMeeting(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(shcMinutesMeetingId)) {
+        newSet.delete(shcMinutesMeetingId);
+      } else {
+        newSet.add(shcMinutesMeetingId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!shcMinutesMeetingItems) return;
+    
+    if (selectAll) {
+      setSelectedShcMinutesMeeting(new Set());
+    } else {
+      const allIds = shcMinutesMeetingItems.map((item: any) => item.id);
+      setSelectedShcMinutesMeeting(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedShcMinutesMeeting.size === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const shcMinutesMeetingIds = Array.from(selectedShcMinutesMeeting);
+      await bulkDeleteMutation.mutateAsync(shcMinutesMeetingIds);
+      
+      toast.custom(() => <CustomToast message={`${selectedShcMinutesMeeting.size} SHC minutes of meeting deleted successfully.`} type="success" />, { duration: 3000 });
+      setSelectedShcMinutesMeeting(new Set());
+      setSelectAll(false);
+      setIsBulkDeleteModalOpen(false);
+      shcMinutesMeetingRefetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete SHC minutes of meeting';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
     }
   };
 
@@ -322,6 +390,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (shcMinutesMeetingItems && shcMinutesMeetingItems.length > 0) {
       return shcMinutesMeetingItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedShcMinutesMeeting.has(item.id)}
+              onChange={() => handleShcMinutesMeetingSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_meeting}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.venue}</td>
@@ -332,7 +408,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -355,35 +430,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsUpdateShcMinutesMeetingModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EditIcon />
-              </button>
-              <button
-                // className='opacity-50'
+              </SmartButton>
+              <SmartButton
+                id="send-email-dole-shc-minute-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                // disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
-                // disabled={true}
-                // data-tooltip-id='email-tooltip'
-                // data-tooltip-content='Not available'
-                // data-tooltip-place='bottom'
-                disabled={!cachedRigths?.state?.data?.edit_dole_SHC_minute}
               >
                 <EmailLogo />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-shc-minute-btn"
                 onClick={() =>
                   setIsShcMinutesMeetingDeleteModalOpen({
                     id: item.id,
@@ -392,7 +462,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -486,13 +556,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-shc-minute-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateShcMeetingMinutesModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_SHC_minute}
               >
                 CREATE
-              </button>
+              </SmartButton>
               <Menu as='div' className='relative'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
@@ -511,20 +581,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <span
+                              onClick={() => item.action()}
                               className={classNames(
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                 item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
                             >
                               {item.name}
                             </span>
@@ -535,6 +601,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div>
+          </div>
+
+          {/* Bulk Actions Section - Left Side */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedShcMinutesMeeting.size > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {bulkDeleteMutation.isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedShcMinutesMeeting(new Set())}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedShcMinutesMeeting.size} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
             </div>
           </div>
 
@@ -550,6 +655,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!shcMinutesMeetingItems || shcMinutesMeetingItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Meeting
                       </th>
@@ -638,6 +752,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
         />
       )}
+      
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        selectedCount={selectedShcMinutesMeeting.size}
+        moduleName="SHC minutes of meeting"
+        onConfirm={confirmBulkDelete}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        isLoading={bulkDeleteMutation.isLoading}
+      />
 
       <Tooltip id='search-tooltip' />
       <Tooltip id='email-tooltip' />

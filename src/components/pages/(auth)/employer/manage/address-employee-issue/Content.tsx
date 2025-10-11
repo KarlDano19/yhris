@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -586,7 +588,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
                 isInvestigated={item.isInvestigated}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -598,7 +599,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
                 employeeIssueDetails={item}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -614,7 +614,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 hasInvestigationReport={hasInvestigationReport}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -641,23 +640,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </button>
                     {moreMenuOpen[item.id] && (
                       <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
-                        <ul className='py-1 text-left'>
-                          <li
-                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status ? 'border-b' : ''}`}
-                            onClick={() => handleEdit(item.id)}
-                          >
-                            {/* Hide Edit Report when NTE attachment exists and status is not pending, or when user doesn't have edit rights */}
-                            {cachedUserRights?.state?.data?.edit_employee_issue && item.status === 'pending' && !item.nte_attachment ? 'Edit Report' : 'View Report'}
-                          </li>
-                          {item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status && (
-                            <li
-                              className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
-                              onClick={() => handleUpdateStatus(item.id)}
+                        <div className='py-1 text-left flex flex-col gap-2'>
+                            <SmartButton
+                              id="edit-employee-issue-btn"
+                              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${item.status === 'pending' ? 'border-b' : ''}`}
+                              onClick={() => handleEdit(item.id)}
                             >
-                              Update Status
-                            </li>
-                          )}
-                        </ul>
+                              {/* Hide Edit Report when NTE attachment exists and status is not pending, or when user doesn't have edit rights */}
+                              {item.status === 'pending' && !item.nte_attachment ? 'Edit Report' : 'View Report'}
+                            </SmartButton>
+                            {item.status === 'pending' && (
+                              <SmartButton
+                                id="update-employee-issue-status-btn"
+                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                                onClick={() => handleUpdateStatus(item.id)}
+                              >
+                                Update Status
+                              </SmartButton>
+                            )}
+
+                        </div>
                       </div>
                     )}
                   </div>
@@ -766,13 +768,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-employee-issue-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
-                disabled={!cachedUserRights?.state?.data?.create_employee_issue}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           
@@ -891,7 +893,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsEditIncidentReportModalOpen}
         refetch={refetch}
         selectedIssue={selectedIssue}
-        cachedUserRights={cachedUserRights}
       />
       {isUpdateStatusModalOpen && (
         <UpdateStatusModal
@@ -901,7 +902,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsUpdateStatusModalOpen}
           refetch={refetch}
           selectedIssue={selectedIssue}
-          cachedUserRights={cachedUserRights}
         />
       )}
       {isSendNTEModalOpen && (

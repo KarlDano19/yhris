@@ -5,13 +5,14 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
@@ -25,10 +26,14 @@ import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIll
 import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import { useBulkDeleteWorkAccidentIllnessReport } from './hooks/useBulkDeleteWorkAccidentIllnessReport';
+import BulkDeleteModal from '@/components/BulkDeleteModal';
+import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
 
 import EditIcon from '@/svg/EditIcon';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 type PaginationProps = {
   totalRecords: number;
@@ -53,9 +58,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
@@ -91,22 +94,29 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const menuOptions = [
     {
+      id: 'export-dole-wair-btn',
       name: 'Export',
       action: () => {
         setIsExportProgressModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.export_dole_wair,
     },
     {
+      id: 'export-dole-wair-btn',
       name: 'Generate Report',
       action: () => {
         setIsSelectBranchModalOpen(true);
       },
-      disabled: !cachedRigths?.state?.data?.generate_dole_wair,
     },
   ];
 
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
+
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
+  const { mutate: bulkDeleteWorkAccidentIllnessReports, isLoading: isBulkDeleting } = useBulkDeleteWorkAccidentIllnessReport();
+  const cachedRigths = useLegacyPermissions();
 
   useEffect(() => {
     if (workAccidentIlnessReportsData) {
@@ -222,6 +232,44 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) {
+      toast.custom(() => <CustomToast message="Please select items to delete" type='error' />, { duration: 4000 });
+      return;
+    }
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const handleConfirmBulkDelete = () => {
+    bulkDeleteWorkAccidentIllnessReports(selectedItems, {
+      onSuccess: (data) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        setSelectedItems([]);
+        setIsBulkDeleteModalOpen(false);
+        workAccidentIlnessReportsRefetch();
+      },
+      onError: (error: any) => {
+        toast.custom(() => <CustomToast message={error.message} type='error' />, { duration: 4000 });
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.length === workAccidentIlnessReportsItems.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(workAccidentIlnessReportsItems.map((item: any) => item.id));
+    }
+  };
+
+  const handleSelectItem = (itemId: number) => {
+    if (selectedItems.includes(itemId)) {
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } else {
+      setSelectedItems([...selectedItems, itemId]);
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isWorkAccidentIlnessReportsLoading) {
       return (
@@ -237,6 +285,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (workAccidentIlnessReportsItems && workAccidentIlnessReportsItems.length > 0) {
       return workAccidentIlnessReportsItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedItems.includes(item.id)}
+              onChange={() => handleSelectItem(item.id)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.time_of_incident}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee}</td>
@@ -270,28 +326,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.extent_of_injury}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-wair-btn"
                 onClick={() =>
                   setIsUpdateWorkAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-wair-btn"
                 onClick={() =>
                   setIsWorkAccidentIllnessReportDeleteModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_wair}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -385,13 +441,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-wair-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateWorkAccidentIllnessReportModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_wair}
               >
                 CREATE
-              </button>
+              </SmartButton>
               <Menu as='div' className='relative'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
@@ -410,7 +466,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <span
@@ -419,11 +475,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                 item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
+                              onClick={(e) => {
+                                if (item.disabled) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  return false;
                                 }
+                                item.action();
                               }}
+                              data-permission-id={item.id}
+                              data-has-permission={item.hasPermission}
+                              data-is-disabled={item.disabled}
                             >
                               {item.name}
                             </span>
@@ -434,6 +496,45 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Menu.Items>
                 </Transition>
               </Menu>
+            </div>
+          </div>
+
+          {/* Bulk Actions Section */}
+          <div className="mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              {/* Bulk Actions - Left Side */}
+              {selectedItems.length > 0 && (
+                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={isBulkDeleting || !cachedRigths?.state?.data?.edit_dole_wair}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isBulkDeleting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Deleting...
+                      </div>
+                    ) : (
+                      'Delete Selected'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedItems([])}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Clear Selected
+                  </button>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {selectedItems.length} selected
+                  </span>
+                </div>
+              )}
+
+              {/* Right side - can be used for filters or empty */}
+              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
+                {/* Add any filter tabs here if needed in the future */}
+              </div>
             </div>
           </div>
 
@@ -449,6 +550,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === workAccidentIlnessReportsItems.length && workAccidentIlnessReportsItems.length > 0}
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Accident
                       </th>
@@ -751,6 +860,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          isOpen={isBulkDeleteModalOpen}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          onConfirm={handleConfirmBulkDelete}
+          selectedCount={selectedItems.length}
+          moduleName="work accident illness report"
+          isLoading={isBulkDeleting}
+        />
+      )}
     </>
   );
 }

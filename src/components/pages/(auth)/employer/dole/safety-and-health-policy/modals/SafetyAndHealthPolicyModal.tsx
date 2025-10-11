@@ -33,11 +33,7 @@ import PrintIcon from "@/svg/PrintIcon";
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import classNames from "@/helpers/classNames";
-
-interface cachedRigthsData {
-  name: string;
-  type_of_industry: string;
-}
+import { SmartButton } from "@/components/SmartPermissions/SmartButton";
 
 type T_ModalData = {
   open: boolean;
@@ -76,9 +72,6 @@ function SafetyAndHealthPolicyModal({
     number | null
   >(null);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
   const [isSendEmailModalOpen, setIsSendEmailModalOpen] =
     useState<T_ModalData | null>(null);
   
@@ -320,7 +313,6 @@ function SafetyAndHealthPolicyModal({
                       <select
                         value={safetyAndHealthPolicyDetails?.status || 'on-schedule'}
                         onChange={(e) => handleStatusChange(e.target.value)}
-                        disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
                         className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(safetyAndHealthPolicyDetails?.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
                       >
                         {statusOptions.map((option) => (
@@ -340,14 +332,13 @@ function SafetyAndHealthPolicyModal({
                         <SelectChevronDown />
                       </div>
                     </div>
-                    <button
+                    <SmartButton
+                      id="edit-dole-safety-health-policy-btn"
                       onClick={() => onEditClick()} // Pass the specific policy ID
-                      disabled={!cachedRigths?.state?.data?.edit_dole_safety_health_policy || !hasActiveSubscription}
-                      data-edit-button
                       className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
                       <EditIcon />
-                    </button>
+                    </SmartButton>
                     {!safetyAndHealthPolicyDetails?.attachment && (
                       <button 
                         onClick={handleGeneratePDF} 
@@ -369,7 +360,6 @@ function SafetyAndHealthPolicyModal({
                           open: true,
                         })
                       }
-                      // disabled={!cachedRigths?.state?.data?.send_email_dole_safety_health_policy || !hasActiveSubscription}
                       data-email-button
                       className={classNames(!hasActiveSubscription && 'opacity-50 pointer-events-none', 'disabled:opacity-50 disabled:pointer-events-none')}
                     >
@@ -497,7 +487,6 @@ function SafetyAndHealthPolicyModal({
                 <SafetyAndHealthPolicyAttachmentSection
                   pdfAttachment={safetyAndHealthPolicyDetails?.attachment || null}
                   isDeleting={isDeleting}
-                  canDelete={!!cachedRigths?.state?.data?.edit_dole_safety_health_policy}
                   onViewAttachment={handleViewAttachment}
                   onDeleteAttachment={handleDeleteAttachment}
                   onGeneratePDF={handleGeneratePDF}
