@@ -221,7 +221,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         ? new Date(selectedEmployeeIssue.incident_date).toISOString().split('T')[0]
         : '';
       // Find the employee info
-      const employeeName = selectedEmployeeIssue.name || '';
+      const employeeName = selectedEmployeeIssue.employee_name || '';
       const position = selectedEmployeeIssue.position || '';
       const department = selectedEmployeeIssue.department || '';
       const incidentPlace = selectedEmployeeIssue.place_of_incident || '';
