@@ -203,7 +203,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     if (isSearching || isPositionListLoading) {
       return (
         <tr>
-          <td colSpan={100}>
+          <td colSpan={5}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
             </div>
@@ -222,7 +222,6 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
             />
           </td>
-        <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -263,7 +262,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     } else {
       return (
         <tr>
-          <td colSpan={4}>
+          <td colSpan={5}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add position.</h4>
           </td>
@@ -388,47 +387,6 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
         </div>
       )}
 
-          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div
-              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#2d3e58 #f1f1f1'
-              }}
-            >
-              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
-                  <thead>
-                    <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date Created
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Description
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-                </table>
-                <hr />
-              </div>
-            </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
-          </div>
-        </div>
-      </div>
       <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
         <div
           className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -455,6 +413,9 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Name
+                  </th>
+                  <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                    Description
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Action
