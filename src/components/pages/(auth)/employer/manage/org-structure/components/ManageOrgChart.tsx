@@ -269,7 +269,19 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
           transition: isDragging ? 'none' : 'transform 0.3s ease-in-out'
         }}
       >
-        <div className="org-tree-container">
+        <div className="org-tree-container relative">
+          {/* Floating Title - Included in exports */}
+          <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
+            <div className="text-left">
+              <h2 className="text-lg font-bold text-gray-800 leading-tight">
+                {profileData?.name || 'Company'}'s
+              </h2>
+              <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                Organizational Structure
+              </h3>
+            </div>
+          </div>
+          
           <Tree
             lineWidth="2px"
             lineColor="#3b82f6"

@@ -362,19 +362,6 @@ const Content = () => {
 
       {/* Main Content */}
       <div className='flex-1 flex flex-col relative'>
-        {/* Floating Title - Left positioned and mobile responsive */}
-        {orgData && (
-          <div className="absolute top-4 left-2 sm:left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-2 sm:px-4 py-2 sm:py-3 pointer-events-none max-w-[calc(100%-1rem)] sm:max-w-none">
-            <div className="text-left">
-              <h2 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 leading-tight">
-                {cachedProfile?.state?.data?.name || 'Company'}'s
-              </h2>
-              <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 leading-tight">
-                Organizational Structure
-              </h3>
-            </div>
-          </div>
-        )}
         <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <ManageOrgChart 
