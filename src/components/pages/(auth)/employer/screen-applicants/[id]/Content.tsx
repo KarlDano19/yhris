@@ -419,7 +419,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} />,
     },
   };
 
