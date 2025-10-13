@@ -6,7 +6,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 
-import DeleteCriteriaModal from '../modals/DeleteCriteriaModal';
+import DeleteModal from '@/components/DeleteModal';
 
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MinusIcon from '@/svg/MinusIcon';
@@ -35,7 +35,7 @@ function CritiriaSubItem({
     name: `evaluation_criterion[${sectionIndex}].criterion`,
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<{ open: boolean } | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const criteriaRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -163,14 +163,14 @@ function CritiriaSubItem({
   
   const handleOpenModal = (index: number) => {
     setSelectedIndex(index);
-    setIsModalOpen(true);
+    setIsModalOpen({ open: true });
   };
 
   const handleConfirm = () => {
     if (selectedIndex !== null && fields.length > 1) {
       remove(selectedIndex);
     }
-    setIsModalOpen(false);
+    setIsModalOpen(null);
   };
 
   // ============================================================================
@@ -191,7 +191,14 @@ function CritiriaSubItem({
   
   return (
     <>
-      <DeleteCriteriaModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} onConfirm={handleConfirm} />
+      {isModalOpen && (
+        <DeleteModal
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
+          onConfirm={handleConfirm}
+          customText="this criteria"
+        />
+      )}
       {fields && fields.length > 0 && (
         <Droppable droppableId={`child-${sectionIndex}`} type='childContainer'>
           {(providedOther: any) => (

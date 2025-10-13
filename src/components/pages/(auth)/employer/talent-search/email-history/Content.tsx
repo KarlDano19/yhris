@@ -11,21 +11,21 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useGetEmailMonitoring from '../hook/email-monitoring/useGetEmailMonitoring';
+import useDeleteEmailMonitoring from '../hook/email-monitoring/useDeleteEmailMonitoring';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
-import DeleteModal from '../modal/DeleteModal';
 
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
 };
 
-type T_ModalData = {
+interface T_ModalData extends DeleteModalData {
   id: number;
-  open: boolean;
-};
+}
 
 const Content = () => {
   const queryClient = useQueryClient();
@@ -54,6 +54,8 @@ const Content = () => {
     isLoading: isEmailMonitoringLoading,
     refetch: emailMonitoringRefetch,
   } = useGetEmailMonitoring({ ...appliedFilter, page_size: pageSize, current_page: currentPage });
+  
+  const { mutate: deleteEmailMonitoring, isLoading: isDeleteLoading } = useDeleteEmailMonitoring();
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -381,8 +383,25 @@ const Content = () => {
           </div>
         </div>
       </div>
-      {isDeleteModalOpen && isDeleteModalOpen.open && (
-        <DeleteModal refetch={emailMonitoringRefetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
+      {isDeleteModalOpen && (
+        <DeleteModal<T_ModalData>
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteModalOpen(null);
+                emailMonitoringRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmailMonitoring(isDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteLoading}
+        />
       )}
     </>
   );

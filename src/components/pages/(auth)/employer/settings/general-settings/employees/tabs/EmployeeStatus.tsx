@@ -14,14 +14,14 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetEmployeeStatusItems from '../hooks/employee-status/useGetEmployeeStatusItems';
 import useBulkDeleteEmployeeStatuses from '../hooks/employee-status/useBulkDeleteEmployeeStatuses';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
-import DeleteModal from '../modals/DeleteModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import useDeleteEmployeeStatus from '../hooks/employee-status/useDeleteEmployeeStatus';
 import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
@@ -32,6 +32,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const formatDate = (dateString: string) => {
@@ -70,7 +74,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
   // Bulk delete states
   const [selectedEmployeeStatuses, setSelectedEmployeeStatuses] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
 
   const {
     data: employeeStatusListData,
@@ -78,6 +82,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
     refetch: employeeStatusListRefetch,
   } = useGetEmployeeStatusItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
+  const { mutate: deleteEmployeeStatus, isLoading: isDeleteEmployeeStatusLoading } = useDeleteEmployeeStatus();
   const bulkDeleteMutation = useBulkDeleteEmployeeStatuses();
 
   const cachedData: any = cachedProfile?.state?.data;
@@ -170,7 +175,10 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedEmployeeStatuses.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedEmployeeStatuses.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -181,7 +189,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
       toast.custom(() => <CustomToast message={`${selectedEmployeeStatuses.size} employee status(es) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedEmployeeStatuses(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       employeeStatusListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete employee statuses';
@@ -225,7 +233,8 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
               <SmartButton
                 id="delete-employee-status-btn"
                 onClick={() => setIsEmployeeStatusDeleteModalOpen({ id: item.id, open: true })}
-                className={selectedEmployeeStatuses.size > 1 ? 'invisible' : ''}
+                disabled={selectedEmployeeStatuses.size > 1}
+                className={selectedEmployeeStatuses.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -331,8 +340,8 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
       </div>
       
       {/* Bulk Actions - Below Date Filters */}
-      {selectedEmployeeStatuses.size > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      {selectedEmployeeStatuses.size > 1 && (
+        <div className="mt-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBulkDelete}
@@ -347,12 +356,6 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
               ) : (
                 'Delete Selected'
               )}
-            </button>
-            <button
-              onClick={() => setSelectedEmployeeStatuses(new Set())}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Clear Selected
             </button>
             <span className="text-sm text-gray-700 font-medium">
               {selectedEmployeeStatuses.size} selected
@@ -423,22 +426,35 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
       )}
       {isEmployeeStatusDeleteModalOpen && (
         <DeleteModal
-          module='employee-status'
-          refetch={employeeStatusListRefetch}
           isOpen={isEmployeeStatusDeleteModalOpen}
           setIsOpen={setIsEmployeeStatusDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsEmployeeStatusDeleteModalOpen(null);
+                employeeStatusListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmployeeStatus(isEmployeeStatusDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEmployeeStatusLoading}
         />
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedEmployeeStatuses.size}
-        moduleName="employee statuses"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} employee status${isBulkDeleteModalOpen.selectedCount > 1 ? 'es' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

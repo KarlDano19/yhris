@@ -10,20 +10,24 @@ import toast from 'react-hot-toast';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import Pagination from '@/components/Pagination';
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
+import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
 import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
 import SuccessModal from './modal/SuccessModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -46,7 +50,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
   const [isEditEmailTemplateModalOpen, setIsEditEmailTemplateModalOpen] = useState(false);
-  const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState(false);
+  const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
@@ -57,7 +61,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
 
   const {
     data: dataEmailTemplate,
@@ -84,6 +88,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     return () => clearTimeout(timer);
   }, [employeeSearchTerm]);
 
+  const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
@@ -168,10 +173,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsEditEmailTemplateModalOpen(true);
       }
       if (actionType === 'delete') {
-        setIsDeleteEmailTemplateModalOpen(true);
+        const templateName = emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject || '';
+        setIsDeleteEmailTemplateModalOpen({ 
+          open: true, 
+          id: selectedEmailTemplateId,
+          templateName 
+        });
       }
     }
-  }, [selectedEmailTemplateId, actionType]);
+  }, [selectedEmailTemplateId, actionType, emailTemplatesItems]);
 
   const openEditEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('edit');
@@ -185,7 +195,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openDeleteEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('delete');
     if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
-      setIsDeleteEmailTemplateModalOpen(true);
+      setIsDeleteEmailTemplateModalOpen({ 
+        open: true, 
+        id: emailTemplateDetails.id,
+        templateName: emailTemplateDetails.subject 
+      });
     } else {
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
@@ -219,7 +233,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedEmailTemplates.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedEmailTemplates.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -230,7 +247,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`${selectedEmailTemplates.size} email template(s) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedEmailTemplates(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       refetchEmailTemplate();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete email templates';
@@ -271,7 +288,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
                 <EditIcon />
               </SmartButton>
-              <SmartButton id="delete-email-template-btn" onClick={() => openDeleteEvaluationModal(item)}>
+              <SmartButton 
+                id="delete-email-template-btn" 
+                onClick={() => openDeleteEvaluationModal(item)}
+                disabled={selectedEmailTemplates.size > 1}
+                className={selectedEmailTemplates.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <DeleteIcon />
               </SmartButton>
             </div>
@@ -345,8 +367,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
           
           {/* Bulk Actions - Below Search/Filter Row */}
-          {selectedEmailTemplates.size > 0 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          {selectedEmailTemplates.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}
@@ -361,12 +383,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
-                <button
-                  onClick={() => setSelectedEmailTemplates(new Set())}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Clear Selected
                 </button>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedEmailTemplates.size} selected
@@ -431,6 +447,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+
+      {/* Create Modal */}
       <CreateEmailTemplateModal
         isOpen={isCreateModalOpen}
         setIsOpen={setIsCreateModalOpen}
@@ -439,18 +457,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         employeeData={employeeData}
         onSearchChange={setEmployeeSearchTerm}
       />
+
+      {/* Success Modal */}
       <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
-      {isDeleteEmailTemplateModalOpen && selectedEmailTemplateId && (
-        <DeleteEmailTemplateModal
-          refetch={refetchEmailTemplate}
+
+      {/* Delete Modal */}
+      {isDeleteEmailTemplateModalOpen && (
+        <DeleteModal
           isOpen={isDeleteEmailTemplateModalOpen}
           setIsOpen={setIsDeleteEmailTemplateModalOpen}
-          selectedEmailTemplateId={selectedEmailTemplateId}
-          selectedEmailTemplateName={
-            emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject
-          }
+          onConfirm={() => {
+            if (!isDeleteEmailTemplateModalOpen.id) return;
+            
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteEmailTemplateModalOpen(null);
+                refetchEmailTemplate();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmailTemplate(isDeleteEmailTemplateModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEmailTemplateLoading}
+          customText={`${isDeleteEmailTemplateModalOpen.templateName} Email Template`}
         />
       )}
+
+      {/* Edit Modal */}
       {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (
         <EditEmailTemplateModal
           refetch={refetchEmailTemplate}
@@ -463,14 +499,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedEmailTemplates.size}
-        moduleName="email templates"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} email template${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

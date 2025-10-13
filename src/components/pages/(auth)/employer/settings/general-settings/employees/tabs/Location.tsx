@@ -9,11 +9,11 @@ import { Tooltip } from 'react-tooltip';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import useGetLocationItems from '../hooks/location/useGetLocationItems';
+import useDeleteLocation from '../hooks/location/useDeleteLocation';
 import useBulkDeleteLocations from '../hooks/location/useBulkDeleteLocations';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
-import DeleteModal from '../modals/DeleteModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -32,6 +32,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const formatDate = (dateString: string) => {
@@ -70,7 +74,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedLocations, setSelectedLocations] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
 
   const {
     data: locationListData,
@@ -78,6 +82,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: locationListRefetch,
   } = useGetLocationItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
+  const { mutate: deleteLocation, isLoading: isDeleteLocationLoading } = useDeleteLocation();
   const bulkDeleteMutation = useBulkDeleteLocations();
 
   const cachedData: any = cachedProfile?.state?.data;
@@ -170,7 +175,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedLocations.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedLocations.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -181,7 +189,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`${selectedLocations.size} location(s) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedLocations(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       locationListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete locations';
@@ -222,7 +230,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton 
                 id="delete-location-btn"
                 onClick={() => setIsLocationDeleteModalOpen({ id: item.id, open: true })}
-                className={selectedLocations.size > 1 ? 'invisible' : ''}
+                disabled={selectedLocations.size > 1}
+                className={selectedLocations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -328,8 +337,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
       
       {/* Bulk Actions - Below Date Filters */}
-      {selectedLocations.size > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      {selectedLocations.size > 1 && (
+        <div className="mt-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBulkDelete}
@@ -344,12 +353,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               ) : (
                 'Delete Selected'
               )}
-            </button>
-            <button
-              onClick={() => setSelectedLocations(new Set())}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Clear Selected
             </button>
             <span className="text-sm text-gray-700 font-medium">
               {selectedLocations.size} selected
@@ -420,22 +423,35 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isLocationDeleteModalOpen && (
         <DeleteModal
-          module='location'
-          refetch={locationListRefetch}
           isOpen={isLocationDeleteModalOpen}
           setIsOpen={setIsLocationDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsLocationDeleteModalOpen(null);
+                locationListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteLocation(isLocationDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteLocationLoading}
         />
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedLocations.size}
-        moduleName="locations"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} location${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

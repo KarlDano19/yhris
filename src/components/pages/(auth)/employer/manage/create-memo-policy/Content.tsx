@@ -12,7 +12,7 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ConfirmModal from '@/components/ConfirmModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import useBulkDeleteDirectives from './hooks/useBulkDeleteDirectives';
@@ -20,11 +20,10 @@ import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePagi
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
-import DeleteMemoLogo from '@/svg/DeleteMemoLogo';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 import classNames from '@/helpers/classNames';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -32,6 +31,10 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 type PaginationProps = {
   totalRecords: number;
   totalPages: number;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
@@ -42,9 +45,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
-  const [idToDelete, setIdToDelete] = useState<number | null>(null);
   const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState<any>([]);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState(false);
   const [isEmployeeResponsesModalOpen, setIsEmployeeResponsesModalOpen] = useState(false);
@@ -61,7 +63,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedDirectives, setSelectedDirectives] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
   
   const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems({
     ...itemsFilter,
@@ -151,39 +153,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [selectedDirectives, createMemoPolicyItems]);
 
-  const deleteMemo = () => {
-    if (idToDelete) {
-      const updatedItems = createMemoPolicyItems.map((item: any) => {
-        return item.id !== idToDelete
-          ? item
-          : {
-              ...item,
-              isDeleted: true,
-            };
-      });
-      const callbackReq = {
-        onSuccess: (data: any) => {
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          setIsConfirmModalOpen(false);
-          setCreateMemoPolicyItems([...updatedItems]);
-          
-          // Refresh data after deletion to maintain pagination consistency
-          // If we're on a page with only one item and we delete it, go back to previous page
-          if (updatedItems.filter((item: any) => !item.isDeleted).length === 0 && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-          } else {
-            refetch();
-          }
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 5000,
-          });
-        },
-      };
-      mutate(idToDelete, callbackReq);
-    }
-  };
 
   // Handle individual directive selection
   const handleDirectiveSelect = (directiveId: number) => {
@@ -213,7 +182,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedDirectives.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedDirectives.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -224,7 +196,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`${selectedDirectives.size} directive(s) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedDirectives(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       refetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete directives';
@@ -314,13 +286,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <SmartButton
-                    id="edit-memo-btn"
+                    id="delete-memo-btn"
                     onClick={() => {
-                      setIdToDelete(item.id);
-                      setIsConfirmModalOpen(true);
+                      setIsDeleteModalOpen({ id: item.id, open: true });
                     }}
+                    disabled={selectedDirectives.size > 1}
+                    className={selectedDirectives.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
                   >
-                    <DeleteMemoLogo />
+                    <DeleteIcon />
                   </SmartButton>
                 </td>
               </tr>
@@ -485,44 +458,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
           
-          {/* Bulk Actions Section - Moved to Left Side */}
-          <div className="mt-8">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              {/* Bulk Actions - Left Side */}
-              {selectedDirectives.size > 0 && (
-                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
-                  <button
-                    onClick={handleBulkDelete}
-                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {bulkDeleteMutation.isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Deleting...
-                      </div>
-                    ) : (
-                      'Delete Selected'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setSelectedDirectives(new Set())}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
-                  <span className="text-sm text-gray-700 font-medium">
-                    {selectedDirectives.size} selected
-                  </span>
-                </div>
-              )}
-
-              {/* Right side - can be used for filters or empty */}
-              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
-                {/* Add any filter tabs here if needed in the future */}
+          {/* Bulk Actions - Below Search/Filter Row */}
+          {selectedDirectives.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedDirectives.size} selected
+                </span>
               </div>
             </div>
-          </div>
+          )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -594,22 +552,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         memoTitle={selectedMemoTitle}
         directiveId={selectedMemoTitle?.id}
       />
-      <ConfirmModal
-        message='Are you sure you want to delete this memo/policy?'
-        isOpen={isConfirmModalOpen}
-        setIsOpen={setIsConfirmModalOpen}
-        confirmAction={deleteMemo}
-        // isLoading={false}
-        isLoading={isLoading}
-      />
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedDirectives.size}
-        moduleName="directives"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteModalOpen(null);
+                refetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            mutate(isDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isLoading}
+        />
+      )}
+      {/* Bulk Delete Modal */}
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} directive${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

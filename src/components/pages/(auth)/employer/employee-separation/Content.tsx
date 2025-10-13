@@ -8,15 +8,15 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
-import DeleteSeparationModal from './modals/DeleteSeparationModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
+import useDeleteSeparation from './hooks/useDeleteSeparation';
 import usePatchSeparation from './hooks/usePatchSeparation';
 import useBulkDeleteSeparations from './hooks/useBulkDeleteSeparations';
 import SeparationLetter from './SeparationLetter';
@@ -37,6 +37,10 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 import classNames from '@/helpers/classNames';
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
@@ -70,9 +74,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedSeparations, setSelectedSeparations] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
 
   const { mutate, isLoading } = usePatchSeparation();
+  const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
   const bulkDeleteMutation = useBulkDeleteSeparations();
   
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems({
@@ -403,7 +408,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedSeparations.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedSeparations.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -414,7 +422,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`${selectedSeparations.size} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedSeparations(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       refetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete separations';
@@ -497,8 +505,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex justify-center space-x-2'>
               <button 
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                disabled={!cachedProfile?.state?.data?.edit_separation}
-                className={selectedSeparations.size > 1 ? 'invisible' : ''}
+                disabled={!cachedProfile?.state?.data?.edit_separation || selectedSeparations.size > 1}
+                className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </button>
@@ -614,8 +622,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
           
           {/* Bulk Actions - Below Date Filters */}
-          {selectedSeparations.size > 0 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          {selectedSeparations.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}
@@ -630,12 +638,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
-                <button
-                  onClick={() => setSelectedSeparations(new Set())}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Clear Selected
                 </button>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedSeparations.size} selected
@@ -765,22 +767,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isDeleteSepartionModalOpen && (
-        <DeleteSeparationModal
-          refetch={refetch}
+        <DeleteModal
           isOpen={isDeleteSepartionModalOpen}
           setIsOpen={setIsDeleteSepartionModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteSepartionModalOpen(null);
+                refetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteSeparation(isDeleteSepartionModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteSeparationLoading}
         />
       )}
       
       {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedSeparations.size}
-        moduleName="separations"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} separation${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>
