@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal from '@/components/DeleteModal';
@@ -309,7 +310,8 @@ export default function VersionHistoryModal({
                   {selectedVersions.size > 1 && (
                     <div className="mb-4 p-3">
                       <div className="flex items-center gap-3">
-                        <button
+                        <SmartButton
+                          id="edit-dole-osh-program-btn"
                           onClick={handleBulkDelete}
                           disabled={bulkDeleteVersionMutation.isLoading}
                           className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -322,13 +324,10 @@ export default function VersionHistoryModal({
                           ) : (
                             'Delete Selected'
                           )}
-                        </button>
-                        <button
-                          onClick={() => setSelectedVersions(new Set())}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        >
-                          Clear Selected
-                        </button>
+                        </SmartButton>
+                        <span className="text-sm text-gray-700 font-medium">
+                          {selectedVersions.size} selected
+                        </span>
                       </div>
                     </div>
                   )}
@@ -412,7 +411,8 @@ export default function VersionHistoryModal({
                                   >
                                     <EyeIcon className="w-5 h-5" />
                                   </button>
-                                  <button
+                                  <SmartButton
+                                    id="edit-dole-osh-program-btn"
                                     onClick={() => handleDeleteVersion(version.id, version.version_number_formatted)}
                                     disabled={deleteVersionMutation.isLoading || selectedVersions.size > 1}
                                     className={`text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${selectedVersions.size > 1 ? 'invisible' : ''}`}
@@ -423,7 +423,7 @@ export default function VersionHistoryModal({
                                     ) : (
                                       <DeleteIcon />
                                     )}
-                                  </button>
+                                  </SmartButton>
                                 </div>
                               </td>
                             </tr>

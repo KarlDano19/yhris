@@ -286,7 +286,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <SmartButton
-                    id="delete-memo-btn"
+                    id="edit-memo-btn"
                     onClick={() => {
                       setIsDeleteModalOpen({ id: item.id, open: true });
                     }}
@@ -397,13 +397,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
                 <div>
-                  <Menu.Button
-                    as = {SmartButton}
+                  <SmartButton
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
-                   >
-                    CREATE
-                  </Menu.Button>
+                  >
+                    <Menu.Button className="w-full h-full">
+                      CREATE
+                    </Menu.Button>
+                  </SmartButton>
                 </div>
 
                 <Transition
@@ -462,8 +463,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {selectedDirectives.size > 1 && (
             <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <button
+                <SmartButton
+                  id="edit-memo-btn"
                   onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {bulkDeleteMutation.isLoading ? (
@@ -474,7 +477,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
+                </SmartButton>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedDirectives.size} selected
                 </span>

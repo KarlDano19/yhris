@@ -343,7 +343,8 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
       {selectedDepartments.size > 1 && (
         <div className="mt-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
-            <button
+            <SmartButton
+              id="delete-department-btn"
               onClick={handleBulkDelete}
               disabled={bulkDeleteMutation.isLoading}
               className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -356,7 +357,7 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               ) : (
                 'Delete Selected'
               )}
-            </button>
+            </SmartButton>
             <span className="text-sm text-gray-700 font-medium">
               {selectedDepartments.size} selected
             </span>

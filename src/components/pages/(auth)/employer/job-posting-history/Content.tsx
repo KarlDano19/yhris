@@ -565,7 +565,8 @@ const Content = () => {
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
                   data-tooltip-id="delete-tooltip"
                   data-tooltip-content="Delete Job"
-                  className={selectedJobPostings.size > 1 ? 'invisible' : ''}
+                  disabled={selectedJobPostings.size > 1}
+                  className={selectedJobPostings.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
                 >
                   <DeleteIcon />
                 </SmartButton>
@@ -822,7 +823,7 @@ const Content = () => {
               {selectedJobPostings.size > 1 && (
                 <div className="flex items-center gap-3 md:pr-4 lg:pr-10">
                   <SmartButton
-                    id="delete-job-posting-btn"
+                    id="delete-job-btn"
                     onClick={handleBulkDelete}
                     disabled={bulkDeleteMutation.isLoading}
                     className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -836,12 +837,6 @@ const Content = () => {
                       'Delete Selected'
                     )}
                   </SmartButton>
-                  <button
-                    onClick={() => setSelectedJobPostings(new Set())}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
                   <span className="text-sm text-gray-700 font-medium">
                     {selectedJobPostings.size} selected
                   </span>
