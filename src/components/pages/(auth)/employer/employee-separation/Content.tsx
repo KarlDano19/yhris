@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -503,13 +505,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
             <div className='flex justify-center space-x-2'>
-              <button 
+              <SmartButton 
+                id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
                 disabled={!cachedProfile?.state?.data?.edit_separation || selectedSeparations.size > 1}
                 className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -611,13 +614,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id='create-separation-btn'
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
-                disabled={!cachedProfile?.state?.data?.create_separation}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           
@@ -625,9 +628,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {selectedSeparations.size > 1 && (
             <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <button
+                <SmartButton
+                  id="edit-separation-btn"
                   onClick={handleBulkDelete}
-                  disabled={bulkDeleteMutation.isLoading || !cachedProfile?.state?.data?.edit_separation}
+                  disabled={bulkDeleteMutation.isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {bulkDeleteMutation.isLoading ? (
@@ -638,6 +642,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
+                </SmartButton>
+                <button
+                  onClick={() => setSelectedSeparations(new Set())}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Clear Selected
+                </button>
                 </button>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedSeparations.size} selected
