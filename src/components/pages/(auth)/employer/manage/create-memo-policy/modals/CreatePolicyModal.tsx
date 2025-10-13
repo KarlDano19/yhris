@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
@@ -14,6 +15,10 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import { DirectiveData, PolicyField } from '@/types/directives';
+
+interface CachedProfileData {
+  name: string;
+}
 
 export default function CreatePolicyModal({
   isOpen,
@@ -52,6 +57,12 @@ export default function CreatePolicyModal({
         });
       }
     }
+  const queryClient = useQueryClient();
+  
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['employerProfileCache']) as {
+    state: { data: CachedProfileData } | undefined;
   };
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
     useForm<DirectiveData>({
@@ -204,6 +215,14 @@ export default function CreatePolicyModal({
   }, [tagsTo, clearErrors]);
 
   // Filter employees based on input using passed data
+  // Set company name from cached profile when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue('company_name', cachedProfile.state.data.name || '');
+    }
+  }, [isOpen, cachedProfile, setValue]);
+
+  // Filter employees based on input
   useEffect(() => {
     if (employeeData?.records) {
       if (inputTo.trim()) {

@@ -178,6 +178,30 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           )}
         </div>
       </div>
+      {!isLoading && jobDetailData?.uploaded_job_description && jobDetailData?.uploaded_job_description.length > 0 && (
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <>
+            <h5 className='text-xl font-semibold text-indigo-dye'>Job Description File</h5>
+            <div className='details mx-5 mt-2'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Job Description Document
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <a 
+                  href={jobDetailData?.uploaded_job_description} 
+                  target='_blank' 
+                  rel='noopener noreferrer'
+                  className='text-savoy-blue underline hover:text-blue-700 flex items-center'
+                >
+                  <ClipboardDocumentIcon className='h-4 w-4 mr-1' />
+                  View Job Description PDF
+                </a>
+              </div>
+            </div>
+          </>
+        </div>
+      )}
     </>
   );
 };

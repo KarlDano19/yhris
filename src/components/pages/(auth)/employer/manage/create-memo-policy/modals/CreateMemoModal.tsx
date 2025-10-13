@@ -6,6 +6,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
@@ -16,6 +17,10 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { DirectiveData } from '@/types/directives';
+
+interface CachedProfileData {
+  name: string;
+}
 
 export default function CreateMemoModal({
   isOpen,
@@ -45,6 +50,13 @@ export default function CreateMemoModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
+  const queryClient = useQueryClient();
+  
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['employerProfileCache']) as {
+    state: { data: CachedProfileData } | undefined;
+  };
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -257,6 +269,13 @@ export default function CreateMemoModal({
     setShowEmployeeSuggestions(false);
     setSelectedEmployeeIndex(-1);
   };
+
+  // Set company name from cached profile when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue('company_name', cachedProfile.state.data.name || '');
+    }
+  }, [isOpen, cachedProfile, setValue]);
 
   useEffect(() => {
     if (signatureUrl) {
