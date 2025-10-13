@@ -1,5 +1,6 @@
-import React from 'react';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import React, { Fragment, useRef } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 interface PipelineInfoModalProps {
   isOpen: boolean;
@@ -18,7 +19,8 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
   numberOfApplicants,
   pipelineData
 }) => {
-  if (!isOpen) return null;
+  const cancelButtonRef = useRef(null);
+
 
   // Parse the pipeline information into stages
   const parsePipelineStages = (pipelineInfo: string, pipelineData?: { [stageTitle: string]: number }) => {
@@ -50,24 +52,42 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
   const stages = parsePipelineStages(pipelineInfo, pipelineData);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-2 text-center md:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
+              enterTo='opacity-100 translate-y-0 md:scale-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100 translate-y-0 md:scale-100'
+              leaveTo='opacity-0 translate-y-4 md:translate-y-0 md:scale-95'
+            >
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all w-full max-w-full mx-2 md:my-8 md:w-full md:max-w-2xl'>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Pipeline Details</h2>
-            <p className="text-sm text-gray-600 mt-1">{role}</p>
+        <div className='flex bg-savoy-blue p-2 items-center'>
+                  <div className='flex-1 ml-2'>
+                    <h3 className='text-white font-semibold'>Pipeline Details - {role}</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
+          <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={onClose} />
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div className='px-2 pt-4 pb-6 md:px-8 overflow-y-auto max-h-[calc(90vh-180px)]'>
           {numberOfApplicants === 0 ? (
             <div className="text-center py-8">
               <div className="text-gray-500 text-lg">No applicants yet</div>
@@ -112,17 +132,24 @@ const PipelineInfoModal: React.FC<PipelineInfoModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
+        <hr />
+          <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
           <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
+          type='button'
+            className='mt-3 inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:mt-0 sm:w-auto'
+              onClick={onClose}
+            ref={cancelButtonRef}
+            >
             Close
           </button>
         </div>
-      </div>
-    </div>
-  );
+      </Dialog.Panel>
+    </Transition.Child>
+  </div>
+</div>
+</Dialog>
+</Transition.Root>
+);
 };
 
 export default PipelineInfoModal;

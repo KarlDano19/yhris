@@ -217,7 +217,7 @@ function PreferencesTab({
           </div>
           <div className='grid-item col-span-6'>
             <label htmlFor='responsibilities' className='text-sm font-medium leading-6 text-gray-900'>
-              Description/Responsibilities
+              Description/Responsibilities<span className='text-red-500'>*</span>
             </label>
             <div className='mt-2 h-40 mb-12'>
               <ReactQuill
