@@ -1,6 +1,7 @@
 import React, { Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 interface PipelineInfoModalProps {
