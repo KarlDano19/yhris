@@ -1,7 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
 
 export async function downloadScreeningAnswersPDF(
   appliedJobId: number, 
