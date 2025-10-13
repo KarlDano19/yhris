@@ -497,13 +497,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
             <div className='flex justify-center space-x-2'>
-              <button 
+              <SmartButton 
+                id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                disabled={!cachedProfile?.state?.data?.edit_separation}
                 className={selectedSeparations.size > 1 ? 'invisible' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -619,9 +619,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           {selectedSeparations.size > 0 && (
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <button
+                <SmartButton
+                  id="edit-separation-btn"
                   onClick={handleBulkDelete}
-                  disabled={bulkDeleteMutation.isLoading || !cachedProfile?.state?.data?.edit_separation}
+                  disabled={bulkDeleteMutation.isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {bulkDeleteMutation.isLoading ? (
@@ -632,7 +633,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
+                </SmartButton>
                 <button
                   onClick={() => setSelectedSeparations(new Set())}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
