@@ -460,7 +460,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 <div className='hidden md:flex justify-start items-center gap-4 my-6'>
                   <button
                     onClick={handleOpenBatchUpload}
-                    className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
+                    className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
                     disabled={!hasActiveSubscription}
                   >
                     <UploadIcon />
