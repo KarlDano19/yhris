@@ -57,6 +57,7 @@ export default function CreatePolicyModal({
         });
       }
     }
+  }
   const queryClient = useQueryClient();
   
   const cachedProfile = queryClient
