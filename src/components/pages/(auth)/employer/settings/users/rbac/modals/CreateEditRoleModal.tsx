@@ -274,6 +274,16 @@ export default function CreateEditRoleModal({
                                   <SelectChevronDown />
                                 </div>
                               </div>
+                              <div className='mt-2 space-y-1'>
+                                <div className='flex items-start space-x-2 text-xs text-gray-600'>
+                                  <div className='w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0'></div>
+                                  <p><span className='font-medium'>System Role:</span> Built-in roles that cannot be modified or deleted</p>
+                                </div>
+                                <div className='flex items-start space-x-2 text-xs text-gray-600'>
+                                  <div className='w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0'></div>
+                                  <p><span className='font-medium'>Custom Role:</span> User-created roles that can be fully modified and deleted</p>
+                                </div>
+                              </div>
                             </div>
 
                             <div className='md:col-span-2'>
