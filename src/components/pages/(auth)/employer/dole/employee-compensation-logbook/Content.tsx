@@ -18,6 +18,7 @@ import { useForm } from 'react-hook-form';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
@@ -109,7 +110,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const [selectedLogbooks, setSelectedLogbooks] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const bulkDeleteMutation = useBulkDeleteEmployeeCompensationLogbook();
 
@@ -136,28 +139,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedLogbooks.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedLogbooks.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedLogbooks.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const logbookIds = Array.from(selectedLogbooks);
       await bulkDeleteMutation.mutateAsync(logbookIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedLogbooks.size} logbook(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedLogbooks(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      employeeCompensationLogbookListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete logbooks';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} logbook(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedLogbooks(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    employeeCompensationLogbookListRefetch();
   };
 
   useEffect(() => {
@@ -619,14 +634,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
         />
       )}
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Employee Compensation Logbook${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} Employee Compensation Logbook${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} Employee Compensation Logbook${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
       {/* Print Section */}

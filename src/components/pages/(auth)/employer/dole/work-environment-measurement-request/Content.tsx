@@ -14,6 +14,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
@@ -82,7 +83,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const updateWorkEnvironmentRequestStatus = useUpdateWorkEnvironmentRequest();
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const bulkDeleteMutation = useBulkDeleteWorkEnvironmentRequest();
   const { mutate: sendEmail, isLoading: isSendingEmail } = useSendEmail();
@@ -418,29 +421,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedRequests.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedRequests.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedRequests.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const requestIds = Array.from(selectedRequests);
       await bulkDeleteMutation.mutateAsync(requestIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedRequests.size} request(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedRequests(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      workEnvironmentRequestItemsRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete requests';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} request(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedRequests(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    workEnvironmentRequestItemsRefetch();
   };
 
   // Update select all state when requests change
@@ -812,14 +826,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isLoading={isSendingEmail}
         />
       )}
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Work Environment Request${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} Work Environment Request${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} Work Environment Request${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
       <Tooltip id='search-tooltip'/>

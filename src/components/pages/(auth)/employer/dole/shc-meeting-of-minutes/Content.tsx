@@ -17,6 +17,7 @@ import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuO
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
@@ -78,7 +79,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedShcMinutesMeeting, setSelectedShcMinutesMeeting] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
   
   const updateShcMinutesMeeting = useUpdateShcMinutesMeeting();
   const { mutate: deleteShcMinutesMeeting, isLoading: isDeleteShcMinutesMeetingLoading } = useDeleteShcMinutesMeeting();
@@ -285,29 +288,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedShcMinutesMeeting.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedShcMinutesMeeting.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedShcMinutesMeeting.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const shcMinutesMeetingIds = Array.from(selectedShcMinutesMeeting);
       await bulkDeleteMutation.mutateAsync(shcMinutesMeetingIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedShcMinutesMeeting.size} SHC minutes of meeting deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedShcMinutesMeeting(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      shcMinutesMeetingRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete SHC minutes of meeting';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} SHC minutes of meeting deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedShcMinutesMeeting(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    shcMinutesMeetingRefetch();
   };
 
   const handlePrint = () => {
@@ -761,14 +775,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} SHC minutes of meeting${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} SHC minutes of meeting${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} SHC minutes of meeting${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

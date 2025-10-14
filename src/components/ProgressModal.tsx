@@ -85,7 +85,7 @@ export default function ProgressModal({
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog 
         as='div' 
-        className='relative z-10' 
+        className='relative z-[9999]' 
         initialFocus={cancelButtonRef} 
         onClose={() => {
           // Only allow closing if processing is not in progress

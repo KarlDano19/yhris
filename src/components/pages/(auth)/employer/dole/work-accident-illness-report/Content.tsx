@@ -16,6 +16,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -118,7 +119,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [isSearching, setIsSearching] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const { mutate: bulkDeleteWorkAccidentIllnessReports, isLoading: isBulkDeleting } = useBulkDeleteWorkAccidentIllnessReport();
   const cachedRigths = useLegacyPermissions();
@@ -237,29 +240,50 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) {
       toast.custom(() => <CustomToast message="Please select items to delete" type='error' />, { duration: 4000 });
       return;
     }
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedItems.length);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedItems.length,
     });
   };
 
-  const handleConfirmBulkDelete = () => {
-    bulkDeleteWorkAccidentIllnessReports(selectedItems, {
-      onSuccess: (data) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setSelectedItems([]);
-        setIsBulkDeleteModalOpen(null);
-        workAccidentIlnessReportsRefetch();
-      },
-      onError: (error: any) => {
-        toast.custom(() => <CustomToast message={error.message} type='error' />, { duration: 4000 });
-      }
-    });
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const handleConfirmBulkDelete = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        bulkDeleteWorkAccidentIllnessReports(selectedItems, {
+          onSuccess: (data) => {
+            resolve(data);
+          },
+          onError: (error: any) => {
+            reject(error);
+          }
+        });
+      });
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to delete work accident illness reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} work accident illness report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedItems([]);
+    setBulkDeleteCount(0);
+    workAccidentIlnessReportsRefetch();
   };
 
   const handleSelectAll = () => {
@@ -870,14 +894,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} work accident illness report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={handleConfirmBulkDelete}
-          isLoading={isBulkDeleting}
-          customText={`${isBulkDeleteModalOpen.selectedCount} work accident illness report${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} work accident illness report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={isBulkDeleting}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
     </>

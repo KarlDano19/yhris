@@ -12,8 +12,10 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import useGetEmailMonitoring from '../hook/email-monitoring/useGetEmailMonitoring';
 import useDeleteEmailMonitoring from '../hook/email-monitoring/useDeleteEmailMonitoring';
+import useBulkDeleteEmailMonitoring from '../hook/email-monitoring/useBulkDeleteEmailMonitoring';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -26,6 +28,10 @@ type PaginationProps = {
 interface T_ModalData extends DeleteModalData {
   id: number;
 }
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
 
 const Content = () => {
   const queryClient = useQueryClient();
@@ -56,9 +62,14 @@ const Content = () => {
   } = useGetEmailMonitoring({ ...appliedFilter, page_size: pageSize, current_page: currentPage });
   
   const { mutate: deleteEmailMonitoring, isLoading: isDeleteLoading } = useDeleteEmailMonitoring();
+  const bulkDeleteMutation = useBulkDeleteEmailMonitoring();
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteProgressModalOpen, setIsBulkDeleteProgressModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   useEffect(() => {
     if (emailMonitoringData) {
@@ -75,6 +86,7 @@ const Content = () => {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
+    setSelectedItems([]); // Clear selections when filters change
   }, [appliedFilter]);
 
   useEffect(() => {
@@ -159,18 +171,73 @@ const Content = () => {
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
+    setSelectedItems([]); // Clear selections when page changes
   };
 
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+    setSelectedItems([]); // Clear selections when page size changes
+  };
+
+  // Selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = employeeItems.map((item: any) => item.id);
+      setSelectedItems(allIds);
+    } else {
+      setSelectedItems([]);
+    }
+  };
+
+  const handleSelectItem = (itemId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedItems(prev => [...prev, itemId]);
+    } else {
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedItems.length <= 1) return;
+    setBulkDeleteCount(selectedItems.length);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+      selectedCount: selectedItems.length,
+    });
+  };
+
+  // Confirm and proceed to progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteProgressModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      await bulkDeleteMutation.mutateAsync(selectedItems);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete email monitoring records';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteProgressModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} email monitoring record(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedItems([]);
+    setBulkDeleteCount(0);
+    emailMonitoringRefetch();
   };
 
   const renderRows = () => {
     if (isSearching || isEmailMonitoringLoading) {
       return (
         <tr>
-          <td colSpan={5}>
+          <td colSpan={7}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
             </div>
@@ -181,6 +248,14 @@ const Content = () => {
     if (emailMonitoringData && emailMonitoringData.records.length > 0) {
       return emailMonitoringData.records.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              checked={selectedItems.includes(item.id)}
+              onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.applicant_name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to_email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 overflow-hidden text-ellipsis max-w-xs'>
@@ -208,6 +283,8 @@ const Content = () => {
             <div>
               <button
                 onClick={() => setIsDeleteModalOpen({ id: item.id, open: true })}
+                disabled={selectedItems.length > 1}
+                className={selectedItems.length > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </button>
@@ -218,7 +295,7 @@ const Content = () => {
     } else {
       return (
         <tr>
-          <td colSpan={5}>
+          <td colSpan={7}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>No email history found.</h4>
           </td>
@@ -238,33 +315,6 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email History</h2>
-          {/* {(appliedFilter.from || appliedFilter.to || appliedFilter.search) && (
-            <div className='mt-2 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'>
-              <div className='flex items-center justify-between'>
-                <div className='text-sm text-blue-700'>
-                  <span className='font-medium'>Filters applied:</span>
-                  {appliedFilter.from && appliedFilter.to && (
-                    <span className='ml-2'>Date range: {new Date(appliedFilter.from).toLocaleDateString()} - {new Date(appliedFilter.to).toLocaleDateString()}</span>
-                  )}
-                  {appliedFilter.from && !appliedFilter.to && (
-                    <span className='ml-2'>From: {new Date(appliedFilter.from).toLocaleDateString()}</span>
-                  )}
-                  {!appliedFilter.from && appliedFilter.to && (
-                    <span className='ml-2'>Until: {new Date(appliedFilter.to).toLocaleDateString()}</span>
-                  )}
-                  {appliedFilter.search && (
-                    <span className='ml-2'>Search: &quot;{appliedFilter.search}&quot;</span>
-                  )}
-                </div>
-                <button
-                  onClick={handleResetFilters}
-                  className='text-blue-600 hover:text-blue-800 text-sm underline'
-                >
-                  Clear all
-                </button>
-              </div>
-            </div>
-          )} */}
           <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-left gap-2'>
               <div className='relative'>
@@ -340,6 +390,31 @@ const Content = () => {
             </div>
           </div>
 
+          {/* Bulk Actions Section */}
+          {selectedItems.length > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedItems.length} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className='mt-8 flow-root'>
             <div className='-mx-4 -my-2 sm:-mx-6 lg:-mx-8'>
               <div className='py-2 sm:px-6 lg:px-8'>
@@ -347,6 +422,14 @@ const Content = () => {
                   <table className='divide-y divide-gray-300 text-center min-w-full'>
                     <thead>
                       <tr>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            checked={employeeItems.length > 0 && selectedItems.length === employeeItems.length}
+                            onChange={(e) => handleSelectAll(e.target.checked)}
+                          />
+                        </th>
                         <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                           Name
                         </th>
@@ -401,6 +484,28 @@ const Content = () => {
             deleteEmailMonitoring(isDeleteModalOpen.id, callbackReq);
           }}
           isLoading={isDeleteLoading}
+        />
+      )}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} email monitoring record${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteProgressModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteProgressModalOpen}
+          setIsOpen={setIsBulkDeleteProgressModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} email monitoring record${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
     </>

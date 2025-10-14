@@ -16,6 +16,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
@@ -94,7 +95,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
   const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const {
     data: healthAndSafetyReportItemsData,
@@ -362,28 +365,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedReports.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedReports.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedReports.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const reportIds = Array.from(selectedReports);
       await bulkDeleteMutation.mutateAsync(reportIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedReports(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      healthAndSafetyReportItemsRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedReports(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    healthAndSafetyReportItemsRefetch();
   };
 
   useEffect(() => {
@@ -760,14 +775,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           itemsFilter={itemsFilter}
         />
       )}
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Health and Safety Report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} Health and Safety Report${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} Health and Safety Report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
       <Tooltip id='search-tooltip' />

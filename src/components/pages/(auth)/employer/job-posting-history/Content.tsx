@@ -16,6 +16,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import RightClickMenu from '@/components/RightClickMenu';
 import Pagination from '@/components/Pagination';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
@@ -80,7 +81,9 @@ const Content = () => {
   // Bulk delete states
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
@@ -426,29 +429,41 @@ const Content = () => {
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedJobPostings.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedJobPostings.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
       selectedCount: selectedJobPostings.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const jobPostingIds = Array.from(selectedJobPostings);
       await bulkDeleteMutation.mutateAsync(jobPostingIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedJobPostings.size} job posting(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedJobPostings(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      refetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete job postings';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} job posting(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedJobPostings(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetch();
   };
 
   const renderRows = () => {
@@ -967,14 +982,26 @@ const Content = () => {
         />
       )}
       
-      {/* Bulk Delete Modal */}
-      {isBulkDeleteModalOpen && (
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
         <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} job posting${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} job posting${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} job posting${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

@@ -11,6 +11,7 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
@@ -76,7 +77,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedSeparations, setSelectedSeparations] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const { mutate, isLoading } = usePatchSeparation();
   const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
@@ -407,29 +410,40 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedSeparations.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedSeparations.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
-      selectedCount: selectedSeparations.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const separationIds = Array.from(selectedSeparations);
       await bulkDeleteMutation.mutateAsync(separationIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedSeparations.size} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedSeparations(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      refetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete separations';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedSeparations(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetch();
   };
 
   const renderRows = () => {
@@ -791,14 +805,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       
-      {/* Bulk Delete Modal */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <DeleteModal<T_BulkDeleteModalData>
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} separation${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 
