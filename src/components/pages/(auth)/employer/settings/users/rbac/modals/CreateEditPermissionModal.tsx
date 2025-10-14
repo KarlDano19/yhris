@@ -141,6 +141,7 @@ export default function CreateEditPermissionModal({
                             </label>
                             <div className='mt-2'>
                               <input
+                                disabled={true}
                                 type='text'
                                 id='name'
                                 {...register('name', { required: 'Permission name is required' })}
@@ -163,6 +164,7 @@ export default function CreateEditPermissionModal({
                             </label>
                             <div className='mt-2'>
                               <input
+                                disabled={true}
                                 type='text'
                                 id='display_name'
                                 {...register('display_name', { required: 'Display name is required' })}
@@ -192,22 +194,6 @@ export default function CreateEditPermissionModal({
                                 className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                 placeholder='Enter or select category'
                               />
-                              <datalist id='category-options'>
-                                {categoriesData?.map((category: any) => (
-                                  <option key={category} value={category} />
-                                ))}
-                                {/* Common default categories */}
-                                <option value='Employee Management' />
-                                <option value='Recruitment' />
-                                <option value='Payroll' />
-                                <option value='HR Operations' />
-                                <option value='Settings' />
-                                <option value='Reports' />
-                                <option value='System' />
-                              </datalist>
-                              <p className='text-xs text-gray-500 mt-1'>
-                                Type a new category or select from existing ones
-                              </p>
                             </div>
                           </div>
 

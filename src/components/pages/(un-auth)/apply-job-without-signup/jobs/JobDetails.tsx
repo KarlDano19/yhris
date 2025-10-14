@@ -59,7 +59,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <h5 className='text-xl font-semibold text-indigo-dye'>
               {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
             </h5>
-            <h6 className='text-indigo-dye text-sm'> 
+            <h6 className='text-indigo-dye text-sm'>
               for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
             <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
@@ -77,11 +77,11 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           ></div>
         </div>
       </div>
-      
+
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
         <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
-        {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
+          {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
             <>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
@@ -92,7 +92,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
               </div>
             </>
           )}
-          
+
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
             <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
             Location
@@ -173,7 +173,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
                 ? renderQualificationsDescription(jobDetailData?.qualifications)
                 : 'Loading qualifications...'}
             </div>
-          </div>  
+          </div>
           {/* notes/remarks */}
           {jobDetailData?.is_show_remarks && jobDetailData?.job_remark && (
             <div className='border-t border-b mt-4 pb-4'>
@@ -202,6 +202,30 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           )}
         </div>
       </div>
+      {!isLoading && jobDetailData?.uploaded_job_description && jobDetailData?.uploaded_job_description.length > 0 && (
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <>
+            <h5 className='text-xl font-semibold text-indigo-dye'>Job Description File</h5>
+            <div className='details mx-5 mt-2'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Job Description Document
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <a 
+                  href={jobDetailData?.uploaded_job_description} 
+                  target='_blank' 
+                  rel='noopener noreferrer'
+                  className='text-savoy-blue underline hover:text-blue-700 flex items-center'
+                >
+                  <ClipboardDocumentIcon className='h-4 w-4 mr-1' />
+                  View Job Description PDF
+                </a>
+              </div>
+            </div>
+          </>
+        </div>
+      )}
     </>
   );
 };

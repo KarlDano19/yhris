@@ -15,6 +15,10 @@ import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outli
 
 import { DirectiveData, PolicyField } from '@/types/directives';
 
+interface CachedProfileData {
+  name: string;
+}
+
 export default function CreatePolicyModal({
   isOpen,
   setIsOpen,
@@ -181,6 +185,105 @@ export default function CreatePolicyModal({
       clearErrors('to');
     }
   }, [tagsTo, clearErrors]);
+
+  // Filter employees based on input using passed data
+  // Set company name from cached profile when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue('company_name', cachedProfile.state.data.name || '');
+    }
+  }, [isOpen, cachedProfile, setValue]);
+
+  // Filter employees based on input
+  useEffect(() => {
+    if (employeeData?.records) {
+      if (inputTo.trim()) {
+        const searchTerm = inputTo.toLowerCase();
+        
+        // Filter employees (exclude already selected ones)
+        const filtered = employeeData.records.filter((employee: any) => {
+          const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+          const email = employee.email?.toLowerCase() || '';
+          const department = employee.department?.toLowerCase() || '';
+          const position = employee.position?.toLowerCase() || '';
+          
+          // Check if employee is already selected
+          const isAlreadySelected = tagsTo.includes(employee.email);
+          
+          return !isAlreadySelected && (
+            fullName.includes(searchTerm) || 
+            email.includes(searchTerm) || 
+            department.includes(searchTerm) || 
+            position.includes(searchTerm)
+          );
+        }).slice(0, 5); // Limit to 5 suggestions
+        
+        // Check if search matches any department name
+        const matchingDepartments = new Set();
+        employeeData.records.forEach((employee: any) => {
+          if (employee.department && employee.department.toLowerCase().includes(searchTerm)) {
+            matchingDepartments.add(employee.department);
+          }
+        });
+        
+        // Create department options (only show if not all employees from that department are selected)
+        const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
+          // Check if all employees from this department are already selected
+          const employeesInDepartment = employeeData.records.filter((emp: any) => 
+            emp.department === deptName && emp.email
+          );
+          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            tagsTo.includes(emp.email)
+          );
+          const allEmployeesSelected = employeesInDepartment.length > 0 && 
+            selectedEmployeesInDepartment.length === employeesInDepartment.length;
+          
+          return {
+            id: `dept:${deptName}`,
+            firstname: null,
+            lastname: null,
+            email: null,
+            department: deptName,
+            position: null,
+            is_department_option: true,
+            label: `${deptName} (All Employees)`,
+            allEmployeesSelected: allEmployeesSelected
+          };
+        }).filter((deptOption: any) => !deptOption.allEmployeesSelected); // Only show departments where not all employees are selected
+        
+        // Combine department options with filtered employees
+        const combinedOptions = [...departmentOptions, ...filtered];
+        
+        setFilteredEmployees(combinedOptions);
+        setShowEmployeeSuggestions(combinedOptions.length > 0);
+        setSelectedEmployeeIndex(-1); // Reset selection when filtering
+      } else {
+        // When no search input, show no suggestions (no department options in default list)
+        setFilteredEmployees([]);
+        setShowEmployeeSuggestions(false);
+        setSelectedEmployeeIndex(-1);
+      }
+    } else {
+      setFilteredEmployees([]);
+      setShowEmployeeSuggestions(false);
+      setSelectedEmployeeIndex(-1);
+    }
+  }, [inputTo, employeeData, tagsTo]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowEmployeeSuggestions(false);
+        setSelectedEmployeeIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
 
   // Handle employee selection for TO field

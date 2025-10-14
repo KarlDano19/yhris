@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
@@ -15,6 +16,10 @@ import EmailField from '@/components/common/EmailField';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { DirectiveData } from '@/types/directives';
+
+interface CachedProfileData {
+  name: string;
+}
 
 export default function CreateMemoModal({
   isOpen,
@@ -36,6 +41,13 @@ export default function CreateMemoModal({
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
+  const queryClient = useQueryClient();
+  
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['employerProfileCache']) as {
+    state: { data: CachedProfileData } | undefined;
+  };
 
 
   const onSubmit = handleSubmit((data) => {
@@ -135,6 +147,13 @@ export default function CreateMemoModal({
       setTagsTo(employee.remainingTags);
     }
   };
+
+  // Set company name from cached profile when modal opens
+  useEffect(() => {
+    if (isOpen && cachedProfile?.state?.data) {
+      setValue('company_name', cachedProfile.state.data.name || '');
+    }
+  }, [isOpen, cachedProfile, setValue]);
 
   useEffect(() => {
     if (signatureUrl) {
