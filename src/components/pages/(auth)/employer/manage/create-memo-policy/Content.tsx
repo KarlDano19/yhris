@@ -17,7 +17,6 @@ import ProgressModal from '@/components/ProgressModal';
 import useGetDirectivesItems from './hooks/useGetDirectivesItems';
 import useDeleteDirectivesItem from './hooks/useDeleteDirectivesItem';
 import useBulkDeleteDirectives from './hooks/useBulkDeleteDirectives';
-import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
@@ -74,24 +73,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   
-  // Employee search state for modals
-  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
-  const [debouncedEmployeeSearch, setDebouncedEmployeeSearch] = useState('');
-  
-  // Debouncing effect for employee search
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedEmployeeSearch(employeeSearchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [employeeSearchTerm]);
-
-  // Get paginated employee data for modals
-  const { data: employeeData } = useGetEmployeePaginatedSelect(
-    debouncedEmployeeSearch && debouncedEmployeeSearch.length >= 2 ? {
-      search: debouncedEmployeeSearch,
-      current_page: 1,
-      page_size: 500
-    } : null
-  );
 
 
   useEffect(() => {
@@ -553,15 +534,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isCreateMemoModalOpen} 
         setIsOpen={setIsCreateMemoModalOpen} 
         refetch={refetch}
-        employeeData={employeeData}
-        onSearchChange={setEmployeeSearchTerm}
       />
       <CreatePolicyModal 
         isOpen={isCreatePolicyModalOpen} 
         setIsOpen={setIsCreatePolicyModalOpen} 
         refetch={refetch}
-        employeeData={employeeData}
-        onSearchChange={setEmployeeSearchTerm}
       />
       <EmployeeResponsesModal 
         isOpen={isEmployeeResponsesModalOpen} 

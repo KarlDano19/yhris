@@ -13,7 +13,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
-import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
@@ -52,10 +51,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
-  // Employee search state for modals
-  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
-  const [debouncedEmployeeSearch, setDebouncedEmployeeSearch] = useState('');
-  
   // Bulk delete states
   const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -72,21 +67,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-
-  // Employee data fetching for modals
-  const { data: employeeData } = useGetEmployeePaginatedSelect(
-    debouncedEmployeeSearch && debouncedEmployeeSearch.length >= 2 ? {
-      search: debouncedEmployeeSearch,
-      current_page: 1,
-      page_size: 500
-    } : null
-  );
-
-  // Debouncing effect for employee search
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedEmployeeSearch(employeeSearchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [employeeSearchTerm]);
 
   const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
@@ -466,8 +446,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsCreateModalOpen}
         refetch={refetchEmailTemplate}
         onSuccess={handleCreateTemplateSuccess}
-        employeeData={employeeData}
-        onSearchChange={setEmployeeSearchTerm}
       />
 
       {/* Success Modal */}
@@ -505,8 +483,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEditEmailTemplateModalOpen}
           setIsOpen={setIsEditEmailTemplateModalOpen}
           selectedEmailTemplateId={selectedEmailTemplateId}
-          employeeData={employeeData}
-          onSearchChange={setEmployeeSearchTerm}
         />
       )}
 
