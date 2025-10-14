@@ -9,30 +9,33 @@ import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import Pagination from '@/components/Pagination';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
-import DeleteEvaluationSchedulerModal from './modals/DeleteEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
 import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailEvaluationSchedulerModal';
-import BulkDeleteEvaluationSchedulerModal from './modals/BulkDeleteEvaluationSchedulerModal';
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
+import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const [evaluationSchedulerItems, setEvaluationSchedulerItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationSchedulerId, setSelectedEvaluationSchedulerId] = useState<number | null>(null);
   const [isEditEvaluationSchedulerModalOpen, setIsEditEvaluationSchedulerModalOpen] = useState(false);
-  const [isDeleteEvaluationSchedulerModalOpen, setIsDeleteEvaluationSchedulerModalOpen] = useState(false);
+  const [isDeleteEvaluationSchedulerModalOpen, setIsDeleteEvaluationSchedulerModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isConfirmSendEmailEvaluationSchedulerModalOpen, setIsConfirmSendEmailEvaluationSchedulerModalOpen] =
     useState(false);
   const [isCreateEvaluationSchedulerOpen, setIsCreateEvaluationSchedulerOpen] = useState(false);
@@ -40,7 +43,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedEvaluationSchedulers, setSelectedEvaluationSchedulers] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
 
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -68,6 +71,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
 
+  const { mutate: deleteEvaluationScheduler, isLoading: isDeleteEvaluationSchedulerLoading } = useDeleteEvaluationScheduler();
   const bulkDeleteMutation = useBulkDeleteEvaluationSchedulers();
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
@@ -169,13 +173,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsEditEvaluationSchedulerModalOpen(true);
       }
       if (actionType === 'delete') {
-        setIsDeleteEvaluationSchedulerModalOpen(true);
+        setIsDeleteEvaluationSchedulerModalOpen({ id: selectedEvaluationSchedulerId, open: true });
       }
       if (actionType === 'send-email') {
         setIsConfirmSendEmailEvaluationSchedulerModalOpen(true);
       }
     }
-  }, [selectedEvaluationSchedulerId]);
+  }, [selectedEvaluationSchedulerId, actionType]);
 
   const openEditEvaluationModal = (evaluationDetails: any) => {
     setActionType('edit');
@@ -189,7 +193,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
     if (selectedEvaluationSchedulerId && selectedEvaluationSchedulerId === evaluationDetails.id) {
-      setIsDeleteEvaluationSchedulerModalOpen(true);
+      setIsDeleteEvaluationSchedulerModalOpen({ id: evaluationDetails.id, open: true });
     } else {
       setSelectedEvaluationSchedulerId(evaluationDetails.id);
     }
@@ -273,7 +277,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedEvaluationSchedulers.size === 0) return;
-    setIsBulkDeleteModalOpen(true);
+    setIsBulkDeleteModalOpen({
+      open: true,
+      selectedCount: selectedEvaluationSchedulers.size,
+    });
   };
 
   const confirmBulkDelete = async () => {
@@ -284,7 +291,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`${selectedEvaluationSchedulers.size} evaluation scheduler(s) deleted successfully.`} type="success" />, { duration: 3000 });
       setSelectedEvaluationSchedulers(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      setIsBulkDeleteModalOpen(null);
       refetchEvaluationScheduler();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete evaluation schedulers';
@@ -347,7 +354,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
               <button 
                 onClick={() => openDeleteEvaluationModal(item)}
-                className={selectedEvaluationSchedulers.size > 1 ? 'invisible' : ''}
+                disabled={selectedEvaluationSchedulers.size > 1}
+                className={selectedEvaluationSchedulers.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </button>
@@ -383,8 +391,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
           
-          
-
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
@@ -424,8 +430,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
-          {selectedEvaluationSchedulers.size > 0 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          {/* Bulk Actions - Below Date Filters */}
+          {selectedEvaluationSchedulers.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}
@@ -440,12 +447,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
-                <button
-                  onClick={() => setSelectedEvaluationSchedulers(new Set())}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Clear Selected
                 </button>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedEvaluationSchedulers.size} selected
@@ -529,15 +530,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           Controller={Controller}
         />
       )}
-      {isDeleteEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
-        <DeleteEvaluationSchedulerModal
-          refetch={refetchEvaluationScheduler}
+      {isDeleteEvaluationSchedulerModalOpen && (
+        <DeleteModal
           isOpen={isDeleteEvaluationSchedulerModalOpen}
           setIsOpen={setIsDeleteEvaluationSchedulerModalOpen}
-          selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
-          selectedEvalationSchedulerName={
-            evaluationSchedulerItems.find((item: any) => item.id === selectedEvaluationSchedulerId)?.name
-          }
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteEvaluationSchedulerModalOpen(null);
+                refetchEvaluationScheduler();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEvaluationScheduler(isDeleteEvaluationSchedulerModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEvaluationSchedulerLoading}
         />
       )}
       {isConfirmSendEmailEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
@@ -550,13 +560,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       {/* Bulk Delete Modal */}
-      <BulkDeleteEvaluationSchedulerModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedEvaluationSchedulers.size}
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {isBulkDeleteModalOpen && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isLoading}
+          customText={`${isBulkDeleteModalOpen.selectedCount} evaluation scheduler${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

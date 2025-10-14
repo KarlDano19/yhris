@@ -15,15 +15,16 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import RightClickMenu from '@/components/RightClickMenu';
 import Pagination from '@/components/Pagination';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
-import DeleteJobModal from './modals/DeleteModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
+import useDeleteJobPost from './hooks/useDeleteJobPost';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
@@ -51,9 +52,12 @@ type ComponentMap = {
   [key: string]: React.ElementType;
 };
 
-type T_ModalData = {
+interface T_ModalData extends DeleteModalData {
   id: number | null;
-  open: boolean;
+}
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const Content = () => {
@@ -77,7 +81,9 @@ const Content = () => {
   // Bulk delete states
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<T_BulkDeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const [pendingFilter, setPendingFilter] = useState<any>({
     from: '',
@@ -114,6 +120,7 @@ const Content = () => {
   const { mutate: mutateRemark } = useUpdateJobRemarkStatus();
   const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
   const bulkDeleteMutation = useBulkDeleteJobPostings();
+  const { mutate: deleteJobPost, isLoading: isDeleteLoading } = useDeleteJobPost();
   
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
@@ -422,26 +429,41 @@ const Content = () => {
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedJobPostings.size === 0) return;
+    setBulkDeleteCount(selectedJobPostings.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+      selectedCount: selectedJobPostings.size,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const jobPostingIds = Array.from(selectedJobPostings);
       await bulkDeleteMutation.mutateAsync(jobPostingIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedJobPostings.size} job posting(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedJobPostings(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
-      refetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete job postings';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} job posting(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedJobPostings(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetch();
   };
 
   const renderRows = () => {
@@ -558,6 +580,8 @@ const Content = () => {
                   onClick={() => setIsDeleteModalOpen({ id: jobPost.id, open: true })}
                   data-tooltip-id="delete-tooltip"
                   data-tooltip-content="Delete Job"
+                  disabled={selectedJobPostings.size > 1}
+                  className={selectedJobPostings.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
                 >
                   <DeleteIcon />
                 </SmartButton>
@@ -811,10 +835,10 @@ const Content = () => {
               </div>
 
               {/* Bulk Actions - Right Side */}
-              {selectedJobPostings.size > 0 && (
+              {selectedJobPostings.size > 1 && (
                 <div className="flex items-center gap-3 md:pr-4 lg:pr-10">
                   <SmartButton
-                    id="delete-job-posting-btn"
+                    id="delete-job-btn"
                     onClick={handleBulkDelete}
                     disabled={bulkDeleteMutation.isLoading}
                     className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -828,12 +852,6 @@ const Content = () => {
                       'Delete Selected'
                     )}
                   </SmartButton>
-                  <button
-                    onClick={() => setSelectedJobPostings(new Set())}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
                   <span className="text-sm text-gray-700 font-medium">
                     {selectedJobPostings.size} selected
                   </span>
@@ -934,8 +952,25 @@ const Content = () => {
         />
       )}
       {isEditModalOpen?.open && <UpdateJobModal refetch={refetch} isOpen={isEditModalOpen} setIsOpen={setIsEditModalOpen} />}
-      {isDeleteModalOpen?.open && (
-        <DeleteJobModal refetch={refetch} isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} />
+      {isDeleteModalOpen && (
+        <DeleteModal<T_ModalData>
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteModalOpen(null);
+                refetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteJobPost(isDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteLoading}
+        />
       )}
       {assignUsersModal && assignUsersModal.id && (
         <AssignUsersModal
@@ -947,15 +982,28 @@ const Content = () => {
         />
       )}
       
-      {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedJobPostings.size}
-        moduleName="job postings"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} job posting${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} job posting${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
 
       <Tooltip id='search-tooltip' />
       <Tooltip id="edit-tooltip" />

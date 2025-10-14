@@ -57,7 +57,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'update-employee-issue-status-rights', permission: 'update_employee_issue_status', type: 'action', fallbackBehavior: 'readonly' },
 
   // Memo & Training
-  { elementId: 'create-memo-btn', permission: 'create_memo', type: 'button', fallbackBehavior: 'disable' },
+  { elementId: 'create_memo_btn', permission: 'create_memo', type: 'button', fallbackBehavior: 'hide' },
   { elementId: 'edit-memo-btn', permission: 'edit_memo', type: 'button', fallbackBehavior: 'disable' },
 
   // Designed Benefits

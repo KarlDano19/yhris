@@ -13,9 +13,10 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
-import DeleteModal from '../modals/DeleteModal';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import useDeletePosition from '../hooks/position/useDeletePosition';
 import CustomToast from '@/components/CustomToast';
+import ProgressModal from '@/components/ProgressModal';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
 import useBulkDeletePositions from '../hooks/position/useBulkDeletePositions';
 
@@ -34,6 +35,7 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -71,7 +73,9 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
   // Bulk delete states
   const [selectedPositions, setSelectedPositions] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const {
     data: positionListData,
@@ -79,6 +83,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     refetch: positionListRefetch,
   } = useGetPositionItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
+  const { mutate: deletePosition, isLoading: isDeletePositionLoading } = useDeletePosition();
   const bulkDeleteMutation = useBulkDeletePositions();
 
   const cachedData: any = cachedProfile?.state?.data;
@@ -168,26 +173,40 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedPositions.size === 0) return;
+    setBulkDeleteCount(selectedPositions.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const positionIds = Array.from(selectedPositions);
       await bulkDeleteMutation.mutateAsync(positionIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedPositions.size} position(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedPositions(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
-      positionListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete positions';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} position(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedPositions(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    positionListRefetch();
   };
 
   const renderRows = () => {
@@ -226,7 +245,8 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               <SmartButton
                 id="delete-position-btn"
                 onClick={() => setIsPositionDeleteModalOpen({ id: item.id, open: true })}
-                className={selectedPositions.size > 1 ? 'invisible' : ''}
+                disabled={selectedPositions.size > 1}
+                className={selectedPositions.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -332,10 +352,11 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
       </div>
       
       {/* Bulk Actions - Below Date Filters */}
-      {selectedPositions.size > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      {selectedPositions.size > 1 && (
+        <div className="mt-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
-            <button
+            <SmartButton
+              id="delete-position-btn"
               onClick={handleBulkDelete}
               disabled={bulkDeleteMutation.isLoading}
               className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -348,13 +369,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               ) : (
                 'Delete Selected'
               )}
-            </button>
-            <button
-              onClick={() => setSelectedPositions(new Set())}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Clear Selected
-            </button>
+            </SmartButton>
             <span className="text-sm text-gray-700 font-medium">
               {selectedPositions.size} selected
             </span>
@@ -424,22 +439,47 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
       )}
       {isPositionDeleteModalOpen && (
         <DeleteModal
-          module='position'
-          refetch={positionListRefetch}
           isOpen={isPositionDeleteModalOpen}
           setIsOpen={setIsPositionDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsPositionDeleteModalOpen(null);
+                positionListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deletePosition(isPositionDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeletePositionLoading}
         />
       )}
       
-      {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedPositions.size}
-        moduleName="positions"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} position${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} position${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

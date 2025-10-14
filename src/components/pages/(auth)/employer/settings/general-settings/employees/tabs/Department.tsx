@@ -12,16 +12,17 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ProgressModal from '@/components/ProgressModal';
 import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 import useBulkDeleteDepartments from '../hooks/department/useBulkDeleteDepartments';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
 import EditModal from '../modals/EditModal';
-import DeleteModal from '../modals/DeleteModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import useDeleteDepartment from '../hooks/department/useDeleteDepartments';
 import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
@@ -33,6 +34,7 @@ type T_ModalData = {
   id: number;
   open: boolean;
 };
+
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -70,7 +72,9 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
   // Bulk delete states
   const [selectedDepartments, setSelectedDepartments] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const {
     data: departmentListData,
@@ -78,6 +82,7 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
     refetch: departmentListRefetch,
   } = useGetDepartmentItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
+  const { mutate: deleteDepartment, isLoading: isDeleteDepartmentLoading } = useDeleteDepartment();
   const bulkDeleteMutation = useBulkDeleteDepartments();
 
   const cachedData: any = cachedProfile?.state?.data;
@@ -167,26 +172,40 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedDepartments.size === 0) return;
+    setBulkDeleteCount(selectedDepartments.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const departmentIds = Array.from(selectedDepartments);
       await bulkDeleteMutation.mutateAsync(departmentIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedDepartments.size} department(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedDepartments(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
-      departmentListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete departments';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} department(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedDepartments(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    departmentListRefetch();
   };
 
   const renderRows = () => {
@@ -225,7 +244,8 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               <SmartButton
                 id="delete-department-btn"
                 onClick={() => setIsDepartmentDeleteModalOpen({ id: item.id, open: true })}
-                className={selectedDepartments.size > 1 ? 'invisible' : ''}
+                disabled={selectedDepartments.size > 1}
+                className={selectedDepartments.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -331,10 +351,11 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
       </div>
       
       {/* Bulk Actions - Below Date Filters */}
-      {selectedDepartments.size > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      {selectedDepartments.size > 1 && (
+        <div className="mt-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
-            <button
+            <SmartButton
+              id="delete-department-btn"
               onClick={handleBulkDelete}
               disabled={bulkDeleteMutation.isLoading}
               className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -347,13 +368,7 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               ) : (
                 'Delete Selected'
               )}
-            </button>
-            <button
-              onClick={() => setSelectedDepartments(new Set())}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Clear Selected
-            </button>
+            </SmartButton>
             <span className="text-sm text-gray-700 font-medium">
               {selectedDepartments.size} selected
             </span>
@@ -423,22 +438,47 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
       )}
       {isDepartmentDeleteModalOpen && (
         <DeleteModal
-          module='department'
-          refetch={departmentListRefetch}
           isOpen={isDepartmentDeleteModalOpen}
           setIsOpen={setIsDepartmentDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDepartmentDeleteModalOpen(null);
+                departmentListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteDepartment(isDepartmentDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteDepartmentLoading}
         />
       )}
       
-      {/* Bulk Delete Modal */}
-      <BulkDeleteModal
-        isOpen={isBulkDeleteModalOpen}
-        selectedCount={selectedDepartments.size}
-        moduleName="departments"
-        onConfirm={confirmBulkDelete}
-        onClose={() => setIsBulkDeleteModalOpen(false)}
-        isLoading={bulkDeleteMutation.isLoading}
-      />
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} department${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} department${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
 
       <Tooltip id='search-tooltip'/>
     </>

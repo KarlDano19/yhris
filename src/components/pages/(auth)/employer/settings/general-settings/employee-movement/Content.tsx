@@ -11,10 +11,11 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, XMarkIcon, TrashIcon } from '@heroi
 import useGetApprovalItems from './hooks/useGetApprovalItems';
 import useAddApproval from './hooks/useAddApproval';
 import CustomToast from '@/components/CustomToast';
+import DeleteModal from '@/components/DeleteModal';
 import toast from 'react-hot-toast';
 import { useForm, Controller } from 'react-hook-form';
 import useGetUsers from '@/components/hooks/useGetUsers';
-import DeleteApprovalModal from './modal/DeleteModal';
+import useDeleteApproval from './hooks/useDeleteApproval';
 import useGetApprovalDetails from './hooks/useGetApprovalDetails';
 import useEditApproval from './hooks/useEditApproval';
 import classNames from '@/helpers/classNames';
@@ -52,6 +53,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch: refetchApprovalItems,
   } = useGetApprovalItems();
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
+  const { mutate: deleteApproval, isLoading: isDeleteApprovalLoading } = useDeleteApproval();
   const { data: dataUsers = [], isLoading: isGetUsersLoading } = useGetUsers();
   const { data: dataApprovalDetails, isLoading: isGetApprovalDetailsLoading } = useGetApprovalDetails(isDeleteApprovalModalOpen?.id || null);
   const { mutate: editApproval, isLoading: isEditApprovalLoading } = useEditApproval();
@@ -307,10 +309,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
       {isDeleteApprovalModalOpen && (
-      <DeleteApprovalModal
-        refetch={refetchApprovalItems}
+        <DeleteModal
           isOpen={isDeleteApprovalModalOpen}
           setIsOpen={setIsDeleteApprovalModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteApprovalModalOpen(null);
+                refetchApprovalItems();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteApproval(isDeleteApprovalModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteApprovalLoading}
         />
       )}
     </>
