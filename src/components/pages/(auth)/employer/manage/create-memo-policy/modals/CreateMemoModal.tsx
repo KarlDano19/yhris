@@ -410,57 +410,59 @@ export default function CreateMemoModal({
                         />
                       </div>
                     )}
-                    <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='qr_code' className='block text-sm font-medium leading-6 text-gray-900'>
-                        QR Code
-                      </label>
-                      <div className='mt-2'>
-                        <input
-                          id='qr_code'
-                          type='file'
-                          onChange={uploadOnChange}
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                        />
-                        {qrCodeExist ? (
-                          <button
-                            type='button'
-                            className='underline text-savoy-blue text-sm mt-1'
-                            onClick={() => {
-                              delete toSaveData.qr_code;
-                              setToSaveData({ ...toSaveData });
-                              setQrCodeExist(false);
-                            }}
-                          >
-                            Remove QR Code
-                          </button>
-                        ) : null}
+                    <div className='grid grid-cols-2 gap-6 mt-4'>
+                      <div>
+                        <label htmlFor='qr_code' className='block text-sm font-medium leading-6 text-gray-900'>
+                          QR Code
+                        </label>
+                        <div className='mt-2'>
+                          <input
+                            id='qr_code'
+                            type='file'
+                            onChange={uploadOnChange}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          />
+                          {qrCodeExist ? (
+                            <button
+                              type='button'
+                              className='underline text-savoy-blue text-sm mt-1'
+                              onClick={() => {
+                                delete toSaveData.qr_code;
+                                setToSaveData({ ...toSaveData });
+                                setQrCodeExist(false);
+                              }}
+                            >
+                              Remove QR Code
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                    <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Attachment
-                      </label>
-                      <div className='mt-2'>
-                        <input
-                          id='attachments'
-                          type='file'
-                          onChange={handleAttachmentUpload}
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                        />
-                        {attachmentExist ? (
-                          <button
-                            type='button'
-                            className='underline text-savoy-blue text-sm mt-1'
-                            onClick={() => {
-                              setValue('attachments', undefined as any);
-                              setAttachmentExist(false);
-                            }}
-                          >
-                            Remove Attachment
-                          </button>
-                        ) : null}
+                      <div>
+                        <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachment
+                        </label>
+                        <div className='mt-2'>
+                          <input
+                            id='attachments'
+                            type='file'
+                            onChange={handleAttachmentUpload}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          />
+                          {attachmentExist ? (
+                            <button
+                              type='button'
+                              className='underline text-savoy-blue text-sm mt-1'
+                              onClick={() => {
+                                setValue('attachments', undefined as any);
+                                setAttachmentExist(false);
+                              }}
+                            >
+                              Remove Attachment
+                            </button>
+                          ) : null}
+                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
+                        </div>
                       </div>
-                      <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                     </div>
                   </div>
                   <hr />
