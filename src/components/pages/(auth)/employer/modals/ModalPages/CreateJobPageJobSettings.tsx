@@ -34,10 +34,11 @@ export default function CreateJobPageJobSettings({
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
+    // Only use initialScreeningQuestions if they exist AND are not empty
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       return initialScreeningQuestions;
     }
-    // Default questions
+    // Always use default questions for new job creation
     return [
     {
       id: 1,
@@ -68,6 +69,7 @@ export default function CreateJobPageJobSettings({
   
   // Sync the prop to state in CreateJobPageJobSettings
   useEffect(() => {
+    // Only sync if initialScreeningQuestions exist AND are not empty
     if (initialScreeningQuestions && initialScreeningQuestions.length > 0) {
       setLocalScreeningQuestions(initialScreeningQuestions);
       // Update custom questions state
@@ -81,6 +83,7 @@ export default function CreateJobPageJobSettings({
       });
       setNextCustomQuestionNumber(Math.max(...customQuestionNumbers, 0) + 1);
     }
+    // If initialScreeningQuestions is empty/undefined, don't sync - keep defaults
   }, [initialScreeningQuestions]);
 
   // Deduplicate questions when initializing
