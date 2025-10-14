@@ -139,7 +139,7 @@ export default function ProgressModal({
                     </div>
                   </div>
                   <div className='mt-4 text-sm text-gray-500'>
-                    <p>Do not close this window</p>
+                    <p>Do not close this modal</p>
                   </div>
                 </div>
               </Dialog.Panel>
