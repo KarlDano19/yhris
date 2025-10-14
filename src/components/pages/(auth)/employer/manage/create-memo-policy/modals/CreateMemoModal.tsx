@@ -3,15 +3,17 @@ import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 import SignatureModal from './SignatureModal';
 import EmailField from '@/components/common/EmailField';
+import EmployeeSelect from '@/components/common/EmployeeSelect';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -38,8 +40,10 @@ export default function CreateMemoModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [employeeSelected, setEmployeeSelected] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, formState: { errors } } = useForm<DirectiveData>();
+  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
   const queryClient = useQueryClient();
   
@@ -79,6 +83,9 @@ export default function CreateMemoModal({
         setIsOpen(false);
         refetch();
         reset();
+        setEmployeeSearch('');
+        setEmployeeSelected(false);
+        setTagsTo([]);
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -168,6 +175,8 @@ export default function CreateMemoModal({
     // Reset form when modal closes
     if (!isOpen) {
       setAttachmentExist(false);
+      setEmployeeSearch('');
+      setEmployeeSelected(false);
     }
   }, [signatureUrl, setValue, isOpen]);
 
@@ -282,30 +291,69 @@ export default function CreateMemoModal({
                     </div>
 
                     <p className='font-bold my-4'>Signatory</p>
-                    <div className='sm:col-span-4'>
-                      <label htmlFor='name' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Name
-                      </label>
-                      <div className='mt-2'>
-                        <input
-                          id='name'
-                          {...register('name')}
-                          type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                        />
+                    <div className='grid grid-cols-2 gap-6'>
+                      <div>
+                        <label htmlFor='name' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Employee Name
+                        </label>
+                        <div className='relative mt-2'>
+                          <Controller
+                            control={control}
+                            name="name"
+                            render={({ field }) => (
+                              <EmployeeSelect
+                                control={control}
+                                name="name"
+                                label=""
+                                required={false}
+                                placeholder="Select employee..."
+                                isMulti={false}
+                                isClearable={true}
+                                employeeSearch={employeeSearch}
+                                setEmployeeSearch={setEmployeeSearch}
+                                setEmployeeSelected={setEmployeeSelected}
+                                className=""
+                                onChange={(selectedOption: any) => {
+                                  if (selectedOption && !selectedOption.isShowMore) {
+                                    setEmployeeSearch(selectedOption.label);
+                                    setEmployeeSelected(true);
+                                    field.onChange(selectedOption.label);
+                                    // Auto-fill position from employee data
+                                    if (selectedOption.position) {
+                                      setValue('position', selectedOption.position);
+                                    }
+                                  } else {
+                                    setEmployeeSearch('');
+                                    setEmployeeSelected(false);
+                                    field.onChange('');
+                                    setValue('position', '');
+                                  }
+                                }}
+                              />
+                            )}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Position
-                      </label>
-                      <div className='mt-2'>
-                        <input
-                          id='position'
-                          {...register('position')}
-                          type='text'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                        />
+                      <div>
+                        <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Position
+                        </label>
+                        <div className='relative mt-2'>
+                          <input
+                            id='position'
+                            {...register('position')}
+                            type='text'
+                            readOnly
+                            data-tooltip-id="position-tooltip"
+                            data-tooltip-content="Auto-populated from selected employee"
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
+                          />
+                          <Tooltip 
+                            id="position-tooltip" 
+                            place="bottom"
+                            style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
+                          />
+                        </div>
                       </div>
                     </div>
                     <p className='my-4 block text-sm font-medium leading-6 text-gray-900'>Signature</p>
