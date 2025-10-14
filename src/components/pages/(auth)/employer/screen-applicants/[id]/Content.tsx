@@ -522,7 +522,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       >
                         <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <div className="py-1">
-                            <Menu.Item>
+                            {/* <Menu.Item>
                               {({ active }) => (
                                 <button
                                   onClick={() => setIsAddApplicantModalOpen(true)}
@@ -535,7 +535,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                                   <span className="ml-1">Add Applicant</span>
                                 </button>
                               )}
-                            </Menu.Item>
+                            </Menu.Item> */}
                             <Menu.Item>
                               {({ active }) => (
                                 <button
