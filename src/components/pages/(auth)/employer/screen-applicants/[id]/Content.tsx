@@ -461,6 +461,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   <button
                     onClick={handleOpenBatchUpload}
                     className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
+                    disabled={!hasActiveSubscription}
                   >
                     <UploadIcon />
                     Upload Resumes
