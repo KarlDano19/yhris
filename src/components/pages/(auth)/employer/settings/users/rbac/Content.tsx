@@ -43,6 +43,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -63,6 +64,12 @@ type T_AssignRoleModalData = {
 
 type T_SimpleModalData = {
   open: boolean;
+};
+
+type T_DeleteModalData = DeleteModalData & {
+  id: number;
+  name: string;
+  type: 'permission' | 'role';
 };
 
 const permissionColumnDefinitions = [
@@ -120,6 +127,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [roleModal, setRoleModal] = useState<T_PermissionRoleModalData | null>(null);
   const [assignRoleModal, setAssignRoleModal] = useState<T_AssignRoleModalData | null>(null);
   const [templateModal, setTemplateModal] = useState<T_SimpleModalData | null>(null);
+  const [deleteModal, setDeleteModal] = useState<T_DeleteModalData | null>(null);
 
   // Column Visibility
   const [visiblePermissionColumns, setVisiblePermissionColumns] = useState<Record<string, boolean>>({
@@ -243,27 +251,38 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleDelete = (type: 'permission' | 'role', id: number, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${type} "${name}"?`)) {
-      const callback = {
-        onSuccess: (data: any) => {
-          toast.custom(() => <CustomToast message={data.message} type='error' />, {
-            duration: 5000,
-          });
-          const refetch = type === 'permission' ? refetchPermissions : refetchRoles;
-          refetch();
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 7000,
-          });
-        },
-      };
+    setDeleteModal({
+      open: true,
+      id,
+      name,
+      type,
+    });
+  };
 
-      if (type === 'permission') {
-        deletePermission(id, callback);
-      } else {
-        deleteRole(id, callback);
-      }
+  const confirmDelete = () => {
+    if (!deleteModal) return;
+    
+    const callback = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 5000,
+        });
+        const refetch = deleteModal.type === 'permission' ? refetchPermissions : refetchRoles;
+        refetch();
+        setDeleteModal(null);
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+        setDeleteModal(null);
+      },
+    };
+
+    if (deleteModal.type === 'permission') {
+      deletePermission(deleteModal.id, callback);
+    } else {
+      deleteRole(deleteModal.id, callback);
     }
   };
 
@@ -827,6 +846,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={templateModal}
           setIsOpen={setTemplateModal}
           refetch={handleRefetch}
+        />
+      )}
+
+      {deleteModal && (
+        <DeleteModal
+          isOpen={deleteModal}
+          setIsOpen={setDeleteModal}
+          onConfirm={confirmDelete}
+          isLoading={false}
         />
       )}
 

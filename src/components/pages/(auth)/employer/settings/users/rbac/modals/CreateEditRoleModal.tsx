@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
@@ -10,7 +10,7 @@ import useUpdateRole from '../hooks/useUpdateRole';
 import useGetRoleDetails from '../hooks/useGetRoleDetails';
 import useGetPermissionsList from '../hooks/useGetPermissionsList';
 
-import { XCircleIcon, CheckIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, CheckIcon, ChevronUpDownIcon, XMarkIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 type T_PermissionRoleModalData = {
@@ -31,6 +31,7 @@ export default function CreateEditRoleModal({
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm();
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   
   const { data: roleDetailsData, refetch: refetchRoleDetails } = useGetRoleDetails(isOpen.id);
   const { data: permissionsData } = useGetPermissionsList({ pageSize: 1000 });
@@ -136,21 +137,56 @@ export default function CreateEditRoleModal({
     return selectedInCategory.length > 0 && selectedInCategory.length < categoryPermissionIds.length;
   };
 
+  // Toggle category collapse/expand state
+  const toggleCategoryCollapse = (category: string) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if a category is collapsed
+  const isCategoryCollapsed = (category: string) => {
+    return collapsedCategories.has(category);
+  };
+
   const customCloseModal = () => {
     reset();
     setSelectedPermissions([]);
+    // Reset all categories to collapsed state
+    if (Object.keys(permissionsByCategory).length > 0) {
+      const allCategories = new Set(Object.keys(permissionsByCategory));
+      setCollapsedCategories(allCategories);
+    } else {
+      setCollapsedCategories(new Set());
+    }
     setIsOpen(null);
   };
 
   // Group permissions by category
-  const permissionsByCategory = permissionsData?.results?.reduce((acc: any, permission: any) => {
-    const category = permission.category || 'Uncategorized';
-    if (!acc[category]) {
-      acc[category] = [];
+  const permissionsByCategory = useMemo(() => {
+    return permissionsData?.results?.reduce((acc: any, permission: any) => {
+      const category = permission.category || 'Uncategorized';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(permission);
+      return acc;
+    }, {}) || {};
+  }, [permissionsData?.results]);
+
+  // Initialize all categories as collapsed when permissions data is loaded
+  useEffect(() => {
+    if (permissionsData?.results && Object.keys(permissionsByCategory).length > 0) {
+      const allCategories = new Set(Object.keys(permissionsByCategory));
+      setCollapsedCategories(allCategories);
     }
-    acc[category].push(permission);
-    return acc;
-  }, {}) || {};
+  }, [permissionsData?.results]);
 
   return (
     <>
@@ -179,8 +215,8 @@ export default function CreateEditRoleModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-4xl'>
-                  <div className='flex bg-savoy-blue p-2 items-center'>
+                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-4xl'>
+                  <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
                       {isEditing ? 'Edit Role' : 'Create Role'}
                     </h3>
@@ -338,10 +374,10 @@ export default function CreateEditRoleModal({
                                         : 'border-gray-300 bg-white'
                                     }`}>
                                       {isCategoryFullySelected(category) && (
-                                        <CheckIcon className='h-3 w-3 text-savoy-blue' aria-hidden='true' />
+                                        <CheckIcon className='h-3 w-3 text-white' aria-hidden='true' />
                                       )}
                                       {isCategoryPartiallySelected(category) && (
-                                        <div className='h-2 w-2 bg-savoy-blue rounded-sm' />
+                                        <div className='h-2 w-2 bg-white rounded-sm' />
                                       )}
                                     </div>
                                     <span>{category}</span>
@@ -405,11 +441,13 @@ export default function CreateEditRoleModal({
                                     leaveFrom='opacity-100'
                                     leaveTo='opacity-0'
                                   >
-                                    <Listbox.Options className='absolute z-10 mt-1 max-h-44 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
+                                    <Listbox.Options className='absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
                                       {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
                                         <div key={category}>
                                           {/* Category Header with Select All/None */}
-                                          <div className='bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200'>
+                                          <div 
+                                            className='bg-gray-50 px-3 py-2 flex items-center justify-between border-b border-gray-200'
+                                          >
                                             <div className='flex items-center space-x-2'>
                                               <button
                                                 type='button'
@@ -419,7 +457,7 @@ export default function CreateEditRoleModal({
                                                 }}
                                                 className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
                                                   isCategoryFullySelected(category)
-                                                    ? 'border-savoy-blue bg-savoy-blue'
+                                                    ? 'border-white bg-savoy-blue'
                                                     : isCategoryPartiallySelected(category)
                                                     ? 'border-savoy-blue bg-savoy-blue bg-opacity-50'
                                                     : 'border-gray-300 bg-white hover:border-savoy-blue'
@@ -432,20 +470,39 @@ export default function CreateEditRoleModal({
                                                   <div className='h-2 w-2 bg-white rounded-sm' />
                                                 )}
                                               </button>
-                                              <span className='text-xs font-semibold text-gray-900'>
-                                                {category}
-                                              </span>
+                                              <button
+                                                type='button'
+                                                className='flex items-center space-x-1 hover:bg-gray-200 rounded px-1 py-0.5 relative z-10'
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  toggleCategoryCollapse(category);
+                                                }}
+                                                onMouseDown={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                }}
+                                              >
+                                                {isCategoryCollapsed(category) ? (
+                                                  <ChevronRightIcon className='h-3 w-3 text-gray-500' />
+                                                ) : (
+                                                  <ChevronDownIcon className='h-3 w-3 text-gray-500' />
+                                                )}
+                                                <span className='text-xs font-semibold text-gray-900'>
+                                                  {category}
+                                                </span>
+                                              </button>
                                             </div>
                                             <span className='text-xs text-gray-500'>
                                               {permissions.filter((p: any) => selectedPermissions.includes(p.id)).length}/{permissions.length}
                                             </span>
                                           </div>
-                                          {permissions.map((permission: any) => (
+                                          {!isCategoryCollapsed(category) && permissions.map((permission: any) => (
                                             <Listbox.Option
                                               key={permission.id}
                                               value={permission.id}
                                               className={({ active }) =>
-                                                `relative cursor-pointer select-none py-2 pl-3 pr-9 ${
+                                                `relative cursor-pointer select-none py-2 pl-8 pr-9 ${
                                                   active ? 'bg-savoy-blue text-white' : 'text-gray-900'
                                                 }`
                                               }
@@ -455,7 +512,7 @@ export default function CreateEditRoleModal({
                                                   <div className='flex items-center'>
                                                     <div className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${
                                                       selected
-                                                        ? 'border-savoy-blue bg-savoy-blue'
+                                                        ? 'border-white bg-savoy-blue'
                                                         : 'border-gray-300 bg-white'
                                                     }`}>
                                                       {selected && (
