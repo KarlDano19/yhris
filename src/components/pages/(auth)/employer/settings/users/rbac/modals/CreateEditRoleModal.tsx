@@ -556,7 +556,7 @@ export default function CreateEditRoleModal({
                                     <button
                                       type='button'
                                       onClick={() => togglePermission(permId)}
-                                      className='group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-blue-600/20'
+                                      className='group relative -mr-1 w-3.5 rounded-sm hover:bg-blue-600/20'
                                     >
                                       <XMarkIcon className='h-3.5 w-3.5' />
                                     </button>
