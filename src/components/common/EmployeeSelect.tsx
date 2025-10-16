@@ -663,6 +663,30 @@ export default function EmployeeSelect({
                 ),
                 IndicatorSeparator: () => null,
               }}
+              styles={isMulti ? {
+                multiValue: (provided) => ({
+                  ...provided,
+                  backgroundColor: '#eff6ff',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(29, 78, 216, 0.1)',
+                }),
+                multiValueLabel: (provided) => ({
+                  ...provided,
+                  color: '#1d4ed8',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                }),
+                multiValueRemove: (provided) => ({
+                  ...provided,
+                  color: '#1d4ed8',
+                  padding: '2px',
+                  borderRadius: '2px',
+                  ':hover': {
+                    backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                    color: '#1d4ed8',
+                  },
+                }),
+              } : undefined}
               isClearable={isClearable}
               placeholder={placeholder}
               isSearchable={isMulti ? true : !formValue} // Disable search for single select when employee is selected

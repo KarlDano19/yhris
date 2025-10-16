@@ -145,7 +145,7 @@ export default function CreateEditPermissionModal({
                                 type='text'
                                 id='name'
                                 {...register('name', { required: 'Permission name is required' })}
-                                className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
+                                className='cursor-not-allowed bg-gray-100 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                 placeholder='e.g. create_employee'
                               />
                               <p className='text-xs text-gray-500 mt-1'>
@@ -168,7 +168,7 @@ export default function CreateEditPermissionModal({
                                 type='text'
                                 id='display_name'
                                 {...register('display_name', { required: 'Display name is required' })}
-                                className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
+                                className='cursor-not-allowed bg-gray-100 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                 placeholder='e.g. Create Employee'
                               />
                               <p className='text-xs text-gray-500 mt-1'>
@@ -187,11 +187,12 @@ export default function CreateEditPermissionModal({
                             </label>
                             <div className='mt-2'>
                               <input
+                                disabled={true}
                                 type='text'
                                 id='category'
                                 list='category-options'
                                 {...register('category', { required: 'Category is required' })}
-                                className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
+                                className='cursor-not-allowed bg-gray-100 block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                 placeholder='Enter or select category'
                               />
                             </div>
