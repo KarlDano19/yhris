@@ -41,12 +41,18 @@ export const SmartButton: React.FC<SmartButtonProps> = ({
   // Combine permission-based disabled state with prop disabled state
   const isDisabled = disabled || (!hasPermission && fallbackBehavior === 'disable');
   
+  // Add opacity when disabled due to permissions
+  const isDisabledByPermissions = !hasPermission && fallbackBehavior === 'disable';
+  const finalClassName = isDisabledByPermissions 
+    ? `${className} opacity-50 cursor-not-allowed`.trim()
+    : className;
+  
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={isDisabled}
-      className={className}
+      className={finalClassName}
       data-permission-id={id}
       data-required-permission={requiredPermission}
       data-has-permission={hasPermission}

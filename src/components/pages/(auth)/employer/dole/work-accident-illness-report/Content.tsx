@@ -15,19 +15,20 @@ import { useForm } from 'react-hook-form';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
+import useDeleteWorkAccidentIllnessReport from './hooks/useDeleteWorkAccidentillnessReport';
 import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
 import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
-import DeleteWorkAccidentIllnessReportModal from './modals/DeleteWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import { useBulkDeleteWorkAccidentIllnessReport } from './hooks/useBulkDeleteWorkAccidentIllnessReport';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
 
 import EditIcon from '@/svg/EditIcon';
@@ -43,6 +44,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
@@ -91,6 +96,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isWorkAccidentIlnessReportsLoading,
     refetch: workAccidentIlnessReportsRefetch,
   } = useGetWorkAccidentIlnessReportsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+  const { mutate: deleteWorkAccidentIllnessReport, isLoading: isDeleteWorkAccidentIllnessReportLoading } = useDeleteWorkAccidentIllnessReport();
   
   const menuOptions = [
     {
@@ -113,7 +119,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [isSearching, setIsSearching] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const { mutate: bulkDeleteWorkAccidentIllnessReports, isLoading: isBulkDeleting } = useBulkDeleteWorkAccidentIllnessReport();
   const cachedRigths = useLegacyPermissions();
@@ -232,26 +240,50 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) {
       toast.custom(() => <CustomToast message="Please select items to delete" type='error' />, { duration: 4000 });
       return;
     }
+    setBulkDeleteCount(selectedItems.length);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
-  const handleConfirmBulkDelete = () => {
-    bulkDeleteWorkAccidentIllnessReports(selectedItems, {
-      onSuccess: (data) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setSelectedItems([]);
-        setIsBulkDeleteModalOpen(false);
-        workAccidentIlnessReportsRefetch();
-      },
-      onError: (error: any) => {
-        toast.custom(() => <CustomToast message={error.message} type='error' />, { duration: 4000 });
-      }
-    });
+  // Perform the actual deletion (called by ProgressModal)
+  const handleConfirmBulkDelete = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        bulkDeleteWorkAccidentIllnessReports(selectedItems, {
+          onSuccess: (data) => {
+            resolve(data);
+          },
+          onError: (error: any) => {
+            reject(error);
+          }
+        });
+      });
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to delete work accident illness reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} work accident illness report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedItems([]);
+    setBulkDeleteCount(0);
+    workAccidentIlnessReportsRefetch();
   };
 
   const handleSelectAll = () => {
@@ -345,6 +377,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     open: true,
                   })
                 }
+                disabled={selectedItems.length > 1}
+                className={selectedItems.length > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -500,43 +534,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           {/* Bulk Actions Section */}
-          <div className="mt-8">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              {/* Bulk Actions - Left Side */}
-              {selectedItems.length > 0 && (
-                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
-                  <button
-                    onClick={handleBulkDelete}
-                    disabled={isBulkDeleting || !cachedRigths?.state?.data?.edit_dole_wair}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isBulkDeleting ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Deleting...
-                      </div>
-                    ) : (
-                      'Delete Selected'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setSelectedItems([])}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
-                  <span className="text-sm text-gray-700 font-medium">
-                    {selectedItems.length} selected
-                  </span>
-                </div>
-              )}
-
-              {/* Right side - can be used for filters or empty */}
-              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
-                {/* Add any filter tabs here if needed in the future */}
+          {selectedItems.length > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-dole-wair-btn"
+                  onClick={handleBulkDelete}
+                  disabled={isBulkDeleting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isBulkDeleting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedItems.length} selected
+                </span>
               </div>
             </div>
-          </div>
+          )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -622,10 +643,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isWorkAccidentIllnessReportDeleteModalOpen && (
-        <DeleteWorkAccidentIllnessReportModal
-          refetch={workAccidentIlnessReportsRefetch}
+        <DeleteModal
           isOpen={isWorkAccidentIllnessReportDeleteModalOpen}
           setIsOpen={setIsWorkAccidentIllnessReportDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsWorkAccidentIllnessReportDeleteModalOpen(null);
+                workAccidentIlnessReportsRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteWorkAccidentIllnessReport(isWorkAccidentIllnessReportDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteWorkAccidentIllnessReportLoading}
         />
       )}
       {isUpdateWorkAccidentIllnessReportModalOpen && (
@@ -860,14 +894,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       </div>
 
       <Tooltip id='search-tooltip'/>
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} work accident illness report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <BulkDeleteModal
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
-          onClose={() => setIsBulkDeleteModalOpen(false)}
+          setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={handleConfirmBulkDelete}
-          selectedCount={selectedItems.length}
-          moduleName="work accident illness report"
-          isLoading={isBulkDeleting}
+          title={`Deleting ${bulkDeleteCount} work accident illness report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={isBulkDeleting}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
     </>

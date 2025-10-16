@@ -15,22 +15,23 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import classNames from '@/helpers/classNames';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
+import ProgressModal from '@/components/ProgressModal';
 import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useGetLocationItems from '@/components/hooks/useGetLocationItems';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import useUpdateEmployerAgreeExport from './hooks/useUpdateEmployerAgreeExport';
-import DeleteEmployeeDetailModal from './modals/DeleteEmployeeDetail';
+import useDeleteEmployee from './hooks/useDeleteEmployee';
 import EditEmployeeDetailsModal from './modals/EditEmployeeDetailsModal';
 import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
@@ -152,6 +153,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { data: employeeStatusItems } = useGetEmployeeStatusItems();
 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
+  const { mutate: deleteEmployee, isLoading: isDeleteEmployeeLoading } = useDeleteEmployee();
   const bulkDeleteMutation = useBulkDeleteEmployees();
 
   // Combined refetch function to refresh both main list and autocomplete data
@@ -167,7 +169,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedEmployees, setSelectedEmployees] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState<number>(0);
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -387,6 +391,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle bulk delete
   const handleBulkDelete = () => {
     if (selectedEmployees.size === 0) return;
+    setBulkDeleteCount(selectedEmployees.size);
+    setIsBulkDeleteConfirmModalOpen({ open: true });
+  };
+
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
@@ -395,15 +405,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const employeeIds = Array.from(selectedEmployees);
       await bulkDeleteMutation.mutateAsync(employeeIds);
       
-      toast.custom(() => <CustomToast message={`${selectedEmployees.size} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
+      // Don't show toast here - let the progress modal handle the success state
       setSelectedEmployees(new Set());
       setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
+      
+      // Refetch data after successful deletion
       refetchAllEmployeeData();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete employees';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
   };
 
   // Update select all state when employees change
@@ -494,6 +510,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton
                 id="delete-employee-btn"
                 onClick={() => setIsEmployeesDeleteModalOpen({ id: item.id, open: true })}
+                disabled={selectedEmployees.size > 1}
+                className={selectedEmployees.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -567,6 +585,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     type='text'
                     name='search'
                     id='search'
+                    data-tooltip-id='search-tooltip'
+                    data-tooltip-hidden={showAutocomplete}
+                    data-tooltip-content='Search for Employee: Name, Department, Position'
+                    data-tooltip-place='bottom'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                     autoComplete='off'
                     autoCorrect='off'
@@ -901,11 +923,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           {/* Bulk Actions - Below Search/Filter Row */}
-          {selectedEmployees.size > 0 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          {selectedEmployees.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <button
+                <SmartButton
+                  id="delete-employee-btn"
                   onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {bulkDeleteMutation.isLoading ? (
@@ -916,13 +940,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   ) : (
                     'Delete Selected'
                   )}
-                </button>
-                <button
-                  onClick={() => setSelectedEmployees(new Set())}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Clear Selected
-                </button>
+                </SmartButton>
                 <span className="text-sm text-gray-700 font-medium">
                   {selectedEmployees.size} selected
                 </span>
@@ -1070,10 +1088,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isEmployeesDeleteModalOpen && (
-        <DeleteEmployeeDetailModal
-          refetch={refetchAllEmployeeData}
+        <DeleteModal
           isOpen={isEmployeesDeleteModalOpen}
           setIsOpen={setIsEmployeesDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsEmployeesDeleteModalOpen(null);
+                refetchAllEmployeeData();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmployee(isEmployeesDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEmployeeLoading}
         />
       )}
       {isEmployeesEditModalOpen && (
@@ -1100,17 +1131,30 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
-      {selectedEmployees.size > 0 && (
-        <BulkDeleteModal
-          isOpen={isBulkDeleteModalOpen}
-          selectedCount={selectedEmployees.size}
-          moduleName="employees"
-          onConfirm={confirmBulkDelete}
-          onClose={() => setIsBulkDeleteModalOpen(false)}
-          isLoading={bulkDeleteMutation.isLoading}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} selected employee${bulkDeleteCount > 1 ? 's' : ''}`}
         />
       )}
 
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} employee${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
+
+      <Tooltip id='search-tooltip' />
     </>
   );
 };

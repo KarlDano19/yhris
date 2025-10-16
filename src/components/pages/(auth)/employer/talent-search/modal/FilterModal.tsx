@@ -150,6 +150,28 @@ export default function FilterModal({ isOpen, setIsOpen, refetch, onFilterUpdate
                               ...base,
                               maxHeight: 200,
                             }),
+                            multiValue: (provided) => ({
+                              ...provided,
+                              backgroundColor: '#eff6ff',
+                              borderRadius: '6px',
+                              border: '1.5px solid rgba(29, 78, 216, 0.1)',
+                            }),
+                            multiValueLabel: (provided) => ({
+                              ...provided,
+                              color: '#305ddb',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                            }),
+                            multiValueRemove: (provided) => ({
+                              ...provided,
+                              color: '#2353d9',
+                              padding: '2px',
+                              borderRadius: '2px',
+                              ':hover': {
+                                backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                                color: '#305ddb',
+                              },
+                            }),
                           }}
                           isOptionDisabled={(option) => {
                             // First check if it's a region header (these should always be disabled)

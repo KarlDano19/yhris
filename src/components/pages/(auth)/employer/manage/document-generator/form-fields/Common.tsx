@@ -27,14 +27,18 @@ export const DocumentTypeField = ({ documentType, handleInputChange, disabled }:
     <label className="block mb-2 text-black font-semibold">
       Document Type <span className="text-red-500">*</span>
     </label>
-    <div className="relative">
+    <div className="relative overflow-hidden">
       <select
         name="documentType"
         value={documentType}
         onChange={handleInputChange}
-        className={`rounded-md appearance-none w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+        className={`rounded-md appearance-none w-full border-0 px-3 pr-12 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 text-sm overflow-hidden ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         required
         disabled={disabled}
+        style={{
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}
       >
         <option value="employee-certificate">Certificate of Employment (No Compensation)</option>
         <option value="employment-agreement">Employment Agreement</option>

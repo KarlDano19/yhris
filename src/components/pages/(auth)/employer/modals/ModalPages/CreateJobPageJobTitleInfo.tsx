@@ -309,6 +309,30 @@ export default function CreateJobPageTitleInfo({
                         const currentSelections = Array.isArray(value) ? value.length : 0;
                         return currentSelections >= 10;
                       }}
+                      styles={{
+                        multiValue: (provided) => ({
+                          ...provided,
+                          backgroundColor: '#eff6ff',
+                          borderRadius: '6px',
+                          border: '1.5px solid rgba(29, 78, 216, 0.1)',
+                        }),
+                        multiValueLabel: (provided) => ({
+                          ...provided,
+                          color: '#305ddb',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                        }),
+                        multiValueRemove: (provided) => ({
+                          ...provided,
+                          color: '#2353d9',
+                          padding: '2px',
+                          borderRadius: '2px',
+                          ':hover': {
+                            backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                            color: '#305ddb',
+                          },
+                        }),
+                      }}
                     />
                   )}
                 />

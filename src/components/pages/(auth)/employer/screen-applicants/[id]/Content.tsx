@@ -139,25 +139,23 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           ? applicant.applicant.screening_answers
           : [];
 
-      // Only check if mustHave questions match their ideal answers
+      // Check if ALL Yes/No and Multiple Choice questions match their ideal answers for "Not Fit" determination
       let isGoodFit = true;
 
       if (!answers.length) {
         // If no answers (empty due to previous data), treat as good fit
         isGoodFit = true;
       } else {
-        // Process each answer and check if it matches the ideal answer for mustHave questions
+        // Process each answer and check if it matches the ideal answer for ALL Yes/No and Multiple Choice questions
         // Only check questions that should be shown to candidates
         answers.forEach((answer: { question: string; answer: string | string[] }) => {
           const question = screeningQuestions.find((q) => q.question === answer.question);
-          if (question && question.mustHave && question.showToCandidates !== false) {
+          if (question && question.showToCandidates !== false) {
             const responseType = question.responseType || 'Yes / No';
             let isMatch = false;
 
-            if (responseType === 'Text') {
-              // For text questions, just check if they provided an answer
-              isMatch = String(answer.answer).trim() !== '';
-            } else if (responseType === 'Multiple Choice') {
+            // Only evaluate Yes/No and Multiple Choice for "Not Fit" determination
+            if (responseType === 'Multiple Choice') {
               // For multiple choice, check if any of the applicant's answers match any ideal answers
               const idealAnswers = Array.isArray(question.idealAnswer) ? question.idealAnswer : [question.idealAnswer];
               const applicantAnswers = Array.isArray(answer.answer) ? answer.answer : [answer.answer];
@@ -167,14 +165,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
                 )
               );
-            } else {
-              // Default case: Yes/No or other types
+            } else if (responseType === 'Yes / No') {
+              // Yes/No questions - check if answer matches ideal answer
               const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
               const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
               isMatch = applicantAnswer.toLowerCase() === idealAnswer.toLowerCase();
+            } else {
+              // For Text questions, don't affect "Not Fit" status - skip evaluation
+              return;
             }
 
-            // If it's a must-have and doesn't match, applicant is not a good fit
+            // If this Yes/No or Multiple Choice question doesn't match ideal answer, mark as not fit
             if (!isMatch) {
               isGoodFit = false;
             }
@@ -419,7 +420,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} />,
     },
   };
 
@@ -482,7 +483,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   <SmartButton
                     id="upload-resumes-btn"
                     onClick={handleOpenBatchUpload}
-                    className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
+                    className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
+                    disabled={!hasActiveSubscription}
                   >
                     <UploadIcon />
                     Upload Resumes
@@ -544,7 +546,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       >
                         <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <div className="py-1">
-                            <Menu.Item>
+                            {/* <Menu.Item>
                               {({ active }) => (
                                 <button
                                   onClick={() => setIsAddApplicantModalOpen(true)}
@@ -557,7 +559,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                                   <span className="ml-1">Add Applicant</span>
                                 </button>
                               )}
-                            </Menu.Item>
+                            </Menu.Item> */}
                             <Menu.Item>
                               {({ active }) => (
                                 <button

@@ -69,6 +69,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/talent-search',
       isAvailable: true,
       permissionId: 'talent-search-page',
+      isGrayedOut: !hasActiveSubscription,
     },
     {
       icon: <ScreenApplicantsLogo />,

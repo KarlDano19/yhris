@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
+import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
 import StateContext from '../contexts/StateContext';
 
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
@@ -14,11 +15,13 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes } from '../types';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
   title: string;
+  JobTitle?: string;
 };
-export default function ApplicantForm({ title }: PropTypes) {
+export default function ApplicantForm({ title, JobTitle }: PropTypes) {
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
@@ -27,6 +30,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { mutate: generateSummary, isLoading: isGeneratingMutation } = useGenerateApplicantSummary();
+  const { mutate: downloadPDF, isLoading: isDownloadingPDF } = useDownloadScreeningAnswersPDF();
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -55,44 +59,94 @@ export default function ApplicantForm({ title }: PropTypes) {
   const handleGenerateSummary = () => {
     // Use the applicant.id from the state, which is the correct applicant_form_id
     if (!applicant?.id) {
-      toast.custom(() => <CustomToast message="Unable to identify applicant" type="error" />, {
+      toast.custom(() => <CustomToast message='Unable to identify applicant' type='error' />, {
         duration: 4000,
       });
       return;
     }
 
     setIsGeneratingSummary(true);
-    
-    generateSummary({ 
-      applicantId: applicant.id, // Use applicant.id (applicant_form_id) instead of applicantProfile.id
-      options: { force_regenerate: true } 
-    }, {
-      onSuccess: (response) => {
-        setIsGeneratingSummary(false);
-        
-        // Update the applicant profile with the new summary
-        setApplicantProfile((prev: any) => ({
-          ...prev,
-          resume_summary: response.summary
-        }));
 
-        const message = response.was_cached 
-          ? 'Resume summary already exists!' 
-          : 'Resume summary generated successfully with Claude AI!';
-          
-        toast.custom(() => <CustomToast message={message} type="success" />, {
-          duration: 4000,
-        });
+    generateSummary(
+      {
+        applicantId: applicant.id, // Use applicant.id (applicant_form_id) instead of applicantProfile.id
+        options: { force_regenerate: true },
       },
-      onError: (error: any) => {
-        setIsGeneratingSummary(false);
-        
-        const errorMessage = error?.message || 'Failed to generate summary. Please try again.';
-        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
-          duration: 6000,
-        });
+      {
+        onSuccess: (response) => {
+          setIsGeneratingSummary(false);
+
+          // Update the applicant profile with the new summary
+          setApplicantProfile((prev: any) => ({
+            ...prev,
+            resume_summary: response.summary,
+          }));
+
+          const message = response.was_cached
+            ? 'Resume summary already exists!'
+            : 'Resume summary generated successfully with Claude AI!';
+
+          toast.custom(() => <CustomToast message={message} type='success' />, {
+            duration: 4000,
+          });
+        },
+        onError: (error: any) => {
+          setIsGeneratingSummary(false);
+
+          const errorMessage = error?.message || 'Failed to generate summary. Please try again.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 6000,
+          });
+        },
       }
+    );
+  };
+
+  const handleDownloadPDF = () => {
+    if (!applicant?.applicationId) {
+      toast.custom(() => <CustomToast message='Unable to identify application' type='error' />, {
+        duration: 4000,
+      });
+      return;
+    }
+
+    downloadPDF({
+      appliedJobId: applicant.applicationId,
+      jobTitle: JobTitle,
+      applicantName: applicant.name || 'Unknown'
     });
+  };
+  
+  const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
+    const [imageError, setImageError] = useState(false);
+
+    const hasValidImage = applicant.photo_url && applicant.photo_url.trim() !== '' && !imageError;
+
+    if (!hasValidImage) {
+      return (
+        <PlaceholderAvatar
+          width={size}
+          height={size}
+          firstName={applicant.name?.split(' ')[0] || ''}
+          lastName={applicant.name?.split(' ')[1] || ''}
+          className='flex-shrink-0'
+        />
+      );
+    }
+
+    return (
+      <div className='mr-8'>
+        <div
+          className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
+          style={{
+            backgroundImage: `url(${applicantProfile.photo_url})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
+      </div>
+    );
   };
 
   const renderProfileTab = () => {
@@ -100,15 +154,7 @@ export default function ApplicantForm({ title }: PropTypes) {
       <>
         <div className='flex mt-8'>
           <div className='mr-8'>
-            <div
-              className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
-              style={{
-                backgroundImage: `url(${applicantProfile.photo_url})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            ></div>
+            <ApplicantAvatar applicant={applicantProfile} size={200} /> {/* Applicant Avatar */}
           </div>
           <div className=''>
             <p className='text-[1.5rem]'>{applicantProfile.name}</p>
@@ -136,7 +182,6 @@ export default function ApplicantForm({ title }: PropTypes) {
                     <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
                   </div>
                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
-                  
                 </div>
               ))}
             </div>
@@ -147,10 +192,10 @@ export default function ApplicantForm({ title }: PropTypes) {
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
             onClick={() => setViewCV(true)}
-            disabled={!!!applicantProfile.cv_url}
-            title={!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
+            disabled={!applicantProfile.cv_url}
+            title={!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
           >
-            {!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
+            {!applicantProfile.cv_url ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
           </button>
         </div>
       </>
@@ -170,7 +215,9 @@ export default function ApplicantForm({ title }: PropTypes) {
                 <p className='font-semibold'>{exp.position}</p>
                 <p>
                   {new Date(exp.dateFrom).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} -{' '}
-                  {exp.dateTo ? new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Present'}
+                  {exp.dateTo
+                    ? new Date(exp.dateTo).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    : 'Present'}
                 </p>
                 <p>{exp.companyOrg}</p>
                 <p className='font-semibold mt-4'>Description/Responsibilities:</p>
@@ -186,7 +233,9 @@ export default function ApplicantForm({ title }: PropTypes) {
   const renderAnswersTab = () => {
     return (
       <>
-        {applicantProfile.screening_answers && applicantProfile.screening_answers !== null && applicantProfile.screening_answers.length > 0 ? (
+        {applicantProfile.screening_answers &&
+        applicantProfile.screening_answers !== null &&
+        applicantProfile.screening_answers.length > 0 ? (
           <div className='mt-6 space-y-6'>
             {applicantProfile.screening_answers.map((item: any, index: number) => (
               <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
@@ -207,13 +256,33 @@ export default function ApplicantForm({ title }: PropTypes) {
             <p className='text-gray-500'>No screening questions were answered by this applicant.</p>
           </div>
         )}
+        <div className='mt-4'>
+          <button
+            type='button'
+            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50 disabled:cursor-not-allowed mr-3'
+            onClick={handleDownloadPDF}
+            disabled={applicantProfile.screening_answers.length === 0 || isDownloadingPDF}
+            title={applicantProfile.screening_answers.length === 0 ? 'No Screening Answers' : ''}
+          >
+            {isDownloadingPDF ? (
+              <div className='flex items-center'>
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-[#355FD0] mr-2'></div>
+                Downloading PDF...
+              </div>
+            ) : applicantProfile.screening_answers.length === 0 ? (
+              'No Screening Answers'
+            ) : (
+              'Download Screening Answers as PDF'
+            )}
+          </button>
+        </div>
       </>
     );
   };
 
   const renderSummaryTab = () => {
     const hasSummary = applicantProfile.resume_summary && applicantProfile.resume_summary.trim() !== '';
-    
+
     return (
       <>
         {hasSummary ? (
@@ -306,14 +375,12 @@ export default function ApplicantForm({ title }: PropTypes) {
               </svg>
               <h4 className='text-gray-600 font-medium mb-4'>No Resume Summary Available</h4>
               {applicantProfile.cv_url ? (
-              <p className='text-gray-500 text-sm mb-6'>
-                Generate an AI-powered summary from the uploaded resume to quickly understand this candidate&apos;s
-                background and qualifications.
-              </p>
-              ) : (
                 <p className='text-gray-500 text-sm mb-6'>
-                  No resume uploaded for this candidate.
+                  Generate an AI-powered summary from the uploaded resume to quickly understand this candidate&apos;s
+                  background and qualifications.
                 </p>
+              ) : (
+                <p className='text-gray-500 text-sm mb-6'>No resume uploaded for this candidate.</p>
               )}
               {applicantProfile.cv_url && (
                 <button
@@ -447,15 +514,9 @@ export default function ApplicantForm({ title }: PropTypes) {
                     </div>
                   )}
                   {!viewCV && currentTab == 1 && renderProfileTab()}
-                  {!viewCV && currentTab == 2 && (
-                    <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>
-                  )}
-                  {!viewCV && currentTab == 3 && (
-                    <div className='h-[28rem] overflow-y-auto'>{renderSummaryTab()}</div>
-                  )}
-                  {!viewCV && currentTab == 4 && (
-                    <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>
-                  )}
+                  {!viewCV && currentTab == 2 && <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>}
+                  {!viewCV && currentTab == 3 && <div className='h-[28rem] overflow-y-auto'>{renderSummaryTab()}</div>}
+                  {!viewCV && currentTab == 4 && <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>}
                   {viewCV && renderResumeView()}
                 </div>
                 {!viewCV && (

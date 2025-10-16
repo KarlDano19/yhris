@@ -17,14 +17,16 @@ import { useForm } from 'react-hook-form';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetEmployeeCompensationLogbookItems from './hooks/useGetEmployeeCompensationLogbookItems';
+import useDeleteEmployeeCompensationLogbook from './hooks/useDeleteEmployeeCompensationLogbook';
 import CreateEmployeeCompensationLogModal from './modals/CreateEmployeeCompensationLogModal';
 import EditEmployeeCompensationLogModal from './modals/EditEmployeeCompensationLogModal';
-import DeleteEmployeeCompensationLogModal from './modals/DeleteEmployeeCompensationLogModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 
@@ -32,7 +34,6 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import useBulkDeleteEmployeeCompensationLogbook from "./hooks/useBulkDeleteEmployeeCompensationLogbook";
-import BulkDeleteModal from "@/components/BulkDeleteModal";
 
 type PaginationProps = {
   totalRecords: number;
@@ -42,6 +43,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
@@ -75,6 +80,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isEmployeeCompensationLogbookListLoading,
     refetch: employeeCompensationLogbookListRefetch,
   } = useGetEmployeeCompensationLogbookItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+  const { mutate: deleteEmployeeCompensationLogbook, isLoading: isDeleteEmployeeCompensationLogbookLoading } = useDeleteEmployeeCompensationLogbook();
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
 
@@ -104,7 +110,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const [selectedLogbooks, setSelectedLogbooks] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const bulkDeleteMutation = useBulkDeleteEmployeeCompensationLogbook();
 
@@ -131,25 +139,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedLogbooks.size === 0) return;
+    setBulkDeleteCount(selectedLogbooks.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const logbookIds = Array.from(selectedLogbooks);
       await bulkDeleteMutation.mutateAsync(logbookIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedLogbooks.size} logbook(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedLogbooks(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
-      employeeCompensationLogbookListRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete logbooks';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} logbook(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedLogbooks(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    employeeCompensationLogbookListRefetch();
   };
 
   useEffect(() => {
@@ -309,6 +332,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton
                 id="edit-dole-employee-compensation-btn"
                 onClick={() => setIsEmployeesCompensationLogbookDeleteModalOpen({ id: item.id, open: true })}
+                disabled={selectedLogbooks.size > 1}
+                className={selectedLogbooks.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
               </SmartButton>
@@ -466,43 +491,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           {/* Bulk Actions Section - Left Side */}
-          <div className="mt-8">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              {/* Bulk Actions - Left Side */}
-              {selectedLogbooks.size > 0 && (
-                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
-                  <button
-                    onClick={handleBulkDelete}
-                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {bulkDeleteMutation.isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Deleting...
-                      </div>
-                    ) : (
-                      'Delete Selected'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setSelectedLogbooks(new Set())}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
-                  <span className="text-sm text-gray-700 font-medium">
-                    {selectedLogbooks.size} selected
-                  </span>
-                </div>
-              )}
-
-              {/* Right side - can be used for filters or empty */}
-              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
-                {/* Add any filter tabs here if needed in the future */}
+          {selectedLogbooks.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-dole-employee-compensation-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedLogbooks.size} selected
+                </span>
               </div>
             </div>
-          </div>
+          )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -593,10 +605,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isEmployeesCompensationLogbookDeleteModalOpen && (
-        <DeleteEmployeeCompensationLogModal
-          refetch={employeeCompensationLogbookListRefetch}
+        <DeleteModal
           isOpen={isEmployeesCompensationLogbookDeleteModalOpen}
           setIsOpen={setIsEmployeesCompensationLogbookDeleteModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsEmployeesCompensationLogbookDeleteModalOpen(null);
+                employeeCompensationLogbookListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmployeeCompensationLogbook(isEmployeesCompensationLogbookDeleteModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEmployeeCompensationLogbookLoading}
         />
       )}
       {isSelectBranchModalOpen && (
@@ -609,14 +634,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
         />
       )}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Employee Compensation Logbook${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <BulkDeleteModal
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
-          selectedCount={selectedLogbooks.size}
-          moduleName="Employee Compensation Logbook"
+          setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          onClose={() => setIsBulkDeleteModalOpen(false)}
-          isLoading={bulkDeleteMutation.isLoading}
+          title={`Deleting ${bulkDeleteCount} Employee Compensation Logbook${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
       {/* Print Section */}

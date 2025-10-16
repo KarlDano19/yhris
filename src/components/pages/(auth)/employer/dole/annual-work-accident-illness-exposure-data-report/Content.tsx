@@ -16,16 +16,18 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
+import useDeleteAnnualAccidentIllnessReport from './hooks/useDeleteAnnualAccidentIllnessReport';
 import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
 import { getPrintAnnualAccidentIllnessReportDetails } from './hooks/useGetPrintAnnualAccidentIllnessDetails';
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
-import DeleteReportModal from './modals/DeleteReportModal';
 import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import AnnualAccidentIllnessAttachmentSection from './components/AnnualAccidentIllnessAttachmentSection';
@@ -35,7 +37,6 @@ import ExportProgressModal from '../work-accident-illness-report/modals/ExportPr
 import useFileforge from '@/components/hooks/useFileforge';
 import { handlePrintPDF } from './PrintData';
 import useBulkDeleteAnnualWorkAccidentIllnessReport from './hooks/useBulkDeleteAnnualWorkAccidentIllnessReport';
-import BulkDeleteModal from '@/components/BulkDeleteModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -53,6 +54,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const statusOptions = [
@@ -109,15 +114,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
-  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
+  const { mutate: deleteAnnualAccidentIllnessReport, isLoading: isDeleteAnnualAccidentIllnessReportLoading } = useDeleteAnnualAccidentIllnessReport();
   const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
   
   // Get the current report details for attachment
@@ -422,26 +427,40 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedReports.size === 0) return;
+    setBulkDeleteCount(selectedReports.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
     setIsBulkDeleteModalOpen(true);
   };
 
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const reportIds = Array.from(selectedReports);
       await bulkDeleteMutation.mutateAsync(reportIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedReports.size} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedReports(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(false);
-      annualAccidentIllnessReportRefetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedReports(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    annualAccidentIllnessReportRefetch();
   };
 
   // Menu options for Export and Generate Report
@@ -525,7 +544,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <EditIcon />
               </SmartButton>
-              <button
+              <SmartButton
+                id="edit-dole-awair-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
@@ -534,8 +554,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 }
               >
                 <EmailLogo />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="generate-dole-awair-btn"
                 onClick={() => handlePrintPDFLocal(item)}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
@@ -545,17 +566,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-awair-btn"
                 onClick={() =>
                   setIsDeleteAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
+                disabled={selectedReports.size > 1}
+                className={selectedReports.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -696,43 +720,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           {/* Bulk Actions Section - Left Side */}
-          <div className="mt-8">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              {/* Bulk Actions - Left Side */}
-              {selectedReports.size > 0 && (
-                <div className="flex items-center gap-3 md:pl-4 lg:pl-10">
-                  <button
-                    onClick={handleBulkDelete}
-                    disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {bulkDeleteMutation.isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Deleting...
-                      </div>
-                    ) : (
-                      'Delete Selected'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setSelectedReports(new Set())}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Clear Selected
-                  </button>
-                  <span className="text-sm text-gray-700 font-medium">
-                    {selectedReports.size} selected
-                  </span>
-                </div>
-              )}
-
-              {/* Right side - can be used for filters or empty */}
-              <div className="flex flex-wrap justify-center md:justify-end md:pr-4 lg:pr-10 gap-2">
-                {/* Add any filter tabs here if needed in the future */}
+          {selectedReports.size > 1 && (
+            <div className="mt-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-dole-awair-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedReports.size} selected
+                </span>
               </div>
             </div>
-          </div>
+          )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -818,10 +829,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isDeleteAnnualAccidentIllnessReportModalOpen && (
-        <DeleteReportModal
-          refetch={annualAccidentIllnessReportRefetch}
+        <DeleteModal
           isOpen={isDeleteAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsDeleteAnnualAccidentIllnessReportModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteAnnualAccidentIllnessReportModalOpen(null);
+                annualAccidentIllnessReportRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteAnnualAccidentIllnessReport(isDeleteAnnualAccidentIllnessReportModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteAnnualAccidentIllnessReportLoading}
         />
       )}
       {isEditAnnualAccidentIllnessReportModalOpen && (
@@ -859,14 +883,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
         />
       )}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Annual Work Accident Illness Report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
       {isBulkDeleteModalOpen && (
-        <BulkDeleteModal
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
-          selectedCount={selectedReports.size}
-          moduleName="Annual Work Accident Illness Report"
+          setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          onClose={() => setIsBulkDeleteModalOpen(false)}
-          isLoading={bulkDeleteMutation.isLoading}
+          title={`Deleting ${bulkDeleteCount} Annual Work Accident Illness Report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
       <Tooltip id='email-tooltip'/>

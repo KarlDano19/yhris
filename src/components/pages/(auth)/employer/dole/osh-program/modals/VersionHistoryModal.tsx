@@ -6,13 +6,15 @@ import toast from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon, EyeIcon } from "@heroicons/react/24/solid";
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
+import DeleteModal from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import useGetOshProgramVersionHistory from '../hooks/useGetOshProgramVersionHistory';
 import useDeleteOshProgramVersion from '../hooks/useDeleteOshProgramVersion';
 import useBulkDeleteOshProgramVersions from '../hooks/useBulkDeleteOshProgramVersions';
-import DeleteVersionModal from './DeleteVersionModal';
 
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -32,10 +34,14 @@ export default function VersionHistoryModal({
 }: VersionHistoryModalProps) {
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [versionToDelete, setVersionToDelete] = useState<{ id: number; versionNumber: string } | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<{ open: boolean; id?: number; versionNumber?: string } | null>(null);
   const [selectedVersions, setSelectedVersions] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  
+  // Bulk delete states
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<{ open: boolean } | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   // Fetch version history data
   const { data: versionHistoryData, isLoading, refetch } = useGetOshProgramVersionHistory({
@@ -53,6 +59,9 @@ export default function VersionHistoryModal({
       setCurrentPage(1);
       setSelectedVersions(new Set());
       setSelectAll(false);
+      setBulkDeleteCount(0);
+      setIsBulkDeleteConfirmModalOpen(null);
+      setIsBulkDeleteModalOpen(false);
       // Refetch data when modal opens to get the latest version history
       refetch();
     }
@@ -91,24 +100,26 @@ export default function VersionHistoryModal({
   };
 
   const handleDeleteVersion = (versionId: number, versionNumber: string) => {
-    setVersionToDelete({ id: versionId, versionNumber });
-    setDeleteModalOpen(true);
+    setDeleteModalOpen({ 
+      open: true, 
+      id: versionId, 
+      versionNumber
+    });
   };
 
 
 
   const confirmDeleteVersion = async () => {
-    if (!versionToDelete) return;
+    if (!deleteModalOpen?.id) return;
     
     try {
-      await deleteVersionMutation.mutateAsync(versionToDelete.id);
+      await deleteVersionMutation.mutateAsync(deleteModalOpen.id);
       toast.custom(() => <CustomToast message="Version deleted successfully." type="success" />, { duration: 3000 });
-      setDeleteModalOpen(false);
-      setVersionToDelete(null);
+      setDeleteModalOpen(null);
       // Clear selection for deleted version
       setSelectedVersions(prev => {
         const newSet = new Set(prev);
-        newSet.delete(versionToDelete.id);
+        newSet.delete(deleteModalOpen.id!);
         return newSet;
       });
       // Wait a bit before refetching to ensure the delete operation is complete
@@ -119,11 +130,6 @@ export default function VersionHistoryModal({
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete version';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
     }
-  };
-
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false);
-    setVersionToDelete(null);
   };
 
   // Handle individual version selection
@@ -153,49 +159,41 @@ export default function VersionHistoryModal({
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedVersions.size === 0) return;
-    
-    const selectedVersionsList = Array.from(selectedVersions);
-    const versionNumbers = versionHistoryData?.records
-      ?.filter(v => selectedVersionsList.includes(v.id))
-      .map(v => v.version_number_formatted)
-      .join(', ') || '';
-    
-    setVersionToDelete({ 
-      id: -1, // Special ID to indicate bulk delete
-      versionNumber: versionNumbers 
+    setBulkDeleteCount(selectedVersions.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
     });
-    setDeleteModalOpen(true);
   };
 
-  // Handle bulk delete confirmation
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
-    if (selectedVersions.size === 0) return;
-    
     try {
-      // Use bulk delete mutation
       const versionIds = Array.from(selectedVersions);
       await bulkDeleteVersionMutation.mutateAsync(versionIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedVersions.size} version(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setDeleteModalOpen(false);
-      setVersionToDelete(null);
-      setSelectedVersions(new Set());
-      setSelectAll(false);
-      
-      // Wait a bit before refetching to ensure the delete operations are complete
-      setTimeout(() => {
-        refetch();
-      }, 500);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete versions';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
   };
 
-  const isBulkDelete = versionToDelete?.id === -1;
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} version(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedVersions(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetch();
+  };
 
   return (
     <>
@@ -315,7 +313,8 @@ export default function VersionHistoryModal({
                   {selectedVersions.size > 1 && (
                     <div className="mb-4 p-3">
                       <div className="flex items-center gap-3">
-                        <button
+                        <SmartButton
+                          id="edit-dole-osh-program-btn"
                           onClick={handleBulkDelete}
                           disabled={bulkDeleteVersionMutation.isLoading}
                           className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -328,13 +327,10 @@ export default function VersionHistoryModal({
                           ) : (
                             'Delete Selected'
                           )}
-                        </button>
-                        <button
-                          onClick={() => setSelectedVersions(new Set())}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        >
-                          Clear Selected
-                        </button>
+                        </SmartButton>
+                        <span className="text-sm text-gray-700 font-medium">
+                          {selectedVersions.size} selected
+                        </span>
                       </div>
                     </div>
                   )}
@@ -418,10 +414,11 @@ export default function VersionHistoryModal({
                                   >
                                     <EyeIcon className="w-5 h-5" />
                                   </button>
-                                  <button
+                                  <SmartButton
+                                    id="edit-dole-osh-program-btn"
                                     onClick={() => handleDeleteVersion(version.id, version.version_number_formatted)}
                                     disabled={deleteVersionMutation.isLoading || selectedVersions.size > 1}
-                                    className={`text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${selectedVersions.size > 1 ? 'invisible' : ''}`}
+                                    className={`text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${selectedVersions.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title="Delete Version"
                                   >
                                     {deleteVersionMutation.isLoading ? (
@@ -429,7 +426,7 @@ export default function VersionHistoryModal({
                                     ) : (
                                       <DeleteIcon />
                                     )}
-                                  </button>
+                                  </SmartButton>
                                 </div>
                               </td>
                             </tr>
@@ -465,14 +462,35 @@ export default function VersionHistoryModal({
 
       {/* Delete Version Confirmation Modal */}
       {deleteModalOpen && (
-        <DeleteVersionModal
+        <DeleteModal
           isOpen={deleteModalOpen}
-          onClose={closeDeleteModal}
-          onConfirm={isBulkDelete ? confirmBulkDelete : confirmDeleteVersion}
-          versionNumber={versionToDelete?.versionNumber || ''}
-          isLoading={isBulkDelete ? bulkDeleteVersionMutation.isLoading : deleteVersionMutation.isLoading}
-          isBulkDelete={isBulkDelete}
-          selectedCount={isBulkDelete ? selectedVersions.size : undefined}
+          setIsOpen={setDeleteModalOpen}
+          onConfirm={confirmDeleteVersion}
+          isLoading={deleteVersionMutation.isLoading}
+          customText={`version ${deleteModalOpen.versionNumber}`}
+        />
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} version${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} version${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteVersionMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

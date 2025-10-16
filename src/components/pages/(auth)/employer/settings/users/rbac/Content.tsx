@@ -43,6 +43,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 
 type PaginationProps = {
   totalRecords: number;
@@ -63,6 +64,12 @@ type T_AssignRoleModalData = {
 
 type T_SimpleModalData = {
   open: boolean;
+};
+
+type T_DeleteModalData = DeleteModalData & {
+  id: number;
+  name: string;
+  type: 'permission' | 'role';
 };
 
 const permissionColumnDefinitions = [
@@ -120,6 +127,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [roleModal, setRoleModal] = useState<T_PermissionRoleModalData | null>(null);
   const [assignRoleModal, setAssignRoleModal] = useState<T_AssignRoleModalData | null>(null);
   const [templateModal, setTemplateModal] = useState<T_SimpleModalData | null>(null);
+  const [deleteModal, setDeleteModal] = useState<T_DeleteModalData | null>(null);
 
   // Column Visibility
   const [visiblePermissionColumns, setVisiblePermissionColumns] = useState<Record<string, boolean>>({
@@ -243,27 +251,38 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleDelete = (type: 'permission' | 'role', id: number, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${type} "${name}"?`)) {
-      const callback = {
-        onSuccess: (data: any) => {
-          toast.custom(() => <CustomToast message={data.message} type='success' />, {
-            duration: 5000,
-          });
-          const refetch = type === 'permission' ? refetchPermissions : refetchRoles;
-          refetch();
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={err} type='error' />, {
-            duration: 7000,
-          });
-        },
-      };
+    setDeleteModal({
+      open: true,
+      id,
+      name,
+      type,
+    });
+  };
 
-      if (type === 'permission') {
-        deletePermission(id, callback);
-      } else {
-        deleteRole(id, callback);
-      }
+  const confirmDelete = () => {
+    if (!deleteModal) return;
+    
+    const callback = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, {
+          duration: 5000,
+        });
+        const refetch = deleteModal.type === 'permission' ? refetchPermissions : refetchRoles;
+        refetch();
+        setDeleteModal(null);
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+        setDeleteModal(null);
+      },
+    };
+
+    if (deleteModal.type === 'permission') {
+      deletePermission(deleteModal.id, callback);
+    } else {
+      deleteRole(deleteModal.id, callback);
     }
   };
 
@@ -350,12 +369,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <EditIcon />
                 </SmartButton>
-                <SmartButton
+                {/* <SmartButton
                   id="delete-permission-btn"
                   onClick={() => handleDelete('permission', permission.id, permission.display_name)}
                 >
                   <DeleteIcon />
-                </SmartButton>
+                </SmartButton> */}
               </div>
             </td>
           )}
@@ -368,7 +387,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='text-center py-8'>
               <ShieldCheckIcon className='mx-auto h-12 w-12 text-gray-400' />
               <h3 className='mt-2 text-sm font-medium text-gray-900'>No permissions found</h3>
-              <p className='mt-1 text-sm text-gray-500'>Get started by creating a new permission.</p>
+              {/* <p className='mt-1 text-sm text-gray-500'>Get started by creating a new permission.</p>
               <div className='mt-6'>
                 <SmartButton
                   id="create-permission-btn"
@@ -378,7 +397,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                   Create Permission
                 </SmartButton>
-              </div>
+              </div> */}
             </div>
           </td>
         </tr>
@@ -609,13 +628,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='flex items-center justify-between'>
             <h2 className='text-xl font-bold text-indigo-dye'>Role-Based Access Control (RBAC)</h2>
-            <button
+            {/* <button
               onClick={handleRefetch}
               className='inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-savoy-blue'
             >
               <ArrowPathIcon className='h-4 w-4 mr-2' />
               Refresh
-            </button>
+            </button> */}
           </div>
 
           {/* Tab Navigation */}
@@ -684,7 +703,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             
             <div className='flex-1 flex justify-start lg:justify-end gap-3'>
               {/* Action Buttons */}
-              {activeTab === 'permissions' && (
+              {/* {activeTab === 'permissions' && (
                 <SmartButton
                   id="create-permission-btn"
                   onClick={() => setPermissionModal({ id: null, open: true, mode: 'create' })}
@@ -693,7 +712,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <PlusIcon className='-ml-1 mr-2 h-5 w-5' />
                   Create Permission
                 </SmartButton>
-              )}
+              )} */}
 
               {activeTab === 'roles' && (
                 <>
@@ -827,6 +846,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={templateModal}
           setIsOpen={setTemplateModal}
           refetch={handleRefetch}
+        />
+      )}
+
+      {deleteModal && (
+        <DeleteModal
+          isOpen={deleteModal}
+          setIsOpen={setDeleteModal}
+          onConfirm={confirmDelete}
+          isLoading={false}
         />
       )}
 

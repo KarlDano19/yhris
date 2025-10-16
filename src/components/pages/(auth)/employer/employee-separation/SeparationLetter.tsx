@@ -4,6 +4,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from '@/helpers/classNames';
 import { T_LetterModal } from '@/types/globals';
 import ClipIcon from '@/svg/ClipIcon';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 const items = [
   { name: 'Letter of Acceptance', type: 'Acceptance' },
@@ -31,16 +32,22 @@ export default function SeparationLetter({
     <div className='flex flex-col'>
       <div className='inline-flex'>
         <Menu as='div' className='relative'>
-          <Menu.Button className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80' disabled={isLetterSent}>
-            <span className='sr-only'>Open options</span>
-            <div className='flex gap-4'>
-              <span className='flex-1'>Create</span>
-              <ChevronDownIcon
-                className='flex-none h-5 w-5'
-                aria-hidden='true'
-              />
-            </div>
-          </Menu.Button>
+          <SmartButton
+            id="create-separation-btn"
+            className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80'
+            disabled={isLetterSent}
+          >
+            <Menu.Button className='w-full h-full'>
+              <span className='sr-only'>Open options</span>
+              <div className='flex gap-4'>
+                <span className='flex-1'>Create</span>
+                <ChevronDownIcon
+                  className='flex-none h-5 w-5'
+                  aria-hidden='true'
+                />
+              </div>
+            </Menu.Button>
+          </SmartButton>
           <Transition
             as={Fragment}
             enter='transition ease-out duration-100'
