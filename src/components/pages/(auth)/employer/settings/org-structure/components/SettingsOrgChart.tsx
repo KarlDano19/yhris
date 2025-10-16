@@ -9,10 +9,10 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import OrgNode from './OrgNode';
 import FullscreenChart from './FullscreenChart';
 import PositionModal from '../modals/PositionModal';
-import DeleteModal from '../modals/DeleteModal';
 import MoveModal from '../modals/MoveModal';
 import useAddOrgStructure from '../hooks/useAddOrgStructure';
 import useUpdateOrgStructure from '../hooks/useUpdateOrgStructure';
@@ -139,8 +139,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   const [showModal, setShowModal] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<number | null>(null);
   const [editingPosition, setEditingPosition] = useState<OrgStructure | null>(null);
-  const [deletingPosition, setDeletingPosition] = useState<OrgStructure | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteModalData, setDeleteModalData] = useState<(DeleteModalData & { position?: OrgStructure }) | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [draggedPosition, setDraggedPosition] = useState<OrgStructure | null>(null);
@@ -370,31 +369,28 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
           setIsFullscreen(false);
           // Use setTimeout to ensure fullscreen exits before opening modal
           setTimeout(() => {
-            setDeletingPosition(nodeToDelete);
-            setShowDeleteModal(true);
+            setDeleteModalData({ open: true, position: nodeToDelete });
           }, 100);
         } else {
-          setDeletingPosition(nodeToDelete);
-          setShowDeleteModal(true);
+          setDeleteModalData({ open: true, position: nodeToDelete });
         }
       }
     }
   };
 
   const handleConfirmDelete = async () => {
-    if (!deletingPosition || typeof deletingPosition.id !== 'number') return;
+    if (!deleteModalData?.position || typeof deleteModalData.position.id !== 'number') return;
 
     setIsDeleting(true);
     
     try {
-      await deleteMutation.mutateAsync(deletingPosition.id);
+      await deleteMutation.mutateAsync(deleteModalData.position.id);
       
       toast.custom(() => <CustomToast message='Position deleted successfully!' type='success' />, {
         duration: 3000,
       });
       
-      setShowDeleteModal(false);
-      setDeletingPosition(null);
+      setDeleteModalData(null);
       
       // Refresh the chart
       refreshChart();
@@ -658,17 +654,15 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
       )}
 
       {/* Delete Modal */}
-      {showDeleteModal && (
+      {deleteModalData && (
         <DeleteModal
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setDeletingPosition(null);
-          }}
+          isOpen={deleteModalData}
+          setIsOpen={setDeleteModalData}
           onConfirm={handleConfirmDelete}
-          deletingPosition={deletingPosition}
           isLoading={isDeleting}
-          />
+          confirmText="Delete"
+          customText={`the position "${deleteModalData.position?.position_name || 'this position'}"`}
+        />
       )}
 
       {/* Move Modal */}

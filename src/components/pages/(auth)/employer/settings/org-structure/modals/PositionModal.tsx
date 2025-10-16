@@ -9,6 +9,7 @@ import 'react-quill/dist/quill.snow.css';
 import CustomToast from '@/components/CustomToast';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import CreateModal from '../../general-settings/employees/modals/CreateModal';
+import EditModal from '../../general-settings/employees/modals/EditModal';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 
@@ -41,6 +42,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   const [selectedPosition, setSelectedPosition] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<{ id: number; open: boolean } | null>(null);
 
   // Fetch all positions for the dropdown (no pagination needed for select view type)
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
@@ -157,12 +159,34 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
     }
   }, [editingPosition, positionOptions]);
 
+  // Update selected position when position data changes (e.g., after editing description)
+  useEffect(() => {
+    if (selectedPosition) {
+      const flatOptions = positionOptions.flatMap(group => group.options);
+      const updatedPosition = flatOptions.find((pos: any) => pos.value === selectedPosition.value);
+      if (updatedPosition && updatedPosition.description !== selectedPosition.description) {
+        setSelectedPosition(updatedPosition);
+      }
+    }
+  }, [positionData]);
+
   const handleAddPosition = () => {
     setIsAddPositionModalOpen(true);
   };
 
   const handlePositionCreated = () => {
     // Refresh positions list to get the updated data with new creation dates
+    refetchPositions();
+  };
+
+  const handleEditDescription = () => {
+    if (selectedPosition?.id) {
+      setIsEditModalOpen({ id: selectedPosition.id, open: true });
+    }
+  };
+
+  const handleEditModalClose = () => {
+    // Refetch positions to get updated description
     refetchPositions();
   };
 
@@ -261,15 +285,40 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                       </div>
                       
                       {/* Display Position Description */}
-                      {selectedPosition?.description && (
+                      {selectedPosition && (
                         <div className='mt-4'>
                           <label className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
                             Position Description
                           </label>
-                          <div 
-                            className="ql-editor text-sm leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto"
-                            dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
-                          />
+                          {selectedPosition.description ? (
+                            <div 
+                              className="ql-editor text-sm leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto cursor-pointer hover:border-savoy-blue transition-colors"
+                              dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
+                              onClick={handleEditDescription}
+                              title="Click to edit description"
+                            />
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 mx-auto">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-4">
+                                No description available
+                              </p>
+                              <button
+                                type="button"
+                                onClick={handleEditDescription}
+                                className="inline-flex items-center px-4 py-2 bg-savoy-blue text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Click here to edit
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -321,12 +370,24 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
           </div>
 
         {/* Position Creation Modal */}
+        {isAddPositionModalOpen && (
         <CreateModal
           module='position'
           isOpen={isAddPositionModalOpen}
           setIsOpen={setIsAddPositionModalOpen}
           refetch={handlePositionCreated}
         />
+        )}
+
+        {/* Position Edit Modal */}
+        {isEditModalOpen && (
+          <EditModal
+            module='position'
+            refetch={handleEditModalClose}
+            isOpen={isEditModalOpen}
+            setIsOpen={setIsEditModalOpen}
+          />
+        )}
         </Dialog>
       </Transition.Root>
     </>
