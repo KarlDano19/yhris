@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/solid';
 
@@ -17,14 +18,43 @@ const CardProfile = () => {
     }
   }, [applicantDetails]);
 
+  const ApplicantAvatar = ({ applicant, width = 32, height = 32 }: { applicant: any; width?: number; height?: number }) => {
+    const [imageError, setImageError] = useState(false);
+  
+    const hasValidImage = applicant.photo && applicant.photo.trim() !== '' && !imageError;
+  
+    if (!hasValidImage) {
+      return (
+        <PlaceholderAvatar
+          width={width}
+          height={height}
+          firstName={applicant.name?.split(' ')[0] || ''}
+          lastName={applicant.name?.split(' ')[1] || ''}
+          className='flex-shrink-0 rounded-none'
+        />
+      );
+    }
+  
+    return (
+      <img
+        src={applicant.photo}
+        alt={applicant.name || 'Applicant'}
+        width={128}
+        height={144}
+        className='w-full h-full rounded-2xl object-cover flex-shrink-0'
+        onError={() => setImageError(true)}
+      />
+    );
+  };
+
   return (
     <>
       {!isLoading && profile && (
         <div className='card card-user-info bg-white border border-gray-300 w-full h-auto shadow rounded-md overflow-hidden relative'>
           <div className='h-32 bg-[#FCCA34] border-b border-gray-300'></div>
           <div className='flex justify-center'>
-            <div className='w-32 h-36 bg-gray-50 border border-gray-300 rounded-md overflow-hidden absolute top-11'>
-              <Image src={profile.photo} fill alt='Profile image' />
+            <div className='w-32 h-36 bg-gray-50 border border-gray-300 rounded-2xl overflow-hidden absolute top-11'>
+              <ApplicantAvatar applicant={profile} width={128} height={144} />
             </div>
           </div>
           <h4 className='applicant-name text-center mt-[74px] text-xl text-indigo-dye font-semibold'>{profile.name}</h4>

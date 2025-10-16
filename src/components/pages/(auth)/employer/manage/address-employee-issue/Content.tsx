@@ -785,7 +785,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() => handleStatusFilter('all')}
                 className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center ${
                   appliedFilter.status === 'all'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
                 }`}
               >

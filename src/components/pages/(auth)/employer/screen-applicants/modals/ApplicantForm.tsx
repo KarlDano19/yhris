@@ -15,6 +15,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes } from '../types';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
   title: string;
@@ -115,21 +116,45 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
       applicantName: applicant.name || 'Unknown'
     });
   };
+  
+  const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
+    const [imageError, setImageError] = useState(false);
+
+    const hasValidImage = applicant.photo_url && applicant.photo_url.trim() !== '' && !imageError;
+
+    if (!hasValidImage) {
+      return (
+        <PlaceholderAvatar
+          width={size}
+          height={size}
+          firstName={applicant.name?.split(' ')[0] || ''}
+          lastName={applicant.name?.split(' ')[1] || ''}
+          className='flex-shrink-0'
+        />
+      );
+    }
+
+    return (
+      <div className='mr-8'>
+        <div
+          className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
+          style={{
+            backgroundImage: `url(${applicantProfile.photo_url})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
+      </div>
+    );
+  };
 
   const renderProfileTab = () => {
     return (
       <>
         <div className='flex mt-8'>
           <div className='mr-8'>
-            <div
-              className='bg-gray-300 h-48 w-36 rounded-md mx-auto lg:mx-0 flex items-center justify-center'
-              style={{
-                backgroundImage: `url(${applicantProfile.photo_url})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            ></div>
+            <ApplicantAvatar applicant={applicantProfile} size={200} /> {/* Applicant Avatar */}
           </div>
           <div className=''>
             <p className='text-[1.5rem]'>{applicantProfile.name}</p>

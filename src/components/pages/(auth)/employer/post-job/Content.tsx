@@ -137,7 +137,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
             <SmartButton
               id="create-job-btn"
-              onClick={() => setIsCreateJobModalOpen(true)}
+              onClick={() => {
+                // Reset screening questions and auto reject state for new job creation
+                setScreeningQuestions([]);
+                setAutoRejectEnabled(false);
+                setIsCreateJobModalOpen(true);
+              }}
               className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center enabled:hover:shadow-md focus:shadow-none disabled:opacity-50'
             >
               <CreateJob />
