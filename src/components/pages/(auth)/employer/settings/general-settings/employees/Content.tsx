@@ -36,7 +36,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() => setActiveTab('location')}
                 className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 whitespace-nowrap ${
                   activeTab === 'location'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
                 }`}
               >
@@ -46,7 +46,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() => setActiveTab('department')}
                 className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 whitespace-nowrap ${
                   activeTab === 'department'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
                 }`}
               >
@@ -56,7 +56,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() => setActiveTab('position')}
                 className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 whitespace-nowrap ${
                   activeTab === 'position'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
                 }`}
               >
@@ -66,7 +66,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 onClick={() => setActiveTab('employee-status')}
                 className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 whitespace-nowrap ${
                   activeTab === 'employee-status'
-                    ? 'bg-white text-sky-600 border-2 border-sky-600 shadow-sm'
+                    ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
                     : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
                 }`}
               >
