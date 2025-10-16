@@ -6,6 +6,7 @@ import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -46,9 +47,7 @@ const SendNTE = ({
   //   });
   // };
 
-  const handleSendClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
+  const handleSendClick = async () => {
     // Check if status is approved before proceeding
     if (employeeIssueDetails?.status !== 'approved') {
       return; // Do nothing if status is not approved
@@ -86,7 +85,8 @@ const SendNTE = ({
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
       <div>
-        <button
+        <SmartButton
+          id="edit-employee-issue-btn"
           className={classNames(
             employeeIssueDetails && employeeIssueDetails.nte_attachment
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
@@ -106,7 +106,7 @@ const SendNTE = ({
           {checkingAttachment
             ? 'Checking...'
             : (isNTESent ? 'Resend' : 'Send')}
-        </button>
+        </SmartButton>
       </div>
       <div>
         <button
