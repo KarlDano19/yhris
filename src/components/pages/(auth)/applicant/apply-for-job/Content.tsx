@@ -14,8 +14,8 @@ import JobDetailsModal from './modals/JobDetailsModal';
 import SavedModal from '../edit-profile/modals/SavedModal';
 import ConfirmModal from './modals/ConfirmModal';
 import useFindJobs from './hooks/useFindJobs';
-import JobSearchAutocomplete from '@/components/common/JobSearchAutocomplete';
-import LocationSearchAutocomplete from '@/components/common/LocationSearchAutocomplete';
+import JobSearchAutocomplete from '@/components/JobSearchAutocomplete';
+import LocationSearchAutocomplete from '@/components/LocationSearchAutocomplete';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
