@@ -8,8 +8,8 @@ import Link from 'next/link';
 import JobDetails from './JobDetails';
 import JobDetailsModal from './modals/JobDetailsModal';
 import useFindJobs from './hooks/useFindJobs';
-import JobSearchAutocomplete from '@/components/common/JobSearchAutocomplete';
-import LocationSearchAutocomplete from '@/components/common/LocationSearchAutocomplete';
+import JobSearchAutocomplete from '@/components/JobSearchAutocomplete';
+import LocationSearchAutocomplete from '@/components/LocationSearchAutocomplete';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
