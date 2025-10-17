@@ -90,6 +90,7 @@ function EmployeeAssigneeTab({
             excludeValues={selectedEmployees}
             employeeNames={recipientNames}
             className=""
+            showEmail={true}
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
@@ -128,6 +129,7 @@ function EmployeeAssigneeTab({
             excludeValues={selectedRecipients}
             employeeNames={employeeNames}
             className=""
+            showEmail={true}
           />
         </div>
         <div className="sm:col-span-4 mt-2 w-full">

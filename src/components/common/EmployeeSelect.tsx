@@ -10,7 +10,7 @@ import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePagi
 
 {/* Custom option component */}
 const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
+  const { data, isSelected, showEmail } = props;
   
   if (data.isLoading) {
     return (
@@ -65,14 +65,21 @@ const CustomOption = (props: any) => {
     <components.Option {...props}>
       <div>
         <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            • {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
+        <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+          {showEmail && data.email && (
+            <div className="mb-1">
+              • {data.email}
+            </div>
+          )}
+          {(data.department || data.position) && (
+            <div>
+              • {data.department && data.position 
+                ? `${data.department} | ${data.position}`
+                : data.department || data.position
+              }
+            </div>
+          )}
+        </div>
       </div>
     </components.Option>
   );
@@ -97,6 +104,7 @@ interface EmployeeSelectProps {
   onChange?: (selectedOption: any) => void;
   employeeName?: string; // Optional employee name for display
   employeeNames?: string[]; // Optional array of employee names for multi-select display
+  showEmail?: boolean; // Optional prop to show email in options
 }
 
 export default function EmployeeSelect({
@@ -117,6 +125,7 @@ export default function EmployeeSelect({
   onChange,
   employeeName,
   employeeNames,
+  showEmail = false,
 }: EmployeeSelectProps) {
   const queryClient = useQueryClient();
   const [employeeLimit, setEmployeeLimit] = useState(50);
@@ -319,6 +328,7 @@ export default function EmployeeSelect({
       employment_status: item.employment_status,
       address: item.address,
       gender: item.gender,
+      email: item.email,
     }));
 
     // Only add department options for multi-select (not for single select)
@@ -369,6 +379,7 @@ export default function EmployeeSelect({
             employment_status: '',
             address: '',
             gender: '',
+            email: '',
             is_department_option: true,
             is_remove_option: false,
             allEmployeesSelected: false
@@ -443,6 +454,7 @@ export default function EmployeeSelect({
                       employment_status: employee.employment_status,
                       address: employee.address,
                       gender: employee.gender,
+                      email: employee.email,
         } : null;
                 })
                 .filter(Boolean);
@@ -465,6 +477,7 @@ export default function EmployeeSelect({
             employment_status: employee.employment_status,
             address: employee.address,
             gender: employee.gender,
+            email: employee.email,
           };
         }
       }
@@ -655,7 +668,7 @@ export default function EmployeeSelect({
               }}
               filterOption={() => true} // Disable React Select's built-in filtering since we handle it ourselves
               components={{
-                Option: CustomOption,
+                Option: (props: any) => <CustomOption {...props} showEmail={showEmail} />,
                 DropdownIndicator: () => (
                   <div className="pointer-events-none px-2">
                     <SelectChevronDown />
