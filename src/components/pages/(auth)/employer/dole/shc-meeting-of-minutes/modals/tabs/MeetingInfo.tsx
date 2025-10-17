@@ -224,6 +224,7 @@ export default function MeetingInfo({
               onChange={(selectedOptions: any) => {
                 clearErrors("attendees");
               }}
+              showEmail={true}
             />
           </div>
           <div>
@@ -262,6 +263,7 @@ export default function MeetingInfo({
               excludeValues={selectedAttendees}
               employeeNames={absenteeNames}
               className=""
+              showEmail={true}
             />
           </div>
         </div>
