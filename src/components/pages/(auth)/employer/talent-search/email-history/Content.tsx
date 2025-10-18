@@ -392,7 +392,7 @@ const Content = () => {
 
           {/* Bulk Actions Section */}
           {selectedItems.length > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg p-3">
+            <div className="mt-4 p-3">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}

@@ -79,7 +79,7 @@ export default function WemAttachmentSection({
           </button>
         ) : null}
       </div>
-      <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
+      <p className='text-xs mt-1 text-gray-400'>Maximum file size: 10MB. <span className='text-red-600'>Upload a new file to replace the current attachment.</span></p>
     </div>
   );
 }

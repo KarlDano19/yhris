@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -34,6 +34,7 @@ const getPasswordRequirements = (pass: string) => ({
 
 const Content = () => {
   const router = useRouter();
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   // const accountType = [
   //   {
   //     value: 'employer',
@@ -51,6 +52,34 @@ const Content = () => {
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
+
+  // Check if user is already logged in and redirect if so
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/get-session');
+        const sessionData = await response.json();
+        
+        if (sessionData.isLoggedIn) {
+          // User is already logged in, redirect appropriately
+          if (sessionData.accountType === 'employer') {
+            window.location.href = '/dashboard';
+          } else if (sessionData.accountType === 'applicant') {
+            window.location.href = '/apply-for-a-job';
+          } else if (sessionData.accountType === 'admin') {
+            window.location.href = '/admin/dashboard';
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   const onSubmit = (data: T_Register) => {
     if (password !== '' || conformPassword !== '') {
@@ -110,6 +139,55 @@ const Content = () => {
       });
     }
   };
+
+  // Show loading while checking session
+  if (isCheckingSession) {
+    return (
+      <>
+        {/* Back Button */}
+        <div className="fixed top-4 left-4 z-50">
+          <Link 
+            href="/landing-page" 
+            className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
+            shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
+            hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+            transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
+            border border-gray-100"
+          >
+            <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+          </Link>
+        </div>
+        
+        <SplitLayout
+          left={
+            <>
+              <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
+                <MainIconOnly className='w-24 h-24' />
+
+                <h1 className='text-[50px] font-bold text-white mt-4'>
+                  YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+                </h1>
+                <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
+              </div>
+            </>
+          }
+          right={
+            <>
+              <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-gray-600">Checking session...</span>
+                </div>
+              </div>
+            </>
+          }
+          leftBG={SplitViewBg}
+        />
+        <FloatingHelpButton />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Back Button */}

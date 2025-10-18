@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
@@ -60,6 +61,7 @@ const statusOptions = [
 ];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+  const queryClient = useQueryClient();
   const [shcMinutesMeetingItems, setShcMinutesMeetingItems] = useState<any>([]);
   const [isShcMinutesMeetingDeleteModalOpen, setIsShcMinutesMeetingDeleteModalOpen] = useState<T_ModalData | null>(
     null
@@ -210,9 +212,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        event.target.value = '';
         return;
       }
       setAttachment(file);
@@ -246,6 +250,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       const callbackReq = {
         onSuccess: () => {
+          // Invalidate the meeting details cache to fetch fresh data with updated attachment
+          queryClient.invalidateQueries(['minutesMeetingDetailsCache', isSendEmailModalOpen.id]);
           setIsSendEmailModalOpen(null);
           shcMinutesMeetingRefetch();
           // Clear attachment state after successful send
@@ -628,7 +634,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions Section - Left Side */}
           {selectedShcMinutesMeeting.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <SmartButton
                   id="edit-dole-shc-minute-btn"

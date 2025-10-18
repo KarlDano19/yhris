@@ -492,7 +492,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions Section - Left Side */}
           {selectedLogbooks.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4">
               <div className="flex items-center gap-3">
                 <SmartButton
                   id="edit-dole-employee-compensation-btn"

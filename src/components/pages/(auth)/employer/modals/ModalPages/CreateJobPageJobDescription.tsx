@@ -149,7 +149,7 @@ export default function CreateJobPageJobDescription({
             </div>
           </div>
           <p className='text-sm text-gray-600 mb-2'>
-            These qualifications will be used to automatically filter candidates in search results.
+          Applicants search using qualifications like these. Setting them here boosts your listing visibility to the right candidates.
           </p>
           <div className='mt-2 h-72 mb-12'>
             <ReactQuill
