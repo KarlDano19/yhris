@@ -349,7 +349,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       
       {/* Bulk Actions - Below Date Filters */}
       {selectedLocations.size > 1 && (
-        <div className="mt-4 bg-gray-50 rounded-lg">
+        <div className="mt-4 rounded-lg">
           <div className="flex items-center gap-3">
             <SmartButton
               id="delete-location-btn"
