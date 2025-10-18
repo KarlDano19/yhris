@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
@@ -31,11 +31,13 @@ import { T_Login } from '@/types/globals';
 function Content() {
   const broadcastChannel = new BroadcastChannel('integration-channel');
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otpData, setOtpData] = useState<any>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   
   // NEW: Rate limiting timer states
   const [isRateLimited, setIsRateLimited] = useState(false);
@@ -43,6 +45,35 @@ function Content() {
 
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
+
+  // Check if user is already logged in and redirect if so
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/get-session');
+        const sessionData = await response.json();
+        
+        if (sessionData.isLoggedIn) {
+          // User is already logged in, redirect appropriately
+          if (sessionData.accountType === 'employer') {
+            const returnTo = searchParams.get('redirect') || '/dashboard';
+            window.location.href = returnTo;
+          } else if (sessionData.accountType === 'applicant') {
+            window.location.href = '/apply-for-a-job';
+          } else if (sessionData.accountType === 'admin') {
+            window.location.href = '/admin/dashboard';
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router, searchParams]);
 
   // NEW: Function to extract time from error message
   const extractTimeFromError = (errorMessage: string) => {
@@ -202,6 +233,55 @@ function Content() {
     }, 1000);
   };
 
+  // Show the login page but redirect if already logged in
+  if (isCheckingSession) {
+    // Still show the layout/header while checking
+    return (
+      <>
+        {/* Back Button */}
+        <div className="fixed top-4 left-4 z-50">
+          <Link 
+            href="/landing-page" 
+            className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
+            shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
+            hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+            transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
+            border border-gray-100"
+          >
+            <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+          </Link>
+        </div>
+        
+        <SplitLayout
+          left={
+            <>
+              <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
+                <MainIconOnly className='w-24 h-24' />
+
+                <h1 className='text-[50px] font-bold text-white mt-4'>
+                  YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+                </h1>
+                <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
+              </div>
+            </>
+          }
+          right={
+            <>
+              <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-gray-600">Checking session...</span>
+                </div>
+              </div>
+            </>
+          }
+          leftBG={SplitViewBg}
+        />
+        <FloatingHelpButton />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Back Button */}
@@ -316,7 +396,7 @@ function Content() {
                             xmlns='http://www.w3.org/2000/svg'
                           >
                             <path
-                              d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                              d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C0 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
                               fill='currentColor'
                             />
                             <path

@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -54,17 +54,11 @@ export async function middleware(request: NextRequest) {
   }
   if (isLoggedIn) {
     if (accountType === 'admin') {
-      if (unAuthRoutes.includes(firstRoute)) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-      }
       if (!adminRoutes.includes(firstRoute)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
     }
     if (accountType === 'employer') {
-      if (unAuthRoutes.includes(firstRoute)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
       if (employerRoutes.includes(firstRoute)) {
         if (
           firstRoute === 'dashboard' ||
@@ -103,9 +97,6 @@ export async function middleware(request: NextRequest) {
       }
     }
     if (accountType === 'applicant') {
-      if (unAuthRoutes.includes(firstRoute)) {
-        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
-      }
       if (applicantRoutes.includes(firstRoute)) {
         if (
           firstRoute === 'application-tracker' ||
