@@ -447,7 +447,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions - Below Date Filters */}
           {selectedEvaluationSchedulers.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}

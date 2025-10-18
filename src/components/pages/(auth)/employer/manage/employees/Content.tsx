@@ -924,7 +924,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions - Below Search/Filter Row */}
           {selectedEmployees.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <SmartButton
                   id="delete-employee-btn"

@@ -634,7 +634,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions Section - Left Side */}
           {selectedShcMinutesMeeting.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <SmartButton
                   id="edit-dole-shc-minute-btn"
