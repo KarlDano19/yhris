@@ -352,7 +352,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
       
       {/* Bulk Actions - Below Date Filters */}
       {selectedEmployeeStatuses.size > 1 && (
-        <div className="mt-4 rounded-lg">
+        <div className="mt-4">
           <div className="flex items-center gap-3">
             <SmartButton
               id="delete-employee-status-btn"
