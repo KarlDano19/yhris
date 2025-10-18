@@ -22,11 +22,11 @@ export interface EmployeeIssueUpdateData {
   decision_bcc?: string;
   decision_message?: string;
   // General update fields
-  employee_id?: number;
+  employee?: number;
   incident_date?: string;
   position?: string;
   department?: string;
-  incident_place?: string;
+  place_of_incident?: string;
   issue_type?: string;
   brief_background?: string;
 }
@@ -64,14 +64,14 @@ async function addEmployeeIssue(employeeIssue: EmployeeIssueUpdateData) {
         data.decision_bcc = employeeIssue.decision_bcc;
         data.decision_message = employeeIssue.decision_message;
       }
-    } else if (employeeIssue.employee_id || employeeIssue.incident_date || employeeIssue.position || employeeIssue.department || employeeIssue.incident_place || employeeIssue.issue_type || employeeIssue.brief_background) {
+    } else if (employeeIssue.employee || employeeIssue.incident_date || employeeIssue.position || employeeIssue.department || employeeIssue.place_of_incident || employeeIssue.issue_type || employeeIssue.brief_background) {
       // General update (edit functionality)
       data = {
-        employee_id: employeeIssue.employee_id,
+        employee: employeeIssue.employee,
         incident_date: employeeIssue.incident_date,
         position: employeeIssue.position,
         department: employeeIssue.department,
-        incident_place: employeeIssue.incident_place,
+        place_of_incident: employeeIssue.place_of_incident,
         issue_type: employeeIssue.issue_type,
         brief_background: employeeIssue.brief_background,
       };
