@@ -11,6 +11,8 @@ import React, {
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import type { Employee } from "@/types/employee-201-records/employee";
 import type { TrainingChangeSet } from "./components/TrainingDevelopmentForm";
 
@@ -596,36 +598,29 @@ export default function Employee201Content({
             </h4>
           </a>
 
-          <button
-            data-testid="save-btn"
-            onClick={() => {
-              if (requiresEdit && !isEditingTab) {
-                // EDIT: enable fields
-                setEditMode((m) => ({ ...m, [activeTab]: true }));
-                return;
-              }
-              // SAVE: open confirm modal (do NOT save immediately)
-              setShowConfirm(true);
-            }}
-            disabled={
-              requiresEdit
-                ? isEditingTab
-                  ? !canSave
-                  : false // Edit is always enabled; Save requires valid+dirty
-                : !canSave // other tabs: Save only when valid+dirty
+        <SmartButton
+          id="edit-employee-201-btn"
+          data-testid="save-btn"
+          onClick={() => {
+            if (requiresEdit && !isEditingTab) {
+              // EDIT: enable fields
+              setEditMode((m) => ({ ...m, [activeTab]: true }));
+              return;
             }
-            className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
-          >
-            {requiresEdit
-              ? isEditingTab
-                ? saving
-                  ? "Saving…"
-                  : "Save"
-                : "Edit"
-              : saving
-              ? "Saving…"
-              : "Save"}
-          </button>
+            // SAVE: open confirm modal (do NOT save immediately)
+            setShowConfirm(true);
+          }}
+          disabled={
+            requiresEdit
+              ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
+              : !canSave                            // other tabs: Save only when valid+dirty
+          }
+          className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
+        >
+          {requiresEdit
+            ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
+            : (saving ? "Saving…" : "Save")}
+        </SmartButton>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">

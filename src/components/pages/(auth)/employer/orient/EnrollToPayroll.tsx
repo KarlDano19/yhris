@@ -1,5 +1,6 @@
 import classNames from '@/helpers/classNames';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 export default function EnrollToPayroll({
   id,
@@ -20,7 +21,8 @@ export default function EnrollToPayroll({
     <>
       <div className='flex gap-2 mt-2 justify-center'>
         <div>
-          <button
+          <SmartButton
+            id="allow-onboarding-btn"
             className={classNames(
               isEnrolled
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
@@ -31,7 +33,7 @@ export default function EnrollToPayroll({
             disabled={isEnrolled || isLoading}
           >
             {isEnrolled ? 'Enrolled' : 'Enroll'}
-          </button>
+          </SmartButton>
         </div>
       </div>
     </>

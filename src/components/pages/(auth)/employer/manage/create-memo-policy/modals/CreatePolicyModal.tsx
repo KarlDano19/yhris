@@ -2,34 +2,27 @@ import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
-import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
 import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
 import RemoveFieldConfirmModal from './RemoveFieldConfirmModal';
+import EmailField from '@/components/common/EmailField';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { MinusCircleIcon, PencilIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import { DirectiveData, PolicyField } from '@/types/directives';
-
-interface CachedProfileData {
-  name: string;
-}
 
 export default function CreatePolicyModal({
   isOpen,
   setIsOpen,
   refetch,
-  employeeData,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
-  employeeData?: any[];
 }) {
   const cancelButtonRef = useRef(null);
   const [isNextForm, setIsNextForm] = useState(false);
@@ -37,16 +30,8 @@ export default function CreatePolicyModal({
   const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [inputTo, setInputTo] = useState('');
-  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
-  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const queryClient = useQueryClient();
-  
-  const cachedProfile = queryClient
-    .getQueryCache()
-    .find(['employerProfileCache']) as {
-    state: { data: CachedProfileData } | undefined;
-  };
+
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
     useForm<DirectiveData>({
       defaultValues: {
@@ -188,7 +173,7 @@ export default function CreatePolicyModal({
     if (titleValue && titleValue !== "") {
       clearErrors('title');
     }
-  }, [watch('title'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -197,47 +182,30 @@ export default function CreatePolicyModal({
     }
   }, [tagsTo, clearErrors]);
 
-  // Set company name from cached profile when modal opens
-  useEffect(() => {
-    if (isOpen && cachedProfile?.state?.data) {
-      setValue('company_name', cachedProfile.state.data.name || '');
-    }
-  }, [isOpen, cachedProfile, setValue]);
-
-  // Filter employees based on input
-  useEffect(() => {
-    if (employeeData && inputTo.trim()) {
-      const filtered = employeeData.filter((employee: any) => {
-        const searchTerm = inputTo.toLowerCase();
-        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
-        const email = employee.email?.toLowerCase() || '';
-        
-        return fullName.includes(searchTerm) || email.includes(searchTerm);
-      }).slice(0, 5); // Limit to 5 suggestions
-      
-      setFilteredEmployees(filtered);
-      setShowEmployeeSuggestions(filtered.length > 0);
-    } else {
-      setFilteredEmployees([]);
-      setShowEmployeeSuggestions(false);
-    }
-  }, [inputTo, employeeData]);
-
-  const handleEmployeeSelect = (employee: any) => {
-    if (employee.email && !tagsTo.includes(employee.email)) {
-      // Add the email directly to tagsTo using the setter
-      setTagsTo([...tagsTo, employee.email]);
-    }
-    setInputTo('');
-    setShowEmployeeSuggestions(false);
-  };
-
-  // Reset form when modal closes
+  // Reset form when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
+      // Reset form state when modal closes
+      setIsNextForm(false);
+      setTagsTo([]);
+      setInputTo('');
       setAttachmentExist(false);
     }
   }, [isOpen]);
+
+
+
+  // Handle employee selection for TO field
+  const handleEmployeeSelect = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsTo([...tagsTo, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsTo([...tagsTo, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsTo(employee.remainingTags);
+    }
+  };
+
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -294,9 +262,20 @@ export default function CreatePolicyModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                          To<span className='text-red-600'>*</span>
-                        </label>
+                        <div className='flex items-center justify-between'>
+                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                            To<span className='text-red-600'>*</span>
+                          </label>
+                          {tagsTo.length > 1 && (
+                            <button
+                              type='button'
+                              className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                              onClick={() => setTagsTo([])}
+                            >
+                              Unselect All
+                            </button>
+                          )}
+                        </div>
                         {errors.to && (
                           <p className='text-xs text-red-600 mt-1'>
                             {errors.to.message || 'To field is required.'}
@@ -304,58 +283,18 @@ export default function CreatePolicyModal({
                         )}
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div 
-                              className='relative border border-gray-300 pl-2 rounded-md flex items-center flex-wrap w-full'
-                              data-tooltip-id='to-section-tooltip'
-                              data-tooltip-place='bottom'
-                            >
-                              {tagsTo.map((tagTo: string) => (
-                                <div
-                                  key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm mr-1'
-                                >
-                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
-                                    <XMarkIcon className='w-4 h-4' />
-                                  </button>
-                                  <p>{tagTo}</p>
-                                </div>
-                              ))}
-                              <input
-                                type='text'
-                                value={inputTo}
-                                onKeyDown={handleKeyDownTo}
-                                onChange={(e) => setInputTo(e.target.value)}
-                                onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
-                                className='focus:none outline-none px-2 py-1 grow rounded-md'
-                              />
-                              <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                <div className='px-1'>
-                                  <h2 className='text-[12px] font-medium'>
-                                    Add multiple recipients by pressing Tab or Enter, or search for employees.
-                                  </h2>
-                                </div>
-                              </Tooltip>
-                            </div>
-                            
-                            {/* Employee Suggestions Dropdown */}
-                            {showEmployeeSuggestions && (
-                              <div className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
-                                {filteredEmployees.map((employee: any) => (
-                                  <div
-                                    key={employee.id}
-                                    className='px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0'
-                                    onClick={() => handleEmployeeSelect(employee)}
-                                  >
-                                    <div className='text-sm font-medium text-gray-900'>
-                                      {employee.firstname} {employee.lastname}
-                                    </div>
-                                    <div className='text-xs text-gray-500'>
-                                      {employee.email}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            <EmailField
+                              tags={tagsTo}
+                              inputValue={inputTo}
+                              onInputChange={(value) => {
+                                setInputTo(value);
+                              }}
+                              onKeyDown={handleKeyDownTo}
+                              onEmployeeSelect={handleEmployeeSelect}
+                              onRemoveTag={handleRemoveTagTo}
+                              showTooltip={true}
+                              tooltipId="to-section-tooltip"
+                            />
                           </div>
                         </div>
                       </div>

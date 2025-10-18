@@ -12,24 +12,39 @@ import { v4 as uuidv4 } from 'uuid';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
-import DeleteEvaluationModal from './modals/DeleteEvaluationTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
+import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
+import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
-  const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState(false);
+  const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  
+  // Bulk delete states
+  const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
+
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -59,6 +74,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const { mutate: deleteEvaluationTemplate, isLoading: isDeleteEvaluationTemplateLoading } = useDeleteEvaluationTemplate();
+  const bulkDeleteMutation = useBulkDeleteEvaluationTemplates();
   const [isSearching, setIsSearching] = useState(false);
 
   // Persisted form state for CreateEvaluationTemplateModal
@@ -121,6 +138,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataEvaluation, pageSize]);
 
+  // Update select all state when evaluation templates change
+  useEffect(() => {
+    if (evaluationItems) {
+      const allEvaluationIds = new Set(evaluationItems.map((e: any) => e.id));
+      const allSelected = allEvaluationIds.size > 0 && 
+        Array.from(allEvaluationIds).every((id: any) => selectedEvaluationTemplates.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEvaluationTemplates, evaluationItems]);
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -137,10 +164,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsEditEvaluationModalOpen(true);
       }
       if (actionType === 'delete') {
-        setIsDeleteEvaluationModalOpen(true);
+        setIsDeleteEvaluationModalOpen({ id: selectedEvaluationTemplateId, open: true });
       }
     }
-  }, [selectedEvaluationTemplateId]);
+  }, [selectedEvaluationTemplateId, actionType]);
 
   const openEditEvaluationModal = (evaluationDetails: any) => {
     setActionType('edit');
@@ -154,7 +181,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
     if (selectedEvaluationTemplateId && selectedEvaluationTemplateId === evaluationDetails.id) {
-      setIsDeleteEvaluationModalOpen(true);
+      setIsDeleteEvaluationModalOpen({ id: evaluationDetails.id, open: true });
     } else {
       setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
@@ -188,6 +215,68 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isGetEvaluationLoading, isSearching]);
 
+  // Handle individual evaluation template selection
+  const handleEvaluationTemplateSelect = (evaluationTemplateId: number) => {
+    setSelectedEvaluationTemplates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(evaluationTemplateId)) {
+        newSet.delete(evaluationTemplateId);
+      } else {
+        newSet.add(evaluationTemplateId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!evaluationItems) return;
+    
+    if (selectAll) {
+      setSelectedEvaluationTemplates(new Set());
+    } else {
+      const allIds = evaluationItems.map((e: any) => e.id);
+      setSelectedEvaluationTemplates(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedEvaluationTemplates.size === 0) return;
+    setBulkDeleteCount(selectedEvaluationTemplates.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+      selectedCount: selectedEvaluationTemplates.size,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      const evaluationTemplateIds = Array.from(selectedEvaluationTemplates);
+      await bulkDeleteMutation.mutateAsync(evaluationTemplateIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete evaluation templates';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} evaluation template(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedEvaluationTemplates(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetchEvaluation();
+  };
+
   const renderRows = () => {
     if (isSearching || isGetEvaluationLoading) {
       return (
@@ -203,6 +292,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (evaluationItems && evaluationItems?.length > 0) {
       return evaluationItems?.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEvaluationTemplates.has(item.id)}
+              onChange={() => handleEvaluationTemplateSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_type}</td>
@@ -212,7 +309,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button onClick={() => openEditEvaluationModal(item)}>
                 <EditIcon />
               </button>
-              <button onClick={() => openDeleteEvaluationModal(item)}>
+              <button 
+                onClick={() => openDeleteEvaluationModal(item)}
+                disabled={selectedEvaluationTemplates.size > 1}
+                className={selectedEvaluationTemplates.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <DeleteIcon />
               </button>
             </div>
@@ -325,6 +426,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
           </div>
+          
+          {/* Bulk Actions - Below Date Filters */}
+          {selectedEvaluationTemplates.size > 1 && (
+            <div className="mt-4 ">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </button>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEvaluationTemplates.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -337,6 +464,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!evaluationItems || evaluationItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date Created
                       </th>
@@ -385,13 +521,47 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationTemplateId={selectedEvaluationTemplateId}
         />
       )}
-      {isDeleteEvaluationModalOpen && selectedEvaluationTemplateId && (
-        <DeleteEvaluationModal
-          refetch={refetchEvaluation}
+      {isDeleteEvaluationModalOpen && (
+        <DeleteModal
           isOpen={isDeleteEvaluationModalOpen}
           setIsOpen={setIsDeleteEvaluationModalOpen}
-          selectedEvaluationTemplateId={selectedEvaluationTemplateId}
-          selectedEvalationTemplateName={evaluationItems.find((item: any) => item.id === selectedEvaluationTemplateId)?.name}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteEvaluationModalOpen(null);
+                refetchEvaluation();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEvaluationTemplate(isDeleteEvaluationModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEvaluationTemplateLoading}
+        />
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} evaluation template${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} evaluation template${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

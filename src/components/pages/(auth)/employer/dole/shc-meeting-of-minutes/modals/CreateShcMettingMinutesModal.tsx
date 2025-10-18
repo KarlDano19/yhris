@@ -4,7 +4,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import toast from "react-hot-toast";
 
 import CustomToast from "@/components/CustomToast";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 import useAddShcMeetingMinutes from "../hooks/useAddShcMinutesMeeting";
 import DiscussionDetails from "./tabs/DiscussionDetails";
 import MeetingSignature from "./tabs/MeetingSignature";
@@ -24,8 +23,6 @@ function CreateShcMettingMinutesModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addShcMeetingMinutes,
@@ -60,12 +57,6 @@ function CreateShcMettingMinutesModal({
     };
     addShcMeetingMinutes(data, callbackReq);
   });
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -117,6 +108,7 @@ function CreateShcMettingMinutesModal({
                     setError={setError}
                     clearErrors={clearErrors}
                     watch={watch}
+                    setValue={setValue}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -140,6 +132,7 @@ function CreateShcMettingMinutesModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingAddShcMeetingMinutes}
                   />
                 )}
               </Dialog.Panel>

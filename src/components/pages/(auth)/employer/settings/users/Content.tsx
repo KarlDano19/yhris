@@ -17,10 +17,16 @@ const menus = [
     link: '/settings/users/accounts',
     isAvailable: true,
   },
+  // {
+  //   icon: <UserLogo />,
+  //   text: 'User Rights Mapping',
+  //   link: '/settings/users/user-rights',
+  //   isAvailable: true,
+  // },
   {
     icon: <UserLogo />,
-    text: 'User Rights Mapping',
-    link: '/settings/users/user-rights',
+    text: 'Roles',
+    link: '/settings/users/roles',
     isAvailable: true,
   },
 ];

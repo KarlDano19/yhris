@@ -5,15 +5,18 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
@@ -21,13 +24,16 @@ import useFileforge from '@/components/hooks/useFileforge';
 
 import useGetHealthAndSafetyReportItems from './hooks/useGetHealthAndSafetyReportItems';
 import { getPrintHealthAndSafetyReportDetails } from './hooks/useGetPrintHealthandSafetyReportDetails';
+import useDeleteHealthAndSafetyReport from './hooks/useDeleteHealthAndSafetyReport';
 import useUpdateHealthAndSafetyReport from './hooks/useUpdateHealthAndSafetyReport';
 import CreateHealthAndSafetyReportModal from './modals/CreateHealthAndSafetyReportModal';
-import DeleteHealthAndSafetyReportModal from './modals/DeleteHealthAndSafetyReportModal';
 import EditHealthAndSafetyReportModal from './modals/EditHealthAndSafetyReportModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
 import ExportProgressModal from './modals/ExportProgressModal';
+import HealthAndSafetyOrganizationAttachmentSection from './components/HealthAndSafetyOrganizationAttachmentSection';
+import useSendEmail from './hooks/useSendEmail';
+import useGetHealthAndSafetyReportDetails from './hooks/useGetHealthAndSafetyReportDetails';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
@@ -36,6 +42,7 @@ import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteHealthAndSafetyReport from "./hooks/useBulkDeleteHealthAndSafetyReport";
 
 type PaginationProps = {
   totalRecords: number;
@@ -45,6 +52,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const statusOptions = [
@@ -68,6 +79,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
+  
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  
   const [pagination, setPagination] = useState<PaginationProps>({
     totalPages: 1,
     totalRecords: 0,
@@ -77,6 +93,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const {
     data: healthAndSafetyReportItemsData,
@@ -90,30 +111,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
 
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-  //   },
-  // ];
   const updateHealthAndSafetyReport = useUpdateHealthAndSafetyReport();
+  const { mutate: deleteHealthAndSafetyReport, isLoading: isDeleteHealthAndSafetyReportLoading } = useDeleteHealthAndSafetyReport();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
+  
+  // Get the current report details for attachment
+  const { data: currentReportDetails } = useGetHealthAndSafetyReportDetails(
+    isSendEmailModalOpen?.id || null
+  );
+  const bulkDeleteMutation = useBulkDeleteHealthAndSafetyReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -131,23 +142,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message={`Failed to generate PDF: ${error.message}`} type='error' />, { duration: 5000 });
     }
   });
-
-  // const menuOptions = [
-  //   {
-  //     name: 'Export',
-  //     action: () => {
-  //       setIsExportProgressModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.export_dole_health_safety_organization,
-  //   },
-  //   {
-  //     name: 'Generate Report',
-  //     action: () => {
-  //       setIsSelectBranchModalOpen(true);
-  //     },
-  //     disabled: !cachedRigths?.state?.data?.generate_dole_health_safety_organization,
-  //   },
-  // ];
 
   useEffect(() => {
     if (healthAndSafetyReportItemsData) {
@@ -193,6 +187,69 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        event.target.value = '';
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      // Add health_and_safety_report_id
+      payload.append('health_and_safety_report_id', isSendEmailModalOpen.id.toString());
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          healthAndSafetyReportItemsRefetch();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const handlePrintPDFLocal = async (item: any) => {
@@ -287,6 +344,74 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (!healthAndSafetyReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = healthAndSafetyReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setBulkDeleteCount(selectedReports.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedReports(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    healthAndSafetyReportItemsRefetch();
+  };
+
+  useEffect(() => {
+    if (healthAndSafetyReportItems) {
+      const allReportIds = new Set(healthAndSafetyReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, healthAndSafetyReportItems]);
+
   const renderRows = () => {
     if (isSearching || isHealthAndSafetyReportItemsLoading) {
       return (
@@ -302,6 +427,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (healthAndSafetyReportItems && healthAndSafetyReportItems.length > 0) {
       return healthAndSafetyReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {Number(item.total_employees_male || 0) + Number(item.total_employees_female || 0)}
@@ -313,7 +446,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -336,31 +468,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex items-center justify-center space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-health-safety-organization-btn"
                 onClick={() =>
                   setIsEditHealthAndSafetyReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-health-safety-organization-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
               >
                 <EmailLogo />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="generate-dole-health-safety-organization-btn"
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_health_safety_organization}
+                disabled={generatingItemId === item.id}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -369,18 +502,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-health-safety-organization-btn"
                 onClick={() =>
                   setIsDeleteHealthAndSafetyReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_health_safety_organization}
+                disabled={selectedReports.size > 1}
+                className={selectedReports.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -475,67 +610,43 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            {/* <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
-                className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_health_safety_organization}
-              >
-                CREATE
-              </button>
-              <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
-                  <span className='sr-only'>Open options</span>
-                  <div className='flex gap-4'>
-                    <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
-                  </div>
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter='transition ease-out duration-100'
-                  enterFrom='transform opacity-0 scale-95'
-                  enterTo='transform opacity-100 scale-100'
-                  leave='transition ease-in duration-75'
-                  leaveFrom='transform opacity-100 scale-100'
-                  leaveTo='transform opacity-0 scale-95'
-                >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='py-1'>
-                      {menuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }) => (
-                            <span
-                              className={classNames(
-                                'block px-4 py-2 text-sm cursor-pointer text-center',
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
-                              )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
-                                }
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
-            </div> */}
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-health-safety-organization-btn"
                 className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateHealthAndSafetyReportModalOpen(true)}
-                disabled={!hasActiveSubscription || !cachedRigths?.state?.data?.create_dole_health_safety_organization}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
+
+          {/* Bulk Actions Section - Left Side */}
+          {selectedReports.size > 1 && (
+            <div className="mt-4 ">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-dole-health-safety-organization-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedReports.size} selected
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -549,6 +660,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!healthAndSafetyReportItems || healthAndSafetyReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Report
                       </th>
@@ -603,10 +723,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isDeleteHealthAndSafetyReportModalOpen && (
-        <DeleteHealthAndSafetyReportModal
-          refetch={healthAndSafetyReportItemsRefetch}
+        <DeleteModal
           isOpen={isDeleteHealthAndSafetyReportModalOpen}
           setIsOpen={setIsDeleteHealthAndSafetyReportModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteHealthAndSafetyReportModalOpen(null);
+                healthAndSafetyReportItemsRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteHealthAndSafetyReport(isDeleteHealthAndSafetyReportModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteHealthAndSafetyReportLoading}
         />
       )}
       {isEditHealthAndSafetyReportModalOpen && (
@@ -618,7 +751,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isSendEmailModalOpen && (
-        <SendEmailModal refetch={healthAndSafetyReportItemsRefetch} isOpen={isSendEmailModalOpen} setIsOpen={setIsSendEmailModalOpen} />
+        <SendEmailModal
+          title="Send Health and Safety Organization Report"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={[]}
+          showAttachment={true}
+          customAttachmentSection={
+            <HealthAndSafetyOrganizationAttachmentSection
+              pdfAttachment={currentReportDetails?.attachment || null}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
+        />
       )}
       {isExportProgressModalOpen && (
         <ExportProgressModal
@@ -627,174 +777,28 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           itemsFilter={itemsFilter}
         />
       )}
-      {/* Print Section */}
-      {/* <div className="container mx-auto p-4 hidden">
-        <div id="printSection">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-800 table-fixed">
-              <thead>
-                <tr>
-                  <th
-                    colSpan={6}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Basic Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1"
-                  >
-                    Risk and Safety Information
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    WEM Details Request
-                  </th>
-                  <th
-                    colSpan={4}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Monitoring Capability
-                  </th>
-                  <th
-                    colSpan={3}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Hazards
-                  </th>
-                </tr>
-                <tr>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date of Application
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Company Name
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Type of Industry
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Male
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Female
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Number of Workers Total
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Risk Classification
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Name of Safety Officer
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Safety Officer Level
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Purpose of WEM Request
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Conducted by
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Last WEM Date
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Internal Monitoring Capability
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    WEM Equipment Owned by Company
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Conducting Internal WEM
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date of Internal Monitoring
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Purpose of WEM Request
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Chemical Hazards
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Ventilation
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {workEnvironmentRequestItems.map(
-                  (item: any, rowIndex: number) => (
-                    <tr key={rowIndex}>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_application}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.company_name}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.type_of_industry}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_male}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_female}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.number_of_workers_total}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.risk_classification}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.name_of_safety_officer}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.safety_officer_levels}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.purpose_of_wem_request}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_conducted_by}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.last_wem_date}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_internal_monitoring_capability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.wem_equipment_owned_by_company}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.conducting_internal_wem ? 'Yes' : 'No'}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_internal_monitoring}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hazards_purpose_of_wem_request}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.chemical_hazards}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.ventilation}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
-        </div>
-      </div> */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Health and Safety Report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} Health and Safety Report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
       <Tooltip id='search-tooltip' />
     </>
   );

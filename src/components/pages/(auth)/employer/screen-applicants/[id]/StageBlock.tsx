@@ -11,7 +11,25 @@ import actionTypes from '../lib/actionTypes';
 
 import { PlusIcon } from '@heroicons/react/24/outline';
 
-export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, filters }: PropTypes) {
+interface EnhancedStageBlockProps extends PropTypes {
+  permissions?: {
+    can_view: boolean;
+    can_move: boolean;
+    can_update: boolean;
+    is_visible: boolean;
+  };
+  isDisabled?: boolean;
+}
+
+export default function StageBlock({ 
+  stage, 
+  index, 
+  openMenuId, 
+  setOpenMenuId, 
+  filters,
+  permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
+  isDisabled = false 
+}: EnhancedStageBlockProps) {
   const { state, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { applicants } = stage;
   
@@ -22,26 +40,17 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
     }
 
     return applicants.filter((applicant: ApplicantType) => {
-      // Determine if applicant is a good fit based on screening answers
-      // Priority order:
-      // 1. Use explicit screeningFit property if available
-      // 2. Fall back to status based filtering
-      
       let isGoodFit: boolean;
       let isNotFit: boolean;
       
       if (applicant.screeningFit) {
-        // Use the screening answers fit evaluation
         isGoodFit = applicant.screeningFit === 'good';
         isNotFit = applicant.screeningFit === 'bad';
       } else {
-        // Fall back to status-based logic
-        // Fall back to status-based logic
         isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
         isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
       }
       
-      // Check if the applicant matches the active tab
       let matchesRating = false;
       if (filters.rating.includes('Good Fit') && isGoodFit) {
         matchesRating = true;
@@ -49,7 +58,6 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
         matchesRating = true;
       }
       
-      // Filter by status (ongoing, passed, withdrawn, rejected, hired)
       const matchesStatus = filters.status.some(status => 
         applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
       );
@@ -72,9 +80,51 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
     }
   };
 
+  // Show restricted access message if stage is disabled
+  if (isDisabled && (!permissions.can_view || filteredApplicants.length === 0)) {
+    return (
+      <div className={`rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto ${
+        isDisabled ? 'bg-gray-100' : 'bg-[#EBF3FF]'
+      }`}>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+          <div className="text-gray-500 text-sm font-medium mb-2">
+            🔒 Restricted Access
+          </div>
+          <div className="text-gray-400 text-xs">
+            You cannot view or manage<br/>applicants in this stage
+          </div>
+          {stage.applicants?.length > 0 && (
+            <div className="text-gray-400 text-xs mt-2">
+              {stage.applicants.length} applicant(s) in this stage
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Show limited view for users without view permission but can see count
+  if (!permissions.can_view && !isDisabled) {
+    return (
+      <div className='bg-gray-100 rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto'>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+          <div className="text-gray-500 text-sm font-medium mb-2">
+            👁️ View Restricted
+          </div>
+          <div className="text-gray-400 text-xs">
+            {stage.applicants?.length || 0} applicant(s) in this stage<br/>
+            Contact admin for viewing access
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
-      className='bg-[#EBF3FF] rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto'
+      className={`rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto ${
+        isDisabled ? 'bg-gray-100 opacity-60' : 'bg-[#EBF3FF]'
+      }`}
       style={{
         scrollbarWidth: 'thin',
         scrollbarColor: '#2d3e58 #f1f1f1'
@@ -89,6 +139,8 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
               isOpenMenu={openMenuId === applicant.id}
               setOpenMenuId={setOpenMenuId}
               stage={stage}
+              permissions={permissions}
+              isStageDisabled={isDisabled}
             />
           );
         })
@@ -96,7 +148,12 @@ export default function StageBlock({ stage, index, openMenuId, setOpenMenuId, fi
         <button
           onClick={handleAddStage}
           type='button'
-          className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 flex hover:bg-savoy-blue/[.025] rounded-2xl transition-all'
+          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 flex rounded-2xl transition-all ${
+            isDisabled || !permissions.can_update 
+              ? 'cursor-not-allowed opacity-30' 
+              : 'hover:bg-savoy-blue/[.025] cursor-pointer'
+          }`}
+          disabled={isDisabled || !permissions.can_update}
         >
           <PlusIcon className='text-[#CCE0FF] w-12 h-12 m-auto' />
         </button>

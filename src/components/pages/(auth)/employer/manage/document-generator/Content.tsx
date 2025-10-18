@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import { toast } from 'react-hot-toast';
+import { getCookie } from 'cookies-next';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import Form from "./Form";
@@ -28,6 +29,7 @@ import { DocumentType } from "@/types/document-generator/form";
 import { print } from './print/index';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './utils/handleProceed';
+import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -35,9 +37,11 @@ import classNames from '@/helpers/classNames';
 
 export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { mutate: uploadAttachment } = useUploadEmployeeIssueAttachments();
+  const { mutate: logAudit } = useAddDocumentGeneratorAudit();
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
+  
   const urlDocType = searchParams.get('type') as DocumentType | null;
   const employeeId = searchParams.get('employee');
   
@@ -217,7 +221,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         ? new Date(selectedEmployeeIssue.incident_date).toISOString().split('T')[0]
         : '';
       // Find the employee info
-      const employeeName = selectedEmployeeIssue.name || '';
+      const employeeName = selectedEmployeeIssue.employee_name || '';
       const position = selectedEmployeeIssue.position || '';
       const department = selectedEmployeeIssue.department || '';
       const incidentPlace = selectedEmployeeIssue.place_of_incident || '';
@@ -242,7 +246,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         referenceNumber: selectedEmployeeIssue.nte_id || ''
       }));
     }
-  }, [documentType, employeeId, selectedEmployeeIssue]);
+  }, [documentType, employeeId, selectedEmployeeIssue, queryClient]);
   
   // Populate company name for all document types when switching between them
   useEffect(() => {
@@ -270,7 +274,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         }));
       }
     }
-  }, [documentType, queryClient]); // Only depend on document type and queryClient
+  }, [documentType, queryClient, employeeCertificateData.companyName, employmentAgreementData.companyName, noticeToExplainData.companyName]);
   
   // Get current data based on document type
   const getCurrentData = () => {
@@ -372,7 +376,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   };
   
   // Handle print
-  const handlePrint = () => {
+  const handlePrint = async () => {
     try {
       const options = {
         elementId: documentType === 'employee-certificate' 
@@ -392,15 +396,28 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             : 'notice-to-explain'
       };
       
+      // Determine document type for audit
+      const docType = 'incidentDate' in currentData && 'incidentPlace' in currentData && 'briefBackground' in currentData
+        ? 'notice-to-explain'
+        : 'probationPeriod' in currentData && 'workingHours' in currentData && 'dailySalary' in currentData
+          ? 'employment-agreement'
+          : 'employee-certificate';
+      
+      // Proceed with printing (validation already happened in Form.tsx)
       print(currentData, options)
+        .then(() => {
+          // Only log audit AFTER successful print
+          logAudit({
+            document_type: docType,
+            document_data: currentData
+          });
+        })
         .catch(error => {
-          console.error('Print error:', error);
           toast.custom(() => <CustomToast message="There was an error preparing your document. Please try again." type="error" />);
         });
       
       // Toast is now handled in the individual print functions
     } catch (error) {
-      console.error('Print error:', error);
       toast.custom(() => <CustomToast message="There was an error preparing your document. Please try again." type="error" />);
     }
   };

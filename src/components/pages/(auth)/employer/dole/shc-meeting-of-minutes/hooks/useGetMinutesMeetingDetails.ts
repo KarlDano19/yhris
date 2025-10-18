@@ -32,7 +32,13 @@ function useGetMinutesMeetingDetails(shc_meeting_minutes_id: number | null) {
   const query = useQuery(
     ["minutesMeetingDetailsCache", shc_meeting_minutes_id],
     () => getMinutesMeetingDetails(shc_meeting_minutes_id),
-    { enabled: !!shc_meeting_minutes_id, refetchOnWindowFocus: false, keepPreviousData: true }
+    { 
+      enabled: !!shc_meeting_minutes_id, 
+      refetchOnWindowFocus: false, 
+      keepPreviousData: true,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 5 * 60 * 1000,
+    }
   );
   return query;
 }

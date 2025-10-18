@@ -5,19 +5,26 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
+import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
+import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
+import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
 import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import DeleteEmailTemplateModal from './modal/DeleteEmailTemplateModal';
 import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
 import SuccessModal from './modal/SuccessModal';
-
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
+
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -40,9 +47,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
   const [isEditEmailTemplateModalOpen, setIsEditEmailTemplateModalOpen] = useState(false);
-  const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState(false);
+  const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  
+  // Bulk delete states
+  const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
+
   const {
     data: dataEmailTemplate,
     isLoading: isGetEmailTemplateLoading,
@@ -52,6 +67,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+
+  const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
+  const bulkDeleteMutation = useBulkDeleteEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
     setIsSuccessModalOpen(true);
@@ -76,7 +94,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     refetchEmailTemplate();
-  }, []);
+  }, [refetchEmailTemplate]);
 
   useEffect(() => {
     if (dataEmailTemplate && !isGetEmailTemplateLoading) {
@@ -119,16 +137,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataEmailTemplate, isGetEmailTemplateLoading, pageSize]);
 
+  // Update select all state when email templates change
+  useEffect(() => {
+    if (emailTemplatesItems) {
+      const allEmailTemplateIds = new Set(emailTemplatesItems.map((e: any) => e.id));
+      const allSelected = allEmailTemplateIds.size > 0 && 
+        Array.from(allEmailTemplateIds).every((id: any) => selectedEmailTemplates.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedEmailTemplates, emailTemplatesItems]);
+
   useEffect(() => {
     if (selectedEmailTemplateId) {
       if (actionType === 'edit') {
         setIsEditEmailTemplateModalOpen(true);
       }
       if (actionType === 'delete') {
-        setIsDeleteEmailTemplateModalOpen(true);
+        const templateName = emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject || '';
+        setIsDeleteEmailTemplateModalOpen({ 
+          open: true, 
+          id: selectedEmailTemplateId,
+          templateName 
+        });
       }
     }
-  }, [selectedEmailTemplateId]);
+  }, [selectedEmailTemplateId, actionType, emailTemplatesItems]);
 
   const openEditEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('edit');
@@ -142,10 +175,75 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openDeleteEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('delete');
     if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
-      setIsDeleteEmailTemplateModalOpen(true);
+      setIsDeleteEmailTemplateModalOpen({ 
+        open: true, 
+        id: emailTemplateDetails.id,
+        templateName: emailTemplateDetails.subject 
+      });
     } else {
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
+  };
+
+  // Handle individual email template selection
+  const handleEmailTemplateSelect = (emailTemplateId: number) => {
+    setSelectedEmailTemplates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(emailTemplateId)) {
+        newSet.delete(emailTemplateId);
+      } else {
+        newSet.add(emailTemplateId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!emailTemplatesItems) return;
+    
+    if (selectAll) {
+      setSelectedEmailTemplates(new Set());
+    } else {
+      const allIds = emailTemplatesItems.map((e: any) => e.id);
+      setSelectedEmailTemplates(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedEmailTemplates.size === 0) return;
+    setBulkDeleteCount(selectedEmailTemplates.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      const emailTemplateIds = Array.from(selectedEmailTemplates);
+      await bulkDeleteMutation.mutateAsync(emailTemplateIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete email templates';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} email template(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedEmailTemplates(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetchEmailTemplate();
   };
 
   const renderRows = () => {
@@ -163,6 +261,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (emailTemplatesItems && emailTemplatesItems.length > 0) {
       return emailTemplatesItems.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedEmailTemplates.has(item.id)}
+              onChange={() => handleEmailTemplateSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
@@ -170,12 +276,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button onClick={() => openEditEvaluationModal(item)}>
+              <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
                 <EditIcon />
-              </button>
-              <button onClick={() => openDeleteEvaluationModal(item)}>
+              </SmartButton>
+              <SmartButton 
+                id="delete-email-template-btn" 
+                onClick={() => openDeleteEvaluationModal(item)}
+                disabled={selectedEmailTemplates.size > 1}
+                className={selectedEmailTemplates.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -203,6 +314,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
+          
+          
+
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
@@ -233,15 +347,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateModalOpen(true)}
-                // disabled={!hasActiveSubscription}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
+          
+          {/* Bulk Actions - Below Search/Filter Row */}
+          {selectedEmailTemplates.size > 1 && (
+            <div className="mt-4 ">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="delete-email-template-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedEmailTemplates.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -254,6 +395,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!emailTemplatesItems || emailTemplatesItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date Created
                       </th>
@@ -289,30 +439,73 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+
+      {/* Create Modal */}
       <CreateEmailTemplateModal
         isOpen={isCreateModalOpen}
         setIsOpen={setIsCreateModalOpen}
         refetch={refetchEmailTemplate}
         onSuccess={handleCreateTemplateSuccess}
       />
+
+      {/* Success Modal */}
       <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
-      {isDeleteEmailTemplateModalOpen && selectedEmailTemplateId && (
-        <DeleteEmailTemplateModal
-          refetch={refetchEmailTemplate}
+
+      {/* Delete Modal */}
+      {isDeleteEmailTemplateModalOpen && (
+        <DeleteModal
           isOpen={isDeleteEmailTemplateModalOpen}
           setIsOpen={setIsDeleteEmailTemplateModalOpen}
-          selectedEmailTemplateId={selectedEmailTemplateId}
-          selectedEmailTemplateName={
-            emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject
-          }
+          onConfirm={() => {
+            if (!isDeleteEmailTemplateModalOpen.id) return;
+            
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteEmailTemplateModalOpen(null);
+                refetchEmailTemplate();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteEmailTemplate(isDeleteEmailTemplateModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteEmailTemplateLoading}
+          customText={`${isDeleteEmailTemplateModalOpen.templateName} Email Template`}
         />
       )}
+
+      {/* Edit Modal */}
       {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (
         <EditEmailTemplateModal
           refetch={refetchEmailTemplate}
           isOpen={isEditEmailTemplateModalOpen}
           setIsOpen={setIsEditEmailTemplateModalOpen}
           selectedEmailTemplateId={selectedEmailTemplateId}
+        />
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} email template${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} email template${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

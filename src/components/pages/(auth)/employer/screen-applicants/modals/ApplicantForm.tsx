@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
+import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
 import StateContext from '../contexts/StateContext';
 
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
@@ -18,8 +19,9 @@ import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
   title: string;
+  JobTitle?: string;
 };
-export default function ApplicantForm({ title }: PropTypes) {
+export default function ApplicantForm({ title, JobTitle }: PropTypes) {
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
@@ -28,6 +30,7 @@ export default function ApplicantForm({ title }: PropTypes) {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { mutate: generateSummary, isLoading: isGeneratingMutation } = useGenerateApplicantSummary();
+  const { mutate: downloadPDF, isLoading: isDownloadingPDF } = useDownloadScreeningAnswersPDF();
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -99,6 +102,21 @@ export default function ApplicantForm({ title }: PropTypes) {
     );
   };
 
+  const handleDownloadPDF = () => {
+    if (!applicant?.applicationId) {
+      toast.custom(() => <CustomToast message='Unable to identify application' type='error' />, {
+        duration: 4000,
+      });
+      return;
+    }
+
+    downloadPDF({
+      appliedJobId: applicant.applicationId,
+      jobTitle: JobTitle,
+      applicantName: applicant.name || 'Unknown'
+    });
+  };
+  
   const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
     const [imageError, setImageError] = useState(false);
 
@@ -174,10 +192,10 @@ export default function ApplicantForm({ title }: PropTypes) {
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
             onClick={() => setViewCV(true)}
-            disabled={!!!applicantProfile.cv_url}
-            title={!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
+            disabled={!applicantProfile.cv_url}
+            title={!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
           >
-            {!!!applicantProfile.cv_url ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
+            {!applicantProfile.cv_url ? 'No CV/Resume Attached' : 'View Attached CV/Resume'}
           </button>
         </div>
       </>
@@ -238,6 +256,26 @@ export default function ApplicantForm({ title }: PropTypes) {
             <p className='text-gray-500'>No screening questions were answered by this applicant.</p>
           </div>
         )}
+        <div className='mt-4'>
+          <button
+            type='button'
+            className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50 disabled:cursor-not-allowed mr-3'
+            onClick={handleDownloadPDF}
+            disabled={applicantProfile.screening_answers.length === 0 || isDownloadingPDF}
+            title={applicantProfile.screening_answers.length === 0 ? 'No Screening Answers' : ''}
+          >
+            {isDownloadingPDF ? (
+              <div className='flex items-center'>
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-[#355FD0] mr-2'></div>
+                Downloading PDF...
+              </div>
+            ) : applicantProfile.screening_answers.length === 0 ? (
+              'No Screening Answers'
+            ) : (
+              'Download Screening Answers as PDF'
+            )}
+          </button>
+        </div>
       </>
     );
   };

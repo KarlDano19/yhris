@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -21,7 +23,10 @@ import IncidentReportModal from './modals/IncidentReportModal';
 import EditIncidentReportModal from './modals/EditIncidentReportModal';
 import UpdateStatusModal from './modals/UpdateStatusModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
-import SendNTEModal from './modals/SendNTEModal';
+import SendEmailModal from '@/components/SendEmailModal';
+import NTEAttachmentSection from './components/NTEAttachmentSection';
+import { useDeleteNTEAttachment } from './hooks/useDeleteNTEAttachment';
+import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
@@ -88,7 +93,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     useState<T_DecisionAttachmentViewModal | null>(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
+  const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
+  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
@@ -120,6 +128,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       router.replace(`/manage/address-employee-issue${newParams.toString() ? '?' + newParams.toString() : ''}`);
     }
   }, [searchParams, router]);
+
+  // Handle PDF attachment from employee issue details
+  useEffect(() => {
+    if (employeeIssueDetails && isSendNTEModalOpen) {
+      if (employeeIssueDetails.nte_attachment) {
+        setPdfAttachment(employeeIssueDetails.nte_attachment);
+      } else {
+        setPdfAttachment(null);
+      }
+    }
+  }, [employeeIssueDetails, isSendNTEModalOpen]);
 
   const setReleased = (id: string, emailType: string) => {
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
@@ -433,6 +452,96 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  // NTE-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleDeleteAttachment = () => {
+    if (isSendNTEModalOpen?.id) {
+      deleteNTEAttachment(isSendNTEModalOpen.id, {
+        onSuccess: (data: any) => {
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message || 'Attachment deleted successfully'} type='success' />, { duration: 3000 });
+          setIsSendNTEModalOpen(null);
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to delete attachment';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 5000,
+          });
+        },
+      });
+    }
+  };
+
+  const handleNTESubmit = (data: any) => {
+    if (isSendNTEModalOpen && isSendNTEModalOpen.id) {
+      const payload = {
+        id: isSendNTEModalOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'nte',
+        nte_subject: data.subject,
+        nte_to: JSON.stringify(data.email),
+        nte_cc: JSON.stringify(data.cc),
+        nte_bcc: JSON.stringify(data.bcc),
+        nte_message: data.message,
+        issueNTEForm: {
+          template: data.template,
+          subject: data.subject,
+          to: data.email,
+          cc: data.cc,
+          bcc: data.bcc,
+          message: data.message,
+          attachment: pdfAttachment || null
+        },
+        sendDecisionForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        dateReceived: null,
+        decision_subject: '',
+        decision_to: '',
+        decision_cc: '',
+        decision_bcc: '',
+        decision_message: ''
+      };
+      
+      mutate(payload, {
+        onSuccess: (data: any) => {
+          setIsSendNTEModalOpen(null);
+          setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
 
   const renderRows = () => {
     if (isSearching || isGetEmployeeIssuesLoading) {
@@ -479,7 +588,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isLoading={isLoading}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
                 isInvestigated={item.isInvestigated}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -491,7 +599,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
                 isResponded={item.is_responded === true}
                 employeeIssueDetails={item}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-middle'>
@@ -507,7 +614,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 isLoading={isLoading}
                 hasInvestigationReport={hasInvestigationReport}
-                userRights={cachedUserRights?.state?.data}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -534,23 +640,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </button>
                     {moreMenuOpen[item.id] && (
                       <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
-                        <ul className='py-1 text-left'>
-                          <li
-                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status ? 'border-b' : ''}`}
-                            onClick={() => handleEdit(item.id)}
-                          >
-                            {/* Hide Edit Report when NTE attachment exists and status is not pending, or when user doesn't have edit rights */}
-                            {cachedUserRights?.state?.data?.edit_employee_issue && item.status === 'pending' && !item.nte_attachment ? 'Edit Report' : 'View Report'}
-                          </li>
-                          {item.status === 'pending' && cachedUserRights?.state?.data?.update_employee_issue_status && (
-                            <li
-                              className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
-                              onClick={() => handleUpdateStatus(item.id)}
+                        <div className='py-1 text-left flex flex-col gap-2'>
+                            <SmartButton
+                              id="edit-employee-issue-btn"
+                              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${item.status === 'pending' ? 'border-b' : ''}`}
+                              onClick={() => handleEdit(item.id)}
                             >
-                              Update Status
-                            </li>
-                          )}
-                        </ul>
+                              {/* Hide Edit Report when NTE attachment exists and status is not pending, or when user doesn't have edit rights */}
+                              {item.status === 'pending' && !item.nte_attachment ? 'Edit Report' : 'View Report'}
+                            </SmartButton>
+                            {item.status === 'pending' && (
+                              <SmartButton
+                                id="update-employee-issue-status-btn"
+                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                                onClick={() => handleUpdateStatus(item.id)}
+                              >
+                                Update Status
+                              </SmartButton>
+                            )}
+
+                        </div>
                       </div>
                     )}
                   </div>
@@ -659,13 +768,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-employee-issue-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                 onClick={() => setIsIncidentReportModalOpen(true)}
-                disabled={!cachedUserRights?.state?.data?.create_employee_issue}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
           
@@ -784,7 +893,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsEditIncidentReportModalOpen}
         refetch={refetch}
         selectedIssue={selectedIssue}
-        cachedUserRights={cachedUserRights}
       />
       {isUpdateStatusModalOpen && (
         <UpdateStatusModal
@@ -794,14 +902,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsUpdateStatusModalOpen}
           refetch={refetch}
           selectedIssue={selectedIssue}
-          cachedUserRights={cachedUserRights}
         />
       )}
-      <SendNTEModal
-        isOpen={isSendNTEModalOpen}
-        setIsOpen={setIsSendNTEModalOpen}
-        refetch={refetch}
-      />
+      {isSendNTEModalOpen && (
+        <SendEmailModal
+          title="Send NTE"
+          isOpen={!!isSendNTEModalOpen}
+          onClose={() => setIsSendNTEModalOpen(null)}
+          onSubmit={handleNTESubmit}
+          defaultRecipients={employeeIssueDetails?.email ? [employeeIssueDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <NTEAttachmentSection
+              pdfAttachment={pdfAttachment}
+              isDeleting={isDeleting}
+              canDelete={!employeeIssueDetails?.is_nte_sent}
+              onViewAttachment={handleViewAttachment}
+              onDeleteAttachment={handleDeleteAttachment}
+            />
+          }
+          submitButtonText="Send & Mark as Sent"
+          isLoading={isLoading}
+        />
+      )}
       <InvestigationModal
         employeeIssueItems={employeeIssueItems}
         setEmployeeIssueItems={setEmployeeIssueItems}

@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import StateContext from '../contexts/StateContext';
 import CustomToast from '@/components/CustomToast';
 import useAddStage from '../hooks/useAddStage';
@@ -17,6 +19,16 @@ import { initialActionState } from '../lib/initialActionState';
 import { ContextTypes, StageHeaderTypes as PropTypes } from '../types';
 import actionTypes from '../lib/actionTypes';
 
+interface EnhancedStageHeaderProps extends PropTypes {
+  permissions?: {
+    can_view: boolean;
+    can_move: boolean;
+    can_update: boolean;
+    is_visible: boolean;
+  };
+  isDisabled?: boolean;
+}
+
 export default function StageHeader({
   index,
   stage,
@@ -24,7 +36,9 @@ export default function StageHeader({
   setStageDropdownId,
   jobPostDetailsRefetch,
   appliedApplicantRefetch,
-}: PropTypes) {
+  permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
+  isDisabled = false,
+}: EnhancedStageHeaderProps) {
   const params = useParams();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [stageTitle, setStageTitle] = useState(stage.title);
@@ -34,7 +48,10 @@ export default function StageHeader({
   const { mutate: addMutate } = useAddStage();
   const { mutate: updateMutate } = useUpdateStage();
 
+  // Check if user can edit this stage
+  
   const handleSave = () => {
+
     let finalTitle;
     if (stageTitle.trim() === '') {
       if (inputRef.current) inputRef.current.select();
@@ -45,6 +62,7 @@ export default function StageHeader({
     } else {
       finalTitle = stageTitle.split('\n').join('');
     }
+    
     if (stage.isNewStage) {
       saveStage(finalTitle);
     } else {
@@ -111,6 +129,7 @@ export default function StageHeader({
   }, [stage.isNewStage]);
 
   const handleOpenDropdown = () => {
+    
     if (stageDropdownId) {
       setStageDropdownId(null);
       return;
@@ -118,7 +137,6 @@ export default function StageHeader({
     setStageDropdownId(stage.id);
   };
 
-  // Handle clicks outside the dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -133,15 +151,24 @@ export default function StageHeader({
   }, [setStageDropdownId]);
 
   const handleDropdownToggle = () => {
-    // Close if already open, otherwise open this one and close others
     setStageDropdownId(stageDropdownId === stage.id ? null : stage.id);
   };
 
   return (
-    <div className='flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative'>
-      <button type='button' className='p-4 disabled:invisible' onClick={() => setIsEditing((prev) => !prev)} disabled={stage.isNewStage}>
+    <div className={`flex items-center justify-between gap-2 rounded-md border border-[#ACB9CB] relative ${
+      isDisabled ? 'opacity-60' : ''
+    }`}>
+      <button 
+        id="edit-job-stage-btn"
+        type='button' 
+        className='p-4 hover:bg-gray-50'
+        onClick={() => setIsEditing((prev) => !prev)} 
+        disabled={stage.isNewStage}
+        title={'Edit stage title'}
+      >
         <PencilIcon className='w-5' />
       </button>
+      
       <textarea
         rows={stageTitle.length <= 21 ? 1 : 2}
         maxLength={42}
@@ -156,28 +183,29 @@ export default function StageHeader({
         onChange={(e) => setStageTitle(e.target.value)}
         className={`${
           isEditing ? 'pointer-events-auto border-b border-black' : 'pointer-events-none'
-        } outline-none bg-transparent hidden-scrollbar text-center font-semibold text-[15px] text-indigo-dye`}
+        } outline-none bg-transparent hidden-scrollbar text-center font-semibold text-[15px] text-indigo-dye ${
+          !permissions.can_update ? 'opacity-60' : ''
+        }`}
         data-tooltip-id='stage-header-tooltip'
-        data-tooltip-content='Press enter to save'
+        data-tooltip-content={'Press enter to save'}
         data-tooltip-place='bottom'
-      >
-        <Tooltip id='stage-header-tooltip' style={{ fontSize: '10px' }} />
-        {stage.title}
-      </textarea>
+      />
+      
       <button
         onClick={handleDropdownToggle}
         type='button'
-        className='border border-[#ACB9CB] px-3 py-6 rounded-md'
+        className='border border-[#ACB9CB] px-3 py-6 rounded-md hover:bg-gray-50'
+        title={'Stage options'}
       >
         <SelectChevronDown />
       </button>
 
-      {/* dropdown */}
+      {/* Dropdown - only show if user has permissions */}
       {stageDropdownId === stage.id && (
         <div className='grid absolute left-0 right-0 bg-white text-indigo-dye border border-[#ACB9CB] top-full z-20 p-4 gap-3 shadow-md' ref={dropdownRef}>
           <button
             onClick={() => {
-              setStageDropdownId(null); // Close dropdown after selection
+              setStageDropdownId(null);
               setActionState({
                 ...initialActionState,
                 stageId: stage.id,
@@ -194,9 +222,33 @@ export default function StageHeader({
           >
             Set-up Stage Requirements
           </button>
-          <button
+          
+          {/* NEW: Assign Users option */}
+          <SmartButton
+            id="assign-job-stage-btn"
             onClick={() => {
-              setStageDropdownId(null); // Close dropdown after selection
+              setStageDropdownId(null);
+              setActionState({
+                ...initialActionState,
+                stageId: stage.id,
+                modal: {
+                  title: `Assign Users to Stage: ${stage.title}`,
+                  whichModal: 'STAGE_ASSIGNMENT',
+                  isOpen: true,
+                },
+              });
+            }}
+            type='button'
+            className='text-left disabled:opacity-50'
+            disabled={stage.isNewStage || !permissions.can_update}
+          >
+            Assign Users
+          </SmartButton>
+          
+          <SmartButton
+            id="delete-job-stage-btn"
+            onClick={() => {
+              setStageDropdownId(null);
               setActionState({
                 ...initialActionState,
                 stageId: stage.id,
@@ -210,11 +262,14 @@ export default function StageHeader({
             }}
             type='button'
             className='text-left'
+            disabled={!permissions.can_update}
           >
             Remove Stage
-          </button>
+          </SmartButton>
         </div>
       )}
+
+      <Tooltip id='stage-header-tooltip' style={{ fontSize: '10px' }} />
     </div>
   );
 }

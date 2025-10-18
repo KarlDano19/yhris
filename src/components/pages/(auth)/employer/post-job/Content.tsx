@@ -4,8 +4,9 @@ import { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CreateJobModal from './create-job/modals/CreateJobModal';
 import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
@@ -65,9 +66,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
   const [isSocialShareModalClosed, setIsSocialShareModalClosed] = useState(false);
   const isSocialShareModalClosedRef = useRef(isSocialShareModalClosed);
-  const queryClient = useQueryClient();
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   useEffect(() => {
     isSocialShareModalClosedRef.current = isSocialShareModalClosed;
   }, [isSocialShareModalClosed]);
@@ -136,7 +135,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Post a Job</h2>
           <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
-            <button
+            <SmartButton
+              id="create-job-btn"
               onClick={() => {
                 // Reset screening questions and auto reject state for new job creation
                 setScreeningQuestions([]);
@@ -147,7 +147,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             >
               <CreateJob />
               <h3 className='text-indigo-dye font-semibold text-center'>Create a Job</h3>
-            </button>
+            </SmartButton>
             {menus.map((menu, index) => {
               return (
                 <Link

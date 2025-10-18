@@ -16,7 +16,6 @@ interface UpdateStatusModalProps {
   setIsOpen: Dispatch<{ id: number; open: boolean } | null>;
   refetch: any;
   selectedIssue: any;
-  cachedUserRights?: any;
 }
 
 const statusOptions = [
@@ -25,16 +24,12 @@ const statusOptions = [
 ];
 
 export default function UpdateStatusModal({
-  employeeIssueItems,
   setEmployeeIssueItems,
   isOpen,
   setIsOpen,
   refetch,
   selectedIssue,
-  cachedUserRights,
 }: UpdateStatusModalProps) {
-  const hasUpdateRights = cachedUserRights?.state?.data?.update_employee_issue_status;
-  const queryClient = useQueryClient();
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const cancelButtonRef = useRef(null);
 
@@ -112,11 +107,6 @@ export default function UpdateStatusModal({
       },
     };
     mutate(updatedIssue, callbackReq);
-  };
-
-  const getStatusColor = (status: string) => {
-    const statusOption = statusOptions.find(option => option.value === status);
-    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
   };
 
   return (

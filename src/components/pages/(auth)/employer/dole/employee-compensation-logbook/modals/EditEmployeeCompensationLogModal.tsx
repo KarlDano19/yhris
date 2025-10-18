@@ -22,17 +22,11 @@ export default function EditEmployeeCompensationLogModal({
   isOpen,
   setIsOpen,
   formMethods,
-  employeeSearch,
-  setEmployeeSearch,
-  setEmployeeSelected,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
   formMethods: any;
-  employeeSearch: string;
-  setEmployeeSearch: (value: string) => void;
-  setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const {
@@ -43,8 +37,9 @@ export default function EditEmployeeCompensationLogModal({
   const { register, handleSubmit, reset, control, setValue } = formMethods;
   const { mutate, isLoading: isLoadingEditEmployeeCompensationLogbook } = useUpdateEmployeeCompensationLogbook();
   
-
-
+  // Internal employee search state
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  
   useEffect(() => {
     if (isOpen) {
       refetchEmployeeCompensationLogbook();
@@ -62,13 +57,14 @@ export default function EditEmployeeCompensationLogModal({
       setValue('days_of_employee_absence', employeeCompensationLogbookData.days_of_employee_absence);
       setValue('remarks', employeeCompensationLogbookData.remarks);
       
-      // Set employee search to show selected employee name
-      // Note: This logic may need to be updated since employeeItems is no longer available
-      // For now, we'll set a placeholder or handle it differently
-      setEmployeeSearch('Loading employee...');
-      setEmployeeSelected(true);
+      // Set employee search to show selected employee name from the API response
+      if (employeeCompensationLogbookData.employee_name) {
+        setEmployeeSearch(employeeCompensationLogbookData.employee_name);
+      } else {
+        setEmployeeSearch('Loading employee...');
+      }
     }
-  }, [employeeCompensationLogbookData, setValue, setEmployeeSearch, setEmployeeSelected]);
+  }, [employeeCompensationLogbookData, setValue, setEmployeeSearch]);
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
@@ -91,7 +87,6 @@ export default function EditEmployeeCompensationLogModal({
   const customCloseModal = () => {
     reset();
     setEmployeeSearch('');
-    setEmployeeSelected(false);
     removeEmployeeCompensationLogbook();
     setIsOpen(null);
   };
@@ -208,7 +203,7 @@ export default function EditEmployeeCompensationLogModal({
                           isClearable={true}
                           employeeSearch={employeeSearch}
                           setEmployeeSearch={setEmployeeSearch}
-                          setEmployeeSelected={setEmployeeSelected}
+                          employeeName={employeeCompensationLogbookData?.employee_name}
                           className="mt-2"
                         />
                       </div>

@@ -10,7 +10,9 @@ import { Tooltip } from 'react-tooltip';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import usePatchEmployeeIssueItems, { EmployeeIssueUpdateData } from '../hooks/usePatchEmployeeIssueItems';
+import { usePermission } from '@/hooks/useLegacyPermissions';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
@@ -28,7 +30,6 @@ interface EditIncidentReportModalProps {
   setIsOpen: Dispatch<boolean>;
   refetch: any;
   selectedIssue: any;
-  cachedUserRights?: any;
 }
 
 export default function EditIncidentReportModal({
@@ -36,11 +37,24 @@ export default function EditIncidentReportModal({
   setIsOpen,
   refetch,
   selectedIssue,
-  cachedUserRights,
 }: EditIncidentReportModalProps) {
-  const hasEditRights = cachedUserRights?.state?.data?.edit_employee_issue;
-  const canEdit = hasEditRights && selectedIssue?.status === 'pending' && !selectedIssue?.nte_attachment;
+  // Use new RBAC hooks
+  const editEmployeeIssue = usePermission('edit_employee_issue');
+  const updateEmployeeIssueStatus = usePermission('update_employee_issue_status');
+  
+  // Can edit when user has both permissions AND issue is pending AND no NTE attachment
+  const canEdit = editEmployeeIssue.hasPermission && 
+                  updateEmployeeIssueStatus.hasPermission && 
+                  selectedIssue?.status === 'pending' && 
+                  !selectedIssue?.nte_attachment;
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
+  
+  // Add data fetching hook similar to UpdateWorkAccidentIllnessReportModal
+  const {
+    data: employeeIssueDetailsData,
+    refetch: refetchEmployeeIssueDetails,
+    remove: removeEmployeeIssueDetails,
+  } = useGetEmployeeIssueDetails(selectedIssue?.id || null);
   const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
     defaultValues: {
       name: '',
@@ -58,50 +72,51 @@ export default function EditIncidentReportModal({
   const maxLength = 430;
   const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
-  const [employeeSelected, setEmployeeSelected] = useState(false);
   const briefBackgroundValue = watch('briefBackground') || '';
   
-
-  // Populate form when selectedIssue changes
+  // Refetch data when modal opens
   useEffect(() => {
-    if (selectedIssue && isOpen) {
-      // Use the employee name directly from the selectedIssue (from backend)
-      if (selectedIssue.name) {
-        setEmployeeSearch(selectedIssue.name);
-        setEmployeeSelected(true);
-        
-        // Use the employee_id from selectedIssue - EmployeeSelect will handle data fetching
-        setValue('name', selectedIssue.employee_id || '');
+    if (isOpen && selectedIssue?.id) {
+      refetchEmployeeIssueDetails();
+    }
+  }, [isOpen, selectedIssue?.id, refetchEmployeeIssueDetails]);
+
+  // Populate form when employeeIssueDetailsData is available (similar to UpdateWorkAccidentIllnessReportModal)
+  useEffect(() => {
+    if (employeeIssueDetailsData && isOpen) {
+      // Set employee search to show selected employee name from the API response
+      if (employeeIssueDetailsData.employee_name) {
+        setEmployeeSearch(employeeIssueDetailsData.employee_name);
+        setValue('name', employeeIssueDetailsData.employee);
+      } else if (employeeIssueDetailsData.employee) {
+        setEmployeeSearch('Loading employee...');
+        setValue('name', employeeIssueDetailsData.employee);
       }
       
-      // Set form values using the mapped data
-      setValue('position', selectedIssue.employee_position || selectedIssue.position || '');
-      setValue('department', selectedIssue.employee_department || selectedIssue.department || '');
-      setValue('incidentDate', selectedIssue.incident_date ? new Date(selectedIssue.incident_date).toISOString() : new Date().toISOString());
-      setValue('incidentPlace', selectedIssue.incident_place || selectedIssue.place_of_incident || '');
-      setValue('issueType', selectedIssue.issue_type || '');
-      setValue('briefBackground', selectedIssue.brief_background || '');
+      // Set form values using the fetched data - matching the API response structure
+      setValue('position', employeeIssueDetailsData.position || '');
+      setValue('department', employeeIssueDetailsData.department || '');
+      setValue('incidentDate', employeeIssueDetailsData.incident_date ? new Date(employeeIssueDetailsData.incident_date).toISOString() : new Date().toISOString());
+      setValue('incidentPlace', employeeIssueDetailsData.place_of_incident || '');
+      setValue('issueType', employeeIssueDetailsData.issue_type || '');
+      setValue('briefBackground', employeeIssueDetailsData.brief_background || '');
     }
-  }, [selectedIssue, isOpen, setValue]);
+  }, [employeeIssueDetailsData, isOpen, setValue, setEmployeeSearch]);
+
+  const customCloseModal = () => {
+    reset();
+    setEmployeeSearch('');
+    removeEmployeeIssueDetails();
+    setIsOpen(false);
+  };
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully updated the incident report."} type='success' />, { duration: 5000 });
-        setIsOpen(false);
-        reset({
-          name: '',
-          incidentDate: new Date().toISOString(),
-          position: '',
-          department: '',
-          incidentPlace: '',
-          issueType: '',
-          briefBackground: ''
-        });
-        setValue('department', '');
-        setValue('position', '');
-        setEmployeeSearch('');
-        setEmployeeSelected(false);
+        // Clear the cached data so it refetches fresh data
+        removeEmployeeIssueDetails();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -114,11 +129,11 @@ export default function EditIncidentReportModal({
     // Transform data to match backend API format
     const updateData: EmployeeIssueUpdateData = {
       id: selectedIssue?.id,
-      employee_id: parseInt(data.name.toString()),
+      employee: parseInt(data.name.toString()),
       incident_date: data.incidentDate,
       position: data.position,
       department: data.department,
-      incident_place: data.incidentPlace,
+      place_of_incident: data.incidentPlace,
       issue_type: data.issueType,
       brief_background: data.briefBackground,
     };
@@ -154,7 +169,7 @@ export default function EditIncidentReportModal({
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {}}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -179,11 +194,11 @@ export default function EditIncidentReportModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
+                <div className='flex bg-savoy-blue p-2 items-center' data-element-id="update-employee-issue-status-rights">
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     {canEdit ? 'Edit Incident Report' : 'View Incident Report'}
                   </h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
@@ -205,39 +220,47 @@ export default function EditIncidentReportModal({
                           Employee Name{canEdit && <span className='text-red-600'>*</span>}
                         </label>
                         <div className='relative mt-2'>
-                          <EmployeeSelect
-                            control={control}
-                            name="name"
-                            label=""
-                            required={true}
-                            placeholder="Select employee..."
-                            isMulti={false}
-                            isClearable={canEdit}
-                            employeeSearch={employeeSearch}
-                            setEmployeeSearch={setEmployeeSearch}
-                            setEmployeeSelected={setEmployeeSelected}
-                            className=""
-                            disabled={!canEdit}
-                            onChange={(selectedOption: any) => {
-                              if (canEdit && selectedOption && !selectedOption.isShowMore) {
-                                setEmployeeSearch(selectedOption.label);
-                                setEmployeeSelected(true);
-                                // Auto-fill department from employee data
-                                if (selectedOption.department) {
-                                  setValue('department', selectedOption.department);
+                          {employeeIssueDetailsData && !canEdit ? (
+                            // Show simple input in view mode
+                            <input
+                              type="text"
+                              value={employeeIssueDetailsData.employee_name}
+                              readOnly
+                              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6"
+                            />
+                          ) : (
+                            // Show EmployeeSelect in edit mode or when no data
+                            <EmployeeSelect
+                              control={control}
+                              name="name"
+                              label=""
+                              required={true}
+                              placeholder="Select employee..."
+                              isMulti={false}
+                              isClearable={canEdit}
+                              employeeSearch={employeeSearch}
+                              setEmployeeSearch={setEmployeeSearch}
+                              employeeName={employeeIssueDetailsData?.employee_name}
+                              className=""
+                              onChange={(selectedOption: any) => {
+                                if (canEdit && selectedOption && !selectedOption.isShowMore) {
+                                  setEmployeeSearch(selectedOption.label);
+                                  // Auto-fill department from employee data
+                                  if (selectedOption.department) {
+                                    setValue('department', selectedOption.department);
+                                  }
+                                  // Auto-fill position from employee data
+                                  if (selectedOption.position) {
+                                    setValue('position', selectedOption.position);
+                                  }
+                                } else if (canEdit) {
+                                  setEmployeeSearch('');
+                                  setValue('department', '');
+                                  setValue('position', '');
                                 }
-                                // Auto-fill position from employee data
-                                if (selectedOption.position) {
-                                  setValue('position', selectedOption.position);
-                                }
-                              } else if (canEdit) {
-                                setEmployeeSearch('');
-                                setEmployeeSelected(false);
-                                setValue('department', '');
-                                setValue('position', '');
-                              }
-                            }}
-                          />
+                              }}
+                            />
+                          )}
                         </div>
                       </div>
                       <div>
@@ -451,7 +474,7 @@ export default function EditIncidentReportModal({
                       <button
                         type='button'
                         className={`inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 ${canEdit ? 'mt-3 w-full sm:mt-0 sm:w-auto' : 'w-auto'}`}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => customCloseModal()}
                         ref={cancelButtonRef}
                       >
                         Close

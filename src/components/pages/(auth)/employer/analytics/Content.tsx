@@ -17,6 +17,7 @@ import CompliancePolicy from './tabs/CompliancePolicy';
 import CompensationBenefits from './tabs/CompensationBenefits';
 import PrintRolePipelineRecordsSelectionModal from './modals/PrintRolePipelineRecordsSelectionModal';
 import PrintEmpPerformanceSelectionModal from './modals/PrintEmpPerformanceSelectionModal/PrintEmpPerformanceSelectionModal';
+import useAddAnalyticsPrintAudit from './hooks/useAddAnalyticsPrintAudit';
 
 import { handlePrintAnalytics } from './PrintData';
 
@@ -24,6 +25,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import PrintIcon from "@/svg/PrintIcon";
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const { mutate: logAudit } = useAddAnalyticsPrintAudit();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(1);
@@ -227,6 +229,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             workforceData.allJobPostsForPrint,
             selectedRecords as number[]
           );
+          
+          // Log audit after successful print
+          logAudit({
+            report_type: 'workforce-overview'
+          });
           break;
         case 2: // Employee Performance
           if (!employeePerformanceData) {
@@ -273,6 +280,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               issueTypeOption, // issue type-specific print option
               employeeIssueOption // employee issue-specific print option
             );
+          
+          // Log audit after successful print
+          logAudit({
+            report_type: 'employee-performance-development'
+          });
           break;
         // Add other tabs here as they are implemented
         default:

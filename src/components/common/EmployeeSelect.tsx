@@ -1,16 +1,31 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import Select, { components } from 'react-select';
+import { useQueryClient } from '@tanstack/react-query';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 
-// Custom Option component to display department/position in dropdown
+{/* Custom option component */}
 const CustomOption = (props: any) => {
-  const { data, isSelected } = props;
+  const { data, isSelected, showEmail } = props;
   
-  // Handle "Show more" option styling - make it non-selectable
+  if (data.isLoading) {
+    return (
+      <div className="px-3 py-4 text-center">
+        <LoadingSpinner 
+          size="sm" 
+          color="yellow" 
+          text="Searching employees..." 
+          showText={true}
+          className="py-2"
+        />
+      </div>
+    );
+  }
+  
   if (data.isShowMore) {
     return (
       <div 
@@ -18,18 +33,31 @@ const CustomOption = (props: any) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Trigger the show more action directly
-          const event = new CustomEvent('showMoreEmployees');
-          document.dispatchEvent(event);
+          document.dispatchEvent(new CustomEvent('showMoreEmployees'));
         }}
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        <span className="text-sm text-gray-600 font-medium">{data.label}</span>
-        <span className="text-xs text-gray-500">Click to load more</span>
+        <span className='text-sm text-gray-600'>Show 50 more employees</span>
+        <span className='text-sm text-gray-600 font-medium'>Click to load more</span>
       </div>
+    );
+  }
+
+  if (data.is_department_option) {
+    return (
+      <components.Option {...props}>
+        <div className='flex flex-col'>
+          <div className='text-sm font-medium text-gray-900'>
+            {data.label}
+          </div>
+          <div className='text-xs text-blue-600'>
+            • Select all employees from this department
+          </div>
+        </div>
+      </components.Option>
     );
   }
   
@@ -37,14 +65,21 @@ const CustomOption = (props: any) => {
     <components.Option {...props}>
       <div>
         <div className="font-medium">{data.label}</div>
-        {(data.department || data.position) && (
-          <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-            • {data.department && data.position 
-              ? `${data.department} | ${data.position}`
-              : data.department || data.position
-            }
-          </div>
-        )}
+        <div className={`text-sm ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+          {showEmail && data.email && (
+            <div className="mb-1">
+              • {data.email}
+            </div>
+          )}
+          {(data.department || data.position) && (
+            <div>
+              • {data.department && data.position 
+                ? `${data.department} | ${data.position}`
+                : data.department || data.position
+              }
+            </div>
+          )}
+        </div>
       </div>
     </components.Option>
   );
@@ -58,6 +93,7 @@ interface EmployeeSelectProps {
   placeholder?: string;
   isMulti?: boolean;
   isClearable?: boolean;
+  disabled?: boolean;
   employeeSearch: string;
   setEmployeeSearch: (value: string) => void;
   setEmployeeSelected?: (value: boolean) => void;
@@ -66,7 +102,9 @@ interface EmployeeSelectProps {
   className?: string;
   rules?: any;
   onChange?: (selectedOption: any) => void;
-  disabled?: boolean;
+  employeeName?: string; // Optional employee name for display
+  employeeNames?: string[]; // Optional array of employee names for multi-select display
+  showEmail?: boolean; // Optional prop to show email in options
 }
 
 export default function EmployeeSelect({
@@ -77,6 +115,7 @@ export default function EmployeeSelect({
   placeholder = "Select employee...",
   isMulti = false,
   isClearable = true,
+  disabled = false,
   employeeSearch,
   setEmployeeSearch,
   setEmployeeSelected,
@@ -84,115 +123,366 @@ export default function EmployeeSelect({
   className = "",
   rules = {},
   onChange,
-  disabled = false,
+  employeeName,
+  employeeNames,
+  showEmail = false,
 }: EmployeeSelectProps) {
-  const [employeeLimit, setEmployeeLimit] = useState(10);
+  const queryClient = useQueryClient();
+  const [employeeLimit, setEmployeeLimit] = useState(50);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+  const [cachedEmployeeItems, setCachedEmployeeItems] = useState<any[]>([]);
+  const [persistentSelections, setPersistentSelections] = useState<any[]>([]);
+  const [isDebouncing, setIsDebouncing] = useState(false);
   
-  // Get employee items from the hook
-  const { data: employeeItems } = useGetEmployeeItems();
+  const formValue = useWatch({ control, name });
 
-  // Intelligent filtering function
-  const filterEmployees = (items: any[], searchTerm: string, excludeValues: any[] = []) => {
-    if (!searchTerm || searchTerm.length < 2) {
-      // No search term, return all items excluding already selected ones
-      return items.filter((item: any) => !excludeValues.includes(item.id));
+  {/* Debounce search */}
+  useEffect(() => {
+    // Set debouncing state when user is typing
+    if (employeeSearch && employeeSearch.length >= 2) {
+      setIsDebouncing(true);
+    } else {
+      setIsDebouncing(false);
     }
 
-    const searchParts = searchTerm.toLowerCase().trim().split(' ').filter((part: string) => part.length > 0);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(employeeSearch);
+      setIsDebouncing(false); // Clear debouncing state when delay is done
+    }, 2000); // 2000ms delay (2 seconds)
+
+    return () => {
+      clearTimeout(timer);
+      // Don't clear debouncing state immediately on cleanup
+    };
+  }, [employeeSearch]);
+
+  {/* Fetch employees */}
+  const { data: employeeData } = useGetEmployeePaginatedSelect({
+    search: debouncedSearch || '',
+    current_page: 1
+  });
+
+  {/* Cache employee data */}
+  useEffect(() => {
+    if (employeeData?.records?.length > 0) {
+      setCachedEmployeeItems(employeeData.records);
+    }
+  }, [employeeData]);
+
+  {/* Combine employee data */}
+  const employeeItems = useMemo(() => {
+    // Always use the latest employee data if available
+    const currentData = employeeData?.records || cachedEmployeeItems;
     
-    const filteredItems = items.filter((item: any) => {
-      // Skip if already selected in the other dropdown
-      if (excludeValues.includes(item.id)) {
-        return false;
+    const combinedItems = [...persistentSelections];
+    currentData.forEach((emp: any) => {
+      if (!persistentSelections.some((persistentEmp: any) => persistentEmp.id === emp.id)) {
+        combinedItems.push(emp);
       }
-
-      const firstName = item.firstname?.toLowerCase() || '';
-      const lastName = item.lastname?.toLowerCase() || '';
-      const position = item.position?.toLowerCase() || '';
-      const department = item.department?.toLowerCase() || '';
-      
-      // If search term is a single word, search across all fields
-      if (searchParts.length === 1) {
-        const singleTerm = searchParts[0];
-        return firstName.includes(singleTerm) ||
-               lastName.includes(singleTerm) ||
-               position.includes(singleTerm) ||
-               department.includes(singleTerm);
-      }
-      
-      // For multi-word searches, try different combinations
-      if (searchParts.length >= 2) {
-        // Try exact phrase matching first for names
-        const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
-        const reverseName = `${lastName} ${firstName}`.replace(/\s+/g, ' ').trim();
-        
-        if (fullName.includes(searchTerm.toLowerCase()) || reverseName.includes(searchTerm.toLowerCase())) {
-          return true;
-        }
-        
-        // Try individual word matching across name fields
-        const allNameParts = [firstName, lastName].filter((part: string) => part.length > 0);
-        const matchedNameParts = searchParts.filter((searchPart: string) => 
-          allNameParts.some((namePart: string) => namePart.includes(searchPart))
-        );
-        
-        // Try position and department matching
-        const matchedPositionDepartment = searchParts.some((searchPart: string) =>
-          position.includes(searchPart) || department.includes(searchPart)
-        );
-        
-        // If most name parts match OR if position/department matches, include the result
-        return matchedNameParts.length >= Math.min(searchParts.length, 2) || matchedPositionDepartment;
-      }
-      
-      return false;
     });
+    return combinedItems;
+  }, [employeeData?.records, cachedEmployeeItems, persistentSelections]);
 
-    return filteredItems;
+  {/* Helper functions */}
+  const createEmployeeFromName = (id: any, name: string) => {
+    const nameParts = name.split(' ');
+    return {
+      id,
+      firstname: nameParts[0] || '',
+      lastname: nameParts.slice(1).join(' ') || '',
+      department: '',
+      position: '',
+      employment_status: '',
+      address: '',
+      gender: ''
+    };
   };
 
-  // Memoize the filtered options with intelligent filtering
-  const selectOptions = useMemo(() => {
-    if (employeeItems && employeeItems.length > 0) {
-      const filtered = filterEmployees(employeeItems, employeeSearch, excludeValues);
-      
-      // Apply limit and add show more option
-      const limitedItems = filtered.slice(0, employeeLimit);
-      const options = limitedItems.map((item: any) => ({
-        value: item.id,
-        label: `${item.firstname} ${item.lastname}`,
-        department: item.department,
-        position: item.position,
-        address: item.address,
-        gender: item.gender,
-      }));
-
-      // Add "Show more" option if there are more filtered results
-      if (filtered.length > employeeLimit) {
-        options.push({
-          value: 'show_more',
-          label: `Show 10 more employees (${filtered.length - employeeLimit} remaining)`,
-          isShowMore: true,
-        } as any);
+  const getEmployeeFromCache = useCallback((id: any) => {
+    const allCachedData = queryClient.getQueryCache().getAll();
+    for (const query of allCachedData) {
+      if (query.queryKey[0] === 'employeePaginatedSelectCache' && (query.state.data as any)?.records) {
+        const employee = (query.state.data as any).records.find((emp: any) => emp.id === id);
+        if (employee) return employee;
       }
-
-      return options;
     }
-    return [];
-  }, [employeeItems, employeeSearch, excludeValues, employeeLimit]);
+    return null;
+  }, [queryClient]);
 
-  // Listen for custom show more event
+  const getEmployeesWithNames = useCallback((idsToFind: any[], currentEmployeeItems: any[] = []) => {
+    return idsToFind.map((id: any, index: number) => {
+      let nameToUse = `Employee ${id}`;
+      
+      if (isMulti && employeeNames?.[index]) {
+        nameToUse = employeeNames[index];
+      } else if (!isMulti && employeeName && idsToFind.length === 1 && idsToFind[0] === id) {
+        nameToUse = employeeName;
+      } else {
+        // Try to find the employee in current employee items if employeeNames is not available or too short
+        const employee = currentEmployeeItems.find((item: any) => item.id === id);
+        if (employee) {
+          nameToUse = `${employee.firstname} ${employee.lastname}`;
+        }
+      }
+      
+      return createEmployeeFromName(id, nameToUse);
+    });
+  }, [isMulti, employeeNames, employeeName]);
+
+  {/* Load persistent selections */}
+  useEffect(() => {
+    if (!formValue || (isMulti && !Array.isArray(formValue)) || (!isMulti && !formValue)) {
+      setPersistentSelections([]);
+      return;
+    }
+
+    const idsToFind = isMulti ? formValue : [formValue];
+    const hasNames = (isMulti && employeeNames && employeeNames.length > 0) || (!isMulti && employeeName);
+
+    // Always use the latest employee data if available
+    const currentData = employeeData?.records || cachedEmployeeItems;
+    
+    const newSelections = idsToFind.map((id: any) => {
+      // First try to find in existing persistent selections to maintain names
+      const existingPersistent = persistentSelections.find((emp: any) => emp.id === id);
+      if (existingPersistent) return existingPersistent;
+      
+      // Then try to find in current employee items
+      const employee = currentData.find((item: any) => item.id === id);
+      if (employee) return employee;
+      
+      // Try to find in cache
+      const cachedEmployee = getEmployeeFromCache(id);
+      if (cachedEmployee) return cachedEmployee;
+      
+      // If we have employeeNames, try to get the name
+      if (hasNames) {
+        if (isMulti) {
+          const idIndex = idsToFind.findIndex((empId: any) => empId === id);
+          if (idIndex >= 0 && employeeNames && employeeNames[idIndex]) {
+            return createEmployeeFromName(id, employeeNames[idIndex]);
+          }
+        } else {
+          // For single select, use employeeName directly
+          if (employeeName) {
+            return createEmployeeFromName(id, employeeName);
+          }
+        }
+      }
+      
+      // Fallback to generic name
+      return createEmployeeFromName(id, `Employee ${id}`);
+    });
+    
+    setPersistentSelections(newSelections);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValue, name, isMulti, queryClient, employeeName, employeeNames, getEmployeeFromCache, getEmployeesWithNames, debouncedSearch, employeeData?.records, cachedEmployeeItems]);
+
+  {/* Update selections when new data fetched */}
+  useEffect(() => {
+    if (employeeData?.records && formValue) {
+      const idsToFind = isMulti ? formValue : [formValue];
+      const foundEmployees = employeeData.records.filter((emp: any) => idsToFind.includes(emp.id));
+      
+      if (foundEmployees.length > 0) {
+        setPersistentSelections(prev => {
+          const newSelections = [...prev];
+          foundEmployees.forEach((emp: any) => {
+            if (!newSelections.some((existing: any) => existing.id === emp.id)) {
+              newSelections.push(emp);
+            }
+          });
+          return newSelections;
+        });
+      }
+    }
+  }, [employeeData, formValue, isMulti]);
+
+  {/* Create select options */}
+  const selectOptions = useMemo(() => {
+    // For single select, hide options when an employee is already selected
+    if (!isMulti && formValue) {
+      return [];
+    }
+
+    // Show loading option when debouncing
+    if (employeeSearch && employeeSearch.length >= 2 && isDebouncing) {
+      return [{
+        value: 'loading',
+        label: 'Searching employees...',
+        isLoading: true,
+      } as any];
+    }
+
+    if (!employeeItems?.length) return [];
+
+    const filtered = employeeItems.filter((item: any) => !excludeValues.includes(item.id));
+      const limitedItems = filtered.slice(0, employeeLimit);
+    
+    const options = limitedItems.map((item: any) => ({
+      value: item.id,
+      label: `${item.firstname} ${item.lastname}`,
+      department: item.department,
+      position: item.position,
+      employment_status: item.employment_status,
+      address: item.address,
+      gender: item.gender,
+      email: item.email,
+    }));
+
+    // Only add department options for multi-select (not for single select)
+    let finalOptions = [...options];
+    
+    if (isMulti) {
+      const allDepartments = new Set();
+      
+      employeeItems.forEach((employee: any) => {
+        if (employee.department) {
+          allDepartments.add(employee.department);
+        }
+      });
+
+      // Create department options for all departments
+      const departmentOptions = Array.from(allDepartments)
+        .map((deptName: any) => {
+          // Get all employees from this department
+          const employeesInDepartment = employeeItems.filter((emp: any) => 
+            emp.department === deptName && emp.email
+          );
+          
+          // Check if all employees from this department are excluded
+          const availableEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
+            !excludeValues.includes(emp.id)
+          );
+          
+          // If all employees from this department are excluded, don't show the department option
+          if (availableEmployeesInDepartment.length === 0) {
+            return null;
+          }
+          
+          // Check if all available employees from this department are already selected
+          const selectedEmployeesInDepartment = availableEmployeesInDepartment.filter((emp: any) => 
+            formValue && formValue.includes(emp.id)
+          );
+          
+          // If all available employees from this department are already selected, don't show the department option
+          if (selectedEmployeesInDepartment.length === availableEmployeesInDepartment.length && availableEmployeesInDepartment.length > 0) {
+            return null;
+          }
+          
+          return {
+            value: `dept:${deptName}`,
+            label: `${deptName} (All Employees)`,
+            department: deptName,
+            position: '',
+            employment_status: '',
+            address: '',
+            gender: '',
+            email: '',
+            is_department_option: true,
+            is_remove_option: false,
+            allEmployeesSelected: false
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null); // Remove null values with type guard
+
+      // Combine department options with filtered employees - departments first
+      finalOptions = [...departmentOptions, ...options];
+    }
+
+    if (filtered.length > employeeLimit) {
+      finalOptions.push({
+        value: 'show_more',
+        label: `${filtered.length - employeeLimit} remaining`,
+        isShowMore: true,
+      } as any);
+    }
+
+    return finalOptions;
+  }, [employeeItems, excludeValues, employeeLimit, employeeSearch, isDebouncing, formValue, isMulti]);
+
+  {/* Show more handler */}
   useEffect(() => {
     const handleShowMore = () => {
-      setEmployeeLimit(prev => prev + 10);
-      // Keep menu open after loading more data
+      setEmployeeLimit(prev => prev + 50);
       setTimeout(() => setIsMenuOpen(true), 100);
     };
-
     document.addEventListener('showMoreEmployees', handleShowMore);
     return () => document.removeEventListener('showMoreEmployees', handleShowMore);
   }, []);
+
+  {/* Sync selections with form order */}
+  useEffect(() => {
+    if (!isMulti) {
+      if (!formValue && persistentSelections.length > 0) {
+        setPersistentSelections([]);
+      }
+      return;
+    }
+
+    if (formValue?.length > 0) {
+      const persistentMap = new Map(persistentSelections.map((emp: any) => [emp.id, emp]));
+      const reorderedSelections = formValue
+        .map((id: any) => persistentMap.get(id))
+        .filter(Boolean);
+      
+      if (JSON.stringify(reorderedSelections.map((emp: any) => emp.id)) !== 
+          JSON.stringify(persistentSelections.map((emp: any) => emp.id))) {
+        setPersistentSelections(reorderedSelections);
+      }
+    } else if (persistentSelections.length > 0) {
+      setPersistentSelections([]);
+    }
+  }, [formValue, name, isMulti, persistentSelections]);
+
+
+  {/* Helper functions for value handling */}
+  const getMultiSelectValue = (fieldValue: any) => {
+    if (!fieldValue || !Array.isArray(fieldValue)) return [];
+    
+    const selectedOptions = selectOptions.filter((option: any) => fieldValue.includes(option.value));
+    const missingOptions = fieldValue
+                .filter((id: any) => !selectOptions.some((option: any) => option.value === id))
+                .map((id: any) => {
+                  const employee = employeeItems?.find((item: any) => item.id === id);
+        return employee ? {
+                      value: employee.id,
+                      label: `${employee.firstname} ${employee.lastname}`,
+                      department: employee.department,
+                      position: employee.position,
+                      employment_status: employee.employment_status,
+                      address: employee.address,
+                      gender: employee.gender,
+                      email: employee.email,
+        } : null;
+                })
+                .filter(Boolean);
+              
+    return [...selectedOptions, ...missingOptions];
+  };
+
+  const getSingleSelectValue = (fieldValue: any) => {
+    const selectedOption = selectOptions.find((option: any) => option.value === fieldValue);
+    if (selectedOption) return selectedOption;
+    
+    if (fieldValue && employeeItems) {
+      const employee = employeeItems.find((item: any) => item.id === fieldValue);
+        if (employee) {
+          return {
+            value: employee.id,
+            label: `${employee.firstname} ${employee.lastname}`,
+            department: employee.department,
+            position: employee.position,
+            employment_status: employee.employment_status,
+            address: employee.address,
+            gender: employee.gender,
+            email: employee.email,
+          };
+        }
+      }
+    return null;
+  };
 
   return (
     <div className={className}>
@@ -201,65 +491,7 @@ export default function EmployeeSelect({
         control={control}
         rules={required ? { required: "Please select an employee" } : rules}
         render={({ field, fieldState: { error: fieldError } }) => {
-          // Handle the value display for both single and multi-select
-          const getValue = () => {
-            if (isMulti) {
-              // For multi-select, field.value is an array of IDs
-              if (!field.value || !Array.isArray(field.value)) {
-                return [];
-              }
-              
-              // Find the selected options from the current options
-              const selectedOptions = selectOptions.filter((option: any) => 
-                field.value.includes(option.value)
-              );
-              
-              // If some selected values are not in the current options (due to filtering),
-              // we need to add them from the full employeeItems list
-              const missingSelectedOptions = field.value
-                .filter((id: any) => !selectOptions.some((option: any) => option.value === id))
-                .map((id: any) => {
-                  const employee = employeeItems?.find((item: any) => item.id === id);
-                  if (employee) {
-                    return {
-                      value: employee.id,
-                      label: `${employee.firstname} ${employee.lastname}`,
-                      department: employee.department,
-                      position: employee.position,
-                      address: employee.address,
-                      gender: employee.gender,
-                    };
-                  }
-                  return null;
-                })
-                .filter(Boolean);
-              
-              return [...selectedOptions, ...missingSelectedOptions];
-            } else {
-              // For single-select, field.value is a single ID
-              const selectedOption = selectOptions.find((option: any) => option.value === field.value);
-              if (selectedOption) {
-                return selectedOption;
-              }
-              
-              // If the selected value is not in current options, find it in employeeItems
-              if (field.value && employeeItems) {
-                const employee = employeeItems.find((item: any) => item.id === field.value);
-                if (employee) {
-                  return {
-                    value: employee.id,
-                    label: `${employee.firstname} ${employee.lastname}`,
-                    department: employee.department,
-                    position: employee.position,
-                    address: employee.address,
-                    gender: employee.gender,
-                  };
-                }
-              }
-              
-              return null;
-            }
-          };
+          const getValue = () => isMulti ? getMultiSelectValue(field.value) : getSingleSelectValue(field.value);
 
           return (
             <Select
@@ -268,27 +500,156 @@ export default function EmployeeSelect({
               options={selectOptions}
               value={getValue()}
               menuIsOpen={isMenuOpen}
-              onMenuOpen={() => setIsMenuOpen(true)}
+              onMenuOpen={() => {
+                // For single select, prevent menu from opening if an employee is already selected
+                if (!isMulti && formValue) {
+                  return;
+                }
+                setIsMenuOpen(true);
+              }}
               onMenuClose={() => setIsMenuOpen(false)}
               onInputChange={(inputValue) => {
                 // Update search term when user types
                 setEmployeeSearch(inputValue);
                 // Reset limit when searching
-                setEmployeeLimit(10);
+                setEmployeeLimit(50);
+              }}
+              noOptionsMessage={({ inputValue }) => {
+                // Show loading state while debouncing
+                if (inputValue && inputValue.length >= 2 && isDebouncing) {
+                  return (
+                    <div className="px-3 py-4 text-center">
+                      <LoadingSpinner 
+                        size="sm" 
+                        color="yellow" 
+                        text="Searching employees..." 
+                        showText={true}
+                        className="py-2"
+                      />
+                    </div>
+                  );
+                }
+                
+                if (inputValue && inputValue.length >= 2) {
+                  return (
+                    <div className="px-3 py-4 text-center">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-sm text-gray-600">
+                          <p className="font-medium">No employees found for &quot;{inputValue}&quot;</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Try searching by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="px-3 py-4 text-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium">No employees found</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Type to search by <span className="font-medium">first name</span>, <span className="font-medium">last name</span>, <span className="font-medium">position</span>, or <span className="font-medium">department</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
               }}
               onChange={(selectedOption: any) => {
                 if (isMulti) {
-                  // Multi-select logic
-                  if (selectedOption && Array.isArray(selectedOption) && selectedOption.some((item: any) => item.value === 'show_more')) {
-                    return; // Don't change the selected value, don't close dropdown
+                  if (selectedOption?.some((item: any) => item.value === 'show_more' || item.value === 'loading')) return;
+                  
+                  const isClearAction = !selectedOption || selectedOption.length === 0;
+                  
+                  if (isClearAction) {
+                    setPersistentSelections([]);
+                  } else {
+                    const filteredOptions = selectedOption.filter((option: any) => option.value !== 'show_more');
+                    
+                    // Handle department selection/removal
+                    const departmentOptions = filteredOptions.filter((option: any) => option.is_department_option);
+                    const employeeOptions = filteredOptions.filter((option: any) => !option.is_department_option);
+                    
+                    let newSelections = [...persistentSelections];
+                    
+                    // Process department options
+                    departmentOptions.forEach((deptOption: any) => {
+                      const employeesInDepartment = employeeItems.filter((emp: any) => 
+                        emp.department === deptOption.department && emp.email
+                      );
+                      
+                      // Add all employees from this department
+                      employeesInDepartment.forEach((emp: any) => {
+                        if (!newSelections.some((existing: any) => existing.id === emp.id)) {
+                          newSelections.push(emp);
+                        }
+                      });
+                    });
+                    
+                    // Process individual employee selections
+                    const hasNames = (isMulti && employeeNames && employeeNames.length > 0) || (!isMulti && employeeName);
+                    
+                    employeeOptions.forEach((option: any) => {
+                      // First try to find in existing persistent selections to maintain names
+                      const existingPersistent = newSelections.find((emp: any) => emp.id === option.value);
+                      if (existingPersistent) return;
+                      
+                      // Then try to find in current employee items
+                      const employee = employeeItems.find((item: any) => item.id === option.value);
+                      if (employee) {
+                        newSelections.push(employee);
+                        return;
+                      }
+                      
+                      // If we have employeeNames and this is a new selection, try to get the name
+                      if (hasNames) {
+                        if (isMulti) {
+                          const formValueArray = isMulti ? formValue : [formValue];
+                          const idIndex = formValueArray.findIndex((id: any) => id === option.value);
+                          if (idIndex >= 0 && employeeNames && employeeNames[idIndex]) {
+                            newSelections.push(createEmployeeFromName(option.value, employeeNames[idIndex]));
+                            return;
+                          }
+                        } else {
+                          // For single select, use employeeName directly
+                          if (employeeName) {
+                            newSelections.push(createEmployeeFromName(option.value, employeeName));
+                            return;
+                          }
+                        }
+                      }
+                      
+                      // Fallback to generic name
+                      newSelections.push(createEmployeeFromName(option.value, `Employee ${option.value}`));
+                    });
+                    
+                    setPersistentSelections(newSelections);
                   }
-                  const fieldOnChange = selectedOption ? selectedOption.map((item: any) => item.value) : [];
+                  
+                  // For department options, we need to create a special field value that includes the department selection
+                  const fieldOnChange = selectedOption ? selectedOption.map((item: any) => {
+                    if (item.is_department_option) {
+                      // For department options, we need to return the actual employee IDs
+                      const employeesInDepartment = employeeItems.filter((emp: any) => 
+                        emp.department === item.department && emp.email
+                      );
+                      return employeesInDepartment.map((emp: any) => emp.id);
+                    }
+                    return item.value;
+                  }).flat() : [];
+                  
                   onChange?.(selectedOption);
                   field.onChange(fieldOnChange);
                 } else {
-                  // Single-select logic
-                  if (selectedOption && selectedOption.value === 'show_more') {
-                    return; // Don't change the selected value, don't close dropdown
+                  if (selectedOption?.value === 'show_more' || selectedOption?.value === 'loading') return;
+                  
+                  if (selectedOption) {
+                    const employee = employeeItems.find((item: any) => item.id === selectedOption.value);
+                    if (employee) setPersistentSelections([employee]);
+                  } else {
+                    setPersistentSelections([]);
                   }
                   
                   const fieldOnChange = selectedOption ? selectedOption.value : '';
@@ -297,17 +658,17 @@ export default function EmployeeSelect({
                   
                   if (selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
-                    if (setEmployeeSelected) setEmployeeSelected(true);
-                    setIsMenuOpen(false); // Close menu for regular selection
+                    setEmployeeSelected?.(true);
+                    setIsMenuOpen(false);
                   } else {
                     setEmployeeSearch('');
-                    if (setEmployeeSelected) setEmployeeSelected(false);
+                    setEmployeeSelected?.(false);
                   }
                 }
               }}
               filterOption={() => true} // Disable React Select's built-in filtering since we handle it ourselves
               components={{
-                Option: CustomOption,
+                Option: (props: any) => <CustomOption {...props} showEmail={showEmail} />,
                 DropdownIndicator: () => (
                   <div className="pointer-events-none px-2">
                     <SelectChevronDown />
@@ -315,11 +676,36 @@ export default function EmployeeSelect({
                 ),
                 IndicatorSeparator: () => null,
               }}
+              styles={isMulti ? {
+                multiValue: (provided) => ({
+                  ...provided,
+                  backgroundColor: '#eff6ff',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(29, 78, 216, 0.1)',
+                }),
+                multiValueLabel: (provided) => ({
+                  ...provided,
+                  color: '#1d4ed8',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                }),
+                multiValueRemove: (provided) => ({
+                  ...provided,
+                  color: '#1d4ed8',
+                  padding: '2px',
+                  borderRadius: '2px',
+                  ':hover': {
+                    backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                    color: '#1d4ed8',
+                  },
+                }),
+              } : undefined}
               isClearable={isClearable}
               placeholder={placeholder}
-              isSearchable={true}
+              isSearchable={isMulti ? true : !formValue} // Disable search for single select when employee is selected
               isMulti={isMulti}
               isDisabled={disabled}
+              inputValue={!isMulti && formValue ? "" : undefined} // Clear input value for single select when employee is selected
             />
           );
         }}

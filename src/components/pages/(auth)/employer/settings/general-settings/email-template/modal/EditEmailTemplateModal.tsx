@@ -1,11 +1,10 @@
-import React, { Dispatch, Fragment, useMemo, useRef, useState, useEffect } from 'react';
+import React, { Dispatch, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import useTagTo from '@/components/hooks/useTagTo';
@@ -13,14 +12,13 @@ import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
 import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
+import EmailField from '@/components/common/EmailField';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
-import InfoIcon from '@/svg/InfoIcon';
 
 export default function EditEmailTemplateModal({
   isOpen,
@@ -40,12 +38,16 @@ export default function EditEmailTemplateModal({
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
+  const [showTooltip, setShowTooltip] = useState(true);
+  
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const [file, setFile] = useState<File | null>(null);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { register, handleSubmit, setValue, watch } = useForm<any>();
+
+  
   const {
     data: dataEmailTemplateDetail,
     refetch: refetchEmailTemplateDetail,
@@ -53,11 +55,46 @@ export default function EditEmailTemplateModal({
   } = useGetEmailTemplateDetails(selectedEmailTemplateId);
   const { mutate, isLoading } = useUpdateEmailTemplate();
 
+
+
+  // Handle employee selection for TO field
+  const handleEmployeeSelectTo = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsTo([...tagsTo, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsTo([...tagsTo, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsTo(employee.remainingTags);
+    }
+  };
+
+  // Handle employee selection for CC field
+  const handleEmployeeSelectCc = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsCc([...tagsCc, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsCc([...tagsCc, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsCc(employee.remainingTags);
+    }
+  };
+
+  // Handle employee selection for BCC field
+  const handleEmployeeSelectBcc = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsBcc([...tagsBcc, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsBcc([...tagsBcc, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsBcc(employee.remainingTags);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       refetchEmailTemplateDetail();
     }
-  }, [isOpen]);
+  }, [isOpen, refetchEmailTemplateDetail]);
 
   useEffect(() => {
     if (dataEmailTemplateDetail) {
@@ -73,7 +110,7 @@ export default function EditEmailTemplateModal({
         setTagsBcc(dataEmailTemplateDetail.bcc);
       }
     }
-  }, [dataEmailTemplateDetail]);
+  }, [dataEmailTemplateDetail, setValue, setTagsTo, setTagsCc, setTagsBcc]);
 
   const customCloseModal = () => {
     removeEmailTemplateDetail();
@@ -144,7 +181,7 @@ export default function EditEmailTemplateModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
+                <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Email Template</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
@@ -160,44 +197,44 @@ export default function EditEmailTemplateModal({
                         {...register('subject', { required: true })}
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                       />
-                      <div className='sm:col-span-4 mt-4'>
-                        <div className='flex items-center gap-2'>
+                      <div className='w-full mt-4'>
+                        <div className='flex items-center justify-between'>
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
-                          <div className='cursor-pointer' data-tooltip-id='to-tooltip' data-tooltip-place='right'>
-                            <InfoIcon />
-                          </div>
-                          <Tooltip id='to-tooltip' opacity={1} style={{ fontSize: '10px' }}>
-                            <div>
-                              <h2 className='text-[12px] font-medium'>
-                                Press enter key or tab key to insert email address
-                              </h2>
-                            </div>
-                          </Tooltip>
+                          {tagsTo.length > 1 && (
+                            <button
+                              type='button'
+                              className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                              onClick={() => setTagsTo([])}
+                            >
+                              Unselect All
+                            </button>
+                          )}
                         </div>
                         <div className='mt-2 flex rounded-md shadow-sm'>
                           <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
-                              {tagsTo.map((tagTo: string) => (
-                                <div
-                                  key={tagTo}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                >
-                                  <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
-                                    <XMarkIcon className='w-4 h-4' />
-                                  </button>
-                                  <p>{tagTo}</p>
-                                </div>
-                              ))}
-                              <input
-                                type='text'
-                                value={inputTo}
-                                onKeyDown={handleKeyDownTo}
-                                onChange={(e) => setInputTo(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow'
-                              />
-                            </div>
+                            <EmailField
+                              tags={tagsTo}
+                              inputValue={inputTo}
+                              onInputChange={(value) => {
+                                setInputTo(value);
+                                setShowTooltip(false);
+                              }}
+                              onInputFocus={() => {
+                                setShowTooltip(false);
+                              }}
+                              onInputBlur={() => {
+                                  if (!inputTo.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                              }}
+                              onKeyDown={handleKeyDownTo}
+                              onEmployeeSelect={handleEmployeeSelectTo}
+                              onRemoveTag={handleRemoveTagTo}
+                              showTooltip={showTooltip}
+                              tooltipId="to-section-tooltip"
+                            />
                           </div>
                           <button
                             type='button'
@@ -220,64 +257,88 @@ export default function EditEmailTemplateModal({
                         </div>
                       </div>
                       {isCCOpen && (
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
-                            CC
-                          </label>
+                        <div className='w-full mt-4'>
+                          <div className='flex items-center justify-between'>
+                            <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
+                              CC
+                            </label>
+                            {tagsCc.length > 1 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsCc([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'>
-                              {tagsCc.map((tag: string) => (
-                                <div
-                                  key={tag}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                >
-                                  <button type='button' onClick={() => handleRemoveTag(tag)}>
-                                    <XMarkIcon className='w-4 h-4' />
-                                  </button>
-                                  <p>{tag}</p>
-                                </div>
-                              ))}
-                              <input
-                                type='text'
-                                value={inputCc}
+                            <EmailField
+                                tags={tagsCc}
+                                inputValue={inputCc}
+                                onInputChange={(value) => {
+                                  setInputCc(value);
+                                  setShowTooltip(false);
+                                }}
+                                onInputFocus={() => {
+                                  setShowTooltip(false);
+                                }}
+                                onInputBlur={() => {
+                                    if (!inputCc.trim()) {
+                                      setShowTooltip(true);
+                                    }
+                                }}
                                 onKeyDown={handleKeyDown}
-                                onChange={(e) => setInputCc(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                onEmployeeSelect={handleEmployeeSelectCc}
+                                onRemoveTag={handleRemoveTag}
+                                showTooltip={showTooltip}
+                                tooltipId="cc-section-tooltip"
                               />
-                            </div>
                           </div>
                         </div>
                       )}
                       {isBCCOpen && (
-                        <div className='sm:col-span-4 mt-4'>
-                          <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
-                            BCC
-                          </label>
+                        <div className='w-full mt-4'>
+                          <div className='flex items-center justify-between'>
+                            <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
+                              BCC
+                            </label>
+                            {tagsBcc.length > 1 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsBcc([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           <div className='mt-2'>
-                            <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
-                              {tagsBcc.map((tagBcc: string) => (
-                                <div
-                                  key={tagBcc}
-                                  className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                >
-                                  <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
-                                    <XMarkIcon className='w-4 h-4' />
-                                  </button>
-                                  <p>{tagBcc}</p>
-                                </div>
-                              ))}
-                              <input
-                                type='text'
-                                value={inputBcc}
+                            <EmailField
+                                tags={tagsBcc}
+                                inputValue={inputBcc}
+                                onInputChange={(value) => {
+                                  setInputBcc(value);
+                                  setShowTooltip(false);
+                                }}
+                                onInputFocus={() => {
+                                  setShowTooltip(false);
+                                }}
+                                onInputBlur={() => {
+                                  if (!inputBcc.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                                }}
                                 onKeyDown={handleKeyDownBcc}
-                                onChange={(e) => setInputBcc(e.target.value)} // Add this line to update input state
-                                className='focus:none outline-none px-2 py-1 grow rounded-md'
+                                onEmployeeSelect={handleEmployeeSelectBcc}
+                                onRemoveTag={handleRemoveTagBcc}
+                                showTooltip={showTooltip}
+                                tooltipId="bcc-section-tooltip"
                               />
-                            </div>
                           </div>
                         </div>
                       )}
-                      <div className='sm:col-span-4 mt-4'>
+                      <div className='w-full mt-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
                           Body<span className='text-red-600'> *</span>
                         </label>
@@ -294,7 +355,7 @@ export default function EditEmailTemplateModal({
                       </div>
                       <div className='sm:col-span-4'>
                         <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachements<span className='text-red-6000'></span>
+                          Attachments<span className='text-red-6000'></span>
                         </label>
                         <div>
                           <div

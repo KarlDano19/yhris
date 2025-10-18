@@ -9,11 +9,11 @@ import toast from 'react-hot-toast';
 
 import CritiriaSubItem from './CritiriaSubItem';
 import CustomToast from '@/components/CustomToast';
+import DeleteModal from '@/components/DeleteModal';
 
 import AddCircleIcon from '@/svg/AddCircleIcon';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MoveIcon from '@/svg/MoveIcon';
-import DeleteSectionModal from '../modals/DeleteSectionModal';
 
 function EvaluationCriterionTab({
   control,
@@ -42,7 +42,7 @@ function EvaluationCriterionTab({
     name: 'evaluation_criterion',
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<{ open: boolean } | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [currentScoreSum, setCurrentScoreSum] = useState(0);
 
@@ -208,14 +208,14 @@ function EvaluationCriterionTab({
   
   const handleOpenModal = (index: number) => {
     setSelectedIndex(index);
-    setIsModalOpen(true);
+    setIsModalOpen({ open: true });
   };
 
   const handleConfirm = () => {
     if (selectedIndex !== null && fields.length > 1) {
       remove(selectedIndex);
     }
-    setIsModalOpen(false);
+    setIsModalOpen(null);
   };
 
   // ============================================================================
@@ -279,7 +279,14 @@ function EvaluationCriterionTab({
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-8 flow-root'>
             <div className='mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <DeleteSectionModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} onConfirm={handleConfirm} />
+              {isModalOpen && (
+                <DeleteModal
+                  isOpen={isModalOpen}
+                  setIsOpen={setIsModalOpen}
+                  onConfirm={handleConfirm}
+                  customText="this section"
+                />
+              )}
               <DragDropContext onDragEnd={reorder}>
                 <Droppable droppableId='parent' type='parentContainer'>
                   {(provided: any) => (

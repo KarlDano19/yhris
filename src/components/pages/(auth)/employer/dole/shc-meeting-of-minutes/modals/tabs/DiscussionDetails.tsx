@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  useEffect,
-  useState,
   useMemo,
 } from "react";
 
@@ -10,7 +8,6 @@ import dynamic from "next/dynamic";
 
 import "react-quill/dist/quill.snow.css";
 
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
@@ -36,14 +33,6 @@ export default function DiscussionDetails({
     setSelectedTab(3);
   });
 
-  const [employeeItems, setEmployeeItems] = useState<any>([]);
-  const { data: employeeData } = useGetEmployeeItems();
-
-  useEffect(() => {
-    if (employeeData) {
-      setEmployeeItems(employeeData);
-    }
-  }, [employeeData]);
 
   return (
     <form onSubmit={onSubmit}>

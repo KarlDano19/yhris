@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import RestoreApplicationModal from './modals/RestoreApplicationModal';
 import useArchiveApplication from './hooks/useArchiveApplication';
 import useUnarchiveApplication from './hooks/useUnarchiveApplication';
@@ -73,7 +75,8 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
 
   return (
     <>
-      <button
+      <SmartButton
+        id="archive-applicant-btn"
         onClick={isArchived ? () => setShowRestoreModal(true) : handleArchive}
         disabled={disabled || isLoading}
         className={classNames(
@@ -96,7 +99,7 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
             Archive
           </>
         )}
-      </button>
+      </SmartButton>
 
       <RestoreApplicationModal
         isOpen={showRestoreModal}
@@ -105,6 +108,7 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
         applicantName={applicantName}
         jobPostingId={jobPostingId}
         isLoading={isUnarchiving}
+        appliedJobId={appliedJobId} // Pass the appliedJobId here
       />
     </>
   );

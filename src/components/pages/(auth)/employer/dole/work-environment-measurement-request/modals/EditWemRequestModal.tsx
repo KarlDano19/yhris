@@ -195,7 +195,6 @@ export default function EditWemRequestModal({
                     watch={watch}
                     errors={errors}
                     setError={setError}
-                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 4 && (
@@ -209,6 +208,7 @@ export default function EditWemRequestModal({
                     errors={errors}
                     setError={setError}
                     clearErrors={clearErrors}
+                    isLoading={isLoadingUpdateWorkEnvironmentRequest}
                   />
                 )}
               </Dialog.Panel>

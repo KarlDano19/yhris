@@ -7,18 +7,21 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
-import LetterModal from './modals/LetterModal';
-import SignDocumentsModal from './modals/SignDocumentsModal';
-import LastPayModal from './modals/LastPayModal';
-import QuitclaimModal from './modals/QuitclaimModal';
-import DeleteSeparationModal from './modals/DeleteSeparationModal';
+import SendEmailModal from '@/components/SendEmailModal';
+import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
+import useDeleteSeparation from './hooks/useDeleteSeparation';
 import usePatchSeparation from './hooks/usePatchSeparation';
+import useBulkDeleteSeparations from './hooks/useBulkDeleteSeparations';
 import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
@@ -37,6 +40,10 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 import classNames from '@/helpers/classNames';
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
@@ -66,7 +73,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
   const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
   const [isDeleteSepartionModalOpen, setIsDeleteSepartionModalOpen] = useState<T_DeleteSepartionModal | null>(null);
+  
+  // Bulk delete states
+  const [selectedSeparations, setSelectedSeparations] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
+
   const { mutate, isLoading } = usePatchSeparation();
+  const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
+  const bulkDeleteMutation = useBulkDeleteSeparations();
+  
   const { data: dataSeparation, isLoading: isGetSeparationLoading, refetch } = useGetSeparationItems({
     ...appliedFilter,
     pageSize: pageSize,
@@ -108,6 +126,90 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       },
     };
     mutate(separationItemsCopy[itemIndex], callbackReq);
+  };
+
+  // Handler for Letter email submission  
+  const handleLetterSubmit = (data: LetterData) => {
+    if (isLetterModalOpen && isLetterModalOpen.id) {
+      const updatedItem = handleLetterSending(data, separationItems, isLetterModalOpen.id, isLetterModalOpen.type);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          const updatedSeparationItems = updateSeparationItems(separationItems, updatedItem, isLetterModalOpen.id);
+          setSeparationItems(updatedSeparationItems);
+          setIsLetterModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  // Handler for Sign Documents email submission
+  const handleSignDocumentsSubmit = (data: any) => {
+    if (isDocumentModalOpen && isDocumentModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'sign documents', separationItems, isDocumentModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setIsDocumentModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  // Handler for Last Pay email submission
+  const handleLastPaySubmit = (data: any) => {
+    if (isLastPayModalOpen && isLastPayModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'last pay', separationItems, isLastPayModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setSeparationItems(separationItems.map((item: any) => 
+            item.id === isLastPayModalOpen.id ? { ...item, ...updatedItem } : item
+          ));
+          setIsLastPayModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  // Handler for Quitclaim email submission
+  const handleQuitclaimSubmit = (data: any) => {
+    if (isQuitclaimModalOpen && isQuitclaimModalOpen.id) {
+      const updatedItem = handleEmailSending(data, 'quit claim', separationItems, isQuitclaimModalOpen.id);
+      
+      mutate(updatedItem, {
+        onSuccess: (data: any) => {
+          setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
+          setIsQuitclaimModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
   };
 
   const paginationChange = (event: any) => {
@@ -273,6 +375,77 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataSeparation, pageSize]);
 
+  // Update select all state when separations change
+  useEffect(() => {
+    if (separationItems) {
+      const allSeparationIds = new Set(separationItems.map((s: any) => s.id));
+      const allSelected = allSeparationIds.size > 0 && 
+        Array.from(allSeparationIds).every((id: any) => selectedSeparations.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedSeparations, separationItems]);
+
+  // Handle individual separation selection
+  const handleSeparationSelect = (separationId: number) => {
+    setSelectedSeparations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(separationId)) {
+        newSet.delete(separationId);
+      } else {
+        newSet.add(separationId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all
+  const handleSelectAll = () => {
+    if (!separationItems) return;
+    
+    if (selectAll) {
+      setSelectedSeparations(new Set());
+    } else {
+      const allIds = separationItems.map((s: any) => s.id);
+      setSelectedSeparations(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedSeparations.size === 0) return;
+    setBulkDeleteCount(selectedSeparations.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      const separationIds = Array.from(selectedSeparations);
+      await bulkDeleteMutation.mutateAsync(separationIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete separations';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedSeparations(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetch();
+  };
+
   const renderRows = () => {
     if (isSearching || isGetSeparationLoading) {
       return (
@@ -288,6 +461,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (separationItems && separationItems.length > 0) {
       return separationItems.map((item: any) => (
         <tr key={item.id}>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedSeparations.has(item.id)}
+              onChange={() => handleSeparationSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.separationDate}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex gap-2'>
@@ -338,12 +519,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
             <div className='flex justify-center space-x-2'>
-              <button 
+              <SmartButton 
+                id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                disabled={!cachedProfile?.state?.data?.edit_separation}
+                disabled={!cachedProfile?.state?.data?.edit_separation || selectedSeparations.size > 1}
+                className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -351,7 +534,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={7}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>
               Please click create to add separation of employee.
@@ -373,6 +556,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
+
           <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
@@ -444,15 +628,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id='create-separation-btn'
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsAddSeparationModalOpen(true)}
-                disabled={!cachedProfile?.state?.data?.create_separation}
               >
                 CREATE
-              </button>
+              </SmartButton>
             </div>
           </div>
+          
+          {/* Bulk Actions - Below Date Filters */}
+          {selectedSeparations.size > 1 && (
+            <div className="mt-4 ">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-separation-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedSeparations.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 '
@@ -465,6 +676,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!separationItems || separationItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Resignation/Separation
                       </th>
@@ -511,36 +731,100 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setIsOpen={setIsAddSeparationModalOpen} 
         refetch={refetch} 
       />
-      <LetterModal
-        separationItems={separationItems}
-        refetch={refetch}
-        type={isLetterModalOpen?.type}
-        isOpen={isLetterModalOpen}
-        setIsOpen={setIsLetterModalOpen}
-      />
-      <SignDocumentsModal
-        separationItems={separationItems}
-        refetch={refetch}
-        isOpen={isDocumentModalOpen}
-        setIsOpen={setIsDocumentModalOpen}
-      />
-      <LastPayModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isLastPayModalOpen}
-        setIsOpen={setIsLastPayModalOpen}
-      />
-      <QuitclaimModal
-        separationItems={separationItems}
-        setSeparationItems={setSeparationItems}
-        isOpen={isQuitclaimModalOpen}
-        setIsOpen={setIsQuitclaimModalOpen}
-      />
+      {isLetterModalOpen && (
+        <SendEmailModal
+          title={`Letter of ${isLetterModalOpen.type}`}
+          isOpen={!!isLetterModalOpen}
+          onClose={() => setIsLetterModalOpen(null)}
+          onSubmit={handleLetterSubmit}
+          defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          showEmailTemplate={false}
+          showSubject={false}
+          showDateField={true}
+          dateFieldLabel="Date"
+          dateFieldRequired={true}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
+      {isDocumentModalOpen && (
+        <SendEmailModal
+          title="Sign Documents"
+          isOpen={!!isDocumentModalOpen}
+          onClose={() => setIsDocumentModalOpen(null)}
+          onSubmit={handleSignDocumentsSubmit}
+          defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
+      {isLastPayModalOpen && (
+        <SendEmailModal
+          title="Send Last Pay"
+          isOpen={!!isLastPayModalOpen}
+          onClose={() => setIsLastPayModalOpen(null)}
+          onSubmit={handleLastPaySubmit}
+          defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
+      {isQuitclaimModalOpen && (
+        <SendEmailModal
+          title="Send Quitclaim"
+          isOpen={!!isQuitclaimModalOpen}
+          onClose={() => setIsQuitclaimModalOpen(null)}
+          onSubmit={handleQuitclaimSubmit}
+          defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
+          showAttachment={false}
+          submitButtonText="Send"
+          isLoading={isLoading}
+        />
+      )}
       {isDeleteSepartionModalOpen && (
-        <DeleteSeparationModal
-          refetch={refetch}
+        <DeleteModal
           isOpen={isDeleteSepartionModalOpen}
           setIsOpen={setIsDeleteSepartionModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteSepartionModalOpen(null);
+                refetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteSeparation(isDeleteSepartionModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteSeparationLoading}
+        />
+      )}
+      
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} separation${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

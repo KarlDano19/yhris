@@ -36,8 +36,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: CachedProfileData } | undefined };
   const [isSafetyAndHealthPolicyModalOpen, setIsSafetyAndHealthPolicyModalOpen] = useState(false);
   const [companyName, setCompanyName] = useState("");
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
-
+  
   useEffect(() => {
     if (cachedProfile?.state?.data) {
       setCompanyName(cachedProfile.state.data.name);
@@ -115,7 +114,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       text: 'OSH Program',
       link: '/dole/osh-program',
       isAvailable: true,
-      // isAvailable: cachedRigths?.state?.data?.create_dole_osh_program,
     },
   ];
   return (

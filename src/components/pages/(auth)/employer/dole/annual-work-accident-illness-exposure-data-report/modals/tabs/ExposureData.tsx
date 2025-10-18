@@ -5,7 +5,7 @@ import {  useEffect } from "react";
 import {  Controller } from "react-hook-form";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
-import useGetEmployeeItems from "@/components/hooks/useGetEmployeeItems";
+import useGetEmployeeCount from "@/components/hooks/useGetEmployeeCount";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -26,13 +26,13 @@ function ExposureData({
     setSelectedTab(2);
   });
 
-  const { data: employeeData } = useGetEmployeeItems();
+  const { data: employeeCount } = useGetEmployeeCount();
 
   useEffect(() => {
-    if (employeeData) {
-      setValue("number_of_employees", employeeData.length);
+    if (employeeCount !== undefined) {
+      setValue("number_of_employees", employeeCount);
     }
-  }, [employeeData, setValue]);
+  }, [employeeCount, setValue]);
 
   return (
     <form onSubmit={onSubmit}>

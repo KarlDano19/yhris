@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import MenuItem from '../MenuItem';
+import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingProgress from '../../../FloatingProgress';
 
 import AddPostLogo from '@/svg/AddPostLogo';
@@ -20,23 +20,38 @@ import AnalyticsLogo from '@/svg/AnalyticsLogo';
 import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
+import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
+  const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
+  const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
 
-  const handleGrayedOutClick = (link: string) => {
+  const handleGrayedOutClick = (link: string, reason: 'subscription' | 'permission', featureName?: string) => {
     setIntendedRedirectLink(link);
-    setIsGoPremiumModalOpen(true);
+    
+    if (reason === 'permission') {
+      setRestrictedFeatureName(featureName || '');
+      setIsInsufficientPermissionsModalOpen(true);
+    } else if (reason === 'subscription') {
+      setIsGoPremiumModalOpen(true);
+    }
   };
 
-  const handleModalClose = () => {
+  const handleGoPremiumModalClose = () => {
     setIsGoPremiumModalOpen(false);
     // Redirect to the intended page after modal is closed
     if (intendedRedirectLink) {
       window.location.href = intendedRedirectLink;
       setIntendedRedirectLink(null);
     }
+  };
+
+  const handlePermissionModalClose = () => {
+    setIsInsufficientPermissionsModalOpen(false);
+    setIntendedRedirectLink(null);
+    setRestrictedFeatureName('');
   };
 
   const menus = [
@@ -46,12 +61,14 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/post-job',
       isAvailable: true,
       isGrayedOut: false,
+      permissionId: 'post-job-page',
     },
     {
       icon: <TalentSearchIcon />,
       text: 'Talent Search',
       link: '/talent-search',
       isAvailable: true,
+      permissionId: 'talent-search-page',
       isGrayedOut: !hasActiveSubscription,
     },
     {
@@ -60,6 +77,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/screen-applicants',
       isAvailable: true,
       isGrayedOut: false,
+      permissionId: 'screen-applicant-page',
     },
     {
       icon: <OrientLogo />,
@@ -67,6 +85,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/orient',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'onboarding-page',
     },
     {
       icon: <ManageLogo />,
@@ -74,6 +93,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/manage',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'manage-page',
     },
     {
       icon: <TrainLogo />,
@@ -81,6 +101,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/train',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'train-page',
     },
     // {
     //   icon: <PayrollLogo />,
@@ -95,6 +116,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/employee-separation',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'employee-separation-page',
     },
     // {
     //   icon: <EmployeeKitLogo />,
@@ -109,6 +131,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/dole',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'dole-page',
     },
     {
       icon: <AnalyticsLogo />,
@@ -116,6 +139,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/analytics',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'analytics-page',
     },
     {
       icon: <SettingsLogo />,
@@ -123,6 +147,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/settings',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'settings-page',
     },
     {
       icon: <AuditLogsIcon />,
@@ -130,6 +155,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/audit-logs',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
+      permissionId: 'audit-log-page',
     },
   ];
 
@@ -142,17 +168,23 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
           <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6 relative'>
             {menus.map((menu, index) => {
               return (
-                <MenuItem 
+                <SmartDashboardItem 
                   key={index} 
                   menu={menu} 
                   onGrayedOutClick={handleGrayedOutClick}
+                  hasActiveSubscription={hasActiveSubscription}
                 />
               );
             })}
           </div>
         </div>
       </div>
-      <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleModalClose} />
+      <GoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handleGoPremiumModalClose} />
+      <InsufficientPermissionsModal 
+        isOpen={isInsufficientPermissionsModalOpen} 
+        setIsOpen={handlePermissionModalClose}
+        featureName={restrictedFeatureName}
+      />
     </>
   );
 };

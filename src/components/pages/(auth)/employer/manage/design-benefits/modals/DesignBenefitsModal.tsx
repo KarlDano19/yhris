@@ -6,13 +6,13 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import UnsavedChangesModal from '@/components/UnsavedChangesModal';
+import EmailField from '@/components/common/EmailField';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
-import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useAddBenefitItems from '../hooks/useAddBenefitItems';
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { T_Benefit } from '@/types/globals';
@@ -28,44 +28,103 @@ export default function DesignBenefitsModal({
 }) {
   const cancelButtonRef = useRef(null);
   const [page, setPage] = useState(1);
-  const [isCCOpen, setIsCCOPen] = useState(false);
+  const [isCCOpen, setIsCCOpen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
   const [inputTo, setInputTo] = useState('');
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
-  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
-  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
-  const [selectedEmployeeIndex, setSelectedEmployeeIndex] = useState(-1);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [showTooltip, setShowTooltip] = useState(true);
+  
+  // Modal state
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { tagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
-  const { tagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
+  const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
+  const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   const { register, handleSubmit, reset, trigger, getValues, setValue, clearErrors, watch, formState: { errors }, setError } = useForm<T_Benefit>();
   const { mutate, isLoading } = useAddBenefitItems();
-  const { data: employeeData } = useGetEmployeeItems();
 
-  // Function to scroll selected item into view
-  const scrollToSelectedItem = (index: number) => {
-    if (dropdownRef.current && index >= 0) {
-      const selectedElement = dropdownRef.current.children[index] as HTMLElement;
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'auto',
-          block: 'nearest',
-        });
-      }
-    }
-  };
-
-  const handleEmployeeSelect = (employee: any) => {
-    if (employee.email && !tagsTo.includes(employee.email)) {
-      // Add the email directly to tagsTo using the setter
+  // Handle employee selection for TO field
+  const handleEmployeeSelectTo = (employee: any) => {
+    if (employee.type === 'individual_select') {
       setTagsTo([...tagsTo, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsTo([...tagsTo, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsTo(employee.remainingTags);
     }
-    setInputTo('');
-    setShowEmployeeSuggestions(false);
-    setSelectedEmployeeIndex(-1);
   };
+
+  // Handle employee selection for CC field
+  const handleEmployeeSelectCc = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsCc([...tagsCc, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsCc([...tagsCc, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsCc(employee.remainingTags);
+    }
+  };
+
+  // Handle employee selection for BCC field
+  const handleEmployeeSelectBcc = (employee: any) => {
+    if (employee.type === 'individual_select') {
+      setTagsBcc([...tagsBcc, employee.email]);
+    } else if (employee.type === 'department_select') {
+      setTagsBcc([...tagsBcc, ...employee.emails]);
+    } else if (employee.type === 'department_remove') {
+      setTagsBcc(employee.remainingTags);
+    }
+  };
+
+  // Function to check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    const title = watch('title');
+    const purpose = watch('purpose');
+    const benefits = watch('benefits');
+    const coverage = watch('coverage');
+    const eligibility = watch('eligibility');
+    
+    return (
+      (title && title.trim() !== '') ||
+      (purpose && purpose.trim() !== '') ||
+      (benefits && benefits.trim() !== '') ||
+      (coverage && coverage.trim() !== '') ||
+      (eligibility && eligibility.trim() !== '') ||
+      tagsTo.length > 0 ||
+      tagsCc.length > 0 ||
+      tagsBcc.length > 0
+    );
+  };
+
+  // Function to handle confirmation modal close (cancel)
+  const handleUnsavedChangesCancel = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingCloseAction(null);
+  };
+
+  // Function to handle confirmation modal confirm (proceed with close)
+  const handleUnsavedChangesConfirm = () => {
+    setIsUnsavedChangesModalOpen(false);
+    const action = pendingCloseAction;
+    setPendingCloseAction(null);
+    
+    // Execute the pending close action
+    if (action) {
+      action();
+    }
+  };
+
+  // Function to handle modal close with unsaved changes check
+  const handleModalClose = (closeAction: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingCloseAction(() => closeAction);
+      setIsUnsavedChangesModalOpen(true);
+    } else {
+      closeAction();
+    }
+  };
+
 
   const onSubmit = handleSubmit((data) => {
     data.email = tagsTo;
@@ -97,7 +156,7 @@ export default function DesignBenefitsModal({
     if (titleValue && titleValue !== "") {
       clearErrors('title');
     }
-  }, [watch('title'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -112,15 +171,15 @@ export default function DesignBenefitsModal({
     if (purposeValue && purposeValue !== "") {
       clearErrors('purpose');
     }
-  }, [watch('purpose'), clearErrors]);
+  }, [watch, clearErrors]);
 
-  // Clear errors when purpose changes
+  // Clear errors when benefits changes
   useEffect(() => {
     const benefitsValue = watch('benefits');
     if (benefitsValue && benefitsValue !== "") {
       clearErrors('benefits');
     }
-  }, [watch('benefits'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when coverage changes
   useEffect(() => {
@@ -128,7 +187,7 @@ export default function DesignBenefitsModal({
     if (coverageValue && coverageValue !== "") {
       clearErrors('coverage');
     }
-  }, [watch('coverage'), clearErrors]);
+  }, [watch, clearErrors]);
 
   // Clear errors when eligibility changes
   useEffect(() => {
@@ -136,7 +195,7 @@ export default function DesignBenefitsModal({
     if (eligibilityValue && eligibilityValue !== "") {
       clearErrors('eligibility');
     }
-  }, [watch('eligibility'), clearErrors]);
+  }, [watch, clearErrors]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -144,31 +203,16 @@ export default function DesignBenefitsModal({
     }
   }, [isOpen]);
 
-  // Filter employees based on input
-  useEffect(() => {
-    if (employeeData && inputTo.trim()) {
-      const filtered = employeeData.filter((employee: any) => {
-        const searchTerm = inputTo.toLowerCase();
-        const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
-        const email = employee.email?.toLowerCase() || '';
-        
-        return fullName.includes(searchTerm) || email.includes(searchTerm);
-      }).slice(0, 5); // Limit to 5 suggestions
-      
-      setFilteredEmployees(filtered);
-      setShowEmployeeSuggestions(filtered.length > 0);
-      setSelectedEmployeeIndex(-1); // Reset selection when filtering
-    } else {
-      setFilteredEmployees([]);
-      setShowEmployeeSuggestions(false);
-      setSelectedEmployeeIndex(-1);
-    }
-  }, [inputTo, employeeData]);
 
   return (
     <>
       <Transition.Root show={isOpen ? true : false} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(null)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => {
+          handleModalClose(() => {
+            reset();
+            setIsOpen(null);
+          });
+        }}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -195,7 +239,12 @@ export default function DesignBenefitsModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Design Benefits</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(null)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                      handleModalClose(() => {
+                        reset();
+                        setIsOpen(null);
+                      });
+                    }} />
                   </div>
                   <form onSubmit={onSubmit}>
                     {page === 1 ? (
@@ -220,9 +269,20 @@ export default function DesignBenefitsModal({
                           </div>
                         </div>
                         <div className='sm:col-span-4 mt-4'>
+                          <div className='flex items-center justify-between'>
                           <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                             To<span className='text-red-600'>*</span>
                           </label>
+                            {tagsTo.length > 1 && (
+                              <button
+                                type='button'
+                                className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                onClick={() => setTagsTo([])}
+                              >
+                                Unselect All
+                              </button>
+                            )}
+                          </div>
                           {errors.email && (
                             <p className='text-xs text-red-600 mt-1'>
                               {errors.email.message || 'To field is required.'}
@@ -230,112 +290,34 @@ export default function DesignBenefitsModal({
                           )}
                           <div className='mt-2 flex rounded-md shadow-sm'>
                             <div className='relative flex flex-grow items-stretch focus-within:z-10'>
-                              <div 
-                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
-                                data-tooltip-id='to-section-tooltip'
-                                data-tooltip-place='bottom'
-                              >
-                                {tagsTo.map((tagTo: string) => (
-                                  <div
-                                    key={tagTo}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                  >
-                                    <button type='button' onClick={() => handleRemoveTagTo(tagTo)}>
-                                      <XMarkIcon className='w-4 h-4' />
-                                    </button>
-                                    <p>{tagTo}</p>
-                                  </div>
-                                ))}
-                                <input
-                                  type='text'
-                                  value={inputTo}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'ArrowDown') {
-                                      e.preventDefault();
-                                      if (showEmployeeSuggestions && filteredEmployees.length > 0) {
-                                        const newIndex = selectedEmployeeIndex < filteredEmployees.length - 1 ? selectedEmployeeIndex + 1 : selectedEmployeeIndex;
-                                        setSelectedEmployeeIndex(newIndex);
-                                        scrollToSelectedItem(newIndex);
-                                      }
-                                    } else if (e.key === 'ArrowUp') {
-                                      e.preventDefault();
-                                      const newIndex = selectedEmployeeIndex > 0 ? selectedEmployeeIndex - 1 : -1;
-                                      setSelectedEmployeeIndex(newIndex);
-                                      if (newIndex >= 0) {
-                                        scrollToSelectedItem(newIndex);
-                                      }
-                                    } else if (e.key === 'Enter' || e.key === 'Tab') {
-                                      e.preventDefault();
-                                      if (selectedEmployeeIndex >= 0 && filteredEmployees[selectedEmployeeIndex]) {
-                                        handleEmployeeSelect(filteredEmployees[selectedEmployeeIndex]);
-                                      } else {
-                                        handleKeyDownTo(e);
-                                      }
-                                    } else if (e.key === 'Escape') {
-                                      e.preventDefault();
-                                      setShowEmployeeSuggestions(false);
-                                      setSelectedEmployeeIndex(-1);
-                                    } else {
-                                      // Let other keys pass through to the original handler
-                                      handleKeyDownTo(e);
-                                    }
-                                  }}
-                                  onChange={(e) => {
-                                    setInputTo(e.target.value);
-                                    setSelectedEmployeeIndex(-1); // Reset selection when typing
-                                  }}
-                                  onFocus={() => setShowEmployeeSuggestions(inputTo.trim().length > 0)}
-                                  className='focus:none outline-none px-2 py-1 grow'
-                                  autoComplete='off'
-                                  autoCorrect='off'
-                                  autoCapitalize='off'
-                                  spellCheck='false'
-                                  data-lpignore='true'
-                                  data-form-type='other'
-                                />
-                                <Tooltip id='to-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add recipients with Tab/Enter. Use arrow keys to navigate.
-                                    </h2>
-                                  </div>
-                                </Tooltip>
-                              </div>
-                              
-                              {/* Employee Suggestions Dropdown */}
-                              {showEmployeeSuggestions && (
-                                <div 
-                                  ref={dropdownRef}
-                                  className='absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'
-                                >
-                                  {filteredEmployees.map((employee: any, index: number) => (
-                                    <div
-                                      key={employee.id}
-                                      className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-                                        index === selectedEmployeeIndex 
-                                          ? 'bg-blue-100' 
-                                          : 'hover:bg-gray-100'
-                                      }`}
-                                      onMouseEnter={() => setSelectedEmployeeIndex(index)}
-                                      onClick={() => handleEmployeeSelect(employee)}
-                                    >
-                                      <div className='text-sm font-medium text-gray-900'>
-                                        {employee.firstname} {employee.lastname}
-                                      </div>
-                                      <div className='text-xs text-gray-500'>
-                                        {employee.email}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              <EmailField
+                                tags={tagsTo}
+                                inputValue={inputTo}
+                                onInputChange={(value) => {
+                                  setInputTo(value);
+                                  setShowTooltip(false);
+                                }}
+                                onInputFocus={() => {
+                                  setShowTooltip(false);
+                                }}
+                                onInputBlur={() => {
+                                  if (!inputTo.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                                }}
+                                onKeyDown={handleKeyDownTo}
+                                onEmployeeSelect={handleEmployeeSelectTo}
+                                onRemoveTag={handleRemoveTagTo}
+                                showTooltip={showTooltip}
+                                tooltipId="to-section-tooltip"
+                              />
                             </div>
                             <button
                               type='button'
                               className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
                                 isCCOpen ? 'bg-savoy-blue text-white hover:bg-blue-700' : 'bg-gray-50'
                               }`}
-                              onClick={() => setIsCCOPen(!isCCOpen)}
+                              onClick={() => setIsCCOpen(!isCCOpen)}
                             >
                               CC
                             </button>
@@ -352,91 +334,93 @@ export default function DesignBenefitsModal({
                         </div>
                         {isCCOpen && (
                           <div className='sm:col-span-4 mt-4'>
+                            <div className='flex items-center justify-between'>
                             <label htmlFor='cc' className='block text-sm font-medium leading-6 text-gray-900'>
                               CC
                             </label>
+                              {tagsCc.length > 1 && (
+                                <button
+                                  type='button'
+                                  className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                  onClick={() => setTagsCc([])}
+                                >
+                                  Unselect All
+                                </button>
+                              )}
+                            </div>
                             {errors.cc && (
                               <p className='text-xs text-red-600 mt-1'>
                                 {errors.cc.message}
                               </p>
                             )}
                             <div className='mt-2'>
-                              <div 
-                                className='relative border border-gray-300 pl-2 rounded-none rounded-l-md flex items-center gap-3 flex-wrap w-full'
-                                data-tooltip-id='cc-section-tooltip'
-                                data-tooltip-place='bottom'
-                              >
-                                {tagsCc.map((tag: string) => (
-                                  <div
-                                    key={tag}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                  >
-                                    <button type='button' onClick={() => handleRemoveTag(tag)}>
-                                      <XMarkIcon className='w-4 h-4' />
-                                    </button>
-                                    <p>{tag}</p>
-                                  </div>
-                                ))}
-                                <input
-                                  type='text'
-                                  value={inputCc}
-                                  onKeyDown={handleKeyDown}
-                                  onChange={(e) => setInputCc(e.target.value)}
-                                  className='focus:none outline-none px-2 py-1 grow rounded-md'
-                                />
-                                <Tooltip id='cc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
-                                    </h2>
-                                  </div>
-                                </Tooltip>
-                              </div>
+                              <EmailField
+                                tags={tagsCc}
+                                inputValue={inputCc}
+                                onInputChange={(value) => {
+                                  setInputCc(value);
+                                  setShowTooltip(false);
+                                }}
+                                onInputFocus={() => {
+                                  setShowTooltip(false);
+                                }}
+                                onInputBlur={() => {
+                                  if (!inputCc.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                                }}
+                                onKeyDown={handleKeyDown}
+                                onEmployeeSelect={handleEmployeeSelectCc}
+                                onRemoveTag={handleRemoveTag}
+                                showTooltip={showTooltip}
+                                tooltipId="cc-section-tooltip"
+                              />
                             </div>
                           </div>
                         )}
                         {isBCCOpen && (
                           <div className='sm:col-span-4 mt-4'>
+                            <div className='flex items-center justify-between'>
                             <label htmlFor='bcc' className='block text-sm font-medium leading-6 text-gray-900'>
                               BCC
                             </label>
+                              {tagsBcc.length > 1 && (
+                                <button
+                                  type='button'
+                                  className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                                  onClick={() => setTagsBcc([])}
+                                >
+                                  Unselect All
+                                </button>
+                              )}
+                            </div>
                             {errors.bcc && (
                               <p className='text-xs text-red-600 mt-1'>
                                 {errors.bcc.message}
                               </p>
                             )}
                             <div className='mt-2'>
-                              <div 
-                                className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full'
-                                data-tooltip-id='bcc-section-tooltip'
-                                data-tooltip-place='bottom'
-                              >
-                                {tagsBcc.map((tagBcc: string) => (
-                                  <div
-                                    key={tagBcc}
-                                    className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
-                                  >
-                                    <button type='button' onClick={() => handleRemoveTagBcc(tagBcc)}>
-                                      <XMarkIcon className='w-4 h-4' />
-                                    </button>
-                                    <p>{tagBcc}</p>
-                                  </div>
-                                ))}
-                                <input
-                                  type='text'
-                                  value={inputBcc}
-                                  onKeyDown={handleKeyDownBcc}
-                                  onChange={(e) => setInputBcc(e.target.value)}
-                                  className='focus:none outline-none px-2 py-1 grow rounded-md'
-                                />
-                                <Tooltip id='bcc-section-tooltip' opacity={1} style={{ fontSize: '10px', borderRadius: '10px', backgroundColor: '#222C3B' }}>
-                                  <div className='px-1'>
-                                    <h2 className='text-[12px] font-medium'>
-                                      Add multiple recipients by pressing Tab or Enter.
-                                    </h2>
-                                  </div>
-                                </Tooltip>
-                              </div>
+                              <EmailField
+                                tags={tagsBcc}
+                                inputValue={inputBcc}
+                                onInputChange={(value) => {
+                                  setInputBcc(value);
+                                  setShowTooltip(false);
+                                }}
+                                onInputFocus={() => {
+                                  setShowTooltip(false);
+                                }}
+                                onInputBlur={() => {
+                                  if (!inputBcc.trim()) {
+                                    setShowTooltip(true);
+                                  }
+                                }}
+                                onKeyDown={handleKeyDownBcc}
+                                onEmployeeSelect={handleEmployeeSelectBcc}
+                                onRemoveTag={handleRemoveTagBcc}
+                                showTooltip={showTooltip}
+                                tooltipId="bcc-section-tooltip"
+                              />
                             </div>
                           </div>
                         )}
@@ -699,6 +683,23 @@ export default function DesignBenefitsModal({
           </div>
         </Dialog>
       </Transition.Root>
+      
+      {/* Unsaved Changes Confirmation Modal */}
+      {isUnsavedChangesModalOpen && (
+        <UnsavedChangesModal
+          isOpen={isUnsavedChangesModalOpen}
+          onClose={handleUnsavedChangesCancel}
+          onConfirm={handleUnsavedChangesConfirm}
+          isLoading={false}
+          isSwitchingEmployee={false}
+          contentType="benefit"
+        />
+      )}
+      
+      {/* Tooltips */}
+      <Tooltip id='to-section-tooltip' />
+      <Tooltip id='cc-section-tooltip' />
+      <Tooltip id='bcc-section-tooltip' />
     </>
   );
 }

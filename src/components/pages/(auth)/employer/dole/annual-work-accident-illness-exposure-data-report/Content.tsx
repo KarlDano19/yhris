@@ -10,32 +10,40 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
-import { createPortal } from 'react-dom';
 import { ArrowLeftIcon, MagnifyingGlassIcon, EllipsisHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetAnnualAccidentIllnessReportItems from './hooks/useGetAnnualAccidentIllnessReportItems';
+import useDeleteAnnualAccidentIllnessReport from './hooks/useDeleteAnnualAccidentIllnessReport';
 import useUpdateAnnualAccidentIllness from './hooks/useUpdateAnnualAccidentIllness';
 import { getPrintAnnualAccidentIllnessReportDetails } from './hooks/useGetPrintAnnualAccidentIllnessDetails';
 import CreateReportModal from './modals/CreateReportModal';
 import EditReportModal from './modals/EditReportModal';
-import DeleteReportModal from './modals/DeleteReportModal';
-import SendEmailModal from './modals/SendEmailModal';
+import SendEmailModal from '@/components/SendEmailModal';
 import SelectBranchModal from './modals/SelectBranchModal';
+import AnnualAccidentIllnessAttachmentSection from './components/AnnualAccidentIllnessAttachmentSection';
+import useSendEmail from './hooks/useSendEmail';
+import useGetAnnualAccidentIllnessReportDetails from './hooks/useGetAnnualAccidentIllnessReportDetails';
 import ExportProgressModal from '../work-accident-illness-report/modals/ExportProgressModal';
 import useFileforge from '@/components/hooks/useFileforge';
 import { handlePrintPDF } from './PrintData';
+import useBulkDeleteAnnualWorkAccidentIllnessReport from './hooks/useBulkDeleteAnnualWorkAccidentIllnessReport';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import EditIcon from '@/svg/EditIcon';
 import EmailLogo from '@/svg/EmailLogo';
 import PrintIcon from "@/svg/PrintIcon";
 import DeleteIcon from '@/svg/DeleteIcon';
+import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
 type PaginationProps = {
@@ -46,6 +54,10 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
+};
+
+type T_BulkDeleteModalData = DeleteModalData & {
+  selectedCount: number;
 };
 
 const statusOptions = [
@@ -92,17 +104,33 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
-  const cachedRigths = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [generatingItemId, setGeneratingItemId] = useState<number | null>(null);
+
+  // Email-specific state
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentExist, setAttachmentExist] = useState(false);
+  
+  // Bulk delete states
+  const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   // Form Methods
   const createFormMethods = useForm();
   const editFormMethods = useForm();
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
-  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const updateAnnualAccidentIllnessReport = useUpdateAnnualAccidentIllness();
+  const { mutate: deleteAnnualAccidentIllnessReport, isLoading: isDeleteAnnualAccidentIllnessReportLoading } = useDeleteAnnualAccidentIllnessReport();
+  const { mutate: sendEmailMutate, isLoading: isEmailLoading } = useSendEmail();
+  
+  // Get the current report details for attachment
+  const { data: currentReportDetails } = useGetAnnualAccidentIllnessReportDetails(
+    isSendEmailModalOpen?.id || null
+  );
+  
+  const bulkDeleteMutation = useBulkDeleteAnnualWorkAccidentIllnessReport();
 
   const { generatePDFLocally, isGenerating } = useFileforge({
     pageMargins: {
@@ -172,6 +200,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setOpenMenuId(null);
   }, [currentPage]);
 
+  // Update select all state when reports change
+  useEffect(() => {
+    if (annualAccidentIllnessReportItems) {
+      const allReportIds = new Set(annualAccidentIllnessReportItems.map((item: any) => item.id));
+      const allSelected = allReportIds.size > 0 && 
+        Array.from(allReportIds).every((id: any) => selectedReports.has(id));
+      setSelectAll(allSelected);
+    }
+  }, [selectedReports, annualAccidentIllnessReportItems]);
+
   // New function to handle menu clicks
   const handleMenuClick = (event: React.MouseEvent, id: number) => {
     event.stopPropagation();
@@ -195,6 +233,69 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-700';
+  };
+
+  // Email-specific handlers
+  const handleViewAttachment = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        event.target.value = '';
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+  };
+
+  const handleEmailSubmit = (data: any) => {
+    if (isSendEmailModalOpen && isSendEmailModalOpen.id) {
+      const payload = new FormData();
+      payload.append('to', JSON.stringify(data.to));
+      payload.append('subject', data.subject);
+      payload.append('context', data.message);
+      if (data.cc && data.cc.length > 0) payload.append('cc', JSON.stringify(data.cc));
+      if (data.bcc && data.bcc.length > 0) payload.append('bcc', JSON.stringify(data.bcc));
+      
+      // Include attachment if present
+      if (data.attachment) { // Prioritize attachment from global modal's form data
+        payload.append('attachment', data.attachment);
+      } else if (attachment) { // Fallback to local attachment state
+        payload.append('attachment', attachment);
+      }
+
+      // Add annual_work_accident_illness_report_id
+      payload.append('annual_work_accident_illness_report_id', isSendEmailModalOpen.id.toString());
+
+      const callbackReq = {
+        onSuccess: () => {
+          setIsSendEmailModalOpen(null);
+          annualAccidentIllnessReportRefetch();
+          // Clear attachment state after successful send
+          setAttachment(null);
+          setAttachmentExist(false);
+          toast.custom(() => <CustomToast message='Email sent successfully.' type='success' />, { duration: 3000 });
+        },
+        onError: (err: any) => {
+          const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send email.';
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+        }
+      };
+      
+      sendEmailMutate(payload, callbackReq);
+    }
   };
 
   const handlePrintPDFLocal = async (item: any) => {
@@ -303,33 +404,79 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  // Handle individual report selection
+  const handleReportSelect = (reportId: number) => {
+    setSelectedReports(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reportId)) {
+        newSet.delete(reportId);
+      } else {
+        newSet.add(reportId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all functionality
+  const handleSelectAll = () => {
+    if (!annualAccidentIllnessReportItems) return;
+    
+    if (selectAll) {
+      setSelectedReports(new Set());
+    } else {
+      const allIds = annualAccidentIllnessReportItems.map((item: any) => item.id);
+      setSelectedReports(new Set(allIds));
+    }
+  };
+
+  // Handle bulk delete - opens confirmation modal
+  const handleBulkDelete = () => {
+    if (selectedReports.size === 0) return;
+    setBulkDeleteCount(selectedReports.size);
+    setIsBulkDeleteConfirmModalOpen({
+      open: true,
+    });
+  };
+
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
+  const confirmBulkDelete = async () => {
+    try {
+      const reportIds = Array.from(selectedReports);
+      await bulkDeleteMutation.mutateAsync(reportIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
+    }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} report(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedReports(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    annualAccidentIllnessReportRefetch();
+  };
+
   // Menu options for Export and Generate Report
   const menuOptions = [
     {
+      id: 'generate-dole-awair-btn',
       name: 'Export',
       action: () => {
         setIsExportProgressModalOpen(true);
       },
-      // disabled: !cachedRigths?.state?.data?.export_dole_awair,
-      disabled: false,
     },
-    // {
-    //   name: 'Generate Report',
-    //   action: () => {
-    //     setIsSelectBranchModalOpen(true);
-    //   },
-    //   disabled: !cachedRigths?.state?.data?.generate_dole_awair,
-    // },
   ];
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setMenuPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.right - 138 + window.scrollX, // 138px = 8.6rem
-    });
-    setOpenMenuId(id);
-  };
+  const smartMenuOptions = useSmartMenuOptions(menuOptions);
 
   const renderRows = () => {
     if (isAnnualAccidentIllnessReportLoading) {
@@ -346,6 +493,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (annualAccidentIllnessReportItems && annualAccidentIllnessReportItems.length > 0) {
       return annualAccidentIllnessReportItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <input
+              type="checkbox"
+              checked={selectedReports.has(item.id)}
+              onChange={() => handleReportSelect(item.id)}
+              className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
+            />
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_report}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.number_of_employees}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.total_hours_worked}</td>
@@ -358,7 +513,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <select
                 value={item.status || 'on-schedule'}
                 onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
                 className={`px-4 py-2 rounded-lg text-sm font-bold ${getStatusColor(item.status || 'on-schedule')} border-0 focus:ring-0 disabled:opacity-50 appearance-none pr-8`}
               >
                 {statusOptions.map((option) => (
@@ -381,31 +535,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
-              <button
+              <SmartButton
+                id="edit-dole-awair-btn"
                 onClick={() =>
                   setIsEditAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EditIcon />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-awair-btn"
                 onClick={() =>
                   setIsSendEmailModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
               >
                 <EmailLogo />
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="generate-dole-awair-btn"
                 onClick={() => handlePrintPDFLocal(item)}
-                disabled={generatingItemId === item.id || !cachedRigths?.state?.data?.generate_dole_awair}
                 className={generatingItemId === item.id ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 {generatingItemId === item.id ? (
@@ -414,18 +568,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
-              </button>
-              <button
+              </SmartButton>
+              <SmartButton
+                id="edit-dole-awair-btn"
                 onClick={() =>
                   setIsDeleteAnnualAccidentIllnessReportModalOpen({
                     id: item.id,
                     open: true,
                   })
                 }
-                disabled={!cachedRigths?.state?.data?.edit_dole_awair}
+                disabled={selectedReports.size > 1}
+                className={selectedReports.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
-              </button>
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -433,7 +589,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       return (
         <tr>
-          <td colSpan={100}>
+          <td colSpan={9}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add data.</h4>
           </td>
@@ -506,13 +662,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </button>
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
-              <button
+              <SmartButton
+                id="create-dole-awair-btn"
                 className='bg-green-500 rounded-l-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateAnnualAccidentIllnessReportModalOpen(true)}
-                disabled={!cachedRigths?.state?.data?.create_dole_awair}
               >
                 CREATE
-              </button>
+              </SmartButton>
               <Menu as='div' className='relative menu-container'>
                 <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
@@ -531,20 +687,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
-                      {menuOptions.map((item) => (
+                      {smartMenuOptions.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
                             <span
                               className={classNames(
+                                item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : '',
                                 'block px-4 py-2 text-sm cursor-pointer text-center',
                                 active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                                 item.disabled ? 'bg-gray-200 cursor-not-allowed opacity-50' : ''
                               )}
-                              onClick={() => {
-                                if (!item.disabled) {
-                                  item.action();
+                              onClick={(e) => {
+                                if (item.disabled) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  return false;
                                 }
+                                item.action();
                               }}
+                              data-permission-id={item.id}
+                              data-has-permission={item.hasPermission}
+                              data-is-disabled={item.disabled}
                             >
                               {item.name}
                             </span>
@@ -558,6 +721,32 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </div>
 
+          {/* Bulk Actions Section - Left Side */}
+          {selectedReports.size > 1 && (
+            <div className="mt-4 ">
+              <div className="flex items-center gap-3">
+                <SmartButton
+                  id="edit-dole-awair-btn"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isLoading || !hasActiveSubscription}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-500 border border-transparent rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkDeleteMutation.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete Selected'
+                  )}
+                </SmartButton>
+                <span className="text-sm text-gray-700 font-medium">
+                  {selectedReports.size} selected
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
               className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
@@ -570,6 +759,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full divide-y divide-gray-300 text-center'>
                   <thead>
                     <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!annualAccidentIllnessReportItems || annualAccidentIllnessReportItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date of Report
                       </th>
@@ -633,10 +831,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
       {isDeleteAnnualAccidentIllnessReportModalOpen && (
-        <DeleteReportModal
-          refetch={annualAccidentIllnessReportRefetch}
+        <DeleteModal
           isOpen={isDeleteAnnualAccidentIllnessReportModalOpen}
           setIsOpen={setIsDeleteAnnualAccidentIllnessReportModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteAnnualAccidentIllnessReportModalOpen(null);
+                annualAccidentIllnessReportRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteAnnualAccidentIllnessReport(isDeleteAnnualAccidentIllnessReportModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteAnnualAccidentIllnessReportLoading}
         />
       )}
       {isEditAnnualAccidentIllnessReportModalOpen && (
@@ -656,217 +867,46 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
       {isSendEmailModalOpen && (
         <SendEmailModal
-          refetch={annualAccidentIllnessReportRefetch}
-          isOpen={isSendEmailModalOpen}
-          setIsOpen={setIsSendEmailModalOpen}
+          title="Send Annual Work Accident Illness Report"
+          isOpen={!!isSendEmailModalOpen}
+          onClose={() => setIsSendEmailModalOpen(null)}
+          onSubmit={handleEmailSubmit}
+          defaultRecipients={[]}
+          showAttachment={true}
+          customAttachmentSection={
+            <AnnualAccidentIllnessAttachmentSection
+              pdfAttachment={currentReportDetails?.attachment || null}
+              onViewAttachment={handleViewAttachment}
+              onAttachmentUpload={handleAttachmentUpload}
+              onRemoveAttachment={handleRemoveAttachment}
+              attachment={attachment}
+              attachmentExist={attachmentExist}
+            />
+          }
         />
       )}
-      {/* Print Section */}
-      {/* <div className="container mx-auto p-4 hidden">
-        <div id="printSection">
-          <Image
-            className="mx-auto my-6"
-            src="/assets/work-accident-illness-report.png"
-            alt="Work Accident/Illness Report"
-            width={1500}
-            height={1000}
-          />
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-800 table-fixed">
-              <thead>
-                <tr>
-                  <th
-                    colSpan={6}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Personal Information
-                  </th>
-                  <th
-                    colSpan={7}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center py-1"
-                  >
-                    Employment Details
-                  </th>
-                  <th
-                    colSpan={5}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Illness
-                  </th>
-                  <th
-                    colSpan={7}
-                    className="border-2 border-gray-800 bg-navy-blue bg-[#aeaaaa] text-black p-1 text-sm whitespace-normal text-center"
-                  >
-                    Nature/Extent of Injury
-                  </th>
-                </tr>
-                <tr>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Name of Injured Worker
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Age
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Civil Status
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Address
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    No. of Dependents
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Sex
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Occupation
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Employment Status
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Average Weekly Wage
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Length of Service in Establishment prior to Accident or
-                    Illness
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Years of Experience at the Occupation
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per day
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Hours of Work per Week
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Reportable Illness
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Illness Begun
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Extent of Disability
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Nature of Injury
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Parts of the Body Affected
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Disability Began
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Date Returned to Work
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Days Lost
-                  </th>
-                  <th className="border-2 border-gray-800 bg-navy-blue bg-[#e7e7e7] text-black p-1 text-sm whitespace-normal">
-                    Day/s Charged
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {annualAccidentIllnessReportItems.map(
-                  (item: any, rowIndex: number) => (
-                    <tr key={rowIndex}>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employee}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.age}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.civil_status}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.address}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.no_of_dependents}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.sex}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.occupation}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.employment_status}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.average_weekly_earnings}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.length_of_service}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.years_of_experience}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_day}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.hours_worked_per_week}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.reportable_illness}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_illness}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work_illness}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence_illness}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable_illness}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.extent_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.nature_of_injury}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.part_of_body_affected}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_of_disability}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.date_returned_to_work}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_of_absence}
-                      </td>
-                      <td className="border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs">
-                        {item.days_chargeable}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xl text-center">-- Nothing follows --</p>
-        </div>
-      </div> */}
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
+        <DeleteModal
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} Annual Work Accident Illness Report${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
+          isOpen={isBulkDeleteModalOpen}
+          setIsOpen={setIsBulkDeleteModalOpen}
+          onConfirm={confirmBulkDelete}
+          title={`Deleting ${bulkDeleteCount} Annual Work Accident Illness Report${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
       <Tooltip id='email-tooltip'/>
     </>
   );
