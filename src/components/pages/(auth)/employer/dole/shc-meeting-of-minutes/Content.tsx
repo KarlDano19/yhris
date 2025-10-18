@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
@@ -60,6 +61,7 @@ const statusOptions = [
 ];
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+  const queryClient = useQueryClient();
   const [shcMinutesMeetingItems, setShcMinutesMeetingItems] = useState<any>([]);
   const [isShcMinutesMeetingDeleteModalOpen, setIsShcMinutesMeetingDeleteModalOpen] = useState<T_ModalData | null>(
     null
@@ -246,6 +248,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       const callbackReq = {
         onSuccess: () => {
+          // Invalidate the meeting details cache to fetch fresh data with updated attachment
+          queryClient.invalidateQueries(['minutesMeetingDetailsCache', isSendEmailModalOpen.id]);
           setIsSendEmailModalOpen(null);
           shcMinutesMeetingRefetch();
           // Clear attachment state after successful send
