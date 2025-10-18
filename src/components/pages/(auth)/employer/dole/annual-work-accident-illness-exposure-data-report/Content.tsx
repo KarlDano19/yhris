@@ -243,7 +243,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size (5MB limit)
+      // Check file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
         // Clear the file input
