@@ -228,8 +228,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const file = event.target.files?.[0];
     if (file) {
       // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+      if (file.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        event.target.value = '';
         return;
       }
       setAttachment(file);
