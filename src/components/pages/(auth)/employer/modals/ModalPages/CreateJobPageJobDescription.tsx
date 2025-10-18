@@ -137,9 +137,20 @@ export default function CreateJobPageJobDescription({
           </label>
         </div>
         <div className={`sm:col-span-4 mt-4 ${manualInputFocus.qualifications ? 'border-2 border-blue-700' : ''}`}>
-          <label htmlFor='qualifications' className='block text-sm font-medium leading-6 text-gray-900'>
-            Qualifications:
-          </label>
+          <div className='flex items-center gap-2 mb-2'>
+            <label htmlFor='qualifications' className='block text-sm font-medium leading-6 text-gray-900'>
+              Qualifications
+            </label>
+            <div className='inline-flex items-center px-2 py-1 rounded-md bg-blue-50 border border-blue-200'>
+              <svg className='w-3 h-3 text-blue-600 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+              </svg>
+              <span className='text-xs font-medium text-blue-600'>Affects Search</span>
+            </div>
+          </div>
+          <p className='text-center text-gray-600 mb-2'>
+          Applicants search using qualifications like these. Setting them here boosts your listing visibility to the right candidates.
+          </p>
           <div className='mt-2 h-72 mb-12'>
             <ReactQuill
               onChange={(value) => setValue('qualifications', value)}
