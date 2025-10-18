@@ -33,10 +33,6 @@ type PaginationProps = {
   totalPages: number;
 };
 
-type T_BulkDeleteModalData = DeleteModalData & {
-  selectedCount: number;
-};
-
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate, isLoading } = useDeleteDirectivesItem();
   const bulkDeleteMutation = useBulkDeleteDirectives();
