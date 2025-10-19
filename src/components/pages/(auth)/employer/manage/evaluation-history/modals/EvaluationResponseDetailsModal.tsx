@@ -1,7 +1,8 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import { XCircleIcon, FunnelIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -24,10 +25,58 @@ const EvaluationResponseDetailsModal = ({
   isLoadingTemplateDetails,
 }: EvaluationResponseDetailsModalProps) => {
   const cancelButtonRef = useRef(null);
+  const [dateFilter, setDateFilter] = useState<{ from: any; to: any }>({
+    from: '',
+    to: '',
+  });
+  const [filteredResponses, setFilteredResponses] = useState<any[]>([]);
 
   const customCloseModal = () => {
+    setDateFilter({ from: '', to: '' });
     setIsOpen(null);
   };
+
+  // Filter responses based on date range
+  useEffect(() => {
+    if (templateResponseDetails?.individual_responses) {
+      let responses = [...templateResponseDetails.individual_responses];
+
+      if (dateFilter.from || dateFilter.to) {
+        responses = responses.filter((evaluation: any) => {
+          if (!evaluation.date_of_evaluation) return false;
+          
+          const evaluationDate = new Date(evaluation.date_of_evaluation);
+          
+          // Normalize dates to start/end of day for proper range comparison
+          let fromDate = null;
+          let toDate = null;
+          
+          if (dateFilter.from) {
+            fromDate = new Date(dateFilter.from);
+            fromDate.setHours(0, 0, 0, 0); // Start of day
+          }
+          
+          if (dateFilter.to) {
+            toDate = new Date(dateFilter.to);
+            toDate.setHours(23, 59, 59, 999); // End of day
+          }
+
+          if (fromDate && toDate) {
+            return evaluationDate >= fromDate && evaluationDate <= toDate;
+          } else if (fromDate) {
+            return evaluationDate >= fromDate;
+          } else if (toDate) {
+            return evaluationDate <= toDate;
+          }
+          return true;
+        });
+      }
+
+      setFilteredResponses(responses);
+    } else {
+      setFilteredResponses([]);
+    }
+  }, [templateResponseDetails, dateFilter]);
 
   if (!isOpen) return null;
 
@@ -91,10 +140,68 @@ const EvaluationResponseDetailsModal = ({
                         </div>
                       </div>
 
+                      {/* Date Filter */}
+                      <div className='bg-white rounded-lg p-6 border border-gray-200'>
+                        <div className='flex items-center gap-2 mb-4'>
+                          <FunnelIcon className='h-5 w-5 text-gray-600' />
+                          <h4 className='text-lg font-semibold text-gray-900'>Filter by Date</h4>
+                        </div>
+                        <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
+                          <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
+                            <label className='text-sm font-medium text-gray-700'>From:</label>
+                            <CustomDatePicker
+                              id='modal-from-datepicker'
+                              placeholder='mm/dd/yyyy'
+                              className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                              selected={dateFilter.from}
+                              pickerOnChange={(date: any) => {
+                                setDateFilter({ ...dateFilter, from: date });
+                              }}
+                              inputOnChange={(value: any) => {
+                                setDateFilter({
+                                  ...dateFilter,
+                                  from: value?.target?.value === '' ? null : value,
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
+                            <label className='text-sm font-medium text-gray-700'>To:</label>
+                            <CustomDatePicker
+                              id='modal-to-datepicker'
+                              placeholder='mm/dd/yyyy'
+                              className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                              selected={dateFilter.to}
+                              pickerOnChange={(date: any) => {
+                                setDateFilter({ ...dateFilter, to: date });
+                              }}
+                              inputOnChange={(value: any) => {
+                                setDateFilter({
+                                  ...dateFilter,
+                                  to: value?.target?.value === '' ? null : value,
+                                });
+                              }}
+                              minDate={dateFilter.from}
+                            />
+                          </div>
+                          {(dateFilter.from || dateFilter.to) && (
+                            <button
+                              onClick={() => setDateFilter({ from: '', to: '' })}
+                              className='text-sm text-blue-600 hover:text-blue-800 font-medium'
+                            >
+                              Clear Filter
+                            </button>
+                          )}
+                        </div>
+                        <div className='mt-2 text-sm text-gray-600'>
+                          Showing {filteredResponses.length} of {templateResponseDetails.individual_responses?.length || 0} responses
+                        </div>
+                      </div>
+
                       {/* Individual Evaluation Responses */}
                       <div className='space-y-4'>
                         <h4 className='text-lg font-semibold text-gray-900'>Individual Evaluation Responses</h4>
-                        {templateResponseDetails.individual_responses?.map((evaluation: any, index: number) => (
+                        {filteredResponses.length > 0 ? filteredResponses.map((evaluation: any, index: number) => (
                           <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
                             <div className='bg-gray-100 px-6 py-4 border-b border-gray-200'>
                               <div className='flex justify-between items-start'>
@@ -187,7 +294,11 @@ const EvaluationResponseDetailsModal = ({
                               ))}
                             </div>
                           </div>
-                        ))}
+                        )) : (
+                          <div className='text-center py-8 bg-gray-50 rounded-lg'>
+                            <p className='text-gray-500'>No responses found for the selected date range.</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
