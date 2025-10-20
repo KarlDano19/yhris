@@ -54,7 +54,8 @@ export default function StageBlock({
       let matchesRating = false;
       if (filters.rating.includes('Good Fit') && isGoodFit) {
         matchesRating = true;
-      } else if (filters.rating.includes('Not Fit') && isNotFit) {
+      }
+      if (filters.rating.includes('Not Fit') && isNotFit) {
         matchesRating = true;
       }
       
