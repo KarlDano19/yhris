@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import { XCircleIcon, FunnelIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -106,7 +106,7 @@ const EvaluationResponseDetailsModal = ({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
+              <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
                 <div className='flex bg-savoy-blue p-4 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     Template Responses: {selectedTemplate?.evaluation_form}
@@ -141,18 +141,13 @@ const EvaluationResponseDetailsModal = ({
                       </div>
 
                       {/* Date Filter */}
-                      <div className='bg-white rounded-lg p-6 border border-gray-200'>
-                        <div className='flex items-center gap-2 mb-4'>
-                          <FunnelIcon className='h-5 w-5 text-gray-600' />
-                          <h4 className='text-lg font-semibold text-gray-900'>Filter by Date</h4>
-                        </div>
-                        <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
-                          <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
-                            <label className='text-sm font-medium text-gray-700'>From:</label>
+                      <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4'>
+                        <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2'>
+                          <div className='relative z-[9999]'>
                             <CustomDatePicker
                               id='modal-from-datepicker'
                               placeholder='mm/dd/yyyy'
-                              className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                              className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                               selected={dateFilter.from}
                               pickerOnChange={(date: any) => {
                                 setDateFilter({ ...dateFilter, from: date });
@@ -165,12 +160,12 @@ const EvaluationResponseDetailsModal = ({
                               }}
                             />
                           </div>
-                          <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
-                            <label className='text-sm font-medium text-gray-700'>To:</label>
+                          <p>to</p>
+                          <div className='relative z-[9999]'>
                             <CustomDatePicker
                               id='modal-to-datepicker'
                               placeholder='mm/dd/yyyy'
-                              className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                              className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                               selected={dateFilter.to}
                               pickerOnChange={(date: any) => {
                                 setDateFilter({ ...dateFilter, to: date });
@@ -184,16 +179,8 @@ const EvaluationResponseDetailsModal = ({
                               minDate={dateFilter.from}
                             />
                           </div>
-                          {(dateFilter.from || dateFilter.to) && (
-                            <button
-                              onClick={() => setDateFilter({ from: '', to: '' })}
-                              className='text-sm text-blue-600 hover:text-blue-800 font-medium'
-                            >
-                              Clear Filter
-                            </button>
-                          )}
                         </div>
-                        <div className='mt-2 text-sm text-gray-600'>
+                        <div className='text-sm text-gray-600 whitespace-nowrap'>
                           Showing {filteredResponses.length} of {templateResponseDetails.individual_responses?.length || 0} responses
                         </div>
                       </div>
