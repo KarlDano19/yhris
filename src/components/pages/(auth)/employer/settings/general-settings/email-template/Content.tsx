@@ -17,14 +17,18 @@ import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
-import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
+import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
 import SuccessModal from './modal/SuccessModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 
+type T_EmailTemplateModalData = {
+  id: number | null;
+  open: boolean;
+  mode: 'create' | 'edit';
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -46,9 +50,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
-  const [isEditEmailTemplateModalOpen, setIsEditEmailTemplateModalOpen] = useState(false);
+  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   // Bulk delete states
@@ -73,6 +76,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handleCreateTemplateSuccess = () => {
     setIsSuccessModalOpen(true);
+    // Reset the modal state to close the create/edit modal
+    setEmailTemplateModal({ id: null, open: false, mode: 'create' });
   };
 
   const paginationChange = (event: any) => {
@@ -150,7 +155,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (selectedEmailTemplateId) {
       if (actionType === 'edit') {
-        setIsEditEmailTemplateModalOpen(true);
+        setEmailTemplateModal({ id: selectedEmailTemplateId, open: true, mode: 'edit' });
       }
       if (actionType === 'delete') {
         const templateName = emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject || '';
@@ -166,7 +171,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openEditEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('edit');
     if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
-      setIsEditEmailTemplateModalOpen(true);
+      setEmailTemplateModal({ id: emailTemplateDetails.id, open: true, mode: 'edit' });
     } else {
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
@@ -350,7 +355,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton
                 id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => setEmailTemplateModal({ id: null, open: true, mode: 'create' })}
               >
                 CREATE
               </SmartButton>
@@ -440,13 +445,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
       </div>
 
-      {/* Create Modal */}
-      <CreateEmailTemplateModal
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
-        refetch={refetchEmailTemplate}
-        onSuccess={handleCreateTemplateSuccess}
-      />
+      {/* Create/Edit Modal */}
+      {emailTemplateModal && (
+        <CreateEditEmailTemplateModal
+          isOpen={emailTemplateModal}
+          setIsOpen={setEmailTemplateModal}
+          refetch={refetchEmailTemplate}
+          onSuccess={handleCreateTemplateSuccess}
+        />
+      )}
 
       {/* Success Modal */}
       <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
@@ -463,6 +470,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onSuccess: (data: any) => {
                 toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
                 setIsDeleteEmailTemplateModalOpen(null);
+                setSelectedEmailTemplateId(null);
+                setActionType('');
                 refetchEmailTemplate();
               },
               onError: (err: any) => {
@@ -473,16 +482,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
           isLoading={isDeleteEmailTemplateLoading}
           customText={`${isDeleteEmailTemplateModalOpen.templateName} Email Template`}
-        />
-      )}
-
-      {/* Edit Modal */}
-      {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (
-        <EditEmailTemplateModal
-          refetch={refetchEmailTemplate}
-          isOpen={isEditEmailTemplateModalOpen}
-          setIsOpen={setIsEditEmailTemplateModalOpen}
-          selectedEmailTemplateId={selectedEmailTemplateId}
         />
       )}
 

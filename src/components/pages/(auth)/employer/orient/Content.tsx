@@ -573,7 +573,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             });
           }}
           defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
-          showAttachment={false}
+          showDragDropAttachment={true}
           submitButtonText="Send Contract"
         />
       )}
@@ -817,7 +817,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             });
           }}
           defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
-          showAttachment={false}
+          showDragDropAttachment={true}
           submitButtonText="Send Introduction"
         />
       )}
