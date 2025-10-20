@@ -179,7 +179,7 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
               {applicant.stage_notes.map((stageNote, index) => (
                 <div key={index} className='border-l-4 border-blue-400 pl-4'>
                   <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
+                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title || 'Stage'}</h5>
                   </div>
                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
                 </div>
