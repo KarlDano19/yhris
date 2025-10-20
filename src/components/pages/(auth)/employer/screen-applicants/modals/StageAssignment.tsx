@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
 import toast from 'react-hot-toast';
-import { getCookie } from 'cookies-next';
+
 import CustomToast from '@/components/CustomToast';
-import { ContextTypes } from '../types';
-import { useContext } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import StateContext from '../contexts/StateContext';
+import useGetAvailableUsers from '../hooks/useGetAvailableUsers';
+import useGetStageAssignments from '../hooks/useGetStageAssignments';
+import useUpdateStageAssignments from '../hooks/useUpdateStageAssignments';
+
+import { ContextTypes } from '../types';
 
 interface StageAssignmentProps {
   title: string;
@@ -31,66 +36,31 @@ interface Assignment {
 
 export default function StageAssignment({ title, handleFormSubmit }: StageAssignmentProps) {
   const { actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const [users, setUsers] = useState<User[]>([]);
-  const [currentAssignments, setCurrentAssignments] = useState<Assignment[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  
+  // Use custom hooks for API calls
+  const { data: users = [], isLoading: isLoadingUsers, error: usersError } = useGetAvailableUsers();
+  const { 
+    data: currentAssignments = [], 
+    isLoading: isLoadingAssignments 
+  } = useGetStageAssignments(actionState.stageId);
+  const { mutateAsync: updateAssignments, isLoading: isUpdating } = useUpdateStageAssignments();
 
-  // Fetch users and current assignments
+  // Update selected users when current assignments change
   useEffect(() => {
-    fetchUsers();
-    fetchCurrentAssignments();
-  }, [actionState.stageId]);
+    if (currentAssignments && currentAssignments.length > 0) {
+      setSelectedUsers(currentAssignments.map((a: Assignment) => a.assigned_user));
+    }
+  }, [currentAssignments]);
 
-  const fetchUsers = async () => {
-    try {
-      const token = getCookie('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/available-users/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.records || data || []);
-      } else {
-        throw new Error('Failed to fetch users');
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
+  // Show error toast if users fetch fails
+  useEffect(() => {
+    if (usersError) {
       toast.custom(() => <CustomToast message="Failed to load users" type="error" />, {
         duration: 4000,
       });
-    } finally {
-      setIsLoadingUsers(false);
     }
-  };
-
-  const fetchCurrentAssignments = async () => {
-    try {
-      const token = getCookie('token');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/screen-applicants/stages/${actionState.stageId}/assignments/`,
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.ok) {
-        const assignments = await response.json();
-        setCurrentAssignments(assignments);
-        setSelectedUsers(assignments.map((a: Assignment) => a.assigned_user));
-      }
-    } catch (error) {
-      console.error('Error fetching assignments:', error);
-    }
-  };
+  }, [usersError]);
 
   const handleUserToggle = (userId: number) => {
     setSelectedUsers(prev => 
@@ -101,61 +71,40 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
-    
     try {
-      const token = getCookie('token');
-      const payload = {
+      await updateAssignments({
+        stageId: actionState.stageId,
         assigned_users: selectedUsers,
         // Default to full permissions for all assigned users
         can_view_applicants: true,
         can_move_applicants: true,
         can_update_status: true,
-      };
+      });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/screen-applicants/stages/${actionState.stageId}/assignments/`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (response.ok) {
-        toast.custom(() => <CustomToast message="Stage assignments updated successfully!" type="success" />, {
-          duration: 4000,
-        });
-        
-        // Close modal
-        handleClose();
-        
-        // Trigger page refresh to update permissions
-        if (handleFormSubmit) {
-          handleFormSubmit({});
-        }
-        
-        // Force refresh the page to reload stage permissions
-        window.location.reload();
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update assignments');
+      toast.custom(() => <CustomToast message="Stage assignments updated successfully!" type="success" />, {
+        duration: 4000,
+      });
+      
+      // Close modal
+      handleClose();
+      
+      // Trigger page refresh to update permissions
+      if (handleFormSubmit) {
+        handleFormSubmit({});
       }
+      
+      // Force refresh the page to reload stage permissions
+      window.location.reload();
     } catch (error: any) {
       console.error('Error updating assignments:', error);
-      toast.custom(() => <CustomToast message={error.message || "Failed to update assignments"} type="error" />, {
+      toast.custom(() => <CustomToast message={error.message || error || "Failed to update assignments"} type="error" />, {
         duration: 7000,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setActionState(prev => ({
+    setActionState((prev: any) => ({
       ...prev,
       modal: { ...prev.modal, isOpen: false }
     }));
@@ -185,16 +134,19 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
               </p>
               
               {isLoadingUsers ? (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading users...</p>
-                </div>
+                <LoadingSpinner 
+                  size="lg" 
+                  color="yellow" 
+                  text="Loading users..." 
+                  showText={true}
+                  className="py-4"
+                />
               ) : (
                 <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-md">
                   {users.length === 0 ? (
                     <p className="text-center py-4 text-sm text-gray-500">No users found</p>
                   ) : (
-                    users.map((user) => (
+                    users.map((user: User) => (
                       <div key={user.id} className="flex items-center p-3 hover:bg-gray-50">
                         <input
                           type="checkbox"
@@ -215,20 +167,28 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
             </div>
 
             {/* Current Assignments Summary */}
-            {currentAssignments.length > 0 && (
+            {isLoadingAssignments ? (
+              <LoadingSpinner 
+                size="md" 
+                color="yellow"
+                text="Loading current assignments..." 
+                showText={true}
+                className="py-2"
+              />
+            ) : currentAssignments.length > 0 ? (
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">
                   Currently Assigned Users ({currentAssignments.length})
                 </h4>
                 <div className="text-xs text-gray-600 space-y-1 bg-gray-50 p-2 rounded">
-                  {currentAssignments.map((assignment) => (
+                  {currentAssignments.map((assignment: Assignment) => (
                     <div key={assignment.id}>
                       • {assignment.assigned_user_name} ({assignment.assigned_user_email})
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Action Buttons */}
@@ -237,19 +197,19 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
               type="button"
               onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              disabled={isLoading}
+              disabled={isUpdating}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isUpdating}
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
-              {isLoading ? (
+              {isUpdating ? (
                 <>
-                  <div className="animate-spin inline-block h-4 w-4 border-b-2 border-white rounded-full mr-2"></div>
+                  <LoadingSpinner size="xs" color="white" className="mr-2" />
                   Saving...
                 </>
               ) : (

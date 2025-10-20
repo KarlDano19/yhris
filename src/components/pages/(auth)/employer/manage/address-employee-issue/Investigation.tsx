@@ -4,6 +4,7 @@ import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 
 import { T_InvestigationModal, T_InvestigationReportDetailsModal } from '@/types/globals';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -32,7 +33,8 @@ const Investigation = ({
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
       <div>
-        <button
+        <SmartButton
+          id="edit-employee-issue-btn"
           className={classNames(
             isInvestigated
               ? 'bg-red-500 border-[1px] border-red-500 text-white cursor-pointer'
@@ -40,8 +42,7 @@ const Investigation = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
           disabled={isInvestigated || shouldDisableInvestigate}
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             if (!isInvestigated && !shouldDisableInvestigate) {
               setIsInvestigateModalOpen({
                 isOpen: true,
@@ -56,7 +57,7 @@ const Investigation = ({
           }
         >
           {isInvestigated ? 'Investigated' : 'Investigate'}
-        </button>
+        </SmartButton>
       </div>
       {isInvestigated && (
         <div className='flex gap-1 items-center justify-center'>

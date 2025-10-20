@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
@@ -43,7 +44,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Bulk delete states
   const [selectedEvaluationSchedulers, setSelectedEvaluationSchedulers] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<T_BulkDeleteModalData | null>(null);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
 
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -274,29 +277,41 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  // Handle bulk delete
+  // Handle bulk delete - opens confirmation modal
   const handleBulkDelete = () => {
     if (selectedEvaluationSchedulers.size === 0) return;
-    setIsBulkDeleteModalOpen({
+    setBulkDeleteCount(selectedEvaluationSchedulers.size);
+    setIsBulkDeleteConfirmModalOpen({
       open: true,
       selectedCount: selectedEvaluationSchedulers.size,
     });
   };
 
+  // Confirm the warning and open progress modal
+  const confirmBulkDeleteWarning = () => {
+    setIsBulkDeleteConfirmModalOpen(null);
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  // Perform the actual deletion (called by ProgressModal)
   const confirmBulkDelete = async () => {
     try {
       const schedulerIds = Array.from(selectedEvaluationSchedulers);
       await bulkDeleteMutation.mutateAsync(schedulerIds);
-      
-      toast.custom(() => <CustomToast message={`${selectedEvaluationSchedulers.size} evaluation scheduler(s) deleted successfully.`} type="success" />, { duration: 3000 });
-      setSelectedEvaluationSchedulers(new Set());
-      setSelectAll(false);
-      setIsBulkDeleteModalOpen(null);
-      refetchEvaluationScheduler();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete evaluation schedulers';
       toast.custom(() => <CustomToast message={errorMessage} type="error" />, { duration: 5000 });
+      setIsBulkDeleteModalOpen(false);
     }
+  };
+
+  // Handle success after deletion completes
+  const handleBulkDeleteSuccess = () => {
+    toast.custom(() => <CustomToast message={`${bulkDeleteCount} evaluation scheduler(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    setSelectedEvaluationSchedulers(new Set());
+    setSelectAll(false);
+    setBulkDeleteCount(0);
+    refetchEvaluationScheduler();
   };
 
   const renderRows = () => {
@@ -432,7 +447,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions - Below Date Filters */}
           {selectedEvaluationSchedulers.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleBulkDelete}
@@ -559,14 +574,26 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
-      {/* Bulk Delete Modal */}
-      {isBulkDeleteModalOpen && (
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkDeleteConfirmModalOpen?.open && (
         <DeleteModal<T_BulkDeleteModalData>
+          isOpen={isBulkDeleteConfirmModalOpen}
+          setIsOpen={setIsBulkDeleteConfirmModalOpen}
+          onConfirm={confirmBulkDeleteWarning}
+          isLoading={false}
+          customText={`${bulkDeleteCount} evaluation scheduler${bulkDeleteCount > 1 ? 's' : ''}`}
+        />
+      )}
+
+      {/* Bulk Delete Progress Modal */}
+      {isBulkDeleteModalOpen && (
+        <ProgressModal
           isOpen={isBulkDeleteModalOpen}
           setIsOpen={setIsBulkDeleteModalOpen}
           onConfirm={confirmBulkDelete}
-          isLoading={bulkDeleteMutation.isLoading}
-          customText={`${isBulkDeleteModalOpen.selectedCount} evaluation scheduler${isBulkDeleteModalOpen.selectedCount > 1 ? 's' : ''}`}
+          title={`Deleting ${bulkDeleteCount} evaluation scheduler${bulkDeleteCount > 1 ? 's' : ''}...`}
+          isProcessing={bulkDeleteMutation.isLoading}
+          onSuccess={handleBulkDeleteSuccess}
         />
       )}
 

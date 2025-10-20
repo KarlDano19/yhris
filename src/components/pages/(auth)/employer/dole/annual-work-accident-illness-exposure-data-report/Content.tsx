@@ -243,9 +243,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        event.target.value = '';
         return;
       }
       setAttachment(file);
@@ -721,7 +723,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
           {/* Bulk Actions Section - Left Side */}
           {selectedReports.size > 1 && (
-            <div className="mt-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 ">
               <div className="flex items-center gap-3">
                 <SmartButton
                   id="edit-dole-awair-btn"

@@ -297,40 +297,40 @@ export default function CreateMemoModal({
                           Employee Name
                         </label>
                         <div className='relative mt-2'>
-                          <Controller
+                          <EmployeeSelect
                             control={control}
-                            name="name"
-                            render={({ field }) => (
-                              <EmployeeSelect
-                                control={control}
-                                name="name"
-                                label=""
-                                required={false}
-                                placeholder="Select employee..."
-                                isMulti={false}
-                                isClearable={true}
-                                employeeSearch={employeeSearch}
-                                setEmployeeSearch={setEmployeeSearch}
-                                setEmployeeSelected={setEmployeeSelected}
-                                className=""
-                                onChange={(selectedOption: any) => {
-                                  if (selectedOption && !selectedOption.isShowMore) {
-                                    setEmployeeSearch(selectedOption.label);
-                                    setEmployeeSelected(true);
-                                    field.onChange(selectedOption.label);
-                                    // Auto-fill position from employee data
-                                    if (selectedOption.position) {
-                                      setValue('position', selectedOption.position);
-                                    }
-                                  } else {
-                                    setEmployeeSearch('');
-                                    setEmployeeSelected(false);
-                                    field.onChange('');
-                                    setValue('position', '');
-                                  }
-                                }}
-                              />
-                            )}
+                            name="employee_id"
+                            label=""
+                            required={false}
+                            placeholder="Select employee..."
+                            isMulti={false}
+                            isClearable={true}
+                            employeeSearch={employeeSearch}
+                            setEmployeeSearch={setEmployeeSearch}
+                            setEmployeeSelected={setEmployeeSelected}
+                            className=""
+                            onChange={(selectedOption: any) => {
+                              if (selectedOption && !selectedOption.isShowMore) {
+                                setEmployeeSearch(selectedOption.label);
+                                setEmployeeSelected(true);
+                                // Set the name field to the employee's full name
+                                setValue('name', selectedOption.label);
+                                // Auto-fill position from employee data
+                                if (selectedOption.position) {
+                                  setValue('position', selectedOption.position);
+                                }
+                              } else {
+                                setEmployeeSearch('');
+                                setEmployeeSelected(false);
+                                setValue('name', '');
+                                setValue('position', '');
+                              }
+                            }}
+                          />
+                          {/* Hidden input to register the name field */}
+                          <input
+                            type="hidden"
+                            {...register('name')}
                           />
                         </div>
                       </div>

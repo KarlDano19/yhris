@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import useLogin from '@/components/pages/(all-layout)/login/hooks/useLogin';
 import updateSession from '@/helpers/updateSession';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import EmailVerificationModal from './modal/EmailVerificationModal';
@@ -31,11 +32,13 @@ import { T_Login } from '@/types/globals';
 function Content() {
   const broadcastChannel = new BroadcastChannel('integration-channel');
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showCreateAccountModal, setCreateAccountModal] = useState(false);
   const [showEmailVerificationModal, setEmailVerificationModal] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otpData, setOtpData] = useState<any>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   
   // NEW: Rate limiting timer states
   const [isRateLimited, setIsRateLimited] = useState(false);
@@ -43,6 +46,35 @@ function Content() {
 
   const { mutate, isLoading } = useLogin();
   const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
+
+  // Check if user is already logged in and redirect if so
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/get-session');
+        const sessionData = await response.json();
+        
+        if (sessionData.isLoggedIn) {
+          // User is already logged in, redirect appropriately
+          if (sessionData.accountType === 'employer') {
+            const returnTo = searchParams.get('redirect') || '/dashboard';
+            window.location.href = returnTo;
+          } else if (sessionData.accountType === 'applicant') {
+            window.location.href = '/apply-for-a-job';
+          } else if (sessionData.accountType === 'admin') {
+            window.location.href = '/admin/dashboard';
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router, searchParams]);
 
   // NEW: Function to extract time from error message
   const extractTimeFromError = (errorMessage: string) => {
@@ -202,6 +234,52 @@ function Content() {
     }, 1000);
   };
 
+  // Show the login page but redirect if already logged in
+  if (isCheckingSession) {
+    // Still show the layout/header while checking
+    return (
+      <>
+        {/* Back Button */}
+        <div className="fixed top-4 left-4 z-50">
+          <Link 
+            href="/landing-page" 
+            className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
+            shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
+            hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+            transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
+            border border-gray-100"
+          >
+            <ChevronLeftIcon className="h-5 w-5 text-gray-700" />
+          </Link>
+        </div>
+        
+        <SplitLayout
+          left={
+            <>
+              <div className={`w-full hidden lg:flex flex-col items-center justify-center  `}>
+                <MainIconOnly className='w-24 h-24' />
+
+                <h1 className='text-[50px] font-bold text-white mt-4'>
+                  YAHSHUA <span className='text-[#FFC107]'>HRIS</span>
+                </h1>
+                <h3 className='text-white text-3xl text-center w-96 mt-2'>Leading your employees in one place.</h3>
+              </div>
+            </>
+          }
+          right={
+            <>
+              <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
+                <LoadingSpinner size="lg" color="yellow" showText text="Checking session..." />
+              </div>
+            </>
+          }
+          leftBG={SplitViewBg}
+        />
+        <FloatingHelpButton />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Back Button */}
@@ -307,25 +385,7 @@ function Content() {
                       disabled={isLoading || isRateLimited}
                     >
                       {isLoading && (
-                        <div role='status'>
-                          <svg
-                            aria-hidden='true'
-                            className='inline w-6 h-6 mr-2 text-gray-200 animate-spin fill-blue-600'
-                            viewBox='0 0 100 101'
-                            fill='none'
-                            xmlns='http://www.w3.org/2000/svg'
-                          >
-                            <path
-                              d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
-                              fill='currentColor'
-                            />
-                            <path
-                              d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
-                              fill='currentFill'
-                            />
-                          </svg>
-                          <span className='sr-only'>Loading...</span>
-                        </div>
+                        <LoadingSpinner size="sm" color="blue" />
                       )}
                       {isRateLimited ? (
                         `Please wait ${formatCountdown(rateLimitCountdown)}`
@@ -337,12 +397,9 @@ function Content() {
                     {/* Rate limit visual indicator */}
                     {isRateLimited && (
                       <div className="text-center text-sm text-orange-600 mb-3">
-                        <div className="flex items-center justify-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Too many requests. Please wait {formatCountdown(rateLimitCountdown)}
+                        <div className="flex items-center justify-center gap-2">
+                          <LoadingSpinner size="xs" color="red" />
+                          <span>Too many requests. Please wait {formatCountdown(rateLimitCountdown)}</span>
                         </div>
                       </div>
                     )}

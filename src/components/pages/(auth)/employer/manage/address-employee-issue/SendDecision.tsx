@@ -3,6 +3,7 @@ import React, { Dispatch } from 'react';
 import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import { T_SendDecisionModal, T_DecisionAttachmentViewModal } from '@/types/globals';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -48,7 +49,8 @@ const SendDecision = ({
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
       <div>
-        <button
+        <SmartButton
+          id="edit-employee-issue-btn"
           className={classNames(
             isDecisionSent
               ? 'bg-red-500 border-[1px] border-red-500 text-white'
@@ -56,8 +58,7 @@ const SendDecision = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
           )}
           disabled={isDecisionSent || shouldDisableSendDecision}
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             if (!isDecisionSent && !shouldDisableSendDecision) {
               setIsSendDecisionModalOpen({
                 isOpen: true,
@@ -72,7 +73,7 @@ const SendDecision = ({
           }
         >
           {isDecisionSent ? 'Sent' : 'Send'}
-        </button>
+        </SmartButton>
       </div>
       <div>
         <button
