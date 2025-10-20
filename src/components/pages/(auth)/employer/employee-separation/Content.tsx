@@ -738,12 +738,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
           defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
-          showAttachment={false}
-          showEmailTemplate={false}
-          showSubject={false}
-          showDateField={true}
-          dateFieldLabel="Date"
-          dateFieldRequired={true}
+          showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
@@ -755,7 +750,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsDocumentModalOpen(null)}
           onSubmit={handleSignDocumentsSubmit}
           defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
-          showAttachment={false}
+          showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
@@ -767,7 +762,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLastPayModalOpen(null)}
           onSubmit={handleLastPaySubmit}
           defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
-          showAttachment={false}
+          showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
@@ -779,7 +774,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsQuitclaimModalOpen(null)}
           onSubmit={handleQuitclaimSubmit}
           defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
-          showAttachment={false}
+          showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
