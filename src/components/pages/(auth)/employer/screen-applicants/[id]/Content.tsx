@@ -507,7 +507,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     <ArchiveIcon />
                   </button>
 
-                  {/* <Filter onFilterChange={handleFilterChange} /> */}
+                  <Filter onFilterChange={handleFilterChange} />
                   
                   <AddStageBtn handleAddStage={handleAddStage} />
                 </div>
