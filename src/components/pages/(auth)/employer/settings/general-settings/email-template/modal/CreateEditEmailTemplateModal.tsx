@@ -185,14 +185,34 @@ export default function CreateEditEmailTemplateModal({
   const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    setFile(e?.dataTransfer?.files[0]);
+    const droppedFile = e?.dataTransfer?.files[0];
+    
+    if (droppedFile) {
+      // Check file size (10MB limit)
+      if (droppedFile.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setFile(droppedFile);
+      setValue('attachment', droppedFile);
+    }
   };
 
   const handleChange = function (e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-      setValue('attachment', e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      
+      // Check file size (10MB limit)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        e.target.value = '';
+        return;
+      }
+      
+      setFile(selectedFile);
+      setValue('attachment', selectedFile);
       e.target.value = '';
     }
   };
