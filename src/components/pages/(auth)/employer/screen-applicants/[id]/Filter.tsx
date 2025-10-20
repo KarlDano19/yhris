@@ -19,7 +19,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Rejected'],
+    status: ['Ongoing', 'Passed', 'Hired'],
   });
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +70,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={filterRef}>
       <SmartButton
         id="use-filter-screen-applicants-btn"
         onClick={toggleFilter}
