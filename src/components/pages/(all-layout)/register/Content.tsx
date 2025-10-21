@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
 import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useLoopsSync } from '@/helpers/useLoopsSync';
@@ -174,10 +175,7 @@ const Content = () => {
           right={
             <>
               <div className={`flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-full lg:py-0 `}>
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-gray-600">Checking session...</span>
-                </div>
+                <LoadingSpinner size="lg" color="yellow" showText text="Checking session..." />
               </div>
             </>
           }
