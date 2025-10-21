@@ -114,6 +114,8 @@ export default function EditIncidentReportModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully updated the incident report."} type='success' />, { duration: 5000 });
+        // Clear the cached data so it refetches fresh data
+        removeEmployeeIssueDetails();
         customCloseModal();
         refetch();
       },
@@ -127,11 +129,11 @@ export default function EditIncidentReportModal({
     // Transform data to match backend API format
     const updateData: EmployeeIssueUpdateData = {
       id: selectedIssue?.id,
-      employee_id: parseInt(data.name.toString()),
+      employee: parseInt(data.name.toString()),
       incident_date: data.incidentDate,
       position: data.position,
       department: data.department,
-      incident_place: data.incidentPlace,
+      place_of_incident: data.incidentPlace,
       issue_type: data.issueType,
       brief_background: data.briefBackground,
     };

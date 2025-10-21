@@ -6,6 +6,8 @@ import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
+import 'react-quill/dist/quill.snow.css';
+
 type T_ModalData = {
   id: number;
   open: boolean;
@@ -59,7 +61,16 @@ export default function EditEmployeeCompensationLogModal({
       try {
         if (val === null || val === undefined) return "N/A";
 
-        if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+        if (typeof val === "string") {
+          // Check if the string contains HTML tags
+          if (val.includes('<') && val.includes('>')) {
+            const markup = { __html: val };
+            return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+          }
+          return String(val);
+        }
+
+        if (typeof val === "number" || typeof val === "boolean") {
           return String(val);
         }
 
@@ -95,6 +106,14 @@ export default function EditEmployeeCompensationLogModal({
       }
     };
 
+    // const formatFieldName = (key: string): string => {
+    //   return key
+    //     .replace(/_/g, ' ') // Replace underscores with spaces
+    //     .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+    //     .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+    //     .trim(); // Remove extra spaces
+    // };
+
     try {
       return Object.entries(data).map(([key, value]) => {
         if (key === "id") return null;
@@ -102,6 +121,7 @@ export default function EditEmployeeCompensationLogModal({
           <div key={key} className="text-sm font-medium break-words whitespace-pre-line">
             <span className="font-semibold">
               {key.charAt(0).toUpperCase() + key.slice(1)}:
+              {/* {formatFieldName(key)}: */}
             </span>{" "}
             {renderValue(value)}
           </div>
