@@ -15,6 +15,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
+import useRegenerateNTEPDF from './hooks/useRegenerateNTEPDF';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
 import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
 import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
@@ -96,6 +97,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
+  const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
@@ -452,6 +454,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleRegenerateNTE = (issueId: number) => {
+    const issue = employeeIssueItems.find((item: any) => item.id === issueId);
+    if (issue) {
+      regenerateNTE({ id: issueId }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={data.message || 'NTE PDF regenerated successfully'} type='success' />, { duration: 5000 });
+          setMoreMenuOpen({}); // Close the menu
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to regenerate NTE PDF';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 7000,
+          });
+          setMoreMenuOpen({}); // Close the menu
+        },
+      });
+    }
+  };
+
   // NTE-specific handlers
   const handleViewAttachment = (url: string) => {
     window.open(url, '_blank');
@@ -652,10 +685,28 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             {item.status === 'pending' && (
                               <SmartButton
                                 id="update-employee-issue-status-btn"
-                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                                 onClick={() => handleUpdateStatus(item.id)}
                               >
                                 Update Status
+                              </SmartButton>
+                            )}
+                            {/* Show regenerate button if issue has response or decision was sent */}
+                            {(item.is_responded || item.isDecisionSent) && (
+                              <SmartButton
+                                id="regenerate-nte-pdf-btn"
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${isRegenerating ? 'opacity-50 pointer-events-none' : ''}`}
+                                onClick={() => handleRegenerateNTE(item.id)}
+                                disabled={isRegenerating}
+                              >
+                                {isRegenerating ? (
+                                  <span className="flex items-center gap-2">
+                                    <div className="animate-spin h-4 w-4 border-2 border-blue-600 rounded-full border-t-transparent"></div>
+                                    Regenerating...
+                                  </span>
+                                ) : (
+                                  'Regenerate NTE PDF'
+                                )}
                               </SmartButton>
                             )}
 
