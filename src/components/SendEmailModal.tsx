@@ -53,6 +53,14 @@ export interface SendEmailModalProps {
   dateFieldRequired?: boolean;
   showEmailTemplate?: boolean;
   showSubject?: boolean;
+  // Pre-populated data props
+  prePopulatedData?: {
+    subject?: string;
+    message?: string;
+    to?: string[];
+    cc?: string[];
+    bcc?: string[];
+  };
 }
 
 export default function SendEmailModal({
@@ -72,7 +80,8 @@ export default function SendEmailModal({
   dateFieldLabel = "Date",
   dateFieldRequired = false,
   showEmailTemplate = true,
-  showSubject = true
+  showSubject = true,
+  prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
     () => dynamic(() => import("react-quill"), { ssr: false }),
@@ -298,14 +307,39 @@ export default function SendEmailModal({
   };
 
   useEffect(() => {
-    if (isOpen && !isInitialized.current) {
-      setTagsTo(defaultRecipients);
-      isInitialized.current = true;
-    } else if (!isOpen) {
-      // Reset the initialization flag when modal closes
-      isInitialized.current = false;
+    if (isOpen) {
+      // Use pre-populated data if available, otherwise use default recipients
+      if (prePopulatedData) {
+        // Set form fields from pre-populated data
+        if (prePopulatedData.subject) {
+          setValue('subject', prePopulatedData.subject);
+          setCustomSubject(prePopulatedData.subject);
+        }
+        if (prePopulatedData.message) {
+          setValue('message', prePopulatedData.message);
+        }
+        
+        // Set recipient fields
+        if (prePopulatedData.to && prePopulatedData.to.length > 0) {
+          setTagsTo(prePopulatedData.to);
+        } else {
+          setTagsTo(defaultRecipients);
+        }
+        
+        if (prePopulatedData.cc && prePopulatedData.cc.length > 0) {
+          setTagsCc(prePopulatedData.cc);
+          setIsCCOpen(true);
+        }
+        
+        if (prePopulatedData.bcc && prePopulatedData.bcc.length > 0) {
+          setTagsBcc(prePopulatedData.bcc);
+          setIsBCCOpen(true);
+        }
+      } else {
+        setTagsTo(defaultRecipients);
+      }
     }
-  }, [isOpen, defaultRecipients]);
+  }, [isOpen, defaultRecipients, setTagsTo, prePopulatedData, setValue]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
