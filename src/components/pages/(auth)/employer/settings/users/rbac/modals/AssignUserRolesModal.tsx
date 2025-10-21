@@ -1,5 +1,4 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
@@ -30,10 +29,8 @@ export default function AssignUserRolesModal({
 }) {
   const queryClient = useQueryClient();
   const cancelButtonRef = useRef(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const { handleSubmit, reset, formState: { errors } } = useForm();
   const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
-  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   
   // Clear selectedRoles when modal opens with a new user
   useEffect(() => {
@@ -100,7 +97,6 @@ export default function AssignUserRolesModal({
   const customCloseModal = () => {
     reset();
     setSelectedRoles([]);
-    setButtonRect(null);
     setIsOpen(null);
   };
 
@@ -161,7 +157,7 @@ export default function AssignUserRolesModal({
                     </h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
-                  <div className='md:mx-6 my-4 max-h-[calc(100vh-12rem)] overflow-y-auto'>
+                  <div className='md:mx-6 my-4 max-h-[calc(100vh-12rem)]'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
                         <div className={`${Object.keys(errors).length > 0 ? 'block' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
@@ -199,15 +195,7 @@ export default function AssignUserRolesModal({
                             {({ open }) => (
                               <>
                                 <div className='relative'>
-                                  <Listbox.Button 
-                                    ref={buttonRef}
-                                    onClick={() => {
-                                      if (buttonRef.current) {
-                                        setButtonRect(buttonRef.current.getBoundingClientRect());
-                                      }
-                                    }}
-                                    className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'
-                                  >
+                                  <Listbox.Button className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'>
                                     <span className='flex flex-wrap gap-1'>
                                       {selectedRoles.length === 0 ? (
                                         <span className='text-gray-400'>Select roles...</span>
@@ -244,24 +232,20 @@ export default function AssignUserRolesModal({
                                     </span>
                                   </Listbox.Button>
 
-                                  {open && buttonRect && createPortal(
-                                    <Transition
-                                      show={open}
-                                      as={Fragment}
-                                      leave='transition ease-in duration-100'
-                                      leaveFrom='opacity-100'
-                                      leaveTo='opacity-0'
+                                  <Transition
+                                    show={open}
+                                    as={Fragment}
+                                    leave='transition ease-in duration-100'
+                                    leaveFrom='opacity-100'
+                                    leaveTo='opacity-0'
+                                  >
+                                    <Listbox.Options 
+                                      className='absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'
+                                      style={{
+                                        scrollbarWidth: 'thin',
+                                        scrollbarColor: '#2d3e58 #f1f1f1'
+                                      }}
                                     >
-                                      <Listbox.Options 
-                                        className='fixed overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'
-                                        style={{
-                                          top: `${buttonRect.bottom + window.scrollY + 4}px`,
-                                          left: `${buttonRect.left + window.scrollX}px`,
-                                          width: `${buttonRect.width}px`,
-                                          maxHeight: '240px',
-                                          zIndex: 9999,
-                                        }}
-                                      >
                                       {Object.entries(rolesByType).map(([type, roles]: [string, any]) => (
                                         <div key={type}>
                                           {roles.map((role: any) => (
@@ -311,9 +295,7 @@ export default function AssignUserRolesModal({
                                         </div>
                                       )}
                                     </Listbox.Options>
-                                  </Transition>,
-                                  document.body
-                                )}
+                                  </Transition>
                                 </div>
                               </>
                             )}

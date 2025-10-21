@@ -32,7 +32,6 @@ import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
-import SendDecisionModal from './modals/SendDecisionModal';
 
 import {
   T_SendNTEModal,
@@ -99,6 +98,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
+  const { data: decisionEmployeeIssueDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
@@ -575,6 +575,60 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleDecisionSubmit = (data: any) => {
+    if (isSendDecisionModalOpen && isSendDecisionModalOpen.id) {
+      const payload = {
+        id: isSendDecisionModalOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'decision',
+        decision_subject: data.subject,
+        decision_to: JSON.stringify(data.email),
+        decision_cc: JSON.stringify(data.cc),
+        decision_bcc: JSON.stringify(data.bcc),
+        decision_message: data.message,
+        issueNTEForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        sendDecisionForm: {
+          template: data.template,
+          subject: data.subject,
+          to: data.email,
+          cc: data.cc,
+          bcc: data.bcc,
+          message: data.message,
+          attachment: null
+        },
+        dateReceived: null,
+        nte_subject: '',
+        nte_to: '',
+        nte_cc: '',
+        nte_bcc: '',
+        nte_message: ''
+      };
+      
+      mutate(payload, {
+        onSuccess: (data: any) => {
+          setIsSendDecisionModalOpen(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
 
   const renderRows = () => {
     if (isSearching || isGetEmployeeIssuesLoading) {
@@ -974,6 +1028,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send & Mark as Sent"
           isLoading={isLoading}
+          prePopulatedData={employeeIssueDetails ? {
+            subject: employeeIssueDetails.nte_subject,
+            message: employeeIssueDetails.nte_message,
+            to: employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : [],
+            cc: employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : [],
+            bcc: employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []
+          } : undefined}
         />
       )}
       <InvestigationModal
@@ -982,11 +1043,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isInvestigateModalOpen}
         setIsOpen={setIsInvestigateModalOpen}
       />
-      <SendDecisionModal
-        isOpen={isSendDecisionModalOpen}
-        setIsOpen={setIsSendDecisionModalOpen}
-        refetch={refetch}
-      />
+      {isSendDecisionModalOpen && (
+        <SendEmailModal
+          title="Send Decision"
+          isOpen={!!isSendDecisionModalOpen}
+          onClose={() => setIsSendDecisionModalOpen(null)}
+          onSubmit={handleDecisionSubmit}
+          defaultRecipients={decisionEmployeeIssueDetails?.email ? [decisionEmployeeIssueDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <NTEAttachmentSection
+              pdfAttachment={decisionEmployeeIssueDetails?.nte_attachment || null}
+              isDeleting={false}
+              canDelete={false}
+              onViewAttachment={handleViewAttachment}
+              onDeleteAttachment={() => {}} // Empty function since delete is disabled
+            />
+          }
+          submitButtonText="Send"
+          isLoading={isLoading}
+          prePopulatedData={decisionEmployeeIssueDetails ? {
+            subject: decisionEmployeeIssueDetails.decision_subject,
+            message: decisionEmployeeIssueDetails.decision_message,
+            to: decisionEmployeeIssueDetails.decision_to ? JSON.parse(decisionEmployeeIssueDetails.decision_to) : [],
+            cc: decisionEmployeeIssueDetails.decision_cc ? JSON.parse(decisionEmployeeIssueDetails.decision_cc) : [],
+            bcc: decisionEmployeeIssueDetails.decision_bcc ? JSON.parse(decisionEmployeeIssueDetails.decision_bcc) : []
+          } : undefined}
+        />
+      )}
       {isInvestigationReportDetailsModalOpen && (
         <InvestigationReportDetailsModal
           isOpen={isInvestigationReportDetailsModalOpen}
