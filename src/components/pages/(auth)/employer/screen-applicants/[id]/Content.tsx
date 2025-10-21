@@ -89,7 +89,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed'],
+    status: ['Ongoing', 'Hired'],
   });
   
   const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
