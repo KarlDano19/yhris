@@ -15,6 +15,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import useGetEmployeeIssueItems from './hooks/useGetEmployeeIssueItems';
 import usePatchEmployeeIssueItems from './hooks/usePatchEmployeeIssueItems';
+import useRegenerateNTEPDF from './hooks/useRegenerateNTEPDF';
 import UploadEmployeeIssueAttachmentModal from './modals/UploadNTEAttachmentModal';
 import NTEAttachmentViewModal from './modals/NTEAttachmentViewModal';
 import UploadDecisionAttachmentModal from './modals/UploadDecisionAttachment';
@@ -31,7 +32,6 @@ import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
-import SendDecisionModal from './modals/SendDecisionModal';
 
 import {
   T_SendNTEModal,
@@ -96,7 +96,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
+  const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
+  const { data: decisionEmployeeIssueDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
@@ -452,6 +454,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleRegenerateNTE = (issueId: number) => {
+    const issue = employeeIssueItems.find((item: any) => item.id === issueId);
+    if (issue) {
+      regenerateNTE({ id: issueId }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={data.message || 'NTE PDF regenerated successfully'} type='success' />, { duration: 5000 });
+          setMoreMenuOpen({}); // Close the menu
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          let errorMessage = 'Failed to regenerate NTE PDF';
+          
+          if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err?.message) {
+            errorMessage = err.message;
+          } else if (err?.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+          
+          toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
+            duration: 7000,
+          });
+          setMoreMenuOpen({}); // Close the menu
+        },
+      });
+    }
+  };
+
   // NTE-specific handlers
   const handleViewAttachment = (url: string) => {
     window.open(url, '_blank');
@@ -528,6 +561,60 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         onSuccess: (data: any) => {
           setIsSendNTEModalOpen(null);
           setPdfAttachment(null);
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          if (refetch) {
+            refetch();
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, {
+            duration: 7000,
+          });
+        },
+      });
+    }
+  };
+
+  const handleDecisionSubmit = (data: any) => {
+    if (isSendDecisionModalOpen && isSendDecisionModalOpen.id) {
+      const payload = {
+        id: isSendDecisionModalOpen.id.toString(),
+        actionType: 'sending',
+        emailType: 'decision',
+        decision_subject: data.subject,
+        decision_to: JSON.stringify(data.email),
+        decision_cc: JSON.stringify(data.cc),
+        decision_bcc: JSON.stringify(data.bcc),
+        decision_message: data.message,
+        issueNTEForm: {
+          template: '',
+          subject: '',
+          to: [],
+          cc: [],
+          bcc: [],
+          message: '',
+          attachment: null
+        },
+        sendDecisionForm: {
+          template: data.template,
+          subject: data.subject,
+          to: data.email,
+          cc: data.cc,
+          bcc: data.bcc,
+          message: data.message,
+          attachment: null
+        },
+        dateReceived: null,
+        nte_subject: '',
+        nte_to: '',
+        nte_cc: '',
+        nte_bcc: '',
+        nte_message: ''
+      };
+      
+      mutate(payload, {
+        onSuccess: (data: any) => {
+          setIsSendDecisionModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           if (refetch) {
             refetch();
@@ -652,10 +739,28 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             {item.status === 'pending' && (
                               <SmartButton
                                 id="update-employee-issue-status-btn"
-                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+                                className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
                                 onClick={() => handleUpdateStatus(item.id)}
                               >
                                 Update Status
+                              </SmartButton>
+                            )}
+                            {/* Show regenerate button if issue has response or decision was sent */}
+                            {(item.is_responded || item.isDecisionSent) && (
+                              <SmartButton
+                                id="regenerate-nte-pdf-btn"
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${isRegenerating ? 'opacity-50 pointer-events-none' : ''}`}
+                                onClick={() => handleRegenerateNTE(item.id)}
+                                disabled={isRegenerating}
+                              >
+                                {isRegenerating ? (
+                                  <span className="flex items-center gap-2">
+                                    <div className="animate-spin h-4 w-4 border-2 border-blue-600 rounded-full border-t-transparent"></div>
+                                    Regenerating...
+                                  </span>
+                                ) : (
+                                  'Regenerate NTE PDF'
+                                )}
                               </SmartButton>
                             )}
 
@@ -923,6 +1028,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send & Mark as Sent"
           isLoading={isLoading}
+          prePopulatedData={employeeIssueDetails ? {
+            subject: employeeIssueDetails.nte_subject,
+            message: employeeIssueDetails.nte_message,
+            to: employeeIssueDetails.nte_to ? JSON.parse(employeeIssueDetails.nte_to) : [],
+            cc: employeeIssueDetails.nte_cc ? JSON.parse(employeeIssueDetails.nte_cc) : [],
+            bcc: employeeIssueDetails.nte_bcc ? JSON.parse(employeeIssueDetails.nte_bcc) : []
+          } : undefined}
         />
       )}
       <InvestigationModal
@@ -931,11 +1043,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isInvestigateModalOpen}
         setIsOpen={setIsInvestigateModalOpen}
       />
-      <SendDecisionModal
-        isOpen={isSendDecisionModalOpen}
-        setIsOpen={setIsSendDecisionModalOpen}
-        refetch={refetch}
-      />
+      {isSendDecisionModalOpen && (
+        <SendEmailModal
+          title="Send Decision"
+          isOpen={!!isSendDecisionModalOpen}
+          onClose={() => setIsSendDecisionModalOpen(null)}
+          onSubmit={handleDecisionSubmit}
+          defaultRecipients={decisionEmployeeIssueDetails?.email ? [decisionEmployeeIssueDetails.email] : []}
+          showAttachment={true}
+          customAttachmentSection={
+            <NTEAttachmentSection
+              pdfAttachment={decisionEmployeeIssueDetails?.nte_attachment || null}
+              isDeleting={false}
+              canDelete={false}
+              onViewAttachment={handleViewAttachment}
+              onDeleteAttachment={() => {}} // Empty function since delete is disabled
+            />
+          }
+          submitButtonText="Send"
+          isLoading={isLoading}
+          prePopulatedData={decisionEmployeeIssueDetails ? {
+            subject: decisionEmployeeIssueDetails.decision_subject,
+            message: decisionEmployeeIssueDetails.decision_message,
+            to: decisionEmployeeIssueDetails.decision_to ? JSON.parse(decisionEmployeeIssueDetails.decision_to) : [],
+            cc: decisionEmployeeIssueDetails.decision_cc ? JSON.parse(decisionEmployeeIssueDetails.decision_cc) : [],
+            bcc: decisionEmployeeIssueDetails.decision_bcc ? JSON.parse(decisionEmployeeIssueDetails.decision_bcc) : []
+          } : undefined}
+        />
+      )}
       {isInvestigationReportDetailsModalOpen && (
         <InvestigationReportDetailsModal
           isOpen={isInvestigationReportDetailsModalOpen}
