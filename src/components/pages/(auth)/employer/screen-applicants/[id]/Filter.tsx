@@ -19,7 +19,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed', 'Hired'],
+    status: ['Ongoing', 'Hired'],
   });
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -117,7 +117,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                 />
                 <span className="text-sm text-gray-800">Ongoing</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              {/* <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   className="rounded text-blue-500 focus:ring-blue-500"
@@ -125,7 +125,7 @@ export default function Filter({ onFilterChange }: FilterProps) {
                   onChange={() => handleStatusChange('Passed')}
                 />
                 <span className="text-sm text-gray-800">Passed</span>
-              </label>
+              </label> */}
               {/* <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"

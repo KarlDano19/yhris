@@ -65,7 +65,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
       >
         {!complete && (
           <div
-            className="absolute right-5 top-4 z-20"
+            className="absolute right-5 top-4"
             onMouseEnter={handleEnter}
             onMouseLeave={handleLeave}
           >
@@ -89,7 +89,7 @@ export default function EmployeeTile({ emp }: { emp: Partial<Employee> }) {
                 <div
                   data-testid="incomplete-records-dialog"
                   className={
-                    "absolute z-50 w-[76vw] max-w-[260px] rounded-xl border border-gray-200 bg-white p-3 shadow-xl ring-1 ring-black/5 sm:w-[300px] " +
+                    "absolute z-[1] w-[76vw] max-w-[260px] rounded-xl border border-gray-200 bg-white p-3 shadow-xl ring-1 ring-black/5 sm:w-[300px] " +
                     (side === "right"
                       ? "left-full top-0 ml-2"
                       : side === "left"

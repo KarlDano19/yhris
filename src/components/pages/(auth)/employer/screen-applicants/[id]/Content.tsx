@@ -89,7 +89,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     rating: ['Good Fit', 'Not Fit'],
-    status: ['Ongoing', 'Passed'],
+    status: ['Ongoing', 'Hired'],
   });
   
   const [isBatchUploadOpen, setIsBatchUploadOpen] = useState(false);
@@ -244,6 +244,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           stage_notes: item.stage_notes || [],
           screeningFit: item.screeningFit,
           screeningAnswers: item.screeningAnswers || [],
+          created_at: item.created_at,
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
