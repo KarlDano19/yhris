@@ -148,6 +148,10 @@ export default function Person({
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
+  const isArchived = applicant.is_archived === true;
+  
+  // Check if applicant meets all ideal answers (screeningFit === 'good')
+  const meetsAllIdealAnswers = applicant.screeningFit === 'good';
 
   const capitalizeFirstLetter = (text: any) => {
     return text.replace(/(?:^|\s)\S/, function (match: any) {
@@ -155,19 +159,53 @@ export default function Person({
     });
   };
 
+  // Determine background color based on priority and Must-Have results
+  let backgroundColorClass = '';
+  let borderClass = '';
+  let hoverClass = '';
+  
+  if (isArchived) {
+    // Archived applicants - Red background (highest priority)
+    backgroundColorClass = 'bg-red-50';
+    borderClass = 'border-b border-b-red-50';
+    hoverClass = 'hover:bg-red-100';
+  } else if (isPassedFinalInterview) {
+    // Hired applicants - Yellow background
+    backgroundColorClass = 'bg-yellow-100';
+    borderClass = 'border-b border-b-yellow-100';
+  } else if (isRestoredApplicant) {
+    // Restored from archived applicants - Red background
+    backgroundColorClass = 'bg-red-50';
+    borderClass = 'border-b border-b-red-50';
+    hoverClass = 'hover:bg-red-100';
+  } else if (isRejected || isWithdrawn) {
+    // Rejected/Withdrawn applicants - Violet background
+    backgroundColorClass = 'bg-violet-100';
+    borderClass = 'border-b border-b-violet-100';
+  } else if (meetsAllIdealAnswers) {
+    // Applicants who meet all ideal answers - Green background
+    backgroundColorClass = 'bg-green-100';
+    borderClass = 'border-b border-b-green-100';
+    hoverClass = 'hover:bg-green-200';
+  } else {
+    // Applicants who don't meet ideal answers - White background (default)
+    backgroundColorClass = 'bg-white';
+    hoverClass = 'hover:bg-gray-50';
+  }
+
   return (
     <div
       className={classNames(
         'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg',
-        isButtonDisabled && !isPassedFinalInterview
-          ? 'border-b border-b-blue-100 bg-blue-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
-          : '',
-        isPassedFinalInterview
-          ? 'border-b border-b-yellow-100 bg-yellow-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
+        backgroundColorClass,
+        borderClass,
+        hoverClass,
+        (isArchived || isPassedFinalInterview || isRestoredApplicant || isRejected || isWithdrawn || meetsAllIdealAnswers)
+          ? 'last:border-none flex items-center gap-2 relative rounded-xl mb-2'
           : '',
         !canViewDetails || isStageDisabled
           ? 'opacity-60 cursor-not-allowed'
-          : 'cursor-pointer hover:bg-gray-50'
+          : ''
       )}
     >
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
@@ -200,11 +238,12 @@ export default function Person({
         </p>
         {canViewDetails && currentStageNote && (
           <div className='flex flex-col mt-1'>
-            <div className='flex items-center'>
-              <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Restored from Archive</span>
-            </div>
-            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+            {!isPassedFinalInterview && (
+              <div className='flex items-center'>
+                <span className='text-xs text-gray-500'>Restored from Archive</span>
+              </div>
+            )}
+            <span className='text-xs text-gray-400'>
               {currentStageNote.created_at 
                 ? new Date(currentStageNote.created_at).toLocaleDateString('en-US', { 
                     month: 'short', 
@@ -218,11 +257,14 @@ export default function Person({
         )}
         {canViewDetails && !currentStageNote && isFirstStage && (
           <div className='flex flex-col mt-1'>
-            <div className='flex items-center'>
-              <div className='w-2 h-2 bg-green-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>New Applicant</span>
-            </div>
-            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+            {!isPassedFinalInterview && (
+              <div className='flex items-center'>
+                <span className='text-xs text-gray-500'>New Applicant
+                  <span className="text-red-600"> *</span>
+                </span>
+              </div>
+            )}
+            <span className='text-xs text-gray-400'>
               {applicant.created_at 
                 ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
                     month: 'short', 
@@ -236,11 +278,12 @@ export default function Person({
         )}
         {canViewDetails && !currentStageNote && !isFirstStage && isRestoredApplicant && (
           <div className='flex flex-col mt-1'>
-            <div className='flex items-center'>
-              <div className='w-2 h-2 bg-purple-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Moved to {stage.title}</span>
-            </div>
-            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+            {/* {!isPassedFinalInterview && (
+              <div className='flex items-center'>
+                <span className='text-xs text-gray-500'>Moved to {stage.title}</span>
+              </div>
+            )} */}
+            <span className='text-xs text-gray-400'>
               {applicant.updated_at 
                 ? new Date(applicant.updated_at).toLocaleDateString('en-US', { 
                     month: 'short', 
@@ -264,7 +307,7 @@ export default function Person({
         <div className='mr-2'>
           <ArchiveButton
             appliedJobId={applicant.applicationId}
-            isArchived={false}
+            isArchived={isArchived}
             status={applicant.status || 'rejected'}
             onSuccess={() => {
               // Refresh will be handled by parent

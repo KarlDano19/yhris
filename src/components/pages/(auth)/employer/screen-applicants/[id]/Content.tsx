@@ -88,7 +88,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
-    rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Hired'],
   });
   
@@ -422,7 +421,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} />,
     },
   };
 

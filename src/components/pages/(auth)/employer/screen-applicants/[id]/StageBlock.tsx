@@ -31,53 +31,22 @@ export default function StageBlock({
   isDisabled = false 
 }: EnhancedStageBlockProps) {
   const { state, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { applicants, orderBy } = stage;
+  const { applicants } = stage;
   
-  // Only apply "Not Fit" filtering on the first stage (orderBy = 0)
-  const isFirstStage = orderBy === 0;
-  
-  // Apply filters to applicants
+  // Apply status filters to applicants
   const filteredApplicants = useMemo(() => {
     if (!filters) {
       return applicants;
     }
 
     return applicants.filter((applicant: ApplicantType) => {
-      let isGoodFit: boolean;
-      let isNotFit: boolean;
-      
-      if (isFirstStage) {
-        // For first stage, use screening fit for both good and not fit
-        if (applicant.screeningFit) {
-          isGoodFit = applicant.screeningFit === 'good';
-          isNotFit = applicant.screeningFit === 'bad';
-        } else {
-          isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
-          isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-        }
-      } else {
-        // For non-first stages, all applicants are considered "Good Fit" since they've progressed
-        // Hired applicants are always "Good Fit" regardless of original screening
-        isGoodFit = true; // All applicants in non-first stages are considered good fit
-        isNotFit = false; // No "Not Fit" applicants in non-first stages
-      }
-      
-      let matchesRating = false;
-      if (filters.rating.includes('Good Fit') && isGoodFit) {
-        matchesRating = true;
-      }
-      // Only apply "Not Fit" filtering on the first stage
-      if (isFirstStage && filters.rating.includes('Not Fit') && isNotFit) {
-        matchesRating = true;
-      }
-      
       const matchesStatus = filters.status.some(status => 
         applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
       );
       
-      return matchesRating && matchesStatus;
+      return matchesStatus;
     });
-  }, [applicants, filters, isFirstStage]);
+  }, [applicants, filters]);
   
   const handleAddStage = () => {
     const hasPendingStage = state.some((stage: any) => stage.isNewStage);

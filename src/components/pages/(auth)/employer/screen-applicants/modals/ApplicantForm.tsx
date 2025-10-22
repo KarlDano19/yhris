@@ -20,8 +20,9 @@ import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 type PropTypes = {
   title: string;
   JobTitle?: string;
+  screeningQuestions?: any[];
 };
-export default function ApplicantForm({ title, JobTitle }: PropTypes) {
+export default function ApplicantForm({ title, JobTitle, screeningQuestions = [] }: PropTypes) {
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
@@ -247,19 +248,32 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
         applicantProfile.screening_answers !== null &&
         applicantProfile.screening_answers.length > 0 ? (
           <div className='mt-6 space-y-6'>
-            {applicantProfile.screening_answers.map((item: any, index: number) => (
-              <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
-                <div className='flex items-start'>
-                  <div className='mr-3'>
-                    <QuestionMarkCircleIcon className='h-6 w-6 text-blue-700' />
-                  </div>
-                  <div>
-                    <p className='font-semibold'>{item.question}</p>
-                    <p className='mt-2 text-gray-700'>{item.answer}</p>
+            {applicantProfile.screening_answers.map((item: any, index: number) => {
+              // Find the corresponding screening question to check if it's must-have
+              const screeningQuestion = screeningQuestions.find((q: any) => q.question === item.question);
+              const isMustHave = screeningQuestion?.mustHave === true;
+              
+              return (
+                <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <div className='flex items-start'>
+                    <div className='mr-3'>
+                      <QuestionMarkCircleIcon className='h-6 w-6 text-blue-700' />
+                    </div>
+                    <div className='flex-1'>
+                      <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
+                        <p className='font-semibold flex-1'>{item.question}</p>
+                        {isMustHave && (
+                          <span className='bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded whitespace-nowrap self-start sm:self-center'>
+                            Must-Have
+                          </span>
+                        )}
+                      </div>
+                      <p className='mt-2 text-gray-700'>{item.answer}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className='mt-8 text-center'>
