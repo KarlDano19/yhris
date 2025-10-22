@@ -4,8 +4,8 @@ import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import FilterIcon from "@/svg/FilterIcon";
 
 type FilterValues = {
   location: string;
@@ -114,8 +114,8 @@ export default function FilterPopover({
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-700" />
-        <span className="text-gray-800 font-medium">Filter</span>
+        <FilterIcon />
+        <span className="text-gray-800 font-medium text-[16px]">Filter</span>
       </button>
 
       {open && (
