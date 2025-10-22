@@ -187,14 +187,39 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
             <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
             <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
-              {applicant.stage_notes.map((stageNote, index) => (
-                <div key={index} className='border-l-4 border-blue-400 pl-4'>
-                  <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title || 'Stage'}</h5>
+              {applicant.stage_notes.map((stageNote, index) => {
+                // Determine the appropriate label based on stage position and applicant status
+                const isFirstStage = index === 0;
+                const isLastStage = index === (applicant?.stage_notes?.length || 0) - 1;
+                const isHired = applicant?.status === 'hired';
+                
+                let dateLabel = '';
+                if (isFirstStage) {
+                  dateLabel = 'Applied on:';
+                } else if (isLastStage && isHired) {
+                  dateLabel = 'Hired on:';
+                } else {
+                  dateLabel = 'Moved to:';
+                }
+                
+                return (
+                  <div key={index} className='border-l-4 border-blue-400 pl-4'>
+                    <div className='mb-2 flex items-center justify-between'>
+                      <h5 className='font-medium text-gray-800'>{stageNote.stage_title || 'Stage'}</h5>
+                      {stageNote.created_at && (
+                        <span className='text-xs text-gray-500'>
+                          <span className='font-bold'>{dateLabel}</span> {new Date(stageNote.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
                   </div>
-                  <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

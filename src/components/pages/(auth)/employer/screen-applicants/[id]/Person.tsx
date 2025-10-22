@@ -225,30 +225,37 @@ export default function Person({
         <ApplicantAvatar applicant={applicant} size={32} />
       </div>
       <div className='flex-1'>
-        <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
-          {name}
-          {!canViewDetails && (
-            <span className="text-gray-400 text-xs ml-2">🔒</span>
-          )}
-          {isPassedFinalInterview && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
+        <div className='flex items-center gap-2'>
+          <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm flex-1`}>
+            {name}
+            {!canViewDetails && (
+              <span className="text-gray-400 text-xs ml-2">🔒</span>
+            )}
+            {isPassedFinalInterview && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )}
+            {isRejected && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )}
+            {isWithdrawn && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )}
+          </p>
+          {canViewDetails && !currentStageNote && isFirstStage && !isPassedFinalInterview && (
+            <span className='bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap'>
+              NEW
             </span>
           )}
-          {isRejected && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-          {isWithdrawn && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-        </p>
+        </div>
         {canViewDetails && currentStageNote && (
           <div className='flex flex-col mt-1'>
             {!isPassedFinalInterview && (
@@ -270,12 +277,6 @@ export default function Person({
         )}
         {canViewDetails && !currentStageNote && isFirstStage && (
           <div className='flex flex-col mt-1'>
-            {!isPassedFinalInterview && (
-              <div className='flex items-center'>
-                <span className='text-xs text-red-400'>(NEW APPLICANT)
-                </span>
-              </div>
-            )}
             <span className='text-xs text-gray-400'>
               {applicant.created_at 
                 ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
