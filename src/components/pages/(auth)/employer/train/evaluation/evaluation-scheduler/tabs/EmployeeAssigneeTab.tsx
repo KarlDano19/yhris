@@ -87,7 +87,6 @@ function EmployeeAssigneeTab({
             isClearable={false}
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
-            excludeValues={selectedEmployees}
             employeeNames={recipientNames}
             className=""
             showEmail={true}
@@ -126,7 +125,6 @@ function EmployeeAssigneeTab({
             isClearable={false}
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
-            excludeValues={selectedRecipients}
             employeeNames={employeeNames}
             className=""
             showEmail={true}
