@@ -203,6 +203,26 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         screeningFit,
         screeningAnswers: answers,
       };
+    }).sort((a: any, b: any) => {
+      // Helper function to check if applicant is a new applicant (first stage, no stage notes)
+      const isNewApplicant = (applicant: any) => {
+        // Check if this is likely a new applicant based on the same logic in Person.tsx
+        // This is a simplified check - in a real scenario, you'd want to pass stage info
+        return !applicant.stage_notes || applicant.stage_notes.length === 0;
+      };
+      
+      const aIsNew = isNewApplicant(a);
+      const bIsNew = isNewApplicant(b);
+      
+      // Prioritize new applicants first
+      if (aIsNew && !bIsNew) return -1; // a comes first
+      if (!aIsNew && bIsNew) return 1;  // b comes first
+      
+      // If both are new or both are not new, sort by date (newest first)
+      const dateA = new Date(a.updated_at || a.created_at || new Date());
+      const dateB = new Date(b.updated_at || b.created_at || new Date());
+      
+      return dateB.getTime() - dateA.getTime();
     });
   };
 

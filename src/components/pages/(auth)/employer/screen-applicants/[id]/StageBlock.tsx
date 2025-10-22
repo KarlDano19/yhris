@@ -33,18 +33,45 @@ export default function StageBlock({
   const { state, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { applicants } = stage;
   
-  // Apply status filters to applicants
+  // Apply status filters to applicants and sort by newest to oldest
   const filteredApplicants = useMemo(() => {
-    if (!filters) {
-      return applicants;
+    let filtered = applicants;
+    
+    if (filters) {
+      filtered = applicants.filter((applicant: ApplicantType) => {
+        const matchesStatus = filters.status.some(status => 
+          applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
+        );
+        
+        return matchesStatus;
+      });
     }
 
-    return applicants.filter((applicant: ApplicantType) => {
-      const matchesStatus = filters.status.some(status => 
-        applicant.status && status.toLowerCase() === applicant.status.toLowerCase()
-      );
+    // Sort applicants with priority: New applicants first, then by date
+    return filtered.sort((a: ApplicantType, b: ApplicantType) => {
+      // Helper function to check if applicant is a new applicant
+      const isNewApplicant = (applicant: ApplicantType) => {
+        // Check if this is the first stage (orderBy === 0) and no stage notes
+        const isFirstStage = stage.orderBy === 0;
+        const hasStageNotes = applicant.stage_notes && applicant.stage_notes.length > 0;
+        const currentStageNote = applicant.stage_notes?.find(note => note.job_stage === stage.id);
+        
+        // New applicant: first stage, no stage notes, and no current stage note
+        return isFirstStage && !hasStageNotes && !currentStageNote;
+      };
       
-      return matchesStatus;
+      const aIsNew = isNewApplicant(a);
+      const bIsNew = isNewApplicant(b);
+      
+      // Prioritize new applicants first
+      if (aIsNew && !bIsNew) return -1; // a comes first
+      if (!aIsNew && bIsNew) return 1;  // b comes first
+      
+      // If both are new or both are not new, sort by date (newest first)
+      const dateA = new Date(a.updated_at || a.created_at || new Date());
+      const dateB = new Date(b.updated_at || b.created_at || new Date());
+      
+      return dateB.getTime() - dateA.getTime();
     });
   }, [applicants, filters]);
   

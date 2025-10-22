@@ -159,36 +159,52 @@ export default function Person({
     });
   };
 
-  // Determine background color based on priority and Must-Have results
+  // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
+  const isWithinTimerWindow = (dateString: string | undefined) => {
+    if (!dateString) return false;
+    const dateCreated = new Date(dateString);
+    const now = new Date();
+    const timeDifference = now.getTime() - dateCreated.getTime();
+    const minutesDifference = timeDifference / (1000 * 60);
+    return Math.abs(minutesDifference) <= 720; // 12 hours
+  };
+
+  // Check if applicant was recently created/updated (within 12 hours)
+  const isRecentlyCreated = isWithinTimerWindow(applicant.created_at);
+  const isRecentlyUpdated = isWithinTimerWindow(applicant.updated_at);
+  const isRecentlyRestored = isRestoredApplicant && isWithinTimerWindow(applicant.updated_at);
+  const isRecentlyArchived = isArchived && isWithinTimerWindow(applicant.updated_at);
+
+  // Determine background color based on priority and Must-Have results with timer logic
   let backgroundColorClass = '';
   let borderClass = '';
   let hoverClass = '';
   
-  if (isArchived) {
-    // Archived applicants - Red background (highest priority)
+  if (isArchived && isRecentlyArchived) {
+    // Recently archived applicants - Red background (highest priority, with timer)
     backgroundColorClass = 'bg-red-50';
     borderClass = 'border-b border-b-red-50';
     hoverClass = 'hover:bg-red-100';
   } else if (isPassedFinalInterview) {
-    // Hired applicants - Yellow background
+    // Hired applicants - Yellow background (no timer, permanent)
     backgroundColorClass = 'bg-yellow-100';
     borderClass = 'border-b border-b-yellow-100';
-  } else if (isRestoredApplicant) {
-    // Restored from archived applicants - Red background
+  } else if (isRestoredApplicant && isRecentlyRestored) {
+    // Recently restored from archived applicants - Red background (with timer)
     backgroundColorClass = 'bg-red-50';
     borderClass = 'border-b border-b-red-50';
     hoverClass = 'hover:bg-red-100';
   } else if (isRejected || isWithdrawn) {
-    // Rejected/Withdrawn applicants - Violet background
+    // Rejected/Withdrawn applicants - Violet background (no timer, permanent)
     backgroundColorClass = 'bg-violet-100';
     borderClass = 'border-b border-b-violet-100';
-  } else if (meetsAllIdealAnswers) {
-    // Applicants who meet all ideal answers - Green background
+  } else if (meetsAllIdealAnswers && (isRecentlyCreated || isRecentlyUpdated)) {
+    // Recently created/updated applicants who meet all ideal answers - Green background (with timer)
     backgroundColorClass = 'bg-green-100';
     borderClass = 'border-b border-b-green-100';
     hoverClass = 'hover:bg-green-200';
   } else {
-    // Applicants who don't meet ideal answers - White background (default)
+    // Applicants who don't meet criteria or timer expired - White background (default)
     backgroundColorClass = 'bg-white';
     hoverClass = 'hover:bg-gray-50';
   }
@@ -196,13 +212,10 @@ export default function Person({
   return (
     <div
       className={classNames(
-        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg',
+        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
         backgroundColorClass,
         borderClass,
         hoverClass,
-        (isArchived || isPassedFinalInterview || isRestoredApplicant || isRejected || isWithdrawn || meetsAllIdealAnswers)
-          ? 'last:border-none flex items-center gap-2 relative rounded-xl mb-2'
-          : '',
         !canViewDetails || isStageDisabled
           ? 'opacity-60 cursor-not-allowed'
           : ''
@@ -259,8 +272,7 @@ export default function Person({
           <div className='flex flex-col mt-1'>
             {!isPassedFinalInterview && (
               <div className='flex items-center'>
-                <span className='text-xs text-gray-500'>New Applicant
-                  <span className="text-red-600"> *</span>
+                <span className='text-xs text-red-400'>(NEW APPLICANT)
                 </span>
               </div>
             )}

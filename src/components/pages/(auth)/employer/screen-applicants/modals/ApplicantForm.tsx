@@ -481,7 +481,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               <Dialog.Panel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  viewCV ? 'max-w-4xl' : 'max-w-xl'
+                  viewCV ? 'max-w-4xl' : 'max-w-3xl'
                 )}
               >
                 <div className='flex bg-savoy-blue p-2 items-center gap-4'>
@@ -490,50 +490,56 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full grid grid-cols-4'>
-                      <div className='mr-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(1)}
-                        >
-                          Profile
-                        </button>
-                      </div>
-                      <div className='mx-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(2)}
-                        >
+                    <div className='w-full overflow-x-auto md:overflow-x-visible justify-center md:justify-stretch' 
+                    style={{
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#2d3e58 #f1f1f1'
+                    }}>
+                      <div className='flex md:grid md:grid-cols-4 gap-2 md:gap-0 min-w-max md:min-w-0 justify-center md:justify-stretch'>
+                        <div className='mr-2 md:mr-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(1)}
+                          >
+                            Profile
+                          </button>
+                        </div>
+                        <div className='mx-2 md:mx-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md whitespace-nowrap md:text-base w-full',
+                              currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(2)}
+                          >
                           Job Experience
-                        </button>
-                      </div>
-                      <div className='mx-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(3)}
-                        >
-                          Summary
-                        </button>
-                      </div>
-                      <div className='ml-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(4)}
-                        >
-                          Answers
-                        </button>
+                          </button>
+                        </div>
+                        <div className='mx-2 md:mx-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(3)}
+                          >
+                            Summary
+                          </button>
+                        </div>
+                        <div className='ml-2 md:ml-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(4)}
+                          >
+                            Answers
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
