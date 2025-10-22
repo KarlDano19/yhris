@@ -101,6 +101,21 @@ export default function Person({
 
   const isPassedFinalInterview = applicant.status === 'hired';
   
+  // Find the stage note for the current stage the applicant is in
+  const currentStageNote = applicant.stage_notes?.find(note => note.job_stage === stage.id);
+  
+  // Check if this is the first stage (order_by === 0)
+  const isFirstStage = stage.orderBy === 0;
+  
+  // Check if applicant has any stage notes (indicating they've been through the process before)
+  const hasAnyStageNotes = applicant.stage_notes && applicant.stage_notes.length > 0;
+  
+  // Determine if this is a restored applicant:
+  // - They have stage notes from previous stages (been through the process)
+  // - They're not in the first stage
+  // - They don't have a stage note for the current stage yet
+  const isRestoredApplicant = hasAnyStageNotes && !isFirstStage && !currentStageNote;
+  
   // Determine if this applicant card should be interactive
   const canInteract = permissions.can_update && !isStageDisabled;
   const canViewDetails = permissions.can_view && !isStageDisabled;
@@ -143,7 +158,7 @@ export default function Person({
   return (
     <div
       className={classNames(
-        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative',
+        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg',
         isButtonDisabled && !isPassedFinalInterview
           ? 'border-b border-b-blue-100 bg-blue-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
           : '',
@@ -183,15 +198,15 @@ export default function Person({
             </span>
           )}
         </p>
-        {canViewDetails && applicant.stage_notes && applicant.stage_notes.length > 0 && (
+        {canViewDetails && currentStageNote && (
           <div className='flex flex-col mt-1'>
             <div className='flex items-center'>
               <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Has stage notes</span>
+              <span className='text-xs text-gray-500'>Restored from Archive</span>
             </div>
             <span className='text-xs text-gray-400 ml-3 mt-0.5'>
-              {applicant.stage_notes[0]?.created_at 
-                ? new Date(applicant.stage_notes[0].created_at).toLocaleDateString('en-US', { 
+              {currentStageNote.created_at 
+                ? new Date(currentStageNote.created_at).toLocaleDateString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric' 
@@ -201,15 +216,33 @@ export default function Person({
             </span>
           </div>
         )}
-        {canViewDetails && (!applicant.stage_notes || applicant.stage_notes.length === 0) && (
+        {canViewDetails && !currentStageNote && isFirstStage && (
           <div className='flex flex-col mt-1'>
             <div className='flex items-center'>
               <div className='w-2 h-2 bg-green-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Applied</span>
+              <span className='text-xs text-gray-500'>New Applicant</span>
             </div>
             <span className='text-xs text-gray-400 ml-3 mt-0.5'>
               {applicant.created_at 
                 ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })
+                : 'Date not available'
+              }
+            </span>
+          </div>
+        )}
+        {canViewDetails && !currentStageNote && !isFirstStage && isRestoredApplicant && (
+          <div className='flex flex-col mt-1'>
+            <div className='flex items-center'>
+              <div className='w-2 h-2 bg-purple-500 rounded-full mr-1'></div>
+              <span className='text-xs text-gray-500'>Moved to {stage.title}</span>
+            </div>
+            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+              {applicant.updated_at 
+                ? new Date(applicant.updated_at).toLocaleDateString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric' 
@@ -257,7 +290,7 @@ export default function Person({
       {/* Menu dropdown - only show if user can interact */}
       {isOpenMenu && canInteract && (
         <div ref={menuRef}>
-          <ul className='absolute right-0 top-12 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
+          <ul className='absolute right-0 top-16 p-2 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
               
