@@ -184,9 +184,39 @@ export default function Person({
           )}
         </p>
         {canViewDetails && applicant.stage_notes && applicant.stage_notes.length > 0 && (
-          <div className='flex items-center mt-1'>
-            <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
-            <span className='text-xs text-gray-500'>Has stage notes</span>
+          <div className='flex flex-col mt-1'>
+            <div className='flex items-center'>
+              <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
+              <span className='text-xs text-gray-500'>Has stage notes</span>
+            </div>
+            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+              {applicant.stage_notes[0]?.created_at 
+                ? new Date(applicant.stage_notes[0].created_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })
+                : 'Date not available'
+              }
+            </span>
+          </div>
+        )}
+        {canViewDetails && (!applicant.stage_notes || applicant.stage_notes.length === 0) && (
+          <div className='flex flex-col mt-1'>
+            <div className='flex items-center'>
+              <div className='w-2 h-2 bg-green-500 rounded-full mr-1'></div>
+              <span className='text-xs text-gray-500'>Applied</span>
+            </div>
+            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+              {applicant.created_at 
+                ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })
+                : 'Date not available'
+              }
+            </span>
           </div>
         )}
         {!canViewDetails && (
@@ -227,7 +257,7 @@ export default function Person({
       {/* Menu dropdown - only show if user can interact */}
       {isOpenMenu && canInteract && (
         <div ref={menuRef}>
-          <ul className='absolute left-0 top-6 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md'>
+          <ul className='absolute right-0 top-12 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
               

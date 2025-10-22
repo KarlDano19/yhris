@@ -91,6 +91,7 @@ export type ApplicantType = {
     mustHave?: boolean;
     isMatch?: boolean;
   }>;
+  created_at?: string;
 };
 
 export type ApplicantsType = [] | ApplicantType[];

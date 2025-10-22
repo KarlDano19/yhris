@@ -31,7 +31,10 @@ export default function StageBlock({
   isDisabled = false 
 }: EnhancedStageBlockProps) {
   const { state, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { applicants } = stage;
+  const { applicants, orderBy } = stage;
+  
+  // Only apply "Not Fit" filtering on the first stage (orderBy = 0)
+  const isFirstStage = orderBy === 0;
   
   // Apply filters to applicants
   const filteredApplicants = useMemo(() => {
@@ -43,19 +46,28 @@ export default function StageBlock({
       let isGoodFit: boolean;
       let isNotFit: boolean;
       
-      if (applicant.screeningFit) {
-        isGoodFit = applicant.screeningFit === 'good';
-        isNotFit = applicant.screeningFit === 'bad';
+      if (isFirstStage) {
+        // For first stage, use screening fit for both good and not fit
+        if (applicant.screeningFit) {
+          isGoodFit = applicant.screeningFit === 'good';
+          isNotFit = applicant.screeningFit === 'bad';
+        } else {
+          isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
+          isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+        }
       } else {
-        isGoodFit = applicant.status === 'passed' || applicant.status === 'ongoing' || applicant.status === 'hired';
-        isNotFit = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+        // For non-first stages, all applicants are considered "Good Fit" since they've progressed
+        // Hired applicants are always "Good Fit" regardless of original screening
+        isGoodFit = true; // All applicants in non-first stages are considered good fit
+        isNotFit = false; // No "Not Fit" applicants in non-first stages
       }
       
       let matchesRating = false;
       if (filters.rating.includes('Good Fit') && isGoodFit) {
         matchesRating = true;
       }
-      if (filters.rating.includes('Not Fit') && isNotFit) {
+      // Only apply "Not Fit" filtering on the first stage
+      if (isFirstStage && filters.rating.includes('Not Fit') && isNotFit) {
         matchesRating = true;
       }
       
@@ -65,7 +77,7 @@ export default function StageBlock({
       
       return matchesRating && matchesStatus;
     });
-  }, [applicants, filters]);
+  }, [applicants, filters, isFirstStage]);
   
   const handleAddStage = () => {
     const hasPendingStage = state.some((stage: any) => stage.isNewStage);
