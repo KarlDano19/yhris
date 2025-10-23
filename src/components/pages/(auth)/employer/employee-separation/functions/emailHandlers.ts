@@ -9,6 +9,7 @@ export interface EmailData {
   cc?: string[];
   bcc?: string[];
   template?: string;
+  attachment?: File | string;
 }
 
 export interface LetterData {
@@ -35,6 +36,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   lastPay: {
     template: string;
@@ -43,6 +45,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   quitClaim: {
     template: string;
@@ -51,6 +54,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   isLetterSent: boolean;
   isDocumentsSent: boolean;
@@ -92,6 +96,9 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.signDocuments.bcc = data.bcc;
     }
+    if (data.attachment) {
+      separationItemCopy.signDocuments.attachment = data.attachment;
+    }
     separationItemCopy.isDocumentsSent = true;
   } else if (emailType === 'last pay') {
     separationItemCopy.lastPay.template = data.template || '';
@@ -104,6 +111,9 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.lastPay.bcc = data.bcc;
     }
+    if (data.attachment) {
+      separationItemCopy.lastPay.attachment = data.attachment;
+    }
     separationItemCopy.isLastPayReleased = true;
   } else if (emailType === 'quit claim') {
     separationItemCopy.quitClaim.template = data.template || '';
@@ -115,6 +125,9 @@ export const handleEmailSending = (
     }
     if (data.bcc) {
       separationItemCopy.quitClaim.bcc = data.bcc;
+    }
+    if (data.attachment) {
+      separationItemCopy.quitClaim.attachment = data.attachment;
     }
     separationItemCopy.isQuitclaimSigned = true;
   }
