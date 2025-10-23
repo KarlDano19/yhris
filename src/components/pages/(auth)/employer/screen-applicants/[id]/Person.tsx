@@ -221,23 +221,31 @@ export default function Person({
           : ''
       )}
     >
+      {/* NEW label - positioned absolutely in upper right corner */}
+      {isRecentlyCreated && (
+        <span className='absolute top-2 right-3 bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0'>
+          NEW
+        </span>
+      )}
+      
+      {/* HIRED label - positioned absolutely in upper right corner */}
+      {isPassedFinalInterview && (
+        <span className={`absolute top-2 right-3 bg-stone-100 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
+          HIRED
+        </span>
+      )}
+      
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
         <ApplicantAvatar applicant={applicant} size={32} />
       </div>
-      <div className='flex-1'>
+      <div className='flex-1 pt-2'>
         <div className='flex items-center gap-2'>
           <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm flex-1`}>
             {name}
             {!canViewDetails && (
               <span className="text-gray-400 text-xs ml-2">🔒</span>
             )}
-            {isPassedFinalInterview && (
-              <span>
-                <br />
-                {capitalizeFirstLetter(applicant.status)}
-              </span>
-            )}
-            {isRejected && (
+            {/* {isRejected && (
               <span>
                 <br />
                 {capitalizeFirstLetter(applicant.status)}
@@ -248,13 +256,8 @@ export default function Person({
                 <br />
                 {capitalizeFirstLetter(applicant.status)}
               </span>
-            )}
+            )} */}
           </p>
-          {canViewDetails && !currentStageNote && isFirstStage && !isPassedFinalInterview && (
-            <span className='bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap'>
-              NEW
-            </span>
-          )}
         </div>
         {canViewDetails && currentStageNote && (
           <div className='flex flex-col mt-1'>
@@ -297,8 +300,8 @@ export default function Person({
               </div>
             )} */}
             <span className='text-xs text-gray-400'>
-              {applicant.updated_at 
-                ? new Date(applicant.updated_at).toLocaleDateString('en-US', { 
+              {applicant.created_at 
+                ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric' 
