@@ -194,7 +194,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 <div className='flex-1 min-w-0'>
                   <div className='flex items-start justify-between mb-1'>
-                    <h5 className='font-semibold text-gray-900 text-base flex-1'>Applied on</h5>
+                    <h5 className='font-semibold text-gray-900 text-base flex-1'>Date Applied:</h5>
                     {applicant?.created_at && (
                       <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
                         {new Date(applicant.created_at).toLocaleDateString('en-US', {
@@ -218,15 +218,13 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               let borderColor = 'border-purple-500';
               let iconColor = 'text-purple-600';
               let iconComponent = <ArrowRightIcon className="w-5 h-5" />;
-              let stageTitle = `Moved from ${stageNote.stage_title || 'Next Stage'}`;
-              let stageDescription = 'Passed previous stage requirements';
+              let stageTitle = `Passed: ${stageNote.stage_title || 'Next Stage'}`;
               
               if (isLastStage && isHired) {
                 borderColor = 'border-green-500';
                 iconColor = 'text-green-600';
                 iconComponent = <CheckCircleIcon className="w-5 h-5" />;
                 stageTitle = 'Hired';
-                stageDescription = 'Successfully passed all interviews';
               }
               
               return (
@@ -248,10 +246,9 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                           </span>
                         )}
                       </div>
-                      <p className='text-sm text-gray-600 mb-2'>{stageDescription}</p>
                       {stageNote.notes && (
                         <div className='mt-2 p-3 bg-gray-50 rounded-md mr-0'>
-                          <p className='text-sm text-gray-700 whitespace-pre-wrap'>{stageNote.notes}</p>
+                          <p className='text-sm text-gray-700 whitespace-pre-wrap'><span className='font-semibold'>Stage Notes:</span> {stageNote.notes}</p>
                         </div>
                       )}
                     </div>
