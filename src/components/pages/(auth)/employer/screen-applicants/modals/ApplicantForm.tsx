@@ -183,84 +183,84 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
             </div>
           </div>
         </div>
-        {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
-          <div className='mt-6'>
-            <h4 className='text-xl font-semibold text-indigo-dye mb-4'>Application Timeline</h4>
-            <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
-              {applicant.stage_notes.map((stageNote, index) => {
-                // Determine the appropriate label and styling based on stage position and applicant status
-                const isFirstStage = index === 0;
-                const isLastStage = index === (applicant?.stage_notes?.length || 0) - 1;
-                const isHired = applicant?.status === 'hired';
-                
-                // Define colors and icons for different stages
-                let borderColor = 'border-blue-500';
-                let iconColor = 'text-blue-600';
-                let iconComponent = null;
-                
-                if (isFirstStage) {
-                  borderColor = 'border-blue-500';
-                  iconColor = 'text-blue-600';
-                  iconComponent = <CalendarIcon className="w-5 h-5" />;
-                } else if (isLastStage && isHired) {
-                  borderColor = 'border-green-500';
-                  iconColor = 'text-green-600';
-                  iconComponent = <CheckCircleIcon className="w-5 h-5" />;
-                } else {
-                  borderColor = 'border-purple-500';
-                  iconColor = 'text-purple-600';
-                  iconComponent = <ArrowRightIcon className="w-5 h-5" />;
-                }
-                
-                let stageTitle = stageNote.stage_title || 'Stage';
-                let stageDescription = '';
-                
-                if (isFirstStage) {
-                  stageTitle = 'Applied on';
-                  stageDescription = 'Candidate applied for the position';
-                } else if (isLastStage && isHired) {
-                  stageTitle = 'Final Interview';
-                  stageDescription = 'Successfully passed all interviews';
-                } else {
-                  stageTitle = `Moved to ${stageNote.stage_title || 'Next Stage'}`;
-                  stageDescription = 'Passed previous stage requirements';
-                }
-                
-                return (
-                  <div key={index} className={`relative bg-white border-l-4 ${borderColor} pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow`}>
-                    <div className='flex items-start'>
-                      <div className={`flex-shrink-0 ${iconColor} mr-3 mt-1`}>
-                        {iconComponent}
+        <div className='mt-6'>
+          <h4 className='text-xl font-semibold text-indigo-dye mb-4'>Application Timeline</h4>
+          <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
+            {/* Always show "Applied on" entry first */}
+            <div className='relative bg-white border-l-4 border-blue-500 pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow'>
+              <div className='flex items-start'>
+                <div className='flex-shrink-0 text-blue-600 mr-3 mt-1'>
+                  <CalendarIcon className="w-5 h-5" />
+                </div>
+                <div className='flex-1 min-w-0'>
+                  <div className='flex items-start justify-between mb-1'>
+                    <h5 className='font-semibold text-gray-900 text-base flex-1'>Applied on</h5>
+                    {applicant?.created_at && (
+                      <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
+                        {new Date(applicant.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Then show all stage notes */}
+            {applicant?.stage_notes && applicant.stage_notes.length > 0 && applicant.stage_notes.map((stageNote, index) => {
+              const isLastStage = index === (applicant?.stage_notes?.length || 0) - 1;
+              const isHired = applicant?.status === 'hired';
+              
+              // Define colors and icons for different stages
+              let borderColor = 'border-purple-500';
+              let iconColor = 'text-purple-600';
+              let iconComponent = <ArrowRightIcon className="w-5 h-5" />;
+              let stageTitle = `Moved from ${stageNote.stage_title || 'Next Stage'}`;
+              let stageDescription = 'Passed previous stage requirements';
+              
+              if (isLastStage && isHired) {
+                borderColor = 'border-green-500';
+                iconColor = 'text-green-600';
+                iconComponent = <CheckCircleIcon className="w-5 h-5" />;
+                stageTitle = 'Hired';
+                stageDescription = 'Successfully passed all interviews';
+              }
+              
+              return (
+                <div key={index} className={`relative bg-white border-l-4 ${borderColor} pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow`}>
+                  <div className='flex items-start'>
+                    <div className={`flex-shrink-0 ${iconColor} mr-3 mt-1`}>
+                      {iconComponent}
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <div className='flex items-start justify-between mb-1'>
+                        <h5 className='font-semibold text-gray-900 text-base flex-1'>{stageTitle}</h5>
+                        {stageNote.created_at && (
+                          <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
+                            {new Date(stageNote.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        )}
                       </div>
-                      <div className='flex-1 min-w-0'>
-                        <div className='flex items-start justify-between mb-1'>
-                          <h5 className='font-semibold text-gray-900 text-base flex-1'>{stageTitle}</h5>
-                          {stageNote.created_at && (
-                            <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
-                              {new Date(stageNote.created_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </span>
-                          )}
+                      <p className='text-sm text-gray-600 mb-2'>{stageDescription}</p>
+                      {stageNote.notes && (
+                        <div className='mt-2 p-3 bg-gray-50 rounded-md mr-0'>
+                          <p className='text-sm text-gray-700 whitespace-pre-wrap'>{stageNote.notes}</p>
                         </div>
-                        {!isFirstStage && (
-                          <p className='text-sm text-gray-600 mb-2'>{stageDescription}</p>
-                        )}
-                        {stageNote.notes && (
-                          <div className='mt-2 p-3 bg-gray-50 rounded-md mr-0'>
-                            <p className='text-sm text-gray-700 whitespace-pre-wrap'>{stageNote.notes}</p>
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
         <div className='mt-4'>
           <button
             type='button'
