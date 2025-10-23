@@ -10,7 +10,7 @@ import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
 import StateContext from '../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
@@ -184,39 +184,77 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           </div>
         </div>
         {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
-          <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
-            <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
+          <div className='mt-6'>
+            <h4 className='text-xl font-semibold text-indigo-dye mb-4'>Application Timeline</h4>
             <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
               {applicant.stage_notes.map((stageNote, index) => {
-                // Determine the appropriate label based on stage position and applicant status
+                // Determine the appropriate label and styling based on stage position and applicant status
                 const isFirstStage = index === 0;
                 const isLastStage = index === (applicant?.stage_notes?.length || 0) - 1;
                 const isHired = applicant?.status === 'hired';
                 
-                let dateLabel = '';
+                // Define colors and icons for different stages
+                let borderColor = 'border-blue-500';
+                let iconColor = 'text-blue-600';
+                let iconComponent = null;
+                
                 if (isFirstStage) {
-                  dateLabel = 'Applied on:';
+                  borderColor = 'border-blue-500';
+                  iconColor = 'text-blue-600';
+                  iconComponent = <CalendarIcon className="w-5 h-5" />;
                 } else if (isLastStage && isHired) {
-                  dateLabel = 'Hired on:';
+                  borderColor = 'border-green-500';
+                  iconColor = 'text-green-600';
+                  iconComponent = <CheckCircleIcon className="w-5 h-5" />;
                 } else {
-                  dateLabel = 'Moved to:';
+                  borderColor = 'border-purple-500';
+                  iconColor = 'text-purple-600';
+                  iconComponent = <ArrowRightIcon className="w-5 h-5" />;
+                }
+                
+                let stageTitle = stageNote.stage_title || 'Stage';
+                let stageDescription = '';
+                
+                if (isFirstStage) {
+                  stageTitle = 'Applied on';
+                  stageDescription = 'Candidate applied for the position';
+                } else if (isLastStage && isHired) {
+                  stageTitle = 'Final Interview';
+                  stageDescription = 'Successfully passed all interviews';
+                } else {
+                  stageTitle = `Moved to ${stageNote.stage_title || 'Next Stage'}`;
+                  stageDescription = 'Passed previous stage requirements';
                 }
                 
                 return (
-                  <div key={index} className='border-l-4 border-blue-400 pl-4'>
-                    <div className='mb-2 flex items-center justify-between'>
-                      <h5 className='font-medium text-gray-800'>{stageNote.stage_title || 'Stage'}</h5>
-                      {stageNote.created_at && (
-                        <span className='text-xs text-gray-500'>
-                          <span className='font-bold'>{dateLabel}</span> {new Date(stageNote.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      )}
+                  <div key={index} className={`relative bg-white border-l-4 ${borderColor} pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow`}>
+                    <div className='flex items-start'>
+                      <div className={`flex-shrink-0 ${iconColor} mr-3 mt-1`}>
+                        {iconComponent}
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-start justify-between mb-1'>
+                          <h5 className='font-semibold text-gray-900 text-base flex-1'>{stageTitle}</h5>
+                          {stageNote.created_at && (
+                            <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
+                              {new Date(stageNote.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          )}
+                        </div>
+                        {!isFirstStage && (
+                          <p className='text-sm text-gray-600 mb-2'>{stageDescription}</p>
+                        )}
+                        {stageNote.notes && (
+                          <div className='mt-2 p-3 bg-gray-50 rounded-md mr-0'>
+                            <p className='text-sm text-gray-700 whitespace-pre-wrap'>{stageNote.notes}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
                   </div>
                 );
               })}
