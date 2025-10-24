@@ -49,6 +49,7 @@ export default function EmailField({
   const [hasUserFocused, setHasUserFocused] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Debouncing effect for search
   useEffect(() => {
@@ -433,11 +434,17 @@ export default function EmailField({
         </div>
       ))}
       {!isFocused && remainingCount > 0 && (
-        <div className='bg-gray-200 rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm text-gray-600'>
+        <button
+          type='button'
+          onClick={() => inputRef.current?.focus()}
+          className='bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm text-gray-600 transition-colors cursor-pointer'
+          title="Click to view all recipients"
+        >
           <p>and {remainingCount} more...</p>
-        </div>
+        </button>
       )}
       <input
+        ref={inputRef}
         type='text'
         value={inputValue}
         onKeyDown={handleKeyDown}
