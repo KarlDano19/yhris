@@ -152,7 +152,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
         employeeId: employeeId
       });
       
-      toast.custom(() => <CustomToast message='Employee will now be displayed in the org chart!' type='success' />, {
+      toast.custom(() => <CustomToast message='Employee will now be displayed in the org chart.' type='success' />, {
         duration: 3000,
       });
     } catch (error: any) {
@@ -269,10 +269,12 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                   {data.description && (
                     <div>
                       <h4 className="text-lg font-semibold text-gray-800 mb-3">Position Description</h4>
-                      <div 
-                        className="text-sm text-gray-600 leading-relaxed ql-editor bg-gray-50 p-4 rounded-lg"
-                        dangerouslySetInnerHTML={{ __html: data.description }}
-                      />
+                      <div className="bg-gray-50 rounded-lg overflow-hidden">
+                        <div 
+                          className="ql-editor"
+                          dangerouslySetInnerHTML={{ __html: data.description }}
+                        />
+                      </div>
                     </div>
                   )}
 

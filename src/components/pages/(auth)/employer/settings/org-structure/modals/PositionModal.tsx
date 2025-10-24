@@ -292,11 +292,15 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           </label>
                           {selectedPosition.description ? (
                             <div 
-                              className="ql-editor text-sm leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto cursor-pointer hover:border-savoy-blue transition-colors"
-                              dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
+                              className="bg-gray-50 rounded-lg border border-gray-200 max-h-60 overflow-y-auto cursor-pointer hover:border-savoy-blue transition-colors"
                               onClick={handleEditDescription}
                               title="Click to edit description"
-                            />
+                            >
+                              <div 
+                                className="ql-editor"
+                                dangerouslySetInnerHTML={{ __html: selectedPosition.description }}
+                              />
+                            </div>
                           ) : (
                             <div className="text-center py-8">
                               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 mx-auto">

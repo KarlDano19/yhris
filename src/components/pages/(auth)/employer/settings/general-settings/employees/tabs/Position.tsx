@@ -37,12 +37,6 @@ type T_ModalData = {
   open: boolean;
 };
 
-type T_DescriptionModalData = {
-  name: string;
-  description: string;
-  open: boolean;
-};
-
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -59,7 +53,6 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState<boolean>(false);
   const [isPositionEditModalOpen, setIsPositionEditModalOpen] = useState<T_ModalData | null>(null);
   const [isPositionDeleteModalOpen, setIsPositionDeleteModalOpen] = useState<T_ModalData | null>(null);
-  const [descriptionModalData, setDescriptionModalData] = useState<T_DescriptionModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -245,11 +238,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             {item.description ? (
               <button
-                onClick={() => setDescriptionModalData({ 
-                  name: item.name, 
-                  description: item.description, 
-                  open: true 
-                })}
+                onClick={() => setIsPositionEditModalOpen({ id: item.id, open: true })}
                 className='text-blue-600 hover:text-blue-800 hover:underline'
               >
                 Click to view
