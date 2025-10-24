@@ -60,6 +60,7 @@ const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({
                 <div className="p-6 space-y-4">
                   <div className="text-center mb-6">
                     <p className="text-gray-600 mb-2">Choose how you want to export the organizational chart:</p>
+                    <p className="text-sm text-gray-500 mt-2">You'll be able to select which positions to include in the next step.</p>
                   </div>
 
                   {/* Export Options */}

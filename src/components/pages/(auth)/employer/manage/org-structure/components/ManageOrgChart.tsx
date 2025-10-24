@@ -44,6 +44,9 @@ interface ManageOrgChartProps {
   setDragOffset: (offset: { x: number; y: number }) => void;
   onExport?: (format: 'pdf' | 'png') => void;
   disableTooltips?: boolean;
+  isSelectionMode?: boolean;
+  selectedPositions?: Set<number | string>;
+  setSelectedPositions?: (positions: Set<number | string>) => void;
 }
 
 // Main Manage Org Chart Component
@@ -64,7 +67,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   dragOffset,
   setDragOffset,
   onExport,
-  disableTooltips = false
+  disableTooltips = false,
+  isSelectionMode = false,
+  selectedPositions = new Set(),
+  setSelectedPositions
 }) => {
   
   // Drag state
@@ -133,6 +139,9 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               setExpandedPositions={setExpandedPositions}
               onSetPrimaryEmployee={handleSetPrimaryEmployee}
               disableTooltips={disableTooltips}
+              isSelectionMode={isSelectionMode}
+              selectedPositions={selectedPositions}
+              setSelectedPositions={setSelectedPositions}
             />
           </div>
         }
@@ -239,6 +248,9 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         renderTree={renderTree}
         setDragOffset={setDragOffset}
         onExport={onExport}
+        isSelectionMode={isSelectionMode}
+        selectedPositions={selectedPositions}
+        setSelectedPositions={setSelectedPositions}
       />, 
       document.body
     );
@@ -296,6 +308,9 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
                   setExpandedPositions={setExpandedPositions}
                   onSetPrimaryEmployee={handleSetPrimaryEmployee}
                   disableTooltips={disableTooltips}
+                  isSelectionMode={isSelectionMode}
+                  selectedPositions={selectedPositions}
+                  setSelectedPositions={setSelectedPositions}
                 />
               </div>
             }

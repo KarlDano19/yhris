@@ -38,6 +38,9 @@ interface ManageFullscreenChartProps {
   renderTree: (node: OrgStructure) => React.ReactNode;
   setDragOffset: (offset: { x: number; y: number }) => void;
   onExport?: (format: 'pdf' | 'png') => void;
+  isSelectionMode?: boolean;
+  selectedPositions?: Set<number | string>;
+  setSelectedPositions?: (positions: Set<number | string>) => void;
 }
 
 const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
@@ -67,7 +70,10 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   hasEmployees,
   renderTree,
   setDragOffset,
-  onExport
+  onExport,
+  isSelectionMode = false,
+  selectedPositions = new Set(),
+  setSelectedPositions
 }) => {
   const [isExporting, setIsExporting] = useState(false);
 

@@ -34,6 +34,10 @@ const Content = () => {
   
   // Track which positions are expanded to show employees
   const [expandedPositions, setExpandedPositions] = useState<Set<number | string>>(new Set());
+  
+  // Position selection for export
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedPositions, setSelectedPositions] = useState<Set<number | string>>(new Set());
 
   // API hooks
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
@@ -125,6 +129,29 @@ const Content = () => {
     return checkForEmployees(orgData);
   })() : false;
 
+  // Function to filter org structure to only include selected positions
+  const filterOrgStructure = (node: OrgStructure): OrgStructure | null => {
+    // If this node is not selected, skip it
+    if (!selectedPositions.has(node.id)) {
+      return null;
+    }
+    
+    // Create a copy of the node
+    const filteredNode: OrgStructure = { ...node };
+    
+    // Filter children recursively
+    if (node.children) {
+      const filteredChildren = node.children
+        .map(child => filterOrgStructure(child))
+        .filter((child): child is OrgStructure => child !== null);
+      
+      filteredNode.children = filteredChildren.length > 0 ? filteredChildren : undefined;
+    }
+    
+    return filteredNode;
+  };
+
+
   // Export menu options
   const exportOptions = [
     {
@@ -157,6 +184,21 @@ const Content = () => {
       const originalExpandedPositions = new Set(expandedPositions);
       const originalZoom = zoomLevel;
       const originalDragOffset = { ...dragOffset };
+      
+      // Get the current full org data from the API data (not state which might be filtered)
+      const currentFullOrgData = orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0 
+        ? orgStructureData[0] 
+        : orgData;
+      
+      // If in selection mode and positions are selected, filter the org structure
+      if (isSelectionMode && selectedPositions.size > 0 && currentFullOrgData) {
+        const filteredData = filterOrgStructure(currentFullOrgData);
+        if (filteredData) {
+          setOrgData(filteredData);
+          // Wait for the UI to update with filtered data
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
 
       // If "all employees" is selected, we need to show all employees first
       if (employeeOption === 'all') {
@@ -281,6 +323,16 @@ const Content = () => {
         setDragOffset(originalDragOffset);
       }
       
+      // Always restore original org data after export to ensure full chart is shown
+      if (currentFullOrgData) {
+        setOrgData(currentFullOrgData);
+        // Small delay to ensure UI updates with restored data
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // Turn off selection mode after successful export
+      setIsSelectionMode(false);
+      
       console.log(`Successfully exported as ${format.toUpperCase()} with ${employeeOption} employees`);
     } catch (error) {
       console.error('Export failed:', error);
@@ -293,6 +345,17 @@ const Content = () => {
         setZoomLevel(1);
         setDragOffset({ x: 0, y: 0 });
       }
+      
+      // Restore full org data on error
+      const fullOrgData = orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0 
+        ? orgStructureData[0] 
+        : null;
+      if (fullOrgData) {
+        setOrgData(fullOrgData);
+      }
+      
+      // Turn off selection mode on error too
+      setIsSelectionMode(false);
     } finally {
       setIsExporting(false);
       setDisableTooltips(false); // Re-enable tooltips after export
@@ -300,10 +363,34 @@ const Content = () => {
   };
 
   const handleExportWithOptions = (option: 'primary' | 'all') => {
-    // Store the selected option and show progress modal
+    // Store the selected option
     setSelectedEmployeeOption(option);
     setShowExportModal(false);
+    
+    // Activate selection mode and select all positions by default
+    setIsSelectionMode(true);
+    if (selectedPositions.size === 0 && orgData) {
+      const allPositionIds = new Set<number | string>();
+      const collectIds = (node: OrgStructure) => {
+        allPositionIds.add(node.id);
+        node.children?.forEach(collectIds);
+      };
+      collectIds(orgData);
+      setSelectedPositions(allPositionIds);
+    }
+  };
+
+  // Handle proceed with export after position selection
+  const handleProceedWithExport = () => {
+    // Keep selection mode active so filtering works during export
+    // It will be turned off after export completes
     setShowProgressModal(true);
+  };
+
+  // Handle cancel position selection
+  const handleCancelSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedPositions(new Set());
   };
 
   // Function to be called by ProgressModal
@@ -326,8 +413,8 @@ const Content = () => {
           <h4 className='text-sm sm:text-base truncate'>Manage | Organizational Structure</h4>
         </Link>
         
-        {/* Export Dropdown - Only show if org data exists */}
-        {orgData && (
+        {/* Export Button - Hide when selection mode is active */}
+        {orgData && !isSelectionMode && (
           <Menu as='div' className='relative self-end sm:self-auto'>
             <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 text-sm sm:text-base' disabled={isExporting}>
               <span className='hidden sm:inline'>{isExporting ? 'Exporting...' : 'Export'}</span>
@@ -366,12 +453,56 @@ const Content = () => {
               </div>
             </Menu.Items>
           </Transition>
-          </Menu>
+            </Menu>
         )}
       </div>
 
+      {/* Selection Mode Action Bar - Show at top when active, hide during export */}
+      {isSelectionMode && !isExporting && (
+        <div className="bg-green-50 border-b-2 border-green-200 shadow-sm">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              {/* Info */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-gray-800">Select Positions to Export</h5>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-bold text-green-700">{selectedPositions.size}</span> position{selectedPositions.size !== 1 ? 's' : ''} selected
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCancelSelection}
+                  className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleProceedWithExport}
+                  disabled={selectedPositions.size === 0}
+                  className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export {selectedPositions.size} Position{selectedPositions.size !== 1 ? 's' : ''}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className='flex-1 flex flex-col relative'>
+      <div className="flex-1 flex flex-col relative">
         <div className='bg-white shadow-sm flex-1 flex flex-col'>     
           {/* Organizational Chart */}
           <ManageOrgChart 
@@ -392,6 +523,9 @@ const Content = () => {
             setDragOffset={setDragOffset}
             onExport={handleExportFormat}
             disableTooltips={disableTooltips}
+            isSelectionMode={isSelectionMode}
+            selectedPositions={selectedPositions}
+            setSelectedPositions={setSelectedPositions}
           />
         </div>
 
@@ -426,6 +560,11 @@ const Content = () => {
         title="Exporting Organizational Chart"
         subtitle={`Preparing your ${selectedFormat.toUpperCase()} export with ${selectedEmployeeOption === 'all' ? 'all employees' : 'primary employees only'}...`}
         isProcessing={isExporting}
+        onSuccess={() => {
+          // Reset selection after successful export
+          setSelectedPositions(new Set());
+          setIsSelectionMode(false);
+        }}
       />
     </div>
   );

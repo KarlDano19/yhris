@@ -22,10 +22,14 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   expandedPositions = new Set(),
   setExpandedPositions,
   onSetPrimaryEmployee,
-  disableTooltips = false
+  disableTooltips = false,
+  isSelectionMode = false,
+  selectedPositions = new Set(),
+  setSelectedPositions
 }) => {
   const isClicked = clickedNodeId === data.id;
   const isExpanded = expandedPositions.has(data.id);
+  const isSelected = selectedPositions.has(data.id);
   
   // Modal state
   const [showActionModal, setShowActionModal] = useState(false);
@@ -112,6 +116,20 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
     }
   };
 
+  // Handle checkbox toggle
+  const handleCheckboxToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (setSelectedPositions) {
+      const newSelectedPositions = new Set(selectedPositions);
+      if (isSelected) {
+        newSelectedPositions.delete(data.id);
+      } else {
+        newSelectedPositions.add(data.id);
+      }
+      setSelectedPositions(newSelectedPositions);
+    }
+  };
+
   // Get other employees (excluding primary)
   const otherEmployees = data.employees?.filter((employee) => employee.id !== primaryEmployee?.id) || [];
   const totalOtherEmployees = otherEmployees.length;
@@ -124,9 +142,34 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
       className="relative pointer-events-auto"
       onMouseDown={(e) => e.stopPropagation()} // Prevent drag when clicking on node
     >
+      {/* Checkbox for Selection Mode - Hide during export */}
+      {isSelectionMode && !disableTooltips && (
+        <div className="absolute -top-2 -right-2 z-20">
+          <button
+            onClick={handleCheckboxToggle}
+            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-md ${
+              isSelected
+                ? 'bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700'
+                : 'bg-white border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+            }`}
+            title={isSelected ? "Deselect position" : "Select position"}
+          >
+            {isSelected ? (
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <div className="w-4 h-4 rounded-full border-2 border-gray-400" />
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Main Position Node with Employee Info */}
       <div 
-        className="text-center cursor-pointer px-10 mb-2 flex flex-col items-center justify-center"
+        className={`text-center cursor-pointer px-10 mb-2 flex flex-col items-center justify-center transition-all ${
+          isSelectionMode && isSelected && !disableTooltips ? 'ring-4 ring-green-400 rounded-lg' : ''
+        }`}
         onClick={handlePositionClick}
         data-tooltip-id={!clickedNodeId && !disableTooltips ? `org-node-tooltip-${data.id}` : undefined}
         data-tooltip-content={!clickedNodeId && !disableTooltips ? 'Click to view options' : undefined}

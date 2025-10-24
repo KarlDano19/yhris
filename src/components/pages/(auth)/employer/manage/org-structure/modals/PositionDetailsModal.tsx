@@ -279,7 +279,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                   )}
 
                   {/* All Employees */}
-                  <div>
+                    <div>
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-gray-800">
                         {pagination ? `All Employees (${pagination.totalRecords})` : 'Employees'}
@@ -601,8 +601,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                             : 'No employees assigned to this position'
                           }
                         </p>
-                      </div>
-                    )}
+                    </div>
+                  )}
                   </div>
                 </div>
               </Dialog.Panel>
