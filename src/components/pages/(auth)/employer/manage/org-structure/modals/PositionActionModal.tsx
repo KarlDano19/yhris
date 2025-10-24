@@ -1,9 +1,14 @@
 import React, { Fragment } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon, EyeIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, EyeIcon, UserGroupIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 
-import { PositionActionModalProps } from '../types';
+import PlaceholderPicture from '@/svg/PlaceholderPicture';
+
+import { Employee, PositionActionModalProps } from '../types';
+
+// Maximum number of employees to show in the chart before showing warning
+const MAX_EMPLOYEES_IN_CHART = 10;
 
 const PositionActionModal: React.FC<PositionActionModalProps> = ({ 
   data, 
@@ -14,6 +19,21 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
   onShowEmployees,
   isExpanded = false
 }) => {
+  // Determine avatar type (male/female) - use gender field if available
+  const getAvatarType = (employee: Employee | undefined) => {
+    if (!employee) return 'male'; // Default
+    // Use gender field if available, otherwise fallback to name-based logic
+    if (employee.gender) {
+      return employee.gender.toLowerCase() === 'female' ? 'female' : 'male';
+    }
+    // Simple logic based on name as fallback
+    return employee.firstname.toLowerCase().includes('a') ? 'female' : 'male';
+  };
+
+  // Check if there are many employees
+  const otherEmployeesCount = data.employees?.filter((employee) => employee.id !== primaryEmployee?.id).length || 0;
+  const hasManyEmployees = otherEmployeesCount > MAX_EMPLOYEES_IN_CHART;
+
   return (
     <Transition.Root show={isVisible} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -56,11 +76,53 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                 <div className="p-6 space-y-4">
                   {/* Position Info - only show if there are employees */}
                   {primaryEmployee && data.employees && data.employees.length > 0 && (
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <h4 className="text-lg font-bold text-gray-800 mb-1">
-                        {primaryEmployee.firstname} {primaryEmployee.lastname}
-                      </h4>
-                      <p className="text-sm text-gray-600">{primaryEmployee.email}</p>
+                    <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
+                        {primaryEmployee.photo ? (
+                          <img
+                            src={primaryEmployee.photo}
+                            alt={`${primaryEmployee.firstname} ${primaryEmployee.lastname}`}
+                            className="w-full h-full object-cover rounded-full"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const placeholder = target.nextElementSibling as HTMLElement;
+                              if (placeholder) placeholder.style.display = 'block';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`w-full h-full flex items-center justify-center ${primaryEmployee.photo ? 'hidden' : 'block'}`}
+                        >
+                          <PlaceholderPicture 
+                            gender={getAvatarType(primaryEmployee)} 
+                            fillColor="#3B82F6" 
+                            width={32} 
+                            height={32}
+                            style={{ opacity: 0.5 }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-lg font-bold text-gray-800 mb-1">
+                          {primaryEmployee.firstname} {primaryEmployee.lastname}
+                        </h4>
+                        <p className="text-sm text-gray-600">{primaryEmployee.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Performance notice for positions with many employees */}
+                  {hasManyEmployees && !isExpanded && (
+                    <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <InformationCircleIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium mb-1">Large Team Position</p>
+                        <p className="text-xs text-blue-700">
+                          This position has {otherEmployeesCount} additional employees. For better performance, 
+                          only the first {MAX_EMPLOYEES_IN_CHART} will show in the chart. Use "View Details" to see everyone.
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -80,14 +142,33 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                           onClose();
                           onViewDetails();
                         }}
-                        className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors group"
+                        className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors group ${
+                          hasManyEmployees 
+                            ? 'bg-blue-600 hover:bg-blue-700 border-2 border-blue-700 shadow-md' 
+                            : 'bg-blue-50 hover:bg-blue-100 border border-blue-200'
+                        }`}
                       >
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                          <EyeIcon className="w-5 h-5 text-blue-600" />
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                          hasManyEmployees 
+                            ? 'bg-blue-500 group-hover:bg-blue-600' 
+                            : 'bg-blue-100 group-hover:bg-blue-200'
+                        }`}>
+                          <EyeIcon className={`w-5 h-5 ${hasManyEmployees ? 'text-white' : 'text-blue-600'}`} />
                         </div>
-                        <div className="text-left">
-                          <h5 className="font-semibold text-gray-800">View Details</h5>
-                          <p className="text-sm text-gray-600">See position information and all employees</p>
+                        <div className="text-left flex-1">
+                          <div className="flex items-center gap-2">
+                            <h5 className={`font-semibold ${hasManyEmployees ? 'text-white' : 'text-gray-800'}`}>
+                              View Details
+                            </h5>
+                            {hasManyEmployees && (
+                              <span className="px-2 py-0.5 bg-blue-400 text-white text-xs font-medium rounded-full">
+                                Recommended
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-sm ${hasManyEmployees ? 'text-blue-100' : 'text-gray-600'}`}>
+                            See position information and all {data.employees.length} employees
+                          </p>
                         </div>
                       </button>
                     )}
@@ -110,8 +191,10 @@ const PositionActionModal: React.FC<PositionActionModalProps> = ({
                           </h5>
                           <p className="text-sm text-gray-600">
                             {isExpanded 
-                              ? 'Hide all employees from the chart view'
-                              : `Display all ${data.employees.filter((employee) => employee.id !== primaryEmployee?.id).length} other employees in the chart`
+                              ? 'Hide employees from the chart view'
+                              : hasManyEmployees
+                                ? `Show first ${MAX_EMPLOYEES_IN_CHART} of ${otherEmployeesCount} employees in chart`
+                                : `Display all ${otherEmployeesCount} other employees in the chart`
                             }
                           </p>
                         </div>

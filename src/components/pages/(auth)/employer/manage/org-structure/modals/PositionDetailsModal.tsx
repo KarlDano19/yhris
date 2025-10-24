@@ -1,12 +1,16 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect, useRef, useMemo } from 'react';
 
 import 'react-quill/dist/quill.snow.css';
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon, StarIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, StarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useSetPrimaryEmployee from '../hooks/useSetPrimaryEmployee';
+import useGetPositionEmployees from '../hooks/useGetPositionEmployees';
+import useGetPositionEmployeesAutocomplete from '../hooks/useGetPositionEmployeesAutocomplete';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
 
@@ -19,6 +23,114 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   onClose
 }) => {
   const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
+  // Search state
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  
+  // Autocomplete state
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [shouldShowAutocomplete, setShouldShowAutocomplete] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [autocompleteLimit, setAutocompleteLimit] = useState(50);
+  const autocompleteRef = useRef<HTMLUListElement>(null);
+
+  // Debounce search input for autocomplete (2 seconds like employee list)
+  useEffect(() => {
+    // Set debouncing state when user is typing
+    if (pendingSearch && pendingSearch.length >= 2) {
+      setIsDebouncing(true);
+    } else {
+      setIsDebouncing(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedSearch(pendingSearch);
+      setIsDebouncing(false);
+    }, 2000); // 2000ms delay (2 seconds)
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pendingSearch]);
+
+  // Reset search when modal closes
+  useEffect(() => {
+    if (!isVisible) {
+      setPendingSearch('');
+      setAppliedSearch('');
+      setDebouncedSearch('');
+      setCurrentPage(1);
+      setShowAutocomplete(false);
+      setShouldShowAutocomplete(false);
+      setSelectedIndex(-1);
+      setAutocompleteLimit(50);
+    }
+  }, [isVisible]);
+
+  // Function to scroll selected item into view
+  const scrollToSelectedItem = (index: number) => {
+    if (autocompleteRef.current && index >= 0) {
+      const selectedElement = autocompleteRef.current.children[index] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    }
+  };
+
+  // Memoize autocomplete filters
+  const autocompleteFilters = useMemo(() => {
+    // Only return search params to load 500 employees when autocomplete is active
+    // Only filter by search when shouldShowAutocomplete is true
+    if (shouldShowAutocomplete && debouncedSearch && debouncedSearch.length >= 2) {
+      return {
+        search: debouncedSearch,
+        current_page: 1,
+        page_size: 500
+      };
+    }
+    // Return empty search to load all 500 employees when autocomplete is shown
+    return shouldShowAutocomplete ? {
+      search: '',
+      current_page: 1,
+      page_size: 500
+    } : null;
+  }, [debouncedSearch, shouldShowAutocomplete]);
+
+  // Fetch main paginated employees when modal is open
+  const { 
+    data: employeesData, 
+    isLoading: isLoadingEmployees 
+  } = useGetPositionEmployees({
+    orgStructureId: data.id,
+    page: currentPage,
+    pageSize: pageSize,
+    search: appliedSearch,
+    enabled: isVisible,
+  });
+
+  // Fetch autocomplete results separately (for dropdown) - loads 500 employees
+  const {
+    data: autocompleteData,
+    isLoading: isAutocompleteLoading
+  } = useGetPositionEmployeesAutocomplete({
+    orgStructureId: data.id,
+    filters: autocompleteFilters,
+  });
+
+  // Use paginated employees if available, otherwise fallback to data.employees
+  const employeesToDisplay = employeesData?.employees || data.employees || [];
+  const pagination = employeesData?.pagination;
+  const autocompleteResults = autocompleteData?.records || [];
 
   // Determine avatar type (male/female) - use gender field if available
   const getAvatarType = (employee: Employee | undefined) => {
@@ -51,6 +163,29 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
     }
   };
 
+  // Pagination handlers
+  const handlePageChange = (selectedItem: { selected: number }) => {
+    setCurrentPage(selectedItem.selected + 1);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when page size changes
+  };
+
+  // Search handler
+  const handleSearch = () => {
+    setAppliedSearch(pendingSearch);
+    setCurrentPage(1);
+  };
+
+  const handleMagnifyingGlassClick = () => {
+    handleSearch();
+    setShowAutocomplete(false);
+    setShouldShowAutocomplete(false);
+    setSelectedIndex(-1);
+  };
+
   return (
     <Transition.Root show={isVisible} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -77,7 +212,7 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-2xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-4xl">
                 {/* Header */}
                 <div className="flex bg-savoy-blue p-4 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold text-lg">
@@ -130,14 +265,255 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                     </div>
                   )}
 
-                  {/* All Employees */}
-                  {data.employees && data.employees.length > 0 && (
+                  {/* Description */}
+                  {data.description && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                        {data.employees.length === 1 ? 'Employee' : `All Employees (${data.employees.length})`}
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Position Description</h4>
+                      <div 
+                        className="text-sm text-gray-600 leading-relaxed ql-editor bg-gray-50 p-4 rounded-lg"
+                        dangerouslySetInnerHTML={{ __html: data.description }}
+                      />
+                    </div>
+                  )}
+
+                  {/* All Employees */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800">
+                        {pagination ? `All Employees (${pagination.totalRecords})` : 'Employees'}
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                        {data.employees.map((employee, index) => {
+                      
+                      {/* Search Bar */}
+                      <div className="flex items-center gap-2 flex-1 max-w-xs ml-4">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            name="employee-search"
+                            placeholder="Search..."
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            value={pendingSearch}
+                            onChange={(e) => {
+                              setPendingSearch(e.target.value);
+                              setShowAutocomplete(true);
+                              setShouldShowAutocomplete(true);
+                              setSelectedIndex(-1);
+                            }}
+                            onFocus={() => {
+                              setShowAutocomplete(true);
+                              setShouldShowAutocomplete(true);
+                            }}
+                            onBlur={() => {
+                              setTimeout(() => {
+                                setShowAutocomplete(false);
+                                setShouldShowAutocomplete(false);
+                                setSelectedIndex(-1);
+                                setAutocompleteLimit(50);
+                              }, 100);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                if (showAutocomplete && selectedIndex >= 0 && autocompleteResults) {
+                                  // Handle autocomplete selection with Enter
+                                  const displayItems = autocompleteResults.slice(0, autocompleteLimit);
+                                  const totalAutocompleteRecords = autocompleteData?.total_records || autocompleteResults.length;
+                                  const hasMoreResults = totalAutocompleteRecords > autocompleteLimit;
+                                  
+                                  if (selectedIndex === displayItems.length && hasMoreResults) {
+                                    e.preventDefault();
+                                    setAutocompleteLimit(prev => prev + 50);
+                                    setSelectedIndex(displayItems.length + 50);
+                                  } else if (displayItems[selectedIndex]) {
+                                    const item = displayItems[selectedIndex];
+                                    const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                                    setPendingSearch(newSearchTerm);
+                                    setAppliedSearch(newSearchTerm);
+                                  }
+                                  setShowAutocomplete(false);
+                                  setShouldShowAutocomplete(false);
+                                  setSelectedIndex(-1);
+                                } else {
+                                  // Perform main search
+                                  handleSearch();
+                                  setShowAutocomplete(false);
+                                  setShouldShowAutocomplete(false);
+                                }
+                              } else if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                if (showAutocomplete && autocompleteResults) {
+                                  const displayItems = autocompleteResults.slice(0, autocompleteLimit);
+                                  const totalAutocompleteRecords = autocompleteData?.total_records || autocompleteResults.length;
+                                  const hasMoreResults = totalAutocompleteRecords > autocompleteLimit;
+                                  const maxIndex = displayItems.length + (hasMoreResults ? 1 : 0) - 1;
+                                  const newIndex = selectedIndex < maxIndex ? selectedIndex + 1 : selectedIndex;
+                                  setSelectedIndex(newIndex);
+                                  scrollToSelectedItem(newIndex);
+                                }
+                              } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                if (showAutocomplete) {
+                                  const newIndex = selectedIndex > 0 ? selectedIndex - 1 : -1;
+                                  setSelectedIndex(newIndex);
+                                  if (newIndex >= 0) {
+                                    scrollToSelectedItem(newIndex);
+                                  }
+                                }
+                              } else if (e.key === 'Escape') {
+                                setShowAutocomplete(false);
+                                setSelectedIndex(-1);
+                              }
+                            }}
+                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                          />
+                          
+                          {/* Autocomplete Dropdown */}
+                          {showAutocomplete && shouldShowAutocomplete && (() => {
+                            // Show loading state while debouncing or API loading
+                            if (pendingSearch && pendingSearch.length >= 2 && (isDebouncing || isAutocompleteLoading)) {
+                              return (
+                                <ul 
+                                  ref={autocompleteRef}
+                                  className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                >
+                                  <li className="px-3 py-4 text-center">
+                                    <LoadingSpinner 
+                                      size="sm" 
+                                      color="yellow" 
+                                      text="Searching employees..." 
+                                      showText={true}
+                                      className="py-2"
+                                    />
+                                  </li>
+                                </ul>
+                              );
+                            }
+
+                            // Show results if available
+                            if (autocompleteResults && autocompleteResults.length > 0) {
+                              const totalAutocompleteRecords = autocompleteData?.total_records || autocompleteResults.length;
+                              const hasMoreResults = totalAutocompleteRecords > autocompleteLimit;
+                              const displayItems = autocompleteResults.slice(0, autocompleteLimit);
+                              
+                              return (
+                                <ul 
+                                  ref={autocompleteRef}
+                                  className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                >
+                                  {displayItems.map((item: Employee, index: number) => (
+                                    <li
+                                      key={item.id}
+                                      className={`px-3 py-2 cursor-pointer ${
+                                        index === selectedIndex 
+                                          ? 'bg-blue-100' 
+                                          : 'hover:bg-blue-100'
+                                      }`}
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
+                                      }}
+                                      onMouseEnter={() => setSelectedIndex(index)}
+                                      onClick={() => {
+                                        const newSearchTerm = `${item.firstname} ${item.lastname}`.trim();
+                                        setPendingSearch(newSearchTerm);
+                                        setAppliedSearch(newSearchTerm);
+                                        setShowAutocomplete(false);
+                                        setSelectedIndex(-1);
+                                      }}
+                                    >
+                                      <div className="flex flex-col">
+                                        <span className="font-medium">{item.firstname} {item.lastname}</span>
+                                        <span className="text-xs text-gray-500">• {item.email}</span>
+                                      </div>
+                                    </li>
+                                  ))}
+                                  {hasMoreResults && (
+                                    <li
+                                      className={`px-3 py-2 cursor-pointer border-t border-gray-200 ${
+                                        selectedIndex === displayItems.length 
+                                          ? 'bg-blue-100' 
+                                          : 'bg-gray-50 hover:bg-gray-100'
+                                      }`}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setAutocompleteLimit(prev => prev + 50);
+                                        setSelectedIndex(displayItems.length + 50);
+                                      }}
+                                      onMouseEnter={() => setSelectedIndex(displayItems.length)}
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
+                                      }}
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">
+                                          Show 50 more results
+                                        </span>
+                                        <span className="text-sm text-gray-600 font-medium">
+                                          Click to load more
+                                        </span>
+                                      </div>
+                                    </li>
+                                  )}
+                                </ul>
+                              );
+                            }
+
+                            // Show no results state only when searching with 2+ characters
+                            if (pendingSearch && pendingSearch.length >= 2 && autocompleteResults?.length === 0) {
+                              return (
+                                <ul 
+                                  ref={autocompleteRef}
+                                  className="absolute left-0 top-full mt-1 z-10 bg-white border border-gray-300 rounded-md w-full max-h-60 overflow-y-auto shadow-lg"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                >
+                                  <li className="px-3 py-4 text-center">
+                                    <div className="flex flex-col items-center space-y-2">
+                                      <div className="text-sm text-gray-600">
+                                        <p className="font-medium">No employees found</p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          Try searching with different keywords
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </li>
+                                </ul>
+                              );
+                            }
+
+                            return null;
+                          })()}
+                        </div>
+                        <button
+                          className="bg-white border border-gray-300 rounded-md p-2 hover:bg-gray-100 transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleMagnifyingGlassClick();
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                          }}
+                        >
+                          <MagnifyingGlassIcon className="h-5 w-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isLoadingEmployees ? (
+                      <div className="text-center p-8">
+                        <LoadingSpinner 
+                          size="lg" 
+                          color="yellow" 
+                          text={appliedSearch ? 'Searching employees...' : 'Loading employees...'} 
+                          showText={true}
+                        />
+                      </div>
+                    ) : employeesToDisplay.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        {employeesToDisplay.map((employee, index) => {
                           const avatarType = getAvatarType(employee);
                           const isPrimary = primaryEmployee?.id === employee.id;
                           return (
@@ -203,19 +579,29 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                           );
                         })}
                       </div>
-                    </div>
-                  )}
 
-                  {/* Description */}
-                  {data.description && (
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Position Description</h4>
-                      <div 
-                        className="text-sm text-gray-600 leading-relaxed ql-editor bg-gray-50 p-4 rounded-lg"
-                        dangerouslySetInnerHTML={{ __html: data.description }}
-                      />
-                    </div>
-                  )}
+                        {/* Pagination - Always visible */}
+                        {pagination && (
+                          <Pagination
+                            pagination={pagination}
+                            currentPage={currentPage}
+                            pageSize={pageSize}
+                            onPageSizeChange={handlePageSizeChange}
+                            onPageChange={handlePageChange}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center p-8 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500">
+                          {appliedSearch 
+                            ? `No employees found matching "${appliedSearch}"`
+                            : 'No employees assigned to this position'
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

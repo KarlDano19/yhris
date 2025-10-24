@@ -97,14 +97,6 @@ const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({
                     )}
                   </div>
 
-                  {/* Exporting State */}
-                  {isExporting && (
-                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <div className="animate-spin w-6 h-6 border-2 border-yellow-600 border-t-transparent rounded-full mx-auto mb-2"></div>
-                      <p className="text-sm text-yellow-700">Preparing export...</p>
-                    </div>
-                  )}
-
                   {/* Close Button */}
                   <div className="pt-4">
                     <button

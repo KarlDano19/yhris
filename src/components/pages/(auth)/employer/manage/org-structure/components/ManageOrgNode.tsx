@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Transition } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
+import { EyeIcon } from '@heroicons/react/24/solid';
 
 import PositionActionModal from '../modals/PositionActionModal';
 import PositionDetailsModal from '../modals/PositionDetailsModal';
@@ -9,6 +10,9 @@ import EmployeeNode from './EmployeeNode';
 import { Employee, OrgNodeProps } from '../types';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
+
+// Maximum number of employees to show in the chart before requiring "View All"
+const MAX_EMPLOYEES_IN_CHART = 5;
 
 // Custom Node Component for Manage Page
 const ManageOrgNode: React.FC<OrgNodeProps> = ({ 
@@ -108,6 +112,13 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
     }
   };
 
+  // Get other employees (excluding primary)
+  const otherEmployees = data.employees?.filter((employee) => employee.id !== primaryEmployee?.id) || [];
+  const totalOtherEmployees = otherEmployees.length;
+  const hasMoreThanMax = totalOtherEmployees > MAX_EMPLOYEES_IN_CHART;
+  const employeesToShow = hasMoreThanMax ? otherEmployees.slice(0, MAX_EMPLOYEES_IN_CHART) : otherEmployees;
+  const remainingCount = totalOtherEmployees - MAX_EMPLOYEES_IN_CHART;
+
   return (
     <div 
       className="relative pointer-events-auto"
@@ -167,7 +178,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
 
       {/* Employee Nodes Display */}
       <Transition
-        show={isExpanded && data.employees && data.employees.filter((employee) => employee.id !== primaryEmployee?.id).length > 0}
+        show={isExpanded && totalOtherEmployees > 0}
         enter="transition-all ease-out duration-300 transform"
         enterFrom="opacity-0 -translate-y-2"
         enterTo="opacity-100 translate-y-0"
@@ -180,10 +191,10 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         <div className="w-0.5 h-4 border-l-2 border-dashed border-gray-400 mb-2"></div>
         
         {/* Employee nodes container */}
-        <div className="flex flex-wrap justify-center gap-4 max-w-xs border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-          {data.employees
-            ?.filter((employee) => employee.id !== primaryEmployee?.id)
-            .map((employee, index) => (
+        <div className="flex flex-col items-center gap-3">
+          {/* Employee grid */}
+          <div className="flex flex-wrap justify-center gap-4 max-w-xs border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+            {employeesToShow.map((employee, index) => (
               <Transition
                 key={employee.id}
                 appear={true}
@@ -200,6 +211,24 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
                 />
               </Transition>
             ))}
+          </div>
+
+          {/* View All Button - shown when there are more employees than the limit (hidden during export) */}
+          {hasMoreThanMax && !disableTooltips && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetails();
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <EyeIcon className="w-4 h-4" />
+              View All {totalOtherEmployees} Employees
+              <span className="ml-1 px-2 py-0.5 bg-blue-500 rounded-full text-xs">
+                +{remainingCount} more
+              </span>
+            </button>
+          )}
         </div>
       </Transition>
 

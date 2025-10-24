@@ -11,6 +11,7 @@ import { Menu, Transition } from '@headlessui/react';
 import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
 import ExportOptionsModal from './modals/ExportOptionsModal';
+import ProgressModal from '@/components/ProgressModal';
 import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 
 import { OrgStructure } from './types';
@@ -18,7 +19,9 @@ import { OrgStructure } from './types';
 const Content = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<'pdf' | 'png'>('png');
+  const [selectedEmployeeOption, setSelectedEmployeeOption] = useState<'primary' | 'all'>('primary');
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
   const [disableTooltips, setDisableTooltips] = useState(false);
   
@@ -146,7 +149,6 @@ const Content = () => {
 
   const handleExport = async (format: 'pdf' | 'png', employeeOption: 'primary' | 'all') => {
     setIsExporting(true);
-    setShowExportModal(false);
     setDisableTooltips(true); // Disable tooltips during export
     
     try {
@@ -298,7 +300,15 @@ const Content = () => {
   };
 
   const handleExportWithOptions = (option: 'primary' | 'all') => {
-    handleExport(selectedFormat, option);
+    // Store the selected option and show progress modal
+    setSelectedEmployeeOption(option);
+    setShowExportModal(false);
+    setShowProgressModal(true);
+  };
+
+  // Function to be called by ProgressModal
+  const performExport = () => {
+    handleExport(selectedFormat, selectedEmployeeOption);
   };
 
   // Wrapper function for ManageOrgChart's onExport prop
@@ -406,6 +416,16 @@ const Content = () => {
         onExport={handleExportWithOptions}
         isExporting={isExporting}
         hasEmployees={hasEmployees}
+      />
+
+      {/* Progress Modal */}
+      <ProgressModal
+        isOpen={showProgressModal}
+        setIsOpen={setShowProgressModal}
+        onConfirm={performExport}
+        title="Exporting Organizational Chart"
+        subtitle={`Preparing your ${selectedFormat.toUpperCase()} export with ${selectedEmployeeOption === 'all' ? 'all employees' : 'primary employees only'}...`}
+        isProcessing={isExporting}
       />
     </div>
   );

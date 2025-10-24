@@ -15,7 +15,7 @@ interface ZoomControlsProps {
 const ZoomControls: React.FC<ZoomControlsProps> = ({ onZoomIn, onZoomOut, onFullscreenToggle, onShowAllEmployees, isFullscreen, zoomLevel, hasEmployees }) => {
   return (
     <>
-    <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-10 z-10 flex flex-col items-start gap-2 sm:gap-3">
+    <div className="fixed bottom-4 sm:bottom-8 left-4 sm:left-10 z-10 flex flex-col items-start gap-2 sm:gap-3">
       {/* Zoom Percentage Display */}
       <div className="bg-gray-800 rounded-lg px-2 sm:px-3 py-1 sm:py-2 shadow-lg">
         <div className="text-white text-xs sm:text-sm font-medium text-center">
