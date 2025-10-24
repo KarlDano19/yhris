@@ -49,7 +49,7 @@ async function getDirectivesItems(filters: any) {
 
 function useGetDirectivesItems(filters: any) {
   const query = useQuery(
-    ['directivesItemCache'],
+    ['directivesItemCache', filters],
     () => getDirectivesItems(filters),
     {
       enabled: false,

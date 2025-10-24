@@ -81,7 +81,10 @@ export default function CreateMemoModal({
           { duration: 5000 }
         );
         setIsOpen(false);
-        refetch();
+        // Add a small delay to ensure backend processing is complete before refetching
+        setTimeout(() => {
+          refetch();
+        }, 300);
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
