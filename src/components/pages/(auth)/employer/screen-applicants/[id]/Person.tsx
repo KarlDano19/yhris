@@ -230,7 +230,7 @@ export default function Person({
       
       {/* HIRED label - positioned absolutely in upper right corner */}
       {isPassedFinalInterview && (
-        <span className={`absolute top-2 right-3 bg-stone-100 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
+        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
           HIRED
         </span>
       )}

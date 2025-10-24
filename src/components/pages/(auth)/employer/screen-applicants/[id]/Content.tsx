@@ -20,7 +20,6 @@ import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
 import SendEmailModal from '@/components/SendEmailModal';
 import Confirmation from '../modals/Confirmation';
-import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
@@ -341,6 +340,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="You have successfully sent an email." type="success" />, {
+              duration: 5000,
+            });
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -357,6 +359,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="You have successfully sent interview request." type="success" />, {
+              duration: 5000,
+            });
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -429,9 +434,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         type: 'STAGE_ASSIGNMENT',
         payload: { actionState, setActionState },
       },
-    },
-    SUCCESS: {
-      component: <Success title={title} />,
     },
     CONFIRMATION: {
       component: <Confirmation onStageDeleted={() => {
