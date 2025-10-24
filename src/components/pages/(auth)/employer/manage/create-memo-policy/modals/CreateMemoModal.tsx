@@ -40,6 +40,7 @@ export default function CreateMemoModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [inputTo, setInputTo] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
+  const [isToFocused, setIsToFocused] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
@@ -177,6 +178,7 @@ export default function CreateMemoModal({
       setAttachmentExist(false);
       setEmployeeSearch('');
       setEmployeeSelected(false);
+      setIsToFocused(false);
     }
   }, [signatureUrl, setValue, isOpen]);
 
@@ -261,8 +263,10 @@ export default function CreateMemoModal({
                               }}
                               onInputFocus={() => {
                                 setShowTooltip(false);
+                                setIsToFocused(true);
                               }}
                               onInputBlur={() => {
+                                setIsToFocused(false);
                                 if (!inputTo.trim()) {
                                   setShowTooltip(true);
                                 }
@@ -272,6 +276,7 @@ export default function CreateMemoModal({
                               onRemoveTag={handleRemoveTagTo}
                               showTooltip={showTooltip}
                               tooltipId="to-section-tooltip"
+                              isFocused={isToFocused}
                             />
                           </div>
                         </div>
