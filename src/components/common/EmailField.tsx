@@ -427,7 +427,11 @@ export default function EmailField({
           key={tag}
           className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
         >
-          <button type='button' onClick={() => onRemoveTag(tag)}>
+          <button 
+            type='button' 
+            onClick={() => onRemoveTag(tag)}
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <XMarkIcon className='w-4 h-4' />
           </button>
           <p>{tag}</p>
