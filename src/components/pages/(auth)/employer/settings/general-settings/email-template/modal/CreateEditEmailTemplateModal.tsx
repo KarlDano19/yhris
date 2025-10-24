@@ -48,6 +48,9 @@ export default function CreateEditEmailTemplateModal({
   const [showTooltip, setShowTooltip] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [attachmentRemoved, setAttachmentRemoved] = useState(false);
+  const [isToFocused, setIsToFocused] = useState(false);
+  const [isCcFocused, setIsCcFocused] = useState(false);
+  const [isBccFocused, setIsBccFocused] = useState(false);
 
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
@@ -141,6 +144,9 @@ export default function CreateEditEmailTemplateModal({
     setIsBCCOpen(false);
     setFile(null);
     setShowTooltip(true);
+    setIsToFocused(false);
+    setIsCcFocused(false);
+    setIsBccFocused(false);
     if (isEditing) {
       removeEmailTemplateDetail();
     }
@@ -151,6 +157,19 @@ export default function CreateEditEmailTemplateModal({
     data.to = tagsTo;
     data.cc = tagsCc;
     data.bcc = tagsBcc;
+
+    // Handle attachment for editing
+    if (isEditing) {
+      // If attachment was removed and no new file is being uploaded, set it to empty string
+      if (attachmentRemoved && !file) {
+        data.attachment = '';
+      }
+      // If no new file and no removal, don't include attachment in the update
+      else if (!file && dataEmailTemplateDetail?.attachment && !attachmentRemoved) {
+        delete data.attachment;
+      }
+      // If a new file is being uploaded, the file will be handled by the FormData logic
+    }
 
     const callbackReq = {
       onSuccess: async (responseData: any) => {
@@ -195,6 +214,7 @@ export default function CreateEditEmailTemplateModal({
       }
       setFile(droppedFile);
       setValue('attachment', droppedFile);
+      setAttachmentRemoved(false); // Reset removal flag when new file is dropped
     }
   };
 
@@ -213,6 +233,7 @@ export default function CreateEditEmailTemplateModal({
       
       setFile(selectedFile);
       setValue('attachment', selectedFile);
+      setAttachmentRemoved(false); // Reset removal flag when new file is selected
       e.target.value = '';
     }
   };
@@ -288,8 +309,10 @@ export default function CreateEditEmailTemplateModal({
                               }}
                               onInputFocus={() => {
                                 setShowTooltip(false);
+                                setIsToFocused(true);
                               }}
                               onInputBlur={() => {
+                                setIsToFocused(false);
                                 if (!inputTo.trim()) {
                                   setShowTooltip(true);
                                 }
@@ -299,6 +322,7 @@ export default function CreateEditEmailTemplateModal({
                               onRemoveTag={handleRemoveTagTo}
                               showTooltip={showTooltip}
                               tooltipId="to-section-tooltip"
+                              isFocused={isToFocused}
                             />
                           </div>
                           <button
@@ -347,8 +371,10 @@ export default function CreateEditEmailTemplateModal({
                               }}
                               onInputFocus={() => {
                                 setShowTooltip(false);
+                                setIsCcFocused(true);
                               }}
                               onInputBlur={() => {
+                                setIsCcFocused(false);
                                 if (!inputCc.trim()) {
                                   setShowTooltip(true);
                                 }
@@ -358,6 +384,7 @@ export default function CreateEditEmailTemplateModal({
                               onRemoveTag={handleRemoveTag}
                               showTooltip={showTooltip}
                               tooltipId="cc-section-tooltip"
+                              isFocused={isCcFocused}
                             />
                           </div>
                         </div>
@@ -388,8 +415,10 @@ export default function CreateEditEmailTemplateModal({
                               }}
                               onInputFocus={() => {
                                 setShowTooltip(false);
+                                setIsBccFocused(true);
                               }}
                               onInputBlur={() => {
+                                setIsBccFocused(false);
                                 if (!inputBcc.trim()) {
                                   setShowTooltip(true);
                                 }
@@ -399,6 +428,7 @@ export default function CreateEditEmailTemplateModal({
                               onRemoveTag={handleRemoveTagBcc}
                               showTooltip={showTooltip}
                               tooltipId="bcc-section-tooltip"
+                              isFocused={isBccFocused}
                             />
                           </div>
                         </div>

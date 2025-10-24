@@ -102,6 +102,9 @@ export default function SendEmailModal({
   const inputRef = useRef<HTMLInputElement>(null);
   // Simple state for tooltip visibility
   const [showTooltip, setShowTooltip] = useState(true);
+  const [isToFocused, setIsToFocused] = useState(false);
+  const [isCcFocused, setIsCcFocused] = useState(false);
+  const [isBccFocused, setIsBccFocused] = useState(false);
   
   // Don't manage attachment state when using custom attachment section
   const shouldManageAttachment = showAttachment && !customAttachmentSection && !showDragDropAttachment;
@@ -717,8 +720,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsToFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsToFocused(false);
                       if (!inputTo.trim()) {
                         setShowTooltip(true);
                       }
@@ -728,6 +733,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTagTo}
                     showTooltip={showTooltip}
                     tooltipId="to-section-tooltip"
+                    isFocused={isToFocused}
                   />
                 </div>
                 <button
@@ -783,8 +789,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsCcFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsCcFocused(false);
                       if (!inputCc.trim()) {
                         setShowTooltip(true);
                       }
@@ -794,6 +802,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTag}
                     showTooltip={showTooltip}
                     tooltipId="cc-section-tooltip"
+                    isFocused={isCcFocused}
                   />
                 </div>
               </div>
@@ -827,8 +836,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsBccFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsBccFocused(false);
                       if (!inputBcc.trim()) {
                         setShowTooltip(true);
                       }
@@ -838,6 +849,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTagBcc}
                     showTooltip={showTooltip}
                     tooltipId="bcc-section-tooltip"
+                    isFocused={isBccFocused}
                   />
                 </div>
               </div>

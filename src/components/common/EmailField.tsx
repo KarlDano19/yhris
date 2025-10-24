@@ -19,6 +19,7 @@ interface EmailFieldProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  isFocused?: boolean;
 }
 
 export default function EmailField({
@@ -35,6 +36,7 @@ export default function EmailField({
   placeholder = "",
   disabled = false,
   className = "",
+  isFocused = false,
 }: EmailFieldProps) {
   // Internal state for suggestions and employee data
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -408,6 +410,10 @@ export default function EmailField({
     }
   };
 
+  // Determine which tags to display based on focus state
+  const displayTags = isFocused ? tags : tags.slice(0, 3);
+  const remainingCount = tags.length - 3;
+
   return (
     <div 
       className={`relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md ${className}`}
@@ -415,7 +421,7 @@ export default function EmailField({
       data-tooltip-place='bottom'
       style={{ width: '100%' }}
     >
-      {tags.map((tag: string) => (
+      {displayTags.map((tag: string) => (
         <div
           key={tag}
           className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
@@ -426,6 +432,11 @@ export default function EmailField({
           <p>{tag}</p>
         </div>
       ))}
+      {!isFocused && remainingCount > 0 && (
+        <div className='bg-gray-200 rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm text-gray-600'>
+          <p>and {remainingCount} more...</p>
+        </div>
+      )}
       <input
         type='text'
         value={inputValue}
