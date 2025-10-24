@@ -18,8 +18,8 @@ import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
 import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
-import SuccessModal from './modal/SuccessModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
@@ -52,7 +52,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
   const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   // Bulk delete states
   const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
@@ -75,7 +74,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
-    setIsSuccessModalOpen(true);
     // Reset the modal state to close the create/edit modal
     setEmailTemplateModal({ id: null, open: false, mode: 'create' });
   };
@@ -276,9 +274,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-48 max-w-48'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.to || ''}
+            >
+              {item.to || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.cc || ''}
+            >
+              {item.cc || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.bcc || ''}
+            >
+              {item.bcc || ''}
+            </div>
+          </td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
               <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
@@ -415,13 +437,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Subject
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 max-w-48'>
                         To
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Cc
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Bcc
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -455,8 +477,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
-      {/* Success Modal */}
-      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
 
       {/* Delete Modal */}
       {isDeleteEmailTemplateModalOpen && (
