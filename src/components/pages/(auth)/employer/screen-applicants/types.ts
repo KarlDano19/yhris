@@ -91,7 +91,9 @@ export type ApplicantType = {
     mustHave?: boolean;
     isMatch?: boolean;
   }>;
+  is_archived?: boolean;
   created_at?: string;
+  updated_at?: string;
 };
 
 export type ApplicantsType = [] | ApplicantType[];
@@ -104,6 +106,12 @@ export type StageType = {
   applicants: ApplicantsType;
   orderBy: number;
   addType: string;
+  permissions?: {
+    can_view: boolean;
+    can_move: boolean;
+    can_update: boolean;
+    is_visible: boolean;
+  };
 };
 
 export type ActionStateType = {

@@ -32,14 +32,12 @@ export default function LocationDepartmentModal({
   setOrientItems,
   isOpen,
   setIsOpen,
-  setSuccessModal,
 }: {
   selectedOrientId: string;
   orientItems: any;
   setOrientItems: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  setSuccessModal: Dispatch<boolean>;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormValues>();
@@ -286,9 +284,8 @@ export default function LocationDepartmentModal({
       onSuccess: (data: any) => {
         setOrientItems([...orientItemCopy]);
         setIsOpen(false);
-        setSuccessModal(true);
         reset();
-        toast.custom(() => <CustomToast message={'Employment Status, Location and Department successfully assigned.'} type='success' />, {
+        toast.custom(() => <CustomToast message="You have successfully assigned location and department." type="success" />, {
           duration: 5000,
         });
       },

@@ -82,7 +82,9 @@ export default function CreateMemoModal({
           { duration: 5000 }
         );
         setIsOpen(false);
+        
         refetch();
+
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);

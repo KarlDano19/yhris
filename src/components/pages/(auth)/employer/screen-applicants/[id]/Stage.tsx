@@ -21,7 +21,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
   const { actionState }: ContextTypes = useContext(StateContext) as ContextTypes
   const [stageDropdownId, setStageDropdownId] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
-  const [activeTab, setActiveTab] = useState('Good Fit')
+  const [activeTab, setActiveTab] = useState('Applicants')
 
   // Check if user has permissions for this stage
   const permissions = stage.permissions || {
@@ -34,24 +34,12 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
   const isStageDisabled = !permissions.can_view && !permissions.can_move && !permissions.can_update
   const canInteract = permissions.can_move || permissions.can_update
 
-  // Reset active tab if current tab is not in filters
-  useEffect(() => {
-    if (filters && !filters.rating.includes(activeTab)) {
-      if (filters.rating.includes('Good Fit')) {
-        setActiveTab('Good Fit');
-      } else if (filters.rating.includes('Not Fit')) {
-        setActiveTab('Not Fit');
-      }
-    }
-  }, [filters, activeTab]);
-
   useEffect(() => {
     setStageDropdownId(null)
     setOpenMenuId(null)
   }, [actionState.modal.isOpen])
 
   const tabFilters: FilterOptions = {
-    rating: [activeTab],
     status: filters?.status || ['Ongoing', 'Passed', 'Withdrawn', 'Rejected', 'Hired'],
   };
 

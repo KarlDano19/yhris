@@ -20,7 +20,6 @@ import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
 import OrientOptionModal from './modals/OrientOptionModal';
 import SendEmailModal from '@/components/SendEmailModal';
-import SuccessModal from './modals/SuccessModal';
 import NoticeModal from './modals/NoticeModal';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
@@ -76,16 +75,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSendOrientLink, setIsSendOrientLink] = useState(false);
   const [isOrientLinkEmail, setIsOrientLinkEmail] = useState(false);
   const [orientLinkEmail, setOrientLinkEmail] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [newHireOriented, setNewHireOriented] = useState(false);
   const [isIntroducedModalOpen, setIsIntroducedModalOpen] = useState(false);
-  const [isSuccessIntroducedModalOpen, setSuccessIsIntroducedModalOpen] = useState(false);
   const [isSignInPayrollModalOpen, setIsSignInPayrollModalOpen] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
-  const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
 
@@ -754,7 +750,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClick={() => {
             if (orientLinkEmail) {
               setIsOrientLinkEmail(false);
-              setIsSuccess(true);
+              toast.custom(() => <CustomToast message="You have successfully sent orientation link to the New Hire." type="success" />, {
+                duration: 5000,
+              });
               const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
               orientItemCopy[0].isOrientationSent = true;
               setOrientItems(orientItemCopy);
@@ -764,11 +762,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           CONTINUE
         </button>
       </NoticeModal>
-      <SuccessModal
-        isOpen={isSuccess}
-        setIsOpen={setIsSuccess}
-        message='You have successfully sent orientation link to the New Hire.'
-      />
       <NoticeModal isOpen={newHireOriented} setIsOpen={setNewHireOriented}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already ORIENTED the NEW HIRE?</h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
@@ -804,8 +797,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onSuccess: () => {
                 setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
                 setIsIntroducedModalOpen(false);
-                setSuccessIsIntroducedModalOpen(true);
-                toast.custom(() => <CustomToast message={'Successfully sent introduction email.'} type='success' />, {
+                toast.custom(() => <CustomToast message="You have successfully sent an email." type="success" />, {
                   duration: 5000,
                 });
               },
@@ -821,11 +813,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           submitButtonText="Send Introduction"
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessIntroducedModalOpen}
-        setIsOpen={setSuccessIsIntroducedModalOpen}
-        message='You have successfully sent an email.'
-      />
       <NoticeModal isOpen={isSignInPayrollModalOpen} setIsOpen={setIsSignInPayrollModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
           It appears that you are not signed in to YAHSHUA.
@@ -841,11 +828,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </button>
       </NoticeModal>
       {isEnrollRedirectModalOpen && (
-        <EnrollRedirectModal
-          isOpen={isEnrollRedirectModalOpen}
-          setIsOpen={setIsEnrollRedirectModalOpen}
-          jobPostingId={String(params.position)}
-        />
+        <>
+          <EnrollRedirectModal
+            isOpen={isEnrollRedirectModalOpen}
+            setIsOpen={setIsEnrollRedirectModalOpen}
+            jobPostingId={String(params.position)}
+          />
+        </>
       )}
       {isLocationDepartmentModalOpen && (
         <LocationDepartmentModal
@@ -854,14 +843,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setOrientItems={setOrientItems}
           setIsOpen={setIsLocationDepartmentModalOpen}
           isOpen={isLocationDepartmentModalOpen}
-          setSuccessModal={setIsSuccessLocationDepartmentModalOpen}
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessLocationDepartmentModalOpen}
-        setIsOpen={setIsSuccessLocationDepartmentModalOpen}
-        message='You have successfully assigned location and department.'
-      />
       {/* Updated warning modal for employment status, location/department assignment */}
       <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>

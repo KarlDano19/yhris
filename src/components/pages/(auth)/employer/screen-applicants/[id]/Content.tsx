@@ -20,7 +20,6 @@ import Checklist from '../modals/Checklist';
 import ScheduleInterview from '../modals/ScheduleInterview';
 import SendEmailModal from '@/components/SendEmailModal';
 import Confirmation from '../modals/Confirmation';
-import Success from '../modals/Success';
 import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
@@ -88,7 +87,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
-    rating: ['Good Fit', 'Not Fit'],
     status: ['Ongoing', 'Hired'],
   });
   
@@ -204,6 +202,26 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         screeningFit,
         screeningAnswers: answers,
       };
+    }).sort((a: any, b: any) => {
+      // Helper function to check if applicant is a new applicant (first stage, no stage notes)
+      const isNewApplicant = (applicant: any) => {
+        // Check if this is likely a new applicant based on the same logic in Person.tsx
+        // This is a simplified check - in a real scenario, you'd want to pass stage info
+        return !applicant.stage_notes || applicant.stage_notes.length === 0;
+      };
+      
+      const aIsNew = isNewApplicant(a);
+      const bIsNew = isNewApplicant(b);
+      
+      // Prioritize new applicants first
+      if (aIsNew && !bIsNew) return -1; // a comes first
+      if (!aIsNew && bIsNew) return 1;  // b comes first
+      
+      // If both are new or both are not new, sort by date (newest first)
+      const dateA = new Date(a.updated_at || a.created_at || new Date());
+      const dateB = new Date(b.updated_at || b.created_at || new Date());
+      
+      return dateB.getTime() - dateA.getTime();
     });
   };
 
@@ -245,6 +263,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           screeningFit: item.screeningFit,
           screeningAnswers: item.screeningAnswers || [],
           created_at: item.created_at,
+          updated_at: item.updated_at,
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
@@ -321,6 +340,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="You have successfully sent an email." type="success" />, {
+              duration: 5000,
+            });
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -337,6 +359,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSuccess: () => {
             isOpen(false);
             dispatch(modalSelected.dispatch);
+            toast.custom(() => <CustomToast message="You have successfully sent interview request." type="success" />, {
+              duration: 5000,
+            });
             // Reset actionState after successful submission to allow modal to be reopened
             setActionState(initialActionState);
           },
@@ -410,9 +435,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         payload: { actionState, setActionState },
       },
     },
-    SUCCESS: {
-      component: <Success title={title} />,
-    },
     CONFIRMATION: {
       component: <Confirmation onStageDeleted={() => {
         jobPostDetailsRefetch();
@@ -421,7 +443,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} />,
     },
   };
 
@@ -491,13 +513,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                     Upload Resumes
                   </SmartButton>
 
-                  <button
+                  {/* <button
                     onClick={() => setIsAddApplicantModalOpen(true)}
                     className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 transition-colors"
                   >
                     <PlusIconGreen />
                     Add Applicant
-                  </button>
+                  </button> */}
 
                   <div className='border-l-2 border-gray-300 h-12'></div>
 
