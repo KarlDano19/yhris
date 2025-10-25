@@ -4,10 +4,10 @@ import StageBlock from "./StageBlock"
 import StageTabs from "./StageTabs"
 import { useContext, useEffect, useState } from "react"
 import StateContext from "../contexts/StateContext"
-import { FilterOptions } from "./Filter"
+import { FilterValues } from "@/components/common/Filter"
 
 interface StageProps extends PropTypes {
-  filters?: FilterOptions;
+  filters?: FilterValues;
 }
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any, isDisabled: boolean) => ({
@@ -39,7 +39,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
     setOpenMenuId(null)
   }, [actionState.modal.isOpen])
 
-  const tabFilters: FilterOptions = {
+  const tabFilters: FilterValues = {
     status: filters?.status || ['Ongoing', 'Passed', 'Withdrawn', 'Rejected', 'Hired'],
   };
 

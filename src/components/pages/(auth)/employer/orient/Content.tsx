@@ -21,7 +21,9 @@ import EnrollToPayroll from './EnrollToPayroll';
 import OrientOptionModal from './modals/OrientOptionModal';
 import SendEmailModal from '@/components/SendEmailModal';
 import NoticeModal from './modals/NoticeModal';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
@@ -51,6 +53,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
+
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'enrolled',
+      title: 'Enrollment Status',
+      options: [
+        { label: 'Not Enrolled', value: 'not_enrolled' },
+        { label: 'Enrolled', value: 'enrolled' },
+      ],
+      multiSelect: true,
+      allowEmpty: true,
+    },
+  ];
+
+  const [filters, setFilters] = useFilterPersistence<FilterValues>('orient', {
+    enrolled: ['not_enrolled'],
+  });
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+
   const {
     data: applicationOrient,
     refetch,
@@ -59,6 +81,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ...itemsFilter,
     pageSize,
     currentPage,
+    enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
   const { mutate: enrollToYP } = useEnrollEmployeeToYP();
@@ -85,11 +108,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
 
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    setIsFilterLoading(true);
+    // The useGetApplicantOrient hook will automatically refetch when filters.enrolled changes
+  };
+
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
     }
   }, [cachedUserDetails]);
+
+  // Handle filter loading state
+  useEffect(() => {
+    if (applicationOrient && isFilterLoading) {
+      setIsFilterLoading(false);
+    }
+  }, [applicationOrient, isFilterLoading]);
 
   useEffect(() => {
     if (applicationOrient) {
@@ -318,7 +354,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isGetOrientLoading) {
+    if (isGetOrientLoading || isFilterLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -329,6 +365,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
+    
+    // Check if no filter options are selected - show no data
+    if (filters.enrolled && filters.enrolled.length === 0) {
+      return (
+        <tr>
+          <td colSpan={8}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>No filter options selected.</h4>
+          </td>
+        </tr>
+      );
+    }
+    
     if (orientItems && orientItems.length > 0) {
       return orientItems.map((item: any, index: number) => (
         <tr key={index}>
@@ -489,6 +537,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
+            <div className='flex-1'></div>
+            <Filter 
+              filterGroups={filterGroups}
+              defaultValues={filters}
+              onFilterChange={handleFilterChange}
+              buttonId="orient-filter-btn"
+            />
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div

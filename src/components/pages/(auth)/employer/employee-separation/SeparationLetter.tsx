@@ -1,10 +1,16 @@
-import { Dispatch, Fragment } from 'react';
+import { Dispatch, Fragment, useState } from 'react';
+
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
 import classNames from '@/helpers/classNames';
 import { T_LetterModal } from '@/types/globals';
+import { Tooltip } from 'react-tooltip';
+
 import ClipIcon from '@/svg/ClipIcon';
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import AttachmentViewModal from './modals/AttachmentViewModal';
 
 const items = [
   { name: 'Letter of Acceptance', type: 'Acceptance' },
@@ -16,6 +22,7 @@ export default function SeparationLetter({
   isLetterSent,
   isLetterReceived,
   letterReceivedDate,
+  letterAttachment,
   setIsLetterModalOpen,
   setReceived,
   isLoading,
@@ -24,11 +31,15 @@ export default function SeparationLetter({
   isLetterSent: boolean;
   isLetterReceived: boolean;
   letterReceivedDate?: string;
+  letterAttachment?: string | null;
   setIsLetterModalOpen: Dispatch<T_LetterModal>;
   setReceived: any;
   isLoading: boolean;
 }) {
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
   return (
+    <>
     <div className='flex flex-col'>
       <div className='inline-flex'>
         <Menu as='div' className='relative'>
@@ -111,6 +122,9 @@ export default function SeparationLetter({
               )}
               disabled={!isLetterSent || isLetterReceived || isLoading}
               onClick={() => setReceived(id, 'letters')}
+              data-tooltip-id='letter-received-tooltip'
+              data-tooltip-content={!isLetterSent ? 'Letter must be sent first' : isLetterReceived ? 'Letter already received' : 'Mark letter as received'}
+              data-tooltip-place='bottom'
             >
               {isLoading && (
                 <div role='status'>
@@ -138,12 +152,36 @@ export default function SeparationLetter({
           </div>
           {isLetterReceived ? (
             <div className='flex gap-1 items-center mt-2 justify-center'>
-              <ClipIcon />
+              <div
+                className={letterAttachment ? 'cursor-pointer' : ''}
+                data-tooltip-id='letter-attachment-tooltip'
+                data-tooltip-content={letterAttachment ? 'Click to view attachment' : 'No attachment'}
+                data-tooltip-place='bottom'
+                onClick={() => {
+                  if (letterAttachment) {
+                    setIsViewModalOpen(true);
+                  }
+                }}
+              >
+                <ClipIcon hasFile={!!letterAttachment} />
+              </div>
               <p className='ml-2 text-xs'>{letterReceivedDate}</p>
             </div>
           ) : null}
         </div>
       </div>
+      <Tooltip id='letter-received-tooltip' />
+      <Tooltip id='letter-attachment-tooltip' />
     </div>
+    
+    {isViewModalOpen && (
+      <AttachmentViewModal
+        isOpen={isViewModalOpen}
+        setIsOpen={setIsViewModalOpen}
+        attachmentUrl={letterAttachment}
+        title="Letter Attachment"
+      />
+    )}
+    </>
   );
 }

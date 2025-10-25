@@ -80,6 +80,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
+  
+  // Individual loading states for each received button
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
 
   const { mutate, isLoading } = usePatchSeparation();
   const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
@@ -95,6 +98,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
 
   const setReceived = (id: string, emailType: string) => {
+    const loadingKey = `${id}-${emailType}`;
+    setLoadingStates(prev => ({ ...prev, [loadingKey]: true }));
+    
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
     const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
     const currentDate = new Date();
@@ -117,9 +123,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const callbackReq = {
       onSuccess: (data: any) => {
         setSeparationItems([...separationItemsCopy]);
+        setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
       },
       onError: (err: any) => {
+        setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
@@ -129,7 +137,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Handler for Letter email submission  
-  const handleLetterSubmit = (data: LetterData) => {
+  const handleLetterSubmit = (data: any) => {
     if (isLetterModalOpen && isLetterModalOpen.id) {
       const updatedItem = handleLetterSending(data, separationItems, isLetterModalOpen.id, isLetterModalOpen.type);
       
@@ -283,29 +291,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             separation.quit_claim_received_date &&
             new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
           separation['separationLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['acceptanceLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['signDocuments'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['lastPay'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['quitClaim'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           return separation;
         });
@@ -335,29 +356,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             separation.quit_claim_received_date &&
             new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
           separation['separationLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['acceptanceLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['signDocuments'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['lastPay'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['quitClaim'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           return separation;
         });
@@ -482,9 +516,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLetterSent={item.isLetterSent}
               isLetterReceived={item.isLetterReceived}
               letterReceivedDate={item.letterReceivedDate}
+              letterAttachment={item.letter_attachment}
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-letters`] || false}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -493,9 +528,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isDocumentsSent={item.isDocumentsSent}
               isDocumentsReceived={item.isDocumentsReceived}
               documentReceivedDate={item.documentReceivedDate}
+              documentsAttachment={item.documents_attachment}
               setIsDocumentModalOpen={setIsDocumentModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-sign documents`] || false}
+              isLetterReceived={item.isLetterReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -503,7 +540,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               id={item.id}
               isLastPayReleased={item.isLastPayReleased}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
+              lastPayAttachment={item.last_pay_attachment}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
+              isDocumentsReceived={item.isDocumentsReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -512,9 +551,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isQuitclaimSigned={item.isQuitclaimSigned}
               isQuitclaimReceived={item.isQuitclaimReceived}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
+              quitclaimAttachment={item.quit_claim_attachment}
               setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-quit claim`] || false}
+              isLastPayReleased={item.isLastPayReleased}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>

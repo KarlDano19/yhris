@@ -18,10 +18,12 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         context: '',
       };
       if (separationEmail.emailType === 'letters') {
-        data.subject = separationEmail.separationLetter.subject;
-        data.to = separationEmail.separationLetter.to;
-        data.cc = separationEmail.separationLetter.cc;
-        data.bcc = separationEmail.separationLetter.bcc;
+        data.subject = separationEmail.separationLetter.subject || '';
+        data.to = Array.isArray(separationEmail.separationLetter.to) 
+          ? separationEmail.separationLetter.to 
+          : [separationEmail.separationLetter.to];
+        data.cc = separationEmail.separationLetter.cc || [];
+        data.bcc = separationEmail.separationLetter.bcc || [];
         data.context = separationEmail.separationLetter.message;
         if (separationEmail.separationLetter.attachment) {
           data.attachment = separationEmail.separationLetter.attachment;

@@ -287,6 +287,11 @@ const Content = () => {
         jobPost['workSetup'] = jobPost['work_setup'];
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
+        // Add dynamic slot fields
+        jobPost['hiredCount'] = jobPost['hired_count'];
+        jobPost['remainingSlots'] = jobPost['remaining_slots'];
+        jobPost['slotsDisplay'] = jobPost['slots_display'];
+        jobPost['isFullyStaffed'] = jobPost['is_fully_staffed'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
         jobPost['position_name'] = jobPost['position_name'] || 'N/A'; // Add this line
@@ -544,11 +549,29 @@ const Content = () => {
             {jobPost.schedule}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.hireCount}
+            <div className="flex flex-col items-center gap-1">
+              <span className={`font-semibold ${jobPost.isFullyStaffed ? 'text-green-600' : 'text-gray-700'}`}>
+                {jobPost.slotsDisplay}
+              </span>
+              {jobPost.isFullyStaffed && (
+                <span 
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+                  data-tooltip-id="fully-staffed-tooltip"
+                  data-tooltip-content="All positions filled"
+                >
+                  ✓ Full
+                </span>
+              )}
+              {!jobPost.isFullyStaffed && jobPost.remainingSlots > 0 && (
+                <span className="text-xs text-amber-600">
+                  {jobPost.remainingSlots} remaining
+                </span>
+              )}
+            </div>
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
@@ -1009,6 +1032,7 @@ const Content = () => {
       <Tooltip id="edit-tooltip" />
       <Tooltip id="delete-tooltip" />
       <Tooltip id="assign-tooltip" />
+      <Tooltip id="fully-staffed-tooltip" />
     </div>
   );
 };
