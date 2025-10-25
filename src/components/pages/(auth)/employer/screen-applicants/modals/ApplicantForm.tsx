@@ -152,23 +152,33 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
   const renderProfileTab = () => {
     return (
       <>
-        <div className='flex mt-8'>
-          <div className='mr-8'>
+        <div className='flex flex-col md:flex-row mt-8'>
+          <div className='mr-0 md:mr-8 mb-4 md:mb-0 flex justify-center md:justify-start'>
             <ApplicantAvatar applicant={applicantProfile} size={200} /> {/* Applicant Avatar */}
           </div>
-          <div className=''>
-            <p className='text-[1.5rem]'>{applicantProfile.name}</p>
-            <div className='my-3 flex'>
-              <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.email}</span>
+          <div className='flex-1 min-w-0'>
+            <p className='text-[1.5rem] text-center md:text-left'>{applicantProfile.name}</p>
+            <div className='my-3 flex items-start'>
+              <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span 
+                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
+                title={applicantProfile.email}
+              >
+                {applicantProfile.email}
+              </span>
             </div>
-            <div className='my-3 flex'>
-              <PhoneIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.mobile}</span>
+            <div className='my-3 flex items-start'>
+              <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
             </div>
-            <div className='my-3 flex'>
-              <MapPinIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.address}</span>
+            <div className='my-3 flex items-start'>
+              <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span 
+                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
+                title={applicantProfile.address}
+              >
+                {applicantProfile.address}
+              </span>
             </div>
           </div>
         </div>
@@ -179,7 +189,7 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
               {applicant.stage_notes.map((stageNote, index) => (
                 <div key={index} className='border-l-4 border-blue-400 pl-4'>
                   <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
+                    <h5 className='font-medium text-gray-800'>{stageNote.stage_title || 'Stage'}</h5>
                   </div>
                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
                 </div>
