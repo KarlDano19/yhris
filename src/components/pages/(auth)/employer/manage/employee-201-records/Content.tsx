@@ -22,6 +22,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       department: "ALL",
       position: "ALL",
       onlyIncomplete: false,
+      isActive: ["true"],
       page: 1,
       pageSize: 12,
     }),
@@ -89,7 +90,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               location: query.location,
               department: query.department,
               position: query.position,
-              recordStatus: query.recordStatus
+              recordStatus: query.recordStatus,
+              isActive: query.isActive
             }}
             onApply={(vals) => {
               // triggers API + resets to page 1 inside the hook

@@ -26,6 +26,8 @@ import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -62,6 +64,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
+  
+  // Filter state with persistence (Unfinished checked by default)
+  const [filters, setFilters] = useFilterPersistence<FilterValues>('employee-separation', {
+    status: ['unfinished'],
+  });
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
@@ -87,8 +95,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
+    status: filters.status?.join(','),
   });
   const [isSearching, setIsSearching] = useState(false);
+
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'status',
+      title: 'Separation Status',
+      options: [
+        { label: 'Unfinished', value: 'unfinished' },
+        { label: 'Separated', value: 'separated' },
+      ],
+      multiSelect: true,
+      allowEmpty: true,
+    },
+  ];
+
+  // Handle filter changes
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    setIsFilterLoading(true);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  // Handle filter loading state
+  useEffect(() => {
+    if (dataSeparation && isFilterLoading) {
+      setIsFilterLoading(false);
+    }
+  }, [dataSeparation, isFilterLoading]);
 
   const setReceived = (id: string, emailType: string) => {
     const loadingKey = `${id}-${emailType}`;
@@ -474,12 +511,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isSearching || isGetSeparationLoading) {
+    if (isSearching || isGetSeparationLoading || isFilterLoading) {
       return (
         <tr>
           <td colSpan={100}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    
+    // Check if no filter options are selected - show no data
+    if (filters.status && filters.status.length === 0) {
+      return (
+        <tr>
+          <td colSpan={9}>
+            <div className='py-4'>
+              <h4 className='text-center text-gray-300 text-sm'>No filter options selected.</h4>
             </div>
           </td>
         </tr>
@@ -661,7 +711,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-2'>
               <SmartButton
                 id='create-separation-btn'
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
@@ -669,6 +719,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 CREATE
               </SmartButton>
+              <Filter 
+                filterGroups={filterGroups}
+                defaultValues={filters}
+                onFilterChange={handleFilterChange}
+                buttonId="separation-filter-btn"
+                size="small"
+              />
             </div>
           </div>
           
