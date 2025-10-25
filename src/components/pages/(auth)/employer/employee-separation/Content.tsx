@@ -515,8 +515,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton 
                 id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                data-tooltip-id="delete-tooltip"
-                data-tooltip-content="Delete Separation"
                 disabled={selectedSeparations.size > 1}
                 className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
@@ -824,7 +822,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
-      <Tooltip id="delete-tooltip" />
     </>
   );
 };
