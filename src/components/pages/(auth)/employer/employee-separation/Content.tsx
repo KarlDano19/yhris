@@ -37,13 +37,8 @@ import {
   T_QuitclaimModal,
   T_DeleteSepartionModal,
 } from '@/types/globals';
-import { useQueryClient } from '@tanstack/react-query';
 
 import classNames from '@/helpers/classNames';
-
-type T_BulkDeleteModalData = DeleteModalData & {
-  selectedCount: number;
-};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [separationItems, setSeparationItems] = useState<any>([]);
@@ -93,8 +88,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
 
   const setReceived = (id: string, emailType: string) => {
@@ -563,7 +556,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton 
                 id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                disabled={!cachedProfile?.state?.data?.edit_separation || selectedSeparations.size > 1}
+                disabled={selectedSeparations.size > 1}
                 className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
