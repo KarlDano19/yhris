@@ -1,5 +1,6 @@
 import { ChangeEvent, ChangeEventHandler, FormEventHandler, useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import ModalLayout from '../../../../../ModalLayout';
@@ -11,6 +12,8 @@ import useGetStageRequirements from '../hooks/useGetStageRequirements';
 import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
 import useGetStageNotes from '../hooks/useGetStageNotes';
 import useUpdateStageNotes from '../hooks/useUpdateStageNotes';
+import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StageType } from '../types';
@@ -53,7 +56,8 @@ export default function Checklist({
   requirements,
   handleFormSubmit,
   hasActiveSubscription,
-}: PropTypes & { hasActiveSubscription?: boolean }) {
+  jobPostingDetails,
+}: PropTypes & { hasActiveSubscription?: boolean; jobPostingDetails?: any }) {
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { getValues, setValue, register, watch } = useForm();
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +67,10 @@ export default function Checklist({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
+  const [isDeactivationConfirmationModalOpen, setIsDeactivationConfirmationModalOpen] = useState(false);
+  const [isSlotIncreaseModalOpen, setIsSlotIncreaseModalOpen] = useState(false);
+  const [pendingHireData, setPendingHireData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -278,6 +286,13 @@ export default function Checklist({
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
 
+    // Check if job posting is fully staffed (show deactivation modal first)
+    if (isBeingHired && jobPostingDetails?.hired_count >= jobPostingDetails?.required_slot) {
+      setPendingHireData(data);
+      setIsDeactivationConfirmationModalOpen(true);
+      return;
+    }
+
     // Reset form data before closing modal to prevent unsaved changes detection
     resetFormData();
     setIsOpen(false);
@@ -315,6 +330,70 @@ export default function Checklist({
         // Remove audit history refetch since it's not needed
       }, 1000);
     }, 400);
+  };
+
+  const handleDeactivationConfirmation = () => {
+    if (pendingHireData) {
+      setIsLoading(true);
+      
+      // Just deactivate the job posting, don't hire the applicant
+      const dataWithDeactivation = {
+        ...pendingHireData,
+        status: 'ongoing', // Keep applicant in ongoing status, don't hire
+        deactivate_job_posting: true
+      };
+      
+      setIsDeactivationConfirmationModalOpen(false);
+      resetFormData();
+      setIsOpen(false);
+      
+      setTimeout(() => {
+        handleFormSubmit(dataWithDeactivation);
+        setTimeout(() => {
+          refetchStageRequirements();
+          refetchStageNotes();
+          setIsLoading(false);
+        }, 1000);
+      }, 400);
+    }
+  };
+
+
+  const handleDeactivationCancel = () => {
+    // Close deactivation modal and show slot increase modal
+    setIsDeactivationConfirmationModalOpen(false);
+    setIsSlotIncreaseModalOpen(true);
+  };
+
+  const handleSlotIncreaseConfirmation = () => {
+    if (pendingHireData) {
+      setIsLoading(true);
+      
+      // Hire the applicant and increase the required slot
+      const dataWithSlotIncrease = {
+        ...pendingHireData,
+        new_required_slot: (jobPostingDetails?.required_slot || 0) + 1,
+        deactivate_job_posting: false
+      };
+      
+      setIsSlotIncreaseModalOpen(false);
+      resetFormData();
+      setIsOpen(false);
+      
+      setTimeout(() => {
+        handleFormSubmit(dataWithSlotIncrease);
+        setTimeout(() => {
+          refetchStageRequirements();
+          refetchStageNotes();
+          setIsLoading(false);
+        }, 1000);
+      }, 400);
+    }
+  };
+
+  const handleSlotIncreaseCancel = () => {
+    setIsSlotIncreaseModalOpen(false);
+    setPendingHireData(null);
   };
 
   const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
@@ -599,21 +678,46 @@ export default function Checklist({
             </button>
           </ModalFooterLayout>
         </form>
+
+        {/* Unsaved Changes Confirmation Modal */}
+          {isUnsavedChangesModalOpen && (
+            <UnsavedChangesModal
+              isOpen={isUnsavedChangesModalOpen}
+              onClose={handleUnsavedChangesCancel}
+              onConfirm={handleUnsavedChangesConfirm}
+              isLoading={false}
+              isSwitchingEmployee={false}
+              contentType="checklist"
+            />
+        )}
+          
+      {/* Deactivation Confirmation Modal - for fully staffed jobs */}
+      {isDeactivationConfirmationModalOpen && (
+        <ConfirmModal
+          message={`Job posting "${jobPostingDetails?.job_title || 'this position'}" is full (${jobPostingDetails?.hired_count || 0}/${jobPostingDetails?.required_slot || 0}).\nDo you want to set this job posting to inactive?`}
+          isOpen={isDeactivationConfirmationModalOpen}
+          setIsOpen={setIsDeactivationConfirmationModalOpen}
+          confirmAction={handleDeactivationConfirmation}
+          cancelAction={handleDeactivationCancel}
+          isLoading={isLoading}
+        />
+      )}
+
+      {/* Slot Increase Confirmation Modal */}
+      {isSlotIncreaseModalOpen && (
+        <ConfirmModal
+          message={`Do you want to increase the required slot from ${jobPostingDetails?.required_slot || 0} to ${(jobPostingDetails?.required_slot || 0) + 1} and hire ${applicant?.name || 'this applicant'}?`}
+          isOpen={isSlotIncreaseModalOpen}
+          setIsOpen={setIsSlotIncreaseModalOpen}
+          confirmAction={handleSlotIncreaseConfirmation}
+          cancelAction={handleSlotIncreaseCancel}
+          isLoading={isLoading}
+        />
+      )}
+        
       </ModalLayout>
       {!hasActiveSubscription && (
         <ScreenApplicantGoPremiumModal isOpen={isGoPremiumModalOpen} setIsOpen={handlePremiumModalClose} />
-      )}
-      
-      {/* Unsaved Changes Confirmation Modal */}
-      {isUnsavedChangesModalOpen && (
-        <UnsavedChangesModal
-          isOpen={isUnsavedChangesModalOpen}
-          onClose={handleUnsavedChangesCancel}
-          onConfirm={handleUnsavedChangesConfirm}
-          isLoading={false}
-          isSwitchingEmployee={false}
-          contentType="checklist"
-        />
       )}
     </>
   );

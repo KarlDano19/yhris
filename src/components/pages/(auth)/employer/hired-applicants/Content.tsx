@@ -68,17 +68,23 @@ const Content = () => {
     setPageSize(value);
   };
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
-      <div className='flex p-4'>
-        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Dashboard</h4>
-        </Link>
-      </div>
-      <div className='px-2 md:px-8 lg:px-4'>
-        <h2 className='text-xl font-bold text-indigo-dye'>Hired Applicants</h2>
-        {/* Search bar */}
-        <div className='mt-6 mb-10 flex flex-col lg:flex-row items-left gap-4'>
+    <>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+        <div className='flex p-4'>
+          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+            <ArrowLeftIcon className='h-5 w-5' />
+            <h4>Dashboard</h4>
+          </Link>
+        </div>
+        
+        <div className='px-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Hired Applicants</h2>
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          {/* Search bar */}
+          <div className='mb-10 flex flex-col lg:flex-row items-left gap-4'>
           <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
             <div className='flex-none w-11/12 lg:w-full'>
               <div className='relative flex items-center'>
@@ -130,17 +136,22 @@ const Content = () => {
               ))
             : ''}
         </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+            pageType='hiredApplicant'
+          />
+        </div>
       </div>
-      <Pagination
-        pagination={pagination}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageSizeChange={pageSizeChange}
-        onPageChange={paginationChange}
-        pageType='hiredApplicant'
-      />
       <Tooltip id='search-tooltip'/>
-    </div>
+    </>
   );
 };
 

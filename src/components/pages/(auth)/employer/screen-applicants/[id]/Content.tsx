@@ -14,6 +14,7 @@ import actionTypes from '../lib/actionTypes';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import CustomToast from '@/components/CustomToast';
+import CustomDatePicker from '@/components/CustomDatePicker';
 import AddApplicantModal from '../modals/AddApplicantModal';
 import StageRequirements from '../modals/StageRequirements';
 import Checklist from '../modals/Checklist';
@@ -27,16 +28,17 @@ import StageAssignment from '../modals/StageAssignment';
 import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
-import Filter, { FilterOptions } from './Filter';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import DragAndDrop from './DragAndDrop';
 import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
 
-import { ArrowLeftIcon, EllipsisVerticalIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
@@ -56,13 +58,41 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
+  
+  // Date range filter states - must be declared before hook calls
+  const [dateFrom, setDateFrom] = useState<any>('');
+  const [dateTo, setDateTo] = useState<any>('');
+  const [useDateFilter, setUseDateFilter] = useState<boolean>(false);
+
+  // Format date to YYYY-MM-DD for API
+  const formatDateForAPI = useCallback((date: any) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+  
   const {
     data: dataJobPostDetails,
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = useGetJobPostDetails(params.id);
-  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(params.id, false);
-  const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(params.id, true);
+  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(
+    params.id, 
+    false, 
+    useDateFilter ? false : true,
+    useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
+    useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
+  );
+  const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(
+    params.id, 
+    true, 
+    useDateFilter ? false : true,
+    useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
+    useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
+  );
   const {
     CLEAR_STAGE,
     STAGE_REQUIREMENTS,
@@ -86,7 +116,22 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterOptions>({
+  
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'status',
+      title: 'Application Status',
+      options: [
+        { label: 'Ongoing', value: 'Ongoing' },
+        { label: 'Hired', value: 'Hired' },
+      ],
+      multiSelect: true,
+      allowEmpty: false,
+    },
+  ];
+
+  const [filters, setFilters] = useFilterPersistence<FilterValues>(`screen-applicants-${params.id}`, {
     status: ['Ongoing', 'Hired'],
   });
   
@@ -304,7 +349,31 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         const callbackReq = {
           onSuccess: () => {
             dispatch(modalSelected.dispatch);
-            toast.custom(() => <CustomToast message='Successfully updated the checklist.' type='success' />, {
+            
+            // Create dynamic success message based on the action performed
+            let successMessage = 'Successfully updated the checklist.';
+            
+            if (data.status === 'hired') {
+              successMessage = 'Successfully hired the applicant!';
+            } else if (data.status === 'rejected') {
+              successMessage = 'Successfully rejected the applicant.';
+            } else if (data.status === 'withdrawn') {
+              successMessage = 'Successfully marked applicant as withdrawn.';
+            } else if (data.status === 'ongoing') {
+              successMessage = 'Successfully updated applicant status.';
+            } else if (data.status === 'passed') {
+              successMessage = 'Successfully moved applicant to next stage.';
+            }
+            
+            // Add additional context for special actions
+            if (data.new_required_slot) {
+              successMessage += ' Required slot increased.';
+            }
+            if (data.deactivate_job_posting) {
+              successMessage += ' Job posting deactivated.';
+            }
+            
+            toast.custom(() => <CustomToast message={successMessage} type='success' />, {
               duration: 4000,
             });
             jobPostDetailsRefetch();
@@ -391,6 +460,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           requirements={requirements}
           handleFormSubmit={handleFormSubmit}
           hasActiveSubscription={hasActiveSubscription}
+          jobPostingDetails={dataJobPostDetails}
         />
       ),
       dispatch: {
@@ -465,7 +535,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   };
 
-  const handleFilterChange = (newFilters: FilterOptions) => {
+  const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
   };
 
@@ -481,6 +551,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
   const handleCloseBatchUpload = () => {
     setIsBatchUploadOpen(false);
+  };
+
+  // Handle date range changes
+  const handleDateFromChange = (date: any) => {
+    setDateFrom(date);
+    setUseDateFilter(true);
+  };
+
+  const handleDateToChange = (date: any) => {
+    setDateTo(date);
+    setUseDateFilter(true);
   };
 
   return (
@@ -502,119 +583,199 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 {whichModal && modals[whichModal].component}
 
                 {/* Desktop Layout */}
-                <div className='hidden md:flex justify-start items-center gap-4 my-6'>
-                  <SmartButton
-                    id="upload-resumes-btn"
-                    onClick={handleOpenBatchUpload}
-                    className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
-                    disabled={!hasActiveSubscription}
-                  >
-                    <UploadIcon />
-                    Upload Resumes
-                  </SmartButton>
+                <div className='hidden md:block my-6'>
+                  {/* Combined Date Range Filter and Action Buttons Row */}
+                  <div className='flex justify-between items-center gap-4'>
+                    {/* Date Range Filter - Left Side */}
+                    <div className='flex items-center gap-2'>
+                      <div className='relative'>
+                        <CustomDatePicker
+                          id='from-datepicker'
+                          placeholder={'mm/dd/yyyy'}
+                          className={
+                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                          }
+                          selected={dateFrom}
+                          pickerOnChange={handleDateFromChange}
+                          inputOnChange={handleDateFromChange}
+                        />
+                      </div>
+                      <p className='text-gray-600'>to</p>
+                      <div className='relative'>
+                        <CustomDatePicker
+                          id='to-datepicker'
+                          placeholder={'mm/dd/yyyy'}
+                          className={
+                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                          }
+                          selected={dateTo}
+                          pickerOnChange={handleDateToChange}
+                          inputOnChange={handleDateToChange}
+                          minDate={dateFrom}
+                        />
+                      </div>
+                    </div>
 
-                  <button
-                    onClick={() => setIsAddApplicantModalOpen(true)}
-                    className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12 transition-colors"
-                  >
-                    <PlusIconGreen />
-                    Add Applicant
-                  </button>
+                    {/* Action Buttons - Right Side */}
+                    <div className='flex items-center gap-4'>
+                      <SmartButton
+                        id="upload-resumes-btn"
+                        onClick={handleOpenBatchUpload}
+                        className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-1.5 px-6 font-bold text-[16px] flex items-center gap-2 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
+                        disabled={!hasActiveSubscription}
+                      >
+                        <UploadIcon />
+                        Upload Resumes
+                      </SmartButton>
 
-                  <div className='border-l-2 border-gray-300 h-12'></div>
+                      <button
+                        onClick={() => setIsAddApplicantModalOpen(true)}
+                        className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
+                        title="Add Applicant"
+                      >
+                        <PlusIconGreen />
+                      </button>
 
-                  <button
-                    onClick={() => setIsArchivedApplicantsModalOpen(true)}
-                    className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
-                  >
-                    <ArchiveIcon />
-                  </button>
+                      <div className='border-l-2 border-gray-300 h-10'></div>
 
-                  <Filter onFilterChange={handleFilterChange} />
-                  
-                  <AddStageBtn handleAddStage={handleAddStage} />
+                      <button
+                        onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                        className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 py-1.5 px-2 flex items-center justify-center w-12 transition-colors"
+                      >
+                        <ArchiveIcon />
+                      </button>
+
+                      <Filter 
+                        filterGroups={filterGroups}
+                        defaultValues={filters}
+                        onFilterChange={handleFilterChange}
+                        buttonId="use-filter-screen-applicants-btn"
+                      />
+                      
+                      <AddStageBtn handleAddStage={handleAddStage} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Mobile Layout */}
-                <div className='md:hidden flex justify-between items-center gap-4 my-6'>
-                  <div className='flex items-center gap-2'>
-                    {/* Empty space on left */}
-                  </div>
-                  
-                  <div className='flex items-center gap-2'>
-                    <SmartButton
-                      id="upload-resumes-btn"
-                      onClick={handleOpenBatchUpload}
-                      className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-12'
-                    >
-                      <UploadIcon />
-                      Upload Resumes
-                    </SmartButton>
+                <div className='md:hidden my-6'>
+                  {/* Combined Date Range Filter and Action Buttons Row */}
+                  <div className='flex flex-col gap-4'>
+                    {/* Date Range Filter Row */}
+                    <div className='flex justify-start items-center gap-2 flex-wrap'>
+                      <div className='relative flex-1 min-w-[140px]'>
+                        <CustomDatePicker
+                          id='from-datepicker-mobile'
+                          placeholder={'From Date'}
+                          className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
+                          selected={dateFrom}
+                          pickerOnChange={(date: any) => {
+                            setDateFrom(date);
+                          }}
+                          inputOnChange={(value: any) => {
+                            setDateFrom(value);
+                          }}
+                        />
+                      </div>
+                      <p className='text-gray-600 text-sm'>to</p>
+                      <div className='relative flex-1 min-w-[140px]'>
+                        <CustomDatePicker
+                          id='to-datepicker-mobile'
+                          placeholder={'To Date'}
+                          className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
+                          selected={dateTo}
+                          pickerOnChange={(date: any) => {
+                            setDateTo(date);
+                          }}
+                          inputOnChange={(value: any) => {
+                            setDateTo(value);
+                          }}
+                          minDate={dateFrom}
+                        />
+                      </div>
+                    </div>
 
-                    <Filter onFilterChange={handleFilterChange} />
-
-                    {/* Mobile Dropdown Menu */}
-                    <Menu as="div" className="relative">
-                      <Menu.Button className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white p-2 flex items-center justify-center h-12 w-12">
-                        <EllipsisVerticalIcon className="h-5 w-5" />
-                      </Menu.Button>
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
+                    {/* Action Buttons Row */}
+                    <div className='flex justify-end items-center gap-2'>
+                      <SmartButton
+                        id="upload-resumes-btn"
+                        onClick={handleOpenBatchUpload}
+                        className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-1.5 px-4 font-bold text-sm flex items-center gap-2'
                       >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <div className="py-1">
-                            {/* <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  onClick={() => setIsAddApplicantModalOpen(true)}
-                                  className={`${
-                                    active ? 'bg-green-50' : 'hover:bg-green-50'
-                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
-                                  style={{ color: '#65c979' }}
-                                >
-                                  <PlusIconGreen />
-                                  <span className="ml-1">Add Applicant</span>
-                                </button>
-                              )}
-                            </Menu.Item> */}
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  onClick={() => setIsArchivedApplicantsModalOpen(true)}
-                                  className={`${
-                                    active ? 'bg-gray-50' : 'hover:bg-gray-50'
-                                  } group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors`}
-                                  style={{ color: '#6b7280' }}
-                                >
-                                  <ArchiveIcon />
-                                  Archived
-                                </button>
-                              )}
-                            </Menu.Item>
-                            <Menu.Item>
-                              {({ active }) => (
-                                <SmartButton
-                                  id="create-job-stage-btn"
-                                  onClick={handleAddStage}
-                                  className={`${
-                                    active ? 'bg-green-50' : 'hover:bg-green-50'
-                                  } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
-                                >
-                                  <PlusIconGreen />
-                                  <span className="ml-1">Add Stage</span>
-                                </SmartButton>
-                              )}
-                            </Menu.Item>
-                          </div>
-                        </Menu.Items>
-                      </Transition>
-                    </Menu>
+                        <UploadIcon />
+                        Upload
+                      </SmartButton>
+
+                      <Filter 
+                        filterGroups={filterGroups}
+                        defaultValues={filters}
+                        onFilterChange={handleFilterChange}
+                        buttonId="use-filter-screen-applicants-btn-mobile"
+                      />
+
+                      {/* Mobile Dropdown Menu */}
+                      <Menu as="div" className="relative">
+                        <Menu.Button className="rounded-lg bg-gray-600 hover:bg-gray-700 text-white py-1.5 px-2 flex items-center justify-center w-12">
+                          <EllipsisVerticalIcon className="h-5 w-5" />
+                        </Menu.Button>
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1">
+                              {/* <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    onClick={() => setIsAddApplicantModalOpen(true)}
+                                    className={`${
+                                      active ? 'bg-green-50' : 'hover:bg-green-50'
+                                    } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                    style={{ color: '#65c979' }}
+                                  >
+                                    <PlusIconGreen />
+                                    <span className="ml-1">Add Applicant</span>
+                                  </button>
+                                )}
+                              </Menu.Item> */}
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    onClick={() => setIsArchivedApplicantsModalOpen(true)}
+                                    className={`${
+                                      active ? 'bg-gray-50' : 'hover:bg-gray-50'
+                                    } group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors`}
+                                    style={{ color: '#6b7280' }}
+                                  >
+                                    <ArchiveIcon />
+                                    Archived
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <SmartButton
+                                    id="create-job-stage-btn"
+                                    onClick={handleAddStage}
+                                    className={`${
+                                      active ? 'bg-green-50' : 'hover:bg-green-50'
+                                    } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
+                                  >
+                                    <PlusIconGreen />
+                                    <span className="ml-1">Add Stage</span>
+                                  </SmartButton>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    </div>
                   </div>
                 </div>
 

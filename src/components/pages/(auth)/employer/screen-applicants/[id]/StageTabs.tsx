@@ -2,13 +2,13 @@
 
 import { useMemo } from 'react';
 import { ApplicantType, StageType } from '../types';
-import { FilterOptions } from './Filter';
+import { FilterValues } from '@/components/common/Filter';
 
 interface StageTabsProps {
   stage: StageType;
   activeTab: string;
   setActiveTab: (tabName: string) => void;
-  filters?: FilterOptions;
+  filters?: FilterValues;
   isDisabled?: boolean;
 }
 

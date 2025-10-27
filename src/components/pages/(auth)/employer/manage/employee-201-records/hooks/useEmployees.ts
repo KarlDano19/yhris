@@ -9,6 +9,7 @@ export type EmployeeQuery = {
   department: string;     
   position: string;       
   recordStatus: string;
+  isActive: string[];     // Array of 'true' and/or 'false'
   page: number;           
   pageSize: number;       
 };
@@ -19,6 +20,7 @@ const DEFAULT_QUERY: EmployeeQuery = {
   department: "ALL",
   position: "ALL",
   recordStatus: "ALL",
+  isActive: ["true"],     // Active only by default
   page: 1,
   pageSize: 12,
 };
@@ -37,6 +39,11 @@ function buildParams(q: EmployeeQuery) {
   setIfNotAll("department", q.department);
   setIfNotAll("position", q.position);
   setIfNotAll("recordStatus", q.recordStatus);
+
+  // Handle isActive array
+  if (q.isActive && q.isActive.length > 0) {
+    params.set("is_active", q.isActive.join(','));
+  }
 
   params.set("current_page", String(q.page));
   params.set("page_size", String(q.pageSize));
@@ -120,7 +127,7 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
   }, []);
 
   const applyFilters = useCallback(
-    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "recordStatus">) => {
+    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "recordStatus" | "isActive">) => {
       setQuery((prev) => ({ ...prev, ...filters, page: 1 }));
     },
     []

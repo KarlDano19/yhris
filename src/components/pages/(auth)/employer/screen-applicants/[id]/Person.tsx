@@ -259,46 +259,8 @@ export default function Person({
             )} */}
           </p>
         </div>
-        {canViewDetails && currentStageNote && (
+        {canViewDetails && (
           <div className='flex flex-col mt-1'>
-            {!isPassedFinalInterview && (
-              <div className='flex items-center'>
-                <span className='text-xs text-gray-500'>Restored from Archive</span>
-              </div>
-            )}
-            <span className='text-xs text-gray-400'>
-              {currentStageNote.created_at 
-                ? new Date(currentStageNote.created_at).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })
-                : 'Date not available'
-              }
-            </span>
-          </div>
-        )}
-        {canViewDetails && !currentStageNote && isFirstStage && (
-          <div className='flex flex-col mt-1'>
-            <span className='text-xs text-gray-400'>
-              {applicant.created_at 
-                ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })
-                : 'Date not available'
-              }
-            </span>
-          </div>
-        )}
-        {canViewDetails && !currentStageNote && !isFirstStage && isRestoredApplicant && (
-          <div className='flex flex-col mt-1'>
-            {/* {!isPassedFinalInterview && (
-              <div className='flex items-center'>
-                <span className='text-xs text-gray-500'>Moved to {stage.title}</span>
-              </div>
-            )} */}
             <span className='text-xs text-gray-400'>
               {applicant.created_at 
                 ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
