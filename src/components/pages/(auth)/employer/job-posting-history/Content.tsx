@@ -729,18 +729,22 @@ const Content = () => {
   };
 
   return (
-    <div>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+    <>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Post Job</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+        </div>
 
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className='flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -948,6 +952,10 @@ const Content = () => {
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
           <Pagination
             pagination={pagination}
             currentPage={currentPage}
@@ -1033,7 +1041,7 @@ const Content = () => {
       <Tooltip id="delete-tooltip" />
       <Tooltip id="assign-tooltip" />
       <Tooltip id="fully-staffed-tooltip" />
-    </div>
+    </>
   );
 };
 
