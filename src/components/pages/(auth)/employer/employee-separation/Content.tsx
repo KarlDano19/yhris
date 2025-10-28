@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -43,6 +44,7 @@ import {
 import classNames from '@/helpers/classNames';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const queryClient = useQueryClient();
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
@@ -155,6 +157,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setSeparationItems([...separationItemsCopy]);
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        
+        // Clear employee cache when quit claim is received (final step in separation)
+        if (emailType === 'quit claim') {
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+        }
       },
       onError: (err: any) => {
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
@@ -240,6 +247,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
           setIsQuitclaimModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          
+          // Clear employee cache when quit claim is sent (approaching final step)
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
