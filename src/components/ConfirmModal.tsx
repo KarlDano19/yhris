@@ -6,12 +6,14 @@ export default function ConfirmModal({
   isOpen,
   setIsOpen,
   confirmAction,
+  cancelAction,
   isLoading,
 }: {
   message?: string;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   confirmAction: Function;
+  cancelAction?: Function;
   isLoading: boolean;
 }) {
   const cancelButtonRef = useRef(null);
@@ -44,13 +46,19 @@ export default function ConfirmModal({
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <div className='px-4 pt-12 pb-6'>
-                  <h2 className='text-xl font-semibold text-center'>{message}</h2>
+                  <h2 className='text-xl font-semibold text-center whitespace-pre-line'>{message}</h2>
                 </div>
                 <div className='mt-2 px-6 mb-6 flex gap-6'>
                   <button
                     type='button'
                     className='w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0'
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      if (cancelAction) {
+                        cancelAction();
+                      } else {
+                        setIsOpen(false);
+                      }
+                    }}
                     ref={cancelButtonRef}
                   >
                     No

@@ -6,6 +6,7 @@ export interface EmailData {
   message: string;
   cc?: string[];
   bcc?: string[];
+  attachment?: File | string;
 }
 
 export interface OrientItem {
@@ -17,6 +18,7 @@ export interface OrientItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   introduceTeam: {
     subject: string;
@@ -24,6 +26,7 @@ export interface OrientItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   isContractSent: boolean;
   isIntroduced: boolean;
@@ -59,6 +62,9 @@ export const handleEmailSending = (
     if (data.bcc) {
       orientItemCopy.sendContract.bcc = data.bcc;
     }
+    if (data.attachment) {
+      orientItemCopy.sendContract.attachment = data.attachment;
+    }
     orientItemCopy.isContractSent = true;
   } else if (emailType === 'introduce') {
     orientItemCopy.introduceTeam.subject = data.subject;
@@ -69,6 +75,9 @@ export const handleEmailSending = (
     }
     if (data.bcc) {
       orientItemCopy.introduceTeam.bcc = data.bcc;
+    }
+    if (data.attachment) {
+      orientItemCopy.introduceTeam.attachment = data.attachment;
     }
     orientItemCopy.isIntroduced = true;
   }

@@ -1,9 +1,10 @@
 "use client";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import toast from "react-hot-toast";
 
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
-import SubmittedModal from "./SubmittedModal";
+import CustomToast from "@/components/CustomToast";
 import Link from "next/link";
 
 
@@ -14,7 +15,6 @@ interface ConfirmModalProps {
 }
 
 const ConfirmModal = ({ open, onClose }: ConfirmModalProps) => {
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   return (
     <>
@@ -67,7 +67,9 @@ const ConfirmModal = ({ open, onClose }: ConfirmModalProps) => {
                       className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
                       onClick={() => {
                         onClose();
-                        setIsSubmitted(true);
+                        toast.custom(() => <CustomToast message="You have successfully submitted application." type="success" />, {
+                          duration: 5000,
+                        });
                       }}
                     >
                       Send Application
@@ -85,10 +87,6 @@ const ConfirmModal = ({ open, onClose }: ConfirmModalProps) => {
           </div>
         </Dialog>
       </Transition.Root>
-      <SubmittedModal
-        open={isSubmitted}
-        onClose={() => setIsSubmitted(false)}
-      />
     </>
   );
 };

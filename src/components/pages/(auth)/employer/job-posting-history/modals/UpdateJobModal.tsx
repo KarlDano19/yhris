@@ -95,6 +95,7 @@ export default function UpdateJobModal({
         schedule: jobPostDataDetails.job_schedule ? jobPostDataDetails.job_schedule.split(',') : [],
         hireDate: new Date(jobPostDataDetails.date_required),
         hireCount: jobPostDataDetails.required_slot,
+        hiredCount: jobPostDataDetails.hired_count || 0, // Store hired count for validation
       });
       if (jobPostDataDetails?.salary_range_type) {
         setHasSalaryRange(true);
@@ -327,6 +328,7 @@ export default function UpdateJobModal({
                       getValues={secondForm.getValues}
                       hasSalaryRange={hasSalaryRange}
                       secondFormSubmit={secondFormSubmit}
+                      hiredCount={jobPostDataDetails?.hired_count || 0}
                     />
                   </div>
                   <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>

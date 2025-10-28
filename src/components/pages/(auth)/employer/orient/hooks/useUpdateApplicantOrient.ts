@@ -23,6 +23,9 @@ async function updateApplicantOrient(data: any) {
         payload.cc = data.sendContract.cc;
         payload.bcc = data.sendContract.bcc;
         payload.context = data.sendContract.message;
+        if (data.sendContract.attachment) {
+          payload.attachment = data.sendContract.attachment;
+        }
       }
       if (data.emailType == 'introduce') {
         payload.subject = data.introduceTeam.subject
@@ -31,7 +34,10 @@ async function updateApplicantOrient(data: any) {
         payload.to = data.introduceTeam.to;
         payload.cc = data.introduceTeam.cc;
         payload.bcc = data.introduceTeam.bcc;
-        payload.context = data.introduceTeam.message;  
+        payload.context = data.introduceTeam.message;
+        if (data.introduceTeam.attachment) {
+          payload.attachment = data.introduceTeam.attachment;
+        }
       }
     } else if (data.actionType == 'received') {
       payload = {
@@ -55,14 +61,42 @@ async function updateApplicantOrient(data: any) {
     }
     
     const token = getCookie('token');
-    const config = {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify(payload),
-    };
+    let config: any;
+    
+    // If attachment exists, use FormData
+    if (payload.attachment) {
+      const formData = new FormData();
+      Object.keys(payload).forEach(key => {
+        if (key === 'attachment') {
+          formData.append(key, payload[key]);
+        } else if (key === 'to' || key === 'cc' || key === 'bcc') {
+          // Ensure email fields are arrays before stringifying
+          const emailArray = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
+          formData.append(key, JSON.stringify(emailArray));
+        } else {
+          formData.append(key, payload[key]);
+        }
+      });
+      
+      config = {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+        body: formData,
+      };
+    } else {
+      // No attachment, use JSON
+      config = {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify(payload),
+      };
+    }
+    
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applicant-orientations/${data.id}/`, config);
     if (!res.ok) {
       throw res.json();

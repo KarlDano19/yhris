@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import ReactPaginate from 'react-paginate';
 
 import useDirectiveReadStatus from '../hooks/useDirectiveReadStatus';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -104,7 +105,7 @@ export default function EmployeeResponsesModal({
                 <div className='px-6 pt-6 pb-6'>
                   {isLoading ? (
                     <div className="flex justify-center items-center py-8">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#355FD0]"></div>
+                      <LoadingSpinner size="lg" color="yellow" />
                     </div>
                   ) : error ? (
                     <div className="text-red-500 text-center py-4">
