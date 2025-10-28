@@ -20,6 +20,8 @@ export default function MeetingInfo({
   watch,
   attendeeNames,
   absenteeNames,
+  attendeeEmails,
+  absenteeEmails,
   setValue,
 }: {
   control: any;
@@ -31,6 +33,8 @@ export default function MeetingInfo({
   watch: any;
   attendeeNames?: string[];
   absenteeNames?: string[];
+  attendeeEmails?: string[];
+  absenteeEmails?: string[];
   setValue?: any;
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
@@ -220,6 +224,7 @@ export default function MeetingInfo({
               setEmployeeSearch={setEmployeeSearch}
               excludeValues={selectedAbsentees}
               employeeNames={attendeeNames}
+              employeeEmails={attendeeEmails}
               className=""
               onChange={(selectedOptions: any) => {
                 clearErrors("attendees");
@@ -262,6 +267,7 @@ export default function MeetingInfo({
               setEmployeeSearch={setEmployeeSearch}
               excludeValues={selectedAttendees}
               employeeNames={absenteeNames}
+              employeeEmails={absenteeEmails}
               className=""
               showEmail={true}
             />

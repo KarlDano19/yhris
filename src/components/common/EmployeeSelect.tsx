@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import Select, { components } from 'react-select';
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -85,6 +86,22 @@ const CustomOption = (props: any) => {
   );
 };
 
+{/* Custom MultiValue component with tooltip */}
+const CustomMultiValue = (props: any) => {
+  const { data } = props;
+  const email = data.email && data.email.trim() !== '' ? data.email : 'No email available';
+  
+  return (
+    <div
+      data-tooltip-id="employee-email-tooltip"
+      data-tooltip-place="top"
+      data-tooltip-content={email}
+    >
+      <components.MultiValue {...props} />
+    </div>
+  );
+};
+
 interface EmployeeSelectProps {
   control: any;
   name: string;
@@ -104,6 +121,8 @@ interface EmployeeSelectProps {
   onChange?: (selectedOption: any) => void;
   employeeName?: string; // Optional employee name for display
   employeeNames?: string[]; // Optional array of employee names for multi-select display
+  employeeEmail?: string; // Optional employee email for single select
+  employeeEmails?: string[]; // Optional array of employee emails for multi-select display
   showEmail?: boolean; // Optional prop to show email in options
 }
 
@@ -125,6 +144,8 @@ export default function EmployeeSelect({
   onChange,
   employeeName,
   employeeNames,
+  employeeEmail,
+  employeeEmails,
   showEmail = false,
 }: EmployeeSelectProps) {
   const queryClient = useQueryClient();
@@ -185,12 +206,13 @@ export default function EmployeeSelect({
   }, [employeeData?.records, cachedEmployeeItems, persistentSelections]);
 
   {/* Helper functions */}
-  const createEmployeeFromName = (id: any, name: string) => {
+  const createEmployeeFromName = (id: any, name: string, email?: string) => {
     const nameParts = name.split(' ');
     return {
       id,
       firstname: nameParts[0] || '',
       lastname: nameParts.slice(1).join(' ') || '',
+      email: email || '',
       department: '',
       position: '',
       employment_status: '',
@@ -213,22 +235,26 @@ export default function EmployeeSelect({
   const getEmployeesWithNames = useCallback((idsToFind: any[], currentEmployeeItems: any[] = []) => {
     return idsToFind.map((id: any, index: number) => {
       let nameToUse = `Employee ${id}`;
+      let emailToUse = '';
       
       if (isMulti && employeeNames?.[index]) {
         nameToUse = employeeNames[index];
+        emailToUse = employeeEmails?.[index] || '';
       } else if (!isMulti && employeeName && idsToFind.length === 1 && idsToFind[0] === id) {
         nameToUse = employeeName;
+        emailToUse = employeeEmail || '';
       } else {
         // Try to find the employee in current employee items if employeeNames is not available or too short
         const employee = currentEmployeeItems.find((item: any) => item.id === id);
         if (employee) {
           nameToUse = `${employee.firstname} ${employee.lastname}`;
+          emailToUse = employee.email || '';
         }
       }
       
-      return createEmployeeFromName(id, nameToUse);
+      return createEmployeeFromName(id, nameToUse, emailToUse);
     });
-  }, [isMulti, employeeNames, employeeName]);
+  }, [isMulti, employeeNames, employeeEmails, employeeName, employeeEmail]);
 
   {/* Load persistent selections */}
   useEffect(() => {
@@ -256,28 +282,29 @@ export default function EmployeeSelect({
       const cachedEmployee = getEmployeeFromCache(id);
       if (cachedEmployee) return cachedEmployee;
       
-      // If we have employeeNames, try to get the name
+      // If we have employeeNames, try to get the name and email
       if (hasNames) {
         if (isMulti) {
           const idIndex = idsToFind.findIndex((empId: any) => empId === id);
           if (idIndex >= 0 && employeeNames && employeeNames[idIndex]) {
-            return createEmployeeFromName(id, employeeNames[idIndex]);
+            const emailForEmployee = employeeEmails?.[idIndex] || '';
+            return createEmployeeFromName(id, employeeNames[idIndex], emailForEmployee);
           }
         } else {
-          // For single select, use employeeName directly
+          // For single select, use employeeName and employeeEmail directly
           if (employeeName) {
-            return createEmployeeFromName(id, employeeName);
+            return createEmployeeFromName(id, employeeName, employeeEmail || '');
           }
         }
       }
       
       // Fallback to generic name
-      return createEmployeeFromName(id, `Employee ${id}`);
+      return createEmployeeFromName(id, `Employee ${id}`, '');
     });
     
     setPersistentSelections(newSelections);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValue, name, isMulti, queryClient, employeeName, employeeNames, getEmployeeFromCache, getEmployeesWithNames, debouncedSearch, employeeData?.records, cachedEmployeeItems]);
+  }, [formValue, name, isMulti, queryClient, employeeName, employeeNames, employeeEmail, employeeEmails, getEmployeeFromCache, getEmployeesWithNames, debouncedSearch, employeeData?.records, cachedEmployeeItems]);
 
   {/* Update selections when new data fetched */}
   useEffect(() => {
@@ -609,20 +636,21 @@ export default function EmployeeSelect({
                           const formValueArray = isMulti ? formValue : [formValue];
                           const idIndex = formValueArray.findIndex((id: any) => id === option.value);
                           if (idIndex >= 0 && employeeNames && employeeNames[idIndex]) {
-                            newSelections.push(createEmployeeFromName(option.value, employeeNames[idIndex]));
+                            const emailForEmployee = employeeEmails?.[idIndex] || '';
+                            newSelections.push(createEmployeeFromName(option.value, employeeNames[idIndex], emailForEmployee));
                             return;
                           }
                         } else {
                           // For single select, use employeeName directly
                           if (employeeName) {
-                            newSelections.push(createEmployeeFromName(option.value, employeeName));
+                            newSelections.push(createEmployeeFromName(option.value, employeeName, employeeEmail || ''));
                             return;
                           }
                         }
                       }
                       
                       // Fallback to generic name
-                      newSelections.push(createEmployeeFromName(option.value, `Employee ${option.value}`));
+                      newSelections.push(createEmployeeFromName(option.value, `Employee ${option.value}`, ''));
                     });
                     
                     setPersistentSelections(newSelections);
@@ -669,6 +697,7 @@ export default function EmployeeSelect({
               filterOption={() => true} // Disable React Select's built-in filtering since we handle it ourselves
               components={{
                 Option: (props: any) => <CustomOption {...props} showEmail={showEmail} />,
+                MultiValue: CustomMultiValue,
                 DropdownIndicator: () => (
                   <div className="pointer-events-none px-2">
                     <SelectChevronDown />
@@ -710,6 +739,7 @@ export default function EmployeeSelect({
           );
         }}
       />
+      <Tooltip id="employee-email-tooltip"/>
     </div>
   );
 }
