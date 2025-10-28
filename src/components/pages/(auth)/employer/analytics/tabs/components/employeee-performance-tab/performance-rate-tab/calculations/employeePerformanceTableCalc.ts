@@ -30,7 +30,7 @@ export const getStatusColor = (status: string): string => {
   switch (status) {
     case 'Passed':
       return 'text-green-600 font-medium';
-    case 'Did not Pass':
+    case 'Failed':
       return 'text-red-600 font-medium';
     default:
       return 'text-gray-600';
