@@ -237,6 +237,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           requirements: item.stage_requirements,
           applicants: [],
           orderBy: item.order_by,
+          is_final_stage: item.is_final_stage || false, // Include is_final_stage from API
           permissions: item.permissions, // Make sure permissions are passed through
         };
         jobStages.push(newData);
