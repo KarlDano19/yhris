@@ -16,6 +16,7 @@ export default function CreateJobPageJobType({
   getValues,
   hasSalaryRange,
   secondFormSubmit,
+  hiredCount = 0, // Add hired count for validation
 }: {
   control: any;
   register: any;
@@ -26,6 +27,7 @@ export default function CreateJobPageJobType({
   getValues: any;
   hasSalaryRange?: boolean;
   secondFormSubmit?: () => void;
+  hiredCount?: number; // Add hired count prop
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
@@ -83,6 +85,14 @@ export default function CreateJobPageJobType({
     setManualInputFocus(manualInputFocusData);
     if (hireCount > 1000) {
       toast.custom(() => <CustomToast message={'The maximum number of hires allowed is 1000.'} type='error' />, {
+        duration: 7000,
+      });
+      return;
+    }
+    
+    // Validate that hireCount is not less than hiredCount
+    if (hiredCount > 0 && hireCount < hiredCount) {
+      toast.custom(() => <CustomToast message={`Cannot set required slots to ${hireCount}. Currently ${hiredCount} applicants are hired. Required slots must be at least ${hiredCount}.`} type='error' />, {
         duration: 7000,
       });
       return;
@@ -356,19 +366,26 @@ export default function CreateJobPageJobType({
               How many people do you want to hire for this opening?
               <span className='text-red-600'>*</span>
             </label>
+            {hiredCount > 0 && (
+              <div className='mt-1 text-sm text-amber-600'>
+                Currently {hiredCount} applicant{hiredCount !== 1 ? 's' : ''} hired. Minimum required: {hiredCount}
+              </div>
+            )}
             <div className='relative mt-2'>
               <input
                 id='hireCount'
                 {...register('hireCount')}
                 onChange={e => {
                   const value = parseInt(e.target.value);
-                  if (value < 1) {
-                    setValue('hireCount', 1);
+                  const minValue = Math.max(1, hiredCount);
+                  if (value < minValue) {
+                    setValue('hireCount', minValue);
                   } else {
                     setValue('hireCount', value);
                   }
                 }}
                 type='number'
+                min={Math.max(1, hiredCount)}
                 defaultValue={1}
                 className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />

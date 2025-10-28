@@ -22,6 +22,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       department: "ALL",
       position: "ALL",
       onlyIncomplete: false,
+      isActive: ["true"],
       page: 1,
       pageSize: 12,
     }),
@@ -65,7 +66,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-10 min-h-[80vh] flex flex-col">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col">
       <div className="flex p-4">
         <Link data-testid="back-link" href="/manage" className="flex-none flex gap-3 items-center rounded-md px-2 py-1 hover:bg-gray-100">
           <ArrowLeftIcon className="h-5 w-5 text-gray-700" />
@@ -89,7 +90,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               location: query.location,
               department: query.department,
               position: query.position,
-              recordStatus: query.recordStatus
+              recordStatus: query.recordStatus,
+              isActive: query.isActive
             }}
             onApply={(vals) => {
               // triggers API + resets to page 1 inside the hook

@@ -287,6 +287,11 @@ const Content = () => {
         jobPost['workSetup'] = jobPost['work_setup'];
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
+        // Add dynamic slot fields
+        jobPost['hiredCount'] = jobPost['hired_count'];
+        jobPost['remainingSlots'] = jobPost['remaining_slots'];
+        jobPost['slotsDisplay'] = jobPost['slots_display'];
+        jobPost['isFullyStaffed'] = jobPost['is_fully_staffed'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['isActive'] = jobPost['is_active'];
         jobPost['position_name'] = jobPost['position_name'] || 'N/A'; // Add this line
@@ -544,11 +549,29 @@ const Content = () => {
             {jobPost.schedule}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.hireCount}
+            <div className="flex flex-col items-center gap-1">
+              <span className={`font-semibold ${jobPost.isFullyStaffed ? 'text-green-600' : 'text-gray-700'}`}>
+                {jobPost.slotsDisplay}
+              </span>
+              {jobPost.isFullyStaffed && (
+                <span 
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+                  data-tooltip-id="fully-staffed-tooltip"
+                  data-tooltip-content="All positions filled"
+                >
+                  ✓ Full
+                </span>
+              )}
+              {!jobPost.isFullyStaffed && jobPost.remainingSlots > 0 && (
+                <span className="text-xs text-amber-600">
+                  {jobPost.remainingSlots} remaining
+                </span>
+              )}
+            </div>
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
@@ -706,18 +729,22 @@ const Content = () => {
   };
 
   return (
-    <div>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+    <>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Post Job</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+        </div>
 
-          <div className='mt-6 flex flex-col lg:flex-row items-left gap-4'>
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className='flex flex-col lg:flex-row items-left gap-4'>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -925,6 +952,10 @@ const Content = () => {
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
           <Pagination
             pagination={pagination}
             currentPage={currentPage}
@@ -1009,7 +1040,8 @@ const Content = () => {
       <Tooltip id="edit-tooltip" />
       <Tooltip id="delete-tooltip" />
       <Tooltip id="assign-tooltip" />
-    </div>
+      <Tooltip id="fully-staffed-tooltip" />
+    </>
   );
 };
 

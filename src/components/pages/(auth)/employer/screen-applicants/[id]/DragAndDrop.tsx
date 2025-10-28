@@ -9,14 +9,14 @@ import { ContextTypes, StageType } from "../types"
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import useDragStage from '../hooks/useDragStage';
-import { FilterOptions } from "./Filter";
+import { FilterValues } from "@/components/common/Filter";
 
 type PropTypes = {
   containerRef: React.MutableRefObject<HTMLElement | null>
   gridCols: React.CSSProperties
   jobPostDetailsRefetch: any
   appliedApplicantRefetch: any
-  filters?: FilterOptions
+  filters?: FilterValues
 }
 
 export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefetch, appliedApplicantRefetch, filters }: PropTypes) {

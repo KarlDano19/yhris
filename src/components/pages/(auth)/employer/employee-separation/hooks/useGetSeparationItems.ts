@@ -36,7 +36,7 @@ async function getSeparationItems(filters: any) {
 
 function useGetSeparationItems(filters: any) {
   const query = useQuery(
-    ['separationsItemsCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
+    ['separationsItemsCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to, filters.status],
     () => getSeparationItems(filters),
     {
       keepPreviousData: true,
