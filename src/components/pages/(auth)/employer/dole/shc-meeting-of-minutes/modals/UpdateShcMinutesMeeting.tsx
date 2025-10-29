@@ -134,6 +134,8 @@ function UpdateShcMinutesMeetingModal({
                     watch={watch}
                     attendeeNames={minutesMeetingData?.attendee_names}
                     absenteeNames={minutesMeetingData?.absentee_names}
+                    attendeeEmails={minutesMeetingData?.attendee_emails}
+                    absenteeEmails={minutesMeetingData?.absentee_emails}
                     setValue={setValue}
                   />
                 )}

@@ -9,7 +9,168 @@ import TemplateResponses from './tabs/TemplateResponses';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const [activeTab, setActiveTab] = useState('individual');
+  const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
+  const [itemsFilter, setItemsFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const [isSearching, setIsSearching] = useState(false);
+
+  const {
+    data: dataEvaluationHistoryItems,
+    isLoading: isLoadingEvaluationHistoryItems,
+    refetch: refetchEvaluationHistoryItems,
+  } = useGetEvaluationHistoryItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
+
+  useEffect(() => {
+    if (dataEvaluationHistoryItems) {
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataEvaluationHistoryItems.records) {
+        items = dataEvaluationHistoryItems.records.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+        totalPages = dataEvaluationHistoryItems.total_pages || 1;
+        totalRecords = dataEvaluationHistoryItems.total_records || items.length;
+      } 
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEvaluationHistoryItems)) {
+        items = dataEvaluationHistoryItems.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+        
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEvaluationHistoryItems(items);
+      setPagination({
+        totalPages,
+        totalRecords
+      });
+    }
+  }, [dataEvaluationHistoryItems, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
+  };
+
+  useEffect(() => {
+    if (!isLoadingEvaluationHistoryItems && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingEvaluationHistoryItems, isSearching]);
+
+  const renderRows = () => {
+    if (isSearching || isLoadingEvaluationHistoryItems) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div className='py-5'>
+              <LoadingSpinner size="lg" color="yellow" />
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (evaluationHistoryItems && evaluationHistoryItems.length > 0) {
+      return evaluationHistoryItems.map((item: any) => (
+        <tr
+          key={item.id}
+          className='cursor-pointer'
+          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
+        >
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_form}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
+              {item.form_total_score}
+            </span>
+            /<span>{item.max_total_score}</span>
+          </td>
+          {/* Still not implemented */}
+          {/* <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button
+              className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+              disabled={!(item.form_total_score < item.passing_score)}
+            >
+              Enroll for Training
+            </button>
+          </td> */}
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+              View
+            </button>
+          </td>
+        </tr>
+      ));
+    } else {
+      return (
+        <tr>
+          <td colSpan={7}>
+            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
+          </td>
+        </tr>
+      );
+    }
+  };
 
   return (
     <>
