@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
 import useGetValidStagesForRestoration, { ValidStage } from '../hooks/useGetValidStagesForRestoration';
+import useGetBatchValidStagesForRestoration from '../hooks/useGetBatchValidStagesForRestoration';
 import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
 
 import classNames from '@/helpers/classNames';
@@ -35,7 +36,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
   onSuccess,
   appliedJobId
 }) => {
-  const { data: jobPostDetails } = useGetJobPostDetails(jobPostingId);
+  const { data: jobPostDetails, isLoading: isLoadingJobDetails } = useGetJobPostDetails(jobPostingId);
   const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
   const [restoreInProgress, setRestoreInProgress] = useState(false);
   const [processedCount, setProcessedCount] = useState(0);
@@ -50,11 +51,20 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
     isOpen && !isMultiple && !!appliedJobId
   );
 
-  // For multiple applicants, use all active stages (fallback behavior)
+  // Get valid stages for batch restoration (only for multiple applicants)
+  const { data: batchValidStagesData, isLoading: isLoadingBatchValidStages } = useGetBatchValidStagesForRestoration(
+    selectedApplicantIds,
+    isOpen && isMultiple && selectedApplicantIds.length >= 2
+  );
+
+  // For multiple applicants, use batch valid stages (stages ALL applicants have passed through)
   // For single applicant, use validated stages
   const availableStages = isMultiple 
-    ? jobPostDetails?.job_stages?.filter((stage: any) => stage.is_active) || []
+    ? batchValidStagesData?.valid_stages || []
     : validStagesData?.valid_stages || [];
+
+  // Determine the correct loading state based on single vs multiple
+  const isLoadingStages = isMultiple ? isLoadingBatchValidStages : isLoadingValidStages;
 
   const handleClose = () => {
     setSelectedStageId(null);
@@ -180,7 +190,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                         {isMultiple ? (
                           <p className="text-sm text-gray-500">
                             You&apos;re about to restore <strong>{applicantName}</strong>. 
-                            Please select a fallback stage to place these applicants:
+                            Please select a stage that all selected applicants have progressed through:
                           </p>
                         ) : (
                           <p className="text-sm text-gray-500">
@@ -195,7 +205,7 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                           Select Stage:
                         </label>
                         
-                        {isLoadingValidStages ? (
+                        {isLoadingStages ? (
                           <div className="flex items-center justify-center py-8">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                             <span className="ml-2 text-gray-600">Loading available stages...</span>
@@ -251,9 +261,9 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                           </div>
                         )}
                         
-                        {availableStages.length === 0 && !isLoadingValidStages && (
+                        {availableStages.length === 0 && !isLoadingStages && (
                           <div className="text-center py-4 text-gray-500">
-                            {isMultiple ? 'No active stages available' : 'No valid stages available for restoration'}
+                            {isMultiple ? 'No common stages available. Selected applicants must have progressed through at least one stage together.' : 'No valid stages available for restoration'}
                           </div>
                         )}
                       </div>
@@ -291,10 +301,10 @@ const RestoreApplicationModal: React.FC<RestoreApplicationModalProps> = ({
                 <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                   <button
                     type="button"
-                    disabled={!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingValidStages}
+                    disabled={!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingStages}
                     className={classNames(
                       'inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm sm:ml-3 sm:w-auto',
-                      (!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingValidStages)
+                      (!selectedStageId || isLoading || restoreInProgress || availableStages.length === 0 || isLoadingStages)
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
                     )}

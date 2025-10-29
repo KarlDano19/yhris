@@ -22,10 +22,16 @@ export default function checklist(state: any, action: any) {
       const isTheNextStage = index === stageIndex + 1
       if (isTheNextStage) {
         
-        // reset applicant's status first
-        applicant.checklists = formData.checklists
-        applicant.status = null
-        return {...stage, applicants: [...stage.applicants, applicant]}
+        // Preserve all applicant data including dates, reset status and update checklists
+        const updatedApplicant = {
+          ...applicant,
+          checklists: formData.checklists,
+          status: null,
+          // Preserve created_at and updated_at
+          created_at: applicant.created_at,
+          updated_at: applicant.updated_at,
+        }
+        return {...stage, applicants: [...stage.applicants, updatedApplicant]}
       } else {
         return stage
       }

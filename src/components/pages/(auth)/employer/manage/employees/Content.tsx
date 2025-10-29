@@ -33,6 +33,8 @@ import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -123,11 +125,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [shouldShowAutocomplete, setShouldShowAutocomplete] = useState(false);
   const autocompleteRef = useRef<HTMLUListElement>(null);
 
+  // Filter state with persistence (Active checked by default)
+  const [filters, setFilters] = useFilterPersistence<FilterValues>('employee-management', {
+    is_active: ['true'], // 'Active' checked by default
+  });
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+
   const {
     data: employeeListData,
     isLoading: isEmployeeListLoading,
     refetch: employeeListRefetch,
-  } = useGetEmployeeItemsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetEmployeeItemsList({ 
+    ...appliedFilter, 
+    pageSize: pageSize, 
+    currentPage: currentPage,
+    is_active: filters.is_active?.join(','),
+  });
   
   // Memoize the search parameters to prevent unnecessary re-renders
   const searchParams = useMemo(() => {
@@ -172,6 +185,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(false);
   const [bulkDeleteCount, setBulkDeleteCount] = useState<number>(0);
+
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'is_active',
+      title: 'Status',
+      options: [
+        { label: 'Active', value: 'true' },
+        { label: 'Inactive', value: 'false' },
+      ],
+      multiSelect: true,
+      allowEmpty: true,
+    },
+  ];
+
+  // Handle filter changes
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    setIsFilterLoading(true);
+    // The useGetEmployeeItemsList hook will automatically refetch when filters change
+  };
+
+  // Handle filter loading state
+  useEffect(() => {
+    if (employeeListData && isFilterLoading) {
+      setIsFilterLoading(false);
+    }
+  }, [employeeListData, isFilterLoading]);
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -433,7 +474,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [selectedEmployees, employeeItems]);
 
   const renderRows = () => {
-    if (isSearching || isEmployeeListLoading) {
+    if (isSearching || isEmployeeListLoading || isFilterLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -444,6 +485,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
+    
+    // Check if no filter options are selected - show no data
+    if (filters.is_active && filters.is_active.length === 0) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div className='py-4'>
+              <h4 className='text-center text-gray-300 text-sm'>No filter options selected.</h4>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    
     if (employeeItems && employeeItems.length > 0) {
       return employeeItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
@@ -520,11 +575,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       ));
     } else {
+      // Calculate total number of visible columns + checkbox + actions column
+      const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
+      const totalColumns = visibleColumnCount + 2; // +2 for checkbox and actions columns
+      
       return (
         <tr>
-          <td colSpan={7}>
-            <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
-            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add employee.</h4>
+          <td colSpan={totalColumns}>
+            <div className='py-4'>
+              <h4 className='text-center text-gray-300 text-sm'>There{`'`}s no data yet.</h4>
+              <h4 className='text-center text-gray-300 text-sm mt-2'>Please click create to add employee.</h4>
+            </div>
           </td>
         </tr>
       );
@@ -532,16 +593,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee List</h2>
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -863,62 +929,85 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </Transition>
                 </Menu>
               </div>
-              <Menu as='div' className='relative ml-2'>
-                <Menu.Button className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
-                  <Cog6ToothIcon className='h-5 w-5' />
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter='transition ease-out duration-100'
-                  enterFrom='transform opacity-0 scale-95'
-                  enterTo='transform opacity-100 scale-100'
-                  leave='transition ease-in duration-75'
-                  leaveFrom='transform opacity-100 scale-100'
-                  leaveTo='transform opacity-0 scale-95'
-                >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                    <div className='p-4'>
-                      <div className='mb-4'>
-                        <h3 className='text-sm font-semibold text-gray-900 mb-2'>
-                          Filter Columns ({Object.values(visibleColumns).filter(Boolean).length} of {columnDefinitions.length})
-                        </h3>
-                        <p className='text-xs text-gray-600'>
-                          Select which columns to display in the table.
-                        </p>
-                      </div>
-                      <div className='max-h-64 overflow-y-auto mb-4'>
-                        <div className='grid grid-cols-1 gap-2'>
-                          {columnDefinitions.map((column) => (
-                            <label key={column.key} className='flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50'>
-                              <input
-                                type='checkbox'
-                                checked={visibleColumns[column.key] || false}
-                                onChange={() => handleColumnToggle(column.key)}
-                                className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
-                              />
-                              <span className='text-sm text-gray-700'>{column.label}</span>
-                            </label>
-                          ))}
+              <div className='flex ml-2'>
+                <div className='flex'>
+                  <Menu as='div' className='relative'>
+                    {({ open }) => (
+                      <>
+                        <Menu.Button 
+                          className='bg-savoy-blue rounded-l-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'
+                          data-tooltip-id={!open ? 'column-filter-tooltip' : undefined}
+                          data-tooltip-content={!open ? 'Column Filter' : undefined}
+                          data-tooltip-place='bottom'
+                          data-tooltip-delay-show={300}
+                        >
+                          <Cog6ToothIcon className='h-5 w-5' />
+                        </Menu.Button>
+                    <Transition
+                      as={Fragment}
+                      enter='transition ease-out duration-100'
+                      enterFrom='transform opacity-0 scale-95'
+                      enterTo='transform opacity-100 scale-100'
+                      leave='transition ease-in duration-75'
+                      leaveFrom='transform opacity-100 scale-100'
+                      leaveTo='transform opacity-0 scale-95'
+                    >
+                      <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                        <div className='p-4'>
+                          <div className='mb-4'>
+                            <h3 className='text-sm font-semibold text-gray-900 mb-2'>
+                              Filter Columns ({Object.values(visibleColumns).filter(Boolean).length} of {columnDefinitions.length})
+                            </h3>
+                            <p className='text-xs text-gray-600'>
+                              Select which columns to display in the table.
+                            </p>
+                          </div>
+                          <div className='max-h-64 overflow-y-auto mb-4'>
+                            <div className='grid grid-cols-1 gap-2'>
+                              {columnDefinitions.map((column) => (
+                                <label key={column.key} className='flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50'>
+                                  <input
+                                    type='checkbox'
+                                    checked={visibleColumns[column.key] || false}
+                                    onChange={() => handleColumnToggle(column.key)}
+                                    className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
+                                  />
+                                  <span className='text-sm text-gray-700'>{column.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          <div className='flex gap-2'>
+                            <button
+                              onClick={handleColumnReset}
+                              className='flex-1 bg-gray-500 text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-gray-600'
+                            >
+                              Reset
+                            </button>
+                            <button
+                              onClick={handleShowAll}
+                              className='flex-1 bg-savoy-blue text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-blue-700'
+                            >
+                              Show All
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className='flex gap-2'>
-                        <button
-                          onClick={handleColumnReset}
-                          className='flex-1 bg-gray-500 text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-gray-600'
-                        >
-                          Reset
-                        </button>
-                        <button
-                          onClick={handleShowAll}
-                          className='flex-1 bg-savoy-blue text-white text-xs font-semibold py-2 px-3 rounded-md hover:bg-blue-700'
-                        >
-                          Show All
-                        </button>
-                      </div>
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
+                      </Menu.Items>
+                    </Transition>
+                      </>
+                    )}
+                  </Menu>
+                  <Filter 
+                    filterGroups={filterGroups}
+                    defaultValues={filters}
+                    onFilterChange={handleFilterChange}
+                    buttonId="employee-filter-btn"
+                    size="small"
+                    showButtonText={false}
+                    variant="connected"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1049,14 +1138,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <hr />
                 </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       {isDataAgreementModalOpen && (
@@ -1155,6 +1248,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip' />
+      <Tooltip id='column-filter-tooltip' />
     </>
   );
 };

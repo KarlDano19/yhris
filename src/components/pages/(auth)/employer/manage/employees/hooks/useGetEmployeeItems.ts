@@ -7,6 +7,7 @@ interface newFiltersProps {
   to?: string;
   current_page?: number;
   page_size?: number;
+  is_active?: string;
 }
 
 async function getEmployeeItems(filters: any) {
@@ -17,6 +18,7 @@ async function getEmployeeItems(filters: any) {
     if (filters.search) newFilters.search = filters.search;
     if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
     if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+    if (filters.is_active) newFilters.is_active = filters.is_active;
     const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
     const token = getCookie('token');
     const config = {
@@ -58,10 +60,22 @@ async function getEmployeeItems(filters: any) {
 }
 
 function useGetEmployeeItemsList(filters: any) {
-  const query = useQuery(['employeesListItemsCache'], () => getEmployeeItems(filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const query = useQuery(
+    [
+      'employeesListItemsCache',
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+      filters.is_active,
+    ],
+    () => getEmployeeItems(filters),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   return query;
 }

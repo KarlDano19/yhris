@@ -20,9 +20,10 @@ import IntroduceToTeam from './IntroduceToTeam';
 import EnrollToPayroll from './EnrollToPayroll';
 import OrientOptionModal from './modals/OrientOptionModal';
 import SendEmailModal from '@/components/SendEmailModal';
-import SuccessModal from './modals/SuccessModal';
 import NoticeModal from './modals/NoticeModal';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetApplicantOrient from './hooks/useGetApplicantOrient';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
@@ -52,6 +53,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
+
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'enrolled',
+      title: 'Enrollment Status',
+      options: [
+        { label: 'Not Enrolled', value: 'not_enrolled' },
+        { label: 'Enrolled', value: 'enrolled' },
+      ],
+      multiSelect: true,
+      allowEmpty: true,
+    },
+  ];
+
+  const [filters, setFilters] = useFilterPersistence<FilterValues>('orient', {
+    enrolled: ['not_enrolled'],
+  });
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+
   const {
     data: applicationOrient,
     refetch,
@@ -60,6 +81,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ...itemsFilter,
     pageSize,
     currentPage,
+    enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
   const { mutate: enrollToYP } = useEnrollEmployeeToYP();
@@ -76,24 +98,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSendOrientLink, setIsSendOrientLink] = useState(false);
   const [isOrientLinkEmail, setIsOrientLinkEmail] = useState(false);
   const [orientLinkEmail, setOrientLinkEmail] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [newHireOriented, setNewHireOriented] = useState(false);
   const [isIntroducedModalOpen, setIsIntroducedModalOpen] = useState(false);
-  const [isSuccessIntroducedModalOpen, setSuccessIsIntroducedModalOpen] = useState(false);
   const [isSignInPayrollModalOpen, setIsSignInPayrollModalOpen] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
-  const [isSuccessLocationDepartmentModalOpen, setIsSuccessLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
+
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    setIsFilterLoading(true);
+    // The useGetApplicantOrient hook will automatically refetch when filters.enrolled changes
+  };
 
   useEffect(() => {
     if (cachedUserDetails?.state?.data) {
       setLoginType(cachedUserDetails.state.data.login_type);
     }
   }, [cachedUserDetails]);
+
+  // Handle filter loading state
+  useEffect(() => {
+    if (applicationOrient && isFilterLoading) {
+      setIsFilterLoading(false);
+    }
+  }, [applicationOrient, isFilterLoading]);
 
   useEffect(() => {
     if (applicationOrient) {
@@ -322,7 +354,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isGetOrientLoading) {
+    if (isGetOrientLoading || isFilterLoading) {
       return (
         <tr>
           <td colSpan={100}>
@@ -333,6 +365,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </tr>
       );
     }
+    
+    // Check if no filter options are selected - show no data
+    if (filters.enrolled && filters.enrolled.length === 0) {
+      return (
+        <tr>
+          <td colSpan={8}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>No filter options selected.</h4>
+          </td>
+        </tr>
+      );
+    }
+    
     if (orientItems && orientItems.length > 0) {
       return orientItems.map((item: any, index: number) => (
         <tr key={index}>
@@ -419,16 +463,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Positions</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -493,6 +542,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
+            <div className='flex-1'></div>
+            <Filter 
+              filterGroups={filterGroups}
+              defaultValues={filters}
+              onFilterChange={handleFilterChange}
+              buttonId="orient-filter-btn"
+            />
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
@@ -539,14 +595,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       {isSendContractModalOpen && (
@@ -754,7 +814,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClick={() => {
             if (orientLinkEmail) {
               setIsOrientLinkEmail(false);
-              setIsSuccess(true);
+              toast.custom(() => <CustomToast message="You have successfully sent orientation link to the New Hire." type="success" />, {
+                duration: 5000,
+              });
               const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
               orientItemCopy[0].isOrientationSent = true;
               setOrientItems(orientItemCopy);
@@ -764,11 +826,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           CONTINUE
         </button>
       </NoticeModal>
-      <SuccessModal
-        isOpen={isSuccess}
-        setIsOpen={setIsSuccess}
-        message='You have successfully sent orientation link to the New Hire.'
-      />
       <NoticeModal isOpen={newHireOriented} setIsOpen={setNewHireOriented}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>Have you already ORIENTED the NEW HIRE?</h5>
         <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:justify-between'>
@@ -804,8 +861,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onSuccess: () => {
                 setOrientItems(updateOrientItems(orientItems, updatedItem, selectedOrientId));
                 setIsIntroducedModalOpen(false);
-                setSuccessIsIntroducedModalOpen(true);
-                toast.custom(() => <CustomToast message={'Successfully sent introduction email.'} type='success' />, {
+                toast.custom(() => <CustomToast message="You have successfully sent an email." type="success" />, {
                   duration: 5000,
                 });
               },
@@ -821,11 +877,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           submitButtonText="Send Introduction"
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessIntroducedModalOpen}
-        setIsOpen={setSuccessIsIntroducedModalOpen}
-        message='You have successfully sent an email.'
-      />
       <NoticeModal isOpen={isSignInPayrollModalOpen} setIsOpen={setIsSignInPayrollModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>
           It appears that you are not signed in to YAHSHUA.
@@ -841,11 +892,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </button>
       </NoticeModal>
       {isEnrollRedirectModalOpen && (
-        <EnrollRedirectModal
-          isOpen={isEnrollRedirectModalOpen}
-          setIsOpen={setIsEnrollRedirectModalOpen}
-          jobPostingId={String(params.position)}
-        />
+        <>
+          <EnrollRedirectModal
+            isOpen={isEnrollRedirectModalOpen}
+            setIsOpen={setIsEnrollRedirectModalOpen}
+            jobPostingId={String(params.position)}
+          />
+        </>
       )}
       {isLocationDepartmentModalOpen && (
         <LocationDepartmentModal
@@ -854,14 +907,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setOrientItems={setOrientItems}
           setIsOpen={setIsLocationDepartmentModalOpen}
           isOpen={isLocationDepartmentModalOpen}
-          setSuccessModal={setIsSuccessLocationDepartmentModalOpen}
         />
       )}
-      <SuccessModal
-        isOpen={isSuccessLocationDepartmentModalOpen}
-        setIsOpen={setIsSuccessLocationDepartmentModalOpen}
-        message='You have successfully assigned location and department.'
-      />
       {/* Updated warning modal for employment status, location/department assignment */}
       <NoticeModal isOpen={isLocationDepartmentWarningModalOpen} setIsOpen={setIsLocationDepartmentWarningModalOpen}>
         <h5 className='text-xl font-bold text-indigo-dye text-center pt-4'>

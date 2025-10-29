@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -26,6 +27,8 @@ import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -37,15 +40,11 @@ import {
   T_QuitclaimModal,
   T_DeleteSepartionModal,
 } from '@/types/globals';
-import { useQueryClient } from '@tanstack/react-query';
 
 import classNames from '@/helpers/classNames';
 
-type T_BulkDeleteModalData = DeleteModalData & {
-  selectedCount: number;
-};
-
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const queryClient = useQueryClient();
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
@@ -67,6 +66,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
+  
+  // Filter state with persistence (Unfinished checked by default)
+  const [filters, setFilters] = useFilterPersistence<FilterValues>('employee-separation', {
+    status: ['unfinished'],
+  });
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [isAddSeparationModalOpen, setIsAddSeparationModalOpen] = useState(false);
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
@@ -80,6 +85,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
+  
+  // Individual loading states for each received button
+  const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
 
   const { mutate, isLoading } = usePatchSeparation();
   const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
@@ -89,12 +97,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
+    status: filters.status?.join(','),
   });
-  const queryClient = useQueryClient();
-  const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
 
+  // Define filter groups for the Filter component
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'status',
+      title: 'Separation Status',
+      options: [
+        { label: 'Unfinished', value: 'unfinished' },
+        { label: 'Separated', value: 'separated' },
+      ],
+      multiSelect: true,
+      allowEmpty: true,
+    },
+  ];
+
+  // Handle filter changes
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    setIsFilterLoading(true);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  // Handle filter loading state
+  useEffect(() => {
+    if (dataSeparation && isFilterLoading) {
+      setIsFilterLoading(false);
+    }
+  }, [dataSeparation, isFilterLoading]);
+
   const setReceived = (id: string, emailType: string) => {
+    const loadingKey = `${id}-${emailType}`;
+    setLoadingStates(prev => ({ ...prev, [loadingKey]: true }));
+    
     const itemIndex = separationItems.findIndex((item: any) => item.id === id);
     const separationItemsCopy = JSON.parse(JSON.stringify(separationItems));
     const currentDate = new Date();
@@ -117,9 +155,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const callbackReq = {
       onSuccess: (data: any) => {
         setSeparationItems([...separationItemsCopy]);
+        setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        
+        // Clear employee cache when quit claim is received (final step in separation)
+        if (emailType === 'quit claim') {
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+        }
       },
       onError: (err: any) => {
+        setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
@@ -129,7 +174,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   // Handler for Letter email submission  
-  const handleLetterSubmit = (data: LetterData) => {
+  const handleLetterSubmit = (data: any) => {
     if (isLetterModalOpen && isLetterModalOpen.id) {
       const updatedItem = handleLetterSending(data, separationItems, isLetterModalOpen.id, isLetterModalOpen.type);
       
@@ -202,6 +247,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
           setIsQuitclaimModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          
+          // Clear employee cache when quit claim is sent (approaching final step)
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -283,29 +331,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             separation.quit_claim_received_date &&
             new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
           separation['separationLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['acceptanceLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['signDocuments'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['lastPay'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['quitClaim'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           return separation;
         });
@@ -335,29 +396,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             separation.quit_claim_received_date &&
             new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
           separation['separationLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['acceptanceLetter'] = {
-            date: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['signDocuments'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['lastPay'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           separation['quitClaim'] = {
             template: '',
+            subject: '',
             to: '',
             message: '',
+            cc: [],
+            bcc: [],
           };
           return separation;
         });
@@ -447,12 +521,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const renderRows = () => {
-    if (isSearching || isGetSeparationLoading) {
+    if (isSearching || isGetSeparationLoading || isFilterLoading) {
       return (
         <tr>
           <td colSpan={100}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    
+    // Check if no filter options are selected - show no data
+    if (filters.status && filters.status.length === 0) {
+      return (
+        <tr>
+          <td colSpan={9}>
+            <div className='py-4'>
+              <h4 className='text-center text-gray-300 text-sm'>No filter options selected.</h4>
             </div>
           </td>
         </tr>
@@ -482,9 +569,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLetterSent={item.isLetterSent}
               isLetterReceived={item.isLetterReceived}
               letterReceivedDate={item.letterReceivedDate}
+              letterAttachment={item.letter_attachment}
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-letters`] || false}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -493,9 +581,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isDocumentsSent={item.isDocumentsSent}
               isDocumentsReceived={item.isDocumentsReceived}
               documentReceivedDate={item.documentReceivedDate}
+              documentsAttachment={item.documents_attachment}
               setIsDocumentModalOpen={setIsDocumentModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-sign documents`] || false}
+              isLetterReceived={item.isLetterReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -503,7 +593,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               id={item.id}
               isLastPayReleased={item.isLastPayReleased}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
+              lastPayAttachment={item.last_pay_attachment}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
+              isDocumentsReceived={item.isDocumentsReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -512,9 +604,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isQuitclaimSigned={item.isQuitclaimSigned}
               isQuitclaimReceived={item.isQuitclaimReceived}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
+              quitclaimAttachment={item.quit_claim_attachment}
               setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
               setReceived={setReceived}
-              isLoading={isLoading}
+              isLoading={loadingStates[`${item.id}-quit claim`] || false}
+              isLastPayReleased={item.isLastPayReleased}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -522,7 +616,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <SmartButton 
                 id="edit-separation-btn"
                 onClick={() => setIsDeleteSepartionModalOpen({ open: true, id: item.id, name: item.name })}
-                disabled={!cachedProfile?.state?.data?.edit_separation || selectedSeparations.size > 1}
+                disabled={selectedSeparations.size > 1}
                 className={selectedSeparations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 <DeleteIcon />
@@ -547,17 +641,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Dashboard</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Resignation/Separation</h2>
+        </div>
 
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -627,7 +725,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-2'>
               <SmartButton
                 id='create-separation-btn'
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
@@ -635,6 +733,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 CREATE
               </SmartButton>
+              <Filter 
+                filterGroups={filterGroups}
+                defaultValues={filters}
+                onFilterChange={handleFilterChange}
+                buttonId="separation-filter-btn"
+                size="small"
+              />
             </div>
           </div>
           
@@ -716,14 +821,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       <AddSeparationModal 

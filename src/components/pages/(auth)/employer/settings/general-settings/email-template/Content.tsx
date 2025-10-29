@@ -18,8 +18,8 @@ import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
 import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
-import SuccessModal from './modal/SuccessModal';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
@@ -52,7 +52,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
   const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   // Bulk delete states
   const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
@@ -75,7 +74,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
-    setIsSuccessModalOpen(true);
     // Reset the modal state to close the create/edit modal
     setEmailTemplateModal({ id: null, open: false, mode: 'create' });
   };
@@ -276,9 +274,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-48 max-w-48'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.to || ''}
+            >
+              {item.to || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.cc || ''}
+            >
+              {item.cc || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.bcc || ''}
+            >
+              {item.bcc || ''}
+            </div>
+          </td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
               <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
@@ -310,19 +332,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>General Settings</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
-          
-          
+        </div>
 
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
@@ -415,13 +439,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Subject
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 max-w-48'>
                         To
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Cc
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Bcc
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -434,14 +458,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
 
@@ -455,8 +483,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         />
       )}
 
-      {/* Success Modal */}
-      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
 
       {/* Delete Modal */}
       {isDeleteEmailTemplateModalOpen && (

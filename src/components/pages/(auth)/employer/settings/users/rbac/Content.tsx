@@ -617,7 +617,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/settings/users' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -637,8 +637,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </button> */}
           </div>
 
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           {/* Tab Navigation */}
-          <div className='mt-6'>
+          <div>
             <div className='border-b border-gray-200'>
               <nav className='-mb-px flex space-x-8'>
                 {[
@@ -805,14 +809,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
 

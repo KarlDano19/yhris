@@ -10,7 +10,7 @@ import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
 import StateContext from '../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../lib/initialActionState';
@@ -20,8 +20,9 @@ import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 type PropTypes = {
   title: string;
   JobTitle?: string;
+  screeningQuestions?: any[];
 };
-export default function ApplicantForm({ title, JobTitle }: PropTypes) {
+export default function ApplicantForm({ title, JobTitle, screeningQuestions = [] }: PropTypes) {
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
@@ -152,41 +153,111 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
   const renderProfileTab = () => {
     return (
       <>
-        <div className='flex mt-8'>
-          <div className='mr-8'>
+        <div className='flex flex-col md:flex-row mt-8'>
+          <div className='mr-0 md:mr-8 mb-4 md:mb-0 flex justify-center md:justify-start'>
             <ApplicantAvatar applicant={applicantProfile} size={200} /> {/* Applicant Avatar */}
           </div>
-          <div className=''>
-            <p className='text-[1.5rem]'>{applicantProfile.name}</p>
-            <div className='my-3 flex'>
-              <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.email}</span>
+          <div className='flex-1 min-w-0'>
+            <p className='text-[1.5rem] text-center md:text-left'>{applicantProfile.name}</p>
+            <div className='my-3 flex items-start'>
+              <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span 
+                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
+                title={applicantProfile.email}
+              >
+                {applicantProfile.email}
+              </span>
             </div>
-            <div className='my-3 flex'>
-              <PhoneIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.mobile}</span>
+            <div className='my-3 flex items-start'>
+              <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
             </div>
-            <div className='my-3 flex'>
-              <MapPinIcon className='h-6 w-6 text-blue-700 mr-3' />
-              <span className='text-[1rem]'>{applicantProfile.address}</span>
+            <div className='my-3 flex items-start'>
+              <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+              <span 
+                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
+                title={applicantProfile.address}
+              >
+                {applicantProfile.address}
+              </span>
             </div>
           </div>
         </div>
-        {applicant?.stage_notes && applicant.stage_notes.length > 0 && (
-          <div className='mt-4 p-4 bg-blue-50 rounded-lg'>
-            <h4 className='font-semibold text-gray-700 mb-3'>Stage Notes</h4>
-            <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
-              {applicant.stage_notes.map((stageNote, index) => (
-                <div key={index} className='border-l-4 border-blue-400 pl-4'>
-                  <div className='mb-2'>
-                    <h5 className='font-medium text-gray-800'>{applicant?.job_stages_title || 'Current Stage'}</h5>
-                  </div>
-                  <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
+        <div className='mt-6'>
+          <h4 className='text-xl font-semibold text-indigo-dye mb-4'>Application Timeline</h4>
+          <div className='max-h-80 overflow-y-auto space-y-4 pr-2'>
+            {/* Always show "Applied on" entry first */}
+            <div className='relative bg-white border-l-4 border-blue-500 pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow'>
+              <div className='flex items-start'>
+                <div className='flex-shrink-0 text-blue-600 mr-3 mt-1'>
+                  <CalendarIcon className="w-5 h-5" />
                 </div>
-              ))}
+                <div className='flex-1 min-w-0'>
+                  <div className='flex items-start justify-between mb-1'>
+                    <h5 className='font-semibold text-gray-900 text-base flex-1'>Date Applied:</h5>
+                    {applicant?.created_at && (
+                      <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
+                        {new Date(applicant.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Then show all stage notes */}
+            {applicant?.stage_notes && applicant.stage_notes.length > 0 && applicant.stage_notes.map((stageNote, index) => {
+              const isLastStage = index === (applicant?.stage_notes?.length || 0) - 1;
+              const isHired = applicant?.status === 'hired';
+              
+              // Define colors and icons for different stages
+              let borderColor = 'border-purple-500';
+              let iconColor = 'text-purple-600';
+              let iconComponent = <ArrowRightIcon className="w-5 h-5" />;
+              let stageTitle = `Passed: ${stageNote.stage_title || 'Next Stage'}`;
+              
+              if (isLastStage && isHired) {
+                borderColor = 'border-green-500';
+                iconColor = 'text-green-600';
+                iconComponent = <CheckCircleIcon className="w-5 h-5" />;
+                stageTitle = 'Hired';
+              }
+              
+              return (
+                <div key={index} className={`relative bg-white border-l-4 ${borderColor} pl-6 pr-4 py-4 rounded-r-lg shadow-sm hover:shadow-md transition-shadow`}>
+                  <div className='flex items-start'>
+                    <div className={`flex-shrink-0 ${iconColor} mr-3 mt-1`}>
+                      {iconComponent}
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <div className='flex items-start justify-between mb-1'>
+                        <h5 className='font-semibold text-gray-900 text-base flex-1'>{stageTitle}</h5>
+                        {stageNote.created_at && (
+                          <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
+                            {new Date(stageNote.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      {stageNote.notes && (
+                        <div className='mt-2 p-3 bg-gray-50 rounded-md mr-0'>
+                          <p className='text-sm text-gray-700 whitespace-pre-wrap'><span className='font-semibold'>Stage Notes:</span> {stageNote.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
         <div className='mt-4'>
           <button
             type='button'
@@ -237,19 +308,32 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
         applicantProfile.screening_answers !== null &&
         applicantProfile.screening_answers.length > 0 ? (
           <div className='mt-6 space-y-6'>
-            {applicantProfile.screening_answers.map((item: any, index: number) => (
-              <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
-                <div className='flex items-start'>
-                  <div className='mr-3'>
-                    <QuestionMarkCircleIcon className='h-6 w-6 text-blue-700' />
-                  </div>
-                  <div>
-                    <p className='font-semibold'>{item.question}</p>
-                    <p className='mt-2 text-gray-700'>{item.answer}</p>
+            {applicantProfile.screening_answers.map((item: any, index: number) => {
+              // Find the corresponding screening question to check if it's must-have
+              const screeningQuestion = screeningQuestions.find((q: any) => q.question === item.question);
+              const isMustHave = screeningQuestion?.mustHave === true;
+              
+              return (
+                <div key={index} className='bg-white p-4 rounded-md shadow-sm border border-gray-200'>
+                  <div className='flex items-start'>
+                    <div className='mr-3'>
+                      <QuestionMarkCircleIcon className='h-6 w-6 text-blue-700' />
+                    </div>
+                    <div className='flex-1'>
+                      <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
+                        <p className='font-semibold flex-1'>{item.question}</p>
+                        {isMustHave && (
+                          <span className='bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded whitespace-nowrap self-start sm:self-center'>
+                            Must-Have
+                          </span>
+                        )}
+                      </div>
+                      <p className='mt-2 text-gray-700'>{item.answer}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className='mt-8 text-center'>
@@ -457,7 +541,7 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
               <Dialog.Panel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full',
-                  viewCV ? 'max-w-4xl' : 'max-w-xl'
+                  viewCV ? 'max-w-4xl' : 'max-w-3xl'
                 )}
               >
                 <div className='flex bg-savoy-blue p-2 items-center gap-4'>
@@ -466,50 +550,56 @@ export default function ApplicantForm({ title, JobTitle }: PropTypes) {
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full grid grid-cols-4'>
-                      <div className='mr-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(1)}
-                        >
-                          Profile
-                        </button>
-                      </div>
-                      <div className='mx-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(2)}
-                        >
+                    <div className='w-full overflow-x-auto md:overflow-x-visible justify-center md:justify-stretch' 
+                    style={{
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#2d3e58 #f1f1f1'
+                    }}>
+                      <div className='flex md:grid md:grid-cols-4 gap-2 md:gap-0 min-w-max md:min-w-0 justify-center md:justify-stretch'>
+                        <div className='mr-2 md:mr-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 1 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(1)}
+                          >
+                            Profile
+                          </button>
+                        </div>
+                        <div className='mx-2 md:mx-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md whitespace-nowrap md:text-base w-full',
+                              currentTab == 2 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(2)}
+                          >
                           Job Experience
-                        </button>
-                      </div>
-                      <div className='mx-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(3)}
-                        >
-                          Summary
-                        </button>
-                      </div>
-                      <div className='ml-2'>
-                        <button
-                          className={classNames(
-                            'px-4 py-2 font-bold rounded-md w-full',
-                            currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
-                          )}
-                          onClick={() => setCurrentTab(4)}
-                        >
-                          Answers
-                        </button>
+                          </button>
+                        </div>
+                        <div className='mx-2 md:mx-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 3 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(3)}
+                          >
+                            Summary
+                          </button>
+                        </div>
+                        <div className='ml-2 md:ml-2 flex-shrink-0'>
+                          <button
+                            className={classNames(
+                              'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                              currentTab == 4 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                            )}
+                            onClick={() => setCurrentTab(4)}
+                          >
+                            Answers
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}

@@ -1,26 +1,41 @@
+import React, { Dispatch, useState } from 'react';
+
+import { Tooltip } from 'react-tooltip';
+
 import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
 import { T_QuitclaimModal } from '@/types/globals';
-import React, { Dispatch } from 'react';
+
+import ClipIcon from '@/svg/ClipIcon';
+import AttachmentViewModal from './modals/AttachmentViewModal';
 
 const Quitclaim = ({
   id,
   isQuitclaimSigned,
   isQuitclaimReceived,
   quitclaimReceivedDate,
+  quitclaimAttachment,
   setIsQuitclaimModalOpen,
   setReceived,
   isLoading,
+  isLastPayReleased,
 }: {
   id: number;
   isQuitclaimSigned: boolean;
   isQuitclaimReceived: boolean;
   quitclaimReceivedDate?: string;
+  quitclaimAttachment?: string | null;
   setIsQuitclaimModalOpen: Dispatch<T_QuitclaimModal>;
   setReceived: any;
   isLoading: boolean;
+  isLastPayReleased: boolean;
 }) => {
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
+  // Disabled if last pay hasn't been released yet
+  const isDisabled = !isLastPayReleased || isQuitclaimSigned;
+  
   return (
+    <>
     <div className='flex flex-col gap-2'>
       <div>
         <button
@@ -30,7 +45,10 @@ const Quitclaim = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={isQuitclaimSigned}
+          disabled={isDisabled}
+          data-tooltip-id='quitclaim-tooltip'
+          data-tooltip-content={!isLastPayReleased ? 'Last pay must be released first' : ''}
+          data-tooltip-place='bottom'
           onClick={() =>
             setIsQuitclaimModalOpen({
               isOpen: true,
@@ -51,6 +69,9 @@ const Quitclaim = ({
           )}
           disabled={!isQuitclaimSigned || isQuitclaimReceived || isLoading}
           onClick={() => setReceived(id, 'quit claim')}
+          data-tooltip-id='quitclaim-received-tooltip'
+          data-tooltip-content={!isQuitclaimSigned ? 'Quitclaim must be signed first' : isQuitclaimReceived ? 'Quitclaim already received' : 'Mark quitclaim as received'}
+          data-tooltip-place='bottom'
         >
           {isLoading && (
             <div role='status'>
@@ -79,12 +100,38 @@ const Quitclaim = ({
       {isQuitclaimReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <ClipIcon />
+            <div
+              className={quitclaimAttachment ? 'cursor-pointer' : ''}
+              data-tooltip-id='quitclaim-attachment-tooltip'
+              data-tooltip-content={quitclaimAttachment ? 'Click to view attachment' : 'No attachment'}
+              data-tooltip-place='bottom'
+              onClick={() => {
+                if (quitclaimAttachment) {
+                  setIsViewModalOpen(true);
+                }
+              }}
+            >
+              <ClipIcon hasFile={!!quitclaimAttachment} />
+            </div>
             <p className='ml-2 text-xs'>{quitclaimReceivedDate}</p>
           </div>
         </div>
       ) : null}
+      
+      <Tooltip id='quitclaim-tooltip' />
+      <Tooltip id='quitclaim-received-tooltip' />
+      <Tooltip id='quitclaim-attachment-tooltip' />
     </div>
+    
+    {isViewModalOpen && (
+      <AttachmentViewModal
+        isOpen={isViewModalOpen}
+        setIsOpen={setIsViewModalOpen}
+        attachmentUrl={quitclaimAttachment}
+        title="Quitclaim Attachment"
+      />
+    )}
+    </>
   );
 };
 

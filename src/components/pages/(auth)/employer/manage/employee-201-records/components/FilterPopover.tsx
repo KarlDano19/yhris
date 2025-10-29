@@ -4,14 +4,15 @@ import useGetLocationItems from "@/components/hooks/useGetLocationItems";
 import useGetDepartmentItems from "@/components/hooks/useGetDepartmentItems";
 import useGetPositionItems from "@/components/hooks/useGetPositionItems";
 
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import SelectChevronDown from "@/svg/SelectChevronDown";
+import FilterIcon from "@/svg/FilterIcon";
 
 type FilterValues = {
   location: string;
   department: string;
   position: string;
   recordStatus: string;
+  isActive: string[];
 };
 
 type Props = {
@@ -114,8 +115,8 @@ export default function FilterPopover({
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <AdjustmentsHorizontalIcon className="h-5 w-5 text-gray-700" />
-        <span className="text-gray-800 font-medium">Filter</span>
+        <FilterIcon />
+        <span className="text-gray-800 font-medium text-[16px]">Filter</span>
       </button>
 
       {open && (
@@ -264,6 +265,49 @@ export default function FilterPopover({
               </div>
             </div>
 
+            {/* Employee Status - Active/Inactive */}
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-2">
+                Employee Status
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={draft.isActive.includes('true')}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setDraft((d) => {
+                        const newIsActive = checked
+                          ? [...d.isActive, 'true']
+                          : d.isActive.filter(v => v !== 'true');
+                        return { ...d, isActive: newIsActive };
+                      });
+                    }}
+                    className="h-4 w-4 text-[#355fd0] focus:ring-[#355fd0] border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Active</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={draft.isActive.includes('false')}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setDraft((d) => {
+                        const newIsActive = checked
+                          ? [...d.isActive, 'false']
+                          : d.isActive.filter(v => v !== 'false');
+                        return { ...d, isActive: newIsActive };
+                      });
+                    }}
+                    className="h-4 w-4 text-[#355fd0] focus:ring-[#355fd0] border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-700">Inactive</span>
+                </label>
+              </div>
+            </div>
+
             {/* Footer */}
             <div className="pt-2 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               <button
@@ -274,6 +318,7 @@ export default function FilterPopover({
                     department: "ALL",
                     position: "ALL",
                     recordStatus: "ALL",
+                    isActive: ["true"],
                   })
                 }
                 className="rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10"
