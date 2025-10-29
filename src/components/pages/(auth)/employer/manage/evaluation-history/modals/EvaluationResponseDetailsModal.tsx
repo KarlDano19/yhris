@@ -215,8 +215,8 @@ const EvaluationResponseDetailsModal = ({
       const employeeName = response.employee_name;
       const formData = response.form_data || {};
       
-      // Try different possible field names for question ID
-      const questionId = question.question_id || question.id || questionIndex.toString();
+      // Use the criterion's ID
+      const questionId = question.id || questionIndex.toString();
       const questionResponse = formData[questionId];
 
       if (questionResponse !== undefined && questionResponse !== null) {
@@ -495,17 +495,17 @@ const EvaluationResponseDetailsModal = ({
                             <div key={questionIndex} className='bg-white border border-gray-200 rounded-lg p-6'>
                               <div className='mb-6'>
                                 <h5 className='text-lg font-medium text-gray-900 mb-2'>
-                                  {questionIndex + 1}. {question.question_text}
+                                  {questionIndex + 1}. {question.title}
                                 </h5>
                                 <p className='text-sm text-gray-600'>
-                                  Question Type: {question.question_type} • Total Responses: {question.total_responses}
+                                  Question Type: {question.type} • Total Responses: {question.total_responses}
                                 </p>
                               </div>
                               
                               {question.employeeScores && question.employeeScores.length > 0 ? (
                                 <QuestionResponseBarChart 
                                   employeeScores={question.employeeScores}
-                                  questionText={question.question_text}
+                                  questionText={question.title}
                                 />
                               ) : question.individual_responses && question.individual_responses.length > 0 ? (
                                 <div className='space-y-3'>
@@ -531,7 +531,7 @@ const EvaluationResponseDetailsModal = ({
                               ) : (
                                 <div className='text-center py-8'>
                                   <p className='text-sm text-gray-500 italic'>
-                                    {question.question_type === 'text' 
+                                    {question.type === 'text' 
                                       ? 'No text responses available for this question' 
                                       : 'No scored responses available for this question'
                                     }
