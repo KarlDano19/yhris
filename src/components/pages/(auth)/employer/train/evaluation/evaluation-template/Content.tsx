@@ -14,16 +14,19 @@ import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
+import useDuplicateEvaluationTemplate from './hooks/useDuplicateEvaluationTemplate';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import DuplicateIcon from '@/svg/DuplicateIcon';
 import classNames from '@/helpers/classNames';
 
 type T_BulkDeleteModalData = DeleteModalData & {
@@ -37,6 +40,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [duplicateEvaluationTemplateId, setDuplicateEvaluationTemplateId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
@@ -76,6 +81,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   });
   const { mutate: deleteEvaluationTemplate, isLoading: isDeleteEvaluationTemplateLoading } = useDeleteEvaluationTemplate();
   const bulkDeleteMutation = useBulkDeleteEvaluationTemplates();
+  const { mutate: duplicateEvaluationTemplate, isLoading: isDuplicateEvaluationTemplateLoading } = useDuplicateEvaluationTemplate();
   const [isSearching, setIsSearching] = useState(false);
 
   // Persisted form state for CreateEvaluationTemplateModal
@@ -277,6 +283,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchEvaluation();
   };
 
+  // Handle duplicate evaluation template
+  const openDuplicateModal = (evaluationDetails: any) => {
+    setDuplicateEvaluationTemplateId(evaluationDetails.id);
+    setIsDuplicateModalOpen(true);
+  };
+
+  const handleDuplicateConfirm = () => {
+    if (!duplicateEvaluationTemplateId) return;
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message || 'Evaluation template duplicated successfully'} type='success' />, { duration: 4000 });
+        setIsDuplicateModalOpen(false);
+        setDuplicateEvaluationTemplateId(null);
+        refetchEvaluation();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err || 'Failed to duplicate evaluation template'} type='error' />, { duration: 4000 });
+      },
+    };
+    duplicateEvaluationTemplate(duplicateEvaluationTemplateId, callbackReq);
+  };
+
   const renderRows = () => {
     if (isSearching || isGetEvaluationLoading) {
       return (
@@ -306,13 +335,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button onClick={() => openEditEvaluationModal(item)}>
+              <button 
+                onClick={() => openEditEvaluationModal(item)}
+                data-tooltip-id={`edit-tooltip-${item.id}`}
+                data-tooltip-content="Edit"
+                title='Edit'
+              >
                 <EditIcon />
+              </button>
+              <button 
+                onClick={() => openDuplicateModal(item)}
+                data-tooltip-id={`duplicate-tooltip-${item.id}`}
+                data-tooltip-content="Duplicate"
+                title='Duplicate'
+              >
+                <DuplicateIcon />
               </button>
               <button 
                 onClick={() => openDeleteEvaluationModal(item)}
                 disabled={selectedEvaluationTemplates.size > 1}
                 className={selectedEvaluationTemplates.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                data-tooltip-id={`delete-tooltip-${item.id}`}
+                data-tooltip-content="Delete"
+                title='Delete'
               >
                 <DeleteIcon />
               </button>
@@ -571,6 +616,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           title={`Deleting ${bulkDeleteCount} evaluation template${bulkDeleteCount > 1 ? 's' : ''}...`}
           isProcessing={bulkDeleteMutation.isLoading}
           onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
+
+      {/* Duplicate Confirmation Modal */}
+      {isDuplicateModalOpen && (
+        <ConfirmModal
+          message="Are you sure you want to duplicate this evaluation template?"
+          isOpen={isDuplicateModalOpen}
+          setIsOpen={setIsDuplicateModalOpen}
+          confirmAction={handleDuplicateConfirm}
+          isLoading={isDuplicateEvaluationTemplateLoading}
         />
       )}
 
