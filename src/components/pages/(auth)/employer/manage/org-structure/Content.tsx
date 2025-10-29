@@ -178,6 +178,10 @@ const Content = () => {
     setIsExporting(true);
     setDisableTooltips(true); // Disable tooltips during export
     
+    // Wait for React to re-render with disableTooltips=true
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    
     try {
       // Store original state
       const originalFullscreen = isFullscreen;
@@ -257,6 +261,13 @@ const Content = () => {
         throw new Error('Chart container not found');
       }
 
+      // Add export mode class to hide hiring badges and shadow nodes
+      chartContainer.classList.add('export-mode');
+      
+      // Wait for CSS to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       // Get company name for filename
       const companyName = cachedProfile?.state?.data?.name || 'Company';
       const timestamp = new Date().toISOString().split('T')[0];
@@ -315,6 +326,9 @@ const Content = () => {
         pdf.save(`${filename}.pdf`);
       }
 
+      // Remove export mode class
+      chartContainer.classList.remove('export-mode');
+      
       // Restore original state if we changed it
       if (employeeOption === 'all') {
         setIsFullscreen(originalFullscreen);
@@ -337,6 +351,12 @@ const Content = () => {
     } catch (error) {
       console.error('Export failed:', error);
       alert('Export failed. Please try again.');
+      
+      // Remove export mode class on error
+      const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
+      if (chartContainer) {
+        chartContainer.classList.remove('export-mode');
+      }
       
       // Restore original state on error
       if (employeeOption === 'all') {
@@ -405,7 +425,15 @@ const Content = () => {
   };
 
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
+    <>
+      {/* CSS for hiding hiring badges and shadow nodes during export */}
+      <style>{`
+        .export-mode [data-export-exclude="true"] {
+          display: none !important;
+        }
+      `}</style>
+      
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border-b-2 flex-shrink-0'>
         <Link href='/manage' className='flex items-center gap-3 hover:bg-gray-200 rounded-lg p-2 -m-2'>
@@ -567,6 +595,7 @@ const Content = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

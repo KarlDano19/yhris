@@ -12,7 +12,7 @@ import { Employee, OrgNodeProps } from '../types';
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
 
 // Maximum number of employees to show in the chart before requiring "View All"
-const MAX_EMPLOYEES_IN_CHART = 5;
+const MAX_EMPLOYEES_IN_CHART = 10;
 
 // Custom Node Component for Manage Page
 const ManageOrgNode: React.FC<OrgNodeProps> = ({ 
@@ -133,9 +133,20 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   // Get other employees (excluding primary)
   const otherEmployees = data.employees?.filter((employee) => employee.id !== primaryEmployee?.id) || [];
   const totalOtherEmployees = otherEmployees.length;
-  const hasMoreThanMax = totalOtherEmployees > MAX_EMPLOYEES_IN_CHART;
-  const employeesToShow = hasMoreThanMax ? otherEmployees.slice(0, MAX_EMPLOYEES_IN_CHART) : otherEmployees;
-  const remainingCount = totalOtherEmployees - MAX_EMPLOYEES_IN_CHART;
+  
+  // Check if this position is actively hiring
+  const isHiring = data.hiring_info?.is_hiring && (data.hiring_info?.total_remaining_slots ?? 0) > 0;
+  const shadowCount = data.hiring_info?.total_remaining_slots ?? 0;
+  
+  // Create shadow employee placeholders (but NOT during export)
+  const shadowEmployees = !disableTooltips ? Array.from({ length: shadowCount }, (_, index) => ({ id: `shadow-${index}` })) : [];
+  
+  // Combine real employees with shadow employees
+  const allEmployeesToDisplay = [...otherEmployees, ...shadowEmployees];
+  const totalToDisplay = allEmployeesToDisplay.length;
+  const hasMoreThanMax = totalToDisplay > MAX_EMPLOYEES_IN_CHART;
+  const employeesToShow = hasMoreThanMax ? allEmployeesToDisplay.slice(0, MAX_EMPLOYEES_IN_CHART) : allEmployeesToDisplay;
+  const remainingCount = totalToDisplay - MAX_EMPLOYEES_IN_CHART;
 
   return (
     <div 
@@ -176,7 +187,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         data-tooltip-place={!clickedNodeId && !disableTooltips ? 'bottom' : undefined}
       >
         {/* Avatar */}
-        <div className="flex justify-center mb-2">
+        <div className="flex justify-center mb-2 relative">
           <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden">
             {primaryEmployee?.photo ? (
               <img
@@ -204,6 +215,18 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
               />
             </div>
           </div>
+          {/* Hiring indicator badge with count - Hidden during export */}
+          {isHiring && data.hiring_info && (
+            <div 
+              className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-green-500 rounded-full border-2 border-white shadow-md flex items-center justify-center"
+              data-export-exclude="true"
+              style={{ display: disableTooltips ? 'none' : 'flex' }}
+            >
+              <span className="text-white text-xs font-bold leading-none">
+                +{data.hiring_info.total_remaining_slots}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Employee Name */}
@@ -221,7 +244,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
 
       {/* Employee Nodes Display */}
       <Transition
-        show={isExpanded && totalOtherEmployees > 0}
+        show={isExpanded && totalToDisplay > 0}
         enter="transition-all ease-out duration-300 transform"
         enterFrom="opacity-0 -translate-y-2"
         enterTo="opacity-100 translate-y-0"
@@ -237,23 +260,29 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         <div className="flex flex-col items-center gap-3">
           {/* Employee grid */}
           <div className="flex flex-wrap justify-center gap-4 max-w-xs border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-            {employeesToShow.map((employee, index) => (
-              <Transition
-                key={employee.id}
-                appear={true}
-                show={isExpanded}
-                enter="transition-all ease-out duration-300 transform"
-                enterFrom="opacity-0 translate-y-2 scale-95"
-                enterTo="opacity-100 translate-y-0 scale-100"
-                className="inline-block"
-                style={{ transitionDelay: `${index * 50}ms` }}
-              >
-                <EmployeeNode
-                  employee={employee}
-                  disableTooltips={disableTooltips}
-                />
-              </Transition>
-            ))}
+            {employeesToShow.map((item, index) => {
+              const isShadow = typeof item.id === 'string' && item.id.startsWith('shadow-');
+              const employee = !isShadow ? item : undefined;
+              
+              return (
+                <Transition
+                  key={typeof item.id === 'string' ? item.id : `employee-${item.id}`}
+                  appear={true}
+                  show={isExpanded}
+                  enter="transition-all ease-out duration-300 transform"
+                  enterFrom="opacity-0 translate-y-2 scale-95"
+                  enterTo="opacity-100 translate-y-0 scale-100"
+                  className="inline-block"
+                  style={{ transitionDelay: `${index * 50}ms` }}
+                >
+                  <EmployeeNode
+                    employee={employee as Employee | undefined}
+                    disableTooltips={disableTooltips}
+                    isShadow={isShadow}
+                  />
+                </Transition>
+              );
+            })}
           </div>
 
           {/* View All Button - shown when there are more employees than the limit (hidden during export) */}
@@ -266,10 +295,12 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
               <EyeIcon className="w-4 h-4" />
-              View All {totalOtherEmployees} Employees
-              <span className="ml-1 px-2 py-0.5 bg-blue-500 rounded-full text-xs">
-                +{remainingCount} more
-              </span>
+              View All {totalToDisplay} Position{totalToDisplay !== 1 ? 's' : ''}
+              {shadowCount > 0 && (
+                <span className="ml-1 px-2 py-0.5 bg-green-500 rounded-full text-xs">
+                  +{shadowCount} open
+                </span>
+              )}
             </button>
           )}
         </div>

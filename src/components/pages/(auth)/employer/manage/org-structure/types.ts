@@ -9,6 +9,24 @@ export interface Employee {
   gender?: string;
 }
 
+// Types for job posting hiring information
+export interface JobPostingDetail {
+  id: number;
+  job_title: string;
+  required_slot: number;
+  hired_count: number;
+  remaining_slots: number;
+}
+
+export interface HiringInfo {
+  is_hiring: boolean;
+  total_remaining_slots: number;
+  total_required_slots: number;
+  total_hired: number;
+  active_postings_count: number;
+  postings: JobPostingDetail[];
+}
+
 // Types for organizational structure data
 export interface OrgStructure {
   id: number | string;
@@ -22,6 +40,7 @@ export interface OrgStructure {
   children?: OrgStructure[];
   employees?: Employee[];
   primary_employee?: Employee;
+  hiring_info?: HiringInfo | null;
 }
 
 // Props for organization node components
