@@ -195,17 +195,31 @@ const EvaluationResponseDetailsModal = ({
   const prepareQuestionResponseData = () => {
     if (!templateResponseDetails?.questions) return [];
 
-    const processedQuestions = templateResponseDetails.questions.map((question: any, index: number) => ({
-      ...question,
-      totalResponses: question.responses?.length || question.individual_responses?.length || 0,
-      employeeScores: getEmployeeScoresForQuestion(question, index)
-    }));
+    const allCriteria: any[] = [];
 
-    return processedQuestions;
+    // Extract individual criteria from each section
+    templateResponseDetails.questions.forEach((section: any, sectionIndex: number) => {
+      if (section.criterion && Array.isArray(section.criterion)) {
+        section.criterion.forEach((criterion: any, criterionIndex: number) => {
+          allCriteria.push({
+            sectionId: section.id,
+            sectionTitle: section.section_title,
+            criterionId: criterion.id,
+            title: criterion.title,
+            max_score: criterion.max_score,
+            sectionIndex,
+            criterionIndex,
+            employeeScores: getEmployeeScoresForCriterion(section.id, criterionIndex)
+          });
+        });
+      }
+    });
+
+    return allCriteria;
   };
 
-  // Helper function to calculate employee scores for each question
-  const getEmployeeScoresForQuestion = (question: any, questionIndex: number) => {
+  // Helper function to calculate employee scores for each criterion
+  const getEmployeeScoresForCriterion = (sectionId: string, criterionIndex: number) => {
     if (!templateResponseDetails?.individual_responses) return [];
 
     const employeeScores: { [key: string]: { name: string; scores: number[]; averageScore: number } } = {};
@@ -213,35 +227,29 @@ const EvaluationResponseDetailsModal = ({
     // Process each individual response
     templateResponseDetails.individual_responses.forEach((response: any) => {
       const employeeName = response.employee_name;
-      const formData = response.form_data || {};
+      const formData = response.form_data || [];
       
-      // Use the criterion's ID
-      const questionId = question.id || questionIndex.toString();
-      const questionResponse = formData[questionId];
+      // Find the section in the form data
+      const section = Array.isArray(formData) 
+        ? formData.find((s: any) => s.id === sectionId)
+        : null;
 
-      if (questionResponse !== undefined && questionResponse !== null) {
-        let score = 0;
-
-        // Extract score based on question type and response format
-        if (typeof questionResponse === 'object' && questionResponse !== null) {
-          score = questionResponse.value || questionResponse.rating || questionResponse.score || 0;
-        } else if (typeof questionResponse === 'number') {
-          score = questionResponse;
-        } else if (typeof questionResponse === 'string') {
-          // Try to parse string as number
-          const parsedScore = parseFloat(questionResponse);
-          score = isNaN(parsedScore) ? 0 : parsedScore;
-        }
-
-        if (score > 0) {
-          if (!employeeScores[employeeName]) {
-            employeeScores[employeeName] = {
-              name: employeeName,
-              scores: [],
-              averageScore: 0
-            };
+      if (section && section.criterion && Array.isArray(section.criterion)) {
+        const criterion = section.criterion[criterionIndex];
+        
+        if (criterion && criterion.score !== undefined && criterion.score !== null) {
+          const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);
+          
+          if (!isNaN(score) && score > 0) {
+            if (!employeeScores[employeeName]) {
+              employeeScores[employeeName] = {
+                name: employeeName,
+                scores: [],
+                averageScore: 0
+              };
+            }
+            employeeScores[employeeName].scores.push(score);
           }
-          employeeScores[employeeName].scores.push(score);
         }
       }
     });
@@ -490,56 +498,40 @@ const EvaluationResponseDetailsModal = ({
 
                       {activeTab === 'questions' && (
                         <div className='space-y-6'>
-                          <h4 className='text-lg font-semibold text-gray-900'>Evaluation Questions & Employee Scores</h4>
-                          {prepareQuestionResponseData().map((question: any, questionIndex: number) => (
-                            <div key={questionIndex} className='bg-white border border-gray-200 rounded-lg p-6'>
-                              <div className='mb-6'>
-                                <h5 className='text-lg font-medium text-gray-900 mb-2'>
-                                  {questionIndex + 1}. {question.title}
-                                </h5>
-                                <p className='text-sm text-gray-600'>
-                                  Question Type: {question.type} • Total Responses: {question.total_responses}
-                                </p>
-                              </div>
-                              
-                              {question.employeeScores && question.employeeScores.length > 0 ? (
-                                <QuestionResponseBarChart 
-                                  employeeScores={question.employeeScores}
-                                  questionText={question.title}
-                                />
-                              ) : question.individual_responses && question.individual_responses.length > 0 ? (
-                                <div className='space-y-3'>
-                                  <div className='bg-blue-50 p-4 rounded border border-blue-200'>
-                                    <h6 className='text-sm font-medium text-blue-900 mb-3'>Individual Text Responses ({question.individual_responses.length})</h6>
-                                    <div className='space-y-3'>
-                                      {question.individual_responses.map((response: any, responseIndex: number) => (
-                                        <div key={responseIndex} className='bg-white p-3 rounded border border-blue-100'>
-                                          <div className='flex justify-between items-start mb-2'>
-                                            <p className='text-sm font-medium text-gray-900'>{response.employee_name}</p>
-                                            <p className='text-xs text-gray-500'>
-                                              {response.date ? new Intl.DateTimeFormat('en-US').format(new Date(response.date)) : 'N/A'}
-                                            </p>
-                                          </div>
-                                          <p className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
-                                            {response.response}
-                                          </p>
-                                        </div>
-                                      ))}
-                                    </div>
+                          <h4 className='text-lg font-semibold text-blue-600 mb-4'>Evaluation Questions & Employee Scores</h4>
+                          {prepareQuestionResponseData().length > 0 ? (
+                            prepareQuestionResponseData().map((criterion: any, index: number) => (
+                              <div key={`${criterion.sectionId}-${criterion.criterionIndex}`} className='bg-white border border-gray-200 rounded-lg p-6'>
+                                <div className='mb-6'>
+                                  <h5 className='text-base font-medium text-gray-900'>
+                                    {index + 1}. {criterion.title}
+                                  </h5>
+                                  {criterion.max_score && (
+                                    <p className='text-sm text-gray-500 mt-1'>Max Score: {criterion.max_score}</p>
+                                  )}
+                                </div>
+                                
+                                {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
+                                  <QuestionResponseBarChart 
+                                    employeeScores={criterion.employeeScores}
+                                    questionText={criterion.title}
+                                  />
+                                ) : (
+                                  <div className='text-center py-8'>
+                                    <p className='text-sm text-gray-500 italic'>
+                                      No scored responses available for this question
+                                    </p>
                                   </div>
-                                </div>
-                              ) : (
-                                <div className='text-center py-8'>
-                                  <p className='text-sm text-gray-500 italic'>
-                                    {question.type === 'text' 
-                                      ? 'No text responses available for this question' 
-                                      : 'No scored responses available for this question'
-                                    }
-                                  </p>
-                                </div>
-                              )}
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className='text-center py-8'>
+                              <p className='text-sm text-gray-500 italic'>
+                                No evaluation criteria found
+                              </p>
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
 
