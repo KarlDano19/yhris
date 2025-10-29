@@ -99,12 +99,15 @@ export const calculatePerformanceTrend = (
             count: 0
           });
         } else {
-          // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-          const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-            return sum + (parseFloat(item.score) || 0);
+          // Monthly Performance Rate = Average Percentage Score in Month
+          const totalPercentage = monthEvaluations.reduce((sum: number, item: any) => {
+            const formScore = parseFloat(item.form_total_score) || parseFloat(item.score) || 0;
+            const maxScore = parseFloat(item.max_total_score) || 100;
+            const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+            return sum + percentage;
           }, 0);
 
-          const averageScore = totalScore / monthEvaluations.length;
+          const averageScore = totalPercentage / monthEvaluations.length;
 
           rangeMonths.push({
             month: monthName,
@@ -128,12 +131,15 @@ export const calculatePerformanceTrend = (
             count: 0
           });
         } else {
-          // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
-          const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
-            return sum + (parseFloat(item.score) || 0);
+          // Monthly Performance Rate = Average Percentage Score for Department in Month
+          const totalPercentage = departmentMonthEvaluations.reduce((sum: number, item: any) => {
+            const formScore = parseFloat(item.form_total_score) || parseFloat(item.score) || 0;
+            const maxScore = parseFloat(item.max_total_score) || 100;
+            const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+            return sum + percentage;
           }, 0);
 
-          const averageScore = totalScore / departmentMonthEvaluations.length;
+          const averageScore = totalPercentage / departmentMonthEvaluations.length;
 
           rangeMonths.push({
             month: monthName,
@@ -165,12 +171,15 @@ export const calculatePerformanceTrend = (
           return { month: month.name, score: 0, count: 0 };
         }
 
-        // Monthly Performance Rate = Sum of Scores in Month / Number of Employees Evaluated in Month
-        const totalScore = monthEvaluations.reduce((sum: number, item: any) => {
-          return sum + (parseFloat(item.score) || 0);
+        // Monthly Performance Rate = Average Percentage Score in Month
+        const totalPercentage = monthEvaluations.reduce((sum: number, item: any) => {
+          const formScore = parseFloat(item.form_total_score) || parseFloat(item.score) || 0;
+          const maxScore = parseFloat(item.max_total_score) || 100;
+          const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+          return sum + percentage;
         }, 0);
 
-        const averageScore = totalScore / monthEvaluations.length;
+        const averageScore = totalPercentage / monthEvaluations.length;
 
         return {
           month: month.name,
@@ -189,12 +198,15 @@ export const calculatePerformanceTrend = (
           return { month: month.name, score: 0, count: 0 };
         }
 
-        // Monthly Performance Rate = Sum of Scores in Month of the Department / Specific Employees Evaluated in a Department in a Month
-        const totalScore = departmentMonthEvaluations.reduce((sum: number, item: any) => {
-          return sum + (parseFloat(item.score) || 0);
+        // Monthly Performance Rate = Average Percentage Score for Department in Month
+        const totalPercentage = departmentMonthEvaluations.reduce((sum: number, item: any) => {
+          const formScore = parseFloat(item.form_total_score) || parseFloat(item.score) || 0;
+          const maxScore = parseFloat(item.max_total_score) || 100;
+          const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+          return sum + percentage;
         }, 0);
 
-        const averageScore = totalScore / departmentMonthEvaluations.length;
+        const averageScore = totalPercentage / departmentMonthEvaluations.length;
 
         return {
           month: month.name,
