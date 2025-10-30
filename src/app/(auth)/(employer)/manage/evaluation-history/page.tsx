@@ -7,7 +7,7 @@ import Content from '@/components/pages/(auth)/employer/manage/evaluation-histor
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: 'Manage - Design Benefits - Yahshua HRIS',
+  title: 'Manage - Evaluation History - Yahshua HRIS',
 };
 
 async function getSession() {

@@ -6,6 +6,13 @@ import { XCircleIcon, ChartBarIcon, UsersIcon, ClipboardDocumentListIcon, Chevro
 import FilterIcon from '@/svg/FilterIcon';
 import FrequentlyEvaluatedPieChart from './charts-and-graphs/FrequentlyEvaluatedPieChart';
 import QuestionResponseBarChart from './charts-and-graphs/QuestionResponseBarChart';
+import {
+  getUniqueDepartments as getUniqueDepts,
+  filterEmployeesByDateAndDepartment,
+  filterFrequentlyEvaluatedEmployees,
+  filterIndividualResponses,
+  getEmployeeScoresForCriterion
+} from '../helpers/evaluationHelpers';
 
 type T_ModalData = {
   id: number;
@@ -140,16 +147,7 @@ const EvaluationResponseDetailsModal = ({
 
   // Helper function to get unique departments from responses
   const getUniqueDepartments = () => {
-    if (!templateResponseDetails?.employees_responded) return [];
-    
-    const departments = new Set<string>();
-    templateResponseDetails.employees_responded.forEach((employee: any) => {
-      if (employee.department && employee.department !== 'N/A') {
-        departments.add(employee.department);
-      }
-    });
-    
-    return Array.from(departments).sort();
+    return getUniqueDepts(templateResponseDetails?.employees_responded || []);
   };
 
   // Handle department filter changes from the Filter component
@@ -159,41 +157,11 @@ const EvaluationResponseDetailsModal = ({
 
   // Filter employees based on date range and department
   useEffect(() => {
-    if (!templateResponseDetails?.employees_responded) {
-      setFilteredEmployees([]);
-      return;
-    }
-
-    let filtered = [...templateResponseDetails.employees_responded];
-
-    // Filter by date range
-    if (dateFilter.from || dateFilter.to) {
-      filtered = filtered.filter((employee: any) => {
-        if (!employee.date_completed) return false;
-        
-        const employeeDate = new Date(employee.date_completed);
-        
-        if (dateFilter.from) {
-          const fromDate = new Date(dateFilter.from);
-          fromDate.setHours(0, 0, 0, 0);
-          if (employeeDate < fromDate) return false;
-        }
-        
-        if (dateFilter.to) {
-          const toDate = new Date(dateFilter.to);
-          toDate.setHours(23, 59, 59, 999);
-          if (employeeDate > toDate) return false;
-        }
-        
-        return true;
-      });
-    }
-
-    // Filter by department
-    if (departmentFilter && departmentFilter.length > 0) {
-      filtered = filtered.filter((employee: any) => departmentFilter.includes(employee.department));
-    }
-
+    const filtered = filterEmployeesByDateAndDepartment(
+      templateResponseDetails?.employees_responded || [],
+      dateFilter,
+      departmentFilter
+    );
     setFilteredEmployees(filtered);
   }, [templateResponseDetails, dateFilter, departmentFilter]);
 
@@ -204,6 +172,24 @@ const EvaluationResponseDetailsModal = ({
       setDepartmentFilter(allDepartments);
     }
   }, [templateResponseDetails]);
+
+  // Helper to get filtered frequently evaluated employees
+  const getFilteredFrequentlyEvaluatedEmployees = () => {
+    return filterFrequentlyEvaluatedEmployees(
+      templateResponseDetails?.frequently_evaluated_employees || [],
+      departmentFilter
+    );
+  };
+
+  // Helper to get filtered individual responses based on department and date
+  const getFilteredIndividualResponses = () => {
+    return filterIndividualResponses(
+      templateResponseDetails?.individual_responses || [],
+      templateResponseDetails?.employees_responded || [],
+      dateFilter,
+      departmentFilter
+    );
+  };
 
   // Helper function to prepare question response data for horizontal bar charts
   const prepareQuestionResponseData = () => {
@@ -223,7 +209,7 @@ const EvaluationResponseDetailsModal = ({
             max_score: criterion.max_score,
             sectionIndex,
             criterionIndex,
-            employeeScores: getEmployeeScoresForCriterion(section.id, criterionIndex)
+            employeeScores: getEmployeeScoresForCriterionWrapper(section.id, criterionIndex)
           });
         });
       }
@@ -233,52 +219,14 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Helper function to calculate employee scores for each criterion
-  const getEmployeeScoresForCriterion = (sectionId: string, criterionIndex: number) => {
-    if (!templateResponseDetails?.individual_responses) return [];
-
-    const employeeScores: { [key: string]: { name: string; scores: number[]; averageScore: number } } = {};
-
-    // Process each individual response
-    templateResponseDetails.individual_responses.forEach((response: any) => {
-      const employeeName = response.employee_name;
-      const formData = response.form_data || [];
-      
-      // Find the section in the form data
-      const section = Array.isArray(formData) 
-        ? formData.find((s: any) => s.id === sectionId)
-        : null;
-
-      if (section && section.criterion && Array.isArray(section.criterion)) {
-        const criterion = section.criterion[criterionIndex];
-        
-        if (criterion && criterion.score !== undefined && criterion.score !== null) {
-          const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);
-          
-          if (!isNaN(score) && score > 0) {
-            if (!employeeScores[employeeName]) {
-              employeeScores[employeeName] = {
-                name: employeeName,
-                scores: [],
-                averageScore: 0
-              };
-            }
-            employeeScores[employeeName].scores.push(score);
-          }
-        }
-      }
-    });
-
-    // Calculate average scores for each employee
-    Object.values(employeeScores).forEach(employee => {
-      if (employee.scores.length > 0) {
-        employee.averageScore = employee.scores.reduce((sum, score) => sum + score, 0) / employee.scores.length;
-      }
-    });
-
-    // Convert to array and sort by average score (descending)
-    return Object.values(employeeScores)
-      .filter(employee => employee.averageScore > 0)
-      .sort((a, b) => b.averageScore - a.averageScore);
+  const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionIndex: number) => {
+    const filteredResponses = getFilteredIndividualResponses();
+    
+    return getEmployeeScoresForCriterion(
+      filteredResponses, 
+      sectionId, 
+      criterionIndex
+    );
   };
 
   if (!isOpen) return null;
@@ -541,32 +489,33 @@ const EvaluationResponseDetailsModal = ({
                                 <div key={questionId} className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
                                   <button
                                     onClick={() => toggleQuestion(questionId)}
-                                    className='w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
+                                    className='w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
                                   >
                                     <div className='flex-1'>
-                                      <h5 className='text-base font-medium text-gray-900 flex items-center gap-2'>
+                                      <h5 className='text-sm font-medium text-gray-900 flex items-center gap-2'>
                                         {isExpanded ? (
-                                          <ChevronDownIcon className='w-5 h-5 text-gray-500' />
+                                          <ChevronDownIcon className='w-4 h-4 text-gray-500' />
                                         ) : (
-                                          <ChevronRightIcon className='w-5 h-5 text-gray-500' />
+                                          <ChevronRightIcon className='w-4 h-4 text-gray-500' />
                                         )}
                                         {index + 1}. {criterion.title}
                                       </h5>
                                       {criterion.max_score && (
-                                        <p className='text-sm text-gray-500 mt-1 ml-7'>Max Score: {criterion.max_score}</p>
+                                        <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {criterion.max_score}</p>
                                       )}
                                     </div>
                                   </button>
                                   
                                   {isExpanded && (
-                                    <div className='px-6 pb-6 pt-2 border-t border-gray-100'>
+                                    <div className='px-4 pb-4 pt-2 border-t border-gray-100'>
                                       {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
                                         <QuestionResponseBarChart 
                                           employeeScores={criterion.employeeScores}
                                           questionText={criterion.title}
+                                          maxScore={criterion.max_score}
                                         />
                                       ) : (
-                                        <div className='text-center py-8'>
+                                        <div className='text-center py-6'>
                                           <p className='text-sm text-gray-500 italic'>
                                             No scored responses available for this question
                                           </p>
@@ -596,13 +545,13 @@ const EvaluationResponseDetailsModal = ({
                             <h5 className='text-lg font-medium text-gray-900 mb-4'>Frequently Evaluated Employees</h5>
                             <div className='h-80'>
                               <FrequentlyEvaluatedPieChart 
-                                frequentlyEvaluatedEmployees={templateResponseDetails.frequently_evaluated_employees || []}
+                                frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
                               />
                             </div>
                           </div>
 
                           {/* Detailed Analytics Table */}
-                          {templateResponseDetails.frequently_evaluated_employees && templateResponseDetails.frequently_evaluated_employees.length > 0 && (
+                          {getFilteredFrequentlyEvaluatedEmployees().length > 0 && (
                             <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
                               <div className='px-6 py-4 bg-gray-50 border-b border-gray-200'>
                                 <h5 className='text-lg font-medium text-gray-900'>Employee Evaluation Details</h5>
@@ -627,7 +576,7 @@ const EvaluationResponseDetailsModal = ({
                                     </tr>
                                   </thead>
                                   <tbody className='bg-white divide-y divide-gray-200'>
-                                    {templateResponseDetails.frequently_evaluated_employees.map((employee: any, index: number) => (
+                                    {getFilteredFrequentlyEvaluatedEmployees().map((employee: any, index: number) => (
                                       <tr key={index} className='hover:bg-gray-50'>
                                         <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                                           {employee.name}
