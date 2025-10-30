@@ -198,6 +198,8 @@ function EditEvaluationSchedulerModal({
                       setSelectedTab={setSelectedTab}
                       recipientNames={dataEvaluationSchedulerDetails?.recipient_names}
                       employeeNames={dataEvaluationSchedulerDetails?.employee_names}
+                      recipientEmails={dataEvaluationSchedulerDetails?.recipient_emails}
+                      employeeEmails={dataEvaluationSchedulerDetails?.employee_emails}
                       setValue={setValue}
                     />
                   )}
