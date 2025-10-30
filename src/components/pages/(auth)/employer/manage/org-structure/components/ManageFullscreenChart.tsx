@@ -134,15 +134,50 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
       >
         <div className="org-tree-container relative">
           {/* Floating Title - Included in exports */}
-          <div className="absolute top-4 left-4 z-10 bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-3 pointer-events-none">
-            <div className="text-left">
-              <h2 className="text-lg font-bold text-gray-800 leading-tight">
+          <div className="absolute top-4 left-4 z-10 pointer-events-none">
+            <svg
+              width="320"
+              height="70"
+              viewBox="0 0 320 70"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))' }}
+            >
+              {/* Background with border */}
+              <rect
+                width="320"
+                height="70"
+                rx="8"
+                fill="white"
+                stroke="#e5e7eb"
+                strokeWidth="1"
+              />
+              
+              {/* First line of text */}
+              <text
+                x="16"
+                y="24"
+                fill="#1f2937"
+                fontSize="18"
+                fontWeight="700"
+                fontFamily="system-ui, -apple-system, sans-serif"
+                dominantBaseline="middle"
+              >
                 {profileData?.name || 'Company'}'s
-              </h2>
-              <h3 className="text-lg font-bold text-gray-800 leading-tight">
+              </text>
+              
+              {/* Second line of text */}
+              <text
+                x="16"
+                y="48"
+                fill="#1f2937"
+                fontSize="18"
+                fontWeight="700"
+                fontFamily="system-ui, -apple-system, sans-serif"
+                dominantBaseline="middle"
+              >
                 Organizational Structure
-              </h3>
-            </div>
+              </text>
+            </svg>
           </div>
           
           {excludeAvatars ? (

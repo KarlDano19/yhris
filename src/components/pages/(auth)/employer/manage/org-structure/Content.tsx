@@ -7,6 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
@@ -299,9 +301,6 @@ const Content = () => {
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
-      // Dynamically import html2canvas and jsPDF
-      const html2canvas = (await import('html2canvas')).default;
-      
       // Find the org chart container
       const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
       
@@ -339,8 +338,6 @@ const Content = () => {
         link.click();
       } else {
         // Export as PDF
-        const { jsPDF } = await import('jspdf');
-        
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
