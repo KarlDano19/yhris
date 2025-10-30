@@ -184,7 +184,7 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
         acc[key].total_responses += 1;
         acc[key].employees.push(item.employee_name);
         acc[key].average_score += item.form_total_score;
-        acc[key].average_total_score += item.total_score;
+        acc[key].average_total_score += item.max_total_score;
         return acc;
       }, {});
 

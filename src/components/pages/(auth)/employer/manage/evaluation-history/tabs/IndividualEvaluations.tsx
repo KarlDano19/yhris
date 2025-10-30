@@ -154,7 +154,7 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
             <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
               {item.form_total_score}
             </span>
-            /<span>{item.total_score}</span>
+            /<span>{item.max_total_score}</span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>

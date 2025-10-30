@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import { XCircleIcon, ChartBarIcon, UsersIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, ChartBarIcon, UsersIcon, ClipboardDocumentListIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import FilterIcon from '@/svg/FilterIcon';
 import FrequentlyEvaluatedPieChart from './charts-and-graphs/FrequentlyEvaluatedPieChart';
 import QuestionResponseBarChart from './charts-and-graphs/QuestionResponseBarChart';
@@ -116,12 +116,26 @@ const EvaluationResponseDetailsModal = ({
     to: '',
   });
   const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
+  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
 
   const customCloseModal = () => {
     setDateFilter({ from: '', to: '' });
     setDepartmentFilter([]);
     setActiveTab('respondents');
+    setExpandedQuestions(new Set());
     setIsOpen(null);
+  };
+
+  const toggleQuestion = (questionId: string) => {
+    setExpandedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
   };
 
   // Helper function to get unique departments from responses
@@ -498,33 +512,71 @@ const EvaluationResponseDetailsModal = ({
 
                       {activeTab === 'questions' && (
                         <div className='space-y-6'>
-                          <h4 className='text-lg font-semibold text-blue-600 mb-4'>Evaluation Questions & Employee Scores</h4>
+                          <div className='flex items-center justify-between'>
+                            <h4 className='text-lg font-semibold text-black'>Evaluation Questions & Employee Scores</h4>
+                            {prepareQuestionResponseData().length > 0 && (
+                              <button
+                                onClick={() => {
+                                  const allQuestions = prepareQuestionResponseData().map((criterion: any) => 
+                                    `${criterion.sectionId}-${criterion.criterionIndex}`
+                                  );
+                                  if (expandedQuestions.size === allQuestions.length) {
+                                    setExpandedQuestions(new Set());
+                                  } else {
+                                    setExpandedQuestions(new Set(allQuestions));
+                                  }
+                                }}
+                                className='px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors'
+                              >
+                                {expandedQuestions.size === prepareQuestionResponseData().length ? 'Collapse All' : 'Expand All'}
+                              </button>
+                            )}
+                          </div>
                           {prepareQuestionResponseData().length > 0 ? (
-                            prepareQuestionResponseData().map((criterion: any, index: number) => (
-                              <div key={`${criterion.sectionId}-${criterion.criterionIndex}`} className='bg-white border border-gray-200 rounded-lg p-6'>
-                                <div className='mb-6'>
-                                  <h5 className='text-base font-medium text-gray-900'>
-                                    {index + 1}. {criterion.title}
-                                  </h5>
-                                  {criterion.max_score && (
-                                    <p className='text-sm text-gray-500 mt-1'>Max Score: {criterion.max_score}</p>
+                            prepareQuestionResponseData().map((criterion: any, index: number) => {
+                              const questionId = `${criterion.sectionId}-${criterion.criterionIndex}`;
+                              const isExpanded = expandedQuestions.has(questionId);
+                              
+                              return (
+                                <div key={questionId} className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
+                                  <button
+                                    onClick={() => toggleQuestion(questionId)}
+                                    className='w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
+                                  >
+                                    <div className='flex-1'>
+                                      <h5 className='text-base font-medium text-gray-900 flex items-center gap-2'>
+                                        {isExpanded ? (
+                                          <ChevronDownIcon className='w-5 h-5 text-gray-500' />
+                                        ) : (
+                                          <ChevronRightIcon className='w-5 h-5 text-gray-500' />
+                                        )}
+                                        {index + 1}. {criterion.title}
+                                      </h5>
+                                      {criterion.max_score && (
+                                        <p className='text-sm text-gray-500 mt-1 ml-7'>Max Score: {criterion.max_score}</p>
+                                      )}
+                                    </div>
+                                  </button>
+                                  
+                                  {isExpanded && (
+                                    <div className='px-6 pb-6 pt-2 border-t border-gray-100'>
+                                      {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
+                                        <QuestionResponseBarChart 
+                                          employeeScores={criterion.employeeScores}
+                                          questionText={criterion.title}
+                                        />
+                                      ) : (
+                                        <div className='text-center py-8'>
+                                          <p className='text-sm text-gray-500 italic'>
+                                            No scored responses available for this question
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
-                                
-                                {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
-                                  <QuestionResponseBarChart 
-                                    employeeScores={criterion.employeeScores}
-                                    questionText={criterion.title}
-                                  />
-                                ) : (
-                                  <div className='text-center py-8'>
-                                    <p className='text-sm text-gray-500 italic'>
-                                      No scored responses available for this question
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            ))
+                              );
+                            })
                           ) : (
                             <div className='text-center py-8'>
                               <p className='text-sm text-gray-500 italic'>

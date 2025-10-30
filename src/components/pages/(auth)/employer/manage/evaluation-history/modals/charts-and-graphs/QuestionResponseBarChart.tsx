@@ -59,6 +59,9 @@ const QuestionResponseBarChart = ({
           return colors[index % colors.length];
         }),
         borderWidth: 1,
+        borderRadius: 8,
+        barThickness: 20,
+        maxBarThickness: 25,
       }]
     };
   };
@@ -123,6 +126,9 @@ const QuestionResponseBarChart = ({
                 },
                 grid: {
                   display: false
+                },
+                ticks: {
+                  autoSkip: false
                 }
               }
             }
@@ -173,7 +179,7 @@ const QuestionResponseBarChart = ({
                   </td>
                   <td className='px-4 py-3 whitespace-nowrap text-sm text-gray-500'>
                     <span className='text-xs'>
-                      {employee.scores.map((score: number) => score.toFixed(1)).join(', ')}
+                      {employee.scores.map((score: number) => Math.round(score)).join(', ')}
                     </span>
                   </td>
                 </tr>
