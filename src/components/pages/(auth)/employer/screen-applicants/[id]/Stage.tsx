@@ -54,7 +54,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
         isStageDisabled 
           ? 'bg-gray-100 border-2 border-dashed border-gray-300' 
           : stage.is_final_stage
-          ? 'bg-white shadow-lg border-2 border-black'
+          ? 'bg-white shadow-lg border-2 border-gray-300'
           : 'bg-white shadow-sm hover:shadow-md'
       }`}
     >
