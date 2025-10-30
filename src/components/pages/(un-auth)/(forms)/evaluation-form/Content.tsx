@@ -283,7 +283,15 @@ function Content() {
                                       }
                                     }}
                                     onChange={(event) => {
-                                      const newScore = Number(event.target.value);
+                                      let newScore = Number(event.target.value);
+                                      // Validate score doesn't exceed max_score
+                                      if (newScore > item.max_score) {
+                                        newScore = item.max_score;
+                                      }
+                                      // Validate score is not negative
+                                      if (newScore < 0) {
+                                        newScore = 0;
+                                      }
                                       setEvaluationForm((prevForm: any) => {
                                         const updatedForm = prevForm.map(
                                           (criterionItem: any, criterionIndex: number) => {

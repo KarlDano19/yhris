@@ -106,6 +106,7 @@ export type StageType = {
   applicants: ApplicantsType;
   orderBy: number;
   addType: string;
+  is_final_stage?: boolean;
   permissions?: {
     can_view: boolean;
     can_move: boolean;
