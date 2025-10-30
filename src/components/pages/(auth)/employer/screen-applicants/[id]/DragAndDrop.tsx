@@ -45,10 +45,11 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
   const dragStage = (result: any) => {
     const callbackReq = {
       onSuccess: () => {
-        jobPostDetailsRefetch();
-        appliedApplicantRefetch();
+        // No refetch needed - drag only reorders stages, optimistic update is sufficient
       },
       onError: (err: any) => {
+        // On error, refetch to revert to correct server state
+        jobPostDetailsRefetch();
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });

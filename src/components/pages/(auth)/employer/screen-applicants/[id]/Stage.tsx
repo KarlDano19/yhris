@@ -50,7 +50,7 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
       {...provided.draggableProps}
       {...provided.dragHandleProps}
       style={getItemStyle(snapshot.isDragging, provided.draggableProps.style, isStageDisabled, stage.is_final_stage || false)}
-      className={`flex flex-col gap-2 p-3 rounded-2xl transition-all duration-200 relative ${
+      className={`flex flex-col gap-2 p-3 rounded-2xl transition-shadow duration-200 relative ${
         isStageDisabled 
           ? 'bg-gray-100 border-2 border-dashed border-gray-300' 
           : stage.is_final_stage
