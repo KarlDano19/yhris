@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 
 import { Tree } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
@@ -83,6 +83,61 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
 }) => {
   const [isExporting, setIsExporting] = useState(false);
 
+  // Calculate dynamic dimensions for floating title based on text length
+  const floatingTitleDimensions = useMemo(() => {
+    const companyName = profileData?.name || 'Company';
+    const charWidth = 10; // Approximate character width for 18px bold font
+    const padding = 32; // 16px on each side
+    const maxCharsPerLine = 30; // Maximum characters per line before wrapping
+    const lineHeight = 24; // Height for each line of text
+    const topPadding = 12; // Top padding
+    const bottomPadding = 12; // Bottom padding
+    
+    // Split company name into multiple lines if too long
+    const companyNameLines: string[] = [];
+    if (companyName.length > maxCharsPerLine) {
+      const words = companyName.split(' ');
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (testLine.length <= maxCharsPerLine) {
+          currentLine = testLine;
+        } else {
+          if (currentLine) companyNameLines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      if (currentLine) companyNameLines.push(currentLine);
+    } else {
+      companyNameLines.push(companyName);
+    }
+    
+    // Add "'s" to the last line of company name
+    if (companyNameLines.length > 0) {
+      companyNameLines[companyNameLines.length - 1] += "'s";
+    }
+    
+    // Add "Organizational Structure" line
+    const allLines = [...companyNameLines, 'Organizational Structure'];
+    
+    // Calculate width based on longest line
+    const maxLineLength = Math.max(...allLines.map(line => line.length));
+    const calculatedWidth = maxLineLength * charWidth + padding;
+    const width = Math.min(Math.max(calculatedWidth, 200), 400);
+    
+    // Calculate height based on number of lines
+    const height = topPadding + (allLines.length * lineHeight) + bottomPadding;
+    
+    // Calculate dynamic top position - more negative for taller boxes
+    // Base: 16px (top-4), then subtract extra height beyond baseline (2 lines = 70px)
+    const baseHeight = 70;
+    const extraHeight = height - baseHeight;
+    const topPosition = 16 - (extraHeight > 0 ? extraHeight * 0.5 : 0); // Move up by half the extra height
+    
+    return { width, height, lines: allLines, topPosition };
+  }, [profileData?.name]);
+
   // Export menu options
   const exportOptions = [
     {
@@ -134,49 +189,42 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
       >
         <div className="org-tree-container relative">
           {/* Floating Title - Included in exports */}
-          <div className="absolute top-4 left-4 z-10 pointer-events-none">
+          <div 
+            className="absolute left-4 z-10 pointer-events-none"
+            style={{ top: `${floatingTitleDimensions.topPosition}px` }}
+          >
             <svg
-              width="320"
-              height="70"
-              viewBox="0 0 320 70"
+              width={floatingTitleDimensions.width}
+              height={floatingTitleDimensions.height}
+              viewBox={`0 0 ${floatingTitleDimensions.width} ${floatingTitleDimensions.height}`}
               xmlns="http://www.w3.org/2000/svg"
               style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))' }}
             >
               {/* Background with border */}
               <rect
-                width="320"
-                height="70"
+                width={floatingTitleDimensions.width}
+                height={floatingTitleDimensions.height}
                 rx="8"
                 fill="white"
                 stroke="#e5e7eb"
                 strokeWidth="1"
               />
               
-              {/* First line of text */}
-              <text
-                x="16"
-                y="24"
-                fill="#1f2937"
-                fontSize="18"
-                fontWeight="700"
-                fontFamily="system-ui, -apple-system, sans-serif"
-                dominantBaseline="middle"
-              >
-                {profileData?.name || 'Company'}'s
-              </text>
-              
-              {/* Second line of text */}
-              <text
-                x="16"
-                y="48"
-                fill="#1f2937"
-                fontSize="18"
-                fontWeight="700"
-                fontFamily="system-ui, -apple-system, sans-serif"
-                dominantBaseline="middle"
-              >
-                Organizational Structure
-              </text>
+              {/* Dynamic text lines */}
+              {floatingTitleDimensions.lines.map((line, index) => (
+                <text
+                  key={index}
+                  x="16"
+                  y={24 + (index * 24)}
+                  fill="#1f2937"
+                  fontSize="18"
+                  fontWeight="700"
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                  dominantBaseline="middle"
+                >
+                  {line}
+                </text>
+              ))}
             </svg>
           </div>
           

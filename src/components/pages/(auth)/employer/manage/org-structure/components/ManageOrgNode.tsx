@@ -59,9 +59,9 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
     };
   }, [isClicked, setClickedNodeId]);
   
-  // Determine avatar type (male/female) - use gender field if available
-  const getAvatarType = (employee: Employee | undefined) => {
-    if (!employee) return 'male'; // Default
+  // Determine avatar type (male/female/empty) - use gender field if available
+  const getAvatarType = (employee: Employee | undefined): 'male' | 'female' | 'empty' => {
+    if (!employee) return 'empty'; // No employee assigned
     // Use gender field if available, otherwise fallback to name-based logic
     if (employee.gender) {
       return employee.gender.toLowerCase() === 'female' ? 'female' : 'male';
