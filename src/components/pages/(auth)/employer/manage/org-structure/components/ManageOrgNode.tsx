@@ -28,7 +28,8 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   selectedPositions = new Set(),
   setSelectedPositions,
   usePlaceholderAvatars = false,
-  excludeAvatars = false
+  excludeAvatars = false,
+  departmentFilter
 }) => {
   const isClicked = clickedNodeId === data.id;
   const isExpanded = expandedPositions.has(data.id);
@@ -341,6 +342,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         primaryEmployee={primaryEmployee}
         isVisible={showDetailsModal}
         onClose={handleCloseDetailsModal}
+        departmentFilter={departmentFilter}
       />
       
       {/* Tooltip for this node */}

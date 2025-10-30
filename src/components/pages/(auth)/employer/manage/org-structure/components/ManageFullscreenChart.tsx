@@ -43,6 +43,7 @@ interface ManageFullscreenChartProps {
   setSelectedPositions?: (positions: Set<number | string>) => void;
   usePlaceholderAvatars?: boolean;
   excludeAvatars?: boolean;
+  departmentFilter?: string;
 }
 
 const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
@@ -77,7 +78,8 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   selectedPositions = new Set(),
   setSelectedPositions,
   usePlaceholderAvatars = false,
-  excludeAvatars = false
+  excludeAvatars = false,
+  departmentFilter
 }) => {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -160,6 +162,7 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
                       onSetPrimaryEmployee={onSetPrimaryEmployee}
                       usePlaceholderAvatars={usePlaceholderAvatars}
                       excludeAvatars={excludeAvatars}
+                      departmentFilter={departmentFilter}
                     />
                   </div>
                 }

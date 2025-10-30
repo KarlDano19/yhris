@@ -12,7 +12,10 @@ import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
 import ExportOptionsModal from './modals/ExportOptionsModal';
 import ProgressModal from '@/components/ProgressModal';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
+import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
 import { OrgStructure } from './types';
 
@@ -40,20 +43,63 @@ const Content = () => {
   // Position selection for export
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedPositions, setSelectedPositions] = useState<Set<number | string>>(new Set());
+  
+  // Department filter state with persistence
+  const [departmentFilter, setDepartmentFilter] = useFilterPersistence<FilterValues>('org-structure-department', {
+    department: ['ALL']
+  });
 
   // API hooks
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
+  const { data: departmentItems = [] } = useGetDepartmentItems();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
 
-  // Load data from API
+  // Load data from API and apply department filter
   useEffect(() => {
     if (orgStructureData && Array.isArray(orgStructureData) && orgStructureData.length > 0) {
-      setOrgData(orgStructureData[0]);
+      let data = orgStructureData[0];
+      
+      // Apply department filter if not "ALL"
+      const selectedDepartments = departmentFilter.department || [];
+      if (selectedDepartments.length > 0 && !selectedDepartments.includes('ALL')) {
+        const dept = selectedDepartments[0]; // Single select, take first value
+        data = filterEmployeesByDepartment(data, dept);
+      }
+      
+      setOrgData(data);
     } else {
       setOrgData(null);
     }
-  }, [orgStructureData]);
+  }, [orgStructureData, departmentFilter]);
+  
+  // Function to filter employees by department (keep all positions to prevent breaking)
+  const filterEmployeesByDepartment = (node: OrgStructure, department: string): OrgStructure => {
+    const filteredNode = { ...node };
+    
+    // Filter employees to only show those matching the department
+    if (node.employees) {
+      filteredNode.employees = node.employees.filter(emp => 
+        emp.department?.toLowerCase() === department.toLowerCase()
+      );
+    }
+    
+    // Filter primary employee - only show if matches department
+    if (node.primary_employee) {
+      if (node.primary_employee.department?.toLowerCase() !== department.toLowerCase()) {
+        filteredNode.primary_employee = undefined;
+      }
+    }
+    
+    // Recursively filter children (keep all positions, just filter their employees)
+    if (node.children) {
+      filteredNode.children = node.children.map(child => 
+        filterEmployeesByDepartment(child, department)
+      );
+    }
+    
+    return filteredNode;
+  };
 
   // Zoom handlers
   const handleZoomIn = () => {
@@ -427,6 +473,29 @@ const Content = () => {
     setSelectedFormat(format);
     setShowExportModal(true);
   };
+  
+  // Create filter groups for department with dropdown mode
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'department',
+      title: 'Department',
+      options: [
+        { value: 'ALL', label: 'ALL' },
+        ...(departmentItems as any[])?.map((dept: any) => ({
+          value: dept.name,
+          label: dept.name
+        })) || []
+      ],
+      multiSelect: false,
+      allowEmpty: false,
+      displayMode: 'dropdown' // Use dropdown select instead of radio buttons
+    }
+  ];
+  
+  // Handle filter change
+  const handleFilterChange = (filters: FilterValues) => {
+    setDepartmentFilter(filters);
+  };
 
   return (
     <>
@@ -445,8 +514,20 @@ const Content = () => {
           <h4 className='text-sm sm:text-base truncate'>Manage | Organizational Structure</h4>
         </Link>
         
-        {/* Export Button - Hide when selection mode is active */}
+        {/* Filter and Export Buttons - Hide when selection mode is active */}
         {orgData && !isSelectionMode && (
+          <div className="flex items-center gap-2">
+            {/* Department Filter */}
+            <Filter
+              filterGroups={filterGroups}
+              defaultValues={departmentFilter}
+              onFilterChange={handleFilterChange}
+              showResetButton={true}
+              showApplyButton={true}
+              size="default"
+            />
+            
+            {/* Export Button */}
           <Menu as='div' className='relative self-end sm:self-auto'>
             <Menu.Button className='bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 text-sm sm:text-base' disabled={isExporting}>
               <span className='hidden sm:inline'>{isExporting ? 'Exporting...' : 'Export'}</span>
@@ -486,6 +567,7 @@ const Content = () => {
             </Menu.Items>
           </Transition>
             </Menu>
+          </div>
         )}
       </div>
 
@@ -560,6 +642,7 @@ const Content = () => {
             setSelectedPositions={setSelectedPositions}
             usePlaceholderAvatars={usePlaceholderAvatars && isExporting}
             excludeAvatars={excludeAvatars && isExporting}
+            departmentFilter={departmentFilter.department?.[0]}
           />
         </div>
 

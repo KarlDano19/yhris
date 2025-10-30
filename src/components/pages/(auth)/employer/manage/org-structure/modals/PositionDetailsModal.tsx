@@ -20,7 +20,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   data, 
   primaryEmployee, 
   isVisible,
-  onClose
+  onClose,
+  departmentFilter
 }) => {
   const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
 
@@ -128,9 +129,19 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
   });
 
   // Use paginated employees if available, otherwise fallback to data.employees
-  const employeesToDisplay = employeesData?.employees || data.employees || [];
+  let employeesToDisplay = employeesData?.employees || data.employees || [];
   const pagination = employeesData?.pagination;
-  const autocompleteResults = autocompleteData?.records || [];
+  let autocompleteResults = autocompleteData?.records || [];
+  
+  // Apply department filter to employees if specified
+  if (departmentFilter && departmentFilter !== 'ALL') {
+    employeesToDisplay = employeesToDisplay.filter((emp: Employee) => 
+      emp.department?.toLowerCase() === departmentFilter.toLowerCase()
+    );
+    autocompleteResults = autocompleteResults.filter((emp: Employee) => 
+      emp.department?.toLowerCase() === departmentFilter.toLowerCase()
+    );
+  }
 
   // Determine avatar type (male/female) - use gender field if available
   const getAvatarType = (employee: Employee | undefined) => {
@@ -226,8 +237,8 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
 
                 {/* Content */}
                 <div className="p-6 space-y-6">
-                  {/* Primary Employee Info */}
-                  {primaryEmployee && (
+                  {/* Primary Employee Info - Only show if matches department filter */}
+                  {primaryEmployee && (!departmentFilter || departmentFilter === 'ALL' || primaryEmployee.department?.toLowerCase() === departmentFilter.toLowerCase()) && (
                     <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600">
                       <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden flex-shrink-0">
                         {primaryEmployee.photo ? (
@@ -259,6 +270,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                         <h4 className="text-lg font-bold text-gray-800">
                           {primaryEmployee.firstname} {primaryEmployee.lastname}
                         </h4>
+                        {primaryEmployee.department && (
+                          <p className="text-sm text-gray-700 font-medium">{primaryEmployee.department}</p>
+                        )}
                         <p className="text-sm text-blue-700 font-medium">Displayed in Org Chart</p>
                         <p className="text-sm text-gray-500">{primaryEmployee.email}</p>
                       </div>
@@ -282,7 +296,10 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                     <div>
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-semibold text-gray-800">
-                        {pagination ? `All Employees (${pagination.totalRecords})` : 'Employees'}
+                        {departmentFilter && departmentFilter !== 'ALL' 
+                          ? `${departmentFilter} Employees (${employeesToDisplay.length})`
+                          : pagination ? `All Employees (${pagination.totalRecords})` : 'Employees'
+                        }
                       </h4>
                       
                       {/* Search Bar */}
@@ -427,6 +444,9 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                     >
                                       <div className="flex flex-col">
                                         <span className="font-medium">{item.firstname} {item.lastname}</span>
+                                        {item.department && (
+                                          <span className="text-xs text-gray-600 font-medium">• {item.department}</span>
+                                        )}
                                         <span className="text-xs text-gray-500">• {item.email}</span>
                                       </div>
                                     </li>
@@ -561,6 +581,11 @@ const PositionDetailsModal: React.FC<PositionDetailsModalProps> = ({
                                     </span>
                                   )}
                                 </div>
+                                {employee.department && (
+                                  <p className="text-xs text-gray-600 font-medium truncate">
+                                    {employee.department}
+                                  </p>
+                                )}
                                 <p className="text-xs text-gray-500 truncate">{employee.email}</p>
                                 <p className="text-xs text-gray-400 truncate">{employee.mobile}</p>
                               </div>

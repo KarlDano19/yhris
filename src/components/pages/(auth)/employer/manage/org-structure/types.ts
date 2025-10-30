@@ -7,6 +7,7 @@ export interface Employee {
   mobile: string;
   photo?: string;
   gender?: string;
+  department?: string | null;
 }
 
 // Types for job posting hiring information
@@ -57,6 +58,7 @@ export interface OrgNodeProps {
   setSelectedPositions?: (positions: Set<number | string>) => void;
   usePlaceholderAvatars?: boolean;
   excludeAvatars?: boolean;
+  departmentFilter?: string;
 }
 
 // Props for position details modal/tooltip
@@ -65,6 +67,7 @@ export interface PositionDetailsModalProps {
   primaryEmployee?: Employee;
   isVisible: boolean;
   onClose: () => void;
+  departmentFilter?: string; // Optional department filter to apply to employee list
 }
 
 // Props for position action modal

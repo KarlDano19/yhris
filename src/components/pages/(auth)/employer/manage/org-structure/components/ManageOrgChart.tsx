@@ -49,6 +49,7 @@ interface ManageOrgChartProps {
   setSelectedPositions?: (positions: Set<number | string>) => void;
   usePlaceholderAvatars?: boolean;
   excludeAvatars?: boolean;
+  departmentFilter?: string;
 }
 
 // Main Manage Org Chart Component
@@ -74,7 +75,8 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   selectedPositions = new Set(),
   setSelectedPositions,
   usePlaceholderAvatars = false,
-  excludeAvatars = false
+  excludeAvatars = false,
+  departmentFilter
 }) => {
   
   // Drag state
@@ -148,6 +150,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               setSelectedPositions={setSelectedPositions}
               usePlaceholderAvatars={usePlaceholderAvatars}
               excludeAvatars={excludeAvatars}
+              departmentFilter={departmentFilter}
             />
           </div>
         }
@@ -259,6 +262,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         setSelectedPositions={setSelectedPositions}
         usePlaceholderAvatars={usePlaceholderAvatars}
         excludeAvatars={excludeAvatars}
+        departmentFilter={departmentFilter}
       />, 
       document.body
     );
@@ -330,7 +334,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
                 {orgData.children && orgData.children.map(renderTree)}
               </Tree>
             </div>
-          ) : (
+            ) : (
             <Tree
               lineWidth="2px"
               lineColor="#3b82f6"
@@ -350,6 +354,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
                     setSelectedPositions={setSelectedPositions}
                     usePlaceholderAvatars={usePlaceholderAvatars}
                     excludeAvatars={excludeAvatars}
+                    departmentFilter={departmentFilter}
                   />
                 </div>
               }
