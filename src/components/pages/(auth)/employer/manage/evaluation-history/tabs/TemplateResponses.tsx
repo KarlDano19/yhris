@@ -54,7 +54,6 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
 
   useEffect(() => {
     if (dataTemplateResponses) {
-      console.log('TemplateResponses data:', dataTemplateResponses);
       
       // New analytics endpoint returns pre-aggregated data with pagination
       if (dataTemplateResponses.records) {
