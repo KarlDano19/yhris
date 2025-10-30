@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,7 +10,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+
 import ColorPaletteModal from '@/components/pages/(auth)/employer/analytics/modals/ColorPaletteModal';
+
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(

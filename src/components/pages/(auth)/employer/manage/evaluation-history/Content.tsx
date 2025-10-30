@@ -1,11 +1,12 @@
 'use client';
+
 import React, { useState } from 'react';
 
 import Link from 'next/link';
 
+import classNames from '@/helpers/classNames';
 import IndividualEvaluations from './tabs/IndividualEvaluations';
 import TemplateResponses from './tabs/TemplateResponses';
-import classNames from '@/helpers/classNames';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 

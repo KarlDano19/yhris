@@ -20,17 +20,16 @@ async function getTemplateResponses(params: TemplateResponsesParams) {
       },
     };
 
-    // Build query string
+    // Build query string for new analytics endpoint
     const queryParams = new URLSearchParams();
     if (params.from) queryParams.append('from', params.from);
     if (params.to) queryParams.append('to', params.to);
     if (params.search) queryParams.append('search', params.search);
     if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
     if (params.currentPage) queryParams.append('currentPage', params.currentPage.toString());
-    queryParams.append('search_type', 'analytics'); // This will get templates with responses
-    queryParams.append('view_type', 'select'); // Get all records without pagination for grouping
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-histories/?${queryParams.toString()}`;
+    // Use new dedicated analytics endpoint for better performance
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/analytics/?${queryParams.toString()}`;
     const res = await fetch(url, config);
     
     if (!res.ok) {
@@ -47,8 +46,9 @@ async function getTemplateResponses(params: TemplateResponsesParams) {
 }
 
 function useGetTemplateResponses(params: TemplateResponsesParams) {
+  // Include all params in cache key for proper caching with pagination
   const query = useQuery(
-    ['templateResponsesCache', params],
+    ['templateResponsesCache', params.from, params.to, params.search, params.pageSize, params.currentPage],
     () => getTemplateResponses(params),
     {
       refetchOnWindowFocus: false,

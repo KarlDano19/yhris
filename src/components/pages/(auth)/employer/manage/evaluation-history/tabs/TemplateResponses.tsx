@@ -1,9 +1,7 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
 
-import toast from 'react-hot-toast';
-
-import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -12,7 +10,7 @@ import useGetTemplateResponses from '../hooks/useGetTemplateResponses';
 import useGetEvaluationResponseHistoryDetails from '../hooks/useGetEvaluationResponseHistoryDetails';
 import EvaluationResponseDetailsModal from '../modals/EvaluationResponseDetailsModal';
 
-import { MagnifyingGlassIcon, ChartBarIcon, UsersIcon } from '@heroicons/react/24/solid';
+import { UsersIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -26,14 +24,7 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
-    search: '',
   });
-  const [appliedFilter, setAppliedFilter] = useState<any>({
-    from: '',
-    to: '',
-    search: '',
-  });
-  const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -43,14 +34,15 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     totalPages: 1,
     totalRecords: 0,
   });
-  const [isSearching, setIsSearching] = useState(false);
 
   const {
     data: dataTemplateResponses,
     isLoading: isLoadingTemplateResponses,
     refetch: refetchTemplateResponses,
   } = useGetTemplateResponses({
-    ...appliedFilter,
+    from: itemsFilter.from ? itemsFilter.from.toLocaleDateString('en-CA') : '',
+    to: itemsFilter.to ? itemsFilter.to.toLocaleDateString('en-CA') : '',
+    search: '',
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -63,37 +55,25 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
   useEffect(() => {
     if (dataTemplateResponses) {
       console.log('TemplateResponses data:', dataTemplateResponses);
-      let items = [];
-      let totalPages = 1;
-      let totalRecords = 0;
-
-      // Handle paginated response structure
+      
+      // New analytics endpoint returns pre-aggregated data with pagination
       if (dataTemplateResponses.records) {
-        items = dataTemplateResponses.records.map((item: any) => {
-          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
-          return item;
-        });
-        totalPages = dataTemplateResponses.total_pages || 1;
-        totalRecords = dataTemplateResponses.total_records || items.length;
-      } 
-      // Handle array response structure (no pagination from backend)
-      else if (Array.isArray(dataTemplateResponses)) {
-        items = dataTemplateResponses.map((item: any) => {
-          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
-          return item;
-        });
+        // Backend already aggregated by template, no need for client-side grouping
+        const items = dataTemplateResponses.records;
         
-        // Calculate pagination locally if backend doesn't support it
-        totalRecords = items.length;
-        totalPages = Math.ceil(totalRecords / pageSize);
+        setTemplateResponses(items);
+        setPagination({
+          totalPages: dataTemplateResponses.total_pages || 1,
+          totalRecords: dataTemplateResponses.total_records || items.length
+        });
+      } else {
+        // Handle empty or unexpected response
+        setTemplateResponses([]);
+        setPagination({
+          totalPages: 1,
+          totalRecords: 0
+        });
       }
-
-      console.log('Processed items:', items);
-      setTemplateResponses(items);
-      setPagination({
-        totalPages,
-        totalRecords
-      });
     }
   }, [dataTemplateResponses, pageSize]);
 
@@ -107,52 +87,13 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     setPageSize(value);
   };
 
-  const handleSearch = () => {
-    const dateFrom = Date.parse(itemsFilter.from);
-    const dateTo = Date.parse(itemsFilter.to);
-    if (dateFrom && !dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
-    }
-    if (!dateFrom && dateTo) {
-      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
-    }
-    if (dateFrom && dateTo && dateFrom > dateTo) {
-      return toast.custom(
-        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
-        { duration: 5000 }
-      );
-    }
-    setIsSearching(true);
-    setAppliedFilter({
-      ...itemsFilter,
-      search: searchText
-    });
-  };
-
-  // Load data on component mount without requiring search
-  useEffect(() => {
-    if (!appliedFilter.from && !appliedFilter.to && !appliedFilter.search) {
-      setAppliedFilter({
-        from: '',
-        to: '',
-        search: ''
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isLoadingTemplateResponses && isSearching) {
-      setIsSearching(false);
-    }
-  }, [isLoadingTemplateResponses, isSearching]);
-
   const handleViewResponses = (item: any) => {
     setSelectedTemplate(item);
     setIsTemplateDetailsModalOpen({ id: item.evaluation_template_id, open: true });
   };
 
   const renderRows = () => {
-    if (isSearching || isLoadingTemplateResponses) {
+    if (isLoadingTemplateResponses) {
       return (
         <tr>
           <td colSpan={100}>
@@ -164,39 +105,8 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
       );
     }
     if (templateResponses && templateResponses.length > 0) {
-      console.log('TemplateResponses items:', templateResponses);
-      // Group responses by evaluation template
-      const groupedByTemplate = templateResponses.reduce((acc: any, item: any) => {
-        console.log('Processing item:', item);
-        const key = `${item.evaluation_template_id}-${item.evaluation_form}`;
-        if (!acc[key]) {
-          acc[key] = {
-            evaluation_template_id: item.evaluation_template_id,
-            evaluation_form: item.evaluation_form,
-            evaluation_period: item.evaluation_period,
-            total_responses: 0,
-            employees: [],
-            average_score: 0,
-            average_total_score: 0,
-            last_evaluation_date: item.date_of_evaluation
-          };
-        }
-        acc[key].total_responses += 1;
-        acc[key].employees.push(item.employee_name);
-        acc[key].average_score += item.form_total_score;
-        acc[key].average_total_score += item.max_total_score;
-        return acc;
-      }, {});
-
-      console.log('Grouped by template:', groupedByTemplate);
-      const templateGroups = Object.values(groupedByTemplate).map((group: any) => ({
-        ...group,
-        average_score: (group.average_score / group.total_responses).toFixed(2),
-        average_total_score: (group.average_total_score / group.total_responses).toFixed(2)
-      }));
-      console.log('Template groups:', templateGroups);
-
-      return templateGroups.map((template: any, index: number) => (
+      // Backend already handles pagination, just render the pre-aggregated data
+      return templateResponses.map((template: any, index: number) => (
         <tr key={index} className='hover:bg-gray-50'>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>{template.evaluation_form}</td>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>{template.evaluation_period}</td>
@@ -284,29 +194,6 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
                 }}
                 minDate={itemsFilter.from}
               />
-            </div>
-          </div>
-          <div className='flex gap-2 lg:w-1/3'>
-            <div className='flex flex-row w-full items-center gap-2'>
-              <input
-                type='text'
-                name='search'
-                id='search'
-                className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                onChange={(e) => setSearchText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSearch();
-                  }
-                }}
-                placeholder='Search evaluation form...'
-              />
-              <button
-                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                onClick={handleSearch}
-              >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
             </div>
           </div>
         </div>

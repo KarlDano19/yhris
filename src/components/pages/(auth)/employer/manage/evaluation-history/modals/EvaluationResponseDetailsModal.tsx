@@ -1,11 +1,14 @@
-import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState, useEffect, useMemo } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
-import { XCircleIcon, ChartBarIcon, UsersIcon, ClipboardDocumentListIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import FilterIcon from '@/svg/FilterIcon';
+import Pagination from '@/components/Pagination';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import FrequentlyEvaluatedPieChart from './charts-and-graphs/FrequentlyEvaluatedPieChart';
 import QuestionResponseBarChart from './charts-and-graphs/QuestionResponseBarChart';
+import RecipientsListModal from './RecipientsListModal';
 import {
   getUniqueDepartments as getUniqueDepts,
   filterEmployeesByDateAndDepartment,
@@ -13,6 +16,13 @@ import {
   filterIndividualResponses,
   getEmployeeScoresForCriterion
 } from '../helpers/evaluationHelpers';
+
+import { XCircleIcon } from '@heroicons/react/24/solid';
+import { ChartBarIcon } from '@heroicons/react/24/solid';
+import { UsersIcon } from '@heroicons/react/24/solid';
+import { ClipboardDocumentListIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -35,79 +45,6 @@ interface EvaluationResponseDetailsModalProps {
   isLoadingTemplateDetails: boolean;
 }
 
-// Filter component matching Screen Applicants design
-const Filter = ({ 
-  onFilterChange, 
-  departments 
-}: { 
-  onFilterChange: (filters: any) => void;
-  departments: string[];
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>(departments);
-  const filterRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => 
-      filterRef.current?.contains(e.target as Node) || setIsOpen(false);
-    
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  const toggleFilter = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleDepartmentChange = (department: string) => {
-    let newDepartments;
-    if (selectedDepartments.includes(department)) {
-      // Don't allow unchecking if this is the only option selected
-      if (selectedDepartments.length === 1) {
-        return;
-      }
-      newDepartments = selectedDepartments.filter((d) => d !== department);
-    } else {
-      newDepartments = [...selectedDepartments, department];
-    }
-    
-    setSelectedDepartments(newDepartments);
-    onFilterChange({ departments: newDepartments });
-  };
-
-  return (
-    <div className="relative" ref={filterRef}>
-      <button
-        onClick={toggleFilter}
-        className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 p-2 flex items-center justify-center h-12 w-12 transition-colors"
-      >
-        <FilterIcon/>
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full mt-2 right-0 bg-white shadow-md rounded-md p-3 z-30 w-64 border border-gray-300">
-          <div className="mb-4">
-            <h3 className="font-semibold text-indigo-dye mb-2">Department</h3>
-            <div className="flex flex-col gap-0.5">
-              {departments.map((dept) => (
-                <label key={dept} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="rounded text-blue-500 focus:ring-blue-500"
-                    checked={selectedDepartments.includes(dept)}
-                    onChange={() => handleDepartmentChange(dept)}
-                  />
-                  <span className="text-sm text-gray-800">{dept}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const EvaluationResponseDetailsModal = ({
   isOpen,
   setIsOpen,
@@ -124,13 +61,110 @@ const EvaluationResponseDetailsModal = ({
   });
   const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  
+  // Pagination state for Respondents tab
+  const [respondentsPageSize, setRespondentsPageSize] = useState(5);
+  const [respondentsCurrentPage, setRespondentsCurrentPage] = useState(1);
+  const [respondentsPagination, setRespondentsPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
+  // Pagination state for Questions tab
+  const [questionsPageSize, setQuestionsPageSize] = useState(5);
+  const [questionsCurrentPage, setQuestionsCurrentPage] = useState(1);
+  const [questionsPagination, setQuestionsPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
+  // Pagination state for Analytics tab (Employee Evaluation Details)
+  const [analyticsPageSize, setAnalyticsPageSize] = useState(5);
+  const [analyticsCurrentPage, setAnalyticsCurrentPage] = useState(1);
+  const [analyticsPagination, setAnalyticsPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
+  // Recipients modal state
+  const [isRecipientsModalOpen, setIsRecipientsModalOpen] = useState(false);
+  const [selectedRecipients, setSelectedRecipients] = useState<{
+    recipients: string;
+    employeeName: string;
+    department: string;
+  } | null>(null);
 
   const customCloseModal = () => {
     setDateFilter({ from: '', to: '' });
     setDepartmentFilter([]);
     setActiveTab('respondents');
     setExpandedQuestions(new Set());
+    setRespondentsCurrentPage(1);
+    setRespondentsPageSize(5);
+    setQuestionsCurrentPage(1);
+    setQuestionsPageSize(5);
+    setAnalyticsCurrentPage(1);
+    setAnalyticsPageSize(5);
+    setIsRecipientsModalOpen(false);
+    setSelectedRecipients(null);
     setIsOpen(null);
+  };
+
+  // Pagination handlers for Respondents tab
+  const handleRespondentsPaginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setRespondentsCurrentPage(newCurrentPage);
+  };
+
+  const handleRespondentsPageSizeChange = (value: number) => {
+    setRespondentsCurrentPage(1);
+    setRespondentsPageSize(value);
+  };
+
+  // Pagination handlers for Questions tab
+  const handleQuestionsPaginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setQuestionsCurrentPage(newCurrentPage);
+  };
+
+  const handleQuestionsPageSizeChange = (value: number) => {
+    setQuestionsCurrentPage(1);
+    setQuestionsPageSize(value);
+  };
+
+  // Pagination handlers for Analytics tab
+  const handleAnalyticsPaginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setAnalyticsCurrentPage(newCurrentPage);
+  };
+
+  const handleAnalyticsPageSizeChange = (value: number) => {
+    setAnalyticsCurrentPage(1);
+    setAnalyticsPageSize(value);
+  };
+
+  // Recipients modal handlers
+  const handleRecipientsClick = (recipients: string, employeeName: string, department: string) => {
+    setSelectedRecipients({
+      recipients,
+      employeeName,
+      department
+    });
+    setIsRecipientsModalOpen(true);
+  };
+
+  const handleCloseRecipientsModal = () => {
+    setIsRecipientsModalOpen(false);
+    setSelectedRecipients(null);
   };
 
   const toggleQuestion = (questionId: string) => {
@@ -150,9 +184,23 @@ const EvaluationResponseDetailsModal = ({
     return getUniqueDepts(templateResponseDetails?.employees_responded || []);
   };
 
+  // Prepare filter groups for the Filter component
+  const filterGroups: FilterGroup[] = useMemo(() => {
+    const departments = getUniqueDepartments();
+    return [
+      {
+        id: 'departments',
+        title: 'Department',
+        options: departments.map(dept => ({ label: dept, value: dept })),
+        multiSelect: true,
+        allowEmpty: false
+      }
+    ];
+  }, [templateResponseDetails]);
+
   // Handle department filter changes from the Filter component
-  const handleDepartmentFilterChange = (filters: any) => {
-    setDepartmentFilter(filters.departments);
+  const handleDepartmentFilterChange = (filters: FilterValues) => {
+    setDepartmentFilter(filters.departments || []);
   };
 
   // Filter employees based on date range and department
@@ -163,7 +211,20 @@ const EvaluationResponseDetailsModal = ({
       departmentFilter
     );
     setFilteredEmployees(filtered);
-  }, [templateResponseDetails, dateFilter, departmentFilter]);
+    
+    // Update pagination for Respondents tab
+    const totalRecords = filtered.length;
+    const totalPages = Math.ceil(totalRecords / respondentsPageSize);
+    setRespondentsPagination({
+      totalRecords,
+      totalPages
+    });
+    
+    // Reset to page 1 if current page exceeds total pages
+    if (respondentsCurrentPage > totalPages && totalPages > 0) {
+      setRespondentsCurrentPage(1);
+    }
+  }, [templateResponseDetails, dateFilter, departmentFilter, respondentsPageSize, respondentsCurrentPage]);
 
   // Initialize department filter with all departments when template response details change
   useEffect(() => {
@@ -173,12 +234,51 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [templateResponseDetails]);
 
+  // Update pagination for Questions tab when data changes
+  useEffect(() => {
+    const allQuestions = prepareQuestionResponseData();
+    const totalRecords = allQuestions.length;
+    const totalPages = Math.ceil(totalRecords / questionsPageSize);
+    setQuestionsPagination({
+      totalRecords,
+      totalPages
+    });
+    
+    // Reset to page 1 if current page exceeds total pages
+    if (questionsCurrentPage > totalPages && totalPages > 0) {
+      setQuestionsCurrentPage(1);
+    }
+  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize, questionsCurrentPage]);
+
+  // Update pagination for Analytics tab when data changes
+  useEffect(() => {
+    const allEmployees = getFilteredFrequentlyEvaluatedEmployees();
+    const totalRecords = allEmployees.length;
+    const totalPages = Math.ceil(totalRecords / analyticsPageSize);
+    setAnalyticsPagination({
+      totalRecords,
+      totalPages
+    });
+    
+    // Reset to page 1 if current page exceeds total pages
+    if (analyticsCurrentPage > totalPages && totalPages > 0) {
+      setAnalyticsCurrentPage(1);
+    }
+  }, [templateResponseDetails, departmentFilter, analyticsPageSize, analyticsCurrentPage]);
+
   // Helper to get filtered frequently evaluated employees
   const getFilteredFrequentlyEvaluatedEmployees = () => {
     return filterFrequentlyEvaluatedEmployees(
       templateResponseDetails?.frequently_evaluated_employees || [],
       departmentFilter
     );
+  };
+
+  // Helper to get paginated employees for Respondents tab
+  const getPaginatedRespondents = () => {
+    const startIndex = (respondentsCurrentPage - 1) * respondentsPageSize;
+    const endIndex = startIndex + respondentsPageSize;
+    return filteredEmployees.slice(startIndex, endIndex);
   };
 
   // Helper to get filtered individual responses based on department and date
@@ -218,6 +318,22 @@ const EvaluationResponseDetailsModal = ({
     return allCriteria;
   };
 
+  // Helper to get paginated questions for Questions tab
+  const getPaginatedQuestions = () => {
+    const allQuestions = prepareQuestionResponseData();
+    const startIndex = (questionsCurrentPage - 1) * questionsPageSize;
+    const endIndex = startIndex + questionsPageSize;
+    return allQuestions.slice(startIndex, endIndex);
+  };
+
+  // Helper to get paginated analytics data
+  const getPaginatedAnalytics = () => {
+    const allEmployees = getFilteredFrequentlyEvaluatedEmployees();
+    const startIndex = (analyticsCurrentPage - 1) * analyticsPageSize;
+    const endIndex = startIndex + analyticsPageSize;
+    return allEmployees.slice(startIndex, endIndex);
+  };
+
   // Helper function to calculate employee scores for each criterion
   const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionIndex: number) => {
     const filteredResponses = getFilteredIndividualResponses();
@@ -232,6 +348,7 @@ const EvaluationResponseDetailsModal = ({
   if (!isOpen) return null;
 
   return (
+    <>
     <Transition.Root show={isOpen.open} as={Fragment}>
       <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={customCloseModal}>
         <Transition.Child
@@ -294,13 +411,12 @@ const EvaluationResponseDetailsModal = ({
                       <div className='bg-white'>
                         
                         <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4'>
-                            <div className='flex flex-col md:flex-row items-start md:items-center gap-4'>
-                              <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
-                                <label className='text-sm font-medium text-gray-700'>From:</label>
+                            <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
+                              <div className='relative'>
                                 <CustomDatePicker
                                   id='modal-from-datepicker'
                                   placeholder='mm/dd/yyyy'
-                                  className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                  className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                   selected={dateFilter.from}
                                   pickerOnChange={(date: any) => {
                                     setDateFilter({ ...dateFilter, from: date });
@@ -313,12 +429,12 @@ const EvaluationResponseDetailsModal = ({
                                   }}
                                 />
                               </div>
-                              <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
-                                <label className='text-sm font-medium text-gray-700'>To:</label>
+                              <p>to</p>
+                              <div className='relative'>
                                 <CustomDatePicker
                                   id='modal-to-datepicker'
                                   placeholder='mm/dd/yyyy'
-                                  className='appearance-none block w-full md:w-40 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                                  className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                                   selected={dateFilter.to}
                                   pickerOnChange={(date: any) => {
                                     setDateFilter({ ...dateFilter, to: date });
@@ -338,8 +454,11 @@ const EvaluationResponseDetailsModal = ({
                               Showing {filteredEmployees.length} of {templateResponseDetails.employees_responded?.length || 0} responses
                             </div>
                             <Filter 
+                              filterGroups={filterGroups}
+                              defaultValues={{ departments: departmentFilter }}
                               onFilterChange={handleDepartmentFilterChange}
-                              departments={getUniqueDepartments()}
+                              showButtonText={true}
+                              size="small"
                             />
                             </div>
                           </div>
@@ -389,7 +508,14 @@ const EvaluationResponseDetailsModal = ({
                         <div className='space-y-4'>
                           <h4 className='text-lg font-semibold text-gray-900'>List of Respondents</h4>
                           <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
-                            <div className='overflow-x-auto'>
+                            <div 
+                              className='overflow-x-auto overflow-y-auto'
+                              style={{
+                                maxHeight: '500px',
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: '#2d3e58 #f1f1f1'
+                              }}
+                            >
                               <table className='min-w-full divide-y divide-gray-200'>
                                 <thead className='bg-gray-50'>
                                   <tr>
@@ -414,37 +540,49 @@ const EvaluationResponseDetailsModal = ({
                                   </tr>
                                 </thead>
                                 <tbody className='bg-white divide-y divide-gray-200'>
-                                  {filteredEmployees?.map((employee: any, index: number) => (
-                                    <tr key={index} className='hover:bg-gray-50'>
-                                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                                        {employee.recipients || 'N/A'}
-                                      </td>
-                                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                        {employee.department}
-                                      </td>
-                                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                        {employee.name}
-                                      </td>
-                                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                        {employee.date_completed ? 
-                                          new Intl.DateTimeFormat('en-US').format(new Date(employee.date_completed)) : 
-                                          'N/A'
-                                        }
-                                      </td>
-                                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                        {employee.score || 0}
-                                      </td>
-                                      <td className='px-6 py-4 whitespace-nowrap'>
-                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                          employee.score >= (templateResponseDetails.template?.passing_score || 0)
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-800'
-                                        }`}>
-                                          {employee.score >= (templateResponseDetails.template?.passing_score || 0) ? 'Passed' : 'Failed'}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  )) || (
+                                  {getPaginatedRespondents().length > 0 ? (
+                                    getPaginatedRespondents().map((employee: any, index: number) => (
+                                      <tr key={index} className='hover:bg-gray-50'>
+                                        <td className='px-6 py-4 text-sm font-medium text-gray-900 max-w-xs'>
+                                          <div 
+                                            className='truncate cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium' 
+                                            title='Click to view full list of evaluators'
+                                            onClick={() => handleRecipientsClick(
+                                              employee.recipients || 'N/A',
+                                              employee.name,
+                                              employee.department
+                                            )}
+                                          >
+                                            {employee.recipients || 'N/A'}
+                                          </div>
+                                        </td>
+                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                          {employee.department}
+                                        </td>
+                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                          {employee.name}
+                                        </td>
+                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                          {employee.date_completed ? 
+                                            new Intl.DateTimeFormat('en-US').format(new Date(employee.date_completed)) : 
+                                            'N/A'
+                                          }
+                                        </td>
+                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                          {employee.score || 0}
+                                        </td>
+                                        <td className='px-6 py-4 whitespace-nowrap'>
+                                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                            employee.score >= (templateResponseDetails.template?.passing_score || 0)
+                                              ? 'bg-green-100 text-green-800'
+                                              : 'bg-red-100 text-red-800'
+                                          }`}>
+                                            {employee.score >= (templateResponseDetails.template?.passing_score || 0) ? 'Passed' : 'Failed'}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
                                     <tr>
                                       <td colSpan={6} className='px-6 py-4 text-center text-sm text-gray-500'>
                                         No respondents found
@@ -455,6 +593,13 @@ const EvaluationResponseDetailsModal = ({
                               </table>
                             </div>
                           </div>
+                          <Pagination
+                            pagination={respondentsPagination}
+                            currentPage={respondentsCurrentPage}
+                            pageSize={respondentsPageSize}
+                            onPageSizeChange={handleRespondentsPageSizeChange}
+                            onPageChange={handleRespondentsPaginationChange}
+                          />
                         </div>
                       )}
 
@@ -480,52 +625,71 @@ const EvaluationResponseDetailsModal = ({
                               </button>
                             )}
                           </div>
-                          {prepareQuestionResponseData().length > 0 ? (
-                            prepareQuestionResponseData().map((criterion: any, index: number) => {
-                              const questionId = `${criterion.sectionId}-${criterion.criterionIndex}`;
-                              const isExpanded = expandedQuestions.has(questionId);
-                              
-                              return (
-                                <div key={questionId} className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
-                                  <button
-                                    onClick={() => toggleQuestion(questionId)}
-                                    className='w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
-                                  >
-                                    <div className='flex-1'>
-                                      <h5 className='text-sm font-medium text-gray-900 flex items-center gap-2'>
-                                        {isExpanded ? (
-                                          <ChevronDownIcon className='w-4 h-4 text-gray-500' />
-                                        ) : (
-                                          <ChevronRightIcon className='w-4 h-4 text-gray-500' />
+                          {getPaginatedQuestions().length > 0 ? (
+                            <>
+                              <div 
+                                className='overflow-y-auto space-y-4'
+                                style={{
+                                  maxHeight: '500px',
+                                  scrollbarWidth: 'thin',
+                                  scrollbarColor: '#2d3e58 #f1f1f1'
+                                }}
+                              >
+                              {getPaginatedQuestions().map((criterion: any, index: number) => {
+                                const questionId = `${criterion.sectionId}-${criterion.criterionIndex}`;
+                                const isExpanded = expandedQuestions.has(questionId);
+                                const globalIndex = (questionsCurrentPage - 1) * questionsPageSize + index;
+                                
+                                return (
+                                  <div key={questionId} className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
+                                    <button
+                                      onClick={() => toggleQuestion(questionId)}
+                                      className='w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
+                                    >
+                                      <div className='flex-1'>
+                                        <h5 className='text-sm font-medium text-gray-900 flex items-center gap-2'>
+                                          {isExpanded ? (
+                                            <ChevronDownIcon className='w-4 h-4 text-gray-500' />
+                                          ) : (
+                                            <ChevronRightIcon className='w-4 h-4 text-gray-500' />
+                                          )}
+                                          {globalIndex + 1}. {criterion.title}
+                                        </h5>
+                                        {criterion.max_score && (
+                                          <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {criterion.max_score}</p>
                                         )}
-                                        {index + 1}. {criterion.title}
-                                      </h5>
-                                      {criterion.max_score && (
-                                        <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {criterion.max_score}</p>
-                                      )}
-                                    </div>
-                                  </button>
-                                  
-                                  {isExpanded && (
-                                    <div className='px-4 pb-4 pt-2 border-t border-gray-100'>
-                                      {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
-                                        <QuestionResponseBarChart 
-                                          employeeScores={criterion.employeeScores}
-                                          questionText={criterion.title}
-                                          maxScore={criterion.max_score}
-                                        />
-                                      ) : (
-                                        <div className='text-center py-6'>
-                                          <p className='text-sm text-gray-500 italic'>
-                                            No scored responses available for this question
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })
+                                      </div>
+                                    </button>
+                                    
+                                    {isExpanded && (
+                                      <div className='px-4 pb-4 pt-2 border-t border-gray-100'>
+                                        {criterion.employeeScores && criterion.employeeScores.length > 0 ? (
+                                          <QuestionResponseBarChart 
+                                            employeeScores={criterion.employeeScores}
+                                            questionText={criterion.title}
+                                            maxScore={criterion.max_score}
+                                          />
+                                        ) : (
+                                          <div className='text-center py-6'>
+                                            <p className='text-sm text-gray-500 italic'>
+                                              No scored responses available for this question
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              </div>
+                              <Pagination
+                                pagination={questionsPagination}
+                                currentPage={questionsCurrentPage}
+                                pageSize={questionsPageSize}
+                                onPageSizeChange={handleQuestionsPageSizeChange}
+                                onPageChange={handleQuestionsPaginationChange}
+                              />
+                            </>
                           ) : (
                             <div className='text-center py-8'>
                               <p className='text-sm text-gray-500 italic'>
@@ -557,7 +721,14 @@ const EvaluationResponseDetailsModal = ({
                                 <h5 className='text-lg font-medium text-gray-900'>Employee Evaluation Details</h5>
                                 <p className='text-sm text-gray-600 mt-1'>Detailed breakdown of employee evaluation frequency and performance</p>
                               </div>
-                              <div className='overflow-x-auto'>
+                              <div 
+                                className='overflow-x-auto overflow-y-auto'
+                                style={{
+                                  maxHeight: '500px',
+                                  scrollbarWidth: 'thin',
+                                  scrollbarColor: '#2d3e58 #f1f1f1'
+                                }}
+                              >
                                 <table className='min-w-full divide-y divide-gray-200'>
                                   <thead className='bg-gray-50'>
                                     <tr>
@@ -576,37 +747,52 @@ const EvaluationResponseDetailsModal = ({
                                     </tr>
                                   </thead>
                                   <tbody className='bg-white divide-y divide-gray-200'>
-                                    {getFilteredFrequentlyEvaluatedEmployees().map((employee: any, index: number) => (
-                                      <tr key={index} className='hover:bg-gray-50'>
-                                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                                          {employee.name}
-                                        </td>
-                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                          {employee.department}
-                                        </td>
-                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                          <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
-                                            {employee.evaluation_count} evaluation{employee.evaluation_count !== 1 ? 's' : ''}
-                                          </span>
-                                        </td>
-                                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                                          <div className='flex flex-col'>
-                                            <span className={`font-medium ${
-                                              employee.average_score >= 80 ? 'text-green-600' :
-                                              employee.average_score >= 60 ? 'text-yellow-600' : 'text-red-600'
-                                            }`}>
-                                              {employee.average_score}%
+                                    {getPaginatedAnalytics().length > 0 ? (
+                                      getPaginatedAnalytics().map((employee: any, index: number) => (
+                                        <tr key={index} className='hover:bg-gray-50'>
+                                          <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
+                                            {employee.name}
+                                          </td>
+                                          <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                            {employee.department}
+                                          </td>
+                                          <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                            <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
+                                              {employee.evaluation_count} evaluation{employee.evaluation_count !== 1 ? 's' : ''}
                                             </span>
-                                            <span className='text-xs text-gray-400'>
-                                              Avg: {employee.average_raw_score || 0} / {templateResponseDetails.template?.total_score || 1}
-                                            </span>
-                                          </div>
+                                          </td>
+                                          <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                                            <div className='flex flex-col'>
+                                              <span className={`font-medium ${
+                                                employee.average_score >= 80 ? 'text-green-600' :
+                                                employee.average_score >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                              }`}>
+                                                {employee.average_score}%
+                                              </span>
+                                              <span className='text-xs text-gray-400'>
+                                                Avg: {employee.average_raw_score || 0} / {templateResponseDetails.template?.total_score || 1}
+                                              </span>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      <tr>
+                                        <td colSpan={4} className='px-6 py-4 text-center text-sm text-gray-500'>
+                                          No employee evaluation data found
                                         </td>
                                       </tr>
-                                    ))}
+                                    )}
                                   </tbody>
                                 </table>
                               </div>
+                              <Pagination
+                                pagination={analyticsPagination}
+                                currentPage={analyticsCurrentPage}
+                                pageSize={analyticsPageSize}
+                                onPageSizeChange={handleAnalyticsPageSizeChange}
+                                onPageChange={handleAnalyticsPaginationChange}
+                              />
                             </div>
                           )}
                         </div>
@@ -617,9 +803,22 @@ const EvaluationResponseDetailsModal = ({
               </Dialog.Panel>
             </Transition.Child>
           </div>
+          {/* Recipients List Modal */}
+      {selectedRecipients && (
+      <RecipientsListModal
+        isOpen={isRecipientsModalOpen}
+        onClose={handleCloseRecipientsModal}
+        recipients={selectedRecipients.recipients}
+        employeeName={selectedRecipients.employeeName}
+        department={selectedRecipients.department}
+      />
+    )}
         </div>
       </Dialog>
     </Transition.Root>
+
+    
+    </>
   );
 };
 
