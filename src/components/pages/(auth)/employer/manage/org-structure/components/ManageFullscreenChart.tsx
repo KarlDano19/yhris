@@ -41,6 +41,8 @@ interface ManageFullscreenChartProps {
   isSelectionMode?: boolean;
   selectedPositions?: Set<number | string>;
   setSelectedPositions?: (positions: Set<number | string>) => void;
+  usePlaceholderAvatars?: boolean;
+  excludeAvatars?: boolean;
 }
 
 const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
@@ -73,7 +75,9 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   onExport,
   isSelectionMode = false,
   selectedPositions = new Set(),
-  setSelectedPositions
+  setSelectedPositions,
+  usePlaceholderAvatars = false,
+  excludeAvatars = false
 }) => {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -139,25 +143,53 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
             </div>
           </div>
           
-          <Tree
-            lineWidth="2px"
-            lineColor="#3b82f6"
-            lineBorderRadius="10px"
-            label={
-              <div className="flex justify-center w-full">
-                <ManageOrgNode 
-                  data={orgData} 
-                  clickedNodeId={clickedNodeId}
-                  setClickedNodeId={setClickedNodeId}
-                  expandedPositions={expandedPositions}
-                  setExpandedPositions={setExpandedPositions}
-                  onSetPrimaryEmployee={onSetPrimaryEmployee}
-                />
-              </div>
-            }
-          >
-            {orgData.children && orgData.children.map(renderTree)}
-          </Tree>
+          {excludeAvatars ? (
+            <div className="pt-20">
+              <Tree
+                lineWidth="2px"
+                lineColor="#3b82f6"
+                lineBorderRadius="10px"
+                label={
+                  <div className="flex justify-center w-full">
+                    <ManageOrgNode 
+                      data={orgData} 
+                      clickedNodeId={clickedNodeId}
+                      setClickedNodeId={setClickedNodeId}
+                      expandedPositions={expandedPositions}
+                      setExpandedPositions={setExpandedPositions}
+                      onSetPrimaryEmployee={onSetPrimaryEmployee}
+                      usePlaceholderAvatars={usePlaceholderAvatars}
+                      excludeAvatars={excludeAvatars}
+                    />
+                  </div>
+                }
+              >
+                {orgData.children && orgData.children.map(renderTree)}
+              </Tree>
+            </div>
+          ) : (
+            <Tree
+              lineWidth="2px"
+              lineColor="#3b82f6"
+              lineBorderRadius="10px"
+              label={
+                <div className="flex justify-center w-full">
+                  <ManageOrgNode 
+                    data={orgData} 
+                    clickedNodeId={clickedNodeId}
+                    setClickedNodeId={setClickedNodeId}
+                    expandedPositions={expandedPositions}
+                    setExpandedPositions={setExpandedPositions}
+                    onSetPrimaryEmployee={onSetPrimaryEmployee}
+                    usePlaceholderAvatars={usePlaceholderAvatars}
+                    excludeAvatars={excludeAvatars}
+                  />
+                </div>
+              }
+            >
+              {orgData.children && orgData.children.map(renderTree)}
+            </Tree>
+          )}
         </div>
       </div>
 

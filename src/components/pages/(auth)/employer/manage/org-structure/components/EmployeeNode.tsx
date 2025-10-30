@@ -3,6 +3,7 @@ import React from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 import { Employee } from '../types';
 
@@ -12,6 +13,8 @@ interface EmployeeNodeProps {
   disableTooltips?: boolean;
   isHiring?: boolean;
   isShadow?: boolean;
+  usePlaceholderAvatars?: boolean;
+  excludeAvatars?: boolean;
 }
 
 const EmployeeNode: React.FC<EmployeeNodeProps> = ({ 
@@ -19,7 +22,9 @@ const EmployeeNode: React.FC<EmployeeNodeProps> = ({
   onClick,
   disableTooltips = false,
   isHiring = false,
-  isShadow = false
+  isShadow = false,
+  usePlaceholderAvatars = false,
+  excludeAvatars = false
 }) => {
   // Determine avatar type (male/female) - use gender field if available
   const getAvatarType = (employee?: Employee) => {
@@ -51,6 +56,7 @@ const EmployeeNode: React.FC<EmployeeNodeProps> = ({
         data-tooltip-place={!onClick && !disableTooltips ? 'bottom' : undefined}
       >
         {/* Avatar */}
+        {!excludeAvatars && (
         <div className="flex justify-center mb-2 relative">
           <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 overflow-hidden ${
             isShadow 
@@ -74,16 +80,27 @@ const EmployeeNode: React.FC<EmployeeNodeProps> = ({
             <div 
               className={`w-full h-full flex items-center justify-center ${!isShadow && employee?.photo ? 'hidden' : 'block'}`}
             >
-              <PlaceholderPicture 
-                gender={avatarType} 
-                fillColor={isShadow ? "#D1D5DB" : "#6B7280"} 
-                width={24} 
-                height={24}
-                style={{ opacity: 0.5 }}
-              />
+              {!isShadow && usePlaceholderAvatars && employee ? (
+                <PlaceholderAvatar 
+                  firstName={employee.firstname} 
+                  lastName={employee.lastname}
+                  width={48} 
+                  height={48}
+                  className="rounded-full"
+                />
+              ) : (
+                <PlaceholderPicture 
+                  gender={avatarType} 
+                  fillColor={isShadow ? "#D1D5DB" : "#6B7280"} 
+                  width={24} 
+                  height={24}
+                  style={{ opacity: 0.5 }}
+                />
+              )}
             </div>
           </div>
         </div>
+        )}
 
         {/* Employee Name or Placeholder */}
         {!isShadow && employee ? (

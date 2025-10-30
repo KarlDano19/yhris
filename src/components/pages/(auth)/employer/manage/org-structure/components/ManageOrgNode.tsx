@@ -10,6 +10,7 @@ import EmployeeNode from './EmployeeNode';
 import { Employee, OrgNodeProps } from '../types';
 
 import PlaceholderPicture from '@/svg/PlaceholderPicture';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 // Maximum number of employees to show in the chart before requiring "View All"
 const MAX_EMPLOYEES_IN_CHART = 10;
@@ -25,7 +26,9 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
   disableTooltips = false,
   isSelectionMode = false,
   selectedPositions = new Set(),
-  setSelectedPositions
+  setSelectedPositions,
+  usePlaceholderAvatars = false,
+  excludeAvatars = false
 }) => {
   const isClicked = clickedNodeId === data.id;
   const isExpanded = expandedPositions.has(data.id);
@@ -187,6 +190,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
         data-tooltip-place={!clickedNodeId && !disableTooltips ? 'bottom' : undefined}
       >
         {/* Avatar */}
+        {!excludeAvatars && (
         <div className="flex justify-center mb-2 relative">
           <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center border-2 border-savoy-blue overflow-hidden">
             {primaryEmployee?.photo ? (
@@ -206,15 +210,26 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
             <div 
               className={`w-full h-full flex items-center justify-center ${primaryEmployee?.photo ? 'hidden' : 'block'}`}
             >
-              <PlaceholderPicture 
-                gender={avatarType} 
-                fillColor="#3B82F6" 
-                width={32} 
-                height={32}
-                style={{ opacity: 0.5 }}
-              />
+              {usePlaceholderAvatars && primaryEmployee ? (
+                <PlaceholderAvatar 
+                  firstName={primaryEmployee.firstname} 
+                  lastName={primaryEmployee.lastname}
+                  width={56} 
+                  height={56}
+                  className="rounded-full"
+                />
+              ) : (
+                <PlaceholderPicture 
+                  gender={avatarType} 
+                  fillColor="#3B82F6" 
+                  width={32} 
+                  height={32}
+                  style={{ opacity: 0.5 }}
+                />
+              )}
             </div>
           </div>
+          
           {/* Hiring indicator badge with count - Hidden during export */}
           {isHiring && data.hiring_info && (
             <div 
@@ -228,6 +243,7 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
             </div>
           )}
         </div>
+        )}
 
         {/* Employee Name */}
         {primaryEmployee && (
@@ -279,6 +295,8 @@ const ManageOrgNode: React.FC<OrgNodeProps> = ({
                     employee={employee as Employee | undefined}
                     disableTooltips={disableTooltips}
                     isShadow={isShadow}
+                    usePlaceholderAvatars={usePlaceholderAvatars}
+                    excludeAvatars={excludeAvatars}
                   />
                 </Transition>
               );

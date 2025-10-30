@@ -55,6 +55,8 @@ export interface OrgNodeProps {
   isSelectionMode?: boolean;
   selectedPositions?: Set<number | string>;
   setSelectedPositions?: (positions: Set<number | string>) => void;
+  usePlaceholderAvatars?: boolean;
+  excludeAvatars?: boolean;
 }
 
 // Props for position details modal/tooltip

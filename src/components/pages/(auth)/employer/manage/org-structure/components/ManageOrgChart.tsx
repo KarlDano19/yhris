@@ -47,6 +47,8 @@ interface ManageOrgChartProps {
   isSelectionMode?: boolean;
   selectedPositions?: Set<number | string>;
   setSelectedPositions?: (positions: Set<number | string>) => void;
+  usePlaceholderAvatars?: boolean;
+  excludeAvatars?: boolean;
 }
 
 // Main Manage Org Chart Component
@@ -70,7 +72,9 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   disableTooltips = false,
   isSelectionMode = false,
   selectedPositions = new Set(),
-  setSelectedPositions
+  setSelectedPositions,
+  usePlaceholderAvatars = false,
+  excludeAvatars = false
 }) => {
   
   // Drag state
@@ -142,6 +146,8 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               isSelectionMode={isSelectionMode}
               selectedPositions={selectedPositions}
               setSelectedPositions={setSelectedPositions}
+              usePlaceholderAvatars={usePlaceholderAvatars}
+              excludeAvatars={excludeAvatars}
             />
           </div>
         }
@@ -251,6 +257,8 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         isSelectionMode={isSelectionMode}
         selectedPositions={selectedPositions}
         setSelectedPositions={setSelectedPositions}
+        usePlaceholderAvatars={usePlaceholderAvatars}
+        excludeAvatars={excludeAvatars}
       />, 
       document.body
     );
@@ -294,29 +302,61 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
             </div>
           </div>
           
-          <Tree
-            lineWidth="2px"
-            lineColor="#3b82f6"
-            lineBorderRadius="10px"
-            label={
-              <div className="flex justify-center w-full">
-                <ManageOrgNode 
-                  data={orgData} 
-                  clickedNodeId={clickedNodeId}
-                  setClickedNodeId={setClickedNodeId}
-                  expandedPositions={expandedPositions}
-                  setExpandedPositions={setExpandedPositions}
-                  onSetPrimaryEmployee={handleSetPrimaryEmployee}
-                  disableTooltips={disableTooltips}
-                  isSelectionMode={isSelectionMode}
-                  selectedPositions={selectedPositions}
-                  setSelectedPositions={setSelectedPositions}
-                />
-              </div>
-            }
-          >
-            {orgData.children && orgData.children.map(renderTree)}
-          </Tree>
+          {excludeAvatars ? (
+            <div className="pt-20">
+              <Tree
+                lineWidth="2px"
+                lineColor="#3b82f6"
+                lineBorderRadius="10px"
+                label={
+                  <div className="flex justify-center w-full">
+                    <ManageOrgNode 
+                      data={orgData} 
+                      clickedNodeId={clickedNodeId}
+                      setClickedNodeId={setClickedNodeId}
+                      expandedPositions={expandedPositions}
+                      setExpandedPositions={setExpandedPositions}
+                      onSetPrimaryEmployee={handleSetPrimaryEmployee}
+                      disableTooltips={disableTooltips}
+                      isSelectionMode={isSelectionMode}
+                      selectedPositions={selectedPositions}
+                      setSelectedPositions={setSelectedPositions}
+                      usePlaceholderAvatars={usePlaceholderAvatars}
+                      excludeAvatars={excludeAvatars}
+                    />
+                  </div>
+                }
+              >
+                {orgData.children && orgData.children.map(renderTree)}
+              </Tree>
+            </div>
+          ) : (
+            <Tree
+              lineWidth="2px"
+              lineColor="#3b82f6"
+              lineBorderRadius="10px"
+              label={
+                <div className="flex justify-center w-full">
+                  <ManageOrgNode 
+                    data={orgData} 
+                    clickedNodeId={clickedNodeId}
+                    setClickedNodeId={setClickedNodeId}
+                    expandedPositions={expandedPositions}
+                    setExpandedPositions={setExpandedPositions}
+                    onSetPrimaryEmployee={handleSetPrimaryEmployee}
+                    disableTooltips={disableTooltips}
+                    isSelectionMode={isSelectionMode}
+                    selectedPositions={selectedPositions}
+                    setSelectedPositions={setSelectedPositions}
+                    usePlaceholderAvatars={usePlaceholderAvatars}
+                    excludeAvatars={excludeAvatars}
+                  />
+                </div>
+              }
+            >
+              {orgData.children && orgData.children.map(renderTree)}
+            </Tree>
+          )}
         </div>
       </div>
 

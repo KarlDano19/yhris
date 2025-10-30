@@ -22,6 +22,8 @@ const Content = () => {
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<'pdf' | 'png'>('png');
   const [selectedEmployeeOption, setSelectedEmployeeOption] = useState<'primary' | 'all'>('primary');
+  const [usePlaceholderAvatars, setUsePlaceholderAvatars] = useState(false);
+  const [excludeAvatars, setExcludeAvatars] = useState(false);
   const [orgData, setOrgData] = useState<OrgStructure | null>(null);
   const [disableTooltips, setDisableTooltips] = useState(false);
   
@@ -382,9 +384,11 @@ const Content = () => {
     }
   };
 
-  const handleExportWithOptions = (option: 'primary' | 'all') => {
-    // Store the selected option
+  const handleExportWithOptions = (option: 'primary' | 'all', usePlaceholders: boolean, excludeAvatars: boolean) => {
+    // Store the selected options
     setSelectedEmployeeOption(option);
+    setUsePlaceholderAvatars(usePlaceholders);
+    setExcludeAvatars(excludeAvatars);
     setShowExportModal(false);
     
     // Activate selection mode and select all positions by default
@@ -554,6 +558,8 @@ const Content = () => {
             isSelectionMode={isSelectionMode}
             selectedPositions={selectedPositions}
             setSelectedPositions={setSelectedPositions}
+            usePlaceholderAvatars={usePlaceholderAvatars && isExporting}
+            excludeAvatars={excludeAvatars && isExporting}
           />
         </div>
 
