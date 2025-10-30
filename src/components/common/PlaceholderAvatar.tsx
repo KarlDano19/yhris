@@ -47,7 +47,7 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
 
   const initials = getInitials();
   const bgColor = getAvatarColor();
-  const fontSize = Math.max(width, height) * 0.4;
+  const fontSize = Math.max(width, height) * 0.45;
 
   return (
     <svg
@@ -70,11 +70,12 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
         <text
           x="50%"
           y="50%"
+          dy="0.1em"
           textAnchor="middle"
-          dominantBaseline="central"
+          dominantBaseline="middle"
           fill="white"
           fontSize={fontSize}
-          fontWeight="600"
+          fontWeight="700"
           fontFamily="system-ui, -apple-system, sans-serif"
           style={{ userSelect: 'none' }}
         >
