@@ -18,6 +18,8 @@ function EmployeeAssigneeTab({
   setSelectedTab,
   recipientNames,
   employeeNames,
+  recipientEmails,
+  employeeEmails,
   setValue,
 }: {
   control: any;
@@ -28,6 +30,8 @@ function EmployeeAssigneeTab({
   setSelectedTab: (tab: number) => void;
   recipientNames?: string[];
   employeeNames?: string[];
+  recipientEmails?: string[];
+  employeeEmails?: string[];
   setValue?: any;
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
@@ -88,6 +92,7 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             employeeNames={recipientNames}
+            employeeEmails={recipientEmails}
             className=""
             showEmail={true}
           />
@@ -126,6 +131,7 @@ function EmployeeAssigneeTab({
             employeeSearch={employeeSearch}
             setEmployeeSearch={setEmployeeSearch}
             employeeNames={employeeNames}
+            employeeEmails={employeeEmails}
             className=""
             showEmail={true}
           />

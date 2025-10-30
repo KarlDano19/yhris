@@ -17,6 +17,7 @@ import CreateJobPagePlatform from '../../modals/ModalPages/CreateJobPagePlatform
 
 import useGetJobDetails from '../hooks/useGetJobPostDetails';
 import useUpdateJobPostItems from '../hooks/useUpdateJobPostItems';
+import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -73,6 +74,9 @@ export default function UpdateJobModal({
   const seventhForm = useForm();
   const eighthForm = useForm();
   const { mutate, isLoading } = useUpdateJobPostItems();
+  
+  // Fetch positions data in the parent component
+  const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
 
   useEffect(() => {
     if (jobPostDataDetails) {
@@ -161,6 +165,13 @@ export default function UpdateJobModal({
       formData.position_id = jobPostDataDetails.position_id;
       formData.position = jobPostDataDetails.position_id; // For API compatibility
     }
+    
+    // Find the selected position and add its description to the data
+    const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
+    if (selectedPosition?.description) {
+      formData.positionDescription = selectedPosition.description;
+    }
+    
     setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
     setPageNumber(2);
   };
@@ -301,6 +312,9 @@ export default function UpdateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={firstFormSubmit}
                       errors={firstForm.formState.errors}
+                      positionData={positionData}
+                      refetchPositions={refetchPositions}
+                      fourthForm={fourthForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
@@ -339,6 +353,9 @@ export default function UpdateJobModal({
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}
                       hasSalaryRange={hasSalaryRange}
+                      combinedFormData={combinedFormData}
+                      positionData={positionData}
+                      firstForm={firstForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>

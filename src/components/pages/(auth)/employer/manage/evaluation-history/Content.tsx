@@ -156,7 +156,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
               {item.form_total_score}
             </span>
-            /<span>{item.total_score}</span>
+            /<span>{item.max_total_score}</span>
           </td>
           {/* Still not implemented */}
           {/* <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>

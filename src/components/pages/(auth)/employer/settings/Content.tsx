@@ -9,6 +9,7 @@ import MenuItem from '../../MenuItem';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
+import OrgStructureLogo from '@/svg/OrgStructureLogo';
 
 const menus = [
   {
@@ -21,6 +22,12 @@ const menus = [
     icon: <UserLogo />,
     text: 'Users',
     link: '/settings/users',
+    isAvailable: true,
+  },
+  {
+    icon: <OrgStructureLogo />,
+    text: <>Org Structure<br/>Settings</>,
+    link: '/settings/org-structure',
     isAvailable: true,
   },
 ];

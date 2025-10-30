@@ -13,26 +13,24 @@ export const calculateAveragePerformance = (
     return { 
       averageScore: 0, 
       totalEmployees: 0, 
-      maxScore: 0 
+      maxScore: 100 
     };
   }
 
-  const totalScore = evaluationData.reduce((sum: number, item: any) => {
-    return sum + (parseFloat(item.score) || 0);
+  // Calculate average percentage score across all evaluations
+  const totalPercentage = evaluationData.reduce((sum: number, item: any) => {
+    const formScore = parseFloat(item.form_total_score) || parseFloat(item.score) || 0;
+    const maxScore = parseFloat(item.max_total_score) || 100;
+    const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+    return sum + percentage;
   }, 0);
 
   const totalEmployees = evaluationData.length;
-  const averageScore = totalEmployees > 0 ? totalScore / totalEmployees : 0;
-
-  // Get the maximum score from form_total_score (assuming all evaluations use the same template)
-  const maxScore = evaluationData[0]?.form_total_score || 
-                   evaluationData[0]?.max_score || 
-                   evaluationData[0]?.evaluation_template?.max_score || 
-                   100; // Final fallback
+  const averagePercentage = totalEmployees > 0 ? totalPercentage / totalEmployees : 0;
 
   return {
-    averageScore: Math.round(averageScore * 100) / 100,
+    averageScore: Math.round(averagePercentage * 100) / 100,
     totalEmployees,
-    maxScore: Math.round(maxScore * 100) / 100
+    maxScore: 100 // Always 100 since we're showing percentage
   };
 }; 

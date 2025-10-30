@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import 'react-quill/dist/quill.snow.css';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -213,7 +214,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     if (isSearching || isPositionListLoading) {
       return (
         <tr>
-          <td colSpan={100}>
+          <td colSpan={5}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
             </div>
@@ -234,6 +235,18 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.description ? (
+              <button
+                onClick={() => setIsPositionEditModalOpen({ id: item.id, open: true })}
+                className='text-blue-600 hover:text-blue-800 hover:underline'
+              >
+                Click to view
+              </button>
+            ) : (
+              '-'
+            )}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
               <SmartButton
@@ -257,7 +270,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     } else {
       return (
         <tr>
-          <td colSpan={4}>
+          <td colSpan={5}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add position.</h4>
           </td>
@@ -405,6 +418,9 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Name
+                  </th>
+                  <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                    Description
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Action

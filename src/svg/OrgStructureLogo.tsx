@@ -1,0 +1,12 @@
+import React from 'react'
+
+const OrgStructureLogo = () => {
+  return (
+    <svg width="58" height="52" viewBox="0 0 58 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M37.7501 51.5V43H26.4167V14.6667H20.7501V23.1667H0.916748V0.5H20.7501V9H37.7501V0.5H57.5834V23.1667H37.7501V14.6667H32.0834V37.3333H37.7501V28.8333H57.5834V51.5H37.7501ZM43.4168 17.5H51.9168V6.16667H43.4168V17.5ZM43.4168 45.8333H51.9168V34.5H43.4168V45.8333ZM6.58342 17.5H15.0834V6.16667H6.58342V17.5Z" fill="#355FD0"/>
+    </svg>
+
+  )
+}
+
+export default OrgStructureLogo
