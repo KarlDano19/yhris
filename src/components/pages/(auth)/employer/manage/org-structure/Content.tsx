@@ -18,6 +18,7 @@ import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import useOrgStructureExportAudit from './hooks/useAddOrgStructureExportAudit';
 
 import { OrgStructure } from './types';
 
@@ -54,6 +55,7 @@ const Content = () => {
   // API hooks
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
   const { data: departmentItems = [] } = useGetDepartmentItems();
+  const { mutate: logExportAudit } = useOrgStructureExportAudit();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
 
@@ -370,6 +372,21 @@ const Content = () => {
         pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
         pdf.save(`${filename}.pdf`);
       }
+
+      // Log export activity to audit logs
+      const selectedDepartments = departmentFilter.department || [];
+      const departmentFilterValue = selectedDepartments.includes('ALL') ? 'ALL' : selectedDepartments[0] || 'ALL';
+      
+      logExportAudit({
+        export_format: format,
+        export_data: {
+          employeeOption: employeeOption === 'all' ? 'All Employees' : 'Primary Employees Only',
+          positionsCount: selectedPositions.size,
+          usePlaceholderAvatars: usePlaceholderAvatars,
+          excludeAvatars: excludeAvatars,
+          departmentFilter: departmentFilterValue,
+        }
+      });
 
       // Remove export mode class
       chartContainer.classList.remove('export-mode');
