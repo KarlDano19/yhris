@@ -265,7 +265,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
               Set up your organizational structure to visualize your company hierarchy and manage employee positions.
             </p>
             <a
-              href="/settings/org-structure-settings"
+              href="/settings/org-structure"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
