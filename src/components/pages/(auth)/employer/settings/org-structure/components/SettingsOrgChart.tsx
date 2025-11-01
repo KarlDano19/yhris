@@ -42,6 +42,11 @@ import {
   createTouchMoveHandler, 
   createTouchEndHandler
 } from '../functions/eventUtils';
+import {
+  createKeyboardZoomHandler,
+  createWheelZoomHandler,
+  createPinchZoomHandler
+} from '../functions/browserZoomUtils';
 
 interface SettingsOrgChartProps {
   isEditMode?: boolean;
@@ -151,6 +156,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
   const [isModeChanging, setIsModeChanging] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pinchDistanceRef = useRef<number | null>(null);
     
   // API hooks
   const addMutation = useAddOrgStructure();
@@ -203,6 +209,61 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
       }
     };
   }, []);
+
+  // Zoom helper functions
+  const handleZoomIn = () => {
+    setZoomLevel(calculateZoomIn(zoomLevel));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(calculateZoomOut(zoomLevel));
+  };
+
+  // Browser zoom integration - keyboard shortcuts (Ctrl/Cmd + Plus/Minus/0)
+  useEffect(() => {
+    const handleKeyboardZoom = createKeyboardZoomHandler(
+      zoomLevel,
+      setZoomLevel,
+      handleZoomIn,
+      handleZoomOut
+    );
+
+    document.addEventListener('keydown', handleKeyboardZoom);
+    return () => document.removeEventListener('keydown', handleKeyboardZoom);
+  }, [zoomLevel]);
+
+  // Browser zoom integration - wheel/pinch zoom (Ctrl + scroll, trackpad pinch)
+  useEffect(() => {
+    const handleWheelZoom = createWheelZoomHandler(zoomLevel, setZoomLevel);
+    
+    const chartElement = chartContainerRef.current?.parentElement;
+    if (chartElement) {
+      chartElement.addEventListener('wheel', handleWheelZoom, { passive: false });
+      return () => chartElement.removeEventListener('wheel', handleWheelZoom);
+    }
+  }, [zoomLevel]);
+
+  // Browser zoom integration - touch pinch zoom for mobile
+  useEffect(() => {
+    const { handleTouchStart, handleTouchMove, handleTouchEnd } = createPinchZoomHandler(
+      zoomLevel,
+      setZoomLevel,
+      pinchDistanceRef
+    );
+
+    const chartElement = chartContainerRef.current?.parentElement;
+    if (chartElement) {
+      chartElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+      chartElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+      chartElement.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        chartElement.removeEventListener('touchstart', handleTouchStart);
+        chartElement.removeEventListener('touchmove', handleTouchMove);
+        chartElement.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [zoomLevel]);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -567,12 +628,13 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onZoomIn={() => setZoomLevel(calculateZoomIn(zoomLevel))}
-        onZoomOut={() => setZoomLevel(calculateZoomOut(zoomLevel))}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
         onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
         renderTree={renderTree}
         setDragOffset={setDragOffset}
         chartContainerRef={chartContainerRef}
+        setZoomLevel={setZoomLevel}
       />, 
       document.body
     );
