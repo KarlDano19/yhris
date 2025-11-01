@@ -9,6 +9,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import SettingsOrgChart from './components/SettingsOrgChart';
 import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureSettings from './hooks/useGetOrgStructureSettings';
+import { calculateZoomIn, calculateZoomOut } from './functions/chartUtils';
 
 const Content = () => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -29,11 +30,11 @@ const Content = () => {
 
   // Zoom handlers
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.1, 2));
+    setZoomLevel(prev => calculateZoomIn(prev));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.1, 0.2));
+    setZoomLevel(prev => calculateZoomOut(prev));
   };
 
   const handleFullscreenToggle = () => {

@@ -24,6 +24,11 @@ import {
   createTouchMoveHandler, 
   createTouchEndHandler
 } from '../functions/eventUtils';
+import {
+  createKeyboardZoomHandler,
+  createWheelZoomHandler,
+  createPinchZoomHandler
+} from '../functions/browserZoomUtils';
 
 // Props interface for ManageOrgChart
 interface ManageOrgChartProps {
@@ -88,6 +93,10 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
   
   // Primary employee mutation
   const setPrimaryEmployeeMutation = useSetPrimaryEmployee();
+  
+  // Ref for pinch zoom distance
+  const pinchDistanceRef = React.useRef<number | null>(null);
+  const chartContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Handle escape key to exit fullscreen
   useEffect(() => {
@@ -98,6 +107,61 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
       return () => document.removeEventListener('keydown', handleEscapeKey);
     }
   }, [isFullscreen]);
+
+  // Zoom helper functions
+  const handleZoomIn = () => {
+    setZoomLevel(calculateZoomIn(zoomLevel));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(calculateZoomOut(zoomLevel));
+  };
+
+  // Browser zoom integration - keyboard shortcuts (Ctrl/Cmd + Plus/Minus/0)
+  useEffect(() => {
+    const handleKeyboardZoom = createKeyboardZoomHandler(
+      zoomLevel,
+      setZoomLevel,
+      handleZoomIn,
+      handleZoomOut
+    );
+
+    document.addEventListener('keydown', handleKeyboardZoom);
+    return () => document.removeEventListener('keydown', handleKeyboardZoom);
+  }, [zoomLevel]);
+
+  // Browser zoom integration - wheel/pinch zoom (Ctrl + scroll, trackpad pinch)
+  useEffect(() => {
+    const handleWheelZoom = createWheelZoomHandler(zoomLevel, setZoomLevel);
+    
+    const chartElement = chartContainerRef.current;
+    if (chartElement) {
+      chartElement.addEventListener('wheel', handleWheelZoom, { passive: false });
+      return () => chartElement.removeEventListener('wheel', handleWheelZoom);
+    }
+  }, [zoomLevel]);
+
+  // Browser zoom integration - touch pinch zoom for mobile
+  useEffect(() => {
+    const { handleTouchStart, handleTouchMove, handleTouchEnd } = createPinchZoomHandler(
+      zoomLevel,
+      setZoomLevel,
+      pinchDistanceRef
+    );
+
+    const chartElement = chartContainerRef.current;
+    if (chartElement) {
+      chartElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+      chartElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+      chartElement.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        chartElement.removeEventListener('touchstart', handleTouchStart);
+        chartElement.removeEventListener('touchmove', handleTouchMove);
+        chartElement.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [zoomLevel]);
 
   // Function to refresh the chart
   const refreshChart = createRefreshChart(refetch);
@@ -298,8 +362,8 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onZoomIn={() => setZoomLevel(calculateZoomIn(zoomLevel))}
-        onZoomOut={() => setZoomLevel(calculateZoomOut(zoomLevel))}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
         onFullscreenToggle={() => setIsFullscreen(!isFullscreen)}
         onShowAllEmployees={onShowAllEmployees}
         setClickedNodeId={setClickedNodeId}
@@ -310,6 +374,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
         hasEmployees={hasEmployees}
         renderTree={renderTree}
         setDragOffset={setDragOffset}
+        setZoomLevel={setZoomLevel}
         onExport={onExport}
         isSelectionMode={isSelectionMode}
         selectedPositions={selectedPositions}
@@ -324,6 +389,7 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
 
   return (
     <div 
+      ref={chartContainerRef}
       className={`w-full bg-gray-50 overflow-hidden relative flex-1 h-full ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
