@@ -19,7 +19,6 @@ import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useOrgStructureExportAudit from './hooks/useAddOrgStructureExportAudit';
-import { calculateZoomIn, calculateZoomOut } from './functions/chartUtils';
 
 import { OrgStructure } from './types';
 
@@ -108,11 +107,11 @@ const Content = () => {
 
   // Zoom handlers
   const handleZoomIn = () => {
-    setZoomLevel(prev => calculateZoomIn(prev));
+    setZoomLevel(prev => Math.min(prev + 0.1, 2));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => calculateZoomOut(prev));
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.2));
   };
 
   const handleFullscreenToggle = () => {
