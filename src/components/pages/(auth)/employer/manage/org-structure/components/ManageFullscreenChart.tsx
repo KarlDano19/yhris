@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useMemo, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 
 import { Tree } from 'react-organizational-chart';
 import { Tooltip } from 'react-tooltip';
@@ -7,11 +7,6 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import ZoomControls from './ZoomControls';
 import ManageOrgNode from './ManageOrgNode';
-import {
-  createKeyboardZoomHandler,
-  createWheelZoomHandler,
-  createPinchZoomHandler
-} from '../functions/browserZoomUtils';
 
 import { OrgStructure } from '../types';
 
@@ -42,7 +37,6 @@ interface ManageFullscreenChartProps {
   hasEmployees: boolean;
   renderTree: (node: OrgStructure) => React.ReactNode;
   setDragOffset: (offset: { x: number; y: number }) => void;
-  setZoomLevel: (level: number) => void;
   onExport?: (format: 'pdf' | 'png') => void;
   isSelectionMode?: boolean;
   selectedPositions?: Set<number | string>;
@@ -79,7 +73,6 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   hasEmployees,
   renderTree,
   setDragOffset,
-  setZoomLevel,
   onExport,
   isSelectionMode = false,
   selectedPositions = new Set(),
@@ -89,56 +82,6 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   departmentFilter
 }) => {
   const [isExporting, setIsExporting] = useState(false);
-
-  // Ref for pinch zoom distance
-  const pinchDistanceRef = useRef<number | null>(null);
-  const fullscreenContainerRef = useRef<HTMLDivElement>(null);
-
-  // Browser zoom integration - keyboard shortcuts (Ctrl/Cmd + Plus/Minus/0)
-  useEffect(() => {
-    const handleKeyboardZoom = createKeyboardZoomHandler(
-      zoomLevel,
-      setZoomLevel,
-      onZoomIn,
-      onZoomOut
-    );
-
-    document.addEventListener('keydown', handleKeyboardZoom);
-    return () => document.removeEventListener('keydown', handleKeyboardZoom);
-  }, [zoomLevel, onZoomIn, onZoomOut, setZoomLevel]);
-
-  // Browser zoom integration - wheel/pinch zoom (Ctrl + scroll, trackpad pinch)
-  useEffect(() => {
-    const handleWheelZoom = createWheelZoomHandler(zoomLevel, setZoomLevel);
-    
-    const chartElement = fullscreenContainerRef.current;
-    if (chartElement) {
-      chartElement.addEventListener('wheel', handleWheelZoom, { passive: false });
-      return () => chartElement.removeEventListener('wheel', handleWheelZoom);
-    }
-  }, [zoomLevel, setZoomLevel]);
-
-  // Browser zoom integration - touch pinch zoom for mobile
-  useEffect(() => {
-    const { handleTouchStart, handleTouchMove, handleTouchEnd } = createPinchZoomHandler(
-      zoomLevel,
-      setZoomLevel,
-      pinchDistanceRef
-    );
-
-    const chartElement = fullscreenContainerRef.current;
-    if (chartElement) {
-      chartElement.addEventListener('touchstart', handleTouchStart, { passive: false });
-      chartElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-      chartElement.addEventListener('touchend', handleTouchEnd);
-      
-      return () => {
-        chartElement.removeEventListener('touchstart', handleTouchStart);
-        chartElement.removeEventListener('touchmove', handleTouchMove);
-        chartElement.removeEventListener('touchend', handleTouchEnd);
-      };
-    }
-  }, [zoomLevel, setZoomLevel]);
 
   // Calculate dynamic dimensions for floating title based on text length
   const floatingTitleDimensions = useMemo(() => {
@@ -221,7 +164,6 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
   };
   return (
     <div 
-      ref={fullscreenContainerRef}
       className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
