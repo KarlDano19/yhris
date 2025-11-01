@@ -303,6 +303,15 @@ const Content = () => {
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
+      // CRITICAL: Reset zoom to 100% and center position before capture
+      // This prevents html2canvas from capturing with transform: scale() which causes text rendering issues
+      setZoomLevel(1);
+      setDragOffset({ x: 0, y: 0 });
+      
+      // Wait for zoom reset to apply
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       // Find the org chart container
       const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
       
@@ -391,12 +400,13 @@ const Content = () => {
       // Remove export mode class
       chartContainer.classList.remove('export-mode');
       
-      // Restore original state if we changed it
+      // Restore original state (zoom, position, fullscreen, expanded positions)
+      setZoomLevel(originalZoom);
+      setDragOffset(originalDragOffset);
+      
       if (employeeOption === 'all') {
         setIsFullscreen(originalFullscreen);
         setExpandedPositions(originalExpandedPositions);
-        setZoomLevel(originalZoom);
-        setDragOffset(originalDragOffset);
       }
       
       // Always restore original org data after export to ensure full chart is shown
@@ -420,12 +430,13 @@ const Content = () => {
         chartContainer.classList.remove('export-mode');
       }
       
-      // Restore original state on error
+      // Restore original state on error - always restore zoom and position
+      setZoomLevel(1);
+      setDragOffset({ x: 0, y: 0 });
+      
       if (employeeOption === 'all') {
         setIsFullscreen(false);
         setExpandedPositions(new Set());
-        setZoomLevel(1);
-        setDragOffset({ x: 0, y: 0 });
       }
       
       // Restore full org data on error

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Tree } from 'react-organizational-chart';
 
@@ -74,6 +74,73 @@ const FullscreenChart: React.FC<FullscreenChartProps> = ({
   setDragOffset,
   chartContainerRef
 }) => {
+  // Handle browser zoom controls (Ctrl + Mouse Wheel, Ctrl + +/-)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Check if Ctrl key is pressed (or Cmd on Mac)
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        // Zoom in if scrolling up (deltaY negative), zoom out if scrolling down
+        if (e.deltaY < 0) {
+          onZoomIn();
+        } else if (e.deltaY > 0) {
+          onZoomOut();
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Ctrl key is pressed (or Cmd on Mac)
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl + Plus or Ctrl + Equals (for zoom in)
+        if (e.key === '+' || e.key === '=') {
+          e.preventDefault();
+          onZoomIn();
+        }
+        // Ctrl + Minus (for zoom out)
+        else if (e.key === '-' || e.key === '_') {
+          e.preventDefault();
+          onZoomOut();
+        }
+        // Ctrl + 0 (reset zoom to 100%)
+        else if (e.key === '0') {
+          e.preventDefault();
+          setDragOffset({ x: 0, y: 0 });
+          // Reset zoom through parent - we need to calculate it
+          const currentZoom = zoomLevel;
+          const targetZoom = 1;
+          const diff = targetZoom - currentZoom;
+          
+          // Call onZoomIn or onZoomOut multiple times to reach 1
+          if (diff > 0) {
+            // Need to zoom in
+            const steps = Math.ceil(diff / 0.1);
+            for (let i = 0; i < steps; i++) {
+              setTimeout(() => onZoomIn(), i * 10);
+            }
+          } else if (diff < 0) {
+            // Need to zoom out
+            const steps = Math.ceil(Math.abs(diff) / 0.1);
+            for (let i = 0; i < steps; i++) {
+              setTimeout(() => onZoomOut(), i * 10);
+            }
+          }
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onZoomIn, onZoomOut, zoomLevel, setDragOffset]);
+
   return (
     <div 
       className={`fixed inset-0 z-50 bg-white ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
