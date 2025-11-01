@@ -99,6 +99,54 @@ const ManageOrgChart: React.FC<ManageOrgChartProps> = ({
     }
   }, [isFullscreen]);
 
+  // Handle browser zoom controls (Ctrl + Mouse Wheel, Ctrl + +/-)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Check if Ctrl key is pressed (or Cmd on Mac)
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        // Zoom in if scrolling up (deltaY negative), zoom out if scrolling down
+        if (e.deltaY < 0) {
+          setZoomLevel(calculateZoomIn(zoomLevel));
+        } else if (e.deltaY > 0) {
+          setZoomLevel(calculateZoomOut(zoomLevel));
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Ctrl key is pressed (or Cmd on Mac)
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl + Plus or Ctrl + Equals (for zoom in)
+        if (e.key === '+' || e.key === '=') {
+          e.preventDefault();
+          setZoomLevel(calculateZoomIn(zoomLevel));
+        }
+        // Ctrl + Minus (for zoom out)
+        else if (e.key === '-' || e.key === '_') {
+          e.preventDefault();
+          setZoomLevel(calculateZoomOut(zoomLevel));
+        }
+        // Ctrl + 0 (reset zoom to 100%)
+        else if (e.key === '0') {
+          e.preventDefault();
+          setZoomLevel(1);
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [zoomLevel, setZoomLevel]);
+
   // Function to refresh the chart
   const refreshChart = createRefreshChart(refetch);
 
