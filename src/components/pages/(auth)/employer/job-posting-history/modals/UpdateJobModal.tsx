@@ -48,7 +48,6 @@ export default function UpdateJobModal({
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
-  const [hasSalaryRange, setHasSalaryRange] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
@@ -98,7 +97,7 @@ export default function UpdateJobModal({
         hiredCount: jobPostDataDetails.hired_count || 0, // Store hired count for validation
       });
       if (jobPostDataDetails?.salary_range_type) {
-        setHasSalaryRange(true);
+        setIsRangeBenefitsAdded(true);
         thirdForm.reset({
           is_show_salary: jobPostDataDetails.is_show_salary,
           is_show_benefits: jobPostDataDetails.is_show_benefits,
@@ -326,7 +325,6 @@ export default function UpdateJobModal({
                       setValue={secondForm.setValue}
                       setPageNumber={setPageNumber}
                       getValues={secondForm.getValues}
-                      hasSalaryRange={hasSalaryRange}
                       secondFormSubmit={secondFormSubmit}
                       hiredCount={jobPostDataDetails?.hired_count || 0}
                     />
@@ -352,7 +350,7 @@ export default function UpdateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}
-                      hasSalaryRange={hasSalaryRange}
+                      hasSalaryRange={isRangeBenefitsAdded}
                       combinedFormData={combinedFormData}
                       positionData={positionData}
                       firstForm={firstForm}
@@ -411,7 +409,7 @@ export default function UpdateJobModal({
                     setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
                     onSubmit={() => {
                       secondFormSubmit();
-                      setHasSalaryRange(true);
+                      setIsRangeBenefitsAdded(true);
                     }}
                   />
                 </Dialog.Panel>
