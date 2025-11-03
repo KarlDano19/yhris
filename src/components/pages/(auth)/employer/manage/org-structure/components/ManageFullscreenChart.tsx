@@ -285,13 +285,14 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
               {floatingTitleDimensions.lines.map((line, index) => (
                 <text
                   key={index}
-                  x="16"
+                  x={floatingTitleDimensions.width / 2}
                   y={24 + (index * 24)}
                   fill="#1f2937"
                   fontSize="18"
                   fontWeight="700"
                   fontFamily="system-ui, -apple-system, sans-serif"
                   dominantBaseline="middle"
+                  textAnchor="middle"
                 >
                   {line}
                 </text>
