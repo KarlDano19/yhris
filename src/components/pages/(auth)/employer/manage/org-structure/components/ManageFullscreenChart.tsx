@@ -257,8 +257,12 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
         <div className="org-tree-container relative">
           {/* Floating Title - Included in exports */}
           <div 
-            className="absolute left-4 z-10 pointer-events-none"
-            style={{ top: `${floatingTitleDimensions.topPosition}px` }}
+            className="absolute z-10 pointer-events-none"
+            style={{ 
+              top: '16px',
+              left: '50%',
+              transform: 'translateX(-50%)'
+            }}
           >
             <svg
               width={floatingTitleDimensions.width}
@@ -281,13 +285,14 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
               {floatingTitleDimensions.lines.map((line, index) => (
                 <text
                   key={index}
-                  x="16"
+                  x={floatingTitleDimensions.width / 2}
                   y={24 + (index * 24)}
                   fill="#1f2937"
                   fontSize="18"
                   fontWeight="700"
                   fontFamily="system-ui, -apple-system, sans-serif"
                   dominantBaseline="middle"
+                  textAnchor="middle"
                 >
                   {line}
                 </text>
@@ -296,7 +301,7 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
           </div>
           
           {excludeAvatars ? (
-            <div className="pt-20">
+            <div className="pt-40">
               <Tree
                 lineWidth="2px"
                 lineColor="#3b82f6"
@@ -321,27 +326,29 @@ const ManageFullscreenChart: React.FC<ManageFullscreenChartProps> = ({
               </Tree>
             </div>
           ) : (
-            <Tree
-              lineWidth="2px"
-              lineColor="#3b82f6"
-              lineBorderRadius="10px"
-              label={
-                <div className="flex justify-center w-full">
-                  <ManageOrgNode 
-                    data={orgData} 
-                    clickedNodeId={clickedNodeId}
-                    setClickedNodeId={setClickedNodeId}
-                    expandedPositions={expandedPositions}
-                    setExpandedPositions={setExpandedPositions}
-                    onSetPrimaryEmployee={onSetPrimaryEmployee}
-                    usePlaceholderAvatars={usePlaceholderAvatars}
-                    excludeAvatars={excludeAvatars}
-                  />
-                </div>
-              }
-            >
-              {orgData.children && orgData.children.map(renderTree)}
-            </Tree>
+            <div className="pt-40">
+              <Tree
+                lineWidth="2px"
+                lineColor="#3b82f6"
+                lineBorderRadius="10px"
+                label={
+                  <div className="flex justify-center w-full">
+                    <ManageOrgNode 
+                      data={orgData} 
+                      clickedNodeId={clickedNodeId}
+                      setClickedNodeId={setClickedNodeId}
+                      expandedPositions={expandedPositions}
+                      setExpandedPositions={setExpandedPositions}
+                      onSetPrimaryEmployee={onSetPrimaryEmployee}
+                      usePlaceholderAvatars={usePlaceholderAvatars}
+                      excludeAvatars={excludeAvatars}
+                    />
+                  </div>
+                }
+              >
+                {orgData.children && orgData.children.map(renderTree)}
+              </Tree>
+            </div>
           )}
         </div>
       </div>

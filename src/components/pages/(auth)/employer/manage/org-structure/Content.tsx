@@ -335,7 +335,7 @@ const Content = () => {
       // Capture the chart as canvas with high quality
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher resolution
+        scale: 3, // Higher resolution
         logging: false,
         useCORS: true,
         allowTaint: true,
@@ -528,6 +528,17 @@ const Content = () => {
       <style>{`
         .export-mode [data-export-exclude="true"] {
           display: none !important;
+        }
+        .export-mode {
+          padding: 50px !important;
+        }
+        /* Reduce the pt-40 padding from Tree container during export */
+        .export-mode .pt-40 {
+          padding-top: 100px !important;
+        }
+        /* Remove drop-shadow from floating title during export to prevent artifacts */
+        .export-mode svg {
+          filter: none !important;
         }
       `}</style>
       

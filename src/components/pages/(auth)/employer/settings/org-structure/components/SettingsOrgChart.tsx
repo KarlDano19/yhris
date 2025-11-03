@@ -435,7 +435,7 @@ const SettingsOrgChart = React.forwardRef<any, SettingsOrgChartProps>(({
     try {
       await deleteMutation.mutateAsync(deleteModalData.position.id);
       
-      toast.custom(() => <CustomToast message='Position deleted successfully!' type='success' />, {
+      toast.custom(() => <CustomToast message='Position deleted successfully.' type='success' />, {
         duration: 3000,
       });
       
