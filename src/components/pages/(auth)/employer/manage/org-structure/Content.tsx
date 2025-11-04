@@ -332,6 +332,21 @@ const Content = () => {
       const suffix = employeeOption === 'all' ? '_All_Employees' : '_Primary_Only';
       const filename = `${companyName}_Org_Structure${suffix}_${timestamp}`;
 
+      // Ensure all images are fully loaded before capturing
+      const images = chartContainer.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+          });
+        })
+      );
+
+      // Additional wait to ensure images are rendered
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       // Capture the chart as canvas with high quality
       const canvas = await html2canvas(chartContainer, {
         backgroundColor: '#ffffff',
@@ -339,6 +354,8 @@ const Content = () => {
         logging: false,
         useCORS: true,
         allowTaint: true,
+        imageTimeout: 0, // No timeout for image loading
+        removeContainer: false, // Keep the container
       });
 
       if (format === 'png') {
@@ -537,8 +554,14 @@ const Content = () => {
           padding-top: 100px !important;
         }
         /* Remove drop-shadow from floating title during export to prevent artifacts */
-        .export-mode svg {
+        .export-mode svg:not(.export-mode img svg) {
           filter: none !important;
+        }
+        /* Fix avatar image rendering in html2canvas - only target images in rounded containers */
+        .export-mode .rounded-full img {
+          object-fit: cover !important;
+          width: 100% !important;
+          height: 100% !important;
         }
       `}</style>
       
