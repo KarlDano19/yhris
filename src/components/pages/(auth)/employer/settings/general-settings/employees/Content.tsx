@@ -22,8 +22,11 @@ import useAddPositionToYP from './hooks/position/useAddPositionToYP';
 import useGetLocationItems from './hooks/location/useGetLocationItems';
 import useGetDepartmentItems from './hooks/department/useGetDepartmentItems';
 import useGetPositionItems from './hooks/position/useGetPositionItems';
+import useAddEmployeeStatusToYP from './hooks/employee-status/useAddEmployeeStatusToYP';
+import useSyncEmployeeStatus from './hooks/employee-status/useSyncEmployeeStatus';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import useGetEmployeeStatusItems from './hooks/employee-status/useGetEmployeeStatusItems';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
@@ -32,17 +35,20 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
   const { mutate: syncDepartment, isLoading: isSyncDepartmentLoading } = useSyncDepartment();
   const { mutate: syncPosition, isLoading: isSyncPositionLoading } = useSyncPosition();
+  const { mutate: syncEmployeeStatus, isLoading: isSyncEmployeeStatusLoading } = useSyncEmployeeStatus();
 
   // Add to YP hooks
   const { mutate: addLocationToYP, isLoading: isAddLocationToYPLoading } = useAddLocationToYP();
   const { mutate: addDepartmentToYP, isLoading: isAddDepartmentToYPLoading } = useAddDepartmentToYP();
   const { mutate: addPositionToYP, isLoading: isAddPositionToYPLoading } = useAddPositionToYP();
+  const { mutate: addEmployeeStatusToYP, isLoading: isAddEmployeeStatusToYPLoading } = useAddEmployeeStatusToYP();
 
   // Data fetching hooks (get all items without pagination)
   const { data: allLocationsData } = useGetLocationItems({ pageSize: 1000, currentPage: 1 });
   const { data: allDepartmentsData } = useGetDepartmentItems({ pageSize: 1000, currentPage: 1 });
   const { data: allPositionsData } = useGetPositionItems({ pageSize: 1000, currentPage: 1 });
-
+  const { data: allEmployeeStatusesData } = useGetEmployeeStatusItems({ pageSize: 1000, currentPage: 1 });
+  
   // Track overall sync state
   const isSyncingAll = isSyncLocationLoading || isSyncDepartmentLoading || isSyncPositionLoading ||
                       isAddLocationToYPLoading || isAddDepartmentToYPLoading || isAddPositionToYPLoading;
@@ -52,8 +58,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const locations = allLocationsData?.records || [];
     const departments = allDepartmentsData?.records || [];
     const positions = allPositionsData?.records || [];
+    const employeeStatuses = allEmployeeStatusesData?.records || [];
 
-    const totalOperations = locations.length + departments.length + positions.length + 3; // +3 for sync operations
+    const totalOperations = locations.length + departments.length + positions.length + employeeStatuses.length + 3; // +3 for sync operations
     let completedCount = 0;
     const errors: string[] = [];
     const successes: string[] = [];
@@ -85,12 +92,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       addLocationToYP({ id: location.id, data: { name: location.name } }, {
         onSuccess: (data) => {
           if (data.status === "already_exists") {
+            toast.custom(() => <CustomToast message={data.message || `Location "${location.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
             onOperationComplete('Location', `"${location.name}" already exists in YP`, true, data.message);
           } else {
+            toast.custom(() => <CustomToast message={data.message || `Location "${location.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
             onOperationComplete('Location', `"${location.name}" added to YP`, true, data.message);
           }
         },
         onError: (err: any) => {
+          toast.custom(() => <CustomToast message={`Failed to add location "${location.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
           onOperationComplete('Location', `"${location.name}" add failed`, false, err.message || err);
         },
       });
@@ -101,12 +111,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       addDepartmentToYP({ id: department.id, data: { name: department.name } }, {
         onSuccess: (data) => {
           if (data.status === "already_exists") {
+            toast.custom(() => <CustomToast message={data.message || `Department "${department.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
             onOperationComplete('Department', `"${department.name}" already exists in YP`, true, data.message);
           } else {
+            toast.custom(() => <CustomToast message={data.message || `Department "${department.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
             onOperationComplete('Department', `"${department.name}" added to YP`, true, data.message);
           }
         },
         onError: (err: any) => {
+          toast.custom(() => <CustomToast message={`Failed to add department "${department.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
           onOperationComplete('Department', `"${department.name}" add failed`, false, err.message || err);
         },
       });
@@ -117,33 +130,93 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       addPositionToYP({ id: position.id, data: { name: position.name } }, {
         onSuccess: (data) => {
           if (data.status === "already_exists") {
+            toast.custom(() => <CustomToast message={data.message || `Position "${position.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
             onOperationComplete('Position', `"${position.name}" already exists in YP`, true, data.message);
           } else {
+            toast.custom(() => <CustomToast message={data.message || `Position "${position.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
             onOperationComplete('Position', `"${position.name}" added to YP`, true, data.message);
           }
         },
         onError: (err: any) => {
+          toast.custom(() => <CustomToast message={`Failed to add position "${position.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
           onOperationComplete('Position', `"${position.name}" add failed`, false, err.message || err);
+        },
+      });
+    });
+
+    // Add Employee Statuses to YP
+    employeeStatuses.forEach((employeeStatus: any) => {
+      addEmployeeStatusToYP({ id: employeeStatus.id, data: { name: employeeStatus.name } }, {
+        onSuccess: (data) => {
+          if (data.status === "already_exists") {
+            toast.custom(() => <CustomToast message={data.message || `Employee Status "${employeeStatus.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
+            onOperationComplete('Employee Status', `"${employeeStatus.name}" already exists in YP`, true, data.message);
+          } else {
+            toast.custom(() => <CustomToast message={data.message || `Employee Status "${employeeStatus.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
+            onOperationComplete('Employee Status', `"${employeeStatus.name}" added to YP`, true, data.message);
+          }
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={`Failed to add employee status "${employeeStatus.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
+          onOperationComplete('Employee Status', `"${employeeStatus.name}" add failed`, false, err.message || err);
         },
       });
     });
 
     // Then perform sync operations
     syncLocation(undefined, {
-      onSuccess: () => onOperationComplete('Location', 'sync', true),
-      onError: (err: any) => onOperationComplete('Location', 'sync', false, err),
+      onSuccess: (data) => {
+        const message = data.message || 'Location sync completed';
+        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
+        onOperationComplete('Location', 'sync', true, message);
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || err;
+        toast.custom(() => <CustomToast message={`Location sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Location', 'sync', false, errorMessage);
+      },
     });
 
     syncDepartment(undefined, {
-      onSuccess: () => onOperationComplete('Department', 'sync', true),
-      onError: (err: any) => onOperationComplete('Department', 'sync', false, err),
+      onSuccess: (data) => {
+        const message = data.message || 'Department sync completed';
+        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
+        onOperationComplete('Department', 'sync', true, message);
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || err;
+        toast.custom(() => <CustomToast message={`Department sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Department', 'sync', false, errorMessage);
+      },
     });
 
     syncPosition(undefined, {
-      onSuccess: () => onOperationComplete('Position', 'sync', true),
-      onError: (err: any) => onOperationComplete('Position', 'sync', false, err),
+      onSuccess: (data) => {
+        const message = data.message || 'Position sync completed';
+        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
+        onOperationComplete('Position', 'sync', true, message);
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || err;
+        toast.custom(() => <CustomToast message={`Position sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Position', 'sync', false, errorMessage);
+      },
+    });
+
+    syncEmployeeStatus(undefined, {
+      onSuccess: (data) => {
+        const message = data.message || 'Employee Status sync completed';
+        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
+        onOperationComplete('Employee Status', 'sync', true, message);
+      },
+      onError: (err: any) => {
+        const errorMessage = err.message || err;
+        toast.custom(() => <CustomToast message={`Employee Status sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Employee Status', 'sync', false, errorMessage);
+      },
     });
   };
+  
 
   return (
     <>
