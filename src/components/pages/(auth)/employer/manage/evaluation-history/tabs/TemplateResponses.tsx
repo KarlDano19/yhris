@@ -55,9 +55,7 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
   useEffect(() => {
     if (dataTemplateResponses) {
       
-      // New analytics endpoint returns pre-aggregated data with pagination
       if (dataTemplateResponses.records) {
-        // Backend already aggregated by template, no need for client-side grouping
         const items = dataTemplateResponses.records;
         
         setTemplateResponses(items);

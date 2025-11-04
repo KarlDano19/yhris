@@ -82,6 +82,8 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
         totalPages = Math.ceil(totalRecords / pageSize);
       }
 
+      // Backend already sorts by date_of_evaluation descending, no client-side sorting needed
+
       setEvaluationHistoryItems(items);
       setPagination({
         totalPages,
