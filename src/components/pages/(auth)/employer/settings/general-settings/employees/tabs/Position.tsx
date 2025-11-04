@@ -19,6 +19,8 @@ import CustomToast from '@/components/CustomToast';
 import ProgressModal from '@/components/ProgressModal';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
 import useBulkDeletePositions from '../hooks/position/useBulkDeletePositions';
+import useAddPositionToYP from '../hooks/position/useAddPositionToYP';
+import useSyncPosition from '../hooks/position/useSyncPosition';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -84,9 +86,25 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
   } = useGetPositionItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const { mutate: deletePosition, isLoading: isDeletePositionLoading } = useDeletePosition();
+  const { mutate: addPositionToYP, isLoading: isAddPositionToYPLoading } = useAddPositionToYP();
+  const { mutate: syncPosition, isLoading: isSyncPositionLoading } = useSyncPosition();
   const bulkDeleteMutation = useBulkDeletePositions();
 
   const cachedData: any = cachedProfile?.state?.data;
+  
+  const handleSyncPosition = () => {
+    syncPosition(undefined, {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        positionListRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     if (positionListData) {   
@@ -250,6 +268,14 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               >
                 <DeleteIcon />
               </SmartButton>
+              <SmartButton
+                id="delete-position-btn"
+                onClick={() => addPositionToYP({ id: item.id, data: { name: item.name } })}
+                disabled={selectedPositions.size > 1}
+                className={selectedPositions.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                Sync to YP
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -349,6 +375,13 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
             className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
           >
             CREATE
+          </SmartButton>
+          <SmartButton
+            id="create-position-btn"
+            onClick={handleSyncPosition}
+            className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+          >
+            SYNC
           </SmartButton>
         </div>
       </div>

@@ -15,8 +15,10 @@ import CustomToast from '@/components/CustomToast';
 import ProgressModal from '@/components/ProgressModal';
 import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 import useBulkDeleteDepartments from '../hooks/department/useBulkDeleteDepartments';
+import useAddDepartmentToYP from '../hooks/department/useAddDepartmentToYP';
+import useSyncDepartment from '../hooks/department/useSyncDepartment';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
@@ -83,9 +85,26 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
   } = useGetDepartmentItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const { mutate: deleteDepartment, isLoading: isDeleteDepartmentLoading } = useDeleteDepartment();
+  const { mutate: addDepartmentToYP, isLoading: isAddDepartmentToYPLoading } = useAddDepartmentToYP();
+  const { mutate: syncDepartment, isLoading: isSyncDepartmentLoading } = useSyncDepartment();
   const bulkDeleteMutation = useBulkDeleteDepartments();
 
   const cachedData: any = cachedProfile?.state?.data;
+
+  const handleSyncDepartment = () => {
+    syncDepartment(undefined, {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        // Optionally refetch the department list to show updated data
+        departmentListRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     if (departmentListData) {
@@ -249,6 +268,14 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               >
                 <DeleteIcon />
               </SmartButton>
+              <SmartButton
+                id="delete-department-btn"
+                onClick={() => addDepartmentToYP({ id: item.id, data: { name: item.name } })}
+                disabled={selectedDepartments.size > 1}
+                className={selectedDepartments.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                Sync to YP
+              </SmartButton>
             </div>
           </td>
         </tr>
@@ -342,6 +369,13 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
           </div>
         </div>
         <div className='flex-1 flex justify-start lg:justify-end'>
+          <SmartButton
+            id="create-department-btn"
+            onClick={handleSyncDepartment}
+            className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+          >
+            SYNC
+          </SmartButton>
           <SmartButton
             id="create-department-btn"
             onClick={() => setIsAddDepartmentModalOpen(true)}

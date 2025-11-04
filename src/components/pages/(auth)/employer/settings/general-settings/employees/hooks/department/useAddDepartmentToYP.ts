@@ -1,13 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-type SyncType = 'active' | 'inactive' | 'all';
-
-interface SyncEmployeesParams {
-  syncType?: SyncType;
-}
-
-async function syncEmployees(params: SyncEmployeesParams = {}) {
+async function addDepartmentToYP(departmentData: { id: string; data: any }) {
   try {
     const token = getCookie('token');
     const config = {
@@ -16,15 +10,9 @@ async function syncEmployees(params: SyncEmployeesParams = {}) {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(departmentData.data),
     };
-
-    // Build URL with query parameter
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/employees/sync-third-party-integration/`;
-    if (params.syncType) {
-      url += `?type=${params.syncType}`;
-    }
-
-    const res = await fetch(url, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/departments/sync-create/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -38,10 +26,10 @@ async function syncEmployees(params: SyncEmployeesParams = {}) {
   }
 }
 
-function useSyncEmployees() {
-  const query = useMutation((params: SyncEmployeesParams) => syncEmployees(params));
+function useAddDepartmentToYP() {
+  const query = useMutation((departmentData: { id: string; data: any }) => addDepartmentToYP(departmentData));
 
   return query;
 }
 
-export default useSyncEmployees;
+export default useAddDepartmentToYP;

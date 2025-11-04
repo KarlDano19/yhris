@@ -1,13 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-type SyncType = 'active' | 'inactive' | 'all';
-
-interface SyncEmployeesParams {
-  syncType?: SyncType;
-}
-
-async function syncEmployees(params: SyncEmployeesParams = {}) {
+async function syncDepartment() {
   try {
     const token = getCookie('token');
     const config = {
@@ -19,10 +13,7 @@ async function syncEmployees(params: SyncEmployeesParams = {}) {
     };
 
     // Build URL with query parameter
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/employees/sync-third-party-integration/`;
-    if (params.syncType) {
-      url += `?type=${params.syncType}`;
-    }
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/departments/sync-third-party-integration/`;
 
     const res = await fetch(url, config);
     if (!res.ok) {
@@ -38,10 +29,12 @@ async function syncEmployees(params: SyncEmployeesParams = {}) {
   }
 }
 
-function useSyncEmployees() {
-  const query = useMutation((params: SyncEmployeesParams) => syncEmployees(params));
+function useSyncDepartment() {
+  const query = useMutation({
+    mutationFn: () => syncDepartment(),
+  });
 
   return query;
 }
 
-export default useSyncEmployees;
+export default useSyncDepartment;

@@ -35,6 +35,7 @@ import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusIt
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import FloatingProgress from '@/components/FloatingProgress';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -73,6 +74,8 @@ const columnDefinitions = [
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']);
+  const [loginType, setLoginType] = useState<string>('');
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
@@ -232,6 +235,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsAgreementAccepted(true);
     }
   }, [hasAgreed]);
+
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType((cachedUserDetails.state.data as any).login_type);
+    }
+  }, [cachedUserDetails]);
 
   // Debounce search input to prevent multiple API calls
   useEffect(() => {
@@ -593,7 +602,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+    {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
