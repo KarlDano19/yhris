@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 
-import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
 
+import { handlePrintIndividualEvaluations } from '../PrintData';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
@@ -14,7 +15,6 @@ import useFileforge from '@/components/hooks/useFileforge';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import EvaluationDetailsModal from '../modals/EvaluationDetailsModal';
 import PrintIndividualEvaluationsSelectionModal from '../modals/PrintIndividualEvaluationsSelectionModal';
-import { handlePrintIndividualEvaluations } from '../PrintData';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';

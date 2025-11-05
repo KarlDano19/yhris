@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
