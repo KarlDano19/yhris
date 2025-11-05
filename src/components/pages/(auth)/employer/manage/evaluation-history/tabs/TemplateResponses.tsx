@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -10,7 +14,7 @@ import useGetTemplateResponses from '../hooks/useGetTemplateResponses';
 import useGetEvaluationResponseHistoryDetails from '../hooks/useGetEvaluationResponseHistoryDetails';
 import EvaluationResponseDetailsModal from '../modals/EvaluationResponseDetailsModal';
 
-import { UsersIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number;
@@ -24,7 +28,14 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
+    search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -34,15 +45,16 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     totalPages: 1,
     totalRecords: 0,
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     data: dataTemplateResponses,
     isLoading: isLoadingTemplateResponses,
     refetch: refetchTemplateResponses,
   } = useGetTemplateResponses({
-    from: itemsFilter.from ? itemsFilter.from.toLocaleDateString('en-CA') : '',
-    to: itemsFilter.to ? itemsFilter.to.toLocaleDateString('en-CA') : '',
-    search: '',
+    from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
+    to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
+    search: appliedFilter.search,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -55,9 +67,7 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
   useEffect(() => {
     if (dataTemplateResponses) {
       
-      // New analytics endpoint returns pre-aggregated data with pagination
       if (dataTemplateResponses.records) {
-        // Backend already aggregated by template, no need for client-side grouping
         const items = dataTemplateResponses.records;
         
         setTemplateResponses(items);
@@ -86,13 +96,41 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     setPageSize(value);
   };
 
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText
+    });
+  };
+
+  useEffect(() => {
+    if (!isLoadingTemplateResponses && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingTemplateResponses, isSearching]);
+
   const handleViewResponses = (item: any) => {
     setSelectedTemplate(item);
     setIsTemplateDetailsModalOpen({ id: item.evaluation_template_id, open: true });
   };
 
   const renderRows = () => {
-    if (isLoadingTemplateResponses) {
+    if (isSearching || isLoadingTemplateResponses) {
       return (
         <tr>
           <td colSpan={100}>
@@ -195,6 +233,32 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
               />
             </div>
           </div>
+          <div className='flex gap-2 lg:w-1/3'>
+            <div className='flex flex-row w-full items-center gap-2'>
+              <input
+                type='text'
+                name='search'
+                id='search'
+                data-tooltip-id='search-tooltip'
+                data-tooltip-content='Search for Template Name'
+                data-tooltip-place='bottom'
+                className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                placeholder='Search ...'
+              />
+              <button
+                className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                onClick={handleSearch}
+              >
+                <MagnifyingGlassIcon className='h-5 w-5' />
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
@@ -252,6 +316,8 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
         templateResponseDetails={templateResponseDetails}
         isLoadingTemplateDetails={isLoadingTemplateDetails}
       />
+
+      <Tooltip id='search-tooltip'/>
     </>
   );
 };

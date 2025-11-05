@@ -1,11 +1,14 @@
 import { Dispatch, Fragment, useRef, useState, useEffect, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+import toast from 'react-hot-toast';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import CustomToast from '@/components/CustomToast';
+import useFileforge from '@/components/hooks/useFileforge';
 import FrequentlyEvaluatedPieChart from './charts-and-graphs/FrequentlyEvaluatedPieChart';
 import QuestionResponseBarChart from './charts-and-graphs/QuestionResponseBarChart';
 import RecipientsListModal from './RecipientsListModal';
@@ -16,6 +19,7 @@ import {
   filterIndividualResponses,
   getEmployeeScoresForCriterion
 } from '../helpers/evaluationHelpers';
+import { handlePrintEvaluationTemplateResponse } from '../PrintData';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChartBarIcon } from '@heroicons/react/24/solid';
@@ -23,6 +27,7 @@ import { UsersIcon } from '@heroicons/react/24/solid';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/solid';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import PrintIcon from '@/svg/PrintIcon';
 
 type T_ModalData = {
   id: number;
@@ -102,6 +107,56 @@ const EvaluationResponseDetailsModal = ({
     employeeName: string;
     department: string;
   } | null>(null);
+
+  // Fileforge hook for PDF generation
+  const { generatePDFLocally, isGenerating: isPrintGenerating } = useFileforge({
+    onSuccess: () => {
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      console.error('Print error:', error);
+      toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
+    },
+  });
+
+  // Handle print button click
+  const handlePrintClick = async () => {
+    if (!templateResponseDetails) {
+      toast.custom(() => <CustomToast message='No template data available to print.' type='error' />, { duration: 3000 });
+      return;
+    }
+
+    try {
+      // Prepare date filter for printing
+      const printDateFilter = dateFilter.from || dateFilter.to
+        ? {
+            from: dateFilter.from ? dateFilter.from.toLocaleDateString('en-CA') : '',
+            to: dateFilter.to ? dateFilter.to.toLocaleDateString('en-CA') : '',
+          }
+        : undefined;
+
+      // Filter the data before printing (use the already filtered employees from the modal)
+      const filteredTemplateData = {
+        ...templateResponseDetails,
+        // Use the already filtered employees based on date and department
+        employees_responded: filteredEmployees,
+        // Filter frequently evaluated employees based on department filter
+        frequently_evaluated_employees: getFilteredFrequentlyEvaluatedEmployees(),
+        // Include individual_responses for question score details
+        individual_responses: getFilteredIndividualResponses()
+      };
+
+      await handlePrintEvaluationTemplateResponse(
+        generatePDFLocally,
+        filteredTemplateData,
+        printDateFilter,
+        departmentFilter
+      );
+    } catch (error) {
+      console.error('Error printing evaluation template response:', error);
+      toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
+    }
+  };
 
   const customCloseModal = () => {
     setDateFilter({ from: '', to: '' });
@@ -210,7 +265,15 @@ const EvaluationResponseDetailsModal = ({
       dateFilter,
       departmentFilter
     );
-    setFilteredEmployees(filtered);
+    
+    // Sort by date_completed in descending order (newest first)
+    const sortedFiltered = filtered.sort((a, b) => {
+      if (!a.date_completed) return 1;
+      if (!b.date_completed) return -1;
+      return new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime();
+    });
+    
+    setFilteredEmployees(sortedFiltered);
     
     // Update pagination for Respondents tab
     const totalRecords = filtered.length;
@@ -238,7 +301,8 @@ const EvaluationResponseDetailsModal = ({
   useEffect(() => {
     const allQuestions = prepareQuestionResponseData();
     const totalRecords = allQuestions.length;
-    const totalPages = Math.ceil(totalRecords / questionsPageSize);
+    const totalPages = Math.ceil(totalRecords / questionsPageSize) || 1;
+    
     setQuestionsPagination({
       totalRecords,
       totalPages
@@ -248,7 +312,7 @@ const EvaluationResponseDetailsModal = ({
     if (questionsCurrentPage > totalPages && totalPages > 0) {
       setQuestionsCurrentPage(1);
     }
-  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize, questionsCurrentPage]);
+  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize]);
 
   // Update pagination for Analytics tab when data changes
   useEffect(() => {
@@ -264,13 +328,15 @@ const EvaluationResponseDetailsModal = ({
     if (analyticsCurrentPage > totalPages && totalPages > 0) {
       setAnalyticsCurrentPage(1);
     }
-  }, [templateResponseDetails, departmentFilter, analyticsPageSize, analyticsCurrentPage]);
+  }, [templateResponseDetails, dateFilter, departmentFilter, analyticsPageSize, analyticsCurrentPage]);
 
   // Helper to get filtered frequently evaluated employees
   const getFilteredFrequentlyEvaluatedEmployees = () => {
     return filterFrequentlyEvaluatedEmployees(
       templateResponseDetails?.frequently_evaluated_employees || [],
-      departmentFilter
+      departmentFilter,
+      templateResponseDetails?.individual_responses || [],
+      dateFilter
     );
   };
 
@@ -293,26 +359,40 @@ const EvaluationResponseDetailsModal = ({
 
   // Helper function to prepare question response data for horizontal bar charts
   const prepareQuestionResponseData = () => {
-    if (!templateResponseDetails?.questions) return [];
+    // Always return questions from the template, regardless of filters
+    if (!templateResponseDetails?.questions || !Array.isArray(templateResponseDetails.questions)) {
+      return [];
+    }
 
     const allCriteria: any[] = [];
 
     // Extract individual criteria from each section
+    // IMPORTANT: Questions should ALWAYS show regardless of date/department filter
+    // Only the employee scores within each question are filtered
     templateResponseDetails.questions.forEach((section: any, sectionIndex: number) => {
-      if (section.criterion && Array.isArray(section.criterion)) {
-        section.criterion.forEach((criterion: any, criterionIndex: number) => {
-          allCriteria.push({
-            sectionId: section.id,
-            sectionTitle: section.section_title,
-            criterionId: criterion.id,
-            title: criterion.title,
-            max_score: criterion.max_score,
-            sectionIndex,
-            criterionIndex,
-            employeeScores: getEmployeeScoresForCriterionWrapper(section.id, criterionIndex)
-          });
-        });
+      if (!section || !section.criterion || !Array.isArray(section.criterion)) {
+        return;
       }
+
+      section.criterion.forEach((criterion: any, criterionIndex: number) => {
+        if (!criterion) {
+          return;
+        }
+
+        // Get filtered scores (this is what gets filtered by date/department)
+        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterionIndex);
+
+        allCriteria.push({
+          sectionId: section.id,
+          sectionTitle: section.section_title || 'Untitled Section',
+          criterionId: criterion.id,
+          title: criterion.title || 'Untitled Question',
+          max_score: criterion.max_score,
+          sectionIndex,
+          criterionIndex,
+          employeeScores: employeeScores // These scores are filtered, but question still shows
+        });
+      });
     });
 
     return allCriteria;
@@ -460,6 +540,23 @@ const EvaluationResponseDetailsModal = ({
                               showButtonText={true}
                               size="small"
                             />
+                            <button
+                              onClick={handlePrintClick}
+                              disabled={isPrintGenerating || isLoadingTemplateDetails}
+                              className='flex items-center justify-center bg-white text-black rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                              title='Print template response'
+                            >
+                              {isPrintGenerating ? (
+                                <div className="animate-spin w-6 h-6">
+                                  
+                                </div>
+                              ) : (
+                                <div>
+                                  <PrintIcon/>
+                                  
+                                </div>
+                              )}
+                            </button>
                             </div>
                           </div>
                       </div>
@@ -670,10 +767,15 @@ const EvaluationResponseDetailsModal = ({
                                             maxScore={criterion.max_score}
                                           />
                                         ) : (
-                                          <div className='text-center py-6'>
-                                            <p className='text-sm text-gray-500 italic'>
+                                          <div className='text-center py-6 bg-gray-50 rounded'>
+                                            <p className='text-sm text-gray-500 italic mb-1'>
                                               No scored responses available for this question
                                             </p>
+                                            {(dateFilter.from || dateFilter.to || (departmentFilter && departmentFilter.length > 0)) && (
+                                              <p className='text-xs text-gray-400'>
+                                                Try adjusting your filters to see more responses
+                                              </p>
+                                            )}
                                           </div>
                                         )}
                                       </div>
@@ -691,9 +793,14 @@ const EvaluationResponseDetailsModal = ({
                               />
                             </>
                           ) : (
-                            <div className='text-center py-8'>
-                              <p className='text-sm text-gray-500 italic'>
-                                No evaluation criteria found
+                            <div className='text-center py-8 bg-gray-50 rounded-lg'>
+                              <p className='text-sm text-gray-500 italic mb-2'>
+                                No evaluation questions found
+                              </p>
+                              <p className='text-xs text-gray-400'>
+                                {templateResponseDetails?.questions 
+                                  ? 'This template does not have any evaluation criteria configured'
+                                  : 'Loading evaluation questions...'}
                               </p>
                             </div>
                           )}
@@ -702,16 +809,38 @@ const EvaluationResponseDetailsModal = ({
 
                       {activeTab === 'analytics' && (
                         <div className='space-y-6'>
-                          <h4 className='text-lg font-semibold text-gray-900'>Analytics</h4>
+                          <div>
+                            <h4 className='text-lg font-semibold text-gray-900'>Analytics</h4>
+                            {(dateFilter.from || dateFilter.to) && (
+                              <p className='text-xs text-blue-600 mt-1'>
+                                Showing analytics for filtered date range
+                              </p>
+                            )}
+                          </div>
                           
                           {/* Frequently Evaluated Employees Pie Chart */}
                           <div className='bg-white border border-gray-200 rounded-lg p-6'>
                             <h5 className='text-lg font-medium text-gray-900 mb-4'>Frequently Evaluated Employees</h5>
-                            <div className='h-80'>
-                              <FrequentlyEvaluatedPieChart 
-                                frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
-                              />
-                            </div>
+                            {getFilteredFrequentlyEvaluatedEmployees().length > 0 ? (
+                              <div className='h-80'>
+                                <FrequentlyEvaluatedPieChart 
+                                  frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
+                                />
+                              </div>
+                            ) : (
+                              <div className='h-80 flex items-center justify-center'>
+                                <div className='text-center'>
+                                  <p className='text-sm text-gray-500 italic mb-1'>
+                                    No employee data available
+                                  </p>
+                                  {(dateFilter.from || dateFilter.to) && (
+                                    <p className='text-xs text-gray-400'>
+                                      Try adjusting your date range to see more data
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Detailed Analytics Table */}
