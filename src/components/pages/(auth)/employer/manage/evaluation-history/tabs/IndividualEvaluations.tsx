@@ -2,18 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 
-import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
 
+import { handlePrintIndividualEvaluations } from '../PrintData';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
+import useFileforge from '@/components/hooks/useFileforge';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import EvaluationDetailsModal from '../modals/EvaluationDetailsModal';
+import PrintIndividualEvaluationsSelectionModal from '../modals/PrintIndividualEvaluationsSelectionModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import PrintIcon from '@/svg/PrintIcon';
 
 type T_ModalData = {
   id: number;
@@ -22,7 +26,9 @@ type T_ModalData = {
 
 const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [allEvaluationRecords, setAllEvaluationRecords] = useState<any>([]);
   const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -55,6 +61,95 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
     currentPage: currentPage,
   });
 
+  // Fileforge hook for PDF generation
+  const { generatePDFLocally, isGenerating: isPrintGenerating } = useFileforge({
+    onSuccess: () => {
+      toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
+    },
+    onError: (error) => {
+      console.error('Print error:', error);
+      toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
+    },
+  });
+
+  // Handle print button click - fetches all records and opens modal
+  const handlePrintClick = async () => {
+    if (!evaluationHistoryItems || evaluationHistoryItems.length === 0) {
+      toast.custom(() => <CustomToast message='No evaluation data available to print.' type='error' />, { duration: 3000 });
+      return;
+    }
+
+    try {
+      // Fetch ALL evaluation data (not paginated) for the modal
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+      
+      let searchParams = new URLSearchParams();
+      if (appliedFilter.from) searchParams.append('from', appliedFilter.from.toLocaleDateString('en-CA'));
+      if (appliedFilter.to) searchParams.append('to', appliedFilter.to.toLocaleDateString('en-CA'));
+      if (appliedFilter.search) searchParams.append('search', appliedFilter.search);
+      searchParams.append('view_type', 'select'); // Get all records without pagination
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-histories/?${searchParams}`,
+        {
+          headers: {
+            'content-type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch evaluation data');
+      }
+
+      const allData = await response.json();
+      const records = Array.isArray(allData) ? allData : allData.records || [];
+      
+      setAllEvaluationRecords(records);
+      setIsPrintModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching evaluation data:', error);
+      toast.custom(() => <CustomToast message='Failed to fetch evaluation data.' type='error' />, { duration: 3000 });
+    }
+  };
+
+  // Handle print modal confirmation - filters and prints data based on selected forms
+  const handlePrintConfirm = async (selectedOption: string, selectedForms?: string[]) => {
+    try {
+      // Format and filter the data based on selected forms
+      let formattedData = allEvaluationRecords.map((item: any) => ({
+        ...item,
+        date_of_evaluation: new Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation))
+      }));
+
+      // Filter by selected evaluation forms if not "all"
+      if (selectedOption === 'selected' && selectedForms && selectedForms.length > 0) {
+        formattedData = formattedData.filter((item: any) => 
+          selectedForms.includes(item.evaluation_form)
+        );
+      }
+
+      // Prepare date filter for printing
+      const printDateFilter = appliedFilter.from || appliedFilter.to
+        ? {
+            from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
+            to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
+          }
+        : undefined;
+
+      await handlePrintIndividualEvaluations(
+        generatePDFLocally,
+        formattedData,
+        printDateFilter,
+        appliedFilter.search
+      );
+    } catch (error) {
+      console.error('Error printing individual evaluations:', error);
+      toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
+    }
+  };
+
   useEffect(() => {
     if (dataEvaluationHistoryItems) {
       let items = [];
@@ -81,6 +176,8 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
         totalRecords = items.length;
         totalPages = Math.ceil(totalRecords / pageSize);
       }
+
+      // Backend already sorts by date_of_evaluation descending, no client-side sorting needed
 
       setEvaluationHistoryItems(items);
       setPagination({
@@ -247,6 +344,20 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
               >
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
+              <button
+                onClick={handlePrintClick}
+                disabled={isPrintGenerating || isLoadingEvaluationHistoryItems || evaluationHistoryItems.length === 0}
+                className='flex items-center justify-center bg-white text-black rounded-md p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                title='Print individual evaluations'
+              >
+                {isPrintGenerating ? (
+                  <div className="animate-spin w-6 h-6"></div>
+                ) : (
+                  <div>
+                    <PrintIcon />
+                  </div>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -303,6 +414,14 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
           setIsOpen={setIsEvaluationDetailsModalOpen}
         />
       )}
+
+      <PrintIndividualEvaluationsSelectionModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        onConfirm={handlePrintConfirm}
+        isLoading={isPrintGenerating}
+        evaluationRecords={allEvaluationRecords}
+      />
 
       <Tooltip id='search-tooltip'/>
     </>
