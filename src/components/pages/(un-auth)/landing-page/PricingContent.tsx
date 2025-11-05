@@ -190,6 +190,9 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                         <span className='text-lg text-gray-600 ml-2'>/month</span>
                       </div>
                       <p className='text-gray-600'>For 1 - 100 employees</p>
+                      {employeeCount <= 100 && (
+                        <p className='text-gray-600 text-xs'>*VAT Excluded</p>
+                      )}
 
                       {/* Pricing Breakdown */}
                       {employeeCount > 100 && (
