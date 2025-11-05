@@ -19,6 +19,7 @@ import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useOrgStructureExportAudit from './hooks/useAddOrgStructureExportAudit';
+import { preloadAndConvertImages, restoreOriginalImages } from './functions/imageUtils';
 
 import { OrgStructure } from './types';
 
@@ -344,6 +345,9 @@ const Content = () => {
         })
       );
 
+      // Convert S3 images to base64 to avoid CORS issues with html2canvas
+      await preloadAndConvertImages(chartContainer);
+
       // Additional wait to ensure images are rendered
       await new Promise(resolve => setTimeout(resolve, 200));
 
@@ -417,6 +421,9 @@ const Content = () => {
       // Remove export mode class
       chartContainer.classList.remove('export-mode');
       
+      // Restore original image sources (convert back from base64 to S3 URLs)
+      restoreOriginalImages(chartContainer);
+      
       // Restore original state (zoom, position, fullscreen, expanded positions)
       setZoomLevel(originalZoom);
       setDragOffset(originalDragOffset);
@@ -435,16 +442,15 @@ const Content = () => {
       
       // Turn off selection mode after successful export
       setIsSelectionMode(false);
-      
-      console.log(`Successfully exported as ${format.toUpperCase()} with ${employeeOption} employees`);
     } catch (error) {
-      console.error('Export failed:', error);
       alert('Export failed. Please try again.');
       
       // Remove export mode class on error
       const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
       if (chartContainer) {
         chartContainer.classList.remove('export-mode');
+        // Restore original image sources on error
+        restoreOriginalImages(chartContainer);
       }
       
       // Restore original state on error - always restore zoom and position
