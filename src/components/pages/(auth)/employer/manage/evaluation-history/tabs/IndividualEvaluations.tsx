@@ -13,6 +13,7 @@ import Pagination from '@/components/Pagination';
 import useFileforge from '@/components/hooks/useFileforge';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import EvaluationDetailsModal from '../modals/EvaluationDetailsModal';
+import PrintIndividualEvaluationsSelectionModal from '../modals/PrintIndividualEvaluationsSelectionModal';
 import { handlePrintIndividualEvaluations } from '../PrintData';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -25,7 +26,9 @@ type T_ModalData = {
 
 const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [allEvaluationRecords, setAllEvaluationRecords] = useState<any>([]);
   const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -69,7 +72,7 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
     },
   });
 
-  // Handle print button click - fetches ALL data for printing
+  // Handle print button click - fetches all records and opens modal
   const handlePrintClick = async () => {
     if (!evaluationHistoryItems || evaluationHistoryItems.length === 0) {
       toast.custom(() => <CustomToast message='No evaluation data available to print.' type='error' />, { duration: 3000 });
@@ -77,7 +80,7 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
     }
 
     try {
-      // Fetch ALL evaluation data (not paginated) for printing
+      // Fetch ALL evaluation data (not paginated) for the modal
       const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
       
       let searchParams = new URLSearchParams();
@@ -101,12 +104,31 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
       }
 
       const allData = await response.json();
+      const records = Array.isArray(allData) ? allData : allData.records || [];
       
-      // Format the data
-      const formattedData = (Array.isArray(allData) ? allData : allData.records || []).map((item: any) => ({
+      setAllEvaluationRecords(records);
+      setIsPrintModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching evaluation data:', error);
+      toast.custom(() => <CustomToast message='Failed to fetch evaluation data.' type='error' />, { duration: 3000 });
+    }
+  };
+
+  // Handle print modal confirmation - filters and prints data based on selected forms
+  const handlePrintConfirm = async (selectedOption: string, selectedForms?: string[]) => {
+    try {
+      // Format and filter the data based on selected forms
+      let formattedData = allEvaluationRecords.map((item: any) => ({
         ...item,
         date_of_evaluation: new Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation))
       }));
+
+      // Filter by selected evaluation forms if not "all"
+      if (selectedOption === 'selected' && selectedForms && selectedForms.length > 0) {
+        formattedData = formattedData.filter((item: any) => 
+          selectedForms.includes(item.evaluation_form)
+        );
+      }
 
       // Prepare date filter for printing
       const printDateFilter = appliedFilter.from || appliedFilter.to
@@ -392,6 +414,14 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
           setIsOpen={setIsEvaluationDetailsModalOpen}
         />
       )}
+
+      <PrintIndividualEvaluationsSelectionModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        onConfirm={handlePrintConfirm}
+        isLoading={isPrintGenerating}
+        evaluationRecords={allEvaluationRecords}
+      />
 
       <Tooltip id='search-tooltip'/>
     </>
