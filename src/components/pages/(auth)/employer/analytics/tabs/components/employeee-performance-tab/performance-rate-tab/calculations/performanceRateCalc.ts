@@ -112,11 +112,15 @@ export const calculateDepartmentPerformance = (
 
   // Calculate performance rate for each department
   const departmentPerformanceData = Object.entries(departmentGroups).map(([department, evaluations], index) => {
-    const totalScore = evaluations.reduce((sum: number, evaluation: any) => {
-      return sum + (parseFloat(evaluation.score) || 0);
+    // Calculate average percentage score for this department
+    const totalPercentage = evaluations.reduce((sum: number, evaluation: any) => {
+      const formScore = parseFloat(evaluation.form_total_score) || parseFloat(evaluation.score) || 0;
+      const maxScore = parseFloat(evaluation.max_total_score) || 100;
+      const percentage = maxScore > 0 ? (formScore / maxScore) * 100 : 0;
+      return sum + percentage;
     }, 0);
     
-    const averageScore = evaluations.length > 0 ? totalScore / evaluations.length : 0;
+    const averageScore = evaluations.length > 0 ? totalPercentage / evaluations.length : 0;
     
     // Get the highest ID from evaluations in this department
     const highestId = Math.max(...evaluations.map((evaluation: any) => parseInt(evaluation.id) || 0));

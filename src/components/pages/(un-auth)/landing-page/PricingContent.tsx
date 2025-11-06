@@ -1,11 +1,12 @@
-"use client"
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { CheckIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+'use client';
+import React, { useState } from 'react';
 
-import Navigation from "./Navigation";
-import Footer from "./Footer";
-import React from "react";
+import { useRouter } from 'next/navigation';
+
+import Navigation from './Navigation';
+import Footer from './Footer';
+
+import { CheckIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 interface PricingContentProps {
   isLoggedIn: boolean;
@@ -14,7 +15,7 @@ interface PricingContentProps {
 const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
   const [employeeCount, setEmployeeCount] = useState(1);
   const router = useRouter();
-  
+
   // Mock variables for the button functionality - these should be properly implemented
   const [periodicity] = useState<'monthly' | 'yearly'>('monthly'); // This should come from your pricing state
   const periodicityDuration = 12; // This should come from your pricing state
@@ -22,34 +23,40 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
 
   const calculatePrice = (employees: number) => {
     const basePrice = 4000;
-    
+
     if (employees <= 100) {
       return basePrice;
     }
-    
+
     let additionalPrice = 0;
     let remainingEmployees = employees - 100;
-    
+
     // 101-250: P39 each
     if (remainingEmployees > 0) {
       const tier1 = Math.min(remainingEmployees, 150); // 250-100 = 150
       additionalPrice += tier1 * 39;
       remainingEmployees -= tier1;
     }
-    
+
     // 251-500: P37 each
     if (remainingEmployees > 0) {
       const tier2 = Math.min(remainingEmployees, 250); // 500-250 = 250
       additionalPrice += tier2 * 37;
       remainingEmployees -= tier2;
     }
-    
+
     // 500+: P35 each
     if (remainingEmployees > 0) {
       additionalPrice += remainingEmployees * 35;
     }
-    
+
     return basePrice + additionalPrice;
+  };
+
+  const calculateTotalPriceWithVAT = (price: number) => {
+    
+    let totalPrice = price + (price * 0.12);
+    return totalPrice;
   };
 
   const formatPrice = (price: number) => {
@@ -119,16 +126,16 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                   </li>
                 </ul>
               </div>
-                <div className="p-6 pt-20">
-                  <button
-                    className='block w-full text-center px-6 py-3 bg-gradient-to-r from-[#355FD0] to-[#25C3E6] text-white rounded-lg font-medium transition-colors hover:from-[#25C3E6] hover:to-[#355FD0]'
-                    onClick={() => {
-                      router.push('/signup');
-                    }}
-                  >
-                    Start Free Plan
-                  </button>
-                </div>
+              <div className='p-6 pt-20'>
+                <button
+                  className='block w-full text-center px-6 py-3 bg-gradient-to-r from-[#355FD0] to-[#25C3E6] text-white rounded-lg font-medium transition-colors hover:from-[#25C3E6] hover:to-[#355FD0]'
+                  onClick={() => {
+                    router.push('/signup');
+                  }}
+                >
+                  Start Free Plan
+                </button>
+              </div>
             </div>
 
             <div className='bg-gradient-to-r from-[#FA7417] to-[#FABE23] max-w-md w-full rounded-[20px] p-[3px] shadow-2xl'>
@@ -178,11 +185,14 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                       <p className='text-sm text-amber-600 font-semibold mb-2'>Introductory Price</p>
                       <div className='flex items-baseline justify-center mb-2'>
                         <span className='text-4xl font-bold text-indigo-dye'>
-                          {formatPrice(calculatePrice(employeeCount))}
+                          {formatPrice((employeeCount <= 100 ? calculatePrice(employeeCount) : calculateTotalPriceWithVAT(calculatePrice(employeeCount))))}
                         </span>
                         <span className='text-lg text-gray-600 ml-2'>/month</span>
                       </div>
                       <p className='text-gray-600'>For 1 - 100 employees</p>
+                      {employeeCount <= 100 && (
+                        <p className='text-gray-600 text-xs'>*VAT Excluded</p>
+                      )}
 
                       {/* Pricing Breakdown */}
                       {employeeCount > 100 && (
@@ -225,9 +235,13 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                                 </div>
                               </>
                             )}
+                            <div className='flex justify-between'>
+                              <span>12% VAT:</span>
+                              <span>₱{(calculatePrice(employeeCount) * 0.12).toLocaleString()}</span>
+                            </div>
                             <div className='flex justify-between font-medium border-t border-blue-300 pt-1'>
                               <span>Monthly Total:</span>
-                              <span>{formatPrice(calculatePrice(employeeCount))}</span>
+                              <span>{formatPrice(calculateTotalPriceWithVAT(calculatePrice(employeeCount)))}</span>
                             </div>
                           </div>
                         </div>
@@ -255,7 +269,9 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                         <span className='text-sm'>Document Management</span>
                       </li>
                       <li className='flex items-start gap-2 ml-7'>
-                        <span className='text-sm'>and <span className='text-black font-bold'>MORE!</span></span>
+                        <span className='text-sm'>
+                          and <span className='text-black font-bold'>MORE!</span>
+                        </span>
                       </li>
                     </ul>
                     <button
