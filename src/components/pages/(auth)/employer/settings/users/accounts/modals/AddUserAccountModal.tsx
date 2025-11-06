@@ -9,6 +9,15 @@ import useAddAccounts from '../hooks/useAddAccounts';
 
 import { EyeSlashIcon, EyeIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
+const getPasswordRequirements = (pass: string) => ({
+  length: pass.length >= 12,
+  lowercase: /[a-z]/.test(pass),
+  uppercase: /[A-Z]/.test(pass),
+  digit: /[0-9]/.test(pass),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+  noSpaces: !/\s/.test(pass),
+});
+
 export default function AddUserAccountModal({
   refetch,
   isOpen,
@@ -25,6 +34,8 @@ export default function AddUserAccountModal({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [backendPasswordError, setBackendPasswordError] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const { register, handleSubmit, reset, control } = formMethods;
   const { mutate: addAccounts, isLoading: isLoadingAddAccounts } = useAddAccounts();
 
@@ -34,8 +45,7 @@ export default function AddUserAccountModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
-        setIsOpen(false);
-        reset();
+        customCloseModal();
         refetch();
       },
       onError: (err: any) => {
@@ -47,22 +57,48 @@ export default function AddUserAccountModal({
     addAccounts(data, callbackReq);
   });
 
+  const customCloseModal = () => {
+    reset();
+    setPassword('');
+    setConfirmPassword('');
+    setPasswordRequirements(getPasswordRequirements(''));
+    setBackendPasswordError('');
+    setIsOpen(false);
+  };
+
   const generateStrongPassword = () => {
-    const length = 12; // Length of the password
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
-    let password = "";
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      password += charset[randomIndex];
+    const length = 12;
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const special = '!@#$%^&*()_+';
+    
+    // Ensure at least one character from each required category
+    let password = '';
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += digits[Math.floor(Math.random() * digits.length)];
+    password += special[Math.floor(Math.random() * special.length)];
+    
+    // Fill the rest with random characters from all categories
+    const allChars = lowercase + uppercase + digits + special;
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
     }
+    
+    // Shuffle the password to avoid predictable patterns (first char always lowercase, etc.)
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    
     setPassword(password);
     setConfirmPassword(password);
+    setPasswordRequirements(getPasswordRequirements(password));
+    setBackendPasswordError('');
   };
 
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => setIsOpen(false)}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -89,7 +125,7 @@ export default function AddUserAccountModal({
                 <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-7xl'>
                   <div className='flex bg-savoy-blue p-2 items-center'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Add User Account</h3>
-                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
@@ -146,7 +182,12 @@ export default function AddUserAccountModal({
                                   {...register('password', { required: true })}
                                   type={showPassword ? 'text' : 'password'}
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                                  onChange={(e) => setPassword(e.currentTarget.value)}
+                                  value={password}
+                                  onChange={(e) => {
+                                    setPassword(e.currentTarget.value);
+                                    setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
+                                    setBackendPasswordError('');
+                                  }}
                                 />
                                 <button
                                   type='button'
@@ -161,6 +202,32 @@ export default function AddUserAccountModal({
                                     <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
                                   )}
                                 </button>
+                                {backendPasswordError && (
+                                  <p className='text-red-600 text-xs mt-1'>{backendPasswordError}</p>
+                                )}
+                                {password && (
+                                  <div className='mt-2 text-sm text-red-600'>
+                                    <ul className='space-y-1'>
+                                      {!passwordRequirements.length && <li>• At least 12 characters</li>}
+                                      {!passwordRequirements.lowercase && <li>• At least 1 lowercase letter (a-z)</li>}
+                                      {!passwordRequirements.uppercase && <li>• At least 1 uppercase letter (A-Z)</li>}
+                                      {!passwordRequirements.digit && <li>• At least 1 number (0-9)</li>}
+                                      {!passwordRequirements.special && (
+                                        <li>• At least 1 special character (!@#$%^&*(),.?":{}|&lt;&gt;)</li>
+                                      )}
+                                      {!passwordRequirements.noSpaces && <li>• Spaces are not allowed</li>}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                              <div className='mt-3'>
+                                <button
+                                  type='button'
+                                  className='inline-flex justify-center rounded-md bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:shadow-md focus:shadow-none disabled:opacity-50'
+                                  onClick={generateStrongPassword}
+                                >
+                                  GENERATE STRONG PASSWORD
+                                </button>
                               </div>
                             </div>
                             <div className='grid-item'>
@@ -174,6 +241,7 @@ export default function AddUserAccountModal({
                                   {...register('confirm_password', { required: true })}
                                   type={showConfirmPassword ? 'text' : 'password'}
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                  value={confirmPassword}
                                   onChange={(e) => setConfirmPassword(e.currentTarget.value)}
                                 />
                                 <button
@@ -190,15 +258,6 @@ export default function AddUserAccountModal({
                                   )}
                                 </button>
                               </div>
-                            </div>
-                            <div className='grid-item'>
-                              <button
-                                type='button'
-                                className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
-                                onClick={generateStrongPassword}
-                              >
-                                Generate Strong Password
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -236,7 +295,7 @@ export default function AddUserAccountModal({
                         <button
                           type='button'
                           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                          onClick={() => setIsOpen(false)}
+                          onClick={() => customCloseModal()}
                           ref={cancelButtonRef}
                         >
                           Close
