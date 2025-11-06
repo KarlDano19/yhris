@@ -220,6 +220,15 @@ export default function AddUserAccountModal({
                                   </div>
                                 )}
                               </div>
+                              <div className='mt-3'>
+                                <button
+                                  type='button'
+                                  className='inline-flex justify-center rounded-md bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:shadow-md focus:shadow-none disabled:opacity-50'
+                                  onClick={generateStrongPassword}
+                                >
+                                  GENERATE STRONG PASSWORD
+                                </button>
+                              </div>
                             </div>
                             <div className='grid-item'>
                               <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -249,15 +258,6 @@ export default function AddUserAccountModal({
                                   )}
                                 </button>
                               </div>
-                            </div>
-                            <div className='grid-item'>
-                              <button
-                                type='button'
-                                className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
-                                onClick={generateStrongPassword}
-                              >
-                                Generate Strong Password
-                              </button>
                             </div>
                           </div>
                         </div>

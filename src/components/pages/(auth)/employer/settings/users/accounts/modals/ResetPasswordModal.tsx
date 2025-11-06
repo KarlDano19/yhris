@@ -217,6 +217,15 @@ export default function ResetPasswordModal({
                                   </div>
                                 )}
                               </div>
+                              <div className='mt-3'>
+                                <button
+                                  type='button'
+                                  className='inline-flex justify-center rounded-md bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:shadow-md focus:shadow-none disabled:opacity-50'
+                                  onClick={generateStrongPassword}
+                                >
+                                  GENERATE STRONG PASSWORD
+                                </button>
+                              </div>
                             </div>
                             <div className='grid-item'>
                               <div className='mb-4'>
@@ -249,13 +258,6 @@ export default function ResetPasswordModal({
                                 </div>
                               </div>
                             </div>
-                            <button
-                              type='button'
-                              className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
-                              onClick={generateStrongPassword}
-                            >
-                              Generate Strong Password
-                            </button>
                           </div>
                         </div>
                       </div>
