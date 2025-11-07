@@ -282,6 +282,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               first_name: orientItemCopy[itemIndex].firstname,
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
+              department: orientItemCopy[itemIndex].department_id,
+              employment_status: orientItemCopy[itemIndex].employment_status_id,
+              location: orientItemCopy[itemIndex].location_name,
+              position: orientItemCopy[itemIndex].position_id,
+              job_posting_id: Number(params.position),
             }
           }, {
             onSuccess: () => {
@@ -304,6 +309,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Skip sync employees and enrollment if password login type
       updateOrientationStatus();
     }
+    console.log(orientItemCopy[itemIndex]);
   };
 
 
