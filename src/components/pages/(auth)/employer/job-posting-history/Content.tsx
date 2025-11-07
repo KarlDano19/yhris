@@ -17,6 +17,7 @@ import RightClickMenu from '@/components/RightClickMenu';
 import Pagination from '@/components/Pagination';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
+import SeederButton from '@/components/SeederButton';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
@@ -25,6 +26,8 @@ import useGetJobPostItems from './hooks/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
 import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
 import useDeleteJobPost from './hooks/useDeleteJobPost';
+import useSeedJobPostings from './hooks/useSeedJobPostings';
+import useUnseedJobPostings from './hooks/useUnseedJobPostings';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
@@ -121,6 +124,8 @@ const Content = () => {
   const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
   const bulkDeleteMutation = useBulkDeleteJobPostings();
   const { mutate: deleteJobPost, isLoading: isDeleteLoading } = useDeleteJobPost();
+  const seedJobPostingsMutation = useSeedJobPostings();
+  const unseedJobPostingsMutation = useUnseedJobPostings();
   
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
@@ -471,6 +476,46 @@ const Content = () => {
     refetch();
   };
 
+  const handleSeedJobPostings = async (count: number) => {
+    try {
+      const result = await seedJobPostingsMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      setSelectedJobPostings(new Set());
+      setSelectAll(false);
+      setMoreMenuOpen({});
+      setShowShareOptions({});
+      refetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed job postings';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedJobPostings = async () => {
+    try {
+      const result = await unseedJobPostingsMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      setSelectedJobPostings(new Set());
+      setSelectAll(false);
+      setMoreMenuOpen({});
+      setShowShareOptions({});
+      refetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed job postings';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
   const renderRows = () => {
     if (isSearching || isGetJobPostLoading) {
       return (
@@ -812,6 +857,16 @@ const Content = () => {
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
               </div>
+            </div>
+            <div className='flex items-center gap-3 lg:ml-auto'>
+              <SeederButton
+                onSeed={handleSeedJobPostings}
+                onUnseed={handleUnseedJobPostings}
+                isLoading={seedJobPostingsMutation.isLoading}
+                isUnseeding={unseedJobPostingsMutation.isLoading}
+                maxCount={100}
+                defaultCount={5}
+              />
             </div>
           </div>
           
