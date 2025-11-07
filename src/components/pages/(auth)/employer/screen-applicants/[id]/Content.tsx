@@ -37,6 +37,9 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
+import useSeedApplicants from '../hooks/useSeedApplicants';
+import useUnseedApplicants from '../hooks/useUnseedApplicants';
+import SeederButton from '@/components/SeederButton';
 
 import { ArrowLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
@@ -58,6 +61,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
+  const seedApplicantsMutation = useSeedApplicants(params.id as string);
+  const unseedApplicantsMutation = useUnseedApplicants(params.id as string);
   
   // Date range filter states - must be declared before hook calls
   const [dateFrom, setDateFrom] = useState<any>('');
@@ -554,6 +559,40 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     setIsBatchUploadOpen(false);
   };
 
+  const handleSeedApplicants = async (count: number) => {
+    try {
+      const result = await seedApplicantsMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      appliedApplicantRefetch();
+      archivedApplicantRefetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed applicants';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedApplicants = async () => {
+    try {
+      const result = await unseedApplicantsMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      appliedApplicantRefetch();
+      archivedApplicantRefetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed applicants';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
   // Handle date range changes
   const handleDateFromChange = (date: any) => {
     setDateFrom(date);
@@ -578,9 +617,21 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </Link>
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
-                <h2 className='text-xl font-bold text-indigo-dye'>
-                  Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
-                </h2>
+                <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+                  <h2 className='text-xl font-bold text-indigo-dye'>
+                    Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
+                  </h2>
+                  <div className='self-start md:self-center'>
+                    <SeederButton
+                      onSeed={handleSeedApplicants}
+                      onUnseed={handleUnseedApplicants}
+                      isLoading={seedApplicantsMutation.isLoading}
+                      isUnseeding={unseedApplicantsMutation.isLoading}
+                      maxCount={100}
+                      defaultCount={5}
+                    />
+                  </div>
+                </div>
                 {whichModal && modals[whichModal].component}
 
                 {/* Desktop Layout */}
