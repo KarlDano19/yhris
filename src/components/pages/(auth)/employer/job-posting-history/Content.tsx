@@ -864,7 +864,7 @@ const Content = () => {
                 onUnseed={handleUnseedJobPostings}
                 isLoading={seedJobPostingsMutation.isLoading}
                 isUnseeding={unseedJobPostingsMutation.isLoading}
-                maxCount={100}
+                maxCount={1000}
                 defaultCount={5}
               />
             </div>

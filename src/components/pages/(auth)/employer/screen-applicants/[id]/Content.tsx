@@ -627,7 +627,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       onUnseed={handleUnseedApplicants}
                       isLoading={seedApplicantsMutation.isLoading}
                       isUnseeding={unseedApplicantsMutation.isLoading}
-                      maxCount={100}
+                      maxCount={1000}
                       defaultCount={5}
                     />
                   </div>
