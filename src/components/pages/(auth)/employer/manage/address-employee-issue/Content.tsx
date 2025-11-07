@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import SeederButton from '@/components/SeederButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -32,6 +33,8 @@ import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
+import useSeedEmployeeIssues from './hooks/useSeedEmployeeIssues';
+import useUnseedEmployeeIssues from './hooks/useUnseedEmployeeIssues';
 
 import {
   T_SendNTEModal,
@@ -97,6 +100,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
+  const seedEmployeeIssuesMutation = useSeedEmployeeIssues();
+  const unseedEmployeeIssuesMutation = useUnseedEmployeeIssues();
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const { data: decisionEmployeeIssueDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
@@ -395,6 +400,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Update the applied filter with the new sort order
     setAppliedFilter({ ...appliedFilter, status_sort: newSortOrder });
     setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  const handleSeedEmployeeIssues = async (count: number) => {
+    try {
+      const result = await seedEmployeeIssuesMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      if (refetch) {
+        await refetch();
+      }
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed employee issues';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedEmployeeIssues = async () => {
+    try {
+      const result = await unseedEmployeeIssuesMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      if (refetch) {
+        await refetch();
+      }
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed employee issues';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -877,7 +918,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
+              <SeederButton
+                onSeed={handleSeedEmployeeIssues}
+                onUnseed={handleUnseedEmployeeIssues}
+                isLoading={seedEmployeeIssuesMutation.isLoading}
+                isUnseeding={unseedEmployeeIssuesMutation.isLoading}
+                maxCount={1000}
+                defaultCount={5}
+              />
               <SmartButton
                 id="create-employee-issue-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
