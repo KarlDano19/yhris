@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { getCookie } from 'cookies-next';
 
 export type ConvertedImage = {
@@ -15,12 +15,6 @@ type ConvertResponse = {
  * can render them without CORS issues during exports.
  */
 function useImageExportHelpers() {
-  const token = getCookie('token');
-  const tokenValue = useMemo(
-    () => (typeof token === 'string' ? token : undefined),
-    [token],
-  );
-
   const convertImagesToDataUri = useCallback(
     async (images: HTMLImageElement[]): Promise<ConvertedImage[]> => {
       const converted: ConvertedImage[] = [];
@@ -50,11 +44,13 @@ function useImageExportHelpers() {
         }
 
         try {
+          const token = getCookie('token');
+
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/images/to-base64/`, {
             method: 'POST',
             headers: {
               'content-type': 'application/json',
-              ...(tokenValue ? { Authorization: `Token ${tokenValue}` } : {}),
+              Authorization: `Token ${token}`,
             },
             body: JSON.stringify({ url: parsedUrl.toString() }),
           });
@@ -93,7 +89,7 @@ function useImageExportHelpers() {
 
       return converted;
     },
-    [tokenValue],
+    [],
   );
 
   const revertConvertedImages = useCallback((converted: ConvertedImage[]) => {
@@ -111,4 +107,3 @@ function useImageExportHelpers() {
 }
 
 export default useImageExportHelpers;
-
