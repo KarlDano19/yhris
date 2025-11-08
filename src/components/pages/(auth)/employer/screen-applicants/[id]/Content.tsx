@@ -645,7 +645,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           id='from-datepicker'
                           placeholder={'mm/dd/yyyy'}
                           className={
-                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                           }
                           selected={dateFrom}
                           pickerOnChange={handleDateFromChange}
@@ -658,7 +658,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           id='to-datepicker'
                           placeholder={'mm/dd/yyyy'}
                           className={
-                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                           }
                           selected={dateTo}
                           pickerOnChange={handleDateToChange}

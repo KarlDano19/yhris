@@ -19,6 +19,7 @@ import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useOrgStructureExportAudit from './hooks/useAddOrgStructureExportAudit';
+import useImageToBase64, { ConvertedImage } from './hooks/useImageToBase64';
 
 import { OrgStructure } from './types';
 
@@ -56,6 +57,7 @@ const Content = () => {
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
   const { data: departmentItems = [] } = useGetDepartmentItems();
   const { mutate: logExportAudit } = useOrgStructureExportAudit();
+  const { convertImagesToDataUri, revertConvertedImages } = useImageToBase64();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
 
@@ -234,6 +236,8 @@ const Content = () => {
     await new Promise(resolve => setTimeout(resolve, 100));
     await new Promise(resolve => requestAnimationFrame(resolve));
     
+    let convertedImages: ConvertedImage[] = [];
+
     try {
       // Store original state
       const originalFullscreen = isFullscreen;
@@ -326,6 +330,10 @@ const Content = () => {
       await new Promise(resolve => setTimeout(resolve, 100));
       await new Promise(resolve => requestAnimationFrame(resolve));
 
+      const imagesNodeList = Array.from(chartContainer.querySelectorAll('img'));
+
+      convertedImages = await convertImagesToDataUri(imagesNodeList);
+
       // Get company name for filename
       const companyName = cachedProfile?.state?.data?.name || 'Company';
       const timestamp = new Date().toISOString().split('T')[0];
@@ -333,9 +341,8 @@ const Content = () => {
       const filename = `${companyName}_Org_Structure${suffix}_${timestamp}`;
 
       // Ensure all images are fully loaded before capturing
-      const images = chartContainer.querySelectorAll('img');
       await Promise.all(
-        Array.from(images).map((img) => {
+        imagesNodeList.map((img) => {
           if (img.complete) return Promise.resolve();
           return new Promise((resolve) => {
             img.onload = () => resolve(true);
@@ -441,6 +448,11 @@ const Content = () => {
       console.error('Export failed:', error);
       alert('Export failed. Please try again.');
       
+      if (convertedImages.length) {
+        revertConvertedImages(convertedImages);
+        convertedImages = [];
+      }
+      
       // Remove export mode class on error
       const chartContainer = document.querySelector('.org-tree-container') as HTMLElement;
       if (chartContainer) {
@@ -469,6 +481,10 @@ const Content = () => {
     } finally {
       setIsExporting(false);
       setDisableTooltips(false); // Re-enable tooltips after export
+      if (convertedImages.length) {
+        revertConvertedImages(convertedImages);
+        convertedImages = [];
+      }
     }
   };
 
