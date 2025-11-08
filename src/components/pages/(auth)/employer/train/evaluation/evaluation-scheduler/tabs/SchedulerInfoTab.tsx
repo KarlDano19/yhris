@@ -28,6 +28,8 @@ function SchedulerInfoTab({
   } = useGetEvaluationTemplateItems();
 
   const selectedFrequencyUnit = watch('frequency_unit');
+  const selectedEvaluationTemplate = watch('evaluation_template');
+  const selectedReminderSchedule = watch('reminder_schedule');
   const [showTooltip, setShowTooltip] = useState(false);
   const [customScheduleDetails, setCustomScheduleDetails] = useState<{
     months: number[];
@@ -296,14 +298,14 @@ function SchedulerInfoTab({
               id='evaluation_template'
               {...register('evaluation_template', { required: true })}
               className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-              defaultValue=''
+              value={selectedEvaluationTemplate !== undefined && selectedEvaluationTemplate !== null ? String(selectedEvaluationTemplate) : ''}
             >
               <option value='' disabled>
                 Select...
               </option>
               {Array.isArray(evaluationItems) && evaluationItems.map((item: any, index: number) => {
                 return (
-                  <option key={item.id} value={item.id}>
+                  <option key={item.id} value={String(item.id)}>
                     {item.name}
                   </option>
                 );
@@ -323,7 +325,7 @@ function SchedulerInfoTab({
               id='reminder_schedule'
               {...register('reminder_schedule', { required: true })}
               className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-              defaultValue=''
+              value={selectedReminderSchedule || ''}
             >
               <option value='' disabled>
                 Select...
