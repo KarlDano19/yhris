@@ -13,12 +13,15 @@ import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import SeederButton from '@/components/SeederButton';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
 import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailEvaluationSchedulerModal';
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
 import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
+import useSeedEvaluationSchedulers from './hooks/useSeedEvaluationSchedulers';
+import useUnseedEvaluationSchedulers from './hooks/useUnseedEvaluationSchedulers';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -79,6 +82,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
+  const seedEvaluationSchedulersMutation = useSeedEvaluationSchedulers();
+  const unseedEvaluationSchedulersMutation = useUnseedEvaluationSchedulers();
 
   // Helper component to display recipient avatar with fallback
   const RecipientAvatar = ({ recipient, size = 40 }: { recipient: any; size?: number }) => {
@@ -199,6 +204,36 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsDeleteEvaluationSchedulerModalOpen({ id: evaluationDetails.id, open: true });
     } else {
       setSelectedEvaluationSchedulerId(evaluationDetails.id);
+    }
+  };
+
+  const handleSeedEvaluationSchedulers = async (count: number) => {
+    try {
+      const result = await seedEvaluationSchedulersMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed evaluation schedulers';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedEvaluationSchedulers = async () => {
+    try {
+      const result = await unseedEvaluationSchedulersMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed evaluation schedulers';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
     }
   };
 
@@ -385,7 +420,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td colSpan={7}>
               <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
               <h4 className='text-center text-gray-300 text-sm mb-4'>
-                Please click create to add evaluation template.
+                Please click create to add an evaluation scheduler.
               </h4>
             </td>
           </tr>
@@ -439,10 +474,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
+              <SeederButton
+                onSeed={handleSeedEvaluationSchedulers}
+                onUnseed={handleUnseedEvaluationSchedulers}
+                isLoading={seedEvaluationSchedulersMutation.isLoading}
+                isUnseeding={unseedEvaluationSchedulersMutation.isLoading}
+                disabled={!hasActiveSubscription}
+                maxCount={1000}
+              />
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>

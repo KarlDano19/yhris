@@ -22,6 +22,9 @@ import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
 import useDuplicateEvaluationTemplate from './hooks/useDuplicateEvaluationTemplate';
+import SeederButton from '@/components/SeederButton';
+import useSeedEvaluationTemplates from './hooks/useSeedEvaluationTemplates';
+import useUnseedEvaluationTemplates from './hooks/useUnseedEvaluationTemplates';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -83,6 +86,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const bulkDeleteMutation = useBulkDeleteEvaluationTemplates();
   const { mutate: duplicateEvaluationTemplate, isLoading: isDuplicateEvaluationTemplateLoading } = useDuplicateEvaluationTemplate();
   const [isSearching, setIsSearching] = useState(false);
+  const seedEvaluationTemplatesMutation = useSeedEvaluationTemplates();
+  const unseedEvaluationTemplatesMutation = useUnseedEvaluationTemplates();
 
   // Persisted form state for CreateEvaluationTemplateModal
   const formMethods = useForm({
@@ -381,6 +386,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
+  const handleSeedEvaluationTemplates = async (count?: number) => {
+    try {
+      const result = await seedEvaluationTemplatesMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed evaluation templates';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedEvaluationTemplates = async () => {
+    try {
+      const result = await unseedEvaluationTemplatesMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed evaluation templates';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
   return (
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
@@ -467,7 +502,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
+              <SeederButton
+                onSeed={handleSeedEvaluationTemplates}
+                onUnseed={handleUnseedEvaluationTemplates}
+                isLoading={seedEvaluationTemplatesMutation.isLoading}
+                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                disabled={!hasActiveSubscription}
+              />
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsSelectionModalOpen(true)}

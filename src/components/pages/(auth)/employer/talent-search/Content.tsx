@@ -20,6 +20,9 @@ import ImageBackground5 from '@/assets/talent-search/Talent_Search_Man_1.png';
 import useGetApplicantFavorites from './hook/favorites/useGetApplicantFavorites';
 import useAddApplicantFavorite from './hook/favorites/useAddApplicantFavorite';
 import useRemoveApplicantFavorite from './hook/favorites/useRemoveApplicantFavorite';
+import useSeedApplicants from './hook/useSeedApplicants';
+import useUnseedApplicants from './hook/useUnseedApplicants';
+import SeederButton from '@/components/SeederButton';
 import ApplicantProfileModal from './modal/ApplicantProfileModal';
 import CompareApplicantsModal from './modal/CompareApplicantsModal';
 import FilterModal from './modal/FilterModal';
@@ -154,6 +157,8 @@ const Content = () => {
   const { data: favoriteApplicants, refetch: refetchFavorites } = useGetApplicantFavorites();
   const addFavoriteMutation = useAddApplicantFavorite();
   const removeFavoriteMutation = useRemoveApplicantFavorite();
+  const seedApplicantsMutation = useSeedApplicants();
+  const unseedApplicantsMutation = useUnseedApplicants();
 
   // Load saved state from localStorage on component mount
   useEffect(() => {
@@ -437,6 +442,38 @@ const Content = () => {
     }
   };
 
+  const handleSeedApplicants = async (count: number) => {
+    try {
+      const result = await seedApplicantsMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type="success" />, { duration: 3000 });
+      refetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed applicants';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedApplicants = async () => {
+    try {
+      const result = await unseedApplicantsMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      refetch();
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed applicants';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
   return (
     <div className='relative'>
       {/* Background Image covering the whole page */}
@@ -525,19 +562,22 @@ const Content = () => {
             </Link>
           </div>
           <div className='px-2 md:px-8 lg:px-4'>
-            {/* <Image
-              src={ImageBackground}
-              alt='Talent Search'
-              fill
-              style={{
-                objectFit: 'cover',
-                zIndex: -1,
-              }}
-            /> */}
-            <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
-              <h2 className='text-center w-full col-span-full text-lg sm:text-xl md:text-2xl font-semibold text-slate-800'>
-                Find the Right Talent for Your Team
-              </h2>
+            <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-6'>
+              <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 w-full'>
+                <h2 className='text-center w-full col-span-full text-lg sm:text-xl md:text-2xl font-semibold text-slate-800'>
+                  Find the Right Talent for Your Team
+                </h2>
+              </div>
+              <div className='self-start md:self-center'>
+                <SeederButton
+                  onSeed={handleSeedApplicants}
+                  onUnseed={handleUnseedApplicants}
+                  isLoading={seedApplicantsMutation.isLoading}
+                  isUnseeding={unseedApplicantsMutation.isLoading}
+                  maxCount={1000}
+                  defaultCount={5}
+                />
+              </div>
             </div>
 
             <div className='flex justify-center mt-4'>
