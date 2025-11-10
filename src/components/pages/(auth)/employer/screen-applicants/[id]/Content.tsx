@@ -79,17 +79,19 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = useGetJobPostDetails(params.id);
+  const recentOnly = !useDateFilter;
+
   const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(
-    params.id, 
-    false, 
-    useDateFilter ? false : true,
+    params.id,
+    false,
+    recentOnly,
     useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
     useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
   );
   const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(
-    params.id, 
-    true, 
-    useDateFilter ? false : true,
+    params.id,
+    true,
+    recentOnly,
     useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
     useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
   );
