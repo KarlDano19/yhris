@@ -84,7 +84,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
-  const { mutate: enrollToYP } = useEnrollEmployeeToYP();
+  const { mutate: enrollToYP, isLoading: isEnrolling } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
@@ -448,7 +448,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setEnrolled={() => {
                   setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
-                isLoading={isLoading}
+                isLoading={isLoading || isEnrolling}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>

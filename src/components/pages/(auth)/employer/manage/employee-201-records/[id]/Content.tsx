@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -45,6 +45,7 @@ import { useCreateTrainingRecord } from "./hooks/useCreateTrainingRecord";
 import { usePatchTrainingRecord } from "./hooks/usePatchTrainingRecord";
 import { useDeleteTrainingRecord } from "./hooks/useDeleteTrainingRecord";
 import { useEmployeePhotoPatch } from "./hooks/useEmployeePhotoPatch";
+import useUpdateEmployeeToYP from "@/components/hooks/useUpdateEmployeeToYP";
 
 export interface ContentProps {
   params: { id: string };
@@ -255,6 +256,7 @@ export default function Employee201Content({
 
   useEffect(() => {
     setEmployeeDetails(data ?? emp);
+    console.log("employeeDetails", data);
   }, [data, emp]);
 
   // warn on unload when dirty
@@ -489,6 +491,29 @@ export default function Employee201Content({
     },
     []
   );
+  
+  const { mutate: updateEmployeeToYP, isLoading: isUpdating } = useUpdateEmployeeToYP();
+
+  const syncToYP = useCallback(() => {
+    updateEmployeeToYP({
+      id: employeeDetails?.id as unknown as string,
+      data: {
+        first_name: employeeDetails?.firstname,
+        last_name: employeeDetails?.lastname,
+        middle_name: employeeDetails?.middlename,
+        email: employeeDetails?.email,
+        tin: employeeDetails?.tin,
+        sss: employeeDetails?.sss,
+        pagibig: employeeDetails?.pagibig,
+        philhealth: employeeDetails?.philhealth,
+        emergency_contact: employeeDetails?.emergency_contact,
+        emergency_contact_name: employeeDetails?.emergency_contact?.name,
+        emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
+        system_id: employeeDetails?.system_id,
+      }
+    });
+    console.log("syncToYP", employeeDetails);
+  }, [updateEmployeeToYP, employeeDetails]);
 
   // ------------------------ Render ------------------------
   const renderActiveForm = () => {
@@ -597,30 +622,45 @@ export default function Employee201Content({
               </span>
             </h4>
           </a>
-
-        <SmartButton
-          id="edit-employee-201-btn"
-          data-testid="save-btn"
-          onClick={() => {
-            if (requiresEdit && !isEditingTab) {
-              // EDIT: enable fields
-              setEditMode((m) => ({ ...m, [activeTab]: true }));
-              return;
-            }
-            // SAVE: open confirm modal (do NOT save immediately)
-            setShowConfirm(true);
-          }}
-          disabled={
-            requiresEdit
-              ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
-              : !canSave                            // other tabs: Save only when valid+dirty
-          }
-          className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
-        >
-          {requiresEdit
-            ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
-            : (saving ? "Saving…" : "Save")}
-        </SmartButton>
+          <div className="flex items-center gap-2">
+            <SmartButton
+              id="edit-employee-201-btn"
+              data-testid="save-btn"
+              onClick={() => {
+                if (requiresEdit && !isEditingTab) {
+                  // EDIT: enable fields
+                  setEditMode((m) => ({ ...m, [activeTab]: true }));
+                  return;
+                }
+                // SAVE: open confirm modal (do NOT save immediately)
+                setShowConfirm(true);
+              }}
+              disabled={
+                requiresEdit
+                  ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
+                  : !canSave                            // other tabs: Save only when valid+dirty
+              }
+              className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
+            >
+              {requiresEdit
+                ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
+                : (saving ? "Saving…" : "Save")}
+            </SmartButton>
+            <button
+              id="sync-to-yp-btn"
+              disabled={isUpdating}
+              onClick={() => {
+                syncToYP();
+              }}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            >
+              {isUpdating && (
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+              )}
+              <ArrowPathIcon className="w-4 h-4" />
+              <span>Sync to YP</span>
+            </button>
+          </div>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">
