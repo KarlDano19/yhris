@@ -19,7 +19,7 @@ import useGetOrgStructureManage from './hooks/useGetOrgStructureManage';
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 import useOrgStructureExportAudit from './hooks/useAddOrgStructureExportAudit';
-import useImageExportHelpers, { ConvertedImage } from './hooks/useImageExportHelpers';
+import useImageToBase64, { ConvertedImage } from './hooks/useImageToBase64';
 
 import { OrgStructure } from './types';
 
@@ -57,7 +57,7 @@ const Content = () => {
   const { data: orgStructureData, isLoading, error, refetch } = useGetOrgStructureManage();
   const { data: departmentItems = [] } = useGetDepartmentItems();
   const { mutate: logExportAudit } = useOrgStructureExportAudit();
-  const { convertImagesToDataUri, revertConvertedImages } = useImageExportHelpers();
+  const { convertImagesToDataUri, revertConvertedImages } = useImageToBase64();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']) as { state: { data: any } | undefined };
 
