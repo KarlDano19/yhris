@@ -10,7 +10,6 @@ import Confetti from 'react-confetti';
 
 import CustomToast from '@/components/CustomToast';
 import ConfirmSubmitModal from '../modals/ConfirmSubmitModal';
-import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import useGetEmployeeIssueActionDetails from '../hooks/useGetEmployeeIssueActionDetails';
 import useUpdateEmployeeIssueAction from '../hooks/useUpdateEmployeeIssueAction';
 
@@ -21,14 +20,11 @@ function Content() {
   const params = useParams<{ employee_issue_id: string }>();
   const [hasIssue, setHasIssue] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [isConfirmSubmitModalOpen, setIsConfirmSubmitModalOpen] = useState(false);
   const [employeeIssueDetails, setEmployeeIssueDetails] = useState<any>({});
   const [responseText, setResponseText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { data: dataEmployeeIssueDetails, isLoading: employeeIssueDetailsLoading } =
-    useGetEmployeeIssueDetails(params.employee_issue_id || null);
+
   const {
     data: dataEmployeeIssueResponseDetails,
     isLoading: employeeIssueResponseDetailsLoading,
@@ -38,21 +34,13 @@ function Content() {
 
   useEffect(() => {
     if (
-      dataEmployeeIssueDetails &&
-      Object.keys(dataEmployeeIssueDetails).length !== 0 &&
-      !employeeIssueDetailsLoading
-    ) {
-      setHasIssue(true);
-      setEmployeeIssueDetails(dataEmployeeIssueDetails);
-    }
-  }, [dataEmployeeIssueDetails, employeeIssueDetailsLoading]);
-
-  useEffect(() => {
-    if (
       dataEmployeeIssueResponseDetails &&
       Object.keys(dataEmployeeIssueResponseDetails).length !== 0 &&
       !employeeIssueResponseDetailsLoading
     ) {
+      setHasIssue(true);
+      setEmployeeIssueDetails(dataEmployeeIssueResponseDetails);
+
       // If already responded, show submitted state
       if (dataEmployeeIssueResponseDetails.is_responded) {
         setIsSubmitted(true);
@@ -102,17 +90,7 @@ function Content() {
     );
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  if (employeeIssueDetailsLoading || employeeIssueResponseDetailsLoading) {
+  if (employeeIssueResponseDetailsLoading) {
     return (
       <div className='w-screen h-screen flex justify-center items-center'>
         <div className='fixed z-20 inset-0 overflow-y-auto'>
