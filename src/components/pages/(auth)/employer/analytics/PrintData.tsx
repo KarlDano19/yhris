@@ -38,6 +38,63 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   allJobPostsForPrint?: any[],
   selectedRecords?: number[]
 ) => {
+  const allApplicants = Array.isArray(appliedApplicantsData) ? appliedApplicantsData : [];
+
+  const hasSelectedJobFilter = !!selectedJobFilter && selectedJobFilter !== 'All Jobs';
+  const selectedJobId =
+    hasSelectedJobFilter && typeof selectedJobFilter === 'string' && /^\d+$/.test(selectedJobFilter)
+      ? Number(selectedJobFilter)
+      : hasSelectedJobFilter && typeof selectedJobFilter === 'number'
+        ? selectedJobFilter
+        : null;
+  const selectedJobTitle =
+    hasSelectedJobFilter && selectedJobId === null && typeof selectedJobFilter === 'string'
+      ? selectedJobFilter
+      : null;
+
+  const shouldFilterBySelectedRecords =
+    printOption === 'selected' && Array.isArray(selectedRecords) && selectedRecords.length > 0;
+  const selectedRecordIdSet = shouldFilterBySelectedRecords
+    ? new Set(
+        selectedRecords
+          .map((record) => {
+            if (typeof record === 'number') {
+              return record;
+            }
+            if (typeof record === 'string' && /^\d+$/.test(record)) {
+              return Number(record);
+            }
+            return null;
+          })
+          .filter((id): id is number => id !== null)
+      )
+    : null;
+
+  const filteredApplicants = allApplicants.filter((applicant: any) => {
+    const jobPosting = applicant?.job_posting;
+    const jobId = jobPosting?.id;
+    const jobTitle = jobPosting?.job_title;
+
+    if (shouldFilterBySelectedRecords) {
+      if (jobId === null || jobId === undefined || !selectedRecordIdSet?.has(Number(jobId))) {
+        return false;
+      }
+    }
+
+    if (selectedJobId !== null) {
+      return jobId === selectedJobId;
+    }
+
+    if (selectedJobTitle) {
+      return jobTitle === selectedJobTitle || jobId === selectedJobTitle;
+    }
+
+    return true;
+  });
+
+  const applicantsDataForPrint =
+    hasSelectedJobFilter || shouldFilterBySelectedRecords ? filteredApplicants : allApplicants;
+
   // Calculate KPI data
   const calculateKPIs = () => {
     // Total Active Employees - Use shared utility function
@@ -71,13 +128,13 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
 
   // Calculate applicant data for sub-tab 1 - Use shared utility function
   const calculateApplicantData = () => {
-    return calculateOverallApplicantsSummary(appliedApplicantsData);
+    return calculateOverallApplicantsSummary(applicantsDataForPrint);
   };
 
   // Calculate demographic data for sub-tab 1 - Use shared utility function
   const calculateDemographicData = () => {
     return calculateDemographicBreakdown(
-      appliedApplicantsData,
+      applicantsDataForPrint,
       { records: allJobPostData },
       validRegions,
       selectedJobFilter
