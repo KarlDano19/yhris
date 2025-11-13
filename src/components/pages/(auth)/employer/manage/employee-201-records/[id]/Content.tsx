@@ -383,6 +383,64 @@ export default function Employee201Content({
     return { ok: true };
   }, [createTraining, updateTraining, deleteTraining, params.id]);
 
+  // Helper function to extract user-friendly error messages
+  const extractErrorMessage = useCallback((error: Error): string => {
+    const errorMessage = error.message || "";
+    
+    // Handle Django field format errors (e.g., "Tin: TIN already registered...")
+    if (errorMessage.includes(': ')) {
+      const parts = errorMessage.split(': ');
+      if (parts.length > 1) {
+        const fieldName = parts[0].toLowerCase();
+        const message = parts.slice(1).join(': ');
+        
+        // Check if this is a government ID validation error
+        if (message.includes('TIN') || message.includes('SSS') || 
+            message.includes('PAGIBIG') || message.includes('PhilHealth') ||
+            fieldName === 'tin' || fieldName === 'sss' || 
+            fieldName === 'pagibig' || fieldName === 'philhealth') {
+          return message; // Return just the message without field prefix
+        }
+      }
+    }
+    
+    // Direct check for government ID errors (fallback)
+    if (errorMessage.includes('TIN') || 
+        errorMessage.includes('SSS') || 
+        errorMessage.includes('PAGIBIG') || 
+        errorMessage.includes('PhilHealth')) {
+      return errorMessage;
+    }
+    
+    try {
+      // Try to parse as JSON in case it's a stringified object
+      const parsedError = JSON.parse(errorMessage);
+      
+      // Handle Django serializer validation errors
+      if (typeof parsedError === 'object' && parsedError !== null) {
+        const errors: string[] = [];
+        
+        // Extract specific field validation errors
+        for (const [field, fieldErrors] of Object.entries(parsedError)) {
+          if (Array.isArray(fieldErrors)) {
+            errors.push(...fieldErrors);
+          } else if (typeof fieldErrors === 'string') {
+            errors.push(fieldErrors);
+          }
+        }
+        
+        if (errors.length > 0) {
+          return errors.join(' ');
+        }
+      }
+    } catch {
+      // Not JSON, continue with fallback
+    }
+    
+    // Fallback to original message or generic error
+    return errorMessage || `Failed to save ${labelForTab(activeTab)}.`;
+  }, [activeTab]);
+
   const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
     const s = sections[key];
@@ -391,14 +449,14 @@ export default function Employee201Content({
       setShowConfirm(false);
       return;
     }
-
+  
     setConfirmBusy(true);
     setSections((prev) => ({
       ...prev,
       [key]: { ...prev[key], saving: true },
     }));
-
-    const savePromise = (async () => {
+  
+    try {
       if (key === "personal") {
         await savePersonalTab();
       } else if (key === "employment") {
@@ -408,7 +466,7 @@ export default function Employee201Content({
       } else {
         // fallback demo save for other tabs
         await new Promise<void>((r) => setTimeout(r, 800));
-        // Not calling refetch here because there’s no actual API change
+        // Not calling refetch here because there's no actual API change
       }
 
       setSections((prev) => ({
@@ -420,25 +478,27 @@ export default function Employee201Content({
           savedAt: Date.now(),
         },
       }));
-    })();
 
-    const ok = await notify.promise(savePromise, {
-      success: `${labelForTab(key)} saved successfully.`,
-      error: `Failed to save ${labelForTab(key)}.`,
-    });
-
-    setConfirmBusy(false);
-    if (ok) {
+      // Success notification
+      notify.success(`${labelForTab(key)} saved successfully.`);
+      
+      setConfirmBusy(false);
       if (activeTab === "personal")
         setEditMode((m) => ({ ...m, personal: false }));
       if (activeTab === "employment")
         setEditMode((m) => ({ ...m, employment: false }));
-      setShowConfirm(false); // harmless if not shown
-    } else {
+      setShowConfirm(false);
+
+    } catch (error: any) {
+      // Extract and show specific error message
+      const errorMessage = extractErrorMessage(error);
+      notify.error(errorMessage);
+      
       setSections((prev) => ({
         ...prev,
         [key]: { ...prev[key], saving: false },
       }));
+      setConfirmBusy(false);
     }
   }, [
     activeTab,
@@ -446,6 +506,7 @@ export default function Employee201Content({
     savePersonalTab,
     saveEmploymentTab,
     saveTrainingTab,
+    extractErrorMessage,
   ]);
 
   // ------------------------ Tab click ------------------------
