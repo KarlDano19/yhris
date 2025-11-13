@@ -15,6 +15,22 @@ interface WorkforceOverviewDocumentProps {
     label: string;
     color: string;
   }>;
+  jobApplicantSummaries?: Array<{
+    jobId: string | number;
+    jobTitle: string;
+    applicantCount: number;
+    summary: Array<{
+      status: string;
+      count: string;
+      percentage: string;
+      label: string;
+      color: string;
+    }>;
+  }>;
+  selectionMetadata?: {
+    totalApplicants: number;
+    jobCount?: number;
+  };
   demographicData?: {
     femalePercentage: string;
     malePercentage: string;
@@ -46,6 +62,8 @@ interface WorkforceOverviewDocumentProps {
 const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
   kpiData,
   applicantData,
+  jobApplicantSummaries,
+  selectionMetadata,
   demographicData,
   rolePipelineData,
   attritionData,
@@ -182,6 +200,47 @@ const WorkforceOverviewDocument: React.FC<WorkforceOverviewDocumentProps> = ({
             <div className="text-center py-4 text-gray-500">
               <div className="font-semibold mb-1 text-xs">No Data Available</div>
               <div className="text-xs">No applicant data found for the selected criteria</div>
+            </div>
+          )}
+          {selectionMetadata && (
+            <div className="text-[11px] text-gray-600 mt-2">
+              Total applicants across selection: <span className="font-semibold">{selectionMetadata.totalApplicants}</span>
+              {typeof selectionMetadata.jobCount === 'number' && (
+                <> • Jobs included: <span className="font-semibold">{selectionMetadata.jobCount}</span></>
+              )}
+            </div>
+          )}
+          {jobApplicantSummaries && jobApplicantSummaries.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <h4 className="text-[11px] font-semibold text-gray-900">
+                Selected Job Breakdown
+                {selectionMetadata?.jobCount ? ` (${selectionMetadata.jobCount} job${selectionMetadata.jobCount > 1 ? 's' : ''})` : ''}
+              </h4>
+              {jobApplicantSummaries.map((job) => (
+                <div key={job.jobId}>
+                  <div className="text-[11px] font-semibold text-gray-700 mb-1">
+                    {job.jobTitle} • Applicants: {job.applicantCount}
+                  </div>
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 p-1 text-center text-[11px]">Status</th>
+                        <th className="border border-gray-300 p-1 text-center text-[11px]">Count</th>
+                        <th className="border border-gray-300 p-1 text-center text-[11px]">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {job.summary.map((item, index) => (
+                        <tr key={index}>
+                          <td className="border border-gray-300 p-1 text-center text-[11px]">{item.status}</td>
+                          <td className="border border-gray-300 p-1 text-center text-[11px]">{item.count}</td>
+                          <td className="border border-gray-300 p-1 text-center text-[11px]">{item.percentage}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
             </div>
           )}
         </div>
