@@ -301,6 +301,7 @@ export default function EmailField({
     onInputChange('');
     setSearchTerm('');
     setSelectedIndex(-1);
+    setShowSuggestions(true);
     
     // Ensure suggestions are prepared for next search by triggering a re-filter
     // This is important after manual email entry to ensure suggestions show on next focus
@@ -502,6 +503,10 @@ export default function EmailField({
                     }`
               }`}
               onMouseEnter={() => !employee.is_show_more_option && setSelectedIndex(index)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => handleEmployeeSelect(employee)}
             >
               {employee.is_show_more_option ? (
