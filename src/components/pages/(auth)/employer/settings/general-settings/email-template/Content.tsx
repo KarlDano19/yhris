@@ -53,7 +53,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
-  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
+  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>(null);
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
   
   // Bulk delete states
@@ -79,8 +79,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const unseedMutation = useUnseedEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
+    setSelectedEmailTemplateId(null);
+    setActionType('');
     // Reset the modal state to close the create/edit modal
-    setEmailTemplateModal({ id: null, open: false, mode: 'create' });
+    setEmailTemplateModal(null);
   };
 
   const paginationChange = (event: any) => {
@@ -192,6 +194,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
   };
+
+  useEffect(() => {
+    if (!emailTemplateModal?.open) {
+      setSelectedEmailTemplateId(null);
+      setActionType('');
+    }
+  }, [emailTemplateModal]);
 
   // Handle individual email template selection
   const handleEmailTemplateSelect = (emailTemplateId: number) => {
