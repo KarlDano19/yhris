@@ -95,6 +95,75 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   const applicantsDataForPrint =
     hasSelectedJobFilter || shouldFilterBySelectedRecords ? filteredApplicants : allApplicants;
 
+  const includeJobBreakdown = hasSelectedJobFilter || shouldFilterBySelectedRecords;
+
+  const jobPostTitleMap = new Map<number, string>();
+  if (Array.isArray(allJobPostData)) {
+    allJobPostData.forEach((job: any) => {
+      if (job?.id != null) {
+        jobPostTitleMap.set(job.id, job.job_title || `Job ${job.id}`);
+      }
+    });
+  }
+
+  const jobApplicantGroups = new Map<string | number, any[]>();
+  const jobTitleLookup = new Map<string | number, string>();
+
+  const registerJobGroup = (key: string | number, titleFallback?: string) => {
+    if (!jobApplicantGroups.has(key)) {
+      jobApplicantGroups.set(key, []);
+    }
+    if (!jobTitleLookup.has(key)) {
+      const numericKey = typeof key === 'string' && /^\d+$/.test(key) ? Number(key) : key;
+      const mappedTitle =
+        typeof numericKey === 'number'
+          ? jobPostTitleMap.get(numericKey)
+          : undefined;
+      jobTitleLookup.set(
+        key,
+        mappedTitle ||
+          titleFallback ||
+          (typeof key === 'number' ? `Job ${key}` : key.toString())
+      );
+    }
+  };
+
+  filteredApplicants.forEach((applicant) => {
+    const jobPosting = applicant?.job_posting;
+    const jobId = jobPosting?.id;
+    const jobTitle = jobPosting?.job_title;
+    const key = jobId ?? (jobTitle ?? 'Unknown Job');
+    registerJobGroup(key, jobTitle);
+    jobApplicantGroups.get(key)!.push(applicant);
+  });
+
+  if (shouldFilterBySelectedRecords && selectedRecordIdSet) {
+    selectedRecordIdSet.forEach((jobId) => {
+      registerJobGroup(jobId, jobPostTitleMap.get(jobId) ?? `Job ${jobId}`);
+    });
+  }
+
+  if (hasSelectedJobFilter && selectedJobId !== null) {
+    registerJobGroup(
+      selectedJobId,
+      jobPostTitleMap.get(selectedJobId) ?? `Job ${selectedJobId}`
+    );
+  } else if (hasSelectedJobFilter && selectedJobTitle) {
+    registerJobGroup(selectedJobTitle, selectedJobTitle);
+  }
+
+  const jobApplicantSummaries = includeJobBreakdown
+    ? Array.from(jobApplicantGroups.entries()).map(([key, applicants]) => {
+        const summary = calculateOverallApplicantsSummary(applicants);
+        return {
+          jobId: key,
+          jobTitle: jobTitleLookup.get(key) ?? (typeof key === 'number' ? `Job ${key}` : key.toString()),
+          applicantCount: applicants.length,
+          summary,
+        };
+      }).sort((a, b) => a.jobTitle.localeCompare(b.jobTitle))
+    : [];
+
   // Calculate KPI data
   const calculateKPIs = () => {
     // Total Active Employees - Use shared utility function
@@ -282,6 +351,15 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
         rolePipelineData={rolePipelineDataForPrint}
         attritionData={{ ...attritionData, exitReasons: exitReasonsData }}
         dateFilter={dateFilter}
+        selectionMetadata={
+          includeJobBreakdown
+            ? {
+                totalApplicants: applicantsDataForPrint.length,
+                jobCount: jobApplicantSummaries.length,
+              }
+            : undefined
+        }
+        jobApplicantSummaries={includeJobBreakdown ? jobApplicantSummaries : undefined}
       />
     </div>
   );
