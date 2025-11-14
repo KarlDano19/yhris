@@ -357,6 +357,12 @@ const EvaluationResponseDetailsModal = ({
     );
   };
 
+  const isValidCriterion = (criterion: any) => {
+    if (!criterion) return false;
+    const title = typeof criterion.title === 'string' ? criterion.title.trim() : '';
+    return Boolean(title) && !/^untitled(\s+question)?$/i.test(title);
+  };
+
   // Helper function to prepare question response data for horizontal bar charts
   const prepareQuestionResponseData = () => {
     // Always return questions from the template, regardless of filters
@@ -375,7 +381,7 @@ const EvaluationResponseDetailsModal = ({
       }
 
       section.criterion.forEach((criterion: any, criterionIndex: number) => {
-        if (!criterion) {
+        if (!isValidCriterion(criterion)) {
           return;
         }
 
@@ -386,7 +392,7 @@ const EvaluationResponseDetailsModal = ({
           sectionId: section.id,
           sectionTitle: section.section_title || 'Untitled Section',
           criterionId: criterion.id,
-          title: criterion.title || 'Untitled Question',
+          title: criterion.title.trim(),
           max_score: criterion.max_score,
           sectionIndex,
           criterionIndex,
