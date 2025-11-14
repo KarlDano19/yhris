@@ -20,6 +20,7 @@ import {
   getEmployeeScoresForCriterion
 } from '../helpers/evaluationHelpers';
 import { handlePrintEvaluationTemplateResponse } from '../PrintData';
+import useGetEvaluationTemplateDetails from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/hooks/useGetEvaluationTemplateDetails';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ChartBarIcon } from '@heroicons/react/24/solid';
@@ -66,6 +67,11 @@ const EvaluationResponseDetailsModal = ({
   });
   const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  const {
+    data: templateDefinition,
+    refetch: refetchTemplateDefinition,
+    remove: clearTemplateDefinition,
+  } = useGetEvaluationTemplateDetails(selectedTemplate?.evaluation_template_id || null);
   
   // Pagination state for Respondents tab
   const [respondentsPageSize, setRespondentsPageSize] = useState(5);
@@ -143,7 +149,8 @@ const EvaluationResponseDetailsModal = ({
         // Filter frequently evaluated employees based on department filter
         frequently_evaluated_employees: getFilteredFrequentlyEvaluatedEmployees(),
         // Include individual_responses for question score details
-        individual_responses: getFilteredIndividualResponses()
+        individual_responses: getFilteredIndividualResponses(),
+        questions: filteredTemplateQuestions
       };
 
       await handlePrintEvaluationTemplateResponse(
@@ -171,6 +178,7 @@ const EvaluationResponseDetailsModal = ({
     setAnalyticsPageSize(5);
     setIsRecipientsModalOpen(false);
     setSelectedRecipients(null);
+    clearTemplateDefinition();
     setIsOpen(null);
   };
 
@@ -253,6 +261,68 @@ const EvaluationResponseDetailsModal = ({
     ];
   }, [templateResponseDetails]);
 
+  useEffect(() => {
+    if (isOpen?.open && selectedTemplate?.evaluation_template_id) {
+      refetchTemplateDefinition();
+    }
+  }, [isOpen?.open, selectedTemplate?.evaluation_template_id, refetchTemplateDefinition]);
+
+  const activeCriterionIds = useMemo(() => {
+    if (!templateDefinition?.evaluation_criterion || !Array.isArray(templateDefinition.evaluation_criterion)) {
+      return new Set<string>();
+    }
+
+    const ids = new Set<string>();
+    templateDefinition.evaluation_criterion.forEach((section: any) => {
+      if (!section || !Array.isArray(section.criterion)) {
+        return;
+      }
+
+      section.criterion.forEach((criterion: any) => {
+        if (criterion?.id) {
+          ids.add(criterion.id);
+        }
+      });
+    });
+
+    return ids;
+  }, [templateDefinition]);
+
+  const filteredTemplateQuestions = useMemo(() => {
+    if (!templateResponseDetails?.questions || !Array.isArray(templateResponseDetails.questions)) {
+      return [];
+    }
+
+    if (activeCriterionIds.size === 0) {
+      return templateResponseDetails.questions;
+    }
+
+    return templateResponseDetails.questions
+      .map((section: any) => {
+        if (!section || !Array.isArray(section.criterion)) {
+          return null;
+        }
+
+        const filteredCriteria = section.criterion.filter((criterion: any) => {
+          if (!criterion?.id) {
+            return true;
+          }
+
+          return activeCriterionIds.has(criterion.id);
+        });
+
+        if (filteredCriteria.length === 0) {
+          return null;
+        }
+
+        return {
+          ...section,
+          criterion: filteredCriteria
+        };
+      })
+      .filter(Boolean);
+  }, [templateResponseDetails?.questions, activeCriterionIds]);
+
   // Handle department filter changes from the Filter component
   const handleDepartmentFilterChange = (filters: FilterValues) => {
     setDepartmentFilter(filters.departments || []);
@@ -312,7 +382,7 @@ const EvaluationResponseDetailsModal = ({
     if (questionsCurrentPage > totalPages && totalPages > 0) {
       setQuestionsCurrentPage(1);
     }
-  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize]);
+  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize, filteredTemplateQuestions]);
 
   // Update pagination for Analytics tab when data changes
   useEffect(() => {
@@ -359,8 +429,7 @@ const EvaluationResponseDetailsModal = ({
 
   // Helper function to prepare question response data for horizontal bar charts
   const prepareQuestionResponseData = () => {
-    // Always return questions from the template, regardless of filters
-    if (!templateResponseDetails?.questions || !Array.isArray(templateResponseDetails.questions)) {
+    if (!filteredTemplateQuestions || filteredTemplateQuestions.length === 0) {
       return [];
     }
 
@@ -369,7 +438,7 @@ const EvaluationResponseDetailsModal = ({
     // Extract individual criteria from each section
     // IMPORTANT: Questions should ALWAYS show regardless of date/department filter
     // Only the employee scores within each question are filtered
-    templateResponseDetails.questions.forEach((section: any, sectionIndex: number) => {
+    filteredTemplateQuestions.forEach((section: any, sectionIndex: number) => {
       if (!section || !section.criterion || !Array.isArray(section.criterion)) {
         return;
       }
