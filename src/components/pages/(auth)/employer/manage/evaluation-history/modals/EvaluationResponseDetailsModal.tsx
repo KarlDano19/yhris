@@ -267,25 +267,42 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [isOpen?.open, selectedTemplate?.evaluation_template_id, refetchTemplateDefinition]);
 
-  const activeCriterionIds = useMemo(() => {
+  const { activeCriterionIds, sectionTitleMap, criterionTitleMap } = useMemo(() => {
     if (!templateDefinition?.evaluation_criterion || !Array.isArray(templateDefinition.evaluation_criterion)) {
-      return new Set<string>();
+      return {
+        activeCriterionIds: new Set<string>(),
+        sectionTitleMap: new Map<string, { title?: string; description?: string }>(),
+        criterionTitleMap: new Map<string, string>()
+      };
     }
 
     const ids = new Set<string>();
+    const sectionMap = new Map<string, { title?: string; description?: string }>();
+    const criterionMap = new Map<string, string>();
+
     templateDefinition.evaluation_criterion.forEach((section: any) => {
       if (!section || !Array.isArray(section.criterion)) {
         return;
       }
 
+      sectionMap.set(section.id, {
+        title: section.section_title,
+        description: section.section_description
+      });
+
       section.criterion.forEach((criterion: any) => {
         if (criterion?.id) {
           ids.add(criterion.id);
+          criterionMap.set(criterion.id, criterion.title);
         }
       });
     });
 
-    return ids;
+    return {
+      activeCriterionIds: ids,
+      sectionTitleMap: sectionMap,
+      criterionTitleMap: criterionMap
+    };
   }, [templateDefinition]);
 
   const filteredTemplateQuestions = useMemo(() => {
@@ -315,13 +332,20 @@ const EvaluationResponseDetailsModal = ({
           return null;
         }
 
+        const sectionMeta = sectionTitleMap.get(section.id) || {};
+
         return {
           ...section,
-          criterion: filteredCriteria
+          section_title: section.section_title || sectionMeta.title || '',
+          section_description: section.section_description || sectionMeta.description || '',
+          criterion: filteredCriteria.map((criterion: any) => ({
+            ...criterion,
+            title: criterion.title || criterionTitleMap.get(criterion.id) || ''
+          }))
         };
       })
       .filter(Boolean);
-  }, [templateResponseDetails?.questions, activeCriterionIds]);
+  }, [templateResponseDetails?.questions, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
 
   // Handle department filter changes from the Filter component
   const handleDepartmentFilterChange = (filters: FilterValues) => {
