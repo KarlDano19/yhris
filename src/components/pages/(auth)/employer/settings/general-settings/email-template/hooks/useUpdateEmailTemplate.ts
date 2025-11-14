@@ -4,14 +4,58 @@ import { getCookie } from 'cookies-next';
 async function updateEmailTemplate(email_template_id: number, data: any) {
   try {
     const token = getCookie('token');
-    const config = {
+    
+    // Check if there's a file attachment
+    const hasFile = data.attachment && data.attachment instanceof File;
+    
+    let config: any = {
       method: 'PATCH',
       headers: {
-        'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify(data),
     };
+
+    if (hasFile) {
+      // Use FormData for file uploads
+      const formData = new FormData();
+      formData.append('subject', data.subject || '');
+      formData.append('body', data.body || '');
+      formData.append('attachment', data.attachment);
+      
+      // Handle email arrays - only append if they have values
+      if (data.to && Array.isArray(data.to) && data.to.length > 0) {
+        data.to.forEach((email: string) => {
+          formData.append('to', email);
+        });
+      }
+      if (data.cc && Array.isArray(data.cc) && data.cc.length > 0) {
+        data.cc.forEach((email: string) => {
+          formData.append('cc', email);
+        });
+      }
+      if (data.bcc && Array.isArray(data.bcc) && data.bcc.length > 0) {
+        data.bcc.forEach((email: string) => {
+          formData.append('bcc', email);
+        });
+      }
+      
+      config.body = formData;
+    } else {
+      // Use JSON for non-file updates
+      config.headers['content-type'] = 'application/json';
+      
+      // Clean up empty arrays before sending
+      const cleanedData = { ...data };
+      if (cleanedData.cc && Array.isArray(cleanedData.cc) && cleanedData.cc.length === 0) {
+        delete cleanedData.cc;
+      }
+      if (cleanedData.bcc && Array.isArray(cleanedData.bcc) && cleanedData.bcc.length === 0) {
+        delete cleanedData.bcc;
+      }
+      
+      config.body = JSON.stringify(cleanedData);
+    }
+    
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/${email_template_id}/`, config);
     if (!res.ok) {
       throw res.json();

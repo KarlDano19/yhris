@@ -1,5 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react';
-import { FilterOptions } from './[id]/Filter';
+import { FilterValues } from '@/components/common/Filter';
 
 export type StateType = StageType[];
 
@@ -10,7 +10,7 @@ export type BlockPropTypes = {
   snapshot: any;
   jobPostDetailsRefetch: any;
   appliedApplicantRefetch: any;
-  filters?: FilterOptions;
+  filters?: FilterValues;
 };
 
 export type WrapperPropTypes = {
@@ -91,7 +91,9 @@ export type ApplicantType = {
     mustHave?: boolean;
     isMatch?: boolean;
   }>;
+  is_archived?: boolean;
   created_at?: string;
+  updated_at?: string;
 };
 
 export type ApplicantsType = [] | ApplicantType[];
@@ -104,6 +106,13 @@ export type StageType = {
   applicants: ApplicantsType;
   orderBy: number;
   addType: string;
+  is_final_stage?: boolean;
+  permissions?: {
+    can_view: boolean;
+    can_move: boolean;
+    can_update: boolean;
+    is_visible: boolean;
+  };
 };
 
 export type ActionStateType = {
@@ -158,5 +167,5 @@ export type StageBlockTypes = {
   index: number;
   openMenuId: number | null;
   setOpenMenuId: any;
-  filters?: FilterOptions;
+  filters?: FilterValues;
 };

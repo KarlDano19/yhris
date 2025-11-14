@@ -4,24 +4,25 @@ import StageBlock from "./StageBlock"
 import StageTabs from "./StageTabs"
 import { useContext, useEffect, useState } from "react"
 import StateContext from "../contexts/StateContext"
-import { FilterOptions } from "./Filter"
+import { FilterValues } from "@/components/common/Filter"
 
 interface StageProps extends PropTypes {
-  filters?: FilterOptions;
+  filters?: FilterValues;
 }
 
-const getItemStyle = (isDragging: boolean, draggableStyle: any, isDisabled: boolean) => ({
+const getItemStyle = (isDragging: boolean, draggableStyle: any, isDisabled: boolean, isFinalStage: boolean) => ({
   ...draggableStyle,
   opacity: isDisabled ? 0.5 : 1,
   pointerEvents: isDisabled ? 'none' : 'auto',
   filter: isDisabled ? 'grayscale(30%)' : 'none',
+  cursor: isFinalStage ? 'not-allowed' : 'grab',
 })
 
 export default function Stage({ stage, index, provided, snapshot, jobPostDetailsRefetch, appliedApplicantRefetch, filters }: StageProps) {
   const { actionState }: ContextTypes = useContext(StateContext) as ContextTypes
   const [stageDropdownId, setStageDropdownId] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
-  const [activeTab, setActiveTab] = useState('Good Fit')
+  const [activeTab, setActiveTab] = useState('Applicants')
 
   // Check if user has permissions for this stage
   const permissions = stage.permissions || {
@@ -34,24 +35,12 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
   const isStageDisabled = !permissions.can_view && !permissions.can_move && !permissions.can_update
   const canInteract = permissions.can_move || permissions.can_update
 
-  // Reset active tab if current tab is not in filters
-  useEffect(() => {
-    if (filters && !filters.rating.includes(activeTab)) {
-      if (filters.rating.includes('Good Fit')) {
-        setActiveTab('Good Fit');
-      } else if (filters.rating.includes('Not Fit')) {
-        setActiveTab('Not Fit');
-      }
-    }
-  }, [filters, activeTab]);
-
   useEffect(() => {
     setStageDropdownId(null)
     setOpenMenuId(null)
   }, [actionState.modal.isOpen])
 
-  const tabFilters: FilterOptions = {
-    rating: [activeTab],
+  const tabFilters: FilterValues = {
     status: filters?.status || ['Ongoing', 'Passed', 'Withdrawn', 'Rejected', 'Hired'],
   };
 
@@ -60,13 +49,17 @@ export default function Stage({ stage, index, provided, snapshot, jobPostDetails
       ref={provided.innerRef}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
-      style={getItemStyle(snapshot.isDragging, provided.draggableProps.style, isStageDisabled)}
-      className={`flex flex-col gap-2 p-3 rounded-2xl transition-all duration-200 relative ${
+      style={getItemStyle(snapshot.isDragging, provided.draggableProps.style, isStageDisabled, stage.is_final_stage || false)}
+      className={`flex flex-col gap-2 p-3 rounded-2xl transition-shadow duration-200 relative ${
         isStageDisabled 
           ? 'bg-gray-100 border-2 border-dashed border-gray-300' 
+          : stage.is_final_stage
+          ? 'bg-white shadow-lg border-2 border-gray-300'
           : 'bg-white shadow-sm hover:shadow-md'
       }`}
     >
+      
+      
       {/* Disabled overlay with tooltip */}
       {isStageDisabled && (
         <div className="absolute inset-0 z-5 flex items-center justify-center bg-gray-200 bg-opacity-40 rounded-2xl pointer-events-none">

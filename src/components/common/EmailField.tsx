@@ -19,6 +19,7 @@ interface EmailFieldProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  isFocused?: boolean;
 }
 
 export default function EmailField({
@@ -35,6 +36,7 @@ export default function EmailField({
   placeholder = "",
   disabled = false,
   className = "",
+  isFocused = false,
 }: EmailFieldProps) {
   // Internal state for suggestions and employee data
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -47,6 +49,8 @@ export default function EmailField({
   const [hasUserFocused, setHasUserFocused] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Debouncing effect for search
   useEffect(() => {
@@ -240,17 +244,23 @@ export default function EmailField({
 
   // Handle click outside to close dropdown
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-        setSelectedIndex(-1);
-        setHasUserFocused(false); // Reset focus flag when clicking outside
+    const handlePointerDown = (event: PointerEvent) => {
+      const targetNode = event.target as Node;
+      const clickedInsideDropdown = dropdownRef.current?.contains(targetNode);
+      const clickedInsideContainer = containerRef.current?.contains(targetNode);
+
+      if (clickedInsideDropdown || clickedInsideContainer) {
+        return;
       }
+
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+      setHasUserFocused(false);
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handlePointerDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handlePointerDown);
     };
   }, []);
 
@@ -298,6 +308,7 @@ export default function EmailField({
     onInputChange('');
     setSearchTerm('');
     setSelectedIndex(-1);
+    setShowSuggestions(true);
     
     // Ensure suggestions are prepared for next search by triggering a re-filter
     // This is important after manual email entry to ensure suggestions show on next focus
@@ -312,8 +323,8 @@ export default function EmailField({
     setSelectedIndex(-1);
     setEmployeeLimit(50); // Reset employee limit when searching
     // Don't automatically show suggestions when typing - only when already visible or on focus
-    onInputChange(value);
-  };
+      onInputChange(value);
+    };
 
   // Handle input focus
   const handleInputFocus = () => {
@@ -331,17 +342,6 @@ export default function EmailField({
 
   // Handle input blur
   const handleInputBlur = () => {
-    setTimeout(() => {
-      if (!justAddedEmail) {
-        setShowSuggestions(false);
-        setSelectedIndex(-1);
-        setHasUserFocused(false); // Reset focus flag when blurring
-      } else {
-        setJustAddedEmail(false);
-        // Don't reset hasUserFocused when just added email - keep it true so suggestions show on next focus
-      }
-    }, 150);
-    
     if (onInputBlur) {
       onInputBlur();
     }
@@ -408,32 +408,74 @@ export default function EmailField({
     }
   };
 
+  // Determine which tags to display based on focus state
+  const showAllTags = isFocused || hasUserFocused;
+  const displayTags = showAllTags ? tags : tags.slice(0, 3);
+  const remainingCount = tags.length - 3;
+
   return (
     <div 
-      className={`relative border border-gray-300 pl-2 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md ${className}`}
+      ref={containerRef}
+      className={`relative border border-gray-300 pl-2 pr-2 pt-1.5 flex items-center gap-3 flex-wrap w-full min-w-0 rounded-l-md ${className}`}
       data-tooltip-id={tooltipId}
       data-tooltip-place='bottom'
       style={{ width: '100%' }}
+      onMouseDown={(event) => {
+        const target = event.target as Node;
+        const clickedInsideContainer = containerRef.current?.contains(target);
+        const clickedInsideDropdown = dropdownRef.current?.contains(target);
+        if (clickedInsideDropdown) {
+          return;
+        }
+        if (clickedInsideContainer) {
+          // Defer the focus to ensure other controls (like remove buttons) execute first
+          setTimeout(() => {
+            if (
+              target instanceof HTMLButtonElement ||
+              target instanceof SVGElement ||
+              target instanceof HTMLAnchorElement
+            ) {
+              return;
+            }
+            inputRef.current?.focus();
+          }, 0);
+        }
+      }}
     >
-      {tags.map((tag: string) => (
+      {displayTags.map((tag: string) => (
         <div
           key={tag}
           className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
         >
-          <button type='button' onClick={() => onRemoveTag(tag)}>
+          <button 
+            type='button' 
+            onClick={() => onRemoveTag(tag)}
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <XMarkIcon className='w-4 h-4' />
           </button>
           <p>{tag}</p>
         </div>
       ))}
+      {!showAllTags && remainingCount > 0 && (
+        <button
+          type='button'
+          onClick={() => inputRef.current?.focus()}
+          className='bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm text-gray-600 transition-colors cursor-pointer'
+          title="Click to view all recipients"
+        >
+          <p>and {remainingCount} more...</p>
+        </button>
+      )}
       <input
+        ref={inputRef}
         type='text'
         value={inputValue}
         onKeyDown={handleKeyDown}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={handleInputFocus}
         onBlur={handleInputBlur}
-        className='focus:none outline-none px-2 py-1 flex-1 min-w-0'
+        className='focus:none outline-none py-1 flex-1 min-w-0'
         style={{ width: '100%' }}
         placeholder={placeholder}
         disabled={disabled}
@@ -480,6 +522,10 @@ export default function EmailField({
                     }`
               }`}
               onMouseEnter={() => !employee.is_show_more_option && setSelectedIndex(index)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={() => handleEmployeeSelect(employee)}
             >
               {employee.is_show_more_option ? (

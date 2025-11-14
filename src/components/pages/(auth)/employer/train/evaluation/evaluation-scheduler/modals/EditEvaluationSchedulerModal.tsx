@@ -67,14 +67,16 @@ function EditEvaluationSchedulerModal({
       // Create a complete form data object
       const formData = {
         name: dataEvaluationSchedulerDetails.name,
-        evaluation_template: dataEvaluationSchedulerDetails.evaluation_template,
+        evaluation_template: dataEvaluationSchedulerDetails.evaluation_template
+          ? String(dataEvaluationSchedulerDetails.evaluation_template)
+          : '',
         recipient: dataEvaluationSchedulerDetails.recipient || [],
         frequency_value: typeof dataEvaluationSchedulerDetails.frequency_value === 'object' && 
                         dataEvaluationSchedulerDetails.frequency_value !== null ? 
                         JSON.stringify(dataEvaluationSchedulerDetails.frequency_value) : 
                         dataEvaluationSchedulerDetails.frequency_value,
         frequency_unit: dataEvaluationSchedulerDetails.frequency_unit,
-        reminder_schedule: dataEvaluationSchedulerDetails.reminder_schedule,
+        reminder_schedule: dataEvaluationSchedulerDetails.reminder_schedule || '',
         employees: dataEvaluationSchedulerDetails.employees || [],
         message: dataEvaluationSchedulerDetails.message || '',
         attachment: dataEvaluationSchedulerDetails.attachment || '',

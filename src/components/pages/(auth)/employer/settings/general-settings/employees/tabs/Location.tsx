@@ -264,9 +264,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <h2 className='text-xl font-bold text-indigo-dye'>Location</h2>
+      <div className='flex flex-col min-h-[70vh]'>
+        <h2 className='text-xl font-bold text-indigo-dye'>Location</h2>
       
-      <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+      <div className='flex-1'>
+        <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
         <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
           <div className='relative'>
             <CustomDatePicker
@@ -410,6 +412,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <hr />
           </div>
         </div>
+      </div>
+      </div>
+      
+      {/* Sticky Pagination */}
+      <div className="mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
         <Pagination
           pagination={pagination}
           currentPage={currentPage}
@@ -418,7 +425,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onPageChange={paginationChange}
         />
       </div>
-      
+      </div>
+    
       <CreateModal
         module='location'
         refetch={locationListRefetch}

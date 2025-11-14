@@ -30,6 +30,7 @@ export default function CreatePolicyModal({
   const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [inputTo, setInputTo] = useState('');
+  const [isToFocused, setIsToFocused] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
   const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, trigger, control, watch, formState: { errors }, setError } =
@@ -190,6 +191,7 @@ export default function CreatePolicyModal({
       setTagsTo([]);
       setInputTo('');
       setAttachmentExist(false);
+      setIsToFocused(false);
     }
   }, [isOpen]);
 
@@ -289,11 +291,18 @@ export default function CreatePolicyModal({
                               onInputChange={(value) => {
                                 setInputTo(value);
                               }}
+                              onInputFocus={() => {
+                                setIsToFocused(true);
+                              }}
+                              onInputBlur={() => {
+                                setIsToFocused(false);
+                              }}
                               onKeyDown={handleKeyDownTo}
                               onEmployeeSelect={handleEmployeeSelect}
                               onRemoveTag={handleRemoveTagTo}
                               showTooltip={true}
                               tooltipId="to-section-tooltip"
+                              isFocused={isToFocused}
                             />
                           </div>
                         </div>

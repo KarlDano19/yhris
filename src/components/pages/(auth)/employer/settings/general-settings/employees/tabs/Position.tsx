@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import 'react-quill/dist/quill.snow.css';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -213,7 +214,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     if (isSearching || isPositionListLoading) {
       return (
         <tr>
-          <td colSpan={100}>
+          <td colSpan={5}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
             </div>
@@ -234,6 +235,18 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.description ? (
+              <button
+                onClick={() => setIsPositionEditModalOpen({ id: item.id, open: true })}
+                className='text-blue-600 hover:text-blue-800 hover:underline'
+              >
+                Click to view
+              </button>
+            ) : (
+              '-'
+            )}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
               <SmartButton
@@ -257,7 +270,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     } else {
       return (
         <tr>
-          <td colSpan={4}>
+          <td colSpan={5}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add position.</h4>
           </td>
@@ -268,9 +281,11 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
 
   return (
     <>
-      <h2 className='text-xl font-bold text-indigo-dye'>Position</h2>
+      <div className='flex flex-col min-h-[70vh]'>
+        <h2 className='text-xl font-bold text-indigo-dye'>Position</h2>
       
-      <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+      <div className='flex-1'>
+        <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
         <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
           <div className='relative'>
             <CustomDatePicker
@@ -405,6 +420,9 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
                     Name
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                    Description
+                  </th>
+                  <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Action
                   </th>
                 </tr>
@@ -414,6 +432,11 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
             <hr />
           </div>
         </div>
+      </div>
+      </div>
+      
+      {/* Sticky Pagination */}
+      <div className="mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
         <Pagination
           pagination={pagination}
           currentPage={currentPage}
@@ -422,7 +445,8 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           onPageChange={paginationChange}
         />
       </div>
-      
+      </div>
+    
       <CreateModal
         module='position'
         refetch={positionListRefetch}

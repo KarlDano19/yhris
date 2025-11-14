@@ -1,26 +1,41 @@
+import React, { Dispatch, useState } from 'react';
+
+import { Tooltip } from 'react-tooltip';
+
 import classNames from '@/helpers/classNames';
-import ClipIcon from '@/svg/ClipIcon';
 import { T_DocumentsModal } from '@/types/globals';
-import React, { Dispatch } from 'react';
+
+import ClipIcon from '@/svg/ClipIcon';
+import AttachmentViewModal from './modals/AttachmentViewModal';
 
 const SignDocuments = ({
   id,
   isDocumentsSent,
   isDocumentsReceived,
   documentReceivedDate,
+  documentsAttachment,
   setIsDocumentModalOpen,
   setReceived,
   isLoading,
+  isLetterReceived,
 }: {
   id: number;
   isDocumentsSent: boolean;
   isDocumentsReceived: boolean;
   documentReceivedDate?: string;
+  documentsAttachment?: string | null;
   setIsDocumentModalOpen: Dispatch<T_DocumentsModal>;
   setReceived: any;
   isLoading: boolean;
+  isLetterReceived: boolean;
 }) => {
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
+  // Disabled if letter hasn't been received yet
+  const isDisabled = !isLetterReceived || isDocumentsSent;
+  
   return (
+    <>
     <div className='flex flex-col gap-2'>
       <div>
         <button
@@ -30,7 +45,10 @@ const SignDocuments = ({
               : 'border-[1px] border-red-500 text-red-500',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={isDocumentsSent}
+          disabled={isDisabled}
+          data-tooltip-id='sign-documents-tooltip'
+          data-tooltip-content={!isLetterReceived ? 'Letter must be sent first' : ''}
+          data-tooltip-place='bottom'
           onClick={() =>
             setIsDocumentModalOpen({
               isOpen: true,
@@ -51,6 +69,9 @@ const SignDocuments = ({
           )}
           disabled={!isDocumentsSent || isDocumentsReceived || isLoading}
           onClick={() => setReceived(id, 'sign documents')}
+          data-tooltip-id='sign-documents-received-tooltip'
+          data-tooltip-content={!isDocumentsSent ? 'Documents must be sent first' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
+          data-tooltip-place='bottom'
         >
           {isLoading && (
               <div role='status'>
@@ -79,13 +100,40 @@ const SignDocuments = ({
       {isDocumentsReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <ClipIcon />
+            <div
+              className={documentsAttachment ? 'cursor-pointer' : ''}
+              data-tooltip-id='documents-attachment-tooltip'
+              data-tooltip-content={documentsAttachment ? 'Click to view attachment' : 'No attachment'}
+              data-tooltip-place='bottom'
+              onClick={() => {
+                if (documentsAttachment) {
+                  setIsViewModalOpen(true);
+                }
+              }}
+            >
+              <ClipIcon hasFile={!!documentsAttachment} />
+            </div>
             <p className='ml-2 text-xs'>{documentReceivedDate}</p>
           </div>
         </div>
       ) : null}
+      
+      <Tooltip id='sign-documents-tooltip' />
+      <Tooltip id='sign-documents-received-tooltip' />
+      <Tooltip id='documents-attachment-tooltip' />
     </div>
+    
+    {isViewModalOpen && (
+      <AttachmentViewModal
+        isOpen={isViewModalOpen}
+        setIsOpen={setIsViewModalOpen}
+        attachmentUrl={documentsAttachment}
+        title="Sign Documents Attachment"
+      />
+    )}
+    </>
   );
 };
 
 export default SignDocuments;
+

@@ -9,12 +9,17 @@ export interface EmailData {
   cc?: string[];
   bcc?: string[];
   template?: string;
+  attachment?: File | string;
 }
 
 export interface LetterData {
   date: string;
   email: string;
   message: string;
+  subject: string;
+  cc?: string[];
+  bcc?: string[];
+  attachment?: File | string;
 }
 
 export interface SeparationItem {
@@ -23,10 +28,13 @@ export interface SeparationItem {
   actionType: string;
   emailType: string;
   separationLetter: {
-    date: string;
-    to: string;
+    to: string | string[];
     message: string;
+    subject: string;
     type?: string;
+    cc?: string[];
+    bcc?: string[];
+    attachment?: File | string;
   };
   signDocuments: {
     template: string;
@@ -35,6 +43,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   lastPay: {
     template: string;
@@ -43,6 +52,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   quitClaim: {
     template: string;
@@ -51,6 +61,7 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
+    attachment?: File | string;
   };
   isLetterSent: boolean;
   isDocumentsSent: boolean;
@@ -92,6 +103,9 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.signDocuments.bcc = data.bcc;
     }
+    if (data.attachment) {
+      separationItemCopy.signDocuments.attachment = data.attachment;
+    }
     separationItemCopy.isDocumentsSent = true;
   } else if (emailType === 'last pay') {
     separationItemCopy.lastPay.template = data.template || '';
@@ -104,6 +118,9 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.lastPay.bcc = data.bcc;
     }
+    if (data.attachment) {
+      separationItemCopy.lastPay.attachment = data.attachment;
+    }
     separationItemCopy.isLastPayReleased = true;
   } else if (emailType === 'quit claim') {
     separationItemCopy.quitClaim.template = data.template || '';
@@ -115,6 +132,9 @@ export const handleEmailSending = (
     }
     if (data.bcc) {
       separationItemCopy.quitClaim.bcc = data.bcc;
+    }
+    if (data.attachment) {
+      separationItemCopy.quitClaim.attachment = data.attachment;
     }
     separationItemCopy.isQuitclaimSigned = true;
   }
@@ -146,14 +166,14 @@ export const updateSeparationItems = (
 /**
  * Handles the logic for preparing letter data for sending, updating the relevant fields
  * in a copy of the separation item for letter type emails.
- * @param data The letter form data containing date, email, and message.
+ * @param data The letter form data (EmailData format from SendEmailModal).
  * @param separationItems The current array of separation items.
  * @param selectedSeparationId The ID of the currently selected separation item.
  * @param letterType The type of letter being sent.
  * @returns The updated separation item ready for mutation.
  */
 export const handleLetterSending = (
-  data: LetterData,
+  data: EmailData,
   separationItems: SeparationItem[],
   selectedSeparationId: string | number,
   letterType?: string
@@ -162,9 +182,18 @@ export const handleLetterSending = (
   const separationItemCopy = JSON.parse(JSON.stringify(separationItems[itemIndex])); // Deep copy to ensure immutability
 
   // Update letter-specific fields
-  separationItemCopy.separationLetter.date = data.date;
+  separationItemCopy.separationLetter.subject = data.subject;
   separationItemCopy.separationLetter.to = data.email;
   separationItemCopy.separationLetter.message = data.message;
+  if (data.cc) {
+    separationItemCopy.separationLetter.cc = data.cc;
+  }
+  if (data.bcc) {
+    separationItemCopy.separationLetter.bcc = data.bcc;
+  }
+  if (data.attachment) {
+    separationItemCopy.separationLetter.attachment = data.attachment;
+  }
   if (letterType) {
     separationItemCopy.separationLetter.type = letterType;
   }

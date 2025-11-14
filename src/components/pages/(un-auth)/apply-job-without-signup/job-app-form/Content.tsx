@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import SubmittedModal from './modals/SubmittedModal';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
@@ -19,6 +18,7 @@ import PreferencesTab from './PreferencesTab';
 
 const Content = () => {
   const params = useParams();
+  const router = useRouter();
   const firstForm = useForm();
   const screeningForm = useForm();
   const secondForm = useForm();
@@ -27,7 +27,6 @@ const Content = () => {
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
 
-  const [submitModal, setOpenSubmitModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const { data } = useGetJobDetails(Number(params.id));
   const { mutate: mutateSubmitApplication, isLoading: isLoadingSubmitApplication } = useSubmitApplication();
@@ -64,7 +63,13 @@ const Content = () => {
       
       const callBackReq = {
         onSuccess: () => {
-          setOpenSubmitModal(true);
+          toast.custom(() => <CustomToast message="You have successfully submitted application." type="success" />, {
+            duration: 5000,
+          });
+          // Navigate back to jobs page after a short delay
+          setTimeout(() => {
+            router.push('/jobs');
+          });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -126,7 +131,6 @@ const Content = () => {
           </div>
         </div>
       </div>
-      <SubmittedModal open={submitModal} onClose={() => setOpenSubmitModal(false)} />
       <DataConfirmationModal open={confirmModal} onClose={handleConfirmation} />
       <SuggestionModal open={isSuggestModal} onClose={() => setSuggestModal(false)} />
     </div>

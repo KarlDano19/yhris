@@ -17,14 +17,21 @@ import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
-import CreateEmailTemplateModal from './modal/CreateEmailTemplate';
-import EditEmailTemplateModal from './modal/EditEmailTemplateModal';
-import SuccessModal from './modal/SuccessModal';
+import useSeedEmailTemplates from './hooks/useSeedEmailTemplates';
+import useUnseedEmailTemplates from './hooks/useUnseedEmailTemplates';
+import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
+import SeederButton from '@/components/SeederButton';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
 
+type T_EmailTemplateModalData = {
+  id: number | null;
+  open: boolean;
+  mode: 'create' | 'edit';
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -46,10 +53,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
-  const [isEditEmailTemplateModalOpen, setIsEditEmailTemplateModalOpen] = useState(false);
+  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>(null);
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   
   // Bulk delete states
   const [selectedEmailTemplates, setSelectedEmailTemplates] = useState<Set<number>>(new Set());
@@ -70,9 +75,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
+  const seedMutation = useSeedEmailTemplates();
+  const unseedMutation = useUnseedEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
-    setIsSuccessModalOpen(true);
+    setSelectedEmailTemplateId(null);
+    setActionType('');
+    // Reset the modal state to close the create/edit modal
+    setEmailTemplateModal(null);
   };
 
   const paginationChange = (event: any) => {
@@ -150,7 +160,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (selectedEmailTemplateId) {
       if (actionType === 'edit') {
-        setIsEditEmailTemplateModalOpen(true);
+        setEmailTemplateModal({ id: selectedEmailTemplateId, open: true, mode: 'edit' });
       }
       if (actionType === 'delete') {
         const templateName = emailTemplatesItems.find((item: any) => item.id === selectedEmailTemplateId)?.subject || '';
@@ -166,7 +176,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const openEditEvaluationModal = (emailTemplateDetails: any) => {
     setActionType('edit');
     if (selectedEmailTemplateId && selectedEmailTemplateId === emailTemplateDetails.id) {
-      setIsEditEmailTemplateModalOpen(true);
+      setEmailTemplateModal({ id: emailTemplateDetails.id, open: true, mode: 'edit' });
     } else {
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
@@ -184,6 +194,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setSelectedEmailTemplateId(emailTemplateDetails.id);
     }
   };
+
+  useEffect(() => {
+    if (!emailTemplateModal?.open) {
+      setSelectedEmailTemplateId(null);
+      setActionType('');
+    }
+  }, [emailTemplateModal]);
 
   // Handle individual email template selection
   const handleEmailTemplateSelect = (emailTemplateId: number) => {
@@ -246,6 +263,52 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchEmailTemplate();
   };
 
+  // Handle seeding email templates
+  const handleSeedEmailTemplates = async (count: number) => {
+    try {
+      const result = await seedMutation.mutateAsync({ count });
+      toast.custom(
+        () => <CustomToast message={result.message} type="success" />,
+        { duration: 3000 }
+      );
+      // Clear any selected template and action type to prevent modal from opening
+      setSelectedEmailTemplateId(null);
+      setActionType('');
+      refetchEmailTemplate();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to seed email templates';
+      toast.custom(
+        () => <CustomToast message={errorMessage} type="error" />,
+        { duration: 5000 }
+      );
+      throw error;
+    }
+  };
+
+  // Handle unseeding email templates
+  const handleUnseedEmailTemplates = async () => {
+    try {
+      const result = await unseedMutation.mutateAsync();
+      toast.custom(
+        () => <CustomToast message={result.message} type="success" />,
+        { duration: 3000 }
+      );
+      // Clear all selection states
+      setSelectedEmailTemplates(new Set());
+      setSelectAll(false);
+      setSelectedEmailTemplateId(null);
+      setActionType('');
+      refetchEmailTemplate();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to unseed email templates';
+      toast.custom(
+        () => <CustomToast message={errorMessage} type="error" />,
+        { duration: 5000 }
+      );
+      throw error;
+    }
+  };
+
   const renderRows = () => {
     if (isGetEmailTemplateLoading) {
       return (
@@ -271,9 +334,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.subject}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.to}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.cc}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.bcc}</td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-48 max-w-48'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.to || ''}
+            >
+              {item.to || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.cc || ''}
+            >
+              {item.cc || ''}
+            </div>
+          </td>
+          <td className='px-3 py-5 text-sm text-gray-500 w-32 max-w-32'>
+            <div 
+              className='truncate cursor-pointer hover:text-blue-600 hover:underline'
+              onClick={() => openEditEvaluationModal(item)}
+              title={item.bcc || ''}
+            >
+              {item.bcc || ''}
+            </div>
+          </td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
               <SmartButton id="edit-email-template-btn" onClick={() => openEditEvaluationModal(item)}>
@@ -305,19 +392,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>General Settings</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
-          
-          
+        </div>
 
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
@@ -346,11 +435,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-3'>
+              <SeederButton
+                onSeed={handleSeedEmailTemplates}
+                onUnseed={handleUnseedEmailTemplates}
+                isLoading={seedMutation.isLoading}
+                isUnseeding={unseedMutation.isLoading}
+              />
               <SmartButton
                 id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => setEmailTemplateModal({ id: null, open: true, mode: 'create' })}
               >
                 CREATE
               </SmartButton>
@@ -410,13 +505,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Subject
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-48 max-w-48'>
                         To
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Cc
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900 w-32 max-w-32'>
                         Bcc
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
@@ -429,27 +524,31 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
 
-      {/* Create Modal */}
-      <CreateEmailTemplateModal
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
-        refetch={refetchEmailTemplate}
-        onSuccess={handleCreateTemplateSuccess}
-      />
+      {/* Create/Edit Modal */}
+      {emailTemplateModal && (
+        <CreateEditEmailTemplateModal
+          isOpen={emailTemplateModal}
+          setIsOpen={setEmailTemplateModal}
+          refetch={refetchEmailTemplate}
+          onSuccess={handleCreateTemplateSuccess}
+        />
+      )}
 
-      {/* Success Modal */}
-      <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen} />
 
       {/* Delete Modal */}
       {isDeleteEmailTemplateModalOpen && (
@@ -463,6 +562,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onSuccess: (data: any) => {
                 toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
                 setIsDeleteEmailTemplateModalOpen(null);
+                setSelectedEmailTemplateId(null);
+                setActionType('');
                 refetchEmailTemplate();
               },
               onError: (err: any) => {
@@ -473,16 +574,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
           isLoading={isDeleteEmailTemplateLoading}
           customText={`${isDeleteEmailTemplateModalOpen.templateName} Email Template`}
-        />
-      )}
-
-      {/* Edit Modal */}
-      {isEditEmailTemplateModalOpen && selectedEmailTemplateId && (
-        <EditEmailTemplateModal
-          refetch={refetchEmailTemplate}
-          isOpen={isEditEmailTemplateModalOpen}
-          setIsOpen={setIsEditEmailTemplateModalOpen}
-          selectedEmailTemplateId={selectedEmailTemplateId}
         />
       )}
 

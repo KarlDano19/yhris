@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import SeederButton from '@/components/SeederButton';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -32,6 +33,8 @@ import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
+import useSeedEmployeeIssues from './hooks/useSeedEmployeeIssues';
+import useUnseedEmployeeIssues from './hooks/useUnseedEmployeeIssues';
 
 import {
   T_SendNTEModal,
@@ -97,6 +100,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
+  const seedEmployeeIssuesMutation = useSeedEmployeeIssues();
+  const unseedEmployeeIssuesMutation = useUnseedEmployeeIssues();
   const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const { data: decisionEmployeeIssueDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
@@ -395,6 +400,42 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Update the applied filter with the new sort order
     setAppliedFilter({ ...appliedFilter, status_sort: newSortOrder });
     setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  const handleSeedEmployeeIssues = async (count: number) => {
+    try {
+      const result = await seedEmployeeIssuesMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      if (refetch) {
+        await refetch();
+      }
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed employee issues';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedEmployeeIssues = async () => {
+    try {
+      const result = await unseedEmployeeIssuesMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+      if (refetch) {
+        await refetch();
+      }
+    } catch (error) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed employee issues';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -793,16 +834,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <span className="text-yellow-600 font-semibold text-xl">Redirecting to document generator...</span>
         </div>
       )}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Address Employee Issue</h2>
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
@@ -872,7 +918,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
+              <SeederButton
+                onSeed={handleSeedEmployeeIssues}
+                onUnseed={handleUnseedEmployeeIssues}
+                isLoading={seedEmployeeIssuesMutation.isLoading}
+                isUnseeding={unseedEmployeeIssuesMutation.isLoading}
+                maxCount={1000}
+                defaultCount={5}
+              />
               <SmartButton
                 id="create-employee-issue-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
@@ -978,14 +1032,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       <IncidentReportModal
