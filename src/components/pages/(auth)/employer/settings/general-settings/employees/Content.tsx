@@ -27,6 +27,7 @@ import useSyncEmployeeStatus from './hooks/employee-status/useSyncEmployeeStatus
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import useGetEmployeeStatusItems from './hooks/employee-status/useGetEmployeeStatusItems';
+import EmployeeId from './tabs/Employee-id';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
@@ -277,6 +278,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 >
                   Employee Status
                 </div>
+                <div
+                  onClick={() => setActiveTab('employee-id')}
+                  className={`cursor-pointer px-4 py-2 rounded-md transition-all duration-200 whitespace-nowrap ${
+                    activeTab === 'employee-id'
+                      ? 'bg-white text-savoy-blue border-2 border-savoy-blue shadow-sm'
+                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Employee ID
+                </div>
               </div>
             </div>
             
@@ -308,6 +319,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {activeTab === 'department' && <Department hasActiveSubscription={hasActiveSubscription} />}
         {activeTab === 'position' && <Position hasActiveSubscription={hasActiveSubscription} />}
         {activeTab === 'employee-status' && <EmployeeStatus hasActiveSubscription={hasActiveSubscription} />}
+        {activeTab === 'employee-id' && <EmployeeId />}
       </div>
     </>
   );
