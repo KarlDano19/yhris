@@ -17,6 +17,8 @@ import FilePreviewModal from './modals/FilePreviewModal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
 
+import 'react-quill/dist/quill.snow.css';
+
 const Content = () => {
   const params = useParams();
   const directiveId = params.id as string;
@@ -58,6 +60,13 @@ const Content = () => {
   } = useSendVerification(directiveId);
 
   const { mutate: verifyDirective, isLoading: isVerifying } = useVerifyDirective();
+
+  // Render HTML formatted body content
+  const renderBodyContent = (bodyContent: any) => {
+    if (!bodyContent) return null;
+    const markup = { __html: bodyContent };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
 
   // Get the list of recipient emails from directive data
   const getRecipientEmails = (): string[] => {
@@ -227,7 +236,9 @@ const Content = () => {
     if (directiveType === 'memo') {
       return (
         <div className="prose max-w-none text-gray-700 leading-relaxed">
-          <p className="text-justify indent-8">{directive.body || 'No memo content available.'}</p>
+          <div className="text-justify">
+            {directive.body ? renderBodyContent(directive.body) : 'No memo content available.'}
+          </div>
         </div>
       );
     } else {
@@ -342,7 +353,9 @@ const Content = () => {
           // If no specific policy fields, fall back to body
           return (
             <div className="prose max-w-none text-gray-700 leading-relaxed">
-              <p>{directive.body || 'No policy content available.'}</p>
+              <div>
+                {directive.body ? renderBodyContent(directive.body) : 'No policy content available.'}
+              </div>
             </div>
           );
         }
