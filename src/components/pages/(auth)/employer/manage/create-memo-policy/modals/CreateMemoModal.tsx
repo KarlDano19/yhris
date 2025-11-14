@@ -1,6 +1,7 @@
-import { Dispatch, Fragment, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -18,6 +19,9 @@ import EmployeeSelect from '@/components/common/EmployeeSelect';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { DirectiveData } from '@/types/directives';
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 interface CachedProfileData {
   name: string;
@@ -47,6 +51,7 @@ export default function CreateMemoModal({
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
   const queryClient = useQueryClient();
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   
   const cachedProfile = queryClient
     .getQueryCache()
@@ -287,12 +292,14 @@ export default function CreateMemoModal({
                       <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>
                         Body
                       </label>
-                      <div className='mt-2'>
-                        <textarea
-                          rows={4}
-                          {...register('body')}
-                          id='body'
-                          className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                      <div className='mt-2 h-72 mb-12'>
+                        <textarea rows={4} {...register('body')} id='body' hidden />
+                        <ReactQuill
+                          onChange={(value) => setValue('body', value)}
+                          formats={QUILL_FORMATS}
+                          modules={QUILL_MODULES}
+                          style={{ height: '100%', padding: '5px 8px !important' }}
+                          value={watch('body') || ''}
                         />
                       </div>
                     </div>

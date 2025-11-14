@@ -195,6 +195,15 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
     );
   };
 
+  const sanitizeQuestionTitle = (title?: string) => {
+    if (typeof title !== 'string') return '';
+    const trimmed = title.trim();
+    if (!trimmed || /^untitled(\s+question)?$/i.test(trimmed)) {
+      return '';
+    }
+    return trimmed;
+  };
+
   const renderQuestions = () => {
     // Flatten all criteria from all sections with employee scores
     const allCriteria: any[] = [];
@@ -203,13 +212,17 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
       templateData.questions.forEach((section: any, sectionIndex: number) => {
         if (section.criterion && Array.isArray(section.criterion)) {
           section.criterion.forEach((criterion: any, criterionIndex: number) => {
+            const questionTitle = sanitizeQuestionTitle(criterion?.title);
+            if (!criterion || !questionTitle) {
+              return;
+            }
             // Get employee scores for this criterion from individual_responses
             const employeeScores = getEmployeeScoresForQuestion(section.id, criterionIndex);
             
             allCriteria.push({
               sectionTitle: section.section_title,
-              title: criterion.title,
-              max_score: criterion.max_score,
+              title: questionTitle,
+              max_score: criterion?.max_score,
               employeeScores: employeeScores,
             });
           });
