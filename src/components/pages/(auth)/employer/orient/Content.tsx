@@ -543,7 +543,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1'></div>
-            <Filter 
+            <Filter
               filterGroups={filterGroups}
               defaultValues={filters}
               onFilterChange={handleFilterChange}
