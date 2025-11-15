@@ -672,7 +672,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons - Right Side */}
                     <div className='flex items-center gap-4'>
-                      {/* <SmartButton
+                      <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
                         className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
@@ -680,15 +680,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       >
                         <UploadIcon />
                         Upload Resumes
-                      </SmartButton> */}
+                      </SmartButton>
 
-                      <button
+                      {/* <button
                         onClick={() => setIsAddApplicantModalOpen(true)}
                         className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
                         title="Add Applicant"
                       >
                         <PlusIconGreen />
-                      </button>
+                      </button> */}
 
                       <div className='border-l-2 border-gray-300 h-10'></div>
 
@@ -751,14 +751,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons Row */}
                     <div className='flex justify-end items-center gap-2'>
-                      {/* <SmartButton
+                      <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
                         className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-1.5 px-4 font-bold text-sm flex items-center gap-2'
                       >
                         <UploadIcon />
                         Upload
-                      </SmartButton> */}
+                      </SmartButton>
 
                       <Filter 
                         filterGroups={filterGroups}
