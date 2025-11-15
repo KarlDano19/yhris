@@ -290,6 +290,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setPageSize(value);
   };
 
+  const getPlainText = (htmlString: string) => {
+    return htmlString
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const truncateText = (text: string, maxLength = 60) => {
+    if (text.length <= maxLength) return text;
+    return `${text.slice(0, maxLength)}...`;
+  };
+
   const renderRows = () => {
     if (isSearching || isEmployeeCompensationLogbookListLoading) {
       return (
@@ -320,7 +333,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.place_of_contingency}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.nature_of_contingency}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.days_of_employee_absence}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.remarks}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            {item.remarks ? (
+              <button
+                type='button'
+                onClick={() => setIsEmployeesCompensationLogbookEditModalOpen({ id: item.id, open: true })}
+                className='block max-w-[200px] truncate text-left text-gray-500 underline hover:text-blue-800 hover:underline'
+              >
+                {truncateText(getPlainText(item.remarks), 35)}
+              </button>
+            ) : (
+              '-'
+            )}
+          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2'>
               <SmartButton
