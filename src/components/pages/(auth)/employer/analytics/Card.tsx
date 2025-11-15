@@ -14,18 +14,18 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ value, trend, isPositive = true, showSeeMore = false }) => {
   return (
-    <div className="bg-white rounded-2xl p-6 mt-2 border border-[#A8B5C7] shadow-lg shadow-gray-300">
-      <div className="relative flex justify-center items-start mb-2">
+    <div className="bg-white rounded-2xl p-5 mt-2 border border-[#A8B5C7] shadow-lg shadow-gray-300">
+      <div className="flex items-center justify-center gap-2 mb-2">
         <span className="text-4xl font-bold text-gray-900">{value}</span>
-        <div className="absolute right-0 top-0 flex flex-col -mt-1">
-          {isPositive ? (
-            <UpIcon />
-          ) : (
-            <DownIcon />
-          )}
-        </div>
+        <span className="-mt-1">
+          {isPositive ? <UpIcon /> : <DownIcon />}
+        </span>
       </div>
-      <p className="text-xs text-gray-400 text-center">{trend}</p>
+      <p
+        className="text-xs text-gray-400 text-center w-full max-w-[150px] mx-auto leading-snug px-2 break-words"
+      >
+        {trend}
+      </p>
       {showSeeMore && (
         <div className="text-center mt-2">
           <button 
