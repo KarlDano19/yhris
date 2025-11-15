@@ -344,7 +344,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                 <div className="p-6">
                   {/* Progress indicator */}
                   <div className="mb-6">
-                    <div className="flex items-center justify-center space-x-4">
+                    <div className="flex flex-wrap justify-center gap-4 sm:flex-nowrap sm:items-center">
                       <div className={`flex items-center ${currentSelectionStep >= 1 ? 'text-savoy-blue' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                           currentSelectionStep >= 1 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
@@ -353,7 +353,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                         </div>
                         <span className="ml-2 text-sm font-medium">Performance Rate</span>
                       </div>
-                      <div className={`w-8 h-1 ${currentSelectionStep >= 2 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
+                      <div className={`hidden sm:block w-8 h-1 ${currentSelectionStep >= 2 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
                       <div className={`flex items-center ${currentSelectionStep >= 2 ? 'text-savoy-blue' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                           currentSelectionStep >= 2 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
@@ -362,7 +362,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                         </div>
                         <span className="ml-2 text-sm font-medium">Performance Table</span>
                       </div>
-                      <div className={`w-8 h-1 ${currentSelectionStep >= 3 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
+                      <div className={`hidden sm:block w-8 h-1 ${currentSelectionStep >= 3 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
                       <div className={`flex items-center ${currentSelectionStep >= 3 ? 'text-savoy-blue' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                           currentSelectionStep >= 3 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
@@ -371,7 +371,7 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
                         </div>
                         <span className="ml-2 text-sm font-medium">Issue Type</span>
                       </div>
-                      <div className={`w-8 h-1 ${currentSelectionStep >= 4 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
+                      <div className={`hidden sm:block w-8 h-1 ${currentSelectionStep >= 4 ? 'bg-savoy-blue' : 'bg-gray-200'}`}></div>
                       <div className={`flex items-center ${currentSelectionStep >= 4 ? 'text-savoy-blue' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                           currentSelectionStep >= 4 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'
