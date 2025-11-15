@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useMemo, useState, Fragment, useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -14,10 +14,13 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import ViewAuditLogDetails from './modals/ViewAuditLogDetails';
 import useGetAuditLogsItems from './hooks/useGetAuditLogsItems';
+import useGetAuditLogFilters from './hooks/useGetAuditLogFilters';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import classNames from '@/helpers/classNames';
+import SelectChevronDown from '@/svg/SelectChevronDown';
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
 type PaginationProps = {
   totalRecords: number;
@@ -29,7 +32,23 @@ type T_ModalData = {
   open: boolean;
 };
 
+type AuditLogFilterValues = {
+  action: string;
+  user: string;
+  module: string;
+};
+
+const defaultAdvancedFilter: AuditLogFilterValues = {
+  action: 'ALL',
+  user: 'ALL',
+  module: 'ALL',
+};
+
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const [persistedAdvancedFilter, setPersistedAdvancedFilter] = useFilterPersistence<AuditLogFilterValues>(
+    'audit-logs-advanced-filter',
+    defaultAdvancedFilter
+  );
   const [auditLogsData, setAuditLogsData] = useState<any>([]);
   const [openModal, setOpenModal] = useState<T_ModalData | null>(null);
   const [pageSize, setPageSize] = useState(5);
@@ -43,12 +62,58 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     from: '',
     to: '',
     search: '',
+    action: persistedAdvancedFilter.action === 'ALL' ? '' : persistedAdvancedFilter.action,
+    module: persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module,
+    user: persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user,
   });
+  const [advancedFilter, setAdvancedFilter] = useState<AuditLogFilterValues>(persistedAdvancedFilter);
+  const [filterDraft, setFilterDraft] = useState<AuditLogFilterValues>(persistedAdvancedFilter);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterPopoverRef = useRef<HTMLDivElement | null>(null);
   const {
     data: auditLogsItems,
     isLoading: isAuditLogsLoading,
+    isFetching: isAuditLogsFetching,
     refetch: auditLogsRefetch,
   } = useGetAuditLogsItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  const {
+    data: auditFilterOptions,
+    isFetching: isAuditFilterFetching,
+    refetch: refetchAuditFilterOptions,
+  } = useGetAuditLogFilters({ enabled: false });
+
+  const actionOptions = useMemo(
+    () => auditFilterOptions?.actions ?? [],
+    [auditFilterOptions]
+  );
+
+  const userOptions = useMemo(
+    () =>
+      (auditFilterOptions?.users ?? []).map((user: any) => ({
+        value: String(user.id),
+        label: user.name ? `${user.name} (${user.email})` : user.email ?? 'Unknown User',
+      })),
+    [auditFilterOptions]
+  );
+
+  const moduleOptions = useMemo(
+    () => auditFilterOptions?.modules ?? [],
+    [auditFilterOptions]
+  );
+
+  const actionOptionsWithAll = useMemo(
+    () => [{ value: 'ALL', label: 'All Actions' }, ...actionOptions],
+    [actionOptions]
+  );
+  const moduleOptionsWithAll = useMemo(
+    () => [{ value: 'ALL', label: 'All Modules' }, ...moduleOptions],
+    [moduleOptions]
+  );
+
+  const userOptionsWithAll = useMemo(
+    () => [{ value: 'ALL', label: 'All Users' }, ...userOptions],
+    [userOptions]
+  );
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -82,10 +147,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [currentPage, pageSize, auditLogsRefetch]);
 
   useEffect(() => {
-    if (!isAuditLogsLoading && isSearching) {
+    if (!isAuditLogsLoading && !isAuditLogsFetching && isSearching) {
       setIsSearching(false);
     }
-  }, [isAuditLogsLoading, isSearching]);
+  }, [isAuditLogsLoading, isAuditLogsFetching, isSearching]);
+
+  const triggerRefetch = () => {
+    setTimeout(() => {
+      auditLogsRefetch();
+    }, 0);
+  };
 
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -109,8 +180,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
-    auditLogsRefetch();
+    triggerRefetch();
   };
 
   const paginationChange = (event: any) => {
@@ -121,6 +193,80 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const handleFilterOpenChange = (value: boolean) => {
+    if (value && !auditFilterOptions) {
+      refetchAuditFilterOptions();
+    }
+    setIsFilterOpen(value);
+  };
+
+  useEffect(() => {
+    if (isFilterOpen) {
+      setFilterDraft(advancedFilter);
+    }
+  }, [isFilterOpen, advancedFilter]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isFilterOpen && filterPopoverRef.current && !filterPopoverRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFilterOpen]);
+
+  useEffect(() => {
+    setAdvancedFilter((prev) => {
+      if (
+        prev.module === persistedAdvancedFilter.module &&
+        prev.user === persistedAdvancedFilter.user &&
+        prev.action === persistedAdvancedFilter.action
+      ) {
+        return prev;
+      }
+      return persistedAdvancedFilter;
+    });
+
+    setFilterDraft(persistedAdvancedFilter);
+
+    setItemsFilter((prev: any) => {
+      const normalizedAction = persistedAdvancedFilter.action === 'ALL' ? '' : persistedAdvancedFilter.action;
+      const normalizedModule = persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module;
+      const normalizedUser = persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user;
+      if (
+        prev.module === normalizedModule &&
+        prev.user === normalizedUser &&
+        prev.action === normalizedAction
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        action: normalizedAction,
+        module: normalizedModule,
+        user: normalizedUser,
+      };
+    });
+  }, [persistedAdvancedFilter]);
+
+  const handleAdvancedFilterApply = (values: AuditLogFilterValues) => {
+    const normalizedAction = values.action === 'ALL' ? '' : values.action;
+    const normalizedModule = values.module === 'ALL' ? '' : values.module;
+    const normalizedUser = values.user === 'ALL' ? '' : values.user;
+    setAdvancedFilter(values);
+    setPersistedAdvancedFilter(values);
+    setItemsFilter((prev: any) => ({
+      ...prev,
+      action: normalizedAction,
+      module: normalizedModule,
+      user: normalizedUser,
+    }));
+    setCurrentPage(1);
+    setIsSearching(true);
+    triggerRefetch();
   };
 
   const renderRows = () => {
@@ -134,7 +280,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
 
-    if (isSearching || isAuditLogsLoading) {
+    if (isSearching || isAuditLogsLoading || isAuditLogsFetching) {
       return (
         <tr>
           <td colSpan={100}>
@@ -254,13 +400,112 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1 flex justify-end'>
-              <button
-                className='border border-blue-600 rounded-l-md py-2 px-5 text-blue-600 text-sm font-semibold hover:shadow-md focus:shadow-none disabled:opacity-50'
-              >
-                Advance Filter
-              </button>
+              <div className='relative' ref={filterPopoverRef}>
+                <button
+                  className='border border-blue-600 rounded-l-md py-2 px-5 text-blue-600 text-sm font-semibold hover:shadow-md focus:shadow-none disabled:opacity-50 bg-white flex items-center gap-2'
+                  onClick={() => handleFilterOpenChange(!isFilterOpen)}
+                  disabled={isAuditFilterFetching}
+                >
+                  Advance Filter
+                </button>
+                {isFilterOpen && (
+                  <div className='absolute right-0 mt-3 w-[320px] rounded-xl border border-gray-200 bg-white shadow-xl z-40 p-4 space-y-4'>
+                    <div>
+                      <label className='block text-sm font-semibold text-gray-800 mb-1'>Action</label>
+                      <div className='relative'>
+                        <select
+                          value={
+                            actionOptionsWithAll.some((opt) => opt.value === filterDraft.action)
+                              ? filterDraft.action
+                              : 'ALL'
+                          }
+                          onChange={(e) => setFilterDraft((prev) => ({ ...prev, action: e.target.value }))}
+                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          disabled={isAuditFilterFetching}
+                        >
+                          {actionOptionsWithAll.map((option) => (
+                            <option key={`action-${option.value}`} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <span className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'>
+                          <SelectChevronDown />
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className='block text-sm font-semibold text-gray-800 mb-1'>User</label>
+                      <div className='relative'>
+                        <select
+                          value={
+                            userOptionsWithAll.some((opt) => opt.value === filterDraft.user)
+                              ? filterDraft.user
+                              : 'ALL'
+                          }
+                          onChange={(e) => setFilterDraft((prev) => ({ ...prev, user: e.target.value }))}
+                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          disabled={isAuditFilterFetching}
+                        >
+                          {userOptionsWithAll.map((option) => (
+                            <option key={`user-${option.value}`} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <span className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'>
+                          <SelectChevronDown />
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className='block text-sm font-semibold text-gray-800 mb-1'>Module</label>
+                      <div className='relative'>
+                        <select
+                          value={
+                            moduleOptionsWithAll.some((opt) => opt.value === filterDraft.module)
+                              ? filterDraft.module
+                              : 'ALL'
+                          }
+                          onChange={(e) => setFilterDraft((prev) => ({ ...prev, module: e.target.value }))}
+                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          disabled={isAuditFilterFetching}
+                        >
+                          {moduleOptionsWithAll.map((option) => (
+                            <option key={`module-${option.value}`} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <span className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'>
+                          <SelectChevronDown />
+                        </span>
+                      </div>
+                    </div>
+                    <div className='pt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+                      <button
+                        onClick={() => setFilterDraft({ action: 'ALL', user: 'ALL', module: 'ALL' })}
+                        className='rounded-lg border border-[#355fd0] bg-white px-4 py-1.5 text-sm font-medium text-[#355fd0] hover:bg-[#355fd0]/10'
+                        disabled={isAuditFilterFetching}
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleAdvancedFilterApply(filterDraft);
+                          setIsFilterOpen(false);
+                        }}
+                        className='rounded-lg bg-[#355fd0] px-5 py-1.5 text-sm font-semibold text-white hover:bg-[#355fd0]/90 disabled:opacity-60'
+                        disabled={isAuditFilterFetching}
+                      >
+                        Apply Filters
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Menu as='div' className='relative'>
-                <Menu.Button className='border border-blue-600 py-2.5 px-3 rounded-r-md text-blue-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                <Menu.Button className='border border-blue-600 py-2 px-3 rounded-r-md text-blue-600 text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
                   <div className='flex gap-4'>
                     <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
