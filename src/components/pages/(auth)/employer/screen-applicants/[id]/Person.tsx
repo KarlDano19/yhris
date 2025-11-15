@@ -206,7 +206,7 @@ export default function Person({
   } else {
     // Applicants who don't meet criteria or timer expired - White background (default)
     backgroundColorClass = 'bg-white';
-    hoverClass = 'hover:bg-gray-50';
+    hoverClass = 'hover:bg-gray-100';
   }
 
   return (
