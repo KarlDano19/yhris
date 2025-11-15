@@ -672,7 +672,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons - Right Side */}
                     <div className='flex items-center gap-4'>
-                      <SmartButton
+                      {/* <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
                         className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
@@ -680,7 +680,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       >
                         <UploadIcon />
                         Upload Resumes
-                      </SmartButton>
+                      </SmartButton> */}
 
                       <button
                         onClick={() => setIsAddApplicantModalOpen(true)}
@@ -751,14 +751,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                     {/* Action Buttons Row */}
                     <div className='flex justify-end items-center gap-2'>
-                      <SmartButton
+                      {/* <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
                         className='rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-1.5 px-4 font-bold text-sm flex items-center gap-2'
                       >
                         <UploadIcon />
                         Upload
-                      </SmartButton>
+                      </SmartButton> */}
 
                       <Filter 
                         filterGroups={filterGroups}
