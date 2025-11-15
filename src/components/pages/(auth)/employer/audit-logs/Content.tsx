@@ -420,7 +420,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               : 'ALL'
                           }
                           onChange={(e) => setFilterDraft((prev) => ({ ...prev, action: e.target.value }))}
-                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
                           disabled={isAuditFilterFetching}
                         >
                           {actionOptionsWithAll.map((option) => (
@@ -444,7 +444,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               : 'ALL'
                           }
                           onChange={(e) => setFilterDraft((prev) => ({ ...prev, user: e.target.value }))}
-                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
                           disabled={isAuditFilterFetching}
                         >
                           {userOptionsWithAll.map((option) => (
@@ -468,7 +468,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               : 'ALL'
                           }
                           onChange={(e) => setFilterDraft((prev) => ({ ...prev, module: e.target.value }))}
-                          className='w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
+                          className='truncate w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none disabled:opacity-60'
                           disabled={isAuditFilterFetching}
                         >
                           {moduleOptionsWithAll.map((option) => (
