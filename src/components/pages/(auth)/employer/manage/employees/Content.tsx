@@ -201,7 +201,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         { label: 'Inactive', value: 'false' },
       ],
       multiSelect: true,
-      allowEmpty: true,
+      allowEmpty: false,
     },
   ];
 
@@ -1049,6 +1049,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <Filter 
                     filterGroups={filterGroups}
                     defaultValues={filters}
+                    resetValues={{ is_active: ['true'] }}
                     onFilterChange={handleFilterChange}
                     buttonId="employee-filter-btn"
                     size="small"

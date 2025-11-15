@@ -111,7 +111,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         { label: 'Separated', value: 'separated' },
       ],
       multiSelect: true,
-      allowEmpty: true,
+      allowEmpty: false,
     },
   ];
 
@@ -736,6 +736,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <Filter 
                 filterGroups={filterGroups}
                 defaultValues={filters}
+                resetValues={{ status: ['unfinished'] }}
                 onFilterChange={handleFilterChange}
                 buttonId="separation-filter-btn"
                 size="small"

@@ -64,7 +64,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         { label: 'Enrolled', value: 'enrolled' },
       ],
       multiSelect: true,
-      allowEmpty: true,
+      allowEmpty: false,
     },
   ];
 
@@ -546,6 +546,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <Filter 
               filterGroups={filterGroups}
               defaultValues={filters}
+              resetValues={{ enrolled: ['not_enrolled'] }}
               onFilterChange={handleFilterChange}
               buttonId="orient-filter-btn"
             />
