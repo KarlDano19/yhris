@@ -171,7 +171,7 @@ export default function Filter({
         <div
           role="dialog"
           aria-label="Filter options"
-          className="absolute z-40 mt-3 right-0 w-64 rounded-xl border border-gray-200 bg-white shadow-xl"
+          className="absolute z-40 mt-3 left-0 w-64 rounded-xl border border-gray-200 bg-white shadow-xl"
         >
           <div className="p-4 space-y-4">
             {filterGroups.map((group, groupIndex) => (
