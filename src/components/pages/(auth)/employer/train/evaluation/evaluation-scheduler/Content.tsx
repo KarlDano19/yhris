@@ -13,12 +13,15 @@ import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import Pagination from '@/components/Pagination';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import SeederButton from '@/components/SeederButton';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
 import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailEvaluationSchedulerModal';
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
 import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
+import useSeedEvaluationSchedulers from './hooks/useSeedEvaluationSchedulers';
+import useUnseedEvaluationSchedulers from './hooks/useUnseedEvaluationSchedulers';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -79,6 +82,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
+  const seedEvaluationSchedulersMutation = useSeedEvaluationSchedulers();
+  const unseedEvaluationSchedulersMutation = useUnseedEvaluationSchedulers();
 
   // Helper component to display recipient avatar with fallback
   const RecipientAvatar = ({ recipient, size = 40 }: { recipient: any; size?: number }) => {
@@ -199,6 +204,36 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsDeleteEvaluationSchedulerModalOpen({ id: evaluationDetails.id, open: true });
     } else {
       setSelectedEvaluationSchedulerId(evaluationDetails.id);
+    }
+  };
+
+  const handleSeedEvaluationSchedulers = async (count: number) => {
+    try {
+      const result = await seedEvaluationSchedulersMutation.mutateAsync({ count });
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to seed evaluation schedulers';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
+
+  const handleUnseedEvaluationSchedulers = async () => {
+    try {
+      const result = await unseedEvaluationSchedulersMutation.mutateAsync();
+      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to unseed evaluation schedulers';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
     }
   };
 
@@ -385,7 +420,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <td colSpan={7}>
               <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
               <h4 className='text-center text-gray-300 text-sm mb-4'>
-                Please click create to add evaluation template.
+                Please click create to add an evaluation scheduler.
               </h4>
             </td>
           </tr>
@@ -396,17 +431,21 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/train' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Train</h4>
           </Link>
         </div>
+        
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Scheduler</h2>
-          
-          <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+        </div>
+
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div className='flex gap-2 lg:w-1/3 pr-5 md:pr-16'>
               <div className='flex-none w-11/12 lg:w-full'>
                 <div className='relative flex items-center'>
@@ -435,10 +474,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
+              <SeederButton
+                onSeed={handleSeedEvaluationSchedulers}
+                onUnseed={handleUnseedEvaluationSchedulers}
+                isLoading={seedEvaluationSchedulersMutation.isLoading}
+                isUnseeding={unseedEvaluationSchedulersMutation.isLoading}
+                disabled={!hasActiveSubscription}
+                maxCount={1000}
+              />
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsCreateEvaluationSchedulerOpen(true)}
+                disabled={!hasActiveSubscription}
               >
                 CREATE
               </button>
@@ -516,14 +564,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <hr />
               </div>
             </div>
-            <Pagination
-              pagination={pagination}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageSizeChange={pageSizeChange}
-              onPageChange={paginationChange}
-            />
           </div>
+        </div>
+        
+        {/* Sticky Pagination */}
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
         </div>
       </div>
       {isCreateEvaluationSchedulerOpen && (

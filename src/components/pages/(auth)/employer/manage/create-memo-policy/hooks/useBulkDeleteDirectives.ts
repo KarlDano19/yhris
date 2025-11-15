@@ -7,25 +7,33 @@ interface BulkDeleteResponse {
 }
 
 const bulkDeleteDirectives = async (directiveIds: number[]): Promise<BulkDeleteResponse> => {
-  const token = getCookie('token');
-  
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/directives/`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Token ${token}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ directive_ids: directiveIds }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to delete directives');
+  try {
+    const token = getCookie('token');
+    
+    const config = {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ directive_ids: directiveIds }),
+    };
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/directives/`, config);
+    
+    if (!res.ok) {
+      throw res.json();
+    }
+    
+    return res.json();
+  } catch (err: any) {
+    let errStringify = await err;
+    if (Object.hasOwn(errStringify, 'response')) {
+      throw errStringify.response.data.message;
+    }
+    throw errStringify.message;
   }
-
-  const data = await response.json();
-  return data;
 };
 
 export default function useBulkDeleteDirectives() {

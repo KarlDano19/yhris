@@ -101,6 +101,21 @@ export default function Person({
 
   const isPassedFinalInterview = applicant.status === 'hired';
   
+  // Find the stage note for the current stage the applicant is in
+  const currentStageNote = applicant.stage_notes?.find(note => note.job_stage === stage.id);
+  
+  // Check if this is the first stage (order_by === 0)
+  const isFirstStage = stage.orderBy === 0;
+  
+  // Check if applicant has any stage notes (indicating they've been through the process before)
+  const hasAnyStageNotes = applicant.stage_notes && applicant.stage_notes.length > 0;
+  
+  // Determine if this is a restored applicant:
+  // - They have stage notes from previous stages (been through the process)
+  // - They're not in the first stage
+  // - They don't have a stage note for the current stage yet
+  const isRestoredApplicant = hasAnyStageNotes && !isFirstStage && !currentStageNote;
+  
   // Determine if this applicant card should be interactive
   const canInteract = permissions.can_update && !isStageDisabled;
   const canViewDetails = permissions.can_view && !isStageDisabled;
@@ -133,6 +148,10 @@ export default function Person({
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
+  const isArchived = applicant.is_archived === true;
+  
+  // Check if applicant meets all ideal answers (screeningFit === 'good')
+  const meetsAllIdealAnswers = applicant.screeningFit === 'good';
 
   const capitalizeFirstLetter = (text: any) => {
     return text.replace(/(?:^|\s)\S/, function (match: any) {
@@ -140,74 +159,109 @@ export default function Person({
     });
   };
 
+  // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
+  const isWithinTimerWindow = (dateString: string | undefined) => {
+    if (!dateString) return false;
+    const dateCreated = new Date(dateString);
+    const now = new Date();
+    const timeDifference = now.getTime() - dateCreated.getTime();
+    const minutesDifference = timeDifference / (1000 * 60);
+    return Math.abs(minutesDifference) <= 720; // 12 hours
+  };
+
+  // Check if applicant was recently created/updated (within 12 hours)
+  const isRecentlyCreated = isWithinTimerWindow(applicant.created_at);
+  const isRecentlyUpdated = isWithinTimerWindow(applicant.updated_at);
+  const isRecentlyRestored = isRestoredApplicant && isWithinTimerWindow(applicant.updated_at);
+  const isRecentlyArchived = isArchived && isWithinTimerWindow(applicant.updated_at);
+
+  // Determine background color based on priority and Must-Have results with timer logic
+  let backgroundColorClass = '';
+  let borderClass = '';
+  let hoverClass = '';
+  
+  if (isArchived && isRecentlyArchived) {
+    // Recently archived applicants - Red background (highest priority, with timer)
+    backgroundColorClass = 'bg-red-50';
+    borderClass = 'border-b border-b-red-50';
+    hoverClass = 'hover:bg-red-100';
+  } else if (isPassedFinalInterview) {
+    // Hired applicants - Yellow background (no timer, permanent)
+    backgroundColorClass = 'bg-yellow-100';
+    borderClass = 'border-b border-b-yellow-100';
+  } else if (isRestoredApplicant && isRecentlyRestored) {
+    // Recently restored from archived applicants - Red background (with timer)
+    backgroundColorClass = 'bg-red-50';
+    borderClass = 'border-b border-b-red-50';
+    hoverClass = 'hover:bg-red-100';
+  } else if (isRejected || isWithdrawn) {
+    // Rejected/Withdrawn applicants - Violet background (no timer, permanent)
+    backgroundColorClass = 'bg-violet-100';
+    borderClass = 'border-b border-b-violet-100';
+  } else if (meetsAllIdealAnswers && (isRecentlyCreated || isRecentlyUpdated)) {
+    // Recently created/updated applicants who meet all ideal answers - Green background (with timer)
+    backgroundColorClass = 'bg-green-100';
+    borderClass = 'border-b border-b-green-100';
+    hoverClass = 'hover:bg-green-200';
+  } else {
+    // Applicants who don't meet criteria or timer expired - White background (default)
+    backgroundColorClass = 'bg-white';
+    hoverClass = 'hover:bg-gray-50';
+  }
+
   return (
     <div
       className={classNames(
-        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative',
-        isButtonDisabled && !isPassedFinalInterview
-          ? 'border-b border-b-blue-100 bg-blue-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
-          : '',
-        isPassedFinalInterview
-          ? 'border-b border-b-yellow-100 bg-yellow-100 last:border-none flex items-center gap-2 relative rounded-xl mb-2'
-          : '',
+        'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
+        backgroundColorClass,
+        borderClass,
+        hoverClass,
         !canViewDetails || isStageDisabled
           ? 'opacity-60 cursor-not-allowed'
-          : 'cursor-pointer hover:bg-gray-50'
+          : ''
       )}
     >
+      {/* NEW label - positioned absolutely in upper right corner */}
+      {isRecentlyCreated && (
+        <span className='absolute top-2 right-3 bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0'>
+          NEW
+        </span>
+      )}
+      
+      {/* HIRED label - positioned absolutely in upper right corner */}
+      {isPassedFinalInterview && (
+        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
+          HIRED
+        </span>
+      )}
+      
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
         <ApplicantAvatar applicant={applicant} size={32} />
       </div>
-      <div className='flex-1'>
-        <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm`}>
-          {name}
-          {!canViewDetails && (
-            <span className="text-gray-400 text-xs ml-2">🔒</span>
-          )}
-          {isPassedFinalInterview && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-          {isRejected && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-          {isWithdrawn && (
-            <span>
-              <br />
-              {capitalizeFirstLetter(applicant.status)}
-            </span>
-          )}
-        </p>
-        {canViewDetails && applicant.stage_notes && applicant.stage_notes.length > 0 && (
+      <div className='flex-1 pt-2'>
+        <div className='flex items-center gap-2'>
+          <p className={`${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'} font-semibold text-sm flex-1`}>
+            {name}
+            {!canViewDetails && (
+              <span className="text-gray-400 text-xs ml-2">🔒</span>
+            )}
+            {/* {isRejected && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )}
+            {isWithdrawn && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )} */}
+          </p>
+        </div>
+        {canViewDetails && (
           <div className='flex flex-col mt-1'>
-            <div className='flex items-center'>
-              <div className='w-2 h-2 bg-blue-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Has stage notes</span>
-            </div>
-            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
-              {applicant.stage_notes[0]?.created_at 
-                ? new Date(applicant.stage_notes[0].created_at).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })
-                : 'Date not available'
-              }
-            </span>
-          </div>
-        )}
-        {canViewDetails && (!applicant.stage_notes || applicant.stage_notes.length === 0) && (
-          <div className='flex flex-col mt-1'>
-            <div className='flex items-center'>
-              <div className='w-2 h-2 bg-green-500 rounded-full mr-1'></div>
-              <span className='text-xs text-gray-500'>Applied</span>
-            </div>
-            <span className='text-xs text-gray-400 ml-3 mt-0.5'>
+            <span className='text-xs text-gray-400'>
               {applicant.created_at 
                 ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
                     month: 'short', 
@@ -231,7 +285,7 @@ export default function Person({
         <div className='mr-2'>
           <ArchiveButton
             appliedJobId={applicant.applicationId}
-            isArchived={false}
+            isArchived={isArchived}
             status={applicant.status || 'rejected'}
             onSuccess={() => {
               // Refresh will be handled by parent
@@ -257,7 +311,7 @@ export default function Person({
       {/* Menu dropdown - only show if user can interact */}
       {isOpenMenu && canInteract && (
         <div ref={menuRef}>
-          <ul className='absolute right-0 top-12 p-4 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
+          <ul className='absolute right-0 top-16 p-2 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
               

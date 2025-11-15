@@ -38,6 +38,132 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
   allJobPostsForPrint?: any[],
   selectedRecords?: number[]
 ) => {
+  const allApplicants = Array.isArray(appliedApplicantsData) ? appliedApplicantsData : [];
+
+  const hasSelectedJobFilter = !!selectedJobFilter && selectedJobFilter !== 'All Jobs';
+  const selectedJobId =
+    hasSelectedJobFilter && typeof selectedJobFilter === 'string' && /^\d+$/.test(selectedJobFilter)
+      ? Number(selectedJobFilter)
+      : hasSelectedJobFilter && typeof selectedJobFilter === 'number'
+        ? selectedJobFilter
+        : null;
+  const selectedJobTitle =
+    hasSelectedJobFilter && selectedJobId === null && typeof selectedJobFilter === 'string'
+      ? selectedJobFilter
+      : null;
+
+  const shouldFilterBySelectedRecords =
+    printOption === 'selected' && Array.isArray(selectedRecords) && selectedRecords.length > 0;
+  const selectedRecordIdSet = shouldFilterBySelectedRecords
+    ? new Set(
+        selectedRecords
+          .map((record) => {
+            if (typeof record === 'number') {
+              return record;
+            }
+            if (typeof record === 'string' && /^\d+$/.test(record)) {
+              return Number(record);
+            }
+            return null;
+          })
+          .filter((id): id is number => id !== null)
+      )
+    : null;
+
+  const filteredApplicants = allApplicants.filter((applicant: any) => {
+    const jobPosting = applicant?.job_posting;
+    const jobId = jobPosting?.id;
+    const jobTitle = jobPosting?.job_title;
+
+    if (shouldFilterBySelectedRecords) {
+      if (jobId === null || jobId === undefined || !selectedRecordIdSet?.has(Number(jobId))) {
+        return false;
+      }
+    }
+
+    if (selectedJobId !== null) {
+      return jobId === selectedJobId;
+    }
+
+    if (selectedJobTitle) {
+      return jobTitle === selectedJobTitle || jobId === selectedJobTitle;
+    }
+
+    return true;
+  });
+
+  const applicantsDataForPrint =
+    hasSelectedJobFilter || shouldFilterBySelectedRecords ? filteredApplicants : allApplicants;
+
+  const includeJobBreakdown = hasSelectedJobFilter || shouldFilterBySelectedRecords;
+
+  const jobPostTitleMap = new Map<number, string>();
+  if (Array.isArray(allJobPostData)) {
+    allJobPostData.forEach((job: any) => {
+      if (job?.id != null) {
+        jobPostTitleMap.set(job.id, job.job_title || `Job ${job.id}`);
+      }
+    });
+  }
+
+  const jobApplicantGroups = new Map<string | number, any[]>();
+  const jobTitleLookup = new Map<string | number, string>();
+
+  const registerJobGroup = (key: string | number, titleFallback?: string) => {
+    if (!jobApplicantGroups.has(key)) {
+      jobApplicantGroups.set(key, []);
+    }
+    if (!jobTitleLookup.has(key)) {
+      const numericKey = typeof key === 'string' && /^\d+$/.test(key) ? Number(key) : key;
+      const mappedTitle =
+        typeof numericKey === 'number'
+          ? jobPostTitleMap.get(numericKey)
+          : undefined;
+      jobTitleLookup.set(
+        key,
+        mappedTitle ||
+          titleFallback ||
+          (typeof key === 'number' ? `Job ${key}` : key.toString())
+      );
+    }
+  };
+
+  filteredApplicants.forEach((applicant) => {
+    const jobPosting = applicant?.job_posting;
+    const jobId = jobPosting?.id;
+    const jobTitle = jobPosting?.job_title;
+    const key = jobId ?? (jobTitle ?? 'Unknown Job');
+    registerJobGroup(key, jobTitle);
+    jobApplicantGroups.get(key)!.push(applicant);
+  });
+
+  if (shouldFilterBySelectedRecords && selectedRecordIdSet) {
+    selectedRecordIdSet.forEach((jobId) => {
+      registerJobGroup(jobId, jobPostTitleMap.get(jobId) ?? `Job ${jobId}`);
+    });
+  }
+
+  if (hasSelectedJobFilter && selectedJobId !== null) {
+    registerJobGroup(
+      selectedJobId,
+      jobPostTitleMap.get(selectedJobId) ?? `Job ${selectedJobId}`
+    );
+  } else if (hasSelectedJobFilter && selectedJobTitle) {
+    registerJobGroup(selectedJobTitle, selectedJobTitle);
+  }
+
+  const jobApplicantSummaries = includeJobBreakdown
+    ? Array.from(jobApplicantGroups.entries()).map(([key, applicants]) => {
+        const summary = calculateOverallApplicantsSummary(applicants);
+        return {
+          jobId: key,
+          jobTitle: jobTitleLookup.get(key) ?? (typeof key === 'number' ? `Job ${key}` : key.toString()),
+          applicantCount: applicants.length,
+          summary,
+        };
+      }).sort((a, b) => a.jobTitle.localeCompare(b.jobTitle))
+    : [];
+
   // Calculate KPI data
   const calculateKPIs = () => {
     // Total Active Employees - Use shared utility function
@@ -71,13 +197,13 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
 
   // Calculate applicant data for sub-tab 1 - Use shared utility function
   const calculateApplicantData = () => {
-    return calculateOverallApplicantsSummary(appliedApplicantsData);
+    return calculateOverallApplicantsSummary(applicantsDataForPrint);
   };
 
   // Calculate demographic data for sub-tab 1 - Use shared utility function
   const calculateDemographicData = () => {
     return calculateDemographicBreakdown(
-      appliedApplicantsData,
+      applicantsDataForPrint,
       { records: allJobPostData },
       validRegions,
       selectedJobFilter
@@ -225,6 +351,15 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
         rolePipelineData={rolePipelineDataForPrint}
         attritionData={{ ...attritionData, exitReasons: exitReasonsData }}
         dateFilter={dateFilter}
+        selectionMetadata={
+          includeJobBreakdown
+            ? {
+                totalApplicants: applicantsDataForPrint.length,
+                jobCount: jobApplicantSummaries.length,
+              }
+            : undefined
+        }
+        jobApplicantSummaries={includeJobBreakdown ? jobApplicantSummaries : undefined}
       />
     </div>
   );

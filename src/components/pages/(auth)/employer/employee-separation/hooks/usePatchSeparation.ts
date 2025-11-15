@@ -18,40 +18,46 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         context: '',
       };
       if (separationEmail.emailType === 'letters') {
-        data.subject = separationEmail.separationLetter.subject
-          ? separationEmail.separationLetter.subject
-          : `Letter of ${separationEmail.separationLetter.type}`;
-        data.to = separationEmail.separationLetter.to;
-        data.cc = separationEmail.separationLetter.cc;
-        data.bcc = separationEmail.separationLetter.bcc;
+        data.subject = separationEmail.separationLetter.subject || '';
+        data.to = Array.isArray(separationEmail.separationLetter.to) 
+          ? separationEmail.separationLetter.to 
+          : [separationEmail.separationLetter.to];
+        data.cc = separationEmail.separationLetter.cc || [];
+        data.bcc = separationEmail.separationLetter.bcc || [];
         data.context = separationEmail.separationLetter.message;
+        if (separationEmail.separationLetter.attachment) {
+          data.attachment = separationEmail.separationLetter.attachment;
+        }
       }
       if (separationEmail.emailType === 'sign documents') {
-        data.subject = separationEmail.signDocuments.subject
-          ? separationEmail.signDocuments.subject
-          : `Sign Documents | ${separationEmail.signDocuments.template}`;
+        data.subject = separationEmail.signDocuments.subject;
         data.to = separationEmail.signDocuments.to;
         data.cc = separationEmail.signDocuments.cc;
         data.bcc = separationEmail.signDocuments.bcc;
         data.context = separationEmail.signDocuments.message;
+        if (separationEmail.signDocuments.attachment) {
+          data.attachment = separationEmail.signDocuments.attachment;
+        }
       }
       if (separationEmail.emailType === 'last pay') {
-        data.subject = separationEmail.lastPay.subject
-          ? separationEmail.lastPay.subject
-          : `Last Pay | ${separationEmail.lastPay.template}`;
+        data.subject = separationEmail.lastPay.subject;
         data.to = separationEmail.lastPay.to;
         data.cc = separationEmail.lastPay.cc;
         data.bcc = separationEmail.lastPay.bcc;
         data.context = separationEmail.lastPay.message;
+        if (separationEmail.lastPay.attachment) {
+          data.attachment = separationEmail.lastPay.attachment;
+        }
       }
       if (separationEmail.emailType === 'quit claim') {
-        data.subject = separationEmail.quitClaim.subject
-          ? separationEmail.quitClaim.subject
-          : `Quit Claim | ${separationEmail.quitClaim.template}`;
+        data.subject = separationEmail.quitClaim.subject;
         data.to = separationEmail.quitClaim.to;
         data.cc = separationEmail.quitClaim.cc;
         data.bcc = separationEmail.quitClaim.bcc;
         data.context = separationEmail.quitClaim.message;
+        if (separationEmail.quitClaim.attachment) {
+          data.attachment = separationEmail.quitClaim.attachment;
+        }
       }
     } else {
       data = {
@@ -60,14 +66,42 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         date_received: separationEmail.dateReceived,
       };
     }
-    const config = {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify(data),
-    };
+    
+    let config: any;
+    
+    // If attachment exists, use FormData
+    if (data.attachment) {
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (key === 'attachment') {
+          formData.append(key, data[key]);
+        } else if (key === 'to' || key === 'cc' || key === 'bcc') {
+          // Ensure email fields are arrays before stringifying
+          const emailArray = Array.isArray(data[key]) ? data[key] : [data[key]];
+          formData.append(key, JSON.stringify(emailArray));
+        } else {
+          formData.append(key, data[key]);
+        }
+      });
+      
+      config = {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+        body: formData,
+      };
+    } else {
+      // No attachment, use JSON
+      config = {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify(data),
+      };
+    }
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/separation/${separationEmail.id}/`, config);
     if (!res.ok) {
       throw res.json();

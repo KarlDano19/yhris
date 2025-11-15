@@ -248,6 +248,13 @@ export default function StageHeader({
           <SmartButton
             id="delete-job-stage-btn"
             onClick={() => {
+              if (stage.is_final_stage) {
+                toast.custom(() => <CustomToast message='Cannot delete the final stage. Please designate another stage as final first.' type='error' />, {
+                  duration: 7000,
+                });
+                setStageDropdownId(null);
+                return;
+              }
               setStageDropdownId(null);
               setActionState({
                 ...initialActionState,
@@ -262,9 +269,10 @@ export default function StageHeader({
             }}
             type='button'
             className='text-left'
-            disabled={!permissions.can_update}
+            disabled={!permissions.can_update || stage.is_final_stage}
+            title={stage.is_final_stage ? 'Cannot delete final stage' : 'Remove this stage'}
           >
-            Remove Stage
+            Remove Stage {stage.is_final_stage && '🔒'}
           </SmartButton>
         </div>
       )}

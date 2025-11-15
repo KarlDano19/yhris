@@ -46,7 +46,8 @@ function useGetApplicantOrient(job_id: number, filters: any) {
       filters.pageSize,
       filters.search,
       filters.from,
-      filters.to
+      filters.to,
+      filters.enrolled
     ],
     () => getApplicantOrient(job_id, filters),
     {

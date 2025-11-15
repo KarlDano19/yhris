@@ -1,4 +1,4 @@
-import React, { Dispatch, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -11,6 +11,8 @@ import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
 import useAddEmailTemplate from '../hooks/useAddEmailTemplate';
+import useUpdateEmailTemplate from '../hooks/useUpdateEmailTemplate';
+import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
 import EmailField from '@/components/common/EmailField';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -19,16 +21,22 @@ import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
-export default function EmailTemplateModal({
+type T_EmailTemplateModalData = {
+  id: number | null;
+  open: boolean;
+  mode: 'create' | 'edit';
+};
+
+export default function CreateEditEmailTemplateModal({
   isOpen,
   setIsOpen,
   refetch,
   onSuccess,
 }: {
-  isOpen: boolean;
-  setIsOpen: Dispatch<boolean>;
+  isOpen: T_EmailTemplateModalData;
+  setIsOpen: Dispatch<T_EmailTemplateModalData | null>;
   refetch: any;
-  onSuccess: any;
+  onSuccess?: any;
 }) {
   const inputRef = useRef(null);
   const cancelButtonRef = useRef(null);
@@ -38,18 +46,61 @@ export default function EmailTemplateModal({
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
-  
+  const [file, setFile] = useState<File | null>(null);
+  const [attachmentRemoved, setAttachmentRemoved] = useState(false);
+  const [isToFocused, setIsToFocused] = useState(false);
+  const [isCcFocused, setIsCcFocused] = useState(false);
+  const [isBccFocused, setIsBccFocused] = useState(false);
+
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
-  const [file, setFile] = useState<File | null>(null);
+  
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
-  const { register, handleSubmit, reset, setValue, getValues } = useForm<any>();
-  
-  
-  const { mutate, isLoading } = useAddEmailTemplate();
+  const { register, handleSubmit, reset, setValue, watch, getValues } = useForm<any>();
 
+  const isEditing = isOpen.mode === 'edit';
+  
+  const {
+    data: dataEmailTemplateDetail,
+    refetch: refetchEmailTemplateDetail,
+    remove: removeEmailTemplateDetail,
+  } = useGetEmailTemplateDetails(isOpen.id);
+  
+  const { mutate: createEmailTemplate, isLoading: isLoadingCreate } = useAddEmailTemplate();
+  const { mutate: updateEmailTemplate, isLoading: isLoadingUpdate } = useUpdateEmailTemplate();
 
+  const isLoading = isLoadingCreate || isLoadingUpdate;
+
+  // Fetch details when opening in edit mode
+  useEffect(() => {
+    if (isOpen.open && isEditing && isOpen.id !== null) {
+      refetchEmailTemplateDetail();
+    }
+  }, [isOpen, refetchEmailTemplateDetail, isEditing]);
+
+  // Populate form with existing data in edit mode
+  useEffect(() => {
+    if (dataEmailTemplateDetail && isEditing) {
+      setValue('subject', dataEmailTemplateDetail.subject);
+      setTagsTo(dataEmailTemplateDetail.to || []);
+      setValue('body', dataEmailTemplateDetail.body);
+      if (dataEmailTemplateDetail.cc) {
+        setIsCCOPen(true);
+        setTagsCc(dataEmailTemplateDetail.cc);
+      }
+      if (dataEmailTemplateDetail.bcc) {
+        setIsBCCOpen(true);
+        setTagsBcc(dataEmailTemplateDetail.bcc);
+      }
+      // Handle existing attachment
+      if (dataEmailTemplateDetail.attachment) {
+        setFile(null); // Don't set a fake file, just show the existing attachment
+        setAttachmentRemoved(false);
+        setValue('attachment', dataEmailTemplateDetail.attachment);
+      }
+    }
+  }, [dataEmailTemplateDetail, setValue, setTagsTo, setTagsCc, setTagsBcc, isEditing]);
 
   // Handle employee selection for TO field
   const handleEmployeeSelectTo = (employee: any) => {
@@ -84,24 +135,65 @@ export default function EmailTemplateModal({
     }
   };
 
+  const customCloseModal = () => {
+    reset();
+    setTagsTo([]);
+    setTagsCc([]);
+    setTagsBcc([]);
+    setIsCCOPen(false);
+    setIsBCCOpen(false);
+    setFile(null);
+    setShowTooltip(true);
+    setIsToFocused(false);
+    setIsCcFocused(false);
+    setIsBccFocused(false);
+    if (isEditing) {
+      removeEmailTemplateDetail();
+    }
+    setIsOpen(null);
+  };
+
   const onSubmit = handleSubmit((data) => {
     data.to = tagsTo;
     data.cc = tagsCc;
     data.bcc = tagsBcc;
 
+    // Handle attachment for editing
+    if (isEditing) {
+      // If attachment was removed and no new file is being uploaded, set it to empty string
+      if (attachmentRemoved && !file) {
+        data.attachment = '';
+      }
+      // If no new file and no removal, don't include attachment in the update
+      else if (!file && dataEmailTemplateDetail?.attachment && !attachmentRemoved) {
+        delete data.attachment;
+      }
+      // If a new file is being uploaded, the file will be handled by the FormData logic
+    }
+
     const callbackReq = {
-      onSuccess: async (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        setIsOpen(false);
-        reset();
+      onSuccess: async (responseData: any) => {
+        toast.custom(() => <CustomToast message={responseData.message} type='success' />, { 
+          duration: 4000 
+        });
+        customCloseModal();
         refetch();
-        onSuccess();
+        if (onSuccess) {
+          onSuccess();
+        }
       },
       onError: async (error: any) => {
-        toast.custom(() => <CustomToast message={error} type='error' />, { duration: 4000 });
+        toast.custom(() => <CustomToast message={error} type='error' />, { 
+          duration: 4000 
+        });
       },
     };
-    mutate(data, callbackReq);
+
+    if (isEditing && isOpen.id) {
+      updateEmailTemplate({ emailTemplateId: isOpen.id, data: data }, callbackReq);
+    } else {
+      createEmailTemplate(data, callbackReq);
+    }
   });
 
   const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
@@ -112,21 +204,43 @@ export default function EmailTemplateModal({
   const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    setFile(e?.dataTransfer?.files[0]);
+    const droppedFile = e?.dataTransfer?.files[0];
+    
+    if (droppedFile) {
+      // Check file size (10MB limit)
+      if (droppedFile.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setFile(droppedFile);
+      setValue('attachment', droppedFile);
+      setAttachmentRemoved(false); // Reset removal flag when new file is dropped
+    }
   };
 
   const handleChange = function (e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-      setValue('attachment', e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      
+      // Check file size (10MB limit)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        // Clear the file input
+        e.target.value = '';
+        return;
+      }
+      
+      setFile(selectedFile);
+      setValue('attachment', selectedFile);
+      setAttachmentRemoved(false); // Reset removal flag when new file is selected
       e.target.value = '';
     }
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-50' initialFocus={cancelButtonRef} onClose={setIsOpen}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
+      <Dialog as='div' className='relative z-50' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'
@@ -151,18 +265,20 @@ export default function EmailTemplateModal({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Email Template</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>
+                    {isEditing ? 'Edit Email Template' : 'Create Email Template'}
+                  </h3>
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                 </div>
                 <form onSubmit={onSubmit}>
-                  <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto h-[750px]'>
+                  <div className='px-4 pt-4 pb-6 space-x-10 overflow-y-auto'>
                     <div className='sm:col-span-4 mt-2 w-full space-y-2'>
-                      <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                      <label htmlFor='subject' className='block text-sm font-medium leading-6 text-gray-900'>
                         Subject<span className='text-red-600'> *</span>
                       </label>
                       <input
-                        id='Subject'
+                        id='subject'
                         type='text'
                         {...register('subject', { required: true })}
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
@@ -193,17 +309,20 @@ export default function EmailTemplateModal({
                               }}
                               onInputFocus={() => {
                                 setShowTooltip(false);
+                                setIsToFocused(true);
                               }}
                               onInputBlur={() => {
-                                  if (!inputTo.trim()) {
-                                    setShowTooltip(true);
-                                  }
+                                setIsToFocused(false);
+                                if (!inputTo.trim()) {
+                                  setShowTooltip(true);
+                                }
                               }}
                               onKeyDown={handleKeyDownTo}
                               onEmployeeSelect={handleEmployeeSelectTo}
                               onRemoveTag={handleRemoveTagTo}
                               showTooltip={showTooltip}
                               tooltipId="to-section-tooltip"
+                              isFocused={isToFocused}
                             />
                           </div>
                           <button
@@ -244,26 +363,29 @@ export default function EmailTemplateModal({
                           </div>
                           <div className='mt-2'>
                             <EmailField
-                                tags={tagsCc}
-                                inputValue={inputCc}
-                                onInputChange={(value) => {
-                                  setInputCc(value);
-                                  setShowTooltip(false);
-                                }}
-                                onInputFocus={() => {
-                                  setShowTooltip(false);
-                                }}
-                                onInputBlur={() => {
-                                    if (!inputCc.trim()) {
-                                      setShowTooltip(true);
-                                    }
-                                }}
-                                onKeyDown={handleKeyDown}
-                                onEmployeeSelect={handleEmployeeSelectCc}
-                                onRemoveTag={handleRemoveTag}
-                                showTooltip={showTooltip}
-                                tooltipId="cc-section-tooltip"
-                              />
+                              tags={tagsCc}
+                              inputValue={inputCc}
+                              onInputChange={(value) => {
+                                setInputCc(value);
+                                setShowTooltip(false);
+                              }}
+                              onInputFocus={() => {
+                                setShowTooltip(false);
+                                setIsCcFocused(true);
+                              }}
+                              onInputBlur={() => {
+                                setIsCcFocused(false);
+                                if (!inputCc.trim()) {
+                                  setShowTooltip(true);
+                                }
+                              }}
+                              onKeyDown={handleKeyDown}
+                              onEmployeeSelect={handleEmployeeSelectCc}
+                              onRemoveTag={handleRemoveTag}
+                              showTooltip={showTooltip}
+                              tooltipId="cc-section-tooltip"
+                              isFocused={isCcFocused}
+                            />
                           </div>
                         </div>
                       )}
@@ -285,47 +407,51 @@ export default function EmailTemplateModal({
                           </div>
                           <div className='mt-2'>
                             <EmailField
-                                tags={tagsBcc}
-                                inputValue={inputBcc}
-                                onInputChange={(value) => {
-                                  setInputBcc(value);
-                                  setShowTooltip(false);
-                                }}
-                                onInputFocus={() => {
-                                  setShowTooltip(false);
-                                }}
-                                onInputBlur={() => {
-                                    if (!inputBcc.trim()) {
-                                      setShowTooltip(true);
-                                    }
-                                }}
-                                onKeyDown={handleKeyDownBcc}
-                                onEmployeeSelect={handleEmployeeSelectBcc}
-                                onRemoveTag={handleRemoveTagBcc}
-                                showTooltip={showTooltip}
-                                tooltipId="bcc-section-tooltip"
-                              />
+                              tags={tagsBcc}
+                              inputValue={inputBcc}
+                              onInputChange={(value) => {
+                                setInputBcc(value);
+                                setShowTooltip(false);
+                              }}
+                              onInputFocus={() => {
+                                setShowTooltip(false);
+                                setIsBccFocused(true);
+                              }}
+                              onInputBlur={() => {
+                                setIsBccFocused(false);
+                                if (!inputBcc.trim()) {
+                                  setShowTooltip(true);
+                                }
+                              }}
+                              onKeyDown={handleKeyDownBcc}
+                              onEmployeeSelect={handleEmployeeSelectBcc}
+                              onRemoveTag={handleRemoveTagBcc}
+                              showTooltip={showTooltip}
+                              tooltipId="bcc-section-tooltip"
+                              isFocused={isBccFocused}
+                            />
                           </div>
                         </div>
                       )}
                       <div className='w-full mt-4'>
-                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
+                        <label htmlFor='body' className='block text-sm font-medium leading-6 text-gray-900'>
                           Body<span className='text-red-600'> *</span>
                         </label>
                         <div className='mt-2 h-72 mb-12'>
                           <textarea rows={4} {...register('body', { required: true })} id='body' hidden />
                           <ReactQuill
+                            key={`${isEditing ? 'edit' : 'create'}-${isOpen.id || 'new'}`}
                             onChange={(value) => setValue('body', value)}
                             formats={QUILL_FORMATS}
                             modules={QUILL_MODULES}
                             style={{ height: '100%', padding: '5px 8px !important' }}
-                            defaultValue={getValues('body')}
+                            value={watch('body') || ''}
                           />
                         </div>
                       </div>
                       <div className='sm:col-span-4'>
-                        <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachments<span className='text-red-600'></span>
+                        <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Attachments
                         </label>
                         <div>
                           <div
@@ -337,7 +463,7 @@ export default function EmailTemplateModal({
                           >
                             <label
                               className={`${
-                                file === null
+                                file === null && (!isEditing || !dataEmailTemplateDetail?.attachment || attachmentRemoved)
                                   ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
                                   : 'hidden'
                               }`}
@@ -351,13 +477,69 @@ export default function EmailTemplateModal({
                                 type='file'
                                 className='sr-only'
                                 onChange={handleChange}
+                                accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                               />
                             </label>
+                            
+                            {/* Show existing attachment when editing */}
+                            {isEditing && dataEmailTemplateDetail?.attachment && file === null && !attachmentRemoved && (
+                              <div className='file-preview'>
+                                <p className='text-sm text-slate-800 font-light'>
+                                  Current: {dataEmailTemplateDetail.attachment.split('/').pop()}
+                                </p>
+                                <div className='flex gap-2 mt-2 justify-center'>
+                                  <a 
+                                    href={dataEmailTemplateDetail.attachment} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='text-blue-500 hover:underline text-sm'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    View File
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='underline text-blue-500 cursor-pointer text-sm'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFile(null);
+                                      setAttachmentRemoved(true);
+                                      setValue('attachment', '');
+                                    }}
+                                  >
+                                    Remove File
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Show new file when selected */}
                             <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>
                               <p className='text-sm text-slate-800 font-light'>{file?.name}</p>
-                              <p className='underline text-blue-500 cursor-pointer' onClick={() => setFile(null)}>
-                                Remove File
-                              </p>
+                              <div className='flex gap-2 mt-2 justify-center'>
+                                {file && (
+                                  <a 
+                                    href={URL.createObjectURL(file)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='text-blue-500 hover:underline text-sm'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    View File
+                                  </a>
+                                )}
+                                <button
+                                  type='button'
+                                  className='underline text-blue-500 cursor-pointer text-sm'
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFile(null);
+                                    setAttachmentRemoved(false);
+                                  }}
+                                >
+                                  Remove File
+                                </button>
+                              </div>
                             </div>
                           </div>
                           <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
@@ -369,8 +551,8 @@ export default function EmailTemplateModal({
                   <div className='mt-5 sm:mt-4 sm:flex sm:flex-row px-4 justify-end space-x-4'>
                     <button
                       type='button'
-                      className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-5 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-100 sm:mt-0 sm:w-auto'
-                      onClick={() => setIsOpen(false)}
+                      className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-5 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-100 sm:mt-0 sm:w-auto'
+                      onClick={() => customCloseModal()}
                       ref={cancelButtonRef}
                     >
                       Close
@@ -402,7 +584,7 @@ export default function EmailTemplateModal({
                             <span className='sr-only'>Loading...</span>
                           </div>
                         )}
-                        {!isLoading && 'Save'}
+                        {!isLoading && (isEditing ? 'Update' : 'Save')}
                       </button>
                     </div>
                   </div>
@@ -415,3 +597,4 @@ export default function EmailTemplateModal({
     </Transition.Root>
   );
 }
+

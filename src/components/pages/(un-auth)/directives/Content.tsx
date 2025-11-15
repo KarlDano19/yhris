@@ -207,35 +207,20 @@ const Content = () => {
   }
 
   if (directiveError || !directive) {
-    // Check for specific error cases
-    const errorMessage = directiveError instanceof Error ? directiveError.message : 'Unknown error';
-    
-    const errorStatus = errorMessage.includes('403') ? 403 :
-                        errorMessage.includes('404') ? 404 : 
-                        500;
-    
-    const errorTitle = errorStatus === 403 ? "Access Denied" : 
-                       errorStatus === 404 ? "Directive Not Found" :
-                       "Error Loading Directive";
-                       
-    const errorDescription = errorStatus === 403 ? "You don't have permission to view this memo/policy." :
-                         errorStatus === 404 ? "The requested memo/policy does not exist or has been deleted." :
-                         "There was a problem loading this memo/policy. Please try again later.";
+    // Display error message from backend
+    const errorMessage = directiveError instanceof Error ? directiveError.message : 'An error occurred while loading this memo/policy.';
     
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md">
-          <p className="font-bold">{errorTitle}</p>
-          <p className="text-sm mt-2">{errorDescription}</p>
-          {errorMessage && (
-            <p className="text-xs mt-2 text-red-500">Details: {errorMessage}</p>
-          )}
+          <p className="font-bold">Unable to Load Memo/Policy</p>
+          <p className="text-sm mt-2">{errorMessage}</p>
           <div className="mt-4 flex gap-2">
             <button 
-              onClick={() => window.location.reload()}
+              onClick={() => window.location.href = '/'}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
-              Try Again
+              Go to landing page
             </button>
           </div>
         </div>

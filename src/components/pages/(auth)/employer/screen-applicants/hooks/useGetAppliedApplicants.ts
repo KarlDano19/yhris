@@ -1,14 +1,32 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getAppliedApplicants(jobId: any, isArchived?: boolean) {
+async function getAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly?: boolean, dateFrom?: string, dateTo?: string) {
   try {
     const token = getCookie('token');
     
-    // Build URL with optional is_archived parameter
+    // Build URL with optional parameters
     let url = `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}/applicants/`;
+    const params = new URLSearchParams();
+    
     if (isArchived !== undefined) {
-      url += `?is_archived=${isArchived}`;
+      params.append('is_archived', isArchived.toString());
+    }
+    
+    if (recentOnly !== undefined) {
+      params.append('recent_only', recentOnly.toString());
+    }
+    
+    if (dateFrom) {
+      params.append('from', dateFrom);
+    }
+    
+    if (dateTo) {
+      params.append('to', dateTo);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
     }
     
     const config = {
@@ -35,10 +53,10 @@ async function getAppliedApplicants(jobId: any, isArchived?: boolean) {
   }
 }
 
-function useGetAppliedApplicants(jobId: any, isArchived?: boolean) {
+function useGetAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly?: boolean, dateFrom?: string, dateTo?: string) {
   const query = useQuery(
-    ['appliedApplicantsCache', jobId, isArchived], 
-    () => getAppliedApplicants(jobId, isArchived), 
+    ['appliedApplicantsCache', jobId, isArchived, recentOnly, dateFrom, dateTo], 
+    () => getAppliedApplicants(jobId, isArchived, recentOnly, dateFrom, dateTo), 
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,

@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useMemo } from "react"
 import { DragDropContext, Draggable } from "react-beautiful-dnd"
 import { StrictModeDroppable } from "../layouts/StrictModeDroppable"
 import Stage from "./Stage"
@@ -9,14 +9,14 @@ import { ContextTypes, StageType } from "../types"
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
 import useDragStage from '../hooks/useDragStage';
-import { FilterOptions } from "./Filter";
+import { FilterValues } from "@/components/common/Filter";
 
 type PropTypes = {
   containerRef: React.MutableRefObject<HTMLElement | null>
   gridCols: React.CSSProperties
   jobPostDetailsRefetch: any
   appliedApplicantRefetch: any
-  filters?: FilterOptions
+  filters?: FilterValues
 }
 
 export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefetch, appliedApplicantRefetch, filters }: PropTypes) {
@@ -25,14 +25,31 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
   const { state, dispatch }: ContextTypes = useContext(
     StateContext
   ) as ContextTypes
+  
+  // Sort stages to ensure final stage is always at the end
+  const sortedStages = useMemo(() => {
+    const stages = [...state];
+    stages.sort((a, b) => {
+      if (a.is_final_stage) return 1;  // Final stage goes to end
+      if (b.is_final_stage) return -1; // Final stage goes to end
+      return 0; // Keep original order for others
+    });
+    return stages;
+  }, [state]);
+  
+  // Calculate grid columns for all stages
+  const allStagesGridCols = {
+    gridTemplateColumns: `repeat(${sortedStages.length}, 300px)`
+  };
     
   const dragStage = (result: any) => {
     const callbackReq = {
       onSuccess: () => {
-        jobPostDetailsRefetch();
-        appliedApplicantRefetch();
+        // No refetch needed - drag only reorders stages, optimistic update is sufficient
       },
       onError: (err: any) => {
+        // On error, refetch to revert to correct server state
+        jobPostDetailsRefetch();
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
@@ -62,19 +79,19 @@ export default function DragAndDrop({ containerRef, gridCols, jobPostDetailsRefe
               containerRef.current = el
             }}
             style={{
-              ...gridCols,
+              ...allStagesGridCols,
               scrollbarWidth: 'thin',
               scrollbarColor: '#2d3e58 #f1f1f1'
             }}
             className="grid mb-4 overflow-auto transition-all pb-2.5"
           >
-            {state.map((stage: StageType, index: number) => {
+            {sortedStages.map((stage: StageType, index: number) => {
               return (
                 <Draggable
                   key={stage.id}
                   draggableId={stage.id.toString()}
                   index={index}
-                  isDragDisabled={stage.isNewStage}
+                  isDragDisabled={stage.isNewStage || stage.is_final_stage}
                 >
                   {(provided, snapshot) => (
                     <Stage

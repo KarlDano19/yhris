@@ -10,8 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
 import ModalLayout from "@/components/ModalLayout";
-import CustomDatePicker from "@/components/CustomDatePicker";
-import CreateEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEmailTemplate";
+import CreateEditEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEditEmailTemplateModal";
 import EmailField from "@/components/common/EmailField";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
@@ -27,6 +26,12 @@ interface Field {
   onChange: (value: any) => void;
   value: any;
 }
+
+type T_EmailTemplateModalData = {
+  id: number | null;
+  open: boolean;
+  mode: 'create' | 'edit';
+};
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
@@ -48,11 +53,9 @@ export interface SendEmailModalProps {
   isLoading?: boolean;
   submitButtonText?: string;
   customFooter?: React.ReactNode;
-  showDateField?: boolean;
-  dateFieldLabel?: string;
-  dateFieldRequired?: boolean;
   showEmailTemplate?: boolean;
   showSubject?: boolean;
+  showDragDropAttachment?: boolean;
   // Pre-populated data props
   prePopulatedData?: {
     subject?: string;
@@ -76,11 +79,9 @@ export default function SendEmailModal({
   isLoading = false,
   submitButtonText = "Send",
   customFooter,
-  showDateField = false,
-  dateFieldLabel = "Date",
-  dateFieldRequired = false,
   showEmailTemplate = true,
   showSubject = true,
+  showDragDropAttachment = false,
   prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
@@ -96,15 +97,21 @@ export default function SendEmailModal({
   const [customSubject, setCustomSubject] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentExist, setAttachmentExist] = useState(false);
+  const [attachmentRemoved, setAttachmentRemoved] = useState(false);
+  const [templateAttachment, setTemplateAttachment] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   // Simple state for tooltip visibility
   const [showTooltip, setShowTooltip] = useState(true);
+  const [isToFocused, setIsToFocused] = useState(false);
+  const [isCcFocused, setIsCcFocused] = useState(false);
+  const [isBccFocused, setIsBccFocused] = useState(false);
   
   // Don't manage attachment state when using custom attachment section
-  const shouldManageAttachment = showAttachment && !customAttachmentSection;
+  const shouldManageAttachment = showAttachment && !customAttachmentSection && !showDragDropAttachment;
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
   const isInitialized = useRef(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
-  const [isCreateEmailTemplateModalOpen, setIsCreateEmailTemplateModalOpen] = useState(false);
+  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
   
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
@@ -125,7 +132,6 @@ export default function SendEmailModal({
       template: "",
       subject: "",
       message: "",
-      date: "",
     },
   });
   
@@ -250,8 +256,7 @@ export default function SendEmailModal({
       (tagsCc.length > 0) ||
       (tagsBcc.length > 0) ||
       (formData.message && !isHtmlEmpty(formData.message)) ||
-      (shouldManageAttachment && attachmentExist) ||
-      (showDateField && formData.date && formData.date !== '')
+      ((shouldManageAttachment || showDragDropAttachment) && (attachmentExist || templateAttachment))
     );
   };
 
@@ -278,7 +283,6 @@ export default function SendEmailModal({
     setValue('template', '');
     setValue('subject', '');
     setValue('message', '');
-    setValue('date', '');
     setTagsTo(defaultRecipients);
     setTagsCc([]);
     setTagsBcc([]);
@@ -289,9 +293,14 @@ export default function SendEmailModal({
     setIsCCOpen(false);
     setIsBCCOpen(false);
     setShowTooltip(true);
-    if (shouldManageAttachment) {
+    if (shouldManageAttachment || showDragDropAttachment) {
       setAttachment(null);
       setAttachmentExist(false);
+      setAttachmentRemoved(false);
+      setTemplateAttachment(null);
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
     }
     clearErrors();
   };
@@ -365,13 +374,6 @@ export default function SendEmailModal({
     }
   }, [watch('message'), clearErrors]);
 
-  // Clear errors when date changes
-  useEffect(() => {
-    const dateValue = watch('date');
-    if (dateValue && dateValue !== '') {
-      clearErrors('date');
-    }
-  }, [watch('date'), clearErrors]);
 
   const handleClose = () => {
     handleModalClose(() => {
@@ -382,29 +384,68 @@ export default function SendEmailModal({
 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Don't handle attachment upload if using custom attachment section
-    if (!shouldManageAttachment) {
+    if (!shouldManageAttachment && !showDragDropAttachment) {
       return;
     }
     
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 5MB.' type='error' />, { duration: 2000 });
+      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+      // Check file size
+      if (file.size > maxSizeInBytes) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
         return;
       }
       setAttachment(file);
       setAttachmentExist(true);
+      setAttachmentRemoved(false);
+    }
+  };
+
+  const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const file = e?.dataTransfer?.files[0];
+    if (file) {
+      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+      // Check file size
+      if (file.size > maxSizeInBytes) {
+        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
+        return;
+      }
+      setAttachment(file);
+      setAttachmentExist(true);
+      setAttachmentRemoved(false);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    setAttachmentExist(false);
+    setAttachmentRemoved(true);
+    setTemplateAttachment(null);
+    
+    // Reset the file input
+    if (inputRef.current) {
+      inputRef.current.value = '';
     }
   };
 
   const handleAddEmailTemplate = () => {
-    setIsCreateEmailTemplateModalOpen(true);
+    setEmailTemplateModal({ id: null, open: true, mode: 'create' });
   };
 
   const handleEmailTemplateCreated = () => {
     // Refresh email templates list to get the updated data with new creation dates
     refetchEmailTemplates();
+    // Reset the modal state to close the create/edit modal
+    setEmailTemplateModal({ id: null, open: false, mode: 'create' });
   };
 
   const handleEmailSent = () => {
@@ -443,15 +484,6 @@ export default function SendEmailModal({
       return;
     }
 
-    // Validate date if required
-    if (showDateField && dateFieldRequired && (!data.date || data.date === '')) {
-      setError('date', {
-        type: 'manual',
-        message: `${dateFieldLabel} is required`
-      });
-      toast.custom(() => <CustomToast message='You cannot proceed due to incomplete fields. Please review.' type='error' />, { duration: 2000 });
-      return;
-    }
 
     const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
@@ -464,8 +496,9 @@ export default function SendEmailModal({
       subject: showSubject ? (customSubject || (template?.subject || '')) : '',
       template: template?.subject || '',
       message: data.message,
-      ...(showDateField && { date: data.date }),
-      ...(showAttachment && { attachment: attachment }),
+      ...((showAttachment || showDragDropAttachment) && { 
+        attachment: attachment || templateAttachment,
+      }),
     };
     
     try {
@@ -493,11 +526,11 @@ export default function SendEmailModal({
         handleClose={handleClose}
         nestedModals={
           <>
-            {/* Create Email Template Modal */}
-            {isCreateEmailTemplateModalOpen && (
-              <CreateEmailTemplateModal
-                isOpen={isCreateEmailTemplateModalOpen}
-                setIsOpen={setIsCreateEmailTemplateModalOpen}
+            {/* Create/Edit Email Template Modal */}
+            {emailTemplateModal && (
+              <CreateEditEmailTemplateModal
+                isOpen={emailTemplateModal}
+                setIsOpen={setEmailTemplateModal}
                 refetch={handleEmailTemplateCreated}
                 onSuccess={handleEmailTemplateCreated}
               />
@@ -566,6 +599,14 @@ export default function SendEmailModal({
                             setCustomSubject(template.subject);
                             clearErrors('subject');
                             clearErrors('message');
+                            
+                            // Handle template attachment if drag and drop is enabled
+                            if (showDragDropAttachment && template.attachment) {
+                              setTemplateAttachment(template.attachment);
+                              setAttachment(null);
+                              setAttachmentExist(false);
+                              setAttachmentRemoved(false);
+                            }
                           } else {
                             // Clear template-related fields if no template is selected
                             setTagsTo(defaultRecipients);
@@ -574,6 +615,11 @@ export default function SendEmailModal({
                             setValue("message", "");
                             setValue("subject", "");
                             setCustomSubject("");
+                            
+                            // Clear template attachment when no template is selected
+                            if (showDragDropAttachment) {
+                              setTemplateAttachment(null);
+                            }
                           }
                         }}
                         components={{
@@ -639,50 +685,6 @@ export default function SendEmailModal({
               </div>
             )}
             
-            {/* Conditional Date Field */}
-            {showDateField && (
-              <div className="sm:col-span-4 mt-4">
-                <label
-                  htmlFor="date"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  {dateFieldLabel}{dateFieldRequired && <span className="text-red-600">*</span>}
-                </label>
-                {errors.date && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.date.message || `${dateFieldLabel} is required`}
-                  </p>
-                )}
-                <div className="mt-2">
-                  <Controller
-                    control={control}
-                    name="date"
-                    rules={dateFieldRequired ? { required: `${dateFieldLabel} is required` } : {}}
-                    render={({ field }) => (
-                      <CustomDatePicker
-                        id="send-email-datepicker"
-                        placeholder="mm/dd/yyyy"
-                        className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                        selected={field.value}
-                        pickerOnChange={(date: any) => {
-                          field.onChange(date);
-                          if (date) {
-                            clearErrors('date');
-                          }
-                        }}
-                        inputOnChange={(value: any) => {
-                          field.onChange(value);
-                          if (value) {
-                            clearErrors('date');
-                          }
-                        }}
-                        required={dateFieldRequired}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            )}
             
             <div className="sm:col-span-4 mt-4">
               <div className="flex items-center justify-between">
@@ -718,8 +720,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsToFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsToFocused(false);
                       if (!inputTo.trim()) {
                         setShowTooltip(true);
                       }
@@ -729,6 +733,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTagTo}
                     showTooltip={showTooltip}
                     tooltipId="to-section-tooltip"
+                    isFocused={isToFocused}
                   />
                 </div>
                 <button
@@ -784,8 +789,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsCcFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsCcFocused(false);
                       if (!inputCc.trim()) {
                         setShowTooltip(true);
                       }
@@ -795,6 +802,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTag}
                     showTooltip={showTooltip}
                     tooltipId="cc-section-tooltip"
+                    isFocused={isCcFocused}
                   />
                 </div>
               </div>
@@ -828,8 +836,10 @@ export default function SendEmailModal({
                     }}
                     onInputFocus={() => {
                       setShowTooltip(false);
+                      setIsBccFocused(true);
                     }}
                     onInputBlur={() => {
+                      setIsBccFocused(false);
                       if (!inputBcc.trim()) {
                         setShowTooltip(true);
                       }
@@ -839,6 +849,7 @@ export default function SendEmailModal({
                     onRemoveTag={handleRemoveTagBcc}
                     showTooltip={showTooltip}
                     tooltipId="bcc-section-tooltip"
+                    isFocused={isBccFocused}
                   />
                 </div>
               </div>
@@ -885,10 +896,103 @@ export default function SendEmailModal({
             </div>
             
             {/* Conditional Attachment section */}
-            {showAttachment && (
+            {(showAttachment || showDragDropAttachment) && (
               <div className='sm:col-span-4 mt-4'>
                 {customAttachmentSection ? (
                   customAttachmentSection
+                ) : showDragDropAttachment ? (
+                  <>
+                    <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                      Attachments
+                    </label>
+                    <div>
+                      <div
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                        className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                      >
+                        <label
+                          className={`${
+                            attachment === null && !templateAttachment
+                              ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                              : 'hidden'
+                          }`}
+                        >
+                          Drop file to upload
+                          <input
+                            name='attachment'
+                            id='attachment'
+                            ref={inputRef}
+                            type='file'
+                            className='sr-only'
+                            onChange={handleAttachmentUpload}
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                          />
+                        </label>
+                        
+                        {/* Show template attachment when available */}
+                        {templateAttachment && (
+                          <div className='file-preview'>
+                            <p className='text-sm text-slate-800 font-light'>
+                              Current: {templateAttachment.split('/').pop()}
+                            </p>
+                            <div className='flex gap-2 mt-2 justify-center'>
+                              <a 
+                                href={templateAttachment} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className='text-blue-500 hover:underline text-sm'
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                View File
+                              </a>
+                              <button
+                                type='button'
+                                className='underline text-blue-500 cursor-pointer text-sm'
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAttachment();
+                                }}
+                              >
+                                Remove File
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Show new file when selected */}
+                        <div className={`${attachment !== null ? 'file-preview' : 'hidden'}`}>
+                          <p className='text-sm text-slate-800 font-light'>{attachment?.name}</p>
+                          <div className='flex gap-2 mt-2 justify-center'>
+                            {attachment && (
+                              <a 
+                                href={URL.createObjectURL(attachment)} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className='text-blue-500 hover:underline text-sm'
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                View File
+                              </a>
+                            )}
+                            <button
+                              type='button'
+                              className='underline text-blue-500 cursor-pointer text-sm'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveAttachment();
+                              }}
+                            >
+                              Remove File
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -906,16 +1010,13 @@ export default function SendEmailModal({
                         <button
                           type='button'
                           className='underline text-savoy-blue text-sm mt-1'
-                          onClick={() => {
-                            setAttachment(null);
-                            setAttachmentExist(false);
-                          }}
+                          onClick={handleRemoveAttachment}
                         >
                           Remove Attachment
                         </button>
                       ) : null}
                     </div>
-                    <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5MB.</p>
+                    <p className='text-xs mt-1 text-gray-400'>Maximum file size: 10MB.</p>
                   </>
                 )}
               </div>
@@ -945,11 +1046,6 @@ export default function SendEmailModal({
                     subjectValid = await trigger('subject');
                   }
                   
-                  let dateValid = true;
-                  // Check date validation if required
-                  if (showDateField && dateFieldRequired) {
-                    dateValid = await trigger('date');
-                  }
                   
                   // Check message content specifically for empty HTML
                   const messageContent = watch('message');
@@ -963,7 +1059,7 @@ export default function SendEmailModal({
                   }
                   
                   // Check if all validations pass
-                  if (!subjectValid || !messageValid || !dateValid || tagsTo.length === 0) {
+                  if (!subjectValid || !messageValid || tagsTo.length === 0) {
                     e.preventDefault();
                     // Set error for "email" field if no recipients
                     if (tagsTo.length === 0) {

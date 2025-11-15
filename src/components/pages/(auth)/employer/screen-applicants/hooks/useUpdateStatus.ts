@@ -13,6 +13,16 @@ async function updateStatus(data: any) {
       finalData.checklists = data.checklists;
     }
     
+    // Include new_required_slot if provided (for hiring with slot increase)
+    if (data.new_required_slot) {
+      finalData.new_required_slot = data.new_required_slot;
+    }
+    
+    // Include deactivate_job_posting if provided (for manual deactivation)
+    if (data.deactivate_job_posting) {
+      finalData.deactivate_job_posting = data.deactivate_job_posting;
+    }
+    
     // Include personalized feedback if provided (for rejections)
     if (data.status === 'rejected' && data.feedback) {
       finalData.personalized_feedback = data.feedback;
