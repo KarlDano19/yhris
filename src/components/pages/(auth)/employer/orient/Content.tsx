@@ -543,13 +543,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </div>
             </div>
             <div className='flex-1'></div>
-            <Filter
-              filterGroups={filterGroups}
-              defaultValues={filters}
-              resetValues={{ enrolled: ['not_enrolled'] }}
-              onFilterChange={handleFilterChange}
-              buttonId="orient-filter-btn"
-            />
+            <div className='w-full lg:w-auto flex justify-end lg:justify-start self-end lg:self-auto'>
+              <Filter
+                filterGroups={filterGroups}
+                defaultValues={filters}
+                resetValues={{ enrolled: ['not_enrolled'] }}
+                onFilterChange={handleFilterChange}
+                buttonId="orient-filter-btn"
+              />
+            </div>
           </div>
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
             <div
