@@ -702,6 +702,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       <Filter 
                         filterGroups={filterGroups}
                         defaultValues={filters}
+                        resetValues={{ status: ['Ongoing', 'Hired'] }}
                         onFilterChange={handleFilterChange}
                         buttonId="use-filter-screen-applicants-btn"
                       />

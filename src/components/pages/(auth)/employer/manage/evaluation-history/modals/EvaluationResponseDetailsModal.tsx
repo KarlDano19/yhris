@@ -256,7 +256,7 @@ const EvaluationResponseDetailsModal = ({
         title: 'Department',
         options: departments.map(dept => ({ label: dept, value: dept })),
         multiSelect: true,
-        allowEmpty: false
+        allowEmpty: true
       }
     ];
   }, [templateResponseDetails]);
@@ -635,6 +635,7 @@ const EvaluationResponseDetailsModal = ({
                             <Filter 
                               filterGroups={filterGroups}
                               defaultValues={{ departments: departmentFilter }}
+                              resetValues={{ departments: [''] }}
                               onFilterChange={handleDepartmentFilterChange}
                               showButtonText={true}
                               size="small"
