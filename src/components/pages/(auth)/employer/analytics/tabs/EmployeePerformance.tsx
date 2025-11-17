@@ -411,34 +411,44 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   return (
     <div className="space-y-8">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Average Performance Card */}
-        <AveragePerformanceCard
-          evaluationData={allEvaluationData}
-          isLoading={allEvaluationLoading}
-          error={allEvaluationError}
-        />
+      <div  className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4">
+        <div className="flex gap-6 min-w-full w-max">
+          {/* Average Performance Card */}
+          <div className="flex-shrink-0">
+            <AveragePerformanceCard
+              evaluationData={allEvaluationData}
+              isLoading={allEvaluationLoading}
+              error={allEvaluationError}
+            />
+          </div>
         
-        {/* Training Completion Card */}
-        {/* <TrainingCompletionCard
-          employeeData={employeeData}
-          isLoading={employeeLoading}
-          error={employeeError}
-        /> */}
+          {/* Training Completion Card */}
+          {/* <div className="flex-shrink-0">
+            <TrainingCompletionCard
+              employeeData={employeeData}
+              isLoading={employeeLoading}
+              error={employeeError}
+            />
+          </div> */}
         
-        {/* Improvement Post Training Card */}
-        {/* <ImprovementPostTrainingCard
-          evaluationData={evaluationData}
-          isLoading={isLoading}
-          error={error}
-        /> */}
+          {/* Improvement Post Training Card */}
+          {/* <div className="flex-shrink-0">
+            <ImprovementPostTrainingCard
+              evaluationData={evaluationData}
+              isLoading={isLoading}
+              error={error}
+            />
+          </div> */}
         
-        {/* Resolved vs Ongoing Issues Card */}
-        <ResolvedVSOngoingCard
-          employeeIssueData={allEmployeeIssueData}
-          isLoading={allEmployeeIssueLoading}
-          error={allEmployeeIssueError}
-        />
+          {/* Resolved vs Ongoing Issues Card */}
+          <div className="flex-shrink-0">
+            <ResolvedVSOngoingCard
+              employeeIssueData={allEmployeeIssueData}
+              isLoading={allEmployeeIssueLoading}
+              error={allEmployeeIssueError}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Sub Tab Navigation */}
@@ -473,10 +483,6 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
         {/* Mobile tabs - horizontal scrollable */}
         <div
           className="md:hidden overflow-x-auto"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#2d3e58 #f1f1f1'
-          }}
         >
           <div className="flex space-x-4 min-w-max px-4">
             {subTabs.map((tab) => (

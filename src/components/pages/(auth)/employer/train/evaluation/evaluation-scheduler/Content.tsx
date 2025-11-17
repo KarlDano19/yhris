@@ -248,14 +248,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const renderRecipientsRoundPhoto = (recipients: any) => {
     return (
-      <div 
-        className='inline-flex items-center overflow-x-auto overflow-y-visible pb-2.5 max-w-[200px]'
-        style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#2d3e58 #f1f1f1',
-          zIndex: 0
-        }}
-      >
+      <div className='inline-flex items-center overflow-x-auto overflow-y-visible pb-2.5 max-w-[200px]'>
         {(recipients || []).map((recipient: any, index: number) => {
           return (
             <div
@@ -454,7 +447,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Schedule: Name / Evaluation Template'
+                  data-tooltip-content='Search for Schedule: Name / Template / Period'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}
@@ -519,13 +512,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
           
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div
-              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#2d3e58 #f1f1f1'
-              }}
-            >
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='min-w-full py-2 sm:px-6 lg:px-8'>
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>

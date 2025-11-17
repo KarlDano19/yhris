@@ -748,13 +748,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
 
           {/* Mobile tabs - horizontal scrollable */}
-          <div
-            className="md:hidden overflow-x-auto"
-            style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#2d3e58 #f1f1f1'
-            }}
-          >
+          <div className="md:hidden overflow-x-auto">
             <div className="flex space-x-4 min-w-max px-4">
               <div onClick={() => handleTabChange(1 as TabNumber)} className="cursor-pointer flex-shrink-0">
                 <h1 className={`text-sm font-bold pb-2 text-center whitespace-nowrap ${selectedTab === 1 ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}>

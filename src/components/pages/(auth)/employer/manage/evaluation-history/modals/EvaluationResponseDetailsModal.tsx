@@ -256,7 +256,7 @@ const EvaluationResponseDetailsModal = ({
         title: 'Department',
         options: departments.map(dept => ({ label: dept, value: dept })),
         multiSelect: true,
-        allowEmpty: false
+        allowEmpty: true
       }
     ];
   }, [templateResponseDetails]);
@@ -635,6 +635,7 @@ const EvaluationResponseDetailsModal = ({
                             <Filter 
                               filterGroups={filterGroups}
                               defaultValues={{ departments: departmentFilter }}
+                              resetValues={{ departments: [''] }}
                               onFilterChange={handleDepartmentFilterChange}
                               showButtonText={true}
                               size="small"
@@ -704,14 +705,7 @@ const EvaluationResponseDetailsModal = ({
                         <div className='space-y-4'>
                           <h4 className='text-lg font-semibold text-gray-900'>List of Respondents</h4>
                           <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
-                            <div 
-                              className='overflow-x-auto overflow-y-auto'
-                              style={{
-                                maxHeight: '500px',
-                                scrollbarWidth: 'thin',
-                                scrollbarColor: '#2d3e58 #f1f1f1'
-                              }}
-                            >
+                            <div className='overflow-x-auto overflow-y-auto'>
                               <table className='min-w-full divide-y divide-gray-200'>
                                 <thead className='bg-gray-50'>
                                   <tr>
@@ -823,14 +817,7 @@ const EvaluationResponseDetailsModal = ({
                           </div>
                           {getPaginatedQuestions().length > 0 ? (
                             <>
-                              <div 
-                                className='overflow-y-auto space-y-4'
-                                style={{
-                                  maxHeight: '500px',
-                                  scrollbarWidth: 'thin',
-                                  scrollbarColor: '#2d3e58 #f1f1f1'
-                                }}
-                              >
+                              <div className='overflow-y-auto space-y-4'>
                               {getPaginatedQuestions().map((criterion: any, index: number) => {
                                 const questionId = `${criterion.sectionId}-${criterion.criterionIndex}`;
                                 const isExpanded = expandedQuestions.has(questionId);
@@ -949,14 +936,7 @@ const EvaluationResponseDetailsModal = ({
                                 <h5 className='text-lg font-medium text-gray-900'>Employee Evaluation Details</h5>
                                 <p className='text-sm text-gray-600 mt-1'>Detailed breakdown of employee evaluation frequency and performance</p>
                               </div>
-                              <div 
-                                className='overflow-x-auto overflow-y-auto'
-                                style={{
-                                  maxHeight: '500px',
-                                  scrollbarWidth: 'thin',
-                                  scrollbarColor: '#2d3e58 #f1f1f1'
-                                }}
-                              >
+                              <div className='overflow-x-auto overflow-y-auto'>
                                 <table className='min-w-full divide-y divide-gray-200'>
                                   <thead className='bg-gray-50'>
                                     <tr>

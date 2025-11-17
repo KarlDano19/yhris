@@ -95,10 +95,11 @@ export default function CreatePolicyModal({
     
     const titleValue = watch('title');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const customFields = watch('custom_policy_fields');
     let hasErrors = false;
     
     // Clear any existing errors first
-    clearErrors(['title', 'to']);
+    clearErrors(['title', 'to', 'custom_policy_fields']);
     
     // Validate title field
     if (!titleValue || titleValue === "") {
@@ -128,6 +129,29 @@ export default function CreatePolicyModal({
       }
     }
 
+    // Validate custom policy fields
+    if (customFields && customFields.length > 0) {
+      customFields.forEach((field: PolicyField, index: number) => {
+        // Validate inputLabel (field title)
+        if (!field.inputLabel || field.inputLabel.trim() === "") {
+          setError(`custom_policy_fields.${index}.inputLabel` as any, {
+            type: "manual",
+            message: "Field title is required."
+          });
+          hasErrors = true;
+        }
+        
+        // Validate inputName (field content)
+        if (!field.inputName || field.inputName.trim() === "") {
+          setError(`custom_policy_fields.${index}.inputName` as any, {
+            type: "manual",
+            message: "Field content is required."
+          });
+          hasErrors = true;
+        }
+      });
+    }
+
     // If there are errors, focus on the first invalid field and return
     if (hasErrors) {
       if (!titleValue || titleValue === "") {
@@ -137,6 +161,23 @@ export default function CreatePolicyModal({
         // Focus on the email input field
         const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement;
         if (emailInput) emailInput.focus();
+      } else if (customFields && customFields.length > 0) {
+        // Focus on the first invalid policy field
+        for (let i = 0; i < customFields.length; i++) {
+          const field = customFields[i];
+          if (!field.inputLabel || field.inputLabel.trim() === "") {
+            const el = document.getElementById(`title${i}`);
+            if (el) {
+              el.removeAttribute('disabled');
+              el.focus();
+            }
+            break;
+          } else if (!field.inputName || field.inputName.trim() === "") {
+            const el = document.getElementById(`custom_policy_fields.${i}.inputName`);
+            if (el) el.focus();
+            break;
+          }
+        }
       }
       return;
     }
@@ -182,6 +223,25 @@ export default function CreatePolicyModal({
       clearErrors('to');
     }
   }, [tagsTo, clearErrors]);
+
+  // Clear errors when custom policy fields change
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name && name.startsWith('custom_policy_fields')) {
+        const fieldIndex = name.match(/custom_policy_fields\.(\d+)/)?.[1];
+        if (fieldIndex !== undefined) {
+          const fieldName = name.split('.').pop();
+          if (fieldName === 'inputLabel' || fieldName === 'inputName') {
+            const fieldValue = value.custom_policy_fields?.[parseInt(fieldIndex)]?.[fieldName as keyof PolicyField];
+            if (fieldValue && String(fieldValue).trim() !== '') {
+              clearErrors(name as any);
+            }
+          }
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, clearErrors]);
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -307,66 +367,90 @@ export default function CreatePolicyModal({
                           </div>
                         </div>
                       </div>
-                      {fields.map((item: PolicyField, index: number) => (
-                        <div className='sm:col-span-4 mt-4' key={index}>
-                          <label
-                            htmlFor={`custom_policy_fields.${index}.inputName`}
-                            className='flex justify-between text-sm font-medium leading-6 text-gray-900'
-                          >
-                            <div>
-                              <input
-                                type='text'
-                                defaultValue={item.inputLabel}
-                                className=' w-[10ch]'
-                                id={`title${index}`}
-                                {...register(`custom_policy_fields.${index}.inputLabel`)}
-                                onInput={(e: any) => increaseWidth(e.currentTarget)}
-                                disabled={true}
-                              />
+                      {fields.map((item: PolicyField, index: number) => {
+                        const labelError = errors.custom_policy_fields?.[index]?.inputLabel;
+                        const contentError = errors.custom_policy_fields?.[index]?.inputName;
+                        return (
+                          <div className='sm:col-span-4 mt-4' key={index}>
+                            <label
+                              htmlFor={`custom_policy_fields.${index}.inputName`}
+                              className='flex justify-between text-sm font-medium leading-6 text-gray-900'
+                            >
+                              <div>
+                                <input
+                                  type='text'
+                                  defaultValue={item.inputLabel}
+                                  className=' w-[10ch]'
+                                  id={`title${index}`}
+                                  {...register(`custom_policy_fields.${index}.inputLabel`, {
+                                    required: "Field title is required."
+                                  })}
+                                  onInput={(e: any) => {
+                                    increaseWidth(e.currentTarget);
+                                    // Clear error when user types
+                                    if (labelError) {
+                                      clearErrors(`custom_policy_fields.${index}.inputLabel` as any);
+                                    }
+                                  }}
+                                  disabled={true}
+                                />
+                                <button
+                                  type='button'
+                                  onClick={() => {
+                                    document.getElementById(`title${index}`)?.removeAttribute('disabled');
+                                    setFocus(`custom_policy_fields.${index}.inputLabel`);
+                                  }}
+                                >
+                                  <PencilIcon className='h-3 text-gray-500 ml-2' />
+                                </button>
+                              </div>
                               <button
                                 type='button'
+                                className='hover:t-red-500 text-white'
                                 onClick={() => {
-                                  document.getElementById(`title${index}`)?.removeAttribute('disabled');
-                                  setFocus(`custom_policy_fields.${index}.inputLabel`);
+                                  setFieldToRemove(index);
+                                  setIsConfirmModalOpen(true);
                                 }}
                               >
-                                <PencilIcon className='h-3 text-gray-500 ml-2' />
+                                <MinusCircleIcon fill='gray' className='h-3' />
                               </button>
+                            </label>
+                            {labelError && (
+                              <p className='text-xs text-red-600 mt-1'>
+                                {labelError.message || 'Field title is required.'}
+                              </p>
+                            )}
+                            <div className='mt-2'>
+                              <textarea
+                                rows={4}
+                                {...register(`custom_policy_fields.${index}.inputName`, {
+                                  required: "Field content is required."
+                                })}
+                                placeholder={`Enter ${item.inputLabel}...`}
+                                id={`custom_policy_fields.${index}.inputName`}
+                                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                              />
                             </div>
-                            <button
-                              type='button'
-                              className='hover:t-red-500 text-white'
-                              onClick={() => {
-                                setFieldToRemove(index);
-                                setIsConfirmModalOpen(true);
+                            {contentError && (
+                              <p className='text-xs text-red-600 mt-1'>
+                                {contentError.message || 'Field content is required.'}
+                              </p>
+                            )}
+                            <RemoveFieldConfirmModal
+                              message={`Are you sure you want to remove the ${item.inputLabel} field`}
+                              isOpen={isConfirmModalOpen && fieldToRemove === index}
+                              setIsOpen={setIsConfirmModalOpen}
+                              confirmAction={() => {
+                                if (fieldToRemove !== null) {
+                                  remove(fieldToRemove);
+                                  setFieldToRemove(null);
+                                }
+                                setIsConfirmModalOpen(false);
                               }}
-                            >
-                              <MinusCircleIcon fill='gray' className='h-3' />
-                            </button>
-                          </label>
-                          <div className='mt-2'>
-                            <textarea
-                              rows={4}
-                              {...register(`custom_policy_fields.${index}.inputName`)}
-                              placeholder={`Enter ${item.inputLabel}...`}
-                              id={`custom_policy_fields.${index}.inputName`}
-                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
                           </div>
-                          <RemoveFieldConfirmModal
-                            message={`Are you sure you want to remove the ${item.inputLabel} field`}
-                            isOpen={isConfirmModalOpen && fieldToRemove === index}
-                            setIsOpen={setIsConfirmModalOpen}
-                            confirmAction={() => {
-                              if (fieldToRemove !== null) {
-                                remove(fieldToRemove);
-                                setFieldToRemove(null);
-                              }
-                              setIsConfirmModalOpen(false);
-                            }}
-                          />
-                        </div>
-                      ))}
+                        );
+                      })}
                       <div className='sm:col-span-4 mt-4'>
                         <button
                           type="button"

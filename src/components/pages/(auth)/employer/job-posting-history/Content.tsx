@@ -836,7 +836,7 @@ const Content = () => {
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Job: Title, Type, Schedule'
+                  data-tooltip-content='Search for Job: Title, Postion, Type, Schedule, Work Setup'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={pendingFilter.search}
@@ -943,13 +943,7 @@ const Content = () => {
           </div>
 
           <div className='mt-8 flow-root'>
-            <div 
-              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#2d3e58 #f1f1f1'
-              }}
-            >
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
                 <table
                   className={classNames(

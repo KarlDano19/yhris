@@ -134,10 +134,6 @@ export default function StageBlock({
       className={`rounded-2xl px-7 py-2 h-[500px] relative overflow-y-auto ${
         isDisabled ? 'bg-gray-100 opacity-60' : 'bg-[#EBF3FF]'
       }`}
-      style={{
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#2d3e58 #f1f1f1'
-      }}
     >
       {filteredApplicants.length ? (
         filteredApplicants.map((applicant) => {
