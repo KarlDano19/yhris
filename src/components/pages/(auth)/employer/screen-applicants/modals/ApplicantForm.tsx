@@ -550,11 +550,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
-                    <div className='w-full overflow-x-auto md:overflow-x-visible justify-center md:justify-stretch' 
-                    style={{
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#2d3e58 #f1f1f1'
-                    }}>
+                    <div className='w-full overflow-x-auto md:overflow-x-visible justify-center md:justify-stretch'>
                       <div className='flex md:grid md:grid-cols-4 gap-2 md:gap-0 min-w-max md:min-w-0 justify-center md:justify-stretch'>
                         <div className='mr-2 md:mr-2 flex-shrink-0'>
                           <button

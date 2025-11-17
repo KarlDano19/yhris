@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useState, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import classNames from '@/helpers/classNames';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 export default function CreateThirdPartyIntegrationModal({
   isOpen,
@@ -86,18 +87,25 @@ export default function CreateThirdPartyIntegrationModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
+              <Dialog.Panel className='relative mx-4 w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:max-w-lg'>
+                <div className='flex items-center gap-3 bg-savoy-blue px-4 py-3'>
+                  <h3 className='flex-1 text-base font-semibold text-white'>Create Third Party Integration</h3>
+                  <XCircleIcon
+                    className='h-6 w-6 cursor-pointer text-white'
+                    onClick={() => setIsOpen(false)}
+                  />
+                </div>
                 <form onSubmit={ssoLogin}>
-                  <div className='text-xl px-20 text-center'>
-                    <div className='flex justify-center py-8 px-2'>Select a platform to integrate</div>
+                  <div className='px-6 py-6'>
+                    <p className='text-center text-lg font-semibold text-gray-900'>Select a platform to integrate</p>
                     <div
                       className={classNames(
-                        'flex flex-col space-y-4 p-2',
-                        manualInputFocus ? 'ring-2 ring-red-500 rounded-md' : ''
+                        'mt-6 flex flex-col space-y-4 rounded-xl border border-gray-200 p-4',
+                        manualInputFocus ? 'ring-2 ring-red-500' : ''
                       )}
                     >
                       {platforms.map((platform: any) => (
-                        <div key={platform.id} className='flex items-center'>
+                        <label key={platform.id} className='flex items-center gap-3 text-sm text-gray-800'>
                           <input
                             id={platform.id}
                             type='radio'
@@ -105,35 +113,32 @@ export default function CreateThirdPartyIntegrationModal({
                             value={platform.value}
                             onChange={() => setSelectedPlatformId(platform.id)}
                             checked={selectedPlatformId === platform.id}
-                            className='form-radio h-4 w-4 text-blue-600 focus:ring-blue-600'
+                            className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue'
                             disabled={platform.disabled}
                             required
                           />
-                          <label htmlFor={platform.id} className='ml-2 text-sm text-gray-700'>
+                          <span className={classNames(platform.disabled ? 'text-gray-400' : 'text-gray-800')}>
                             {platform.title}
-                          </label>
-                        </div>
+                            {platform.disabled && <span className='ml-1 text-xs'>(Coming soon)</span>}
+                          </span>
+                        </label>
                       ))}
                     </div>
                   </div>
-                  <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
-                    <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
-                      <button
-                        type='button'
-                        className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-blue-600 px-20 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Cancel
-                      </button>
-                    </span>
-                    <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
-                      <button
-                        type='submit'
-                        className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-20 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      >
-                        Continue
-                      </button>
-                    </span>
+                  <div className='flex flex-col gap-3 border-t border-gray-100 px-6 py-4 sm:flex-row sm:justify-end'>
+                    <button
+                      type='button'
+                      className='inline-flex w-full justify-center rounded-md border border-savoy-blue px-4 py-2 text-sm font-semibold text-savoy-blue shadow-sm hover:bg-gray-50 sm:w-auto'
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type='submit'
+                      className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-opacity-90 sm:w-auto'
+                    >
+                      Continue
+                    </button>
                   </div>
                 </form>
               </Dialog.Panel>

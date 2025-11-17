@@ -596,6 +596,7 @@ const Content = () => {
             <Filter
               filterGroups={filterGroups}
               defaultValues={departmentFilter}
+              resetValues={{ department: ['ALL'] }}
               onFilterChange={handleFilterChange}
               showResetButton={true}
               showApplyButton={true}
