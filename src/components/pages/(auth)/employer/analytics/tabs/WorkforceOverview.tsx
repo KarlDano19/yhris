@@ -342,13 +342,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   return (
     <div className="space-y-8">
       {/* Workforce KPI Cards */}
-      <div
-        className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4"
-        style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#2d3e58 #f1f1f1'
-        }}
-      >
+      <div className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4">
         <div className="flex gap-6 min-w-full w-max">
           {/* Total Active Employees Card */}
           <div className="flex-shrink-0">
@@ -431,10 +425,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
         {/* Mobile tabs - horizontal scrollable */}
         <div
           className="md:hidden overflow-x-auto"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#2d3e58 #f1f1f1'
-          }}
         >
           <div className="flex space-x-4 min-w-max px-4">
             {subTabs.map((tab) => (

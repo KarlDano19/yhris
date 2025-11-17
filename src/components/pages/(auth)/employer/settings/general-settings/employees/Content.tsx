@@ -24,13 +24,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </Link>
         </div>
         <div className='pl-4 md:pl-10 mb-5'>
-          <div
-            className='overflow-x-auto'
-            style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#2d3e58 #f1f1f1'
-            }}
-          >
+          <div className='overflow-x-auto'>
             <div className='flex gap-2 min-w-max pb-2'>
               <div
                 onClick={() => setActiveTab('location')}
