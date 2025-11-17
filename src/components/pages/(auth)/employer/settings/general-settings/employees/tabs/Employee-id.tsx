@@ -199,7 +199,7 @@ const EmployeeId = () => {
             </div>
 
             {/* Preview Section */}
-            {isChecked && watchedValues.every(Boolean) && (
+            {/* {isChecked && watchedValues.every(Boolean) && (
               <div className='flex flex-col gap-2 py-4 px-4 bg-gray-50 rounded-md mx-4'>
                 <h3 className='text-md font-semibold text-gray-800'>Preview Employee ID</h3>
                 <div className='flex gap-2 items-end'>
@@ -239,7 +239,7 @@ const EmployeeId = () => {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
 
             <div className='flex gap-4 px-4 mt-6'>
               <button
