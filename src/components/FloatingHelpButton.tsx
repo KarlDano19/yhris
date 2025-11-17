@@ -54,9 +54,34 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
         });
       }
     };
+
+    // Function to toggle Tawk.to widget based on modal state
+    const toggleWidget = (hide: boolean) => { 
+      const tawkAPI = (window as any).Tawk_API;
+      const tawkWidget = document.getElementById('tawkchat-container');
+      
+      if (hide) {
+        tawkAPI?.hideWidget?.();
+        if (tawkWidget) (tawkWidget as HTMLElement).style.display = 'none';
+      } else {
+        tawkAPI?.showWidget?.();
+        if (tawkWidget) (tawkWidget as HTMLElement).style.display = '';
+      }
+    };
+
+    const checkModals = () => {
+      const hasModal = document.querySelector('[role="dialog"][aria-modal="true"], .fixed.inset-0.bg-gray-500, .fixed.inset-0.bg-black');
+      toggleWidget(!!hasModal);
+    };
+
+    const observer = new MutationObserver(checkModals);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'role', 'aria-modal'] });
+    const intervalId = setInterval(checkModals, 500);
     
-    // Cleanup function to remove script when component unmounts
+    // Cleanup function to remove script and observers when component unmounts
     return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
       const existingScript = document.querySelector('script[src="https://embed.tawk.to/68872e04ec9db219126f8445/1j180nhfm"]');
       if (existingScript) {
         document.head.removeChild(existingScript);
