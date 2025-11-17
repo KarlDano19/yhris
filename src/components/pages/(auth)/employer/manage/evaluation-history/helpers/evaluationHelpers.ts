@@ -205,6 +205,8 @@ export const filterIndividualResponses = (
     });
   }
 
+  console.log('filtered individual responses', filtered);
+
   return filtered;
 };
 
