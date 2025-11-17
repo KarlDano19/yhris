@@ -479,12 +479,13 @@ const EvaluationResponseDetailsModal = ({
         }
 
         // Get filtered scores (this is what gets filtered by date/department)
-        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterionIndex);
+        // Use criterion ID instead of index for more reliable matching
+        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id || criterion.criterion_id);
 
         allCriteria.push({
           sectionId: section.id,
           sectionTitle: section.section_title || 'Untitled Section',
-          criterionId: criterion.id,
+          criterionId: criterion.id || criterion.criterion_id,
           title: criterion.title.trim(),
           max_score: criterion.max_score,
           sectionIndex,
@@ -514,13 +515,13 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Helper function to calculate employee scores for each criterion
-  const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionIndex: number) => {
+  const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionId: string) => {
     const filteredResponses = getFilteredIndividualResponses();
     
     return getEmployeeScoresForCriterion(
       filteredResponses, 
       sectionId, 
-      criterionIndex
+      criterionId
     );
   };
 
