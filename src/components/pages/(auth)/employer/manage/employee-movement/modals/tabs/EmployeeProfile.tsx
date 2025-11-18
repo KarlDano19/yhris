@@ -250,6 +250,7 @@ function EmployeeProfile({
             <div className='relative mt-2'>
               <select
                 id='new_position'
+                {...register('new_position', { required: true })}
                 value={newPosition}
                 onChange={e => {
                   setNewPosition(e.target.value);
@@ -317,6 +318,7 @@ function EmployeeProfile({
             <div className='relative mt-2'>
               <select
                 id='new_employment_status'
+                {...register('new_employment_status', { required: true })}
                 value={newEmploymentStatus}
                 onChange={e => {
                   setNewEmploymentStatus(e.target.value);
