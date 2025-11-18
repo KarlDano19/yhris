@@ -8,7 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import PostJobCard from './PostJobCard';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
-import SkeletonGrid from './components/SkeletonGrid';
+import SkeletonGrid from '../../../../SkeletonGrid';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import Pagination from '@/components/Pagination';
