@@ -204,9 +204,6 @@ export const filterIndividualResponses = (
       return departmentFilter.includes(employeeDept);
     });
   }
-
-  console.log('filtered individual responses', filtered);
-
   return filtered;
 };
 

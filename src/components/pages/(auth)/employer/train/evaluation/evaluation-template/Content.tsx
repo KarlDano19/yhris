@@ -18,6 +18,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
+import ViewEvaluationModal from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
@@ -25,6 +26,7 @@ import useDuplicateEvaluationTemplate from './hooks/useDuplicateEvaluationTempla
 import SeederButton from '@/components/SeederButton';
 import useSeedEvaluationTemplates from './hooks/useSeedEvaluationTemplates';
 import useUnseedEvaluationTemplates from './hooks/useUnseedEvaluationTemplates';
+import EyePassword from '@/svg/EyePassword';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -41,10 +43,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
+  const [isViewEvaluationModalOpen, setIsViewEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [duplicateEvaluationTemplateId, setDuplicateEvaluationTemplateId] = useState<number | null>(null);
+  const [viewEvaluationTemplateId, setViewEvaluationTemplateId] = useState<number | null>(null);
+  const [lockedTemplates, setLockedTemplates] = useState<Set<number>>(new Set());
   
   // Bulk delete states
   const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
@@ -188,6 +193,37 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
   };
+  const normalizeTemplateId = (value: number | string | null | undefined) => {
+    if (value === null || value === undefined) return null;
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  const handleEditComplete = (templateId: number | string | null | undefined) => {
+    const normalizedId = normalizeTemplateId(templateId);
+    if (!normalizedId) return;
+    setLockedTemplates((prev) => {
+      const updated = new Set(prev);
+      updated.add(normalizedId);
+      return updated;
+    });
+    setEvaluationItems((prev: any[]) =>
+      prev?.map((item) =>
+        normalizeTemplateId(item.id) === normalizedId
+          ? {
+              ...item,
+              can_edit: false,
+            }
+          : item
+      )
+    );
+  };
+
+
+  const openViewEvaluationModal = (evaluationDetails: any) => {
+    setViewEvaluationTemplateId(evaluationDetails.id);
+    setIsViewEvaluationModalOpen(true);
+  };
 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
@@ -324,7 +360,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     if (evaluationItems && evaluationItems?.length > 0) {
-      return evaluationItems?.map((item: any) => (
+      return evaluationItems?.map((item: any) => {
+        const normalizedItemId = normalizeTemplateId(item.id);
+        const isLocked = item.can_edit === false || (normalizedItemId !== null && lockedTemplates.has(normalizedItemId));
+        return (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <input
@@ -340,14 +379,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button 
-                onClick={() => openEditEvaluationModal(item)}
-                data-tooltip-id={`edit-tooltip-${item.id}`}
-                data-tooltip-content="Edit"
-                title='Edit'
-              >
-                <EditIcon />
-              </button>
+              {isLocked ? (
+                <button
+                  onClick={() => openViewEvaluationModal(item)}
+                  className='cursor-pointer'
+                  data-tooltip-id={`view-tooltip-${item.id}`}
+                  data-tooltip-content="To edit this template, you need to duplicate it first"
+                  data-tooltip-place='bottom'
+                  title='To edit this template, you need to duplicate it first'
+                >
+                  <EyePassword visible />
+                </button>
+              ) : (
+                <button 
+                  onClick={() => openEditEvaluationModal(item)}
+                  data-tooltip-id={`edit-tooltip-${item.id}`}
+                  data-tooltip-content="Edit"
+                  title='Edit'
+                >
+                  <EditIcon />
+                </button>
+              )}
               <button 
                 onClick={() => openDuplicateModal(item)}
                 data-tooltip-id={`duplicate-tooltip-${item.id}`}
@@ -369,7 +421,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </td>
         </tr>
-      ));
+        );
+      });
     } else {
       return (
         <>
@@ -609,6 +662,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isEditEvaluationModalOpen}
           setIsOpen={setIsEditEvaluationModalOpen}
           selectedEvaluationTemplateId={selectedEvaluationTemplateId}
+          onEditComplete={handleEditComplete}
+        />
+      )}
+      {isViewEvaluationModalOpen && viewEvaluationTemplateId && (
+        <ViewEvaluationModal
+          isOpen={isViewEvaluationModalOpen}
+          setIsOpen={setIsViewEvaluationModalOpen}
+          selectedEvaluationTemplateId={viewEvaluationTemplateId}
         />
       )}
       {isDeleteEvaluationModalOpen && (
@@ -667,6 +728,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip />
     </>
   );
 };
