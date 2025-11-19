@@ -204,7 +204,6 @@ export const filterIndividualResponses = (
       return departmentFilter.includes(employeeDept);
     });
   }
-
   return filtered;
 };
 
@@ -214,7 +213,7 @@ export const filterIndividualResponses = (
 export const getEmployeeScoresForCriterion = (
   filteredResponses: any[],
   sectionId: string,
-  criterionIndex: number
+  criterionId: string
 ) => {
   if (filteredResponses.length === 0) return [];
 
@@ -237,12 +236,17 @@ export const getEmployeeScoresForCriterion = (
       : null;
 
     if (section && section.criterion && Array.isArray(section.criterion)) {
-      const criterion = section.criterion[criterionIndex];
+      // Find criterion by ID instead of index for more reliable matching
+      const criterion = section.criterion.find((c: any) => {
+        const cId = c.id || c.criterion_id;
+        return cId === criterionId;
+      });
       
       if (criterion && criterion.score !== undefined && criterion.score !== null) {
         const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);
         
-        if (!isNaN(score) && score > 0) {
+        // Allow score of 0, but filter out NaN and negative scores
+        if (!isNaN(score) && score >= 0) {
           if (!employeeScores[employeeName]) {
             employeeScores[employeeName] = {
               name: employeeName,
@@ -264,8 +268,9 @@ export const getEmployeeScoresForCriterion = (
   });
 
   // Convert to array and sort by average score (descending)
+  // Include employees with average score of 0 (they might have scored 0 on purpose)
   return Object.values(employeeScores)
-    .filter(employee => employee.averageScore > 0)
+    .filter(employee => employee.scores.length > 0)
     .sort((a, b) => b.averageScore - a.averageScore);
 };
 
@@ -294,7 +299,7 @@ export const prepareQuestionResponseData = (
           max_score: criterion.max_score,
           sectionIndex,
           criterionIndex: criterionIdx,
-          employeeScores: getEmployeeScoresForCriterion(filteredResponses, section.id, criterionIdx)
+          employeeScores: getEmployeeScoresForCriterion(filteredResponses, section.id, criterion.id || criterion.criterion_id)
         });
       });
     }
