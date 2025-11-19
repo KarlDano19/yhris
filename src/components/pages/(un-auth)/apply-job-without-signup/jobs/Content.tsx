@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -34,6 +34,7 @@ const Content = () => {
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [jobsItems, setJobsItems] = useState<any>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const previousDataJobsRef = useRef<string>('');
   const { 
     data: dataJobs, 
     isLoading: isGetJobsLoading, 
@@ -48,23 +49,35 @@ const Content = () => {
     setSelectedJobId(null);
     setIsJobView(false);
     setJobModal(false);
+    // Reset the ref when search query changes so new data is processed
+    previousDataJobsRef.current = '';
   }, [searchQuery.job_title, searchQuery.location]);
 
   useEffect(() => {
-    if (dataJobs && dataJobs.length !== 0) {
-      setJob(true);
-      setJobsItems(dataJobs);
-      if (!selectedJobId && dataJobs[0]) {
-        setSelectedJobId(dataJobs[0].id);
-        setIsJobView(true);
-        setJobModal(true);
+    // Create a stable string representation of dataJobs to compare
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+    
+    // Only update if dataJobs actually changed (by comparing job IDs)
+    if (previousDataJobsRef.current !== dataJobsString) {
+      previousDataJobsRef.current = dataJobsString;
+      
+      if (dataJobs && dataJobs.length !== 0) {
+        setJob(true);
+        setJobsItems(dataJobs);
+        // Only auto-select first job if no job is currently selected
+        if (!selectedJobId && dataJobs[0]) {
+          setSelectedJobId(dataJobs[0].id);
+          setIsJobView(true);
+          setJobModal(true);
+        }
+      } else {
+        setJobsItems([]);
+        setIsJobView(false);
+        setJobModal(false);
       }
-    } else {
-      setJobsItems([]);
-      setIsJobView(false);
-      setJobModal(false);
     }
-  }, [dataJobs, selectedJobId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataJobs]);
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -224,9 +237,8 @@ const Content = () => {
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (
-                            <>
+                            <div key={job.id}>
                               <div
-                                key={job.id}
                                 className={classNames(
                                   'card border rounded-md p-4 cursor-pointer',
                                   isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
@@ -242,7 +254,7 @@ const Content = () => {
                                     <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
                                     <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
                                     <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
-                                    <Link href={`/job-app-form/${job.id}`}>
+                                    <Link href={`/job-app-form/${job.id}`} onClick={(e) => e.stopPropagation()}>
                                       <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
                                         Apply Now!
                                       </button>
@@ -267,7 +279,7 @@ const Content = () => {
                                   </div>
                                 </div>
                               )}
-                            </>
+                            </div>
                           ))
                         : 'Loading jobs...'}
                     </>
@@ -307,11 +319,6 @@ const Content = () => {
                             'Load More Jobs'
                           )}
                         </button>
-                      </div>
-                    )}
-                    {!hasNextPage && jobsItems.length > 0 && (
-                      <div className="flex justify-center py-6">
-                        <p className="text-sm text-gray-400">No more jobs to load</p>
                       </div>
                     )}
                   </div>

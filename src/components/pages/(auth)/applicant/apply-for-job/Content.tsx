@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -44,6 +44,7 @@ const Content = () => {
   const [jobsItems, setJobsItems] = useState<any>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const previousDataJobsRef = useRef<string>('');
   const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
   const { 
     data: dataJobs, 
@@ -62,23 +63,35 @@ const Content = () => {
     setSelectedJobId(null);
     setIsJobView(false);
     setJobModal(false);
+    // Reset the ref when search query changes so new data is processed
+    previousDataJobsRef.current = '';
   }, [searchQuery.job_title, searchQuery.location]);
 
   useEffect(() => {
-    if (dataJobs && dataJobs.length !== 0) {
-      setJob(true);
-      setJobsItems(dataJobs);
-      if (!selectedJobId && dataJobs[0]) {
-        setSelectedJobId(dataJobs[0].id);
-        setIsJobView(true);
-        setJobModal(true);
+    // Create a stable string representation of dataJobs to compare
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+    
+    // Only update if dataJobs actually changed (by comparing job IDs)
+    if (previousDataJobsRef.current !== dataJobsString) {
+      previousDataJobsRef.current = dataJobsString;
+      
+      if (dataJobs && dataJobs.length !== 0) {
+        setJob(true);
+        setJobsItems(dataJobs);
+        // Only auto-select first job if no job is currently selected
+        if (!selectedJobId && dataJobs[0]) {
+          setSelectedJobId(dataJobs[0].id);
+          setIsJobView(true);
+          setJobModal(true);
+        }
+      } else {
+        setJobsItems([]);
+        setIsJobView(false);
+        setJobModal(false);
       }
-    } else {
-      setJobsItems([]);
-      setIsJobView(false);
-      setJobModal(false);
     }
-  }, [dataJobs, selectedJobId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataJobs]);
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -275,57 +288,55 @@ const Content = () => {
                   <div className='lg:flex'>
                     <div className='lg:w-[36%] overflow-y-auto max-h-screen'>
                       <div className='px-2 py-2 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
-                        <>
-                          {!isGetJobsLoading
-                            ? jobsItems.map((job: any) => (
-                                <div key={job.id}>
-                                  <div
-                                    className={classNames(
-                                      'card border rounded-md p-4 cursor-pointer',
-                                      isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
-                                    )}
-                                    onClick={() => openJobDetails(job.id)}
-                                  >
-                                    <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
-                                    <div className='flex flex-col'>
-                                      <span className='mt-1 ml-1'>
-                                        <FileCaseIcon className='h-6 w-6' />
-                                      </span>
-                                      <div className='ml-0 mt-2'>
-                                        <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>
-                                          {job.title}
-                                        </h5>
-                                        <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
-                                        <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
-                                        <Link href={`/job-applicant-form/${job.id}`}>
-                                          <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
-                                            Apply Now!
-                                          </button>
-                                        </Link>
-                                      </div>
+                        {!isGetJobsLoading
+                          ? jobsItems.map((job: any) => (
+                              <div key={job.id}>
+                                <div
+                                  className={classNames(
+                                    'card border rounded-md p-4 cursor-pointer',
+                                    isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
+                                  )}
+                                  onClick={() => openJobDetails(job.id)}
+                                >
+                                  <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
+                                  <div className='flex flex-col'>
+                                    <span className='mt-1 ml-1'>
+                                      <FileCaseIcon className='h-6 w-6' />
+                                    </span>
+                                    <div className='ml-0 mt-2'>
+                                      <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>
+                                        {job.title}
+                                      </h5>
+                                      <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
+                                      <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
+                                      <Link href={`/job-applicant-form/${job.id}`} onClick={(e) => e.stopPropagation()}>
+                                        <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
+                                          Apply Now!
+                                        </button>
+                                      </Link>
                                     </div>
                                   </div>
-                                  {isJobView && selectedJobId === job.id && (
-                                    <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
-                                      <div
-                                        className={classNames(
-                                          'card border border-savoy-blue rounded-md sticky top-10',
-                                          isJobModalOpen ? '' : 'hidden'
-                                        )}
-                                      >
-                                        <div className='flex justify-end px-3 mt-2'>
-                                          <button onClick={closeJobDetails}>
-                                            <XMarkIcon className='h-5 w-5 text-indigo-dye' />
-                                          </button>
-                                        </div>
-                                        <JobDetails jobId={selectedJobId} />
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
-                              ))
-                            : 'Loading jobs...'}
-                        </>
+                                {isJobView && selectedJobId === job.id && (
+                                  <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
+                                    <div
+                                      className={classNames(
+                                        'card border border-savoy-blue rounded-md sticky top-10',
+                                        isJobModalOpen ? '' : 'hidden'
+                                      )}
+                                    >
+                                      <div className='flex justify-end px-3 mt-2'>
+                                        <button onClick={closeJobDetails}>
+                                          <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                                        </button>
+                                      </div>
+                                      <JobDetails jobId={selectedJobId} />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          : 'Loading jobs...'}
                         {/* Load More Button */}
                         {hasNextPage && (
                           <div className="flex justify-center py-6">
@@ -362,11 +373,6 @@ const Content = () => {
                                 'Load More Jobs'
                               )}
                             </button>
-                          </div>
-                        )}
-                        {!hasNextPage && jobsItems.length > 0 && (
-                          <div className="flex justify-center py-6">
-                            <p className="text-sm text-gray-400">No more jobs to load</p>
                           </div>
                         )}
                       </div>
