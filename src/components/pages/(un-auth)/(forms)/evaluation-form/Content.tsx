@@ -18,6 +18,7 @@ import useUpdateEvaluationForm from './hooks/useUpdateEvaluationEmployeeForm';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
 import ConfettiLogo from '@/svg/Confetti';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 function Content() {
   const { width, height } = useWindowSize();
@@ -347,39 +348,44 @@ function Content() {
                             )}
                             {evaluationTemplateDetails.criteria_rating_view_type === 'dropdown' && (
                               <div className='flex gap-4 items-center text-center whitespace-nowrap'>
-                                <select
-                                  id={`dropdown-${evaluationCriterionIndex}-${index}`}
-                                  value={item.score || 0}
-                                  onChange={(event) => {
-                                    const newScore = Number(event.target.value);
-                                    setEvaluationForm((prevForm: any) => {
-                                      const updatedForm = prevForm.map(
-                                        (criterionItem: any, criterionIndex: number) => {
-                                          if (criterionIndex === evaluationCriterionIndex) {
-                                            return {
-                                              ...criterionItem,
-                                              criterion: criterionItem.criterion.map(
-                                                (item: any, itemIndex: number) => {
-                                                  if (itemIndex === index) {
-                                                    return { ...item, score: newScore };
+                                <div className='relative'>
+                                  <select
+                                    id={`dropdown-${evaluationCriterionIndex}-${index}`}
+                                    value={item.score || 0}
+                                    onChange={(event) => {
+                                      const newScore = Number(event.target.value);
+                                      setEvaluationForm((prevForm: any) => {
+                                        const updatedForm = prevForm.map(
+                                          (criterionItem: any, criterionIndex: number) => {
+                                            if (criterionIndex === evaluationCriterionIndex) {
+                                              return {
+                                                ...criterionItem,
+                                                criterion: criterionItem.criterion.map(
+                                                  (item: any, itemIndex: number) => {
+                                                    if (itemIndex === index) {
+                                                      return { ...item, score: newScore };
+                                                    }
+                                                    return item;
                                                   }
-                                                  return item;
-                                                }
-                                              ),
-                                            };
+                                                ),
+                                              };
+                                            }
+                                            return criterionItem;
                                           }
-                                          return criterionItem;
-                                        }
-                                      );
-                                      return updatedForm;
-                                    });
-                                  }}
-                                  className='border px-8 py-2 rounded-md'
-                                >
-                                  {Array.from({ length: parseInt(item.max_score) + 1 }, (_, i) => (
-                                    <option key={i} value={i}>{i}</option>
-                                  ))}
-                                </select>
+                                        );
+                                        return updatedForm;
+                                      });
+                                    }}
+                                    className='appearance-none border px-8 py-2 rounded-md pr-10'
+                                  >
+                                    {Array.from({ length: parseInt(item.max_score) + 1 }, (_, i) => (
+                                      <option key={i} value={i}>{i}</option>
+                                    ))}
+                                  </select>
+                                  <div className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2'>
+                                    <SelectChevronDown />
+                                  </div>
+                                </div>
                               </div>
                             )}
                             {evaluationTemplateDetails.criteria_rating_view_type === 'slider' && (

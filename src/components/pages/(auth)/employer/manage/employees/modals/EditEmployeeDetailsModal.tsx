@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 import CustomToast from '@/components/CustomToast';
 import useGetEmployeeDetails from '../hooks/useGetEmployeeDetails';
@@ -34,6 +35,7 @@ export default function EditEmployeeDetailsModal({
   employeeStatusItems: any[];
 }) {
   const cancelButtonRef = useRef(null);
+  const queryClient = useQueryClient();
   const {
     data: employeeDetailsData,
     refetch: refetchEmployeeDetails,
@@ -93,6 +95,8 @@ export default function EditEmployeeDetailsModal({
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
           duration: 5000,
         });
+        // Invalidate employee paginated select cache to ensure separation page gets updated data
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         customCloseModal();
         refetch();
       },
