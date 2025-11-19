@@ -1,8 +1,19 @@
 import { useState } from 'react';
+
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+
 import Pagination from '@/components/Pagination';
-import QuestionResponseBarChart from '../../../modals/charts-and-graphs/QuestionResponseBarChart';
-import { PaginationState, DateFilter } from '../../../modals/types';
+import QuestionResponseBarChart from '../../modals/charts-and-graphs/QuestionResponseBarChart';
+
+interface PaginationState {
+  totalRecords: number;
+  totalPages: number;
+}
+
+interface DateFilter {
+  from: any;
+  to: any;
+}
 
 interface QuestionsTabProps {
   paginatedQuestions: any[];

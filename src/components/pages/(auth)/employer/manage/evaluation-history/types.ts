@@ -1,8 +1,3 @@
-export type T_ModalData = {
-  id: number;
-  open: boolean;
-};
-
 export interface EmployeeEvaluationData {
   name: string;
   department: string;
@@ -12,8 +7,8 @@ export interface EmployeeEvaluationData {
 }
 
 export interface EvaluationResponseDetailsModalProps {
-  isOpen: T_ModalData | null;
-  setIsOpen: React.Dispatch<T_ModalData | null>;
+  isOpen: { id: number; open: boolean } | null;
+  setIsOpen: React.Dispatch<{ id: number; open: boolean } | null>;
   selectedTemplate: any;
   templateResponseDetails: any;
   isLoadingTemplateDetails: boolean;
@@ -25,15 +20,5 @@ export interface SelectedRecipients {
   recipients: string;
   employeeName: string;
   department: string;
-}
-
-export interface DateFilter {
-  from: any;
-  to: any;
-}
-
-export interface PaginationState {
-  totalRecords: number;
-  totalPages: number;
 }
 
