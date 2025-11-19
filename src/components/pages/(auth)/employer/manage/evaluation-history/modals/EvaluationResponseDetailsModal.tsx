@@ -36,12 +36,12 @@ interface PaginationState {
 }
 
 // Components
-import TemplateSummary from '../tabs/components/TemplateSummary';
-import EvaluationFilters from '../tabs/components/EvaluationFilters';
-import TabNavigation from '../tabs/components/TabNavigation';
-import RespondentsTab from '../tabs/components/RespondentsTab';
-import QuestionsTab from '../tabs/components/QuestionsTab';
-import AnalyticsTab from '../tabs/components/AnalyticsTab';
+import TemplateSummary from './components/evaluation-response-details/TemplateSummary';
+import EvaluationFilters from './components/evaluation-response-details/EvaluationFilters';
+import TabNavigation from './components/evaluation-response-details/TabNavigation';
+import RespondentsTab from './components/evaluation-response-details/RespondentsTab';
+import QuestionsTab from './components/evaluation-response-details/QuestionsTab';
+import AnalyticsTab from './components/evaluation-response-details/AnalyticsTab';
 
 const EvaluationResponseDetailsModal = ({
   isOpen,
@@ -64,7 +64,7 @@ const EvaluationResponseDetailsModal = ({
     refetch: refetchTemplateDefinition,
     remove: clearTemplateDefinition,
   } = useGetEvaluationTemplateDetails(selectedTemplate?.evaluation_template_id || null);
-  
+
   // Pagination state for Respondents tab
   const [respondentsPageSize, setRespondentsPageSize] = useState(5);
   const [respondentsCurrentPage, setRespondentsCurrentPage] = useState(1);
@@ -612,127 +612,127 @@ const EvaluationResponseDetailsModal = ({
 
   return (
     <>
-    <Transition.Root show={isOpen.open} as={Fragment}>
-      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={customCloseModal}>
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+      <Transition.Root show={isOpen.open} as={Fragment}>
+        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={customCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
 
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
-                <div className='flex bg-savoy-blue p-4 items-center'>
-                  <h3 className='flex-1 text-white ml-2 text-lg font-semibold'>
-                    Template Summary
-                  </h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
-                </div>
-                
-                <div className='p-6'>
-                  {isLoadingTemplateDetails ? (
-                    <div className='flex justify-center py-8'>
-                      <LoadingSpinner size="lg" color="yellow" />
-                    </div>
-                  ) : (
-                    <div className='space-y-6'>
-                      {/* Template Summary */}
-                      <TemplateSummary template={templateResponseDetails?.template} />
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
+                  <div className='flex bg-savoy-blue p-4 items-center'>
+                    <h3 className='flex-1 text-white ml-2 text-lg font-semibold'>
+                      Template Summary
+                    </h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
+                  </div>
+                  
+                  <div className='p-6'>
+                    {isLoadingTemplateDetails ? (
+                      <div className='flex justify-center py-8'>
+                        <LoadingSpinner size="lg" color="yellow" />
+                      </div>
+                    ) : (
+                      <div className='space-y-6'>
+                        {/* Template Summary */}
+                        <TemplateSummary template={templateResponseDetails?.template} />
 
-                      {/* Filters */}
-                      <EvaluationFilters
-                        dateFilter={dateFilter}
-                        setDateFilter={setDateFilter}
-                        departmentFilter={departmentFilter}
-                        filterGroups={filterGroups}
-                        onDepartmentFilterChange={handleDepartmentFilterChange}
-                        filteredCount={filteredEmployees.length}
-                        totalCount={templateResponseDetails?.employees_responded?.length || 0}
-                        onPrintClick={handlePrintClick}
-                        isPrintGenerating={isPrintGenerating}
-                        isLoadingTemplateDetails={isLoadingTemplateDetails}
-                      />
+                        {/* Filters */}
+                        <EvaluationFilters
+                          dateFilter={dateFilter}
+                          setDateFilter={setDateFilter}
+                          departmentFilter={departmentFilter}
+                          filterGroups={filterGroups}
+                          onDepartmentFilterChange={handleDepartmentFilterChange}
+                          filteredCount={filteredEmployees.length}
+                          totalCount={templateResponseDetails?.employees_responded?.length || 0}
+                          onPrintClick={handlePrintClick}
+                          isPrintGenerating={isPrintGenerating}
+                          isLoadingTemplateDetails={isLoadingTemplateDetails}
+                        />
 
-                      {/* Tab Navigation */}
-                      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+                        {/* Tab Navigation */}
+                        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-                      {/* Tab Content */}
-                      {activeTab === 'respondents' && (
-                        <RespondentsTab
-                          paginatedRespondents={getPaginatedRespondents()}
+                        {/* Tab Content */}
+                        {activeTab === 'respondents' && (
+                          <RespondentsTab
+                            paginatedRespondents={getPaginatedRespondents()}
                           pagination={respondentsPagination}
                           currentPage={respondentsCurrentPage}
                           pageSize={respondentsPageSize}
                           onPageChange={handleRespondentsPaginationChange}
                           onPageSizeChange={handleRespondentsPageSizeChange}
-                          onRecipientsClick={handleRecipientsClick}
-                          passingScore={templateResponseDetails?.template?.passing_score || 0}
-                        />
-                      )}
+                            onRecipientsClick={handleRecipientsClick}
+                            passingScore={templateResponseDetails?.template?.passing_score || 0}
+                          />
+                        )}
 
-                      {activeTab === 'questions' && (
-                        <QuestionsTab
-                          paginatedQuestions={getPaginatedQuestions()}
-                          allQuestions={prepareQuestionResponseData()}
+                        {activeTab === 'questions' && (
+                          <QuestionsTab
+                            paginatedQuestions={getPaginatedQuestions()}
+                            allQuestions={prepareQuestionResponseData()}
                           pagination={questionsPagination}
                           currentPage={questionsCurrentPage}
                           pageSize={questionsPageSize}
                           onPageChange={handleQuestionsPaginationChange}
                           onPageSizeChange={handleQuestionsPageSizeChange}
-                          dateFilter={dateFilter}
-                          departmentFilter={departmentFilter}
-                          templateResponseDetails={templateResponseDetails}
-                        />
-                      )}
+                            dateFilter={dateFilter}
+                            departmentFilter={departmentFilter}
+                            templateResponseDetails={templateResponseDetails}
+                          />
+                        )}
 
-                      {activeTab === 'analytics' && (
-                        <AnalyticsTab
-                          frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
-                          paginatedAnalytics={getPaginatedAnalytics()}
+                        {activeTab === 'analytics' && (
+                          <AnalyticsTab
+                            frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
+                            paginatedAnalytics={getPaginatedAnalytics()}
                           pagination={analyticsPagination}
                           currentPage={analyticsCurrentPage}
                           pageSize={analyticsPageSize}
                           onPageChange={handleAnalyticsPaginationChange}
                           onPageSizeChange={handleAnalyticsPageSizeChange}
-                          dateFilter={dateFilter}
-                          totalScore={templateResponseDetails?.template?.total_score || 1}
-                        />
-                      )}
-                    </div>
-                  )}
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
+                            dateFilter={dateFilter}
+                            totalScore={templateResponseDetails?.template?.total_score || 1}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+            {/* Recipients List Modal */}
+            {selectedRecipients && (
+              <RecipientsListModal
+                isOpen={isRecipientsModalOpen}
+                onClose={handleCloseRecipientsModal}
+                recipients={selectedRecipients.recipients}
+                employeeName={selectedRecipients.employeeName}
+                department={selectedRecipients.department}
+              />
+            )}
           </div>
-          {/* Recipients List Modal */}
-      {selectedRecipients && (
-      <RecipientsListModal
-        isOpen={isRecipientsModalOpen}
-        onClose={handleCloseRecipientsModal}
-        recipients={selectedRecipients.recipients}
-        employeeName={selectedRecipients.employeeName}
-        department={selectedRecipients.department}
-      />
-    )}
-        </div>
-      </Dialog>
-    </Transition.Root>
+        </Dialog>
+      </Transition.Root>
 
     
     </>

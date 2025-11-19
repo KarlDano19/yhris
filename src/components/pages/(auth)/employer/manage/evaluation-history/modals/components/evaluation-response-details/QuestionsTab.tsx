@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
 import Pagination from '@/components/Pagination';
-import QuestionResponseBarChart from '../../modals/charts-and-graphs/QuestionResponseBarChart';
+import QuestionResponseBarChart from '../../charts-and-graphs/QuestionResponseBarChart';
 
 interface PaginationState {
   totalRecords: number;

@@ -1,6 +1,6 @@
 import { ChartBarIcon, UsersIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid';
 
-import { TabType } from '../../types';
+import { TabType } from '../../../types';
 
 interface TabNavigationProps {
   activeTab: TabType;

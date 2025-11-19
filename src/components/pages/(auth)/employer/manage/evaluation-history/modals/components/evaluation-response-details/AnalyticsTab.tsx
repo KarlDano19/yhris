@@ -1,5 +1,5 @@
 import Pagination from '@/components/Pagination';
-import FrequentlyEvaluatedPieChart from '../../modals/charts-and-graphs/FrequentlyEvaluatedPieChart';
+import FrequentlyEvaluatedPieChart from '../../charts-and-graphs/FrequentlyEvaluatedPieChart';
 
 interface PaginationState {
   totalRecords: number;

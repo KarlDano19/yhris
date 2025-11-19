@@ -22,13 +22,11 @@ export default function EditEvaluationModal({
   isOpen,
   setIsOpen,
   selectedEvaluationTemplateId,
-  onEditComplete,
 }: {
   refetch: any;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   selectedEvaluationTemplateId: number | null;
-  onEditComplete?: (templateId: number | null) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
@@ -73,11 +71,8 @@ export default function EditEvaluationModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
-        if (typeof onEditComplete === 'function') {
-          onEditComplete(selectedEvaluationTemplateId);
-        }
         customCloseModal();
-        refetch();
+        refetch(); // This will refetch and get the correct can_edit status from backend
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
