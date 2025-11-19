@@ -1,7 +1,11 @@
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import PrintIcon from '@/svg/PrintIcon';
-import { DateFilter } from '../../modals/types';
+
+interface DateFilter {
+  from: any;
+  to: any;
+}
 
 interface EvaluationFiltersProps {
   dateFilter: DateFilter;

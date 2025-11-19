@@ -1,6 +1,15 @@
 import Pagination from '@/components/Pagination';
-import FrequentlyEvaluatedPieChart from '../../../modals/charts-and-graphs/FrequentlyEvaluatedPieChart';
-import { PaginationState, DateFilter } from '../../../modals/types';
+import FrequentlyEvaluatedPieChart from '../../modals/charts-and-graphs/FrequentlyEvaluatedPieChart';
+
+interface PaginationState {
+  totalRecords: number;
+  totalPages: number;
+}
+
+interface DateFilter {
+  from: any;
+  to: any;
+}
 
 interface AnalyticsTabProps {
   frequentlyEvaluatedEmployees: any[];

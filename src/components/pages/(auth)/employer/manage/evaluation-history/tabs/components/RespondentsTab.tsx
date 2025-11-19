@@ -1,5 +1,9 @@
 import Pagination from '@/components/Pagination';
-import { PaginationState } from '../../../modals/types';
+
+interface PaginationState {
+  totalRecords: number;
+  totalPages: number;
+}
 
 interface RespondentsTabProps {
   paginatedRespondents: any[];
