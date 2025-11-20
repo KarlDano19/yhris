@@ -2,23 +2,27 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import CustomToast from '@/components/CustomToast';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import AddUserAccountModal from '../accounts/modals/AddUserAccountModal';
 import useGetAccountsList from './hooks/useGetAccountsList';
+import useSyncYPUsers from './hooks/useSyncYPUsers';
 import UpdateUserAccountModal from './modals/UpdateUserAccountModal';
 import ResetPasswordModal from './modals/ResetPasswordModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, CloudArrowDownIcon } from "@heroicons/react/24/outline";
 import EditIcon from '@/svg/EditIcon';
 import classNames from '@/helpers/classNames';
 
@@ -37,6 +41,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState<boolean>(false);
   const [isUpdateAccountModalOpen, setIsUpdateAccountModalOpen] = useState<T_ModalData | null>(null);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState<T_ModalData | null>(null);
+  const queryClient = useQueryClient();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const [loginType, setLoginType] = useState<string>('');
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
@@ -50,11 +57,23 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [appliedFilter, setAppliedFilter] = useState<any>({
     search: '',
   });
+  
+  // Hooks
   const {
     data: accountsListData,
     isLoading: isAccountsListLoading,
     refetch: accountsListRefetch,
   } = useGetAccountsList({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
+
+  const {
+    syncUsers,
+    isLoading: isSyncLoading,
+    isError: isSyncError,
+    error: syncError,
+    isSuccess: isSyncSuccess,
+    data: syncData,
+    reset: resetSync,
+  } = useSyncYPUsers();
 
   // Form Methods
   const createFormMethods = useForm();
@@ -80,10 +99,66 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isAccountsListLoading, isSearching]);
 
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType(cachedUserDetails.state.data.login_type);
+    }
+  }, [cachedUserDetails]);
+
+  // Handle sync success/error
+  useEffect(() => {
+    if (isSyncSuccess && syncData) {
+      const { sync_results } = syncData;
+      const message = `Sync completed successfully!`;
+      
+      toast.custom((t) => (
+        <CustomToast 
+          message={message} 
+          type="success" 
+          duration={6000}
+        />
+      ));
+      
+      // Refresh the accounts list to show new users
+      accountsListRefetch();
+      resetSync();
+    }
+  }, [isSyncSuccess, syncData, accountsListRefetch, resetSync]);
+
+  useEffect(() => {
+    if (isSyncError && syncError) {
+      const errorMessage = syncError.message || 'Failed to sync users from Yahshua Payroll';
+      
+      toast.custom((t) => (
+        <CustomToast 
+          message={`Sync failed: ${errorMessage}`} 
+          type="error" 
+          duration={5000}
+        />
+      ));
+      
+      resetSync();
+    }
+  }, [isSyncError, syncError, resetSync]);
+
   const handleSearch = () => {
     setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
     // No need to call refetch; useGetAccountsList will refetch on appliedFilter change
+  };
+
+  const handleSyncUsers = () => {
+    if (isSyncLoading) return; // Prevent multiple clicks while syncing
+    
+    toast.custom((t) => (
+      <CustomToast 
+        message="Starting user sync from Yahshua Payroll..." 
+        type="info" 
+        duration={3000}
+      />
+    ));
+    
+    syncUsers();
   };
 
   const paginationChange = (event: any) => {
@@ -182,7 +257,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end'>
+            <div className='flex-1 flex justify-start lg:justify-end gap-3'>
+              {loginType !== 'password' && (
+                <SmartButton
+                  id="sync-yp-users-btn"
+                  onClick={handleSyncUsers}
+                  disabled={isSyncLoading || !hasActiveSubscription}
+                  className={classNames(
+                    'bg-blue-600 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50',
+                    'flex items-center gap-2',
+                    isSyncLoading && 'cursor-not-allowed'
+                  )}
+                  data-tooltip-id='sync-tooltip'
+                  data-tooltip-content='Sync users from Yahshua Payroll system. Only non-employee users will be imported.'
+                  data-tooltip-place='bottom'
+                >
+                  {isSyncLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      SYNCING...
+                    </>
+                  ) : (
+                    <>
+                      <CloudArrowDownIcon className='h-4 w-4' />
+                      SYNC YP USERS
+                    </>
+                  )}
+                </SmartButton>
+              )}
               <SmartButton
                 id="create-sub-account-btn"
                 onClick={() => setIsAddAccountModalOpen(true)}
@@ -260,6 +362,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='sync-tooltip'/>
     </>
   );
 };

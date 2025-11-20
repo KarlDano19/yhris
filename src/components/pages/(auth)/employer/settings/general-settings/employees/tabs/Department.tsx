@@ -268,14 +268,14 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               >
                 <DeleteIcon />
               </SmartButton>
-              <SmartButton
+              {/* <SmartButton
                 id="delete-department-btn"
                 onClick={() => addDepartmentToYP({ id: item.id, data: { name: item.name } })}
                 disabled={selectedDepartments.size > 1}
                 className={selectedDepartments.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 Sync to YP
-              </SmartButton>
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -369,13 +369,13 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
           </div>
         </div>
         <div className='flex-1 flex justify-start lg:justify-end'>
-          <SmartButton
+          {/* <SmartButton
             id="create-department-btn"
             onClick={handleSyncDepartment}
             className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
           >
             SYNC
-          </SmartButton>
+          </SmartButton> */}
           <SmartButton
             id="create-department-btn"
             onClick={() => setIsAddDepartmentModalOpen(true)}

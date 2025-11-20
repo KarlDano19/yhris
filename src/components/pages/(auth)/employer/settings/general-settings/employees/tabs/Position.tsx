@@ -268,14 +268,14 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               >
                 <DeleteIcon />
               </SmartButton>
-              <SmartButton
+              {/* <SmartButton
                 id="delete-position-btn"
                 onClick={() => addPositionToYP({ id: item.id, data: { name: item.name } })}
                 disabled={selectedPositions.size > 1}
                 className={selectedPositions.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 Sync to YP
-              </SmartButton>
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -376,13 +376,13 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           >
             CREATE
           </SmartButton>
-          <SmartButton
+          {/* <SmartButton
             id="create-position-btn"
             onClick={handleSyncPosition}
             className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
           >
             SYNC
-          </SmartButton>
+          </SmartButton> */}
         </div>
       </div>
       

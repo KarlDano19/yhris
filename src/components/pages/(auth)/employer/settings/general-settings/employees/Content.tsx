@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -31,6 +32,15 @@ import EmployeeId from './tabs/Employee-id';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
+  const queryClient = useQueryClient();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const [loginType, setLoginType] = useState<string>('');
+
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType(cachedUserDetails.state.data.login_type);
+    }
+  }, [cachedUserDetails]);
 
   // Sync hooks
   const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
@@ -292,7 +302,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             
             {/* Sync All Button */}
-            <div className='flex-shrink-0'>
+            <div className={`flex-shrink-0 ${loginType === 'password' ? 'hidden' : ''}`}>
               <SmartButton
                 id="sync-all-btn"
                 onClick={handleSyncAll}

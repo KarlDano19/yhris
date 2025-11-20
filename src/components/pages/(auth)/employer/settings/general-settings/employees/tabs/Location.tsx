@@ -264,14 +264,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </SmartButton>
-              <SmartButton
+              {/* <SmartButton
                 id="delete-location-btn"
                 onClick={() => addLocationToYP({ id: item.id, data: { name: item.name } })}
                 disabled={selectedLocations.size > 1}
                 className={selectedLocations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
               >
                 Sync to YP
-              </SmartButton>
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -372,13 +372,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           >
             CREATE
           </SmartButton>
-          <SmartButton
+          {/* <SmartButton
             id="create-location-btn"
             onClick={handleSyncLocation}
             className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
           >
             SYNC
-          </SmartButton>
+          </SmartButton> */}
         </div>
       </div>
       
