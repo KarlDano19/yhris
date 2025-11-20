@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -9,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import useGetHiredApplicants from './hooks/useGetHiredApplicants';
+import SkeletonGrid from '../../../../SkeletonGrid';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -36,10 +36,7 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  const lastSearchedValue = useRef(itemsFilter.search || '');
-  useEffect(() => {
-    refetch();
-  }, [currentPage, pageSize]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (data && data.total_pages && data.total_records) {
@@ -57,6 +54,12 @@ const Content = () => {
       });
     }
   }, [data]);
+
+  useEffect(() => {
+    if (!isLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoading, isSearching]);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -102,6 +105,7 @@ const Content = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      setIsSearching(true);
                       setItemsFilter({ ...itemsFilter, search: inputValue });
                     }
                   }}
@@ -111,31 +115,38 @@ const Content = () => {
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => setItemsFilter({ ...itemsFilter, search: inputValue })}
+              onClick={() => {
+                setIsSearching(true);
+                setItemsFilter({ ...itemsFilter, search: inputValue });
+              }}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />
             </button>
           </div>
         </div>
-        <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
-          {!isLoading && data?.records
-            ? data.records.map((hiredApplicant: any, index: number) => (
-                <div
-                  key={index}
-                  className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'
-                >
-                  <h2 className='font-semibold text-xl'>{hiredApplicant.job_title}</h2>
-                  <p className='text-[15px] mb-12'>{hiredApplicant.advertise_to}</p>
-                  <Link
-                    href={'/orient/' + hiredApplicant.id}
-                    className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
+        {isSearching || isLoading ? (
+          <SkeletonGrid count={6} />
+        ) : (
+          <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
+            {data?.records
+              ? data.records.map((hiredApplicant: any, index: number) => (
+                  <div
+                    key={index}
+                    className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'
                   >
-                    {hiredApplicant.hired_applicant_applied_no} Hired Applicant/s
-                  </Link>
-                </div>
-              ))
-            : ''}
-        </div>
+                    <h2 className='font-semibold text-xl'>{hiredApplicant.job_title}</h2>
+                    <p className='text-[15px] mb-12'>{hiredApplicant.advertise_to}</p>
+                    <Link
+                      href={'/orient/' + hiredApplicant.id}
+                      className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
+                    >
+                      {hiredApplicant.hired_applicant_applied_no} Hired Applicant/s
+                    </Link>
+                  </div>
+                ))
+              : null}
+          </div>
+        )}
         </div>
         
         {/* Sticky Pagination */}

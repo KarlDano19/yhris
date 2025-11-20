@@ -37,7 +37,7 @@ async function getHiredApplicants(filters: any) {
 
 function useGetHiredApplicants(filters: any) {
   const query = useQuery(['hiredApplicantJobCache', filters], () => getHiredApplicants(filters), {
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     keepPreviousData: true,
   });
 

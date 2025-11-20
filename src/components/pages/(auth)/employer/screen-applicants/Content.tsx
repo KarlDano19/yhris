@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -9,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import PostJobCard from './PostJobCard';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
+import SkeletonGrid from '../../../../SkeletonGrid';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import Pagination from '@/components/Pagination';
@@ -19,6 +19,7 @@ type PaginationProps = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const [inputValue, setInputValue] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
     is_active: 'true', // Only show active job postings
@@ -30,14 +31,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
-  const { data: dataJobPost, refetch: refetchJobPost } = useGetJobPostItems({
+  const { data: dataJobPost, isLoading: isGetJobPostLoading, refetch: refetchJobPost } = useGetJobPostItems({
     ...itemsFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  useEffect(() => {
-    refetchJobPost();
-  }, [currentPage, pageSize]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
@@ -70,7 +69,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataJobPost]);
 
-  const lastSearchedValue = useRef('');
+  useEffect(() => {
+    if (!isGetJobPostLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetJobPostLoading, isSearching]);
 
   return (
     <div className='min-h-screen mb-24 md:mb-0'>
@@ -95,14 +98,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Job Title'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
+                  value={inputValue}
                   onChange={(e) => {
-                    const newValue = e.target.value;
-                    setItemsFilter({ ...itemsFilter, search: newValue });
+                    setInputValue(e.target.value);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      refetchJobPost();
+                      setIsSearching(true);
+                      setItemsFilter({ ...itemsFilter, search: inputValue });
                     }
                   }}
                   placeholder='Search ...'
@@ -112,37 +115,44 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <button
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-              onClick={() => refetchJobPost()}
+              onClick={() => {
+                setIsSearching(true);
+                setItemsFilter({ ...itemsFilter, search: inputValue });
+              }}
             >
-                <MagnifyingGlassIcon className='h-5 w-5' />
-              </button>
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
             </div>
           </div>
-          <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
-            {jobPostHistoryItems.map((item: any) => {
-              return (
-                <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
-                  <h2 className='font-semibold text-xl break-words '>{item.jobTitle}</h2>
-                  <p className='text-[15px] mb-12 break-words text-pretty'>{item.placeAdvertise}</p>
-                  <Link
-                    href={`screen-applicants/${item.id}`}
-                    className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
-                  >
-                    {item.applicantApplied - item.hiredApplicant} New Applicant/s
-                  </Link>
-                </div>
-              );
-            })}
-            {/* ensuring cards displayed are always six */}
-            {jobPostHistoryItems.length <= 6 &&
-              Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
-                return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+          {isSearching || isGetJobPostLoading ? (
+            <SkeletonGrid count={6} />
+          ) : (
+            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6'>
+              {jobPostHistoryItems.map((item: any) => {
+                return (
+                  <div key={item.id} className='rounded-lg px-8 py-14 shadow text-indigo-dye text-center bg-white'>
+                    <h2 className='font-semibold text-xl break-words '>{item.jobTitle}</h2>
+                    <p className='text-[15px] mb-12 break-words text-pretty'>{item.placeAdvertise}</p>
+                    <Link
+                      href={`screen-applicants/${item.id}`}
+                      className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
+                    >
+                      {item.applicantApplied - item.hiredApplicant} New Applicant/s
+                    </Link>
+                  </div>
+                );
               })}
-            {jobPostHistoryItems.length > 6 &&
-              Array.from({ length: 1 }).map((_, index) => {
-                return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
-              })}
-          </div>
+              {/* ensuring cards displayed are always six */}
+              {jobPostHistoryItems.length <= 6 &&
+                Array.from({ length: 6 - jobPostHistoryItems.length }).map((_, index) => {
+                  return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+                })}
+              {jobPostHistoryItems.length > 6 &&
+                Array.from({ length: 1 }).map((_, index) => {
+                  return <PostJobCard key={index} hasActiveSubscription={hasActiveSubscription} />;
+                })}
+            </div>
+          )}
         </div>
         <Pagination
           pagination={pagination}
