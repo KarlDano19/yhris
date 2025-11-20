@@ -180,7 +180,7 @@ const EvaluationResponseDetailsModal = ({
         // Use the already filtered employees based on date and department
         employees_responded: filteredEmployees,
         // Filter frequently evaluated employees based on department filter
-        frequently_evaluated_employees: getFilteredFrequentlyEvaluatedEmployees(),
+        frequently_evaluated_employees: getFilteredFrequentlyEvaluatedEmployees,
         // Include individual_responses for question score details
         individual_responses: getFilteredIndividualResponses(),
         // Use questions extracted from individual_responses instead of aggregated questions
@@ -536,7 +536,8 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Helper function to prepare question response data for horizontal bar charts
-  const prepareQuestionResponseData = () => {
+  // Memoized to prevent unnecessary recalculations
+  const prepareQuestionResponseData = useMemo(() => {
     // Use questions extracted from individual_responses instead of aggregated questions
     const questionsFromResponses = extractQuestionsFromIndividualResponses;
     
@@ -582,21 +583,22 @@ const EvaluationResponseDetailsModal = ({
     });
 
     return allCriteria;
-  };
+  }, [extractQuestionsFromIndividualResponses, dateFilter, departmentFilter, templateResponseDetails?.individual_responses]);
 
   // Helper to get filtered frequently evaluated employees
-  const getFilteredFrequentlyEvaluatedEmployees = () => {
+  // Memoized to prevent unnecessary recalculations
+  const getFilteredFrequentlyEvaluatedEmployees = useMemo(() => {
     return filterFrequentlyEvaluatedEmployees(
       templateResponseDetails?.frequently_evaluated_employees || [],
       departmentFilter,
       templateResponseDetails?.individual_responses || [],
       dateFilter
     );
-  };
+  }, [templateResponseDetails?.frequently_evaluated_employees, departmentFilter, templateResponseDetails?.individual_responses, dateFilter]);
 
   // Update pagination for Questions tab when data changes
   useEffect(() => {
-    const allQuestions = prepareQuestionResponseData();
+    const allQuestions = prepareQuestionResponseData;
     const totalRecords = allQuestions.length;
     const totalPages = Math.ceil(totalRecords / questionsPageSize) || 1;
     
@@ -609,11 +611,11 @@ const EvaluationResponseDetailsModal = ({
     if (questionsCurrentPage > totalPages && totalPages > 0) {
       setQuestionsCurrentPage(1);
     }
-  }, [templateResponseDetails, dateFilter, departmentFilter, questionsPageSize, extractQuestionsFromIndividualResponses]);
+  }, [prepareQuestionResponseData, questionsPageSize, questionsCurrentPage]);
 
   // Update pagination for Analytics tab when data changes
   useEffect(() => {
-    const allEmployees = getFilteredFrequentlyEvaluatedEmployees();
+    const allEmployees = getFilteredFrequentlyEvaluatedEmployees;
     const totalRecords = allEmployees.length;
     const totalPages = Math.ceil(totalRecords / analyticsPageSize);
     setAnalyticsPagination({
@@ -625,7 +627,7 @@ const EvaluationResponseDetailsModal = ({
     if (analyticsCurrentPage > totalPages && totalPages > 0) {
       setAnalyticsCurrentPage(1);
     }
-  }, [templateResponseDetails, dateFilter, departmentFilter, analyticsPageSize, analyticsCurrentPage]);
+  }, [getFilteredFrequentlyEvaluatedEmployees, analyticsPageSize, analyticsCurrentPage]);
 
   // Helper to get paginated employees for Respondents tab
   const getPaginatedRespondents = () => {
@@ -635,20 +637,22 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Helper to get paginated questions for Questions tab
-  const getPaginatedQuestions = () => {
-    const allQuestions = prepareQuestionResponseData();
+  // Memoized to prevent unnecessary recalculations
+  const getPaginatedQuestions = useMemo(() => {
+    const allQuestions = prepareQuestionResponseData;
     const startIndex = (questionsCurrentPage - 1) * questionsPageSize;
     const endIndex = startIndex + questionsPageSize;
     return allQuestions.slice(startIndex, endIndex);
-  };
+  }, [prepareQuestionResponseData, questionsCurrentPage, questionsPageSize]);
 
   // Helper to get paginated analytics data
-  const getPaginatedAnalytics = () => {
-    const allEmployees = getFilteredFrequentlyEvaluatedEmployees();
+  // Memoized to prevent unnecessary recalculations
+  const getPaginatedAnalytics = useMemo(() => {
+    const allEmployees = getFilteredFrequentlyEvaluatedEmployees;
     const startIndex = (analyticsCurrentPage - 1) * analyticsPageSize;
     const endIndex = startIndex + analyticsPageSize;
     return allEmployees.slice(startIndex, endIndex);
-  };
+  }, [getFilteredFrequentlyEvaluatedEmployees, analyticsCurrentPage, analyticsPageSize]);
 
   if (!isOpen) return null;
 
@@ -730,8 +734,8 @@ const EvaluationResponseDetailsModal = ({
 
                         {activeTab === 'questions' && (
                           <QuestionsTab
-                            paginatedQuestions={getPaginatedQuestions()}
-                            allQuestions={prepareQuestionResponseData()}
+                            paginatedQuestions={getPaginatedQuestions}
+                            allQuestions={prepareQuestionResponseData}
                           pagination={questionsPagination}
                           currentPage={questionsCurrentPage}
                           pageSize={questionsPageSize}
@@ -745,8 +749,8 @@ const EvaluationResponseDetailsModal = ({
 
                         {activeTab === 'analytics' && (
                           <AnalyticsTab
-                            frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees()}
-                            paginatedAnalytics={getPaginatedAnalytics()}
+                            frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees}
+                            paginatedAnalytics={getPaginatedAnalytics}
                           pagination={analyticsPagination}
                           currentPage={analyticsCurrentPage}
                           pageSize={analyticsPageSize}

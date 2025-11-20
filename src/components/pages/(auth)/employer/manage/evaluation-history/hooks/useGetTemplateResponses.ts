@@ -20,7 +20,7 @@ async function getTemplateResponses(params: TemplateResponsesParams) {
       },
     };
 
-    // Build query string for new analytics endpoint
+    // Build query string for template responses endpoint
     const queryParams = new URLSearchParams();
     if (params.from) queryParams.append('from', params.from);
     if (params.to) queryParams.append('to', params.to);
@@ -28,8 +28,8 @@ async function getTemplateResponses(params: TemplateResponsesParams) {
     if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
     if (params.currentPage) queryParams.append('currentPage', params.currentPage.toString());
 
-    // Use new dedicated analytics endpoint for better performance
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/analytics/?${queryParams.toString()}`;
+    // Use template responses endpoint for list view
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/responses/?${queryParams.toString()}`;
     const res = await fetch(url, config);
     
     if (!res.ok) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -68,30 +68,31 @@ const QuestionResponseBarChart = ({
     localStorage.setItem('questionResponseColorPalette', JSON.stringify(colors));
   };
 
-  // Helper function to prepare horizontal bar chart data
-  const prepareHorizontalBarChartData = (scores: EmployeeScore[]) => {
-    if (!scores || scores.length === 0) {
+  // Memoize colors to avoid recalculating
+  const colorsToUse = useMemo(() => {
+    return customColors.length > 0 ? customColors : defaultColors;
+  }, [customColors]);
+
+  // Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => {
+    if (!employeeScores || employeeScores.length === 0) {
       return { labels: [], datasets: [] };
     }
 
-    const colorsToUse = customColors.length > 0 ? customColors : defaultColors;
-
     return {
-      labels: scores.map(emp => emp.name),
+      labels: employeeScores.map(emp => emp.name),
       datasets: [{
         label: 'Average Score',
-        data: scores.map(emp => emp.averageScore),
-        backgroundColor: scores.map((_, index) => colorsToUse[index % colorsToUse.length]),
-        borderColor: scores.map((_, index) => colorsToUse[index % colorsToUse.length]),
+        data: employeeScores.map(emp => emp.averageScore),
+        backgroundColor: employeeScores.map((_, index) => colorsToUse[index % colorsToUse.length]),
+        borderColor: employeeScores.map((_, index) => colorsToUse[index % colorsToUse.length]),
         borderWidth: 1,
         borderRadius: 8,
         barThickness: 20,
         maxBarThickness: 25,
       }]
     };
-  };
-
-  const chartData = prepareHorizontalBarChartData(employeeScores);
+  }, [employeeScores, colorsToUse]);
 
   if (chartData.labels.length === 0) {
     return (
@@ -103,7 +104,57 @@ const QuestionResponseBarChart = ({
     );
   }
 
-  const colorsToUse = customColors.length > 0 ? customColors : defaultColors;
+  // Memoize chart options to prevent re-renders
+  const chartOptions = useMemo(() => ({
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        callbacks: {
+          label: (context: any) => {
+            const employeeName = context.label || '';
+            const score = context.parsed.x || 0;
+            const employeeData = employeeScores.find((emp: EmployeeScore) => emp.name === employeeName);
+            const evaluationCount = employeeData ? employeeData.scores.length : 0;
+            return `${employeeName}: ${score.toFixed(1)} (${evaluationCount} evaluation${evaluationCount !== 1 ? 's' : ''})`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Average Score'
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Employee Name'
+        },
+        grid: {
+          display: false
+        },
+        ticks: {
+          autoSkip: false
+        }
+      }
+    }
+  }), [employeeScores]);
 
   return (
     <>
@@ -120,59 +171,10 @@ const QuestionResponseBarChart = ({
         </div>
         <div className='h-72'>
           <Bar 
-          data={chartData} 
-          options={{
-            indexAxis: 'y' as const,
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: '#3B82F6',
-                borderWidth: 1,
-                callbacks: {
-                  label: (context: any) => {
-                    const employeeName = context.label || '';
-                    const score = context.parsed.x || 0;
-                    const employeeData = employeeScores.find((emp: EmployeeScore) => emp.name === employeeName);
-                    const evaluationCount = employeeData ? employeeData.scores.length : 0;
-                    return `${employeeName}: ${score.toFixed(1)} (${evaluationCount} evaluation${evaluationCount !== 1 ? 's' : ''})`;
-                  }
-                }
-              }
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Average Score'
-                },
-                grid: {
-                  color: 'rgba(0, 0, 0, 0.1)'
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Employee Name'
-                },
-                grid: {
-                  display: false
-                },
-                ticks: {
-                  autoSkip: false
-                }
-              }
-            }
-          }} 
-        />
-      </div>
+            data={chartData} 
+            options={chartOptions}
+          />
+        </div>
       
       {/* Employee Score Details Table */}
       <div className='mt-3'>

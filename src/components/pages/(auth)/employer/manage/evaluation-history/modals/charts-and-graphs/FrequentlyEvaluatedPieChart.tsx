@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -60,16 +60,25 @@ const FrequentlyEvaluatedPieChart = ({
     localStorage.setItem('frequentlyEvaluatedPieChartColorPalette', JSON.stringify(colors));
   };
 
-  // Helper function to prepare pie chart data for frequently evaluated employees
-  const prepareFrequentlyEvaluatedData = () => {
+  // Memoize top employees to avoid recalculating on every render
+  const topEmployees = useMemo(() => {
     if (!frequentlyEvaluatedEmployees || frequentlyEvaluatedEmployees.length === 0) {
+      return [];
+    }
+    // Take top 10 most frequently evaluated employees
+    return frequentlyEvaluatedEmployees.slice(0, 10);
+  }, [frequentlyEvaluatedEmployees]);
+
+  // Memoize colors to avoid recalculating
+  const colorsToUse = useMemo(() => {
+    return customColors.length > 0 ? customColors : defaultColors;
+  }, [customColors]);
+
+  // Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => {
+    if (topEmployees.length === 0) {
       return { labels: [], datasets: [] };
     }
-
-    // Take top 10 most frequently evaluated employees
-    const topEmployees = frequentlyEvaluatedEmployees.slice(0, 10);
-
-    const colorsToUse = customColors.length > 0 ? customColors : defaultColors;
 
     return {
       labels: topEmployees.map((emp: EmployeeEvaluationData) => emp.name),
@@ -80,9 +89,7 @@ const FrequentlyEvaluatedPieChart = ({
         borderWidth: 1,
       }]
     };
-  };
-
-  const chartData = prepareFrequentlyEvaluatedData();
+  }, [topEmployees, colorsToUse]);
 
   if (chartData.labels.length === 0) {
     return (
@@ -92,7 +99,49 @@ const FrequentlyEvaluatedPieChart = ({
     );
   }
 
-  const colorsToUse = customColors.length > 0 ? customColors : defaultColors;
+  // Memoize chart options to prevent re-renders
+  const chartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        align: 'center' as const,
+        labels: {
+          usePointStyle: true,
+          padding: 15,
+          font: {
+            size: 11
+          },
+          boxWidth: 12,
+          boxHeight: 12,
+        },
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          label: (context: any) => {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${value} evaluation${value !== 1 ? 's' : ''}`;
+          }
+        }
+      }
+    },
+    layout: {
+      padding: {
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10
+      }
+    }
+  }), []);
 
   return (
     <>
@@ -110,48 +159,7 @@ const FrequentlyEvaluatedPieChart = ({
         <div className='flex-1 min-h-0'>
           <Pie 
             data={chartData} 
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'right' as const,
-                  align: 'center' as const,
-                  labels: {
-                    usePointStyle: true,
-                    padding: 15,
-                    font: {
-                      size: 11
-                    },
-                    boxWidth: 12,
-                    boxHeight: 12,
-                  },
-                },
-                tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: 'white',
-                  bodyColor: 'white',
-                  borderColor: '#3B82F6',
-                  borderWidth: 1,
-                  padding: 12,
-                  callbacks: {
-                    label: (context: any) => {
-                      const label = context.label || '';
-                      const value = context.parsed || 0;
-                      return `${label}: ${value} evaluation${value !== 1 ? 's' : ''}`;
-                    }
-                  }
-                }
-              },
-              layout: {
-                padding: {
-                  top: 10,
-                  bottom: 10,
-                  left: 10,
-                  right: 10
-                }
-              }
-            }} 
+            options={chartOptions}
           />
         </div>
       </div>
