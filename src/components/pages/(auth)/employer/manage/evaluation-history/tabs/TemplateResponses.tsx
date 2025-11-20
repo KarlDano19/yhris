@@ -11,7 +11,6 @@ import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import useGetTemplateResponses from '../hooks/useGetTemplateResponses';
-import useGetEvaluationResponseHistoryDetails from '../hooks/useGetEvaluationResponseHistoryDetails';
 import EvaluationResponseDetailsModal from '../modals/EvaluationResponseDetailsModal';
 
 import { MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/solid';
@@ -59,10 +58,6 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     currentPage: currentPage,
   });
 
-  const {
-    data: templateResponseDetails,
-    isLoading: isLoadingTemplateDetails,
-  } = useGetEvaluationResponseHistoryDetails(selectedTemplate?.evaluation_template_id || null);
 
   useEffect(() => {
     if (dataTemplateResponses) {
@@ -307,8 +302,6 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
         isOpen={isTemplateDetailsModalOpen}
         setIsOpen={setIsTemplateDetailsModalOpen}
         selectedTemplate={selectedTemplate}
-        templateResponseDetails={templateResponseDetails}
-        isLoadingTemplateDetails={isLoadingTemplateDetails}
       />
 
       <Tooltip id='search-tooltip'/>

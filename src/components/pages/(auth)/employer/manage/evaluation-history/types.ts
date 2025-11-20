@@ -10,8 +10,6 @@ export interface EvaluationResponseDetailsModalProps {
   isOpen: { id: number; open: boolean } | null;
   setIsOpen: React.Dispatch<{ id: number; open: boolean } | null>;
   selectedTemplate: any;
-  templateResponseDetails: any;
-  isLoadingTemplateDetails: boolean;
 }
 
 export type TabType = 'respondents' | 'questions' | 'analytics';

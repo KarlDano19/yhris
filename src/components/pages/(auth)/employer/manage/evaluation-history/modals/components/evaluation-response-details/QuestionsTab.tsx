@@ -147,8 +147,8 @@ const QuestionsTab = ({
             No evaluation questions found
           </p>
           <p className='text-xs text-gray-400'>
-            {templateResponseDetails?.questions 
-              ? 'This template does not have any evaluation criteria configured'
+            {allQuestions.length === 0
+              ? 'This template does not have completed evaluation questions yet.'
               : 'Loading evaluation questions...'}
           </p>
         </div>

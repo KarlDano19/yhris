@@ -15,10 +15,17 @@ import {
   filterEmployeesByDateAndDepartment,
   filterFrequentlyEvaluatedEmployees,
   filterIndividualResponses,
-  getEmployeeScoresForCriterion
+  getEmployeeScoresForCriterion,
+  getCriterionIdentifier,
+  getSectionIdentifier,
+  normalizeFormSections
 } from '../helpers/evaluationHelpers';
 import { handlePrintEvaluationTemplateResponse } from '../PrintData';
 import useGetEvaluationTemplateDetails from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/hooks/useGetEvaluationTemplateDetails';
+import useGetEvaluationResponseSummary from '../hooks/useGetEvaluationResponseSummary';
+import useGetEvaluationResponseRespondents from '../hooks/useGetEvaluationResponseRespondents';
+import useGetEvaluationResponseQuestions from '../hooks/useGetEvaluationResponseQuestions';
+import useGetEvaluationResponseAnalytics from '../hooks/useGetEvaluationResponseAnalytics';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -47,11 +54,10 @@ const EvaluationResponseDetailsModal = ({
   isOpen,
   setIsOpen,
   selectedTemplate,
-  templateResponseDetails,
-  isLoadingTemplateDetails,
 }: EvaluationResponseDetailsModalProps) => {
   const cancelButtonRef = useRef(null);
   const [activeTab, setActiveTab] = useState<TabType>('respondents');
+  const [visitedTabs, setVisitedTabs] = useState<Set<TabType>>(new Set<TabType>(['respondents']));
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [dateFilter, setDateFilter] = useState<DateFilter>({
     from: '',
@@ -59,11 +65,59 @@ const EvaluationResponseDetailsModal = ({
   });
   const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  
+  const templateId = selectedTemplate?.evaluation_template_id || null;
+  
+  // Always fetch summary (needed for header)
+  const { 
+    data: template, 
+    isLoading: isLoadingSummary 
+  } = useGetEvaluationResponseSummary(templateId, true);
+
+  // Fetch tab data only when that tab has been visited (for better UX)
+  const { 
+    data: employeesResponded = [], 
+    isLoading: isLoadingRespondents 
+  } = useGetEvaluationResponseRespondents(
+    templateId, 
+    visitedTabs.has('respondents')
+  );
+
+  const { 
+    data: individualResponses = [], 
+    isLoading: isLoadingQuestions 
+  } = useGetEvaluationResponseQuestions(
+    templateId, 
+    visitedTabs.has('questions')
+  );
+
+  const { 
+    data: frequentlyEvaluatedEmployees = [], 
+    isLoading: isLoadingAnalytics 
+  } = useGetEvaluationResponseAnalytics(
+    templateId, 
+    visitedTabs.has('analytics')
+  );
+
+  // Combine data for backward compatibility
+  const templateResponseDetails = {
+    template,
+    employees_responded: employeesResponded,
+    individual_responses: individualResponses,
+    frequently_evaluated_employees: frequentlyEvaluatedEmployees,
+  };
+
+  const isLoadingTemplateDetails = 
+    isLoadingSummary || 
+    (activeTab === 'respondents' && isLoadingRespondents) ||
+    (activeTab === 'questions' && isLoadingQuestions) ||
+    (activeTab === 'analytics' && isLoadingAnalytics);
+
   const {
     data: templateDefinition,
     refetch: refetchTemplateDefinition,
     remove: clearTemplateDefinition,
-  } = useGetEvaluationTemplateDetails(selectedTemplate?.evaluation_template_id || null);
+  } = useGetEvaluationTemplateDetails(templateId);
 
   // Pagination state for Respondents tab
   const [respondentsPageSize, setRespondentsPageSize] = useState(5);
@@ -145,10 +199,17 @@ const EvaluationResponseDetailsModal = ({
     }
   };
 
+  // Handle tab change and track visited tabs
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    setVisitedTabs(prev => new Set<TabType>([...Array.from(prev), tab]));
+  };
+
   const customCloseModal = () => {
     setDateFilter({ from: '', to: '' });
     setDepartmentFilter([]);
     setActiveTab('respondents');
+    setVisitedTabs(new Set<TabType>(['respondents']));
     setExpandedQuestions(new Set());
     setRespondentsCurrentPage(1);
     setRespondentsPageSize(5);
@@ -285,52 +346,24 @@ const EvaluationResponseDetailsModal = ({
     };
   }, [templateDefinition]);
 
-  const filteredTemplateQuestions = useMemo(() => {
-    if (!templateResponseDetails?.questions || !Array.isArray(templateResponseDetails.questions)) {
-      return [];
+  const resolveCriterionTitle = (criterion: any, criterionId?: string) => {
+    const possibleTitles = [
+      typeof criterion?.title === 'string' ? criterion.title : '',
+      typeof criterion?.name === 'string' ? criterion.name : '',
+      criterionId ? (criterionTitleMap.get(criterionId) || '') : ''
+    ].filter(Boolean) as string[];
+
+    if (possibleTitles.length === 0) {
+      return '';
     }
 
-    if (activeCriterionIds.size === 0) {
-      return templateResponseDetails.questions;
-    }
+    const resolved = possibleTitles.find(title => title && title.trim()) || '';
+    return resolved.trim();
+  };
 
-    return templateResponseDetails.questions
-      .map((section: any) => {
-        if (!section || !Array.isArray(section.criterion)) {
-          return null;
-        }
-
-        const filteredCriteria = section.criterion.filter((criterion: any) => {
-          if (!criterion?.id) {
-            return true;
-          }
-
-          return activeCriterionIds.has(criterion.id);
-        });
-
-        if (filteredCriteria.length === 0) {
-          return null;
-        }
-
-        const sectionMeta = sectionTitleMap.get(section.id) || {};
-
-        return {
-          ...section,
-          section_title: section.section_title || sectionMeta.title || '',
-          section_description: section.section_description || sectionMeta.description || '',
-          criterion: filteredCriteria.map((criterion: any) => ({
-            ...criterion,
-            title: criterion.title || criterionTitleMap.get(criterion.id) || ''
-          }))
-        };
-      })
-      .filter(Boolean);
-  }, [templateResponseDetails?.questions, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
-
-  const isValidCriterion = (criterion: any) => {
-    if (!criterion) return false;
-    const title = typeof criterion.title === 'string' ? criterion.title.trim() : '';
-    return Boolean(title) && !/^untitled(\s+question)?$/i.test(title);
+  const isMeaningfulCriterionTitle = (title: string) => {
+    if (!title) return false;
+    return !/^untitled(\s+question)?$/i.test(title.trim());
   };
 
   // Helper function to extract unique questions from individual_responses
@@ -352,33 +385,37 @@ const EvaluationResponseDetailsModal = ({
 
     // Extract all unique sections and criteria from all form_data
     allResponses.forEach((response: any) => {
-      const formData = response.form_data || [];
+      const formData = normalizeFormSections(response.form_data || []);
       if (!Array.isArray(formData)) return;
 
       formData.forEach((section: any) => {
-        if (!section || !section.id) return;
+        const sectionId = getSectionIdentifier(section);
+        if (!section || !sectionId) return;
 
         // Get or create section
-        if (!sectionsMap.has(section.id)) {
-          sectionsMap.set(section.id, {
-            id: section.id,
-            section_title: section.section_title || section.title || sectionTitleMap.get(section.id)?.title || 'Untitled Section',
-            section_description: section.section_description || section.description || sectionTitleMap.get(section.id)?.description || '',
+        if (!sectionsMap.has(sectionId)) {
+          sectionsMap.set(sectionId, {
+            id: sectionId,
+            section_title: section.section_title || section.title || sectionTitleMap.get(sectionId)?.title || 'Untitled Section',
+            section_description: section.section_description || section.description || sectionTitleMap.get(sectionId)?.description || '',
             criterion: new Map(),
           });
         }
 
-        const sectionData = sectionsMap.get(section.id)!;
+        const sectionData = sectionsMap.get(sectionId)!;
         const criteriaList = section.criterion || [];
         
         if (!Array.isArray(criteriaList)) return;
 
         // Extract unique criteria from this section
         criteriaList.forEach((criterion: any) => {
-          if (!criterion || !isValidCriterion(criterion)) return;
+          if (!criterion) return;
 
-          const criterionId = criterion.id || criterion.criterion_id;
+          const criterionId = getCriterionIdentifier(criterion);
           if (!criterionId) return;
+
+          const criterionTitle = resolveCriterionTitle(criterion, criterionId);
+          if (!isMeaningfulCriterionTitle(criterionTitle)) return;
 
           // Only add if not already exists or if we should show all criteria
           // Apply activeCriterionIds filter if available
@@ -390,15 +427,15 @@ const EvaluationResponseDetailsModal = ({
           if (!sectionData.criterion.has(criterionId)) {
             sectionData.criterion.set(criterionId, {
               id: criterionId,
-              title: criterion.title || criterion.name || criterionTitleMap.get(criterionId) || 'Untitled',
+              title: criterionTitle || 'Untitled',
               max_score: criterion.max_score || criterion.weight || criterion.maxScore || 0,
               type: criterion.type || 'rating',
             });
           } else {
             // Update if we have better data (non-empty title, non-zero max_score)
             const existing = sectionData.criterion.get(criterionId)!;
-            if ((!existing.title || existing.title === 'Untitled') && (criterion.title || criterion.name)) {
-              existing.title = criterion.title || criterion.name || criterionTitleMap.get(criterionId) || existing.title;
+            if ((!existing.title || existing.title === 'Untitled') && criterionTitle) {
+              existing.title = criterionTitle || existing.title;
             }
             if (existing.max_score === 0 && (criterion.max_score || criterion.weight || criterion.maxScore)) {
               existing.max_score = criterion.max_score || criterion.weight || criterion.maxScore || 0;
@@ -518,19 +555,24 @@ const EvaluationResponseDetailsModal = ({
       }
 
       section.criterion.forEach((criterion: any) => {
-        if (!isValidCriterion(criterion)) {
+        if (!criterion || !criterion.id || !section?.id) {
+          return;
+        }
+
+        const title = typeof criterion.title === 'string' ? criterion.title.trim() : '';
+        if (!isMeaningfulCriterionTitle(title)) {
           return;
         }
 
         // Get filtered scores (this is what gets filtered by date/department)
         // Use criterion ID instead of index for more reliable matching
-        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id || criterion.criterion_id);
+        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id);
 
         allCriteria.push({
           sectionId: section.id,
           sectionTitle: section.section_title || 'Untitled Section',
-          criterionId: criterion.id || criterion.criterion_id,
-          title: criterion.title.trim(),
+          criterionId: criterion.id,
+          title,
           max_score: criterion.max_score,
           sectionIndex: section.sectionIndex,
           criterionIndex: criterion.criterionIndex,
@@ -670,7 +712,7 @@ const EvaluationResponseDetailsModal = ({
                         />
 
                         {/* Tab Navigation */}
-                        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+                        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
                         {/* Tab Content */}
                         {activeTab === 'respondents' && (

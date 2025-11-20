@@ -210,6 +210,103 @@ export const filterIndividualResponses = (
 /**
  * Calculate employee scores for a specific criterion
  */
+const sanitizeKeyPart = (value: any) => {
+  if (value === null || value === undefined) return '';
+  return String(value).trim().toLowerCase();
+};
+
+const buildDeterministicId = (prefix: string, parts: string[]) => {
+  const normalized = parts.filter(Boolean).join('|').trim();
+  if (!normalized) {
+    return null;
+  }
+
+  let hash = 0;
+  for (let idx = 0; idx < normalized.length; idx += 1) {
+    hash = (hash << 5) - hash + normalized.charCodeAt(idx);
+    hash |= 0;
+  }
+
+  return `${prefix}-${Math.abs(hash).toString(36)}`;
+};
+
+export const normalizeFormSections = (formData: any) => {
+  if (!formData) return [];
+
+  if (Array.isArray(formData)) {
+    return formData;
+  }
+
+  if (typeof formData === 'string') {
+    try {
+      const parsed = JSON.parse(formData);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+      if (parsed && Array.isArray(parsed.sections)) {
+        return parsed.sections;
+      }
+      return [];
+    } catch (_err) {
+      return [];
+    }
+  }
+
+  if (Array.isArray(formData.sections)) {
+    return formData.sections;
+  }
+
+  return [];
+};
+
+export const getSectionIdentifier = (section: any) => {
+  if (!section) return null;
+  const explicitId =
+    section.id ||
+    section.section_id ||
+    section.sectionId ||
+    section.section_uuid ||
+    section.sectionUUID ||
+    section.uuid;
+
+  if (explicitId) {
+    return explicitId;
+  }
+
+  const fallback = buildDeterministicId('section', [
+    sanitizeKeyPart(section.section_title || section.title),
+    sanitizeKeyPart(section.section_description || section.description),
+    sanitizeKeyPart(
+      Array.isArray(section.criterion)
+        ? section.criterion.map((crit: any) => crit?.title || crit?.name || '').join('|')
+        : ''
+    ),
+  ]);
+
+  return fallback;
+};
+
+export const getCriterionIdentifier = (criterion: any) => {
+  if (!criterion) return null;
+  const explicitId =
+    criterion.id ||
+    criterion.criterion_id ||
+    criterion.criterionId ||
+    criterion.uuid ||
+    criterion.item_id;
+
+  if (explicitId) {
+    return explicitId;
+  }
+
+  const fallback = buildDeterministicId('criterion', [
+    sanitizeKeyPart(criterion.title || criterion.name),
+    sanitizeKeyPart(criterion.description || criterion.details || criterion.remark),
+  ]);
+
+  return fallback;
+};
+
 export const getEmployeeScoresForCriterion = (
   filteredResponses: any[],
   sectionId: string,
@@ -228,19 +325,16 @@ export const getEmployeeScoresForCriterion = (
   // Process each individual response
   filteredResponses.forEach((response: any) => {
     const employeeName = response.employee_name;
-    const formData = response.form_data || [];
+    const formData = normalizeFormSections(response.form_data || []);
     
     // Find the section in the form data
-    const section = Array.isArray(formData) 
-      ? formData.find((s: any) => s.id === sectionId)
-      : null;
+    const section = formData.find((s: any) => getSectionIdentifier(s) === sectionId);
 
     if (section && section.criterion && Array.isArray(section.criterion)) {
       // Find criterion by ID instead of index for more reliable matching
-      const criterion = section.criterion.find((c: any) => {
-        const cId = c.id || c.criterion_id;
-        return cId === criterionId;
-      });
+      const criterion = section.criterion.find(
+        (c: any) => getCriterionIdentifier(c) === criterionId
+      );
       
       if (criterion && criterion.score !== undefined && criterion.score !== null) {
         const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);
@@ -291,15 +385,26 @@ export const prepareQuestionResponseData = (
   questions.forEach((section: any, sectionIndex: number) => {
     if (section.criterion && Array.isArray(section.criterion)) {
       section.criterion.forEach((criterion: any, criterionIdx: number) => {
+        const sectionIdentifier = getSectionIdentifier(section);
+        const criterionIdentifier = getCriterionIdentifier(criterion);
+
+        if (!sectionIdentifier || !criterionIdentifier) {
+          return;
+        }
+
         allCriteria.push({
-          sectionId: section.id,
+          sectionId: sectionIdentifier,
           sectionTitle: section.section_title,
-          criterionId: criterion.id,
+          criterionId: criterionIdentifier,
           title: criterion.title,
           max_score: criterion.max_score,
           sectionIndex,
           criterionIndex: criterionIdx,
-          employeeScores: getEmployeeScoresForCriterion(filteredResponses, section.id, criterion.id || criterion.criterion_id)
+          employeeScores: getEmployeeScoresForCriterion(
+            filteredResponses,
+            sectionIdentifier,
+            criterionIdentifier
+          )
         });
       });
     }
