@@ -27,6 +27,7 @@ import DeleteIcon from '@/svg/DeleteIcon';
 
 import classNames from '@/helpers/classNames';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -90,7 +91,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         items = dataDirectives.records.map((directive: any) => {
           return {
             ...directive,
-            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+            date: formatDateToLocal(directive.date)
           };
         });
         totalPages = dataDirectives.total_pages || 1;
@@ -101,7 +102,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         items = dataDirectives.map((directive: any) => {
           return {
             ...directive,
-            date: Intl.DateTimeFormat('en-US').format(new Date(directive.date))
+            date: formatDateToLocal(directive.date)
           };
         });
         

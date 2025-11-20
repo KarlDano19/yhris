@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -69,11 +70,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (personelMovementListData) {
-      personelMovementListData.records.map((item: any) => {
-        item.created_at = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
-        return item;
-      });
-      setPersonelMovementList(personelMovementListData.records);
+      const formattedRecords = personelMovementListData.records.map((item: any) => ({
+        ...item,
+        created_at: formatDateToLocal(item.created_at)
+      }));
+      setPersonelMovementList(formattedRecords);
       setPagination({
         totalPages: personelMovementListData.total_pages,
         totalRecords: personelMovementListData.total_records,

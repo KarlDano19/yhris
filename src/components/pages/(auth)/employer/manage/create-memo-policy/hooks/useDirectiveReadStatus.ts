@@ -2,33 +2,7 @@ import { useQuery, UseQueryResult, UseQueryOptions } from '@tanstack/react-query
 import { getCookie } from 'cookies-next';
 
 import { ReadStatusData } from '@/types/directives';
-
-/**
- * Format ISO datetime string to local timezone
- */
-const formatDateTimeToLocal = (isoString: string | null): string => {
-  if (!isoString) return '';
-  
-  // Parse the ISO string to a Date object
-  const date = new Date(isoString);
-  
-  // Extract date components
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  
-  // Format time in 12-hour format with AM/PM (using local timezone)
-  const options = {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  } as Intl.DateTimeFormatOptions;
-  
-  const timeString = date.toLocaleTimeString('en-US', options);
-  
-  // Return formatted string with HTML tags
-  return `<strong>Date:</strong> ${month}/${day}/${year}&nbsp;&nbsp;&nbsp;&nbsp;<strong>Time:</strong> ${timeString}`;
-};
+import { formatDateTimeToLocal } from '@/helpers/date';
 
 async function getDirectiveReadStatus(directiveId: string | number) {
   try {

@@ -26,6 +26,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type T_EmailTemplateModalData = {
   id: number | null;
@@ -116,10 +117,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       if (dataEmailTemplate.records) {
         items = dataEmailTemplate.records.map((item: any) => ({
           ...item,
-          created_at: (() => {
-            const d = new Date(item.created_at);
-            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
-          })(),
+          created_at: formatDateToLocal(item.created_at),
         }));
         totalPages = dataEmailTemplate.total_pages || 1;
         totalRecords = dataEmailTemplate.total_records || items.length;
@@ -128,10 +126,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       else if (Array.isArray(dataEmailTemplate)) {
         items = dataEmailTemplate.map((item: any) => ({
           ...item,
-          created_at: (() => {
-            const d = new Date(item.created_at);
-            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
-          })(),
+          created_at: formatDateToLocal(item.created_at),
         }));
         
         // Calculate pagination locally if backend doesn't support it

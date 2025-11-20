@@ -53,6 +53,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
@@ -157,19 +158,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeIssueItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'nte') {
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
-      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'decision') {
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -194,37 +187,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataEmployeeIssues.records) {
         items = dataEmployeeIssues.records.map((employeeIssue: any) => {
-          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['incidentReceivedDate'] =
-            employeeIssue.incident_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
-            ? Intl.DateTimeFormat('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            ? formatDateToLocal(employeeIssue.investigate.date_of_investigation)
             : '';
           employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
           employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
-          employeeIssue['decisionReceivedDate'] =
-            employeeIssue.decision_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['decisionReceivedDate'] = formatDateToLocal(employeeIssue.decision_received_date);
           employeeIssue['investigateForm'] = employeeIssue.investigate || {
             date: '',
             witness: '',
@@ -261,37 +234,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       else if (Array.isArray(dataEmployeeIssues)) {
         items = dataEmployeeIssues.map((employeeIssue: any) => {
           // Same transformation as above
-          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['incidentReceivedDate'] =
-            employeeIssue.incident_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
-            ? Intl.DateTimeFormat('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            ? formatDateToLocal(employeeIssue.investigate.date_of_investigation)
             : '';
           employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
           employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
-          employeeIssue['decisionReceivedDate'] =
-            employeeIssue.decision_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['decisionReceivedDate'] = formatDateToLocal(employeeIssue.decision_received_date);
           employeeIssue['investigateForm'] = employeeIssue.investigate || {
             date: '',
             witness: '',

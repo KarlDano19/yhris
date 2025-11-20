@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import useGetInvestigationReportDetails from '../hooks/useGetInvestigationReportDetails';
 import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
+import { formatDateToLocal } from '@/helpers/date';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -30,15 +31,22 @@ function InvestigationReportDetailsModal({ isOpen, setIsOpen }: { isOpen: any; s
     setCurrentView('attachment');
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    const formatted = formatDateToLocal(dateString);
+    if (!formatted) return 'N/A';
+    // Parse the ISO string to get time components
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    const timeString = date.toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
+    // Convert MM/DD/YYYY to a more readable format with time
+    const [month, day, year] = formatted.split('/');
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}, ${timeString}`;
   };
 
   return (

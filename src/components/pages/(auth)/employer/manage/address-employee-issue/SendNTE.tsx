@@ -7,6 +7,7 @@ import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import { formatDateToLocal } from '@/helpers/date';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -72,15 +73,7 @@ const SendNTE = ({
   };
 
   // Format incident_received_date as MM/DD/YYYY
-  let formattedReceivedDate = '';
-  if (employeeIssueDetails && employeeIssueDetails.incident_received_date) {
-    const date = new Date(employeeIssueDetails.incident_received_date);
-    formattedReceivedDate = date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  }
+  const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.incident_received_date);
 
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>

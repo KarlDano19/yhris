@@ -14,6 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 import SendContract from './SendContract';
 import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
@@ -135,12 +136,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (applicationOrient.records) {
         items = applicationOrient.records.map((item: any) => {
-          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           item['isContractSent'] = item.is_contract_sent;
           item['isContractReceived'] = item.is_contract_received;
-          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
-            new Date(item.contract_received_date && item.contract_received_date)
-          );
+          item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
@@ -165,12 +164,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalRecords = applicationOrient.total_records || items.length;
       } else if (Array.isArray(applicationOrient)) {
         items = applicationOrient.map((item: any) => {
-          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           item['isContractSent'] = item.is_contract_sent;
           item['isContractReceived'] = item.is_contract_received;
-          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
-            new Date(item.contract_received_date && item.contract_received_date)
-          );
+          item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
@@ -222,7 +219,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     orientItemCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'contract') {
       orientItemCopy[itemIndex].isContractReceived = true;
-      orientItemCopy[itemIndex].contractReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      orientItemCopy[itemIndex].contractReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {

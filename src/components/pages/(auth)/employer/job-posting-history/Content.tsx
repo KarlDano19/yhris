@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -307,7 +308,7 @@ const Content = () => {
         jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
         jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['company_logo'] = jobPost['company_logo'];
-        jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
+        jobPost['created_at'] = formatDateToLocal(jobPost['created_at']);
       });
       setJobPostHistoryItems(dataJobPost.records);
       setPagination({

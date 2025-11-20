@@ -42,6 +42,7 @@ import {
 } from '@/types/globals';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -142,15 +143,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     separationItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'letters') {
       separationItemsCopy[itemIndex].isLetterReceived = true;
-      separationItemsCopy[itemIndex].letterReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].letterReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'sign documents') {
       separationItemsCopy[itemIndex].isDocumentsReceived = true;
-      separationItemsCopy[itemIndex].documentReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].documentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'quit claim') {
       separationItemsCopy[itemIndex].isQuitclaimReceived = true;
-      separationItemsCopy[itemIndex].quitclaimReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].quitclaimReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -311,25 +312,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataSeparation.records) {
         items = dataSeparation.records.map((separation: any) => {
-          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['separationDate'] = formatDateToLocal(separation.date_of_separation);
           separation['name'] = separation.name;
           separation['reasonForLeaving'] = separation.reason_of_leaving;
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
-          separation['letterReceivedDate'] =
-            separation.letter_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
-          separation['documentReceivedDate'] =
-            separation.documents_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['isLastPayReleased'] = separation.is_last_pay_released;
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-          separation['quitclaimReceivedDate'] =
-            separation.quit_claim_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -376,25 +371,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle array response structure (no pagination from backend)
       else if (Array.isArray(dataSeparation)) {
         items = dataSeparation.map((separation: any) => {
-          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['separationDate'] = formatDateToLocal(separation.date_of_separation);
           separation['name'] = separation.name;
           separation['reasonForLeaving'] = separation.reason_of_leaving;
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
-          separation['letterReceivedDate'] =
-            separation.letter_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
-          separation['documentReceivedDate'] =
-            separation.documents_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['isLastPayReleased'] = separation.is_last_pay_released;
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-          separation['quitclaimReceivedDate'] =
-            separation.quit_claim_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
           separation['separationLetter'] = {
             subject: '',
             to: '',

@@ -24,6 +24,12 @@ async function saveProfile(profile: T_EmployerProfile) {
     formData.append('zip_code', profile.zipCode);
     formData.append('language', profile.language);
     formData.append('currency', profile.currency);
+    if (profile.timezone) {
+      formData.append('timezone', profile.timezone);
+    }
+    if (profile.timeFormat) {
+      formData.append('time_format', profile.timeFormat);
+    }
     if (profile.companyLogo) {
       formData.append('logo', profile.companyLogo);
     }
