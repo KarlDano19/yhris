@@ -21,7 +21,7 @@ type SyncError = {
 async function syncYPUsers(): Promise<SyncResponse> {
   try {
     const token = getCookie('token');
-    
+
     if (!token) {
       throw new Error('Authentication token not found');
     }
@@ -33,21 +33,18 @@ async function syncYPUsers(): Promise<SyncResponse> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sync_all: true // Updated to match the new API expectations
+        sync_all: true, // Updated to match the new API expectations
       }),
     };
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/yp-sync/users/`, 
-      config
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/yp-sync/users/`, config);
 
     if (!res.ok) {
       const errorData = await res.json();
       throw {
         message: errorData.message || 'Failed to sync users from Yahshua Payroll',
         details: errorData,
-        status: res.status
+        status: res.status,
       };
     }
 
@@ -57,7 +54,7 @@ async function syncYPUsers(): Promise<SyncResponse> {
     if (err instanceof TypeError && err.message.includes('fetch')) {
       throw new Error('Network error: Unable to connect to the server');
     }
-    
+
     if (err.message) {
       throw err;
     }
@@ -67,7 +64,7 @@ async function syncYPUsers(): Promise<SyncResponse> {
       const errorResponse = await err;
       throw {
         message: errorResponse.message || 'An unexpected error occurred',
-        details: errorResponse
+        details: errorResponse,
       };
     }
 
@@ -77,13 +74,13 @@ async function syncYPUsers(): Promise<SyncResponse> {
 
 function useSyncYPUsers() {
   const queryClient = useQueryClient();
-  
+
   const mutation = useMutation<SyncResponse, SyncError, void>({
     mutationFn: syncYPUsers,
     onSuccess: (data) => {
       // Invalidate accounts list to refresh the data after sync
       queryClient.invalidateQueries(['accountsList']);
-      
+
       // You can also update the cache directly if needed
       // queryClient.setQueryData(['accountsList'], (oldData: any) => {
       //   // Update the cached data with new synced users
@@ -92,7 +89,7 @@ function useSyncYPUsers() {
     },
     onError: (error) => {
       console.error('YP User Sync Error:', error);
-    }
+    },
   });
 
   return {

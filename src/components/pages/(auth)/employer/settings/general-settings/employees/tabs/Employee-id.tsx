@@ -9,6 +9,8 @@ import useGetEmployeeIdSettings from '../hooks/employee-id-settings/useGetEmploy
 import usePatchEmployeeIdSettings from '../hooks/employee-id-settings/usePatchEmployeeIdSettings';
 import useGenerateEmployeeId from '../hooks/employee-id-settings/useGenerateEmployeeId';
 import useBulkGenerateEmployeeIds from '../hooks/employee-id-settings/useBulkGenerateEmployeeIds';
+import usePullEmployeeIdSettingsFromPayroll from '../hooks/employee-id-settings/useSyncEmployeeIdSettings';
+import usePushEmployeeIdSettingsToPayroll from '../hooks/employee-id-settings/usePushEmployeeIdSettingsToPayroll';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import toast from 'react-hot-toast';
@@ -29,6 +31,8 @@ const EmployeeId = () => {
   const { mutate: patchEmployeeIdSettings, isLoading: isLoadingPatchEmployeeIdSettings } = usePatchEmployeeIdSettings();
   const { mutate: generateEmployeeId, isLoading: isGeneratingPreview } = useGenerateEmployeeId();
   const { mutate: bulkGenerateEmployeeIds, isLoading: isBulkGenerating } = useBulkGenerateEmployeeIds();
+  const { mutate: pullFromPayroll, isLoading: isPullingFromPayroll } = usePullEmployeeIdSettingsFromPayroll();
+  const { mutate: pushToPayroll, isLoading: isPushingToPayroll } = usePushEmployeeIdSettingsToPayroll();
 
   // Watch form values for preview generation
   const watchedValues = watch(['employee-id-series-format', 'employee-id-start-of-series', 'employee-id-year-format']);
@@ -81,6 +85,36 @@ const EmployeeId = () => {
 
   const handleBulkGenerate = () => {
     bulkGenerateEmployeeIds(undefined as any, {
+      onSuccess: (response: any) => {
+        toast.custom(() => <CustomToast message={response.message} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={String(err)} type='error' />, {
+          duration: 5000,
+        });
+      },
+    });
+  };
+
+  const handlePullFromPayroll = () => {
+    pullFromPayroll(undefined as any, {
+      onSuccess: (response: any) => {
+        toast.custom(() => <CustomToast message={response.message} type='success' />, {
+          duration: 5000,
+        });
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={String(err)} type='error' />, {
+          duration: 5000,
+        });
+      },
+    });
+  };
+
+  const handlePushToPayroll = () => {
+    pushToPayroll(undefined as any, {
       onSuccess: (response: any) => {
         toast.custom(() => <CustomToast message={response.message} type='success' />, {
           duration: 5000,
@@ -260,6 +294,37 @@ const EmployeeId = () => {
                   {isBulkGenerating ? 'Generating...' : 'Generate IDs for All Employees'}
                 </button>
               )}
+            </div>
+
+            {/* Sync with Payroll Section */}
+            <div className='border-t mt-8 pt-6'>
+              <h3 className='text-lg font-semibold text-gray-900 mb-4'>Sync with Payroll System</h3>
+              <p className='text-sm text-gray-600 mb-4'>
+                Keep your Employee ID settings synchronized between HRIS and Payroll systems.
+              </p>
+              <div className='flex gap-4 px-4'>
+                <button
+                  type='button'
+                  onClick={handlePullFromPayroll}
+                  disabled={isPullingFromPayroll}
+                  className='rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50'
+                >
+                  {isPullingFromPayroll ? 'Syncing...' : 'Sync from Payroll'}
+                </button>
+                
+                <button
+                  type='button'
+                  onClick={handlePushToPayroll}
+                  disabled={isPushingToPayroll}
+                  className='rounded-md bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 disabled:opacity-50'
+                >
+                  {isPushingToPayroll ? 'Syncing...' : 'Sync to Payroll'}
+                </button>
+              </div>
+              <div className='text-xs text-gray-500 mt-2 px-4'>
+                <p>• <strong>Sync from Payroll:</strong> Update HRIS settings with current payroll system settings</p>
+                <p>• <strong>Sync to Payroll:</strong> Update payroll system with current HRIS settings</p>
+              </div>
             </div>
           </form>
         </div>
