@@ -451,6 +451,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const employeeIds = Array.from(selectedEmployees);
       await bulkDeleteMutation.mutateAsync(employeeIds);
       
+      // Invalidate employee paginated select cache to ensure separation page gets updated data
+      queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+      
       // Don't show toast here - let the progress modal handle the success state
       setSelectedEmployees(new Set());
       setSelectAll(false);
@@ -1232,6 +1235,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             const callbackReq = {
               onSuccess: (data: any) => {
                 toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                // Invalidate employee paginated select cache to ensure separation page gets updated data
+                queryClient.invalidateQueries(['employeePaginatedSelectCache']);
                 setIsEmployeesDeleteModalOpen(null);
                 refetchAllEmployeeData();
               },

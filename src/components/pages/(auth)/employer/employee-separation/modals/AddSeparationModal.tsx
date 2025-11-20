@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import { useQueryClient } from '@tanstack/react-query';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
@@ -27,6 +28,7 @@ export default function AddSeparationModal({
   refetch: any;
 }) {
   const cancelButtonRef = useRef(null);
+  const queryClient = useQueryClient();
   const { register, handleSubmit, control, reset, trigger, setValue } = useForm<T_Separation>({
     defaultValues: {
       date: new Date().toISOString(),
@@ -56,6 +58,8 @@ export default function AddSeparationModal({
         toast.custom(() => <CustomToast message={'Create separation successfully'} type='success' />, {
           duration: 5000,
         });
+        // Clear employee select cache so the newly separated employee is no longer searchable
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         resetForm();
         setIsOpen(false);
         refetch();

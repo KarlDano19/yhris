@@ -514,6 +514,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Handle success after deletion completes
   const handleBulkDeleteSuccess = () => {
     toast.custom(() => <CustomToast message={`${bulkDeleteCount} separation(s) deleted successfully.`} type="success" />, { duration: 3000 });
+    // Clear employee select cache so the employees become searchable again
+    queryClient.invalidateQueries(['employeePaginatedSelectCache']);
     setSelectedSeparations(new Set());
     setSelectAll(false);
     setBulkDeleteCount(0);
@@ -891,6 +893,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             const callbackReq = {
               onSuccess: (data: any) => {
                 toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                // Clear employee select cache so the employee becomes searchable again
+                queryClient.invalidateQueries(['employeePaginatedSelectCache']);
                 setIsDeleteSepartionModalOpen(null);
                 refetch();
               },
