@@ -368,48 +368,4 @@ export const getEmployeeScoresForCriterion = (
     .sort((a, b) => b.averageScore - a.averageScore);
 };
 
-/**
- * Prepare question response data for charts
- */
-export const prepareQuestionResponseData = (
-  questions: any[],
-  filteredResponses: any[],
-  sectionId: string,
-  criterionIndex: number
-) => {
-  if (!questions) return [];
-
-  const allCriteria: any[] = [];
-
-  // Extract individual criteria from each section
-  questions.forEach((section: any, sectionIndex: number) => {
-    if (section.criterion && Array.isArray(section.criterion)) {
-      section.criterion.forEach((criterion: any, criterionIdx: number) => {
-        const sectionIdentifier = getSectionIdentifier(section);
-        const criterionIdentifier = getCriterionIdentifier(criterion);
-
-        if (!sectionIdentifier || !criterionIdentifier) {
-          return;
-        }
-
-        allCriteria.push({
-          sectionId: sectionIdentifier,
-          sectionTitle: section.section_title,
-          criterionId: criterionIdentifier,
-          title: criterion.title,
-          max_score: criterion.max_score,
-          sectionIndex,
-          criterionIndex: criterionIdx,
-          employeeScores: getEmployeeScoresForCriterion(
-            filteredResponses,
-            sectionIdentifier,
-            criterionIdentifier
-          )
-        });
-      });
-    }
-  });
-
-  return allCriteria;
-};
 
