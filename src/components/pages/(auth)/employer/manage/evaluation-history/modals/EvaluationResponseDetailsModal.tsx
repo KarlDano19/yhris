@@ -358,18 +358,20 @@ const EvaluationResponseDetailsModal = ({
     // React Query handles refetching automatically when templateId changes
   ]);
 
-  const { activeCriterionIds, sectionTitleMap, criterionTitleMap } = useMemo(() => {
+  const { activeCriterionIds, sectionTitleMap, criterionTitleMap, criterionTitleToTitleMap } = useMemo(() => {
     if (!templateDefinition?.evaluation_criterion || !Array.isArray(templateDefinition.evaluation_criterion)) {
       return {
         activeCriterionIds: new Set<string>(),
         sectionTitleMap: new Map<string, { title?: string; description?: string }>(),
-        criterionTitleMap: new Map<string, string>()
+        criterionTitleMap: new Map<string, string>(),
+        criterionTitleToTitleMap: new Map<string, string>() // Title-based lookup for criteria without IDs
       };
     }
 
     const ids = new Set<string>();
     const sectionMap = new Map<string, { title?: string; description?: string }>();
     const criterionMap = new Map<string, string>();
+    const titleToTitleMap = new Map<string, string>(); // Normalized title -> original title mapping
 
     templateDefinition.evaluation_criterion.forEach((section: any) => {
       if (!section || !Array.isArray(section.criterion)) {
@@ -382,9 +384,19 @@ const EvaluationResponseDetailsModal = ({
       });
 
       section.criterion.forEach((criterion: any) => {
+        const criterionTitle = criterion?.title || criterion?.name || '';
+        
+        // Map by ID if available
         if (criterion?.id) {
           ids.add(criterion.id);
-          criterionMap.set(criterion.id, criterion.title);
+          criterionMap.set(criterion.id, criterionTitle);
+        }
+        
+        // Also map by normalized title for criteria without IDs
+        // This allows us to match criteria by title even when IDs are missing
+        if (criterionTitle && criterionTitle.trim()) {
+          const normalizedTitle = criterionTitle.trim().toLowerCase();
+          titleToTitleMap.set(normalizedTitle, criterionTitle);
         }
       });
     });
@@ -392,7 +404,8 @@ const EvaluationResponseDetailsModal = ({
     return {
       activeCriterionIds: ids,
       sectionTitleMap: sectionMap,
-      criterionTitleMap: criterionMap
+      criterionTitleMap: criterionMap,
+      criterionTitleToTitleMap: titleToTitleMap
     };
   }, [templateDefinition]);
 
@@ -402,6 +415,16 @@ const EvaluationResponseDetailsModal = ({
       typeof criterion?.name === 'string' ? criterion.name : '',
       criterionId ? (criterionTitleMap.get(criterionId) || '') : ''
     ].filter(Boolean) as string[];
+
+    // If we still don't have a title and the criterion has a title, try title-based lookup
+    // This helps when criteria don't have IDs in the template definition
+    if (possibleTitles.length === 0 && criterion?.title) {
+      const normalizedTitle = criterion.title.trim().toLowerCase();
+      const templateTitle = criterionTitleToTitleMap.get(normalizedTitle);
+      if (templateTitle) {
+        possibleTitles.push(templateTitle);
+      }
+    }
 
     if (possibleTitles.length === 0) {
       return '';
@@ -489,9 +512,20 @@ const EvaluationResponseDetailsModal = ({
           
           // If title is empty or "untitled", try to get it from template definition
           if (!criterionTitle || !isMeaningfulCriterionTitle(criterionTitle)) {
+            // First try ID-based lookup
             const templateTitle = criterionTitleMap.get(criterionId);
             if (templateTitle && isMeaningfulCriterionTitle(templateTitle)) {
               criterionTitle = templateTitle;
+            } else {
+              // Fallback to title-based lookup (for criteria without IDs)
+              const formTitle = criterion?.title || criterion?.name;
+              if (formTitle) {
+                const normalizedFormTitle = formTitle.trim().toLowerCase();
+                const titleBasedTemplateTitle = criterionTitleToTitleMap.get(normalizedFormTitle);
+                if (titleBasedTemplateTitle && isMeaningfulCriterionTitle(titleBasedTemplateTitle)) {
+                  criterionTitle = titleBasedTemplateTitle;
+                }
+              }
             }
           }
 
@@ -549,7 +583,7 @@ const EvaluationResponseDetailsModal = ({
     });
 
     return sections;
-  }, [templateResponseDetails?.individual_responses, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
+  }, [templateResponseDetails?.individual_responses, activeCriterionIds, sectionTitleMap, criterionTitleMap, criterionTitleToTitleMap]);
 
   // Handle department filter changes from the Filter component
   const handleDepartmentFilterChange = (filters: FilterValues) => {
@@ -599,13 +633,14 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Helper function to calculate employee scores for each criterion
-  const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionId: string) => {
+  const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionId: string, criterionTitle?: string) => {
     const filteredResponses = getFilteredIndividualResponses();
     
     return getEmployeeScoresForCriterion(
       filteredResponses, 
       sectionId, 
-      criterionId
+      criterionId,
+      criterionTitle
     );
   };
 
@@ -640,8 +675,8 @@ const EvaluationResponseDetailsModal = ({
         }
 
         // Get filtered scores (this is what gets filtered by date/department)
-        // Use criterion ID instead of index for more reliable matching
-        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id);
+        // Use criterion ID for matching, with title as fallback for more reliable matching
+        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id, title);
 
         allCriteria.push({
           sectionId: section.id,
@@ -829,7 +864,6 @@ const EvaluationResponseDetailsModal = ({
                           pageSize={respondentsPageSize}
                           onPageChange={handleRespondentsPaginationChange}
                           onPageSizeChange={handleRespondentsPageSizeChange}
-                            onRecipientsClick={handleRecipientsClick}
                             passingScore={templateResponseDetails?.template?.passing_score || 0}
                           />
                         )}

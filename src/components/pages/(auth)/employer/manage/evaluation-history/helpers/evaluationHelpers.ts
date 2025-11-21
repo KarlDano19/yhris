@@ -310,7 +310,8 @@ export const getCriterionIdentifier = (criterion: any) => {
 export const getEmployeeScoresForCriterion = (
   filteredResponses: any[],
   sectionId: string,
-  criterionId: string
+  criterionId: string,
+  criterionTitle?: string
 ) => {
   if (filteredResponses.length === 0) return [];
 
@@ -322,6 +323,15 @@ export const getEmployeeScoresForCriterion = (
     } 
   } = {};
 
+  // Helper to normalize title for comparison
+  const normalizeTitle = (title: string | undefined | null): string => {
+    if (!title) return '';
+    return String(title).trim().toLowerCase();
+  };
+
+  // Normalize the target criterion title for comparison
+  const normalizedTargetTitle = criterionTitle ? normalizeTitle(criterionTitle) : '';
+
   // Process each individual response
   filteredResponses.forEach((response: any) => {
     const employeeName = response.employee_name;
@@ -331,10 +341,29 @@ export const getEmployeeScoresForCriterion = (
     const section = formData.find((s: any) => getSectionIdentifier(s) === sectionId);
 
     if (section && section.criterion && Array.isArray(section.criterion)) {
-      // Find criterion by ID instead of index for more reliable matching
-      const criterion = section.criterion.find(
-        (c: any) => getCriterionIdentifier(c) === criterionId
-      );
+      let criterion = null;
+      
+      // If we have a title, prioritize title matching (works even when IDs are null)
+      // Otherwise, use ID matching only
+      if (normalizedTargetTitle) {
+        // Try title matching first (more reliable when IDs are null or missing)
+        criterion = section.criterion.find((c: any) => {
+          const cTitle = normalizeTitle(c.title || c.name);
+          return cTitle === normalizedTargetTitle && cTitle !== '';
+        });
+        
+        // Fallback to ID matching if title matching didn't work
+        if (!criterion) {
+          criterion = section.criterion.find(
+            (c: any) => getCriterionIdentifier(c) === criterionId
+          );
+        }
+      } else {
+        // No title available, use ID matching only
+        criterion = section.criterion.find(
+          (c: any) => getCriterionIdentifier(c) === criterionId
+        );
+      }
       
       if (criterion && criterion.score !== undefined && criterion.score !== null) {
         const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);

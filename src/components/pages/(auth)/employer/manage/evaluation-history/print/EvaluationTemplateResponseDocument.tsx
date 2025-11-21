@@ -149,7 +149,6 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-1 text-center text-xs">Recipients (Evaluators)</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Department</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Employee Evaluated</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Date Completed</th>
@@ -160,9 +159,6 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
             <tbody>
               {sortedRespondents.map((employee, index) => (
                 <tr key={index}>
-                  <td className="border border-gray-300 p-1 text-center text-xs">
-                    {employee.recipients || 'N/A'}
-                  </td>
                   <td className="border border-gray-300 p-1 text-center text-xs">{employee.department}</td>
                   <td className="border border-gray-300 p-1 text-center text-xs">{employee.name}</td>
                   <td className="border border-gray-300 p-1 text-center text-xs">
