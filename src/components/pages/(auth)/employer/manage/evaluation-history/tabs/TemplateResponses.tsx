@@ -20,7 +20,7 @@ type T_ModalData = {
   open: boolean;
 };
 
-const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubscription: boolean; isActive?: boolean }) => {
   const [templateResponses, setTemplateResponses] = useState<any>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [isTemplateDetailsModalOpen, setIsTemplateDetailsModalOpen] = useState<T_ModalData | null>(null);
@@ -50,13 +50,16 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     data: dataTemplateResponses,
     isLoading: isLoadingTemplateResponses,
     refetch: refetchTemplateResponses,
-  } = useGetTemplateResponses({
-    from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
-    to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
-    search: appliedFilter.search,
-    pageSize: pageSize,
-    currentPage: currentPage,
-  });
+  } = useGetTemplateResponses(
+    {
+      from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
+      to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
+      search: appliedFilter.search,
+      pageSize: pageSize,
+      currentPage: currentPage,
+    },
+    isActive !== false // Only fetch when tab is active (default to true for backward compatibility)
+  );
 
 
   useEffect(() => {

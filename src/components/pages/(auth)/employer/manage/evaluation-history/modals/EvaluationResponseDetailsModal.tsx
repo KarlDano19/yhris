@@ -22,7 +22,6 @@ import {
 } from '../helpers/evaluationHelpers';
 import { handlePrintEvaluationTemplateResponse } from '../PrintData';
 import useGetEvaluationTemplateDetails from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/hooks/useGetEvaluationTemplateDetails';
-import useGetEvaluationResponseSummary from '../hooks/useGetEvaluationResponseSummary';
 import useGetEvaluationResponseRespondents from '../hooks/useGetEvaluationResponseRespondents';
 import useGetEvaluationResponseQuestions from '../hooks/useGetEvaluationResponseQuestions';
 import useGetEvaluationResponseAnalytics from '../hooks/useGetEvaluationResponseAnalytics';
@@ -66,26 +65,49 @@ const EvaluationResponseDetailsModal = ({
   const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   
+  // Pagination state for Respondents tab (declared before hook usage)
+  const [respondentsPageSize, setRespondentsPageSize] = useState(5);
+  const [respondentsCurrentPage, setRespondentsCurrentPage] = useState(1);
+  const [respondentsPagination, setRespondentsPagination] = useState<PaginationState>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  
   const templateId = selectedTemplate?.evaluation_template_id || null;
   
-  // Always fetch summary (needed for header)
+  // Fetch respondents tab data (includes template summary to avoid redundant API calls)
+  // Always fetch since it contains the summary needed for header, even if tab hasn't been visited yet
   const { 
-    data: template, 
-    isLoading: isLoadingSummary 
-  } = useGetEvaluationResponseSummary(templateId, true);
-
-  // Fetch tab data only when that tab has been visited (for better UX)
-  const { 
-    data: employeesResponded = [], 
-    isLoading: isLoadingRespondents 
+    data: respondentsData, 
+    isLoading: isLoadingRespondents,
+    refetch: refetchRespondents
   } = useGetEvaluationResponseRespondents(
     templateId, 
-    visitedTabs.has('respondents')
+    {
+      pageSize: respondentsPageSize,
+      currentPage: respondentsCurrentPage
+    },
+    true // Always enabled since it provides summary data for the header
   );
+  
+  // Extract template summary and employees from respondents response
+  const template = respondentsData?.template || null;
+  const employeesResponded = respondentsData?.employees_responded || [];
+  
+  // Update pagination state from backend response
+  useEffect(() => {
+    if (respondentsData) {
+      setRespondentsPagination({
+        totalRecords: respondentsData.total_records || 0,
+        totalPages: respondentsData.total_pages || 0
+      });
+    }
+  }, [respondentsData]);
 
   const { 
     data: individualResponses = [], 
-    isLoading: isLoadingQuestions 
+    isLoading: isLoadingQuestions,
+    refetch: refetchQuestions
   } = useGetEvaluationResponseQuestions(
     templateId, 
     visitedTabs.has('questions')
@@ -93,7 +115,8 @@ const EvaluationResponseDetailsModal = ({
 
   const { 
     data: frequentlyEvaluatedEmployees = [], 
-    isLoading: isLoadingAnalytics 
+    isLoading: isLoadingAnalytics,
+    refetch: refetchAnalytics
   } = useGetEvaluationResponseAnalytics(
     templateId, 
     visitedTabs.has('analytics')
@@ -107,9 +130,10 @@ const EvaluationResponseDetailsModal = ({
     frequently_evaluated_employees: frequentlyEvaluatedEmployees,
   };
 
+  // Loading state: always check respondents since it provides summary for header
+  // Also check active tab's loading state
   const isLoadingTemplateDetails = 
-    isLoadingSummary || 
-    (activeTab === 'respondents' && isLoadingRespondents) ||
+    isLoadingRespondents || // Always check since it provides summary
     (activeTab === 'questions' && isLoadingQuestions) ||
     (activeTab === 'analytics' && isLoadingAnalytics);
 
@@ -118,14 +142,6 @@ const EvaluationResponseDetailsModal = ({
     refetch: refetchTemplateDefinition,
     remove: clearTemplateDefinition,
   } = useGetEvaluationTemplateDetails(templateId);
-
-  // Pagination state for Respondents tab
-  const [respondentsPageSize, setRespondentsPageSize] = useState(5);
-  const [respondentsCurrentPage, setRespondentsCurrentPage] = useState(1);
-  const [respondentsPagination, setRespondentsPagination] = useState<PaginationState>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
 
   // Pagination state for Questions tab
   const [questionsPageSize, setQuestionsPageSize] = useState(5);
@@ -302,11 +318,45 @@ const EvaluationResponseDetailsModal = ({
     ];
   }, [templateResponseDetails]);
 
+  // Track previous template ID to detect changes
+  const prevTemplateIdRef = useRef<number | null>(null);
+  
+  // Reset state when template changes or modal opens
+  // Note: React Query automatically refetches when templateId changes, so we don't need manual refetches
   useEffect(() => {
     if (isOpen?.open && selectedTemplate?.evaluation_template_id) {
-      refetchTemplateDefinition();
+      const currentTemplateId = selectedTemplate.evaluation_template_id;
+      const isNewTemplate = prevTemplateIdRef.current !== currentTemplateId;
+      
+      if (isNewTemplate) {
+        // Reset state when template changes
+        setDateFilter({ from: '', to: '' });
+        setDepartmentFilter([]);
+        setActiveTab('respondents');
+        setVisitedTabs(new Set<TabType>(['respondents']));
+        setExpandedQuestions(new Set());
+        setRespondentsCurrentPage(1);
+        setQuestionsCurrentPage(1);
+        setAnalyticsCurrentPage(1);
+        
+        // Update ref to current template ID
+        prevTemplateIdRef.current = currentTemplateId;
+        
+        // Only refetch template definition (not used by React Query hooks)
+        // React Query will automatically refetch respondents (which includes summary), etc. when templateId changes
+        refetchTemplateDefinition();
+      }
+    } else if (!isOpen?.open) {
+      // Reset ref when modal closes
+      prevTemplateIdRef.current = null;
     }
-  }, [isOpen?.open, selectedTemplate?.evaluation_template_id, refetchTemplateDefinition]);
+  }, [
+    isOpen?.open, 
+    selectedTemplate?.evaluation_template_id, 
+    refetchTemplateDefinition
+    // Note: Removed refetch functions from dependencies to prevent double-fetching
+    // React Query handles refetching automatically when templateId changes
+  ]);
 
   const { activeCriterionIds, sectionTitleMap, criterionTitleMap } = useMemo(() => {
     if (!templateDefinition?.evaluation_criterion || !Array.isArray(templateDefinition.evaluation_criterion)) {
@@ -408,26 +458,57 @@ const EvaluationResponseDetailsModal = ({
         if (!Array.isArray(criteriaList)) return;
 
         // Extract unique criteria from this section
-        criteriaList.forEach((criterion: any) => {
+        // Use index as part of ID to differentiate questions with same title
+        criteriaList.forEach((criterion: any, criterionIndex: number) => {
           if (!criterion) return;
 
-          const criterionId = getCriterionIdentifier(criterion);
-          if (!criterionId) return;
-
-          const criterionTitle = resolveCriterionTitle(criterion, criterionId);
-          if (!isMeaningfulCriterionTitle(criterionTitle)) return;
-
-          // Only add if not already exists or if we should show all criteria
-          // Apply activeCriterionIds filter if available
-          if (activeCriterionIds.size > 0 && !activeCriterionIds.has(criterionId)) {
-            return;
+          let criterionId = getCriterionIdentifier(criterion);
+          
+          // If no ID could be generated, create one using index
+          if (!criterionId) {
+            criterionId = `criterion-${sectionId}-${criterionIndex}`;
           }
+          
+          // Check if this ID already exists - if so, it might be a duplicate title
+          // Use index to make it unique so all questions are shown
+          const baseCriterionId = criterionId;
+          let uniqueCriterionId = baseCriterionId;
+          let attempt = 0;
+          
+          // If the ID already exists, append index to make it unique
+          // This ensures all questions are shown even if they have identical titles
+          while (sectionData.criterion.has(uniqueCriterionId) && attempt < 100) {
+            uniqueCriterionId = `${baseCriterionId}-${criterionIndex}-${attempt}`;
+            attempt++;
+          }
+          
+          criterionId = uniqueCriterionId;
+
+          // Resolve title - try form_data first, then template definition
+          let criterionTitle = resolveCriterionTitle(criterion, criterionId);
+          
+          // If title is empty or "untitled", try to get it from template definition
+          if (!criterionTitle || !isMeaningfulCriterionTitle(criterionTitle)) {
+            const templateTitle = criterionTitleMap.get(criterionId);
+            if (templateTitle && isMeaningfulCriterionTitle(templateTitle)) {
+              criterionTitle = templateTitle;
+            }
+          }
+
+          // Use a fallback title if we still don't have a meaningful title
+          if (!criterionTitle || !isMeaningfulCriterionTitle(criterionTitle)) {
+            criterionTitle = `Question ${criterionId}`;
+          }
+
+          // Don't filter by activeCriterionIds - show all questions that were actually answered
+          // The form_data is the source of truth for what questions exist in responses
+          // Even if the template definition doesn't have this criterion, if it was answered, show it
 
           // Get or create criterion (use the most complete version)
           if (!sectionData.criterion.has(criterionId)) {
             sectionData.criterion.set(criterionId, {
               id: criterionId,
-              title: criterionTitle || 'Untitled',
+              title: criterionTitle,
               max_score: criterion.max_score || criterion.weight || criterion.maxScore || 0,
               type: criterion.type || 'rating',
             });
@@ -476,7 +557,10 @@ const EvaluationResponseDetailsModal = ({
   };
 
   // Filter employees based on date range and department
+  // Note: This is kept for print functionality. Pagination is now handled by the backend.
   useEffect(() => {
+    // Get all employees from all pages for filtering (used in print)
+    // For display, we use the paginated results from backend
     const filtered = filterEmployeesByDateAndDepartment(
       templateResponseDetails?.employees_responded || [],
       dateFilter,
@@ -492,19 +576,9 @@ const EvaluationResponseDetailsModal = ({
     
     setFilteredEmployees(sortedFiltered);
     
-    // Update pagination for Respondents tab
-    const totalRecords = filtered.length;
-    const totalPages = Math.ceil(totalRecords / respondentsPageSize);
-    setRespondentsPagination({
-      totalRecords,
-      totalPages
-    });
-    
-    // Reset to page 1 if current page exceeds total pages
-    if (respondentsCurrentPage > totalPages && totalPages > 0) {
-      setRespondentsCurrentPage(1);
-    }
-  }, [templateResponseDetails, dateFilter, departmentFilter, respondentsPageSize, respondentsCurrentPage]);
+    // Note: Pagination is now handled by the backend via the API response
+    // The pagination state is updated in the useEffect that watches respondentsData
+  }, [templateResponseDetails, dateFilter, departmentFilter]);
 
   // Initialize department filter with all departments when template response details change
   useEffect(() => {
@@ -629,11 +703,39 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [getFilteredFrequentlyEvaluatedEmployees, analyticsPageSize, analyticsCurrentPage]);
 
-  // Helper to get paginated employees for Respondents tab
+  // Helper to get filtered and paginated employees for Respondents tab
+  // Note: Backend handles pagination, but we still apply date/department filters on frontend
   const getPaginatedRespondents = () => {
-    const startIndex = (respondentsCurrentPage - 1) * respondentsPageSize;
-    const endIndex = startIndex + respondentsPageSize;
-    return filteredEmployees.slice(startIndex, endIndex);
+    // Apply date and department filters to the paginated results from backend
+    let filtered = employeesResponded;
+    
+    // Apply date filter
+    if (dateFilter.from || dateFilter.to) {
+      filtered = filtered.filter((emp: any) => {
+        if (!emp.date_completed) return false;
+        const completedDate = new Date(emp.date_completed);
+        const fromDate = dateFilter.from ? new Date(dateFilter.from) : null;
+        const toDate = dateFilter.to ? new Date(dateFilter.to) : null;
+        
+        if (fromDate && completedDate < fromDate) return false;
+        if (toDate && completedDate > toDate) return false;
+        return true;
+      });
+    }
+    
+    // Apply department filter
+    if (departmentFilter.length > 0) {
+      filtered = filtered.filter((emp: any) => 
+        departmentFilter.includes(emp.department)
+      );
+    }
+    
+    // Sort by date_completed in descending order (newest first)
+    return filtered.sort((a: any, b: any) => {
+      if (!a.date_completed) return 1;
+      if (!b.date_completed) return -1;
+      return new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime();
+    });
   };
 
   // Helper to get paginated questions for Questions tab

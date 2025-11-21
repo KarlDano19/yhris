@@ -45,12 +45,13 @@ async function getTemplateResponses(params: TemplateResponsesParams) {
   }
 }
 
-function useGetTemplateResponses(params: TemplateResponsesParams) {
+function useGetTemplateResponses(params: TemplateResponsesParams, enabled: boolean = true) {
   // Include all params in cache key for proper caching with pagination
   const query = useQuery(
     ['templateResponsesCache', params.from, params.to, params.search, params.pageSize, params.currentPage],
     () => getTemplateResponses(params),
     {
+      enabled: enabled,
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
