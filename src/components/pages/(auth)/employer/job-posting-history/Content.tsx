@@ -19,6 +19,7 @@ import Pagination from '@/components/Pagination';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import SeederButton from '@/components/SeederButton';
+import ConfirmModal from '@/components/ConfirmModal';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
@@ -29,6 +30,7 @@ import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
 import useDeleteJobPost from './hooks/useDeleteJobPost';
 import useSeedJobPostings from './hooks/useSeedJobPostings';
 import useUnseedJobPostings from './hooks/useUnseedJobPostings';
+import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
@@ -42,6 +44,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import DuplicateIcon from '@/svg/DuplicateIcon';
 import AssignUsersModal from './modals/AssignUsersModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
@@ -81,6 +84,8 @@ const Content = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [duplicateJobPostingId, setDuplicateJobPostingId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
@@ -127,6 +132,7 @@ const Content = () => {
   const { mutate: deleteJobPost, isLoading: isDeleteLoading } = useDeleteJobPost();
   const seedJobPostingsMutation = useSeedJobPostings();
   const unseedJobPostingsMutation = useUnseedJobPostings();
+  const { mutate: duplicateJobPosting, isLoading: isDuplicateJobPostingLoading } = useDuplicateJobPosting();
   
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
@@ -517,6 +523,29 @@ const Content = () => {
     }
   };
 
+  // Handle duplicate job posting
+  const openDuplicateModal = (jobPost: any) => {
+    setDuplicateJobPostingId(jobPost.id);
+    setIsDuplicateModalOpen(true);
+  };
+
+  const handleDuplicateConfirm = () => {
+    if (!duplicateJobPostingId) return;
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message || 'Job posting duplicated successfully'} type='success' />, { duration: 4000 });
+        setIsDuplicateModalOpen(false);
+        setDuplicateJobPostingId(null);
+        refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err || 'Failed to duplicate job posting'} type='error' />, { duration: 4000 });
+      },
+    };
+    duplicateJobPosting(duplicateJobPostingId, callbackReq);
+  };
+
   const renderRows = () => {
     if (isSearching || isGetJobPostLoading) {
       return (
@@ -643,6 +672,14 @@ const Content = () => {
                   data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
+                </SmartButton>
+                <SmartButton 
+                  id="duplicate-job-btn"
+                  onClick={() => openDuplicateModal(jobPost)}
+                  data-tooltip-id="duplicate-tooltip"
+                  data-tooltip-content="Duplicate Job"
+                >
+                  <DuplicateIcon />
                 </SmartButton>
                 <SmartButton 
                   id="delete-job-btn"
@@ -1086,9 +1123,21 @@ const Content = () => {
         />
       )}
 
+      {/* Duplicate Confirmation Modal */}
+      {isDuplicateModalOpen && (
+        <ConfirmModal
+          message="Are you sure you want to duplicate this job posting?"
+          isOpen={isDuplicateModalOpen}
+          setIsOpen={setIsDuplicateModalOpen}
+          confirmAction={handleDuplicateConfirm}
+          isLoading={isDuplicateJobPostingLoading}
+        />
+      )}
+
       <Tooltip id='search-tooltip' />
       <Tooltip id="edit-tooltip" />
       <Tooltip id="delete-tooltip" />
+      <Tooltip id="duplicate-tooltip" />
       <Tooltip id="assign-tooltip" />
       <Tooltip id="fully-staffed-tooltip" />
     </>
