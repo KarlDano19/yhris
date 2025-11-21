@@ -44,6 +44,7 @@ const Content = () => {
   const [jobsItems, setJobsItems] = useState<any>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const hasAutoSelectedRef = useRef(false);
   const previousDataJobsRef = useRef<string>('');
   const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
   const { 
@@ -63,35 +64,40 @@ const Content = () => {
     setSelectedJobId(null);
     setIsJobView(false);
     setJobModal(false);
-    // Reset the ref when search query changes so new data is processed
-    previousDataJobsRef.current = '';
+    hasAutoSelectedRef.current = false; // Reset auto-select flag when search changes
+    previousDataJobsRef.current = ''; // Reset data comparison when search changes
   }, [searchQuery.job_title, searchQuery.location]);
 
   useEffect(() => {
-    // Create a stable string representation of dataJobs to compare
-    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+    // Create a stable string representation to compare actual content, not reference
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job?.id) || []);
     
-    // Only update if dataJobs actually changed (by comparing job IDs)
+    // Only update if the actual data content changed (not just the array reference)
     if (previousDataJobsRef.current !== dataJobsString) {
       previousDataJobsRef.current = dataJobsString;
       
-      if (dataJobs && dataJobs.length !== 0) {
+      const hasValidData = Array.isArray(dataJobs) && dataJobs.length > 0;
+      
+      if (hasValidData) {
         setJob(true);
         setJobsItems(dataJobs);
-        // Only auto-select first job if no job is currently selected
-        if (!selectedJobId && dataJobs[0]) {
+        // Only auto-select first job if we haven't already auto-selected for this data set
+        if (!hasAutoSelectedRef.current && dataJobs[0]?.id) {
           setSelectedJobId(dataJobs[0].id);
           setIsJobView(true);
           setJobModal(true);
+          hasAutoSelectedRef.current = true; // Mark as auto-selected
         }
-      } else {
+      } else if (!isGetJobsLoading) {
+        // Only clear when not loading to avoid premature clearing
         setJobsItems([]);
+        setJob(false);
         setIsJobView(false);
         setJobModal(false);
+        hasAutoSelectedRef.current = false; // Reset when clearing
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataJobs]);
+  }, [dataJobs, isGetJobsLoading]);
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
