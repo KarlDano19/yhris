@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,64 +26,24 @@ const Content = () => {
     job_title: '',
     location: '',
   });
-  // Separate state for the actual search query (only updates on form submit)
-  const [searchQuery, setSearchQuery] = useState<any>({
-    job_title: '',
-    location: '',
-  });
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [jobsItems, setJobsItems] = useState<any>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const previousDataJobsRef = useRef<string>('');
-  const { 
-    data: dataJobs, 
-    isLoading: isGetJobsLoading, 
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    totalRecords
-  } = useFindJobs(searchQuery);
-
-  // Reset selected job when search query changes (not filter changes)
-  useEffect(() => {
-    setSelectedJobId(null);
-    setIsJobView(false);
-    setJobModal(false);
-    // Reset the ref when search query changes so new data is processed
-    previousDataJobsRef.current = '';
-  }, [searchQuery.job_title, searchQuery.location]);
+  const { data: dataJobs, isLoading: isGetJobsLoading, refetch, searchWithFilter } = useFindJobs(itemsFilter);
 
   useEffect(() => {
-    // Create a stable string representation of dataJobs to compare
-    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
-    
-    // Only update if dataJobs actually changed (by comparing job IDs)
-    if (previousDataJobsRef.current !== dataJobsString) {
-      previousDataJobsRef.current = dataJobsString;
-      
-      if (dataJobs && dataJobs.length !== 0) {
-        setJob(true);
-        setJobsItems(dataJobs);
-        // Only auto-select first job if no job is currently selected
-        if (!selectedJobId && dataJobs[0]) {
-          setSelectedJobId(dataJobs[0].id);
-          setIsJobView(true);
-          setJobModal(true);
-        }
-      } else {
-        setJobsItems([]);
-        setIsJobView(false);
-        setJobModal(false);
-      }
+    if (dataJobs && dataJobs.length !== 0) {
+      setJob(true);
+      setJobsItems(dataJobs);
+      setSelectedJobId(dataJobs[0].id);
+      setIsJobView(true);
+      setJobModal(true);
+    } else {
+      setJobsItems([]);
+      setIsJobView(false);
+      setJobModal(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataJobs]);
-
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  };
 
   const openJobDetails = (jobId: any) => {
     setSelectedJobId(jobId);
@@ -110,8 +70,7 @@ const Content = () => {
               className=''
               onSubmit={(e) => {
                 e.preventDefault();
-                // Update search query to trigger fetch
-                setSearchQuery({ ...itemsFilter });
+                refetch();
               }}
             >
               <div className='lg:flex lg:px-4 lg:justify-between md:mt-4'>
@@ -123,10 +82,25 @@ const Content = () => {
                     isLoading={false}
                     onSearch={async (searchValue?: string) => {
                       setShowAutocomplete(false);
-                      // Update filter and trigger search by updating searchQuery
-                      const searchFilter = searchValue ? { ...itemsFilter, job_title: searchValue } : itemsFilter;
-                      setItemsFilter(searchFilter);
-                      setSearchQuery(searchFilter);
+                      try {
+                        // Use the searchValue if provided (from suggestion click), otherwise use current filter
+                        const searchFilter = searchValue ? { ...itemsFilter, job_title: searchValue } : itemsFilter;
+                        const results = await searchWithFilter(searchFilter);
+                        // Update the jobs list with search results
+                        if (results && results.length !== 0) {
+                          setJob(true);
+                          setJobsItems(results);
+                          setSelectedJobId(results[0].id);
+                          setIsJobView(true);
+                          setJobModal(true);
+                        } else {
+                          setJobsItems([]);
+                          setIsJobView(false);
+                          setJobModal(false);
+                        }
+                      } catch (error) {
+                        console.error('Search error:', error);
+                      }
                     }}
                     onShowAutocomplete={() => setShowAutocomplete(true)}
                     suggestions={showAutocomplete ? (() => {
@@ -166,10 +140,25 @@ const Content = () => {
                     isLoading={false}
                     onSearch={async (searchValue?: string) => {
                       setShowAutocomplete(false);
-                      // Update filter and trigger search by updating searchQuery
-                      const searchFilter = searchValue ? { ...itemsFilter, location: searchValue } : itemsFilter;
-                      setItemsFilter(searchFilter);
-                      setSearchQuery(searchFilter);
+                      try {
+                        // Use the searchValue if provided (from suggestion click), otherwise use current filter
+                        const searchFilter = searchValue ? { ...itemsFilter, location: searchValue } : itemsFilter;
+                        const results = await searchWithFilter(searchFilter);
+                        // Update the jobs list with search results
+                        if (results && results.length !== 0) {
+                          setJob(true);
+                          setJobsItems(results);
+                          setSelectedJobId(results[0].id);
+                          setIsJobView(true);
+                          setJobModal(true);
+                        } else {
+                          setJobsItems([]);
+                          setIsJobView(false);
+                          setJobModal(false);
+                        }
+                      } catch (error) {
+                        console.error('Search error:', error);
+                      }
                     }}
                     onShowAutocomplete={() => setShowAutocomplete(true)}
                     suggestions={showAutocomplete ? (() => {
@@ -225,7 +214,7 @@ const Content = () => {
         <div className='mt-4'>
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
-              Jobs available: {!isGetJobsLoading ? totalRecords || jobsItems.length : '0'}
+              Jobs available: {!isGetJobsLoading ? jobsItems.length : '0'}
             </p>
           </div>
           <div className='border-t border-gray-300'></div>
@@ -237,8 +226,9 @@ const Content = () => {
                     <>
                       {!isGetJobsLoading
                         ? jobsItems.map((job: any) => (
-                            <div key={job.id}>
+                            <>
                               <div
+                                key={job.id}
                                 className={classNames(
                                   'card border rounded-md p-4 cursor-pointer',
                                   isJobView && selectedJobId === job.id ? 'border-savoy-blue' : 'border-gray-300'
@@ -254,7 +244,7 @@ const Content = () => {
                                     <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
                                     <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
                                     <h6 className='text-indigo-dye text-sm'>{job.location}</h6>
-                                    <Link href={`/job-app-form/${job.id}`} onClick={(e) => e.stopPropagation()}>
+                                    <Link href={`/job-app-form/${job.id}`}>
                                       <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
                                         Apply Now!
                                       </button>
@@ -279,48 +269,10 @@ const Content = () => {
                                   </div>
                                 </div>
                               )}
-                            </div>
+                            </>
                           ))
                         : 'Loading jobs...'}
                     </>
-                    {/* Load More Button */}
-                    {hasNextPage && (
-                      <div className="flex justify-center py-6">
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={isFetchingNextPage}
-                          className="rounded-md bg-savoy-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isFetchingNextPage ? (
-                            <span className="flex items-center">
-                              <svg
-                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                              </svg>
-                              Loading...
-                            </span>
-                          ) : (
-                            'Load More Jobs'
-                          )}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
                 <div className='lg:border-l lg:border-gray-300 lg:pl-10 lg:pr-5 py-10 lg:w-[64%] hidden lg:block'>

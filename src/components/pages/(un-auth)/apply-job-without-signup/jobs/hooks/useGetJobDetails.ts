@@ -23,15 +23,10 @@ async function getJobDetails(jobId: any) {
 }
 
 function useGetJobDetails(jobId: any) {
-  const query = useQuery(
-    ['jobPostDetailPublicCache', jobId], 
-    () => getJobDetails(jobId), 
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      enabled: !!jobId, // Only fetch when jobId is truthy (not null, undefined, or empty)
-    }
-  );
+  const query = useQuery(['jobPostDetailPublicCache', jobId], () => getJobDetails(jobId), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
 
   return query;
 }
