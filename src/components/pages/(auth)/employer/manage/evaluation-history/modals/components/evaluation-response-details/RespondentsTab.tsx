@@ -92,15 +92,13 @@ const RespondentsTab = ({
           </table>
         </div>
       </div>
-      <div className='flex justify-center'>
-        <Pagination
-          pagination={pagination}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          onPageSizeChange={onPageSizeChange}
-          onPageChange={onPageChange}
-        />
-      </div>
+      <Pagination
+        pagination={pagination}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        onPageSizeChange={onPageSizeChange}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 };

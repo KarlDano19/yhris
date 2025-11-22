@@ -68,9 +68,10 @@ const EvaluationFilters = ({
 
   return (
     <div className='bg-white'>
-      <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4'>
-        <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-          <div className='relative'>
+      <div className='flex flex-col gap-4'>
+        {/* Date Range Section */}
+        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full'>
+          <div className='relative flex-1 sm:flex-initial sm:w-auto w-full'>
             <CustomDatePicker
               id='date-from'
               placeholder={'mm/dd/yyyy'}
@@ -82,8 +83,8 @@ const EvaluationFilters = ({
               inputOnChange={handleDateFromInputChange}
             />
           </div>
-          <p>to</p>
-          <div className='relative'>
+          <p className='text-gray-600 self-center sm:self-auto'>to</p>
+          <div className='relative flex-1 sm:flex-initial sm:w-auto w-full'>
             <CustomDatePicker
               id='date-to'
               placeholder={'mm/dd/yyyy'}
@@ -97,32 +98,36 @@ const EvaluationFilters = ({
             />
           </div>
         </div>
-        <div className='flex items-center gap-4 flex-wrap'>
-          <div className='text-sm text-gray-600'>
+        
+        {/* Actions Section */}
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4'>
+          <div className='text-sm text-gray-600 whitespace-nowrap'>
             Showing {filteredCount} of {totalCount} responses
           </div>
-          <Filter 
-            filterGroups={filterGroups}
-            defaultValues={defaultValues}
-            resetValues={resetValues}
-            onFilterChange={onDepartmentFilterChange}
-            showButtonText={true}
-            size="small"
-          />
-          <button
-            onClick={onPrintClick}
-            disabled={isPrintGenerating || isLoadingTemplateDetails}
-            className='flex items-center justify-center bg-white text-black rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-            title='Print template response'
-          >
-            {isPrintGenerating ? (
-              <div className="animate-spin w-6 h-6" />
-            ) : (
-              <div>
-                <PrintIcon/>
-              </div>
-            )}
-          </button>
+          <div className='flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end'>
+            <button
+              onClick={onPrintClick}
+              disabled={isPrintGenerating || isLoadingTemplateDetails}
+              className='flex items-center justify-center bg-white text-black rounded-md p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-color flex-shrink-0 h-9 w-9'
+              title='Print template response'
+            >
+              {isPrintGenerating ? (
+                <div className="animate-spin w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full" />
+              ) : (
+                <span className="flex items-center justify-center">
+                  <PrintIcon />
+                </span>
+              )}
+            </button>
+            <Filter 
+              filterGroups={filterGroups}
+              defaultValues={defaultValues}
+              resetValues={resetValues}
+              onFilterChange={onDepartmentFilterChange}
+              showButtonText={true}
+              size="small"
+            />
+          </div>
         </div>
       </div>
     </div>
