@@ -840,8 +840,7 @@ const EvaluationResponseDetailsModal = ({
     return getEmployeeScoresForCriterion(
       filteredResponses, 
       sectionId, 
-      criterionId,
-      criterionTitle
+      criterionId
     );
   };
 
@@ -876,8 +875,8 @@ const EvaluationResponseDetailsModal = ({
         }
 
         // Get filtered scores (this is what gets filtered by date/department)
-        // Use criterion ID for matching, with title as fallback for more reliable matching
-        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id, title);
+        // Use criterion ID for matching
+        const employeeScores = getEmployeeScoresForCriterionWrapper(section.id, criterion.id);
 
         allCriteria.push({
           sectionId: section.id,
