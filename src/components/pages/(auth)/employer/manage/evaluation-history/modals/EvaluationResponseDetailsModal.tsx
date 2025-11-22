@@ -807,7 +807,7 @@ const EvaluationResponseDetailsModal = ({
             
             filteredResponses.forEach((response: any) => {
               const employeeName = response.employee_name;
-              const score = typeof response.score === 'number' ? response.score : parseFloat(response.score);
+              const score = typeof response.form_total_score === 'number' ? response.form_total_score : parseFloat(response.form_total_score || 0);
               
               if (!isNaN(score) && score >= 0) {
                 if (!employeeScoresMap[employeeName]) {
@@ -1107,6 +1107,7 @@ const EvaluationResponseDetailsModal = ({
                           onPageSizeChange={handleQuestionsPageSizeChange}
                             departmentFilter={departmentFilter}
                             templateResponseDetails={templateResponseDetails}
+                            totalScore={templateResponseDetails?.template?.total_score || 0}
                           />
                         )}
 
@@ -1119,7 +1120,7 @@ const EvaluationResponseDetailsModal = ({
                             pageSize={analyticsPageSize}
                             onPageChange={handleAnalyticsPaginationChange}
                             onPageSizeChange={handleAnalyticsPageSizeChange}
-                            totalScore={templateResponseDetails?.template?.total_score || 1}
+                            totalScore={templateResponseDetails?.template?.total_score || 0}
                           />
                         )}
                       </div>

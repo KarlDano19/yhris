@@ -133,6 +133,7 @@ const QuestionResponseBarChart = ({
     scales: {
       x: {
         beginAtZero: true,
+        max: maxScore || undefined,
         title: {
           display: true,
           text: 'Average Score'
@@ -154,7 +155,7 @@ const QuestionResponseBarChart = ({
         }
       }
     }
-  }), [employeeScores]);
+  }), [employeeScores, maxScore]);
 
   return (
     <>

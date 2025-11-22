@@ -20,6 +20,7 @@ interface QuestionsTabProps {
   onPageSizeChange: (value: number) => void;
   departmentFilter: string[];
   templateResponseDetails: any;
+  totalScore: number;
 }
 
 const QuestionsTab = ({
@@ -32,6 +33,7 @@ const QuestionsTab = ({
   onPageSizeChange,
   departmentFilter,
   templateResponseDetails,
+  totalScore,
 }: QuestionsTabProps) => {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
 
@@ -94,8 +96,8 @@ const QuestionsTab = ({
                         )}
                         {globalIndex + 1}. {criterion.title}
                       </h5>
-                      {criterion.max_score && (
-                        <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {criterion.max_score}</p>
+                      {totalScore > 0 && (
+                        <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {totalScore}</p>
                       )}
                     </div>
                   </button>
@@ -106,7 +108,7 @@ const QuestionsTab = ({
                         <QuestionResponseBarChart 
                           employeeScores={criterion.employeeScores}
                           questionText={criterion.title}
-                          maxScore={criterion.max_score}
+                          maxScore={totalScore}
                         />
                       ) : (
                         <div className='text-center py-6 bg-gray-50 rounded'>

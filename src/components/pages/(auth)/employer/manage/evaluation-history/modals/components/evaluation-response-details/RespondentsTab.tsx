@@ -34,19 +34,19 @@ const RespondentsTab = ({
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Department
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Employee Evaluated
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Date Completed
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Score
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Status
                 </th>
               </tr>
@@ -55,22 +55,22 @@ const RespondentsTab = ({
               {paginatedRespondents.length > 0 ? (
                 paginatedRespondents.map((employee: any, index: number) => (
                   <tr key={index} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center'>
                       {employee.department}
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center'>
                       {employee.name}
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center'>
                       {employee.date_completed ? 
                         new Intl.DateTimeFormat('en-US').format(new Date(employee.date_completed)) : 
                         'N/A'
                       }
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center'>
                       {employee.score || 0} / {totalScore || 0}
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
+                    <td className='px-6 py-4 whitespace-nowrap text-center'>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         employee.score >= passingScore
                           ? 'bg-green-100 text-green-800'
@@ -92,13 +92,15 @@ const RespondentsTab = ({
           </table>
         </div>
       </div>
-      <Pagination
-        pagination={pagination}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageSizeChange={onPageSizeChange}
-        onPageChange={onPageChange}
-      />
+      <div className='flex justify-center'>
+        <Pagination
+          pagination={pagination}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageSizeChange={onPageSizeChange}
+          onPageChange={onPageChange}
+        />
+      </div>
     </div>
   );
 };
