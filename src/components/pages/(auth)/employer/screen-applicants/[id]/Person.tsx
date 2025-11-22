@@ -187,14 +187,14 @@ export default function Person({
     >
       {/* NEW label - positioned absolutely in upper right corner */}
       {isRecentlyCreated && (
-        <span className='absolute top-2 right-3 bg-white text-black text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0'>
+        <span className='absolute top-2 right-3 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap z-0'>
           NEW
         </span>
       )}
       
       {/* HIRED label - positioned absolutely in upper right corner */}
       {isPassedFinalInterview && (
-        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
+        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
           HIRED
         </span>
       )}
