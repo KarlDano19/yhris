@@ -1092,6 +1092,7 @@ const EvaluationResponseDetailsModal = ({
                           onPageChange={handleRespondentsPaginationChange}
                           onPageSizeChange={handleRespondentsPageSizeChange}
                             passingScore={templateResponseDetails?.template?.passing_score || 0}
+                            totalScore={templateResponseDetails?.template?.total_score || 0}
                           />
                         )}
 

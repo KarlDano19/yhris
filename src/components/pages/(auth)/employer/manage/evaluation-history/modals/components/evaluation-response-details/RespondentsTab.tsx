@@ -13,6 +13,7 @@ interface RespondentsTabProps {
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
   passingScore: number;
+  totalScore: number;
 }
 
 const RespondentsTab = ({
@@ -23,6 +24,7 @@ const RespondentsTab = ({
   onPageChange,
   onPageSizeChange,
   passingScore,
+  totalScore,
 }: RespondentsTabProps) => {
   return (
     <div className='space-y-4'>
@@ -66,7 +68,7 @@ const RespondentsTab = ({
                       }
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                      {employee.score || 0}
+                      {employee.score || 0} / {totalScore || 0}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
