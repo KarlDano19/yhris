@@ -14,7 +14,7 @@ async function findJobs(itemsFilter: any, pageParam: number = 1) {
     
     // Add pagination parameters
     searchParams.append('currentPage', pageParam.toString());
-    searchParams.append('pageSize', '20'); // 20 jobs per page
+    searchParams.append('pageSize', '20');
     
     const config = {
       method: 'GET',
