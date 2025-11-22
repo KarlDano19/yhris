@@ -15,6 +15,7 @@ interface AnalyticsTabProps {
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
   totalScore: number;
+  passingScore: number;
 }
 
 const AnalyticsTab = ({
@@ -26,6 +27,7 @@ const AnalyticsTab = ({
   onPageChange,
   onPageSizeChange,
   totalScore,
+  passingScore,
 }: AnalyticsTabProps) => {
   return (
     <div className='space-y-6'>
@@ -97,8 +99,9 @@ const AnalyticsTab = ({
                         <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center'>
                           <div className='flex flex-col items-center'>
                             <span className={`font-medium ${
-                              employee.average_score >= 80 ? 'text-green-600' :
-                              employee.average_score >= 60 ? 'text-yellow-600' : 'text-red-600'
+                              parseFloat(employee.average_raw_score || 0) < parseFloat(passingScore.toString()) 
+                                ? 'text-red-500' 
+                                : 'text-gray-500'
                             }`}>
                               {employee.average_score}%
                             </span>

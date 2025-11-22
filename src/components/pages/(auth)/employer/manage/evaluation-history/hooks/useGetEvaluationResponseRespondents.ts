@@ -19,7 +19,7 @@ async function getEvaluationResponseRespondents(
   try {
     if (!evaluation_template_id) {
       return { 
-        template: null, 
+        template_summary: null, 
         employees_responded: [],
         total_records: 0,
         total_pages: 0,
@@ -70,7 +70,7 @@ async function getEvaluationResponseRespondents(
     const data = await response.json();
     // Response now includes template summary, paginated employees_responded, and pagination metadata
     return {
-      template: data?.template || null,
+      template_summary: data?.template_summary || null,
       employees_responded: data?.employees_responded || [],
       total_records: data?.total_records || 0,
       total_pages: data?.total_pages || 0,

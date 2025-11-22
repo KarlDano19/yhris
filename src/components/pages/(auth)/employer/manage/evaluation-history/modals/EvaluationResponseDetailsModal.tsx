@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState, useEffect, useMemo } from 'react';
+import { Fragment, useRef, useState, useEffect, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
@@ -6,7 +6,7 @@ import { getCookie } from 'cookies-next';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import { FilterGroup, FilterValues } from '@/components/common/Filter';
 import CustomToast from '@/components/CustomToast';
 import useFileforge from '@/components/hooks/useFileforge';
 
@@ -61,7 +61,7 @@ const EvaluationResponseDetailsModal = ({
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   const initializedDepartmentsRef = useRef<number | null>(null);
   
-  // Pagination state for Respondents tab (declared before hook usage)
+  // Pagination state for all tabs
   const [respondentsPageSize, setRespondentsPageSize] = useState(5);
   const [respondentsCurrentPage, setRespondentsCurrentPage] = useState(1);
   const [respondentsPagination, setRespondentsPagination] = useState<PaginationState>({
@@ -69,7 +69,51 @@ const EvaluationResponseDetailsModal = ({
     totalRecords: 0,
   });
   
+  const [questionsPageSize, setQuestionsPageSize] = useState(5);
+  const [questionsCurrentPage, setQuestionsCurrentPage] = useState(1);
+  const [questionsPagination, setQuestionsPagination] = useState<PaginationState>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  
+  const [analyticsPageSize, setAnalyticsPageSize] = useState(5);
+  const [analyticsCurrentPage, setAnalyticsCurrentPage] = useState(1);
+  const [analyticsPagination, setAnalyticsPagination] = useState<PaginationState>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  
   const templateId = selectedTemplate?.evaluation_template_id || null;
+  
+  /**
+   * Creates pagination handlers for a tab.
+   * @param setCurrentPage - Function to set the current page number
+   * @param setPageSize - Function to set the page size
+   * @returns Object containing handlePageChange and handlePageSizeChange handlers
+   */
+  const createPaginationHandlers = (
+    setCurrentPage: (page: number) => void,
+    setPageSize: (size: number) => void
+  ) => ({
+    handlePageChange: (event: any) => setCurrentPage(event.selected + 1),
+    handlePageSizeChange: (value: number) => {
+      setCurrentPage(1);
+      setPageSize(value);
+    },
+  });
+  
+  const respondentsPaginationHandlers = createPaginationHandlers(
+    setRespondentsCurrentPage,
+    setRespondentsPageSize
+  );
+  const questionsPaginationHandlers = createPaginationHandlers(
+    setQuestionsCurrentPage,
+    setQuestionsPageSize
+  );
+  const analyticsPaginationHandlers = createPaginationHandlers(
+    setAnalyticsCurrentPage,
+    setAnalyticsPageSize
+  );
   
   // Fetch respondents tab data (includes template summary to avoid redundant API calls)
   // Always fetch since it contains the summary needed for header, even if tab hasn't been visited yet
@@ -91,14 +135,19 @@ const EvaluationResponseDetailsModal = ({
   );
   
   // Extract template summary and employees from respondents response
-  const template = respondentsData?.template || null;
-  // Memoize to prevent new array reference on every render
+  const template = respondentsData?.template_summary || null;
+  
+  /**
+   * Memoized employees responded array to prevent new array reference on every render.
+   */
   const employeesResponded = useMemo(() => 
     respondentsData?.employees_responded || [], 
     [respondentsData?.employees_responded]
   );
   
-  // Update pagination state from backend response
+  /**
+   * Updates pagination state for Respondents tab from backend response.
+   */
   useEffect(() => {
     if (respondentsData) {
       setRespondentsPagination({
@@ -107,14 +156,6 @@ const EvaluationResponseDetailsModal = ({
       });
     }
   }, [respondentsData]);
-
-  // Pagination state for Questions tab (declared before hook usage)
-  const [questionsPageSize, setQuestionsPageSize] = useState(5);
-  const [questionsCurrentPage, setQuestionsCurrentPage] = useState(1);
-  const [questionsPagination, setQuestionsPagination] = useState<PaginationState>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
 
   const { 
     data: questionsData, 
@@ -133,20 +174,13 @@ const EvaluationResponseDetailsModal = ({
     }
   );
   
-  // Extract sections and pagination metadata from backend response
-  // Memoize to prevent new array reference on every render
+  /**
+   * Memoized sections data to prevent new array reference on every render.
+   */
   const sectionsData = useMemo(() => 
     questionsData?.sections || [], 
     [questionsData?.sections]
   );
-
-  // Pagination state for Analytics tab (declared before hook usage)
-  const [analyticsPageSize, setAnalyticsPageSize] = useState(5);
-  const [analyticsCurrentPage, setAnalyticsCurrentPage] = useState(1);
-  const [analyticsPagination, setAnalyticsPagination] = useState<PaginationState>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
 
   const { 
     data: analyticsData, 
@@ -165,20 +199,26 @@ const EvaluationResponseDetailsModal = ({
     }
   );
   
-  // Extract frequently evaluated employees and pagination metadata from backend response
-  // Memoize to prevent new array reference on every render
+  /**
+   * Memoized frequently evaluated employees array to prevent new array reference on every render.
+   */
   const frequentlyEvaluatedEmployees = useMemo(() => 
     analyticsData?.frequently_evaluated_employees || [], 
     [analyticsData?.frequently_evaluated_employees]
   );
-  // Extract analytics_chart_data (ALL employees with evaluation counts for chart)
+  
+  /**
+   * Memoized analytics chart data containing ALL employees with evaluation counts for chart visualization.
+   */
   const analyticsChartData = useMemo(() => 
     analyticsData?.analytics_chart_data || [], 
     [analyticsData?.analytics_chart_data]
   );
 
-  // Combine data - sections is the new format from backend
-  // Memoize to prevent infinite loops in useEffects that depend on this object
+  /**
+   * Memoized template response details object combining all data sources.
+   * Memoized to prevent infinite loops in useEffects that depend on this object.
+   */
   const templateResponseDetails = useMemo(() => ({
     template,
     employees_responded: employeesResponded,
@@ -212,7 +252,11 @@ const EvaluationResponseDetailsModal = ({
     },
   });
 
-  // Handle print button click
+  /**
+   * Handles the print button click event.
+   * Fetches all data (unpaginated) for the current template and generates a PDF.
+   * Applies date and department filters to the printed data.
+   */
   const handlePrintClick = async () => {
     if (!templateId) {
       toast.custom(() => <CustomToast message='No template data available to print.' type='error' />, { duration: 3000 });
@@ -254,7 +298,7 @@ const EvaluationResponseDetailsModal = ({
       const respondentsData = await respondentsResponse.json();
       // Backend returns all data when no pagination params are sent
       const allRespondents = respondentsData?.data?.employees_responded || respondentsData?.employees_responded || [];
-      const templateSummary = respondentsData?.data?.template || respondentsData?.template || template;
+      const templateSummary = respondentsData?.data?.template_summary || respondentsData?.template_summary || template;
 
       // Fetch all questions (no pagination - don't send pageSize/currentPage to get all data)
       const questionsUrl = queryParams.toString()
@@ -275,17 +319,8 @@ const EvaluationResponseDetailsModal = ({
       const allAnalyticsEmployees = analyticsData?.data?.frequently_evaluated_employees || analyticsData?.frequently_evaluated_employees || [];
 
       // Apply department filter to all data
-      let filteredRespondents = allRespondents;
-      let filteredAnalytics = allAnalyticsEmployees;
-      
-      if (departmentFilter && departmentFilter.length > 0) {
-        filteredRespondents = allRespondents.filter((emp: any) => 
-          departmentFilter.includes(emp.department)
-        );
-        filteredAnalytics = allAnalyticsEmployees.filter((emp: any) => 
-          departmentFilter.includes(emp.department)
-        );
-      }
+      const filteredRespondents = applyDepartmentFilter(allRespondents);
+      const filteredAnalytics = applyDepartmentFilter(allAnalyticsEmployees);
 
       // Prepare print data with ALL records (not paginated)
       const printTemplateData = {
@@ -316,18 +351,26 @@ const EvaluationResponseDetailsModal = ({
     }
   };
 
-  // Handle tab change and track visited tabs
+  /**
+   * Handles tab change and tracks visited tabs for lazy loading.
+   * @param tab - The tab type to switch to
+   */
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     setVisitedTabs(prev => new Set<TabType>([...Array.from(prev), tab]));
   };
 
+  /**
+   * Closes the modal and resets all state to initial values.
+   * Clears filters, pagination, expanded questions, and template definition cache.
+   */
   const customCloseModal = () => {
     setDepartmentFilter([]);
     setDateFilter({ from: '', to: '' });
     setActiveTab('respondents');
     setVisitedTabs(new Set<TabType>(['respondents']));
     setExpandedQuestions(new Set());
+    // Reset pagination for all tabs
     setRespondentsCurrentPage(1);
     setRespondentsPageSize(5);
     setQuestionsCurrentPage(1);
@@ -339,54 +382,25 @@ const EvaluationResponseDetailsModal = ({
     setIsOpen(null);
   };
 
-  // Pagination handlers for Respondents tab
-  const handleRespondentsPaginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setRespondentsCurrentPage(newCurrentPage);
-  };
-
-  const handleRespondentsPageSizeChange = (value: number) => {
-    setRespondentsCurrentPage(1);
-    setRespondentsPageSize(value);
-  };
-
-  // Pagination handlers for Questions tab
-  const handleQuestionsPaginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setQuestionsCurrentPage(newCurrentPage);
-  };
-
-  const handleQuestionsPageSizeChange = (value: number) => {
-    setQuestionsCurrentPage(1);
-    setQuestionsPageSize(value);
-  };
-
-  // Pagination handlers for Analytics tab
-  const handleAnalyticsPaginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setAnalyticsCurrentPage(newCurrentPage);
-  };
-
-  const handleAnalyticsPageSizeChange = (value: number) => {
-    setAnalyticsCurrentPage(1);
-    setAnalyticsPageSize(value);
-  };
-
-
+  /**
+   * Toggles the expansion state of a question in the Questions tab.
+   * @param questionId - The unique identifier of the question to toggle
+   */
   const toggleQuestion = (questionId: string) => {
     setExpandedQuestions(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(questionId)) {
-        newSet.delete(questionId);
-      } else {
-        newSet.add(questionId);
-      }
+      newSet.has(questionId) ? newSet.delete(questionId) : newSet.add(questionId);
       return newSet;
     });
   };
 
-  // Prepare filter groups for the Filter component
-  // Memoize based on employees_responded directly to avoid circular dependencies
+  /**
+   * Prepares filter groups for the Filter component used in EvaluationFilters.
+   * Note: Filter component is rendered in EvaluationFilters, but filter logic stays in modal
+   * because it needs access to modal state (employeesResponded, departmentFilter).
+   * Memoized based on employees_responded directly to avoid circular dependencies.
+   * @returns Array of filter groups with department options
+   */
   const filterGroups: FilterGroup[] = useMemo(() => {
     const departments = getUniqueDepts(employeesResponded);
     return [
@@ -403,8 +417,10 @@ const EvaluationResponseDetailsModal = ({
   // Track previous template ID to detect changes
   const prevTemplateIdRef = useRef<number | null>(null);
   
-  // Reset state when template changes or modal opens
-  // Note: React Query automatically refetches when templateId changes, so we don't need manual refetches
+  /**
+   * Resets state when template changes or modal opens.
+   * Note: React Query automatically refetches when templateId changes, so we don't need manual refetches.
+   */
   useEffect(() => {
     if (isOpen?.open && selectedTemplate?.evaluation_template_id) {
       const currentTemplateId = selectedTemplate.evaluation_template_id;
@@ -441,6 +457,11 @@ const EvaluationResponseDetailsModal = ({
     // React Query handles refetching automatically when templateId changes
   ]);
 
+  /**
+   * Builds maps of criterion IDs, section titles, and criterion titles from template definition.
+   * Used for resolving titles and matching criteria between form data and template definition.
+   * @returns Object containing activeCriterionIds Set, sectionTitleMap, criterionTitleMap, and criterionTitleToTitleMap
+   */
   const { activeCriterionIds, sectionTitleMap, criterionTitleMap, criterionTitleToTitleMap } = useMemo(() => {
     if (!templateDefinition?.evaluation_criterion || !Array.isArray(templateDefinition.evaluation_criterion)) {
       return {
@@ -492,6 +513,13 @@ const EvaluationResponseDetailsModal = ({
     };
   }, [templateDefinition]);
 
+  /**
+   * Resolves the title for a criterion by checking multiple sources.
+   * Tries form data first, then template definition, with fallback to title-based lookup.
+   * @param criterion - The criterion object from form data
+   * @param criterionId - Optional criterion ID for template definition lookup
+   * @returns The resolved title string, or empty string if not found
+   */
   const resolveCriterionTitle = (criterion: any, criterionId?: string) => {
     const possibleTitles = [
       typeof criterion?.title === 'string' ? criterion.title : '',
@@ -517,14 +545,22 @@ const EvaluationResponseDetailsModal = ({
     return resolved.trim();
   };
 
+  /**
+   * Checks if a criterion title is meaningful (not empty or "untitled").
+   * @param title - The title string to check
+   * @returns True if the title is meaningful, false otherwise
+   */
   const isMeaningfulCriterionTitle = (title: string) => {
     if (!title) return false;
     return !/^untitled(\s+question)?$/i.test(title.trim());
   };
 
-  // Helper function to extract unique questions from sections (new backend format) or individual_responses (legacy)
-  // IMPORTANT: Extract from ALL responses (not filtered) so questions always show
-  // Only the scores within questions are filtered by date/department
+  /**
+   * Extracts unique questions from sections (new backend format) or individual_responses (legacy).
+   * IMPORTANT: Extracts from ALL responses (not filtered) so questions always show.
+   * Only the scores within questions are filtered by date/department.
+   * @returns Array of sections with their criteria and responses
+   */
   const extractQuestionsFromIndividualResponses = useMemo(() => {
     // Prefer sections from backend (new format) if available
     const backendSections = templateResponseDetails?.sections || [];
@@ -689,39 +725,49 @@ const EvaluationResponseDetailsModal = ({
     return sections;
   }, [templateResponseDetails?.sections, templateResponseDetails?.individual_responses, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
 
-  // Handle department filter changes from the Filter component
+  /**
+   * Handles department filter changes from the Filter component in EvaluationFilters.
+   * This callback is passed to EvaluationFilters which renders the Filter component.
+   * Updates the departmentFilter state in the modal.
+   * @param filters - Filter values object containing departments array
+   */
   const handleDepartmentFilterChange = (filters: FilterValues) => {
     setDepartmentFilter(filters.departments || []);
   };
 
-  // Filter employees based on department
-  // Note: This is kept for print functionality. Pagination is now handled by the backend.
+  /**
+   * Generic helper function to filter items by department.
+   * Used throughout the modal to apply department filtering to various data sets.
+   * The departmentFilter state is managed in the modal and updated via handleDepartmentFilterChange
+   * when the Filter component (rendered in EvaluationFilters) changes.
+   * Returns all items if no department filter is applied.
+   * @param items - Array of items with department property
+   * @returns Filtered array of items matching the department filter
+   */
+  const applyDepartmentFilter = <T extends { department: string }>(items: T[]): T[] => {
+    if (departmentFilter.length === 0) return items;
+    return items.filter(item => departmentFilter.includes(item.department));
+  };
+
+  /**
+   * Filters employees based on department (used for print functionality).
+   * Sorts by date_completed in descending order (newest first).
+   */
   useEffect(() => {
-    // Apply department filter to paginated results (used in print)
-    let filtered = templateResponseDetails?.employees_responded || [];
-    
-    // Apply department filter
-    if (departmentFilter.length > 0) {
-      filtered = filtered.filter((emp: any) => 
-        departmentFilter.includes(emp.department)
-      );
-    }
-    
+    const filtered = applyDepartmentFilter(templateResponseDetails?.employees_responded || []);
     // Sort by date_completed in descending order (newest first)
-    const sortedFiltered = filtered.sort((a: any, b: any) => {
+    const sorted = filtered.sort((a: any, b: any) => {
       if (!a.date_completed) return 1;
       if (!b.date_completed) return -1;
       return new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime();
     });
-    
-    setFilteredEmployees(sortedFiltered);
-    
-    // Note: Pagination is now handled by the backend via the API response
-    // The pagination state is updated in the useEffect that watches respondentsData
+    setFilteredEmployees(sorted);
   }, [templateResponseDetails, departmentFilter]);
 
-  // Initialize department filter with all departments when template response details change
-  // Use ref to track which template we've initialized to prevent infinite loops
+  /**
+   * Initializes department filter with all departments when template response details change.
+   * Uses ref to track which template we've initialized to prevent infinite loops.
+   */
   useEffect(() => {
     if (employeesResponded && 
         employeesResponded.length > 0 &&
@@ -741,14 +787,19 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [template?.id, employeesResponded]);
 
-  // Reset pagination when date filter changes
+  /**
+   * Resets pagination to page 1 for all tabs when date filter changes.
+   */
   useEffect(() => {
     setRespondentsCurrentPage(1);
     setQuestionsCurrentPage(1);
     setAnalyticsCurrentPage(1);
   }, [dateFilter.from, dateFilter.to]);
 
-  // Helper to get filtered individual responses based on department and date
+  /**
+   * Gets filtered individual responses based on department and date filters.
+   * @returns Filtered array of individual evaluation responses
+   */
   const getFilteredIndividualResponses = () => {
     return filterIndividualResponses(
       templateResponseDetails?.individual_responses || [],
@@ -758,7 +809,13 @@ const EvaluationResponseDetailsModal = ({
     );
   };
 
-  // Helper function to calculate employee scores for each criterion
+  /**
+   * Calculates employee scores for a specific criterion.
+   * Filters responses by date and department, then aggregates scores by employee.
+   * @param sectionId - The section identifier (e.g., "section-0")
+   * @param criterionId - The criterion identifier (e.g., "criterion-0-1")
+   * @returns Array of employee score objects with name, scores array, and averageScore
+   */
   const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionId: string) => {
     // If we have sections (new backend format), extract scores directly
     const backendSections = templateResponseDetails?.sections || [];
@@ -844,8 +901,12 @@ const EvaluationResponseDetailsModal = ({
     );
   };
 
-  // Helper function to prepare question response data for horizontal bar charts
-  // Memoized to prevent unnecessary recalculations
+  /**
+   * Prepares question response data for horizontal bar charts.
+   * Extracts all criteria from sections and calculates employee scores for each.
+   * Questions always show regardless of filters; only scores are filtered.
+   * @returns Array of criterion objects with employee scores for charting
+   */
   const prepareQuestionResponseData = useMemo(() => {
     // Use questions extracted from individual_responses instead of aggregated questions
     const questionsFromResponses = extractQuestionsFromIndividualResponses;
@@ -894,8 +955,11 @@ const EvaluationResponseDetailsModal = ({
     return allCriteria;
   }, [extractQuestionsFromIndividualResponses, departmentFilter, dateFilter, templateResponseDetails?.sections]);
 
-  // Helper to get filtered frequently evaluated employees
-  // Memoized to prevent unnecessary recalculations
+  /**
+   * Gets filtered frequently evaluated employees based on department and date filters.
+   * Memoized to prevent unnecessary recalculations.
+   * @returns Filtered array of frequently evaluated employees
+   */
   const getFilteredFrequentlyEvaluatedEmployees = useMemo(() => {
     return filterFrequentlyEvaluatedEmployees(
       templateResponseDetails?.frequently_evaluated_employees || [],
@@ -905,7 +969,9 @@ const EvaluationResponseDetailsModal = ({
     );
   }, [templateResponseDetails?.frequently_evaluated_employees, departmentFilter, dateFilter, templateResponseDetails?.individual_responses]);
 
-  // Update pagination for Questions tab from backend response
+  /**
+   * Updates pagination state for Questions tab from backend response.
+   */
   useEffect(() => {
     if (questionsData) {
       setQuestionsPagination({
@@ -915,7 +981,9 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [questionsData]);
 
-  // Update pagination for Analytics tab from backend response
+  /**
+   * Updates pagination state for Analytics tab from backend response.
+   */
   useEffect(() => {
     if (analyticsData) {
       setAnalyticsPagination({
@@ -925,22 +993,13 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [analyticsData]);
 
-
-
-  // Helper to get filtered and paginated employees for Respondents tab
-  // Note: Backend handles pagination, we only apply department filter on frontend
-  // Memoize to prevent unnecessary recalculations and potential infinite loops
+  /**
+   * Gets filtered and paginated employees for Respondents tab.
+   * Note: Backend handles pagination; we only apply department filter on frontend.
+   * @returns Filtered and sorted array of employee responses
+   */
   const getPaginatedRespondents = useMemo(() => {
-    // Apply department filter to the paginated results from backend
-    let filtered = [...employeesResponded]; // Create a copy to avoid mutating the original
-    
-    // Apply department filter
-    if (departmentFilter.length > 0) {
-      filtered = filtered.filter((emp: any) => 
-        departmentFilter.includes(emp.department)
-      );
-    }
-    
+    const filtered = applyDepartmentFilter([...employeesResponded]);
     // Sort by date_completed in descending order (newest first)
     return filtered.sort((a: any, b: any) => {
       if (!a.date_completed) return 1;
@@ -949,9 +1008,12 @@ const EvaluationResponseDetailsModal = ({
     });
   }, [employeesResponded, departmentFilter]);
 
-  // Helper to get paginated questions for Questions tab
-  // Backend now handles pagination, so we use the sections directly from the response
-  // But we still need to transform them to the format expected by QuestionsTab
+  /**
+   * Gets paginated questions for Questions tab.
+   * Backend handles pagination; we transform sections to the format expected by QuestionsTab.
+   * Applies department filter to employee scores within each question.
+   * @returns Array of criterion objects formatted for QuestionsTab component
+   */
   const getPaginatedQuestions = useMemo(() => {
     // Use sections from backend (already paginated)
     const backendSections = sectionsData || [];
@@ -999,23 +1061,13 @@ const EvaluationResponseDetailsModal = ({
     return allCriteria;
   }, [sectionsData, departmentFilter]);
 
-  // Helper to get paginated analytics data
-  // Backend now handles pagination, we only apply department filter on frontend
+  /**
+   * Gets paginated analytics data for Analytics tab.
+   * Backend handles pagination; we only apply department filter on frontend.
+   * @returns Filtered array of frequently evaluated employees
+   */
   const getPaginatedAnalytics = useMemo(() => {
-    // Use backend paginated data
-    const paginatedEmployees = frequentlyEvaluatedEmployees || [];
-    
-    // Apply department filter to the paginated results
-    let filtered = paginatedEmployees;
-    
-    // Apply department filter
-    if (departmentFilter && departmentFilter.length > 0) {
-      filtered = filtered.filter((emp: any) => 
-        departmentFilter.includes(emp.department)
-      );
-    }
-    
-    return filtered;
+    return applyDepartmentFilter(frequentlyEvaluatedEmployees || []);
   }, [frequentlyEvaluatedEmployees, departmentFilter]);
 
   if (!isOpen) return null;
@@ -1086,11 +1138,11 @@ const EvaluationResponseDetailsModal = ({
                         {activeTab === 'respondents' && (
                           <RespondentsTab
                             paginatedRespondents={getPaginatedRespondents}
-                          pagination={respondentsPagination}
-                          currentPage={respondentsCurrentPage}
-                          pageSize={respondentsPageSize}
-                          onPageChange={handleRespondentsPaginationChange}
-                          onPageSizeChange={handleRespondentsPageSizeChange}
+                            pagination={respondentsPagination}
+                            currentPage={respondentsCurrentPage}
+                            pageSize={respondentsPageSize}
+                            onPageChange={respondentsPaginationHandlers.handlePageChange}
+                            onPageSizeChange={respondentsPaginationHandlers.handlePageSizeChange}
                             passingScore={templateResponseDetails?.template?.passing_score || 0}
                             totalScore={templateResponseDetails?.template?.total_score || 0}
                           />
@@ -1100,11 +1152,11 @@ const EvaluationResponseDetailsModal = ({
                           <QuestionsTab
                             paginatedQuestions={getPaginatedQuestions}
                             allQuestions={prepareQuestionResponseData}
-                          pagination={questionsPagination}
-                          currentPage={questionsCurrentPage}
-                          pageSize={questionsPageSize}
-                          onPageChange={handleQuestionsPaginationChange}
-                          onPageSizeChange={handleQuestionsPageSizeChange}
+                            pagination={questionsPagination}
+                            currentPage={questionsCurrentPage}
+                            pageSize={questionsPageSize}
+                            onPageChange={questionsPaginationHandlers.handlePageChange}
+                            onPageSizeChange={questionsPaginationHandlers.handlePageSizeChange}
                             departmentFilter={departmentFilter}
                             templateResponseDetails={templateResponseDetails}
                             totalScore={templateResponseDetails?.template?.total_score || 0}
@@ -1118,9 +1170,10 @@ const EvaluationResponseDetailsModal = ({
                             pagination={analyticsPagination}
                             currentPage={analyticsCurrentPage}
                             pageSize={analyticsPageSize}
-                            onPageChange={handleAnalyticsPaginationChange}
-                            onPageSizeChange={handleAnalyticsPageSizeChange}
+                            onPageChange={analyticsPaginationHandlers.handlePageChange}
+                            onPageSizeChange={analyticsPaginationHandlers.handlePageSizeChange}
                             totalScore={templateResponseDetails?.template?.total_score || 0}
+                            passingScore={templateResponseDetails?.template?.passing_score || 0}
                           />
                         )}
                       </div>
