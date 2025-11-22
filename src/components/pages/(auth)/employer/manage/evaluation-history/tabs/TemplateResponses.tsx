@@ -152,11 +152,12 @@ const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubsc
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>
-            <span className={classNames('font-semibold', 
-              (parseFloat(template.average_score) / parseFloat(template.average_total_score) * 100) >= 80 ? 'text-green-600' : 
-              (parseFloat(template.average_score) / parseFloat(template.average_total_score) * 100) >= 60 ? 'text-yellow-600' : 
-              'text-red-600')}>
-              {template.average_score} / {template.average_total_score}
+            <span className='font-semibold'>
+              <span className={classNames('text-gray-500', parseFloat(template.average_score) < parseFloat(template.passing_score) && 'text-red-500')}>
+                {template.average_score}
+              </span>
+              {' / '}
+              <span className='text-gray-500'>{template.average_total_score}</span>
             </span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>{template.last_evaluation_date}</td>
