@@ -6,11 +6,6 @@ interface PaginationState {
   totalPages: number;
 }
 
-interface DateFilter {
-  from: any;
-  to: any;
-}
-
 interface AnalyticsTabProps {
   frequentlyEvaluatedEmployees: any[];
   paginatedAnalytics: any[];
@@ -19,7 +14,6 @@ interface AnalyticsTabProps {
   pageSize: number;
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
-  dateFilter: DateFilter;
   totalScore: number;
 }
 
@@ -31,18 +25,12 @@ const AnalyticsTab = ({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  dateFilter,
   totalScore,
 }: AnalyticsTabProps) => {
   return (
     <div className='space-y-6'>
       <div>
         <h4 className='text-lg font-semibold text-gray-900'>Analytics</h4>
-        {(dateFilter.from || dateFilter.to) && (
-          <p className='text-xs text-blue-600 mt-1'>
-            Showing analytics for filtered date range
-          </p>
-        )}
       </div>
       
       {/* Frequently Evaluated Employees Pie Chart */}
@@ -60,11 +48,6 @@ const AnalyticsTab = ({
               <p className='text-sm text-gray-500 italic mb-1'>
                 No employee data available
               </p>
-              {(dateFilter.from || dateFilter.to) && (
-                <p className='text-xs text-gray-400'>
-                  Try adjusting your date range to see more data
-                </p>
-              )}
             </div>
           </div>
         )}

@@ -1,9 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
+interface DateFilter {
+  from?: any;
+  to?: any;
+}
+
 interface RespondentsParams {
   pageSize?: number;
   currentPage?: number;
+  dateFilter?: DateFilter;
 }
 
 async function getEvaluationResponseRespondents(
@@ -23,12 +29,26 @@ async function getEvaluationResponseRespondents(
     }
 
     const token = getCookie('token');
-    const { pageSize = 5, currentPage = 1 } = params;
+    const { pageSize = 5, currentPage = 1, dateFilter } = params;
     
     const queryParams = new URLSearchParams({
       pageSize: pageSize.toString(),
       currentPage: currentPage.toString(),
     });
+
+    // Add date filter parameters if provided
+    if (dateFilter?.from) {
+      const fromDate = dateFilter.from instanceof Date 
+        ? dateFilter.from.toLocaleDateString('en-CA') 
+        : dateFilter.from;
+      queryParams.append('dateFrom', fromDate);
+    }
+    if (dateFilter?.to) {
+      const toDate = dateFilter.to instanceof Date 
+        ? dateFilter.to.toLocaleDateString('en-CA') 
+        : dateFilter.to;
+      queryParams.append('dateTo', toDate);
+    }
 
     const config: RequestInit = {
       method: 'GET',
@@ -72,7 +92,14 @@ export function useGetEvaluationResponseRespondents(
   enabled: boolean = false
 ) {
   const query = useQuery(
-    ['evaluationResponseRespondents', evaluation_template_id, params.pageSize, params.currentPage],
+    [
+      'evaluationResponseRespondents', 
+      evaluation_template_id, 
+      params.pageSize, 
+      params.currentPage,
+      params.dateFilter?.from,
+      params.dateFilter?.to
+    ],
     () => getEvaluationResponseRespondents(evaluation_template_id, params),
     {
       enabled: enabled && !!evaluation_template_id,

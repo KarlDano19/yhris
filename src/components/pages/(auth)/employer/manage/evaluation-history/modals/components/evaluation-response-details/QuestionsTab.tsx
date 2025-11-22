@@ -10,11 +10,6 @@ interface PaginationState {
   totalPages: number;
 }
 
-interface DateFilter {
-  from: any;
-  to: any;
-}
-
 interface QuestionsTabProps {
   paginatedQuestions: any[];
   allQuestions: any[];
@@ -23,7 +18,6 @@ interface QuestionsTabProps {
   pageSize: number;
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
-  dateFilter: DateFilter;
   departmentFilter: string[];
   templateResponseDetails: any;
 }
@@ -36,7 +30,6 @@ const QuestionsTab = ({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  dateFilter,
   departmentFilter,
   templateResponseDetails,
 }: QuestionsTabProps) => {
@@ -120,7 +113,7 @@ const QuestionsTab = ({
                           <p className='text-sm text-gray-500 italic mb-1'>
                             No scored responses available for this question
                           </p>
-                          {(dateFilter.from || dateFilter.to || (departmentFilter && departmentFilter.length > 0)) && (
+                          {(departmentFilter && departmentFilter.length > 0) && (
                             <p className='text-xs text-gray-400'>
                               Try adjusting your filters to see more responses
                             </p>

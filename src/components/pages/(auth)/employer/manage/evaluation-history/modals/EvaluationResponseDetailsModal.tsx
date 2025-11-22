@@ -2,6 +2,7 @@ import { Dispatch, Fragment, useRef, useState, useEffect, useMemo } from 'react'
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+import { getCookie } from 'cookies-next';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -9,7 +10,6 @@ import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import CustomToast from '@/components/CustomToast';
 import useFileforge from '@/components/hooks/useFileforge';
 
-import RecipientsListModal from './RecipientsListModal';
 import {
   getUniqueDepartments as getUniqueDepts,
   filterEmployeesByDateAndDepartment,
@@ -29,12 +29,7 @@ import useGetEvaluationResponseAnalytics from '../hooks/useGetEvaluationResponse
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 
-import { EvaluationResponseDetailsModalProps, TabType, SelectedRecipients } from '../types';
-
-interface DateFilter {
-  from: any;
-  to: any;
-}
+import { EvaluationResponseDetailsModalProps, TabType } from '../types';
 
 interface PaginationState {
   totalRecords: number;
@@ -58,12 +53,13 @@ const EvaluationResponseDetailsModal = ({
   const [activeTab, setActiveTab] = useState<TabType>('respondents');
   const [visitedTabs, setVisitedTabs] = useState<Set<TabType>>(new Set<TabType>(['respondents']));
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
-  const [dateFilter, setDateFilter] = useState<DateFilter>({
+  const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
+  const [dateFilter, setDateFilter] = useState<{ from: any; to: any }>({
     from: '',
     to: '',
   });
-  const [departmentFilter, setDepartmentFilter] = useState<string[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  const initializedDepartmentsRef = useRef<number | null>(null);
   
   // Pagination state for Respondents tab (declared before hook usage)
   const [respondentsPageSize, setRespondentsPageSize] = useState(5);
@@ -85,14 +81,22 @@ const EvaluationResponseDetailsModal = ({
     templateId, 
     {
       pageSize: respondentsPageSize,
-      currentPage: respondentsCurrentPage
+      currentPage: respondentsCurrentPage,
+      dateFilter: {
+        from: dateFilter.from || undefined,
+        to: dateFilter.to || undefined,
+      }
     },
     true // Always enabled since it provides summary data for the header
   );
   
   // Extract template summary and employees from respondents response
   const template = respondentsData?.template || null;
-  const employeesResponded = respondentsData?.employees_responded || [];
+  // Memoize to prevent new array reference on every render
+  const employeesResponded = useMemo(() => 
+    respondentsData?.employees_responded || [], 
+    [respondentsData?.employees_responded]
+  );
   
   // Update pagination state from backend response
   useEffect(() => {
@@ -104,31 +108,84 @@ const EvaluationResponseDetailsModal = ({
     }
   }, [respondentsData]);
 
+  // Pagination state for Questions tab (declared before hook usage)
+  const [questionsPageSize, setQuestionsPageSize] = useState(5);
+  const [questionsCurrentPage, setQuestionsCurrentPage] = useState(1);
+  const [questionsPagination, setQuestionsPagination] = useState<PaginationState>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
   const { 
-    data: individualResponses = [], 
+    data: questionsData, 
     isLoading: isLoadingQuestions,
     refetch: refetchQuestions
   } = useGetEvaluationResponseQuestions(
     templateId, 
-    visitedTabs.has('questions')
+    visitedTabs.has('questions'),
+    {
+      pageSize: questionsPageSize,
+      currentPage: questionsCurrentPage,
+      dateFilter: {
+        from: dateFilter.from || undefined,
+        to: dateFilter.to || undefined,
+      }
+    }
+  );
+  
+  // Extract sections and pagination metadata from backend response
+  // Memoize to prevent new array reference on every render
+  const sectionsData = useMemo(() => 
+    questionsData?.sections || [], 
+    [questionsData?.sections]
   );
 
+  // Pagination state for Analytics tab (declared before hook usage)
+  const [analyticsPageSize, setAnalyticsPageSize] = useState(5);
+  const [analyticsCurrentPage, setAnalyticsCurrentPage] = useState(1);
+  const [analyticsPagination, setAnalyticsPagination] = useState<PaginationState>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
   const { 
-    data: frequentlyEvaluatedEmployees = [], 
+    data: analyticsData, 
     isLoading: isLoadingAnalytics,
     refetch: refetchAnalytics
   } = useGetEvaluationResponseAnalytics(
     templateId, 
-    visitedTabs.has('analytics')
+    visitedTabs.has('analytics'),
+    {
+      pageSize: analyticsPageSize,
+      currentPage: analyticsCurrentPage,
+      dateFilter: {
+        from: dateFilter.from || undefined,
+        to: dateFilter.to || undefined,
+      }
+    }
+  );
+  
+  // Extract frequently evaluated employees and pagination metadata from backend response
+  // Memoize to prevent new array reference on every render
+  const frequentlyEvaluatedEmployees = useMemo(() => 
+    analyticsData?.frequently_evaluated_employees || [], 
+    [analyticsData?.frequently_evaluated_employees]
+  );
+  // Extract analytics_chart_data (ALL employees with evaluation counts for chart)
+  const analyticsChartData = useMemo(() => 
+    analyticsData?.analytics_chart_data || [], 
+    [analyticsData?.analytics_chart_data]
   );
 
-  // Combine data for backward compatibility
-  const templateResponseDetails = {
+  // Combine data - sections is the new format from backend
+  // Memoize to prevent infinite loops in useEffects that depend on this object
+  const templateResponseDetails = useMemo(() => ({
     template,
     employees_responded: employeesResponded,
-    individual_responses: individualResponses,
+    sections: sectionsData, // New backend format with merged questions
+    individual_responses: [], // Empty for now, will be populated if needed for legacy code
     frequently_evaluated_employees: frequentlyEvaluatedEmployees,
-  };
+  }), [template, employeesResponded, sectionsData, frequentlyEvaluatedEmployees]);
 
   // Loading state: always check respondents since it provides summary for header
   // Also check active tab's loading state
@@ -143,25 +200,6 @@ const EvaluationResponseDetailsModal = ({
     remove: clearTemplateDefinition,
   } = useGetEvaluationTemplateDetails(templateId);
 
-  // Pagination state for Questions tab
-  const [questionsPageSize, setQuestionsPageSize] = useState(5);
-  const [questionsCurrentPage, setQuestionsCurrentPage] = useState(1);
-  const [questionsPagination, setQuestionsPagination] = useState<PaginationState>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
-
-  // Pagination state for Analytics tab (Employee Evaluation Details)
-  const [analyticsPageSize, setAnalyticsPageSize] = useState(5);
-  const [analyticsCurrentPage, setAnalyticsCurrentPage] = useState(1);
-  const [analyticsPagination, setAnalyticsPagination] = useState<PaginationState>({
-    totalPages: 1,
-    totalRecords: 0,
-  });
-
-  // Recipients modal state
-  const [isRecipientsModalOpen, setIsRecipientsModalOpen] = useState(false);
-  const [selectedRecipients, setSelectedRecipients] = useState<SelectedRecipients | null>(null);
 
   // Fileforge hook for PDF generation
   const { generatePDFLocally, isGenerating: isPrintGenerating } = useFileforge({
@@ -169,19 +207,96 @@ const EvaluationResponseDetailsModal = ({
       toast.custom(() => <CustomToast message='PDF generated successfully.' type='success' />, { duration: 3000 });
     },
     onError: (error) => {
-      console.error('Print error:', error);
+
       toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
     },
   });
 
   // Handle print button click
   const handlePrintClick = async () => {
-    if (!templateResponseDetails) {
+    if (!templateId) {
       toast.custom(() => <CustomToast message='No template data available to print.' type='error' />, { duration: 3000 });
       return;
     }
 
     try {
+      // Fetch ALL data (not paginated) for printing
+      const token = getCookie('token');
+      const queryParams = new URLSearchParams();
+
+      // Add date filter parameters if provided
+      if (dateFilter.from) {
+        const fromDate = dateFilter.from instanceof Date 
+          ? dateFilter.from.toLocaleDateString('en-CA') 
+          : dateFilter.from;
+        queryParams.append('dateFrom', fromDate);
+      }
+      if (dateFilter.to) {
+        const toDate = dateFilter.to instanceof Date 
+          ? dateFilter.to.toLocaleDateString('en-CA') 
+          : dateFilter.to;
+        queryParams.append('dateTo', toDate);
+      }
+
+      const config: RequestInit = {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      };
+
+      // Fetch all respondents (no pagination - don't send pageSize/currentPage to get all data)
+      const respondentsUrl = queryParams.toString() 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/respondents/?${queryParams.toString()}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/respondents/`;
+      const respondentsResponse = await fetch(respondentsUrl, config);
+      const respondentsData = await respondentsResponse.json();
+      // Backend returns all data when no pagination params are sent
+      const allRespondents = respondentsData?.data?.employees_responded || respondentsData?.employees_responded || [];
+      const templateSummary = respondentsData?.data?.template || respondentsData?.template || template;
+
+      // Fetch all questions (no pagination - don't send pageSize/currentPage to get all data)
+      const questionsUrl = queryParams.toString()
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/questions/?${queryParams.toString()}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/questions/`;
+      const questionsResponse = await fetch(questionsUrl, config);
+      const questionsData = await questionsResponse.json();
+      // Backend returns all sections when no pagination params are sent
+      const allSections = questionsData?.data?.sections || questionsData?.sections || [];
+
+      // Fetch all analytics (no pagination - don't send pageSize/currentPage to get all data)
+      const analyticsUrl = queryParams.toString()
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/analytics/?${queryParams.toString()}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${templateId}/responses/analytics/`;
+      const analyticsResponse = await fetch(analyticsUrl, config);
+      const analyticsData = await analyticsResponse.json();
+      // Backend returns all employees when no pagination params are sent
+      const allAnalyticsEmployees = analyticsData?.data?.frequently_evaluated_employees || analyticsData?.frequently_evaluated_employees || [];
+
+      // Apply department filter to all data
+      let filteredRespondents = allRespondents;
+      let filteredAnalytics = allAnalyticsEmployees;
+      
+      if (departmentFilter && departmentFilter.length > 0) {
+        filteredRespondents = allRespondents.filter((emp: any) => 
+          departmentFilter.includes(emp.department)
+        );
+        filteredAnalytics = allAnalyticsEmployees.filter((emp: any) => 
+          departmentFilter.includes(emp.department)
+        );
+      }
+
+      // Prepare print data with ALL records (not paginated)
+      const printTemplateData = {
+        template: templateSummary,
+        employees_responded: filteredRespondents,
+        sections: allSections, // Use sections from backend (new format)
+        questions: allSections, // Also provide as questions for compatibility
+        frequently_evaluated_employees: filteredAnalytics,
+        individual_responses: [] // Not needed for new format
+      };
+
       // Prepare date filter for printing
       const printDateFilter = dateFilter.from || dateFilter.to
         ? {
@@ -190,27 +305,13 @@ const EvaluationResponseDetailsModal = ({
           }
         : undefined;
 
-      // Filter the data before printing (use the already filtered employees from the modal)
-      const filteredTemplateData = {
-        ...templateResponseDetails,
-        // Use the already filtered employees based on date and department
-        employees_responded: filteredEmployees,
-        // Filter frequently evaluated employees based on department filter
-        frequently_evaluated_employees: getFilteredFrequentlyEvaluatedEmployees,
-        // Include individual_responses for question score details
-        individual_responses: getFilteredIndividualResponses(),
-        // Use questions extracted from individual_responses instead of aggregated questions
-        questions: extractQuestionsFromIndividualResponses
-      };
-
       await handlePrintEvaluationTemplateResponse(
         generatePDFLocally,
-        filteredTemplateData,
+        printTemplateData,
         printDateFilter,
         departmentFilter
       );
     } catch (error) {
-      console.error('Error printing evaluation template response:', error);
       toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
     }
   };
@@ -222,8 +323,8 @@ const EvaluationResponseDetailsModal = ({
   };
 
   const customCloseModal = () => {
-    setDateFilter({ from: '', to: '' });
     setDepartmentFilter([]);
+    setDateFilter({ from: '', to: '' });
     setActiveTab('respondents');
     setVisitedTabs(new Set<TabType>(['respondents']));
     setExpandedQuestions(new Set());
@@ -233,8 +334,7 @@ const EvaluationResponseDetailsModal = ({
     setQuestionsPageSize(5);
     setAnalyticsCurrentPage(1);
     setAnalyticsPageSize(5);
-    setIsRecipientsModalOpen(false);
-    setSelectedRecipients(null);
+    initializedDepartmentsRef.current = null;
     clearTemplateDefinition();
     setIsOpen(null);
   };
@@ -272,20 +372,6 @@ const EvaluationResponseDetailsModal = ({
     setAnalyticsPageSize(value);
   };
 
-  // Recipients modal handlers
-  const handleRecipientsClick = (recipients: string, employeeName: string, department: string) => {
-    setSelectedRecipients({
-      recipients,
-      employeeName,
-      department
-    });
-    setIsRecipientsModalOpen(true);
-  };
-
-  const handleCloseRecipientsModal = () => {
-    setIsRecipientsModalOpen(false);
-    setSelectedRecipients(null);
-  };
 
   const toggleQuestion = (questionId: string) => {
     setExpandedQuestions(prev => {
@@ -299,14 +385,10 @@ const EvaluationResponseDetailsModal = ({
     });
   };
 
-  // Helper function to get unique departments from responses
-  const getUniqueDepartments = () => {
-    return getUniqueDepts(templateResponseDetails?.employees_responded || []);
-  };
-
   // Prepare filter groups for the Filter component
+  // Memoize based on employees_responded directly to avoid circular dependencies
   const filterGroups: FilterGroup[] = useMemo(() => {
-    const departments = getUniqueDepartments();
+    const departments = getUniqueDepts(employeesResponded);
     return [
       {
         id: 'departments',
@@ -316,7 +398,7 @@ const EvaluationResponseDetailsModal = ({
         allowEmpty: true
       }
     ];
-  }, [templateResponseDetails]);
+  }, [employeesResponded]);
 
   // Track previous template ID to detect changes
   const prevTemplateIdRef = useRef<number | null>(null);
@@ -330,14 +412,15 @@ const EvaluationResponseDetailsModal = ({
       
       if (isNewTemplate) {
         // Reset state when template changes
-        setDateFilter({ from: '', to: '' });
         setDepartmentFilter([]);
+        setDateFilter({ from: '', to: '' });
         setActiveTab('respondents');
         setVisitedTabs(new Set<TabType>(['respondents']));
         setExpandedQuestions(new Set());
         setRespondentsCurrentPage(1);
         setQuestionsCurrentPage(1);
         setAnalyticsCurrentPage(1);
+        initializedDepartmentsRef.current = null;
         
         // Update ref to current template ID
         prevTemplateIdRef.current = currentTemplateId;
@@ -416,10 +499,31 @@ const EvaluationResponseDetailsModal = ({
     return !/^untitled(\s+question)?$/i.test(title.trim());
   };
 
-  // Helper function to extract unique questions from individual_responses
+  // Helper function to extract unique questions from sections (new backend format) or individual_responses (legacy)
   // IMPORTANT: Extract from ALL responses (not filtered) so questions always show
   // Only the scores within questions are filtered by date/department
   const extractQuestionsFromIndividualResponses = useMemo(() => {
+    // Prefer sections from backend (new format) if available
+    const backendSections = templateResponseDetails?.sections || [];
+    if (backendSections && backendSections.length > 0) {
+      // Backend already provides merged sections with criterion
+      // Transform to expected format
+      return backendSections.map((section: any, sectionIndex: number) => ({
+        id: `section-${section.section_index}`,
+        section_title: section.section_title,
+        section_description: section.section_description,
+        sectionIndex: section.section_index,
+        criterion: (section.criterion || []).map((criterion: any, criterionIndex: number) => ({
+          id: `criterion-${section.section_index}-${criterion.criterion_index}`,
+          title: criterion.title,
+          max_score: criterion.max_score,
+          criterionIndex: criterion.criterion_index,
+          responses: criterion.responses || [] // Include responses for filtering
+        }))
+      }));
+    }
+    
+    // Fallback to old format (individual_responses)
     const allResponses = templateResponseDetails?.individual_responses || [];
     if (!allResponses || allResponses.length === 0) {
       return [];
@@ -549,26 +653,28 @@ const EvaluationResponseDetailsModal = ({
     });
 
     return sections;
-  }, [templateResponseDetails?.individual_responses, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
+  }, [templateResponseDetails?.sections, templateResponseDetails?.individual_responses, activeCriterionIds, sectionTitleMap, criterionTitleMap]);
 
   // Handle department filter changes from the Filter component
   const handleDepartmentFilterChange = (filters: FilterValues) => {
     setDepartmentFilter(filters.departments || []);
   };
 
-  // Filter employees based on date range and department
+  // Filter employees based on department
   // Note: This is kept for print functionality. Pagination is now handled by the backend.
   useEffect(() => {
-    // Get all employees from all pages for filtering (used in print)
-    // For display, we use the paginated results from backend
-    const filtered = filterEmployeesByDateAndDepartment(
-      templateResponseDetails?.employees_responded || [],
-      dateFilter,
-      departmentFilter
-    );
+    // Apply department filter to paginated results (used in print)
+    let filtered = templateResponseDetails?.employees_responded || [];
+    
+    // Apply department filter
+    if (departmentFilter.length > 0) {
+      filtered = filtered.filter((emp: any) => 
+        departmentFilter.includes(emp.department)
+      );
+    }
     
     // Sort by date_completed in descending order (newest first)
-    const sortedFiltered = filtered.sort((a, b) => {
+    const sortedFiltered = filtered.sort((a: any, b: any) => {
       if (!a.date_completed) return 1;
       if (!b.date_completed) return -1;
       return new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime();
@@ -578,15 +684,35 @@ const EvaluationResponseDetailsModal = ({
     
     // Note: Pagination is now handled by the backend via the API response
     // The pagination state is updated in the useEffect that watches respondentsData
-  }, [templateResponseDetails, dateFilter, departmentFilter]);
+  }, [templateResponseDetails, departmentFilter]);
 
   // Initialize department filter with all departments when template response details change
+  // Use ref to track which template we've initialized to prevent infinite loops
   useEffect(() => {
-    if (templateResponseDetails?.employees_responded) {
-      const allDepartments = getUniqueDepartments();
-      setDepartmentFilter(allDepartments);
+    if (employeesResponded && 
+        employeesResponded.length > 0 &&
+        template?.id &&
+        initializedDepartmentsRef.current !== template.id) {
+      const allDepartments = getUniqueDepts(employeesResponded);
+      // Only update if departments have actually changed
+      setDepartmentFilter(prev => {
+        const prevStr = JSON.stringify([...prev].sort());
+        const newStr = JSON.stringify([...allDepartments].sort());
+        if (prevStr !== newStr) {
+          return allDepartments;
+        }
+        return prev;
+      });
+      initializedDepartmentsRef.current = template.id;
     }
-  }, [templateResponseDetails]);
+  }, [template?.id, employeesResponded]);
+
+  // Reset pagination when date filter changes
+  useEffect(() => {
+    setRespondentsCurrentPage(1);
+    setQuestionsCurrentPage(1);
+    setAnalyticsCurrentPage(1);
+  }, [dateFilter.from, dateFilter.to]);
 
   // Helper to get filtered individual responses based on department and date
   const getFilteredIndividualResponses = () => {
@@ -600,8 +726,83 @@ const EvaluationResponseDetailsModal = ({
 
   // Helper function to calculate employee scores for each criterion
   const getEmployeeScoresForCriterionWrapper = (sectionId: string, criterionId: string) => {
-    const filteredResponses = getFilteredIndividualResponses();
+    // If we have sections (new backend format), extract scores directly
+    const backendSections = templateResponseDetails?.sections || [];
+    if (backendSections && backendSections.length > 0) {
+      // Extract section_index and criterion_index from IDs
+      const sectionMatch = sectionId.match(/section-(\d+)/);
+      const criterionMatch = criterionId.match(/criterion-(\d+)-(\d+)/);
+      
+      if (sectionMatch && criterionMatch) {
+        const sectionIndex = parseInt(sectionMatch[1]);
+        const criterionIndex = parseInt(criterionMatch[2]);
+        
+        // Find the section and criterion
+        const section = backendSections.find((s: any) => s.section_index === sectionIndex);
+        if (section && section.criterion) {
+          const criterion = section.criterion.find((c: any) => c.criterion_index === criterionIndex);
+            if (criterion && criterion.responses) {
+              // Filter responses by date and department
+              let filteredResponses = criterion.responses.filter((response: any) => {
+                // Filter by date
+                if (dateFilter.from || dateFilter.to) {
+                  if (!response.date_of_evaluation) return false;
+                  const responseDate = new Date(response.date_of_evaluation);
+                  if (dateFilter.from) {
+                    const fromDate = new Date(dateFilter.from);
+                    fromDate.setHours(0, 0, 0, 0);
+                    if (responseDate < fromDate) return false;
+                  }
+                  if (dateFilter.to) {
+                    const toDate = new Date(dateFilter.to);
+                    toDate.setHours(23, 59, 59, 999);
+                    if (responseDate > toDate) return false;
+                  }
+                }
+                
+                // Filter by department
+                if (departmentFilter && departmentFilter.length > 0) {
+                  if (!departmentFilter.includes(response.department)) return false;
+                }
+                
+                return true;
+              });
+            
+            // Transform to expected format
+            const employeeScoresMap: { [key: string]: { name: string; scores: number[]; averageScore: number } } = {};
+            
+            filteredResponses.forEach((response: any) => {
+              const employeeName = response.employee_name;
+              const score = typeof response.score === 'number' ? response.score : parseFloat(response.score);
+              
+              if (!isNaN(score) && score >= 0) {
+                if (!employeeScoresMap[employeeName]) {
+                  employeeScoresMap[employeeName] = {
+                    name: employeeName,
+                    scores: [],
+                    averageScore: 0
+                  };
+                }
+                employeeScoresMap[employeeName].scores.push(score);
+              }
+            });
+            
+            // Calculate averages
+            return Object.values(employeeScoresMap).map(employee => {
+              if (employee.scores.length > 0) {
+                employee.averageScore = employee.scores.reduce((sum, score) => sum + score, 0) / employee.scores.length;
+              }
+              return employee;
+            });
+          }
+        }
+      }
+      
+      return [];
+    }
     
+    // Fallback to old format
+    const filteredResponses = getFilteredIndividualResponses();
     return getEmployeeScoresForCriterion(
       filteredResponses, 
       sectionId, 
@@ -621,9 +822,9 @@ const EvaluationResponseDetailsModal = ({
 
     const allCriteria: any[] = [];
 
-    // Extract individual criteria from each section
-    // IMPORTANT: Questions should ALWAYS show regardless of date/department filter
-    // Only the employee scores within each question are filtered
+        // Extract individual criteria from each section
+        // IMPORTANT: Questions should ALWAYS show regardless of department filter
+        // Only the employee scores within each question are filtered
     questionsFromResponses.forEach((section: any) => {
       if (!section || !section.criterion || !Array.isArray(section.criterion)) {
         return;
@@ -657,7 +858,7 @@ const EvaluationResponseDetailsModal = ({
     });
 
     return allCriteria;
-  }, [extractQuestionsFromIndividualResponses, dateFilter, departmentFilter, templateResponseDetails?.individual_responses]);
+  }, [extractQuestionsFromIndividualResponses, departmentFilter, dateFilter, templateResponseDetails?.sections]);
 
   // Helper to get filtered frequently evaluated employees
   // Memoized to prevent unnecessary recalculations
@@ -668,60 +869,36 @@ const EvaluationResponseDetailsModal = ({
       templateResponseDetails?.individual_responses || [],
       dateFilter
     );
-  }, [templateResponseDetails?.frequently_evaluated_employees, departmentFilter, templateResponseDetails?.individual_responses, dateFilter]);
+  }, [templateResponseDetails?.frequently_evaluated_employees, departmentFilter, dateFilter, templateResponseDetails?.individual_responses]);
 
-  // Update pagination for Questions tab when data changes
+  // Update pagination for Questions tab from backend response
   useEffect(() => {
-    const allQuestions = prepareQuestionResponseData;
-    const totalRecords = allQuestions.length;
-    const totalPages = Math.ceil(totalRecords / questionsPageSize) || 1;
-    
-    setQuestionsPagination({
-      totalRecords,
-      totalPages
-    });
-    
-    // Reset to page 1 if current page exceeds total pages
-    if (questionsCurrentPage > totalPages && totalPages > 0) {
-      setQuestionsCurrentPage(1);
-    }
-  }, [prepareQuestionResponseData, questionsPageSize, questionsCurrentPage]);
-
-  // Update pagination for Analytics tab when data changes
-  useEffect(() => {
-    const allEmployees = getFilteredFrequentlyEvaluatedEmployees;
-    const totalRecords = allEmployees.length;
-    const totalPages = Math.ceil(totalRecords / analyticsPageSize);
-    setAnalyticsPagination({
-      totalRecords,
-      totalPages
-    });
-    
-    // Reset to page 1 if current page exceeds total pages
-    if (analyticsCurrentPage > totalPages && totalPages > 0) {
-      setAnalyticsCurrentPage(1);
-    }
-  }, [getFilteredFrequentlyEvaluatedEmployees, analyticsPageSize, analyticsCurrentPage]);
-
-  // Helper to get filtered and paginated employees for Respondents tab
-  // Note: Backend handles pagination, but we still apply date/department filters on frontend
-  const getPaginatedRespondents = () => {
-    // Apply date and department filters to the paginated results from backend
-    let filtered = employeesResponded;
-    
-    // Apply date filter
-    if (dateFilter.from || dateFilter.to) {
-      filtered = filtered.filter((emp: any) => {
-        if (!emp.date_completed) return false;
-        const completedDate = new Date(emp.date_completed);
-        const fromDate = dateFilter.from ? new Date(dateFilter.from) : null;
-        const toDate = dateFilter.to ? new Date(dateFilter.to) : null;
-        
-        if (fromDate && completedDate < fromDate) return false;
-        if (toDate && completedDate > toDate) return false;
-        return true;
+    if (questionsData) {
+      setQuestionsPagination({
+        totalRecords: questionsData.total_records || 0,
+        totalPages: questionsData.total_pages || 1
       });
     }
+  }, [questionsData]);
+
+  // Update pagination for Analytics tab from backend response
+  useEffect(() => {
+    if (analyticsData) {
+      setAnalyticsPagination({
+        totalRecords: analyticsData.total_records || 0,
+        totalPages: analyticsData.total_pages || 1
+      });
+    }
+  }, [analyticsData]);
+
+
+
+  // Helper to get filtered and paginated employees for Respondents tab
+  // Note: Backend handles pagination, we only apply department filter on frontend
+  // Memoize to prevent unnecessary recalculations and potential infinite loops
+  const getPaginatedRespondents = useMemo(() => {
+    // Apply department filter to the paginated results from backend
+    let filtered = [...employeesResponded]; // Create a copy to avoid mutating the original
     
     // Apply department filter
     if (departmentFilter.length > 0) {
@@ -736,25 +913,76 @@ const EvaluationResponseDetailsModal = ({
       if (!b.date_completed) return -1;
       return new Date(b.date_completed).getTime() - new Date(a.date_completed).getTime();
     });
-  };
+  }, [employeesResponded, departmentFilter]);
 
   // Helper to get paginated questions for Questions tab
-  // Memoized to prevent unnecessary recalculations
+  // Backend now handles pagination, so we use the sections directly from the response
+  // But we still need to transform them to the format expected by QuestionsTab
   const getPaginatedQuestions = useMemo(() => {
-    const allQuestions = prepareQuestionResponseData;
-    const startIndex = (questionsCurrentPage - 1) * questionsPageSize;
-    const endIndex = startIndex + questionsPageSize;
-    return allQuestions.slice(startIndex, endIndex);
-  }, [prepareQuestionResponseData, questionsCurrentPage, questionsPageSize]);
+    // Use sections from backend (already paginated)
+    const backendSections = sectionsData || [];
+    
+    if (!backendSections || backendSections.length === 0) {
+      return [];
+    }
+
+    const allCriteria: any[] = [];
+
+    // Extract individual criteria from each section
+    backendSections.forEach((section: any) => {
+      if (!section || !section.criterion || !Array.isArray(section.criterion)) {
+        return;
+      }
+
+      section.criterion.forEach((criterion: any) => {
+        if (!criterion) {
+          return;
+        }
+
+        const title = typeof criterion.title === 'string' ? criterion.title.trim() : '';
+        if (!isMeaningfulCriterionTitle(title)) {
+          return;
+        }
+
+        // Get filtered scores (this is what gets filtered by date/department)
+        const sectionId = `section-${section.section_index}`;
+        const criterionId = `criterion-${section.section_index}-${criterion.criterion_index}`;
+        const employeeScores = getEmployeeScoresForCriterionWrapper(sectionId, criterionId);
+
+        allCriteria.push({
+          sectionId,
+          sectionTitle: section.section_title || 'Untitled Section',
+          criterionId,
+          title,
+          max_score: criterion.max_score,
+          sectionIndex: section.section_index,
+          criterionIndex: criterion.criterion_index,
+          employeeScores: employeeScores // These scores are filtered, but question still shows
+        });
+      });
+    });
+
+    return allCriteria;
+  }, [sectionsData, departmentFilter]);
 
   // Helper to get paginated analytics data
-  // Memoized to prevent unnecessary recalculations
+  // Backend now handles pagination, we only apply department filter on frontend
   const getPaginatedAnalytics = useMemo(() => {
-    const allEmployees = getFilteredFrequentlyEvaluatedEmployees;
-    const startIndex = (analyticsCurrentPage - 1) * analyticsPageSize;
-    const endIndex = startIndex + analyticsPageSize;
-    return allEmployees.slice(startIndex, endIndex);
-  }, [getFilteredFrequentlyEvaluatedEmployees, analyticsCurrentPage, analyticsPageSize]);
+    // Use backend paginated data
+    const paginatedEmployees = frequentlyEvaluatedEmployees || [];
+    
+    // Apply department filter to the paginated results
+    let filtered = paginatedEmployees;
+    
+    // Apply department filter
+    if (departmentFilter && departmentFilter.length > 0) {
+      filtered = filtered.filter((emp: any) => 
+        departmentFilter.includes(emp.department)
+      );
+    }
+    
+    return filtered;
+  }, [frequentlyEvaluatedEmployees, departmentFilter]);
 
   if (!isOpen) return null;
 
@@ -805,13 +1033,13 @@ const EvaluationResponseDetailsModal = ({
 
                         {/* Filters */}
                         <EvaluationFilters
-                          dateFilter={dateFilter}
-                          setDateFilter={setDateFilter}
                           departmentFilter={departmentFilter}
                           filterGroups={filterGroups}
                           onDepartmentFilterChange={handleDepartmentFilterChange}
-                          filteredCount={filteredEmployees.length}
-                          totalCount={templateResponseDetails?.employees_responded?.length || 0}
+                          dateFilter={dateFilter}
+                          onDateFilterChange={setDateFilter}
+                          filteredCount={getPaginatedRespondents.length}
+                          totalCount={respondentsData?.total_records || 0}
                           onPrintClick={handlePrintClick}
                           isPrintGenerating={isPrintGenerating}
                           isLoadingTemplateDetails={isLoadingTemplateDetails}
@@ -823,13 +1051,12 @@ const EvaluationResponseDetailsModal = ({
                         {/* Tab Content */}
                         {activeTab === 'respondents' && (
                           <RespondentsTab
-                            paginatedRespondents={getPaginatedRespondents()}
+                            paginatedRespondents={getPaginatedRespondents}
                           pagination={respondentsPagination}
                           currentPage={respondentsCurrentPage}
                           pageSize={respondentsPageSize}
                           onPageChange={handleRespondentsPaginationChange}
                           onPageSizeChange={handleRespondentsPageSizeChange}
-                            onRecipientsClick={handleRecipientsClick}
                             passingScore={templateResponseDetails?.template?.passing_score || 0}
                           />
                         )}
@@ -843,7 +1070,6 @@ const EvaluationResponseDetailsModal = ({
                           pageSize={questionsPageSize}
                           onPageChange={handleQuestionsPaginationChange}
                           onPageSizeChange={handleQuestionsPageSizeChange}
-                            dateFilter={dateFilter}
                             departmentFilter={departmentFilter}
                             templateResponseDetails={templateResponseDetails}
                           />
@@ -851,14 +1077,13 @@ const EvaluationResponseDetailsModal = ({
 
                         {activeTab === 'analytics' && (
                           <AnalyticsTab
-                            frequentlyEvaluatedEmployees={getFilteredFrequentlyEvaluatedEmployees}
+                            frequentlyEvaluatedEmployees={analyticsChartData}
                             paginatedAnalytics={getPaginatedAnalytics}
-                          pagination={analyticsPagination}
-                          currentPage={analyticsCurrentPage}
-                          pageSize={analyticsPageSize}
-                          onPageChange={handleAnalyticsPaginationChange}
-                          onPageSizeChange={handleAnalyticsPageSizeChange}
-                            dateFilter={dateFilter}
+                            pagination={analyticsPagination}
+                            currentPage={analyticsCurrentPage}
+                            pageSize={analyticsPageSize}
+                            onPageChange={handleAnalyticsPaginationChange}
+                            onPageSizeChange={handleAnalyticsPageSizeChange}
                             totalScore={templateResponseDetails?.template?.total_score || 1}
                           />
                         )}
@@ -868,16 +1093,6 @@ const EvaluationResponseDetailsModal = ({
                 </Dialog.Panel>
               </Transition.Child>
             </div>
-            {/* Recipients List Modal */}
-            {selectedRecipients && (
-              <RecipientsListModal
-                isOpen={isRecipientsModalOpen}
-                onClose={handleCloseRecipientsModal}
-                recipients={selectedRecipients.recipients}
-                employeeName={selectedRecipients.employeeName}
-                department={selectedRecipients.department}
-              />
-            )}
           </div>
         </Dialog>
       </Transition.Root>

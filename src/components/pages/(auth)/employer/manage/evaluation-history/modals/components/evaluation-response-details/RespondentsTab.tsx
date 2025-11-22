@@ -12,7 +12,6 @@ interface RespondentsTabProps {
   pageSize: number;
   onPageChange: (event: any) => void;
   onPageSizeChange: (value: number) => void;
-  onRecipientsClick: (recipients: string, employeeName: string, department: string) => void;
   passingScore: number;
 }
 
@@ -23,7 +22,6 @@ const RespondentsTab = ({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  onRecipientsClick,
   passingScore,
 }: RespondentsTabProps) => {
   return (
@@ -34,9 +32,6 @@ const RespondentsTab = ({
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Recipients (Evaluators)
-                </th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Department
                 </th>
@@ -58,19 +53,6 @@ const RespondentsTab = ({
               {paginatedRespondents.length > 0 ? (
                 paginatedRespondents.map((employee: any, index: number) => (
                   <tr key={index} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 text-sm font-medium text-gray-900 max-w-xs'>
-                      <div 
-                        className='truncate cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium' 
-                        title='Click to view full list of evaluators'
-                        onClick={() => onRecipientsClick(
-                          employee.recipients || 'N/A',
-                          employee.name,
-                          employee.department
-                        )}
-                      >
-                        {employee.recipients || 'N/A'}
-                      </div>
-                    </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                       {employee.department}
                     </td>
@@ -99,7 +81,7 @@ const RespondentsTab = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className='px-6 py-4 text-center text-sm text-gray-500'>
+                  <td colSpan={5} className='px-6 py-4 text-center text-sm text-gray-500'>
                     No respondents found
                   </td>
                 </tr>
