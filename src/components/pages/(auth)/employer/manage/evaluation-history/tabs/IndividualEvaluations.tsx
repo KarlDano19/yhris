@@ -24,7 +24,7 @@ type T_ModalData = {
   open: boolean;
 };
 
-const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveSubscription: boolean; isActive?: boolean }) => {
   const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
   const [allEvaluationRecords, setAllEvaluationRecords] = useState<any>([]);
   const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
@@ -55,11 +55,14 @@ const IndividualEvaluations = ({ hasActiveSubscription }: { hasActiveSubscriptio
     data: dataEvaluationHistoryItems,
     isLoading: isLoadingEvaluationHistoryItems,
     refetch: refetchEvaluationHistoryItems,
-  } = useGetEvaluationHistoryItems({
-    ...appliedFilter,
-    pageSize: pageSize,
-    currentPage: currentPage,
-  });
+  } = useGetEvaluationHistoryItems(
+    {
+      ...appliedFilter,
+      pageSize: pageSize,
+      currentPage: currentPage,
+    },
+    isActive !== false // Only fetch when tab is active (default to true for backward compatibility)
+  );
 
   // Fileforge hook for PDF generation
   const { generatePDFLocally, isGenerating: isPrintGenerating } = useFileforge({

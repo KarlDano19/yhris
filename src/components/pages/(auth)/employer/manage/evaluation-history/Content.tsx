@@ -103,8 +103,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
         {/* Tab Content */}
         <div className='mt-6'>
-          {activeTab === 'individual' && <IndividualEvaluations hasActiveSubscription={hasActiveSubscription} />}
-          {activeTab === 'template-responses' && <TemplateResponses hasActiveSubscription={hasActiveSubscription} />}
+          <div style={{ display: activeTab === 'individual' ? 'block' : 'none' }}>
+            <IndividualEvaluations hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'individual'} />
+          </div>
+          <div style={{ display: activeTab === 'template-responses' ? 'block' : 'none' }}>
+            <TemplateResponses hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'template-responses'} />
+          </div>
         </div>
       </div>
     </>

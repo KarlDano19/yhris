@@ -204,19 +204,114 @@ export const filterIndividualResponses = (
       return departmentFilter.includes(employeeDept);
     });
   }
-
-  console.log('filtered individual responses', filtered);
-
   return filtered;
 };
 
 /**
  * Calculate employee scores for a specific criterion
  */
+const sanitizeKeyPart = (value: any) => {
+  if (value === null || value === undefined) return '';
+  return String(value).trim().toLowerCase();
+};
+
+const buildDeterministicId = (prefix: string, parts: string[]) => {
+  const normalized = parts.filter(Boolean).join('|').trim();
+  if (!normalized) {
+    return null;
+  }
+
+  let hash = 0;
+  for (let idx = 0; idx < normalized.length; idx += 1) {
+    hash = (hash << 5) - hash + normalized.charCodeAt(idx);
+    hash |= 0;
+  }
+
+  return `${prefix}-${Math.abs(hash).toString(36)}`;
+};
+
+export const normalizeFormSections = (formData: any) => {
+  if (!formData) return [];
+
+  if (Array.isArray(formData)) {
+    return formData;
+  }
+
+  if (typeof formData === 'string') {
+    try {
+      const parsed = JSON.parse(formData);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+      if (parsed && Array.isArray(parsed.sections)) {
+        return parsed.sections;
+      }
+      return [];
+    } catch (_err) {
+      return [];
+    }
+  }
+
+  if (Array.isArray(formData.sections)) {
+    return formData.sections;
+  }
+
+  return [];
+};
+
+export const getSectionIdentifier = (section: any) => {
+  if (!section) return null;
+  const explicitId =
+    section.id ||
+    section.section_id ||
+    section.sectionId ||
+    section.section_uuid ||
+    section.sectionUUID ||
+    section.uuid;
+
+  if (explicitId) {
+    return explicitId;
+  }
+
+  const fallback = buildDeterministicId('section', [
+    sanitizeKeyPart(section.section_title || section.title),
+    sanitizeKeyPart(section.section_description || section.description),
+    sanitizeKeyPart(
+      Array.isArray(section.criterion)
+        ? section.criterion.map((crit: any) => crit?.title || crit?.name || '').join('|')
+        : ''
+    ),
+  ]);
+
+  return fallback;
+};
+
+export const getCriterionIdentifier = (criterion: any) => {
+  if (!criterion) return null;
+  const explicitId =
+    criterion.id ||
+    criterion.criterion_id ||
+    criterion.criterionId ||
+    criterion.uuid ||
+    criterion.item_id;
+
+  if (explicitId) {
+    return explicitId;
+  }
+
+  const fallback = buildDeterministicId('criterion', [
+    sanitizeKeyPart(criterion.title || criterion.name),
+    sanitizeKeyPart(criterion.description || criterion.details || criterion.remark),
+  ]);
+
+  return fallback;
+};
+
 export const getEmployeeScoresForCriterion = (
   filteredResponses: any[],
   sectionId: string,
-  criterionId: string
+  criterionId: string,
+  criterionTitle?: string
 ) => {
   if (filteredResponses.length === 0) return [];
 
@@ -228,22 +323,47 @@ export const getEmployeeScoresForCriterion = (
     } 
   } = {};
 
+  // Helper to normalize title for comparison
+  const normalizeTitle = (title: string | undefined | null): string => {
+    if (!title) return '';
+    return String(title).trim().toLowerCase();
+  };
+
+  // Normalize the target criterion title for comparison
+  const normalizedTargetTitle = criterionTitle ? normalizeTitle(criterionTitle) : '';
+
   // Process each individual response
   filteredResponses.forEach((response: any) => {
     const employeeName = response.employee_name;
-    const formData = response.form_data || [];
+    const formData = normalizeFormSections(response.form_data || []);
     
     // Find the section in the form data
-    const section = Array.isArray(formData) 
-      ? formData.find((s: any) => s.id === sectionId)
-      : null;
+    const section = formData.find((s: any) => getSectionIdentifier(s) === sectionId);
 
     if (section && section.criterion && Array.isArray(section.criterion)) {
-      // Find criterion by ID instead of index for more reliable matching
-      const criterion = section.criterion.find((c: any) => {
-        const cId = c.id || c.criterion_id;
-        return cId === criterionId;
-      });
+      let criterion = null;
+      
+      // If we have a title, prioritize title matching (works even when IDs are null)
+      // Otherwise, use ID matching only
+      if (normalizedTargetTitle) {
+        // Try title matching first (more reliable when IDs are null or missing)
+        criterion = section.criterion.find((c: any) => {
+          const cTitle = normalizeTitle(c.title || c.name);
+          return cTitle === normalizedTargetTitle && cTitle !== '';
+        });
+        
+        // Fallback to ID matching if title matching didn't work
+        if (!criterion) {
+          criterion = section.criterion.find(
+            (c: any) => getCriterionIdentifier(c) === criterionId
+          );
+        }
+      } else {
+        // No title available, use ID matching only
+        criterion = section.criterion.find(
+          (c: any) => getCriterionIdentifier(c) === criterionId
+        );
+      }
       
       if (criterion && criterion.score !== undefined && criterion.score !== null) {
         const score = typeof criterion.score === 'number' ? criterion.score : parseFloat(criterion.score);
@@ -277,37 +397,4 @@ export const getEmployeeScoresForCriterion = (
     .sort((a, b) => b.averageScore - a.averageScore);
 };
 
-/**
- * Prepare question response data for charts
- */
-export const prepareQuestionResponseData = (
-  questions: any[],
-  filteredResponses: any[],
-  sectionId: string,
-  criterionIndex: number
-) => {
-  if (!questions) return [];
-
-  const allCriteria: any[] = [];
-
-  // Extract individual criteria from each section
-  questions.forEach((section: any, sectionIndex: number) => {
-    if (section.criterion && Array.isArray(section.criterion)) {
-      section.criterion.forEach((criterion: any, criterionIdx: number) => {
-        allCriteria.push({
-          sectionId: section.id,
-          sectionTitle: section.section_title,
-          criterionId: criterion.id,
-          title: criterion.title,
-          max_score: criterion.max_score,
-          sectionIndex,
-          criterionIndex: criterionIdx,
-          employeeScores: getEmployeeScoresForCriterion(filteredResponses, section.id, criterion.id || criterion.criterion_id)
-        });
-      });
-    }
-  });
-
-  return allCriteria;
-};
 

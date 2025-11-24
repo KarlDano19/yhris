@@ -72,7 +72,7 @@ export default function EditEvaluationModal({
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         customCloseModal();
-        refetch();
+        refetch(); // This will refetch and get the correct can_edit status from backend
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });

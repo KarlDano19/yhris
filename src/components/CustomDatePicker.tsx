@@ -26,6 +26,7 @@ const CustomDatePicker = ({
   className,
   required,
   tabIndex,
+  usePortal = false,
 }: {
   id: string;
   pickerOnChange: any;
@@ -37,6 +38,7 @@ const CustomDatePicker = ({
   className?: string;
   required?: boolean;
   tabIndex?: number;
+  usePortal?: boolean;
 }) => {
   const isGoodDate = (date: any) => {
     const regexGoodDate = /^(?:(0[1-9]|1[012])[\/.](0[1-9]|[12][0-9]|3[01])[\/.](19|20)\d{2})$/;
@@ -96,7 +98,7 @@ const CustomDatePicker = ({
       {/* @ts-ignore */}
       <DatePicker
         wrapperClassName='w-full'
-        popperClassName='!z-20'
+        popperClassName='!z-[9999]'
         selected={selected}
         onChange={date => {
           if (date) {
@@ -115,6 +117,8 @@ const CustomDatePicker = ({
         showYearDropdown
         showMonthDropdown
         dropdownMode='select'
+        withPortal={usePortal}
+        portalId={usePortal ? 'datepicker-portal' : undefined}
       />
     </>
   );

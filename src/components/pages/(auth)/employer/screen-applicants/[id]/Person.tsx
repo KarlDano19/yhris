@@ -99,22 +99,8 @@ export default function Person({
   const { photo_url, name, id } = applicant;
   const params = useParams();
 
+  // Check if applicant is hired - check both 'hired' and 'passed' in final stage
   const isPassedFinalInterview = applicant.status === 'hired';
-  
-  // Find the stage note for the current stage the applicant is in
-  const currentStageNote = applicant.stage_notes?.find(note => note.job_stage === stage.id);
-  
-  // Check if this is the first stage (order_by === 0)
-  const isFirstStage = stage.orderBy === 0;
-  
-  // Check if applicant has any stage notes (indicating they've been through the process before)
-  const hasAnyStageNotes = applicant.stage_notes && applicant.stage_notes.length > 0;
-  
-  // Determine if this is a restored applicant:
-  // - They have stage notes from previous stages (been through the process)
-  // - They're not in the first stage
-  // - They don't have a stage note for the current stage yet
-  const isRestoredApplicant = hasAnyStageNotes && !isFirstStage && !currentStageNote;
   
   // Determine if this applicant card should be interactive
   const canInteract = permissions.can_update && !isStageDisabled;
@@ -149,15 +135,6 @@ export default function Person({
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
   const isArchived = applicant.is_archived === true;
-  
-  // Check if applicant meets all ideal answers (screeningFit === 'good')
-  const meetsAllIdealAnswers = applicant.screeningFit === 'good';
-
-  const capitalizeFirstLetter = (text: any) => {
-    return text.replace(/(?:^|\s)\S/, function (match: any) {
-      return match.toUpperCase();
-    });
-  };
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
   const isWithinTimerWindow = (dateString: string | undefined) => {
@@ -169,44 +146,26 @@ export default function Person({
     return Math.abs(minutesDifference) <= 720; // 12 hours
   };
 
-  // Check if applicant was recently created/updated (within 12 hours)
+  // Check if applicant was recently created (within 12 hours) - only for NEW label
   const isRecentlyCreated = isWithinTimerWindow(applicant.created_at);
-  const isRecentlyUpdated = isWithinTimerWindow(applicant.updated_at);
-  const isRecentlyRestored = isRestoredApplicant && isWithinTimerWindow(applicant.updated_at);
-  const isRecentlyArchived = isArchived && isWithinTimerWindow(applicant.updated_at);
 
-  // Determine background color based on priority and Must-Have results with timer logic
-  let backgroundColorClass = '';
-  let borderClass = '';
-  let hoverClass = '';
-  
-  if (isArchived && isRecentlyArchived) {
-    // Recently archived applicants - Red background (highest priority, with timer)
-    backgroundColorClass = 'bg-red-50';
-    borderClass = 'border-b border-b-red-50';
-    hoverClass = 'hover:bg-red-100';
-  } else if (isPassedFinalInterview) {
-    // Hired applicants - Yellow background (no timer, permanent)
+  // Check if applicant meets all must-have answers (screeningFit === 'good')
+  const meetsMustHaveAnswers = applicant.screeningFit === 'good';
+  // Check if applicant doesn't meet must-have answers (screeningFit === 'bad')
+  const doesNotMeetMustHaveAnswers = applicant.screeningFit === 'bad';
+
+  // Determine background color with priority:
+  // 1. Hired applicants - Yellow background (highest priority)
+  // 2. Applicants who meet must-have answers - Green background
+  // 3. Applicants who don't meet must-have answers - Red background
+  // 4. All others - White background (default)
+  let backgroundColorClass = 'bg-white';
+  if (isPassedFinalInterview) {
     backgroundColorClass = 'bg-yellow-100';
-    borderClass = 'border-b border-b-yellow-100';
-  } else if (isRestoredApplicant && isRecentlyRestored) {
-    // Recently restored from archived applicants - Red background (with timer)
-    backgroundColorClass = 'bg-red-50';
-    borderClass = 'border-b border-b-red-50';
-    hoverClass = 'hover:bg-red-100';
-  } else if (isRejected || isWithdrawn) {
-    // Rejected/Withdrawn applicants - Violet background (no timer, permanent)
-    backgroundColorClass = 'bg-violet-100';
-    borderClass = 'border-b border-b-violet-100';
-  } else if (meetsAllIdealAnswers && (isRecentlyCreated || isRecentlyUpdated)) {
-    // Recently created/updated applicants who meet all ideal answers - Green background (with timer)
+  } else if (meetsMustHaveAnswers) {
     backgroundColorClass = 'bg-green-100';
-    borderClass = 'border-b border-b-green-100';
-    hoverClass = 'hover:bg-green-200';
-  } else {
-    // Applicants who don't meet criteria or timer expired - White background (default)
-    backgroundColorClass = 'bg-white';
-    hoverClass = 'hover:bg-gray-100';
+  } else if (doesNotMeetMustHaveAnswers) {
+    backgroundColorClass = 'bg-red-100';
   }
 
   return (
@@ -214,8 +173,13 @@ export default function Person({
       className={classNames(
         'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
         backgroundColorClass,
-        borderClass,
-        hoverClass,
+        !isPassedFinalInterview 
+          ? (meetsMustHaveAnswers 
+              ? 'hover:bg-green-200' 
+              : doesNotMeetMustHaveAnswers 
+                ? 'hover:bg-red-200' 
+                : 'hover:bg-gray-100')
+          : '',
         !canViewDetails || isStageDisabled
           ? 'opacity-60 cursor-not-allowed'
           : ''
@@ -223,14 +187,14 @@ export default function Person({
     >
       {/* NEW label - positioned absolutely in upper right corner */}
       {isRecentlyCreated && (
-        <span className='absolute top-2 right-3 bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0'>
+        <span className='absolute top-2 right-3 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap z-0'>
           NEW
         </span>
       )}
       
       {/* HIRED label - positioned absolutely in upper right corner */}
       {isPassedFinalInterview && (
-        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
+        <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
           HIRED
         </span>
       )}
