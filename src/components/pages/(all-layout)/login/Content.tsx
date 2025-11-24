@@ -431,14 +431,72 @@ function Content() {
                     >
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
                     </button>
-                    <button
-                      id='yahshua-payroll-login-button'
-                      className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
-                      onClick={() => loginWithYahshuaPayroll()}
-                    >
-                      <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
-                      YAHSHUA Payroll
-                    </button>
+                    <div className="relative w-full lg:w-full group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-lg opacity-100 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-timed"></div>
+                      <button
+                        id='yahshua-payroll-login-button'
+                        className='relative flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50 transition-all duration-300 hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] animate-button-border-timed'
+                        onClick={() => loginWithYahshuaPayroll()}
+                      >
+                        <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
+                        YAHSHUA Payroll
+                      </button>
+                      <style jsx>{`
+                        @keyframes gradient-timed {
+                          0% {
+                            background-size: 400% 400%;
+                            background-position: left center;
+                            opacity: 1;
+                          }
+                          15% {
+                            background-size: 200% 200%;
+                            background-position: right center;
+                            opacity: 1;
+                          }
+                          30% {
+                            background-size: 400% 400%;
+                            background-position: left center;
+                            opacity: 1;
+                          }
+                          45% {
+                            background-size: 200% 200%;
+                            background-position: right center;
+                            opacity: 1;
+                          }
+                          60% {
+                            background-size: 400% 400%;
+                            background-position: left center;
+                            opacity: 1;
+                          }
+                          75% {
+                            opacity: 1;
+                          }
+                          100% {
+                            opacity: 0;
+                            background-size: 400% 400%;
+                            background-position: left center;
+                          }
+                        }
+                        @keyframes button-border-timed {
+                          0% {
+                            border: none;
+                          }
+                          75% {
+                            border: none;
+                          }
+                          100% {
+                            border: 1px solid #9CA3AF;
+                          }
+                        }
+                        .animate-gradient-timed {
+                          animation: gradient-timed 5s ease forwards;
+                          background: linear-gradient(-45deg, #3b82f6, #8b5cf6, #ec4899, #06b6d4, #3b82f6);
+                        }
+                        .animate-button-border-timed {
+                          animation: button-border-timed 5s ease forwards;
+                        }
+                      `}</style>
+                    </div>
                   </div>
                   <div className='text-sm'>
                     By continuing, you agree to our{' '}

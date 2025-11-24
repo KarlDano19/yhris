@@ -11,6 +11,7 @@ import { Tooltip } from 'react-tooltip';
 
 import ClipIcon from '@/svg/ClipIcon';
 import AttachmentViewModal from './modals/AttachmentViewModal';
+import CreateSeparationLetterModal from './modals/CreateSeparationLetterModal';
 
 const items = [
   { name: 'Letter of Acceptance', type: 'Acceptance' },
@@ -26,6 +27,9 @@ export default function SeparationLetter({
   setIsLetterModalOpen,
   setReceived,
   isLoading,
+  refetch,
+  employerName,
+  effectiveDate,
 }: {
   id: number;
   isLetterSent: boolean;
@@ -35,8 +39,27 @@ export default function SeparationLetter({
   setIsLetterModalOpen: Dispatch<T_LetterModal>;
   setReceived: any;
   isLoading: boolean;
+  refetch: () => void;
+  employerName?: string;
+  effectiveDate?: string;
 }) {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isCreateLetterModalOpen, setIsCreateLetterModalOpen] = useState(false);
+  const [selectedLetterType, setSelectedLetterType] = useState<'Acceptance' | 'Separation'>('Acceptance');
+
+  const handleSendClick = async () => {
+    // Check if there's an attachment (PDF already generated)
+    if (letterAttachment) {
+      // Open the existing separation email modal with the PDF
+      setIsLetterModalOpen({
+        type: selectedLetterType,
+        id,
+      });
+    } else {
+      // If no attachment, open create letter modal to generate PDF first
+      setIsCreateLetterModalOpen(true);
+    }
+  };
 
   return (
     <>
@@ -80,12 +103,10 @@ export default function SeparationLetter({
                             : 'text-gray-700',
                           'block px-4 py-2 text-sm cursor-pointer'
                         )}
-                        onClick={() =>
-                          setIsLetterModalOpen({
-                            type: item.type,
-                            id,
-                          })
-                        }
+                        onClick={() => {
+                          setSelectedLetterType(item.type as 'Acceptance' | 'Separation');
+                          setIsCreateLetterModalOpen(true);
+                        }}
                       >
                         {item.name}
                       </span>
@@ -101,14 +122,18 @@ export default function SeparationLetter({
         <div>
           <button
             className={classNames(
-              isLetterSent
+              letterAttachment
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
-                : 'border-[1px] border-red-500 text-red-500',
-              'relative inline-flex items-center rounded-md px-2 py-1 focus:z-10 disabled:opacity-75'
+                : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
+              'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
             )}
-            disabled={isLetterSent}
+            disabled={isLoading}
+            onClick={handleSendClick}
+            title={letterAttachment
+              ? (isLetterSent ? 'Resend Letter' : 'Send Letter') 
+              : 'Click to Generate & Send Letter'}
           >
-            {isLetterSent ? 'Sent' : 'Send'}
+            {isLetterSent ? 'Resent' : 'Send'}
           </button>
         </div>
         <div className='flex flex-col'>
@@ -174,6 +199,27 @@ export default function SeparationLetter({
       <Tooltip id='letter-attachment-tooltip' />
     </div>
     
+    {/* Create Separation Letter Modal */}
+    {isCreateLetterModalOpen && (
+      <CreateSeparationLetterModal
+        isOpen={isCreateLetterModalOpen}
+        setIsOpen={setIsCreateLetterModalOpen}
+        separationId={id}
+        letterType={selectedLetterType}
+        refetch={refetch}
+        employerName={employerName}
+        effectiveDate={effectiveDate}
+        onSuccess={(data) => {
+          // Automatically open send modal after PDF generation
+          setIsLetterModalOpen({
+            type: selectedLetterType,
+            id,
+          });
+        }}
+      />
+    )}
+    
+    {/* View Attachment Modal */}
     {isViewModalOpen && (
       <AttachmentViewModal
         isOpen={isViewModalOpen}

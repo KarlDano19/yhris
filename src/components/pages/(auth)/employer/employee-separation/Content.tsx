@@ -17,6 +17,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import useDeleteSeparation from './hooks/useDeleteSeparation';
@@ -563,6 +564,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-letters`] || false}
+              refetch={refetch}
+              employerName={item.employer_name}
+              effectiveDate={item.effective_date || item.date_of_separation}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -837,9 +841,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
           defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
-          showDragDropAttachment={true}
-          submitButtonText="Send"
+          showAttachment={true}
+          customAttachmentSection={
+            <SeparationLetterAttachmentSection
+              pdfAttachment={isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.letter_attachment : null}
+              letterType={isLetterModalOpen.type as 'Acceptance' | 'Separation'}
+              onViewAttachment={(url: string) => window.open(url, '_blank')}
+              canShowPreview={true}
+            />
+          }
+          submitButtonText="Send Letter"
           isLoading={isLoading}
+          prePopulatedData={{
+            subject: `Letter of ${isLetterModalOpen.type} - ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'}`,
+            message: `<p>Dear ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`,
+            to: isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : [],
+            cc: [],
+            bcc: []
+          }}
         />
       )}
       {isDocumentModalOpen && (
