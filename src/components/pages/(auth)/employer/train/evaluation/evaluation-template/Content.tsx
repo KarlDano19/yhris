@@ -18,6 +18,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
+import ViewEvaluationModal from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
@@ -31,6 +32,8 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
 import classNames from '@/helpers/classNames';
+import EyePassword from '@/svg/EyePassword';
+
 import { formatDateToLocal } from '@/helpers/date';
 
 type T_BulkDeleteModalData = DeleteModalData & {
@@ -42,10 +45,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
+  const [isViewEvaluationModalOpen, setIsViewEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [duplicateEvaluationTemplateId, setDuplicateEvaluationTemplateId] = useState<number | null>(null);
+  const [viewEvaluationTemplateId, setViewEvaluationTemplateId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
@@ -189,6 +194,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
   };
+  const openViewEvaluationModal = (evaluationDetails: any) => {
+    setViewEvaluationTemplateId(evaluationDetails.id);
+    setIsViewEvaluationModalOpen(true);
+  };
 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
     setActionType('delete');
@@ -325,7 +334,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     if (evaluationItems && evaluationItems?.length > 0) {
-      return evaluationItems?.map((item: any) => (
+      return evaluationItems?.map((item: any) => {
+        // Use backend's can_edit value directly - it determines if template has rooms/is in use
+        const isLocked = item.can_edit === false;
+        return (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <input
@@ -341,14 +353,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button 
-                onClick={() => openEditEvaluationModal(item)}
-                data-tooltip-id={`edit-tooltip-${item.id}`}
-                data-tooltip-content="Edit"
-                title='Edit'
-              >
-                <EditIcon />
-              </button>
+              {isLocked ? (
+                <button
+                  onClick={() => openViewEvaluationModal(item)}
+                  className='cursor-pointer'
+                  data-tooltip-id={`view-tooltip-${item.id}`}
+                  data-tooltip-content="To edit this template, you need to duplicate it first"
+                  data-tooltip-place='bottom'
+                  title='To edit this template, you need to duplicate it first'
+                >
+                  <EyePassword visible />
+                </button>
+              ) : (
+                <button 
+                  onClick={() => openEditEvaluationModal(item)}
+                  data-tooltip-id={`edit-tooltip-${item.id}`}
+                  data-tooltip-content="Edit"
+                  title='Edit'
+                >
+                  <EditIcon />
+                </button>
+              )}
               <button 
                 onClick={() => openDuplicateModal(item)}
                 data-tooltip-id={`duplicate-tooltip-${item.id}`}
@@ -370,7 +395,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </td>
         </tr>
-      ));
+        );
+      });
     } else {
       return (
         <>
@@ -612,6 +638,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationTemplateId={selectedEvaluationTemplateId}
         />
       )}
+      {isViewEvaluationModalOpen && viewEvaluationTemplateId && (
+        <ViewEvaluationModal
+          isOpen={isViewEvaluationModalOpen}
+          setIsOpen={setIsViewEvaluationModalOpen}
+          selectedEvaluationTemplateId={viewEvaluationTemplateId}
+        />
+      )}
       {isDeleteEvaluationModalOpen && (
         <DeleteModal
           isOpen={isDeleteEvaluationModalOpen}
@@ -668,6 +701,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip />
     </>
   );
 };

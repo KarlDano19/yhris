@@ -34,13 +34,14 @@ async function getEvaluationHistoryItems(filters: any) {
   }
 }
 
-function useGetEvaluationHistoryItems(filters: any) {
+function useGetEvaluationHistoryItems(filters: any, enabled: boolean = true) {
   const query = useQuery(
     ['evaluationHistoryListItemsCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getEvaluationHistoryItems(filters),
     {
-      // enabled: false,
-    keepPreviousData: true,
+      enabled: enabled,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 

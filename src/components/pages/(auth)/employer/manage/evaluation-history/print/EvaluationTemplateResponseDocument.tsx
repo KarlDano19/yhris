@@ -13,11 +13,27 @@ interface EvaluationTemplateResponseDocumentProps {
     employees_responded: Array<{
       name: string;
       department: string;
-      recipients: string;
       date_completed: string;
       score: number;
     }>;
-    questions: Array<{
+    sections?: Array<{
+      section_index: number;
+      section_title: string;
+      section_description: string;
+      criterion: Array<{
+        criterion_index: number;
+        title: string;
+        max_score: number;
+        responses?: Array<{
+          employee_name: string;
+          employee_id: number;
+          department: string;
+          date_of_evaluation: string;
+          score: number;
+        }>;
+      }>;
+    }>;
+    questions?: Array<{
       id: string;
       section_title: string;
       criterion: Array<{
@@ -149,7 +165,6 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-1 text-center text-xs">Recipients (Evaluators)</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Department</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Employee Evaluated</th>
                 <th className="border border-gray-300 p-1 text-center text-xs">Date Completed</th>
@@ -160,9 +175,6 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
             <tbody>
               {sortedRespondents.map((employee, index) => (
                 <tr key={index}>
-                  <td className="border border-gray-300 p-1 text-center text-xs">
-                    {employee.recipients || 'N/A'}
-                  </td>
                   <td className="border border-gray-300 p-1 text-center text-xs">{employee.department}</td>
                   <td className="border border-gray-300 p-1 text-center text-xs">{employee.name}</td>
                   <td className="border border-gray-300 p-1 text-center text-xs">
@@ -208,21 +220,61 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
     // Flatten all criteria from all sections with employee scores
     const allCriteria: any[] = [];
     
-    if (templateData.questions && Array.isArray(templateData.questions)) {
-      templateData.questions.forEach((section: any, sectionIndex: number) => {
+    // Use sections from backend (new format) if available, otherwise fall back to questions
+    const sectionsToProcess = templateData.sections && Array.isArray(templateData.sections) && templateData.sections.length > 0
+      ? templateData.sections
+      : (templateData.questions && Array.isArray(templateData.questions) ? templateData.questions : []);
+    
+    if (sectionsToProcess && sectionsToProcess.length > 0) {
+      sectionsToProcess.forEach((section: any, sectionIndex: number) => {
         if (section.criterion && Array.isArray(section.criterion)) {
           section.criterion.forEach((criterion: any, criterionIndex: number) => {
             const questionTitle = sanitizeQuestionTitle(criterion?.title);
             if (!criterion || !questionTitle) {
               return;
             }
-            // Get employee scores for this criterion from individual_responses
-            const employeeScores = getEmployeeScoresForQuestion(section.id, criterionIndex);
+            
+            // Get employee scores from criterion.responses (new backend format)
+            const employeeScoresMap: { [key: string]: { name: string; scores: number[]; averageScore: number } } = {};
+            
+            if (criterion.responses && Array.isArray(criterion.responses)) {
+              // Process responses from backend format
+              criterion.responses.forEach((response: any) => {
+                const employeeName = response.employee_name;
+                const score = typeof response.score === 'number' ? response.score : parseFloat(response.score || 0);
+                
+                if (!isNaN(score) && score >= 0) {
+                  if (!employeeScoresMap[employeeName]) {
+                    employeeScoresMap[employeeName] = {
+                      name: employeeName,
+                      scores: [],
+                      averageScore: 0
+                    };
+                  }
+                  employeeScoresMap[employeeName].scores.push(score);
+                }
+              });
+            } else {
+              // Fallback to old format
+              const scores = getEmployeeScoresForQuestion(section.id || `section-${section.section_index}`, criterionIndex);
+              scores.forEach((emp: any) => {
+                employeeScoresMap[emp.name] = emp;
+              });
+            }
+            
+            // Calculate averages
+            const employeeScores = Object.values(employeeScoresMap).map(employee => {
+              if (employee.scores.length > 0) {
+                employee.averageScore = employee.scores.reduce((sum, score) => sum + score, 0) / employee.scores.length;
+              }
+              return employee;
+            }).filter(employee => employee.averageScore > 0)
+              .sort((a, b) => b.averageScore - a.averageScore);
             
             allCriteria.push({
-              sectionTitle: section.section_title,
+              sectionTitle: section.section_title || section.title || 'Untitled Section',
               title: questionTitle,
-              max_score: criterion?.max_score,
+              max_score: criterion?.max_score || 0,
               employeeScores: employeeScores,
             });
           });
@@ -362,52 +414,57 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
       .sort((a, b) => b.averageScore - a.averageScore);
   };
 
-  const renderAnalytics = () => (
-    <div className="mb-4 ml-3">
-      <h3 className="text-xs font-semibold text-gray-900 mb-2">Employee Evaluation Details</h3>
-      
-      {templateData.frequently_evaluated_employees && templateData.frequently_evaluated_employees.length > 0 ? (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-1 text-center text-xs">Employee Name</th>
-              <th className="border border-gray-300 p-1 text-center text-xs">Department</th>
-              <th className="border border-gray-300 p-1 text-center text-xs">Evaluation Count</th>
-              <th className="border border-gray-300 p-1 text-center text-xs">Average Score</th>
-              <th className="border border-gray-300 p-1 text-center text-xs">Average Raw Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {templateData.frequently_evaluated_employees.map((employee, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 p-1 text-center text-xs">{employee.name}</td>
-                <td className="border border-gray-300 p-1 text-center text-xs">{employee.department}</td>
-                <td className="border border-gray-300 p-1 text-center text-xs">
-                  {employee.evaluation_count} evaluation{employee.evaluation_count !== 1 ? 's' : ''}
-                </td>
-                <td className="border border-gray-300 p-1 text-center text-xs">
-                  <span className={`font-semibold ${
-                    employee.average_score >= 80 ? 'text-green-600' :
-                    employee.average_score >= 60 ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
-                    {employee.average_score}%
-                  </span>
-                </td>
-                <td className="border border-gray-300 p-1 text-center text-xs">
-                  {employee.average_raw_score || 0} / {templateData.template?.total_score || 1}
-                </td>
+  const renderAnalytics = () => {
+    // Get all analytics employees (not paginated for print)
+    const allAnalyticsEmployees = templateData.frequently_evaluated_employees || [];
+    
+    return (
+      <div className="mb-4 ml-3">
+        <h3 className="text-xs font-semibold text-gray-900 mb-2">Employee Evaluation Details</h3>
+        
+        {allAnalyticsEmployees.length > 0 ? (
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-1 text-center text-xs">Employee Name</th>
+                <th className="border border-gray-300 p-1 text-center text-xs">Department</th>
+                <th className="border border-gray-300 p-1 text-center text-xs">Evaluation Count</th>
+                <th className="border border-gray-300 p-1 text-center text-xs">Average Score</th>
+                <th className="border border-gray-300 p-1 text-center text-xs">Average Raw Score</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className="text-center py-6 text-gray-500">
-          <div className="text-sm mb-1">No employee evaluation data found</div>
-          <div className="text-xs">Analytics data will appear here when available</div>
-        </div>
-      )}
-    </div>
-  );
+            </thead>
+            <tbody>
+              {allAnalyticsEmployees.map((employee: any, index: number) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-1 text-center text-xs">{employee.name}</td>
+                  <td className="border border-gray-300 p-1 text-center text-xs">{employee.department}</td>
+                  <td className="border border-gray-300 p-1 text-center text-xs">
+                    {employee.evaluation_count} evaluation{employee.evaluation_count !== 1 ? 's' : ''}
+                  </td>
+                  <td className="border border-gray-300 p-1 text-center text-xs">
+                    <span className={`font-semibold ${
+                      employee.average_score >= 80 ? 'text-green-600' :
+                      employee.average_score >= 60 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {employee.average_score}%
+                    </span>
+                  </td>
+                  <td className="border border-gray-300 p-1 text-center text-xs">
+                    {employee.average_raw_score || 0} / {templateData.template?.total_score || 1}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-6 text-gray-500">
+            <div className="text-sm mb-1">No employee evaluation data found</div>
+            <div className="text-xs">Analytics data will appear here when available</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="text-black bg-white font-sans text-xs leading-tight max-w-4xl mx-auto p-4">
