@@ -17,6 +17,7 @@ import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
@@ -298,7 +299,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Create a new array instead of mutating the original
       const formattedEmployees = employeeListData.records.map((employee: any) => ({
         ...employee,
-        date_hired: Intl.DateTimeFormat('en-US').format(new Date(employee.date_hired))
+        date_hired: formatDateToLocal(employee.date_hired)
       }));
       
       setEmployeeItems(formattedEmployees);

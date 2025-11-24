@@ -7,6 +7,7 @@ import useGetAddPersonelMovementDetails from "../hooks/useGetAddPersonelMovement
 import useGetPersonnelMovementApprovals from "../hooks/useGetPersonnelMovementApprovals";
 import EmployeeProfilePrint from "./print/EmployeeProfilePrint";
 import ReccomendationPrint from "./print/ReccomendationPrint";
+import { formatDateToLocal } from "@/helpers/date";
 
 import { XCircleIcon, PrinterIcon } from "@heroicons/react/24/solid";
 
@@ -39,7 +40,7 @@ function PrintModal({
 
   useEffect(() => {
     if (personelMovementData) {
-      personelMovementData['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(personelMovementData.created_at));
+      personelMovementData['created_at'] = formatDateToLocal(personelMovementData.created_at);
     }
   }, [personelMovementData]);
 

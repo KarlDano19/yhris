@@ -24,6 +24,12 @@ async function updateProfile(profile: T_EmployerProfile) {
     data.append('zip_code', profile.zipCode);
     data.append('language', profile.language);
     data.append('currency', profile.currency);
+    if (profile.timezone) {
+      data.append('timezone', profile.timezone);
+    }
+    if (profile.timeFormat) {
+      data.append('time_format', profile.timeFormat);
+    }
     if (profile.companyLogo) {
       data.append('logo', profile.companyLogo);
     }

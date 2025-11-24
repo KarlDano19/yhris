@@ -11,6 +11,7 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import useGetEmailMonitoring from '../hook/email-monitoring/useGetEmailMonitoring';
@@ -277,7 +278,7 @@ const Content = () => {
             </span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {new Date(item.scheduled_date).toLocaleDateString()}
+            {formatDateToLocal(item.scheduled_date)}
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div>

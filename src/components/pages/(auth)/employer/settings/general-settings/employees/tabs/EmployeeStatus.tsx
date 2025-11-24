@@ -24,6 +24,7 @@ import EditModal from '../modals/EditModal';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useDeleteEmployeeStatus from '../hooks/employee-status/useDeleteEmployeeStatus';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -33,15 +34,6 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
-};
-
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
 };
 
 const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
@@ -231,7 +223,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
             />
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDateToLocal(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>

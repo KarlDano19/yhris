@@ -7,6 +7,7 @@ import ModalLayout from '../../../../../ModalLayout';
 import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
 import titleCase from '@/helpers/titleCase';
+import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
 import ScreenApplicantGoPremiumModal from '../../modals/SubsriptionModals/ScreenApplicantGoPremiumModal';
 import useGetStageRequirements from '../hooks/useGetStageRequirements';
 import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
@@ -557,7 +558,7 @@ export default function Checklist({
                                   <p className='text-gray-600 text-sm whitespace-pre-wrap'>{stageNote.notes}</p>
                                   {stageNote.created_at && (
                                     <p className='text-xs text-gray-400 mt-2'>
-                                      Added: {new Date(stageNote.created_at).toLocaleDateString()}
+                                      Added: {formatDateToLocal(stageNote.created_at)}
                                     </p>
                                   )}
                                 </div>
@@ -652,7 +653,7 @@ export default function Checklist({
                               <p className='text-xs text-gray-500'>{audit.user}</p>
                             </div>
                             <p className='text-xs text-gray-400'>
-                              {new Date(audit.created_at).toLocaleString()}
+                              {formatDateTimeSeparate(audit.created_at).formattedDate} {formatDateTimeSeparate(audit.created_at).formattedTime}
                             </p>
                           </div>
                         </div>

@@ -34,6 +34,7 @@ import DuplicateIcon from '@/svg/DuplicateIcon';
 import classNames from '@/helpers/classNames';
 import EyePassword from '@/svg/EyePassword';
 
+import { formatDateToLocal } from '@/helpers/date';
 
 type T_BulkDeleteModalData = DeleteModalData & {
   selectedCount: number;
@@ -128,7 +129,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataEvaluation.records) {
         items = dataEvaluation.records.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         totalPages = dataEvaluation.total_pages || 1;
@@ -137,7 +138,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle array response structure (no pagination from backend)
       else if (Array.isArray(dataEvaluation)) {
         items = dataEvaluation.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         

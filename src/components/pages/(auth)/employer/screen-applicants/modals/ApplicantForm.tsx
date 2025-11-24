@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
 import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
@@ -197,11 +198,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                     <h5 className='font-semibold text-gray-900 text-base flex-1'>Date Applied:</h5>
                     {applicant?.created_at && (
                       <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
-                        {new Date(applicant.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
+                        {formatDateToLocal(applicant.created_at)}
                       </span>
                     )}
                   </div>
@@ -238,11 +235,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                         <h5 className='font-semibold text-gray-900 text-base flex-1'>{stageTitle}</h5>
                         {stageNote.created_at && (
                           <span className='text-sm text-gray-500 ml-4 flex-shrink-0'>
-                            {new Date(stageNote.created_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
+                            {formatDateToLocal(stageNote.created_at)}
                           </span>
                         )}
                       </div>
@@ -432,7 +425,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   {applicantProfile.summary_updated_at && (
                     <div className='mt-3 pt-3 border-t border-blue-200'>
                       <p className='text-xs text-blue-600'>
-                        Last updated: {new Date(applicantProfile.summary_updated_at).toLocaleString()}
+                        Last updated: {formatDateTimeSeparate(applicantProfile.summary_updated_at).formattedDate} {formatDateTimeSeparate(applicantProfile.summary_updated_at).formattedTime}
                       </p>
                     </div>
                   )}

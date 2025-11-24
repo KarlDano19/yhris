@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import useGetApplicationByUser from './hooks/useGetApplicationByUser';
+import { formatDateToLocal, formatDateTimeToLocal } from '@/helpers/date';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
@@ -72,11 +73,7 @@ const Content = () => {
             applications.map((application: Application, index: number) => (
               <tr key={index}>
                 <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>
-                  {new Date(application.created_at).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {formatDateToLocal(application.created_at, true)}
                 </td>
                 <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.job_title}</td>
                 <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.employer_name}</td>
@@ -90,15 +87,7 @@ const Content = () => {
                   </h6>
                   <span className='flex justify-center'>
                     <p className='md:absolute mt-1 text-xs text-[#ACB9CB]'>
-                      Status as of{' '}
-                      {new Date(application.updated_at).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true,
-                      })}
+                      Status as of {formatDateTimeToLocal(application.updated_at, true)}
                     </p>
                   </span>
                 </td>

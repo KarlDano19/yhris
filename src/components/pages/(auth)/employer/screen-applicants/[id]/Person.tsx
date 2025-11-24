@@ -9,6 +9,7 @@ import StateContext from '../contexts/StateContext';
 import classNames from '@/helpers/classNames';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import { useParams } from 'next/navigation';
+import { formatDateToLocal } from '@/helpers/date';
 
 const menuList = [
   {
@@ -227,11 +228,7 @@ export default function Person({
           <div className='flex flex-col mt-1'>
             <span className='text-xs text-gray-400'>
               {applicant.created_at 
-                ? new Date(applicant.created_at).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })
+                ? formatDateToLocal(applicant.created_at)
                 : 'Date not available'
               }
             </span>

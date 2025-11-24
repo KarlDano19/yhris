@@ -21,6 +21,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/
 import classNames from '@/helpers/classNames';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import { formatDateTimeSeparate } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -115,16 +116,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     [userOptions]
   );
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = date.toLocaleDateString(undefined, options); // e.g., "January 1, 2023"
-    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, '0')}`;
-    return { formattedDate, formattedTime };
-  };
 
   const menuOptions = [
     {
@@ -295,7 +286,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       return auditLogsData.map((item: any) => (
         <tr key={item.id} className='cursor-pointer hover:bg-gray-100' onClick={() => setOpenModal({ id: item.id, open: true })}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.id}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 grid'>{formatDateTime(item.created_at).formattedDate} <span>{formatDateTime(item.created_at).formattedTime}</span></td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 grid'>{formatDateTimeSeparate(item.created_at).formattedDate} <span>{formatDateTimeSeparate(item.created_at).formattedTime}</span></td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.action.toUpperCase()}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.model_name}</td>
