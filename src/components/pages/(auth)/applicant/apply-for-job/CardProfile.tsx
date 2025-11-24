@@ -67,13 +67,13 @@ const CardProfile = () => {
             </Link>
           </div>
           <div className='contact-address py-5 text-indigo-dye'>
-            <div className='email flex w-[75%] mx-auto items-center space-x-3 truncate'>
-              <EnvelopeIcon className='h-6' />
-              <h6 className='w-10'>{profile.email}</h6>
+            <div className='email flex w-[75%] mx-auto items-center space-x-3'>
+              <EnvelopeIcon className='h-6 flex-shrink-0' />
+              <h6 className='min-w-0 truncate'>{profile.email}</h6>
             </div>
             <div className='email mt-2 flex w-[75%] mx-auto items-center space-x-3'>
-              <PhoneIcon className='h-6' />
-              <h6>{profile.mobile}</h6>
+              <PhoneIcon className='h-6 flex-shrink-0' />
+              <h6 className='min-w-0 truncate'>{profile.mobile}</h6>
             </div>
           </div>
         </div>
