@@ -42,11 +42,20 @@ function Settings({ register, onSubmit, isLoading, onBack, watch, setValue, cont
   ], []);
 
   const timezoneValue = watch('timezone');
+  const timeFormatValue = watch('timeFormat');
 
   // Set default timezone to Asia/Manila if empty (only on mount)
   useEffect(() => {
     if (!timezoneValue) {
       setValue('timezone', 'Asia/Manila', { shouldValidate: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Set default time format to 12hr if empty (only on mount)
+  useEffect(() => {
+    if (!timeFormatValue) {
+      setValue('timeFormat', '12hr', { shouldValidate: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
