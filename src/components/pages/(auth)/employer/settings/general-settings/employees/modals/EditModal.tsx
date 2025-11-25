@@ -1,9 +1,10 @@
-import { Dispatch, Fragment, useRef, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import dynamic from 'next/dynamic';
 
 import CustomToast from '@/components/CustomToast';
 import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
@@ -14,6 +15,9 @@ import useGetPositionDetails from '../hooks/position/useGetPositionDetails';
 import useEditPositionDetails from '../hooks/position/useEditPositionDetails';
 import useGetEmployeeStatusDetails from '../hooks/employee-status/useGetEmployeeStatusDetails';
 import useEditEmployeeStatusDetails from '../hooks/employee-status/useEditEmployeeStatusDetails';
+
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import 'react-quill/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;
@@ -33,6 +37,7 @@ export default function EditModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control, setValue } = useForm();
+  const [description, setDescription] = useState('');
   const {
     data: locationDetailsData,
     refetch: refetchLocationDetails,
@@ -57,6 +62,12 @@ export default function EditModal({
   const { mutate: editDepartment, isLoading: isLoadingEditDepartment } = useEditDepartmentDetails();
   const { mutate: editPosition, isLoading: isLoadingEditPosition } = useEditPositionDetails();
   const { mutate: editEmployeeStatus, isLoading: isLoadingEditEmployeeStatus } = useEditEmployeeStatusDetails();
+
+  // Dynamic import for React Quill
+  const ReactQuill = useMemo(
+    () => dynamic(() => import("react-quill"), { ssr: false }),
+    [isOpen]
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -84,6 +95,7 @@ export default function EditModal({
     } else if (module === 'position') {
       if (positionDetailsData) {
         setValue('name', positionDetailsData.name);
+        setDescription(positionDetailsData.description || '');
       }
     } else if (module === 'employee-status') {
       if (employeeStatusDetailsData) {
@@ -93,6 +105,9 @@ export default function EditModal({
   }, [locationDetailsData, departmentDetailsData, positionDetailsData, employeeStatusDetailsData]);
 
   const onSubmit = handleSubmit((data) => {
+    // Add description to data if it's a position
+    const submitData = module === 'position' ? { ...data, description } : data;
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -108,18 +123,19 @@ export default function EditModal({
       },
     };
     if (module === 'location') {
-      editLocation({ location_id: isOpen.id, data: data }, callbackReq);
+      editLocation({ location_id: isOpen.id, data: submitData }, callbackReq);
     } else if (module === 'department') {
-      editDepartment({ department_id: isOpen.id, data: data }, callbackReq);
+      editDepartment({ department_id: isOpen.id, data: submitData }, callbackReq);
     } else if (module === 'position') {
-      editPosition({ position_id: isOpen.id, data: data }, callbackReq);
+      editPosition({ position_id: isOpen.id, data: submitData }, callbackReq);
     } else if (module === 'employee-status') {
-      editEmployeeStatus({ employee_status_id: isOpen.id, data: data }, callbackReq);
+      editEmployeeStatus({ employee_status_id: isOpen.id, data: submitData }, callbackReq);
     }
   });
 
   const customCloseModal = () => {
     reset();
+    setDescription('');
     removeLocation();
     removeDepartment();
     removePosition();
@@ -153,7 +169,7 @@ export default function EditModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
+              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 ${module === 'position' ? 'w-[750px]' : 'w-[500px]'}`}>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Edit {module}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
@@ -170,6 +186,23 @@ export default function EditModal({
                       className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                     />
                   </div>
+                  {module === 'position' && (
+                    <div className='px-4 pb-6'>
+                      <label htmlFor='description' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                        Description
+                      </label>
+                      <div className='h-48'>
+                        <ReactQuill
+                          value={description}
+                          onChange={setDescription}
+                          formats={QUILL_FORMATS}
+                          modules={QUILL_MODULES}
+                          style={{ height: "100%", padding: "5px 8px !important" }}
+                          placeholder='Enter position description, responsibilities, and requirements...'
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
                     <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
                       <button

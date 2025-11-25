@@ -1,8 +1,9 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef, useState, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
+import dynamic from 'next/dynamic';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import CustomToast from '@/components/CustomToast';
@@ -12,12 +13,15 @@ import useAddDepartment from '../hooks/department/useAddDepartment';
 import useAddPosition from '../hooks/position/useAddPosition';
 import useAddEmployeeStatus from '../hooks/employee-status/useAddEmployeeStatus';
 
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
+import 'react-quill/dist/quill.snow.css';
+
 export default function CreateLocationModal({
   module,
   isOpen,
   setIsOpen,
   refetch,
-  hideDescription,
+  hideDescription = false,
 }: {
   module: string;
   isOpen: boolean;
@@ -27,12 +31,22 @@ export default function CreateLocationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control } = useForm();
+  const [description, setDescription] = useState('');
   const { mutate: addLocation, isLoading: isLoadingAddLocation } = useAddLocation();
   const { mutate: addDepartment, isLoading: isLoadingAddDepartment } = useAddDepartment();
   const { mutate: addPosition, isLoading: isLoadingAddPosition } = useAddPosition();
   const { mutate: addEmployeeStatus, isLoading: isLoadingAddEmployeeStatus } = useAddEmployeeStatus();
 
+  // Dynamic import for React Quill
+  const ReactQuill = useMemo(
+    () => dynamic(() => import("react-quill"), { ssr: false }),
+    [isOpen]
+  );
+
   const onSubmit = handleSubmit((data) => {
+    // Add description to data if it's a position
+    const submitData = module === 'position' ? { ...data, description } : data;
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -40,6 +54,7 @@ export default function CreateLocationModal({
         });
         setIsOpen(false);
         reset();
+        setDescription('');
         refetch();
       },
       onError: (err: any) => {
@@ -49,13 +64,13 @@ export default function CreateLocationModal({
       },
     };
     if (module === 'location') {
-      addLocation(data, callbackReq);
+      addLocation(submitData, callbackReq);
     } else if (module === 'department') {
-      addDepartment(data, callbackReq);
+      addDepartment(submitData, callbackReq);
     } else if (module === 'position') {
-      addPosition(data, callbackReq);
+      addPosition(submitData, callbackReq);
     } else if (module === 'employee-status') {
-      addEmployeeStatus(data, callbackReq);
+      addEmployeeStatus(submitData, callbackReq);
     }
   });
 
@@ -85,7 +100,7 @@ export default function CreateLocationModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'  
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
+              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 ${module === 'position' ? 'w-[750px]' : 'w-[500px]'}`}>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create {module}</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
@@ -102,6 +117,23 @@ export default function CreateLocationModal({
                       className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                     />
                   </div>
+                  {module === 'position' && !hideDescription && (
+                    <div className='px-4 pb-6'>
+                      <label htmlFor='description' className='block text-sm font-medium leading-6 text-gray-900 mb-2'>
+                        Description
+                      </label>
+                      <div className='h-48'>
+                        <ReactQuill
+                          value={description}
+                          onChange={setDescription}
+                          formats={QUILL_FORMATS}
+                          modules={QUILL_MODULES}
+                          style={{ height: "100%", padding: "5px 8px !important" }}
+                          placeholder='Enter position description, responsibilities, and requirements...'
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div className='flex justify-center w-full px-4 space-x-8 pt-10 pb-7'>
                     <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
                       <button
