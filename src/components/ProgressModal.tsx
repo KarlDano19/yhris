@@ -127,7 +127,7 @@ export default function ProgressModal({
                       {subtitle}
                     </p>
                   </div>
-                  <div className='w-full h-6 bg-gray-200 rounded-full dark:bg-gray-700'>
+                  <div className='w-full h-6 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden'>
                     <div
                       className='h-6 font-medium text-white text-center p-0.5 leading-none rounded-full transition-all ease-out duration-300'
                       style={{ 

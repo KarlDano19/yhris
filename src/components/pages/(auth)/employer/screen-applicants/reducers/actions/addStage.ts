@@ -11,6 +11,7 @@ export default function addStage(state: any, action: any) {
     requirements: [],
     applicants: [],
     addType: addType,
+    is_final_stage: false, // New stages are never final stages
     // Add default permissions for new stages
     permissions: {
       can_view: true,

@@ -18,6 +18,9 @@ interface DemographicBreakdownProps {
   error?: any;
   selectedJobFilter?: string;
   onJobFilterChange?: (jobFilter: string) => void;
+  applicantStatusOptions?: string[];
+  selectedStatusFilter?: string;
+  onStatusFilterChange?: (status: string) => void;
 }
 
 const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({ 
@@ -27,7 +30,10 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   isLoading = false, 
   error = null,
   selectedJobFilter = 'All Jobs',
-  onJobFilterChange
+  onJobFilterChange,
+  applicantStatusOptions,
+  selectedStatusFilter = 'All Statuses',
+  onStatusFilterChange
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -61,8 +67,12 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   }, [appliedApplicantsData, jobPostData, validRegions, selectedJobFilter]);
 
   const handleFilterApply = (filters: any) => {
-    if (filters.selectedJob && onJobFilterChange) {
+    if (filters.selectedJob !== undefined && onJobFilterChange) {
       onJobFilterChange(filters.selectedJob);
+    }
+
+    if (filters.selectedStatus !== undefined && onStatusFilterChange) {
+      onStatusFilterChange(filters.selectedStatus);
     }
   };
 
@@ -162,6 +172,8 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         onFilterApply={handleFilterApply}
         jobItems={jobPostData?.records || []}
         currentSelectedJob={selectedJobFilter}
+        applicantStatusOptions={applicantStatusOptions}
+        currentSelectedStatus={selectedStatusFilter}
       />
       <Tooltip id="demographic-filter-tooltip" />
     </>

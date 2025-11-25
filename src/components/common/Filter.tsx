@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import FilterIcon from '@/svg/FilterIcon';
-// import SelectChevronDown from '@/svg/SelectChevronDown';
+import SelectChevronDown from '@/svg/SelectChevronDown';
 
 export type FilterOption = {
   label: string;
@@ -16,6 +16,7 @@ export type FilterGroup = {
   options: FilterOption[];
   multiSelect?: boolean;
   allowEmpty?: boolean; // If false, at least one option must be selected
+  displayMode?: 'checkbox' | 'dropdown'; // Display mode: checkbox/radio or dropdown select
 };
 
 export type FilterValues = {
@@ -178,20 +179,42 @@ export default function Filter({
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
                   {group.title}
                 </label>
-                <div className="flex flex-col gap-2">
-                  {group.options.map((option) => (
-                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type={group.multiSelect !== false ? 'checkbox' : 'radio'}
-                        name={group.multiSelect !== false ? undefined : group.id}
-                        className="rounded text-blue-500 focus:ring-blue-500"
-                        checked={draftFilters[group.id]?.includes(option.value) || false}
-                        onChange={() => handleOptionChange(group.id, option.value)}
-                      />
-                      <span className="text-sm text-gray-800">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
+                
+                {/* Render as dropdown select if displayMode is 'dropdown' */}
+                {group.displayMode === 'dropdown' ? (
+                  <div className="relative">
+                    <select
+                      value={draftFilters[group.id]?.[0] || group.options[0]?.value}
+                      onChange={(e) => handleOptionChange(group.id, e.target.value)}
+                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none"
+                    >
+                      {group.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                      <SelectChevronDown />
+                    </div>
+                  </div>
+                ) : (
+                  // Render as checkboxes/radio buttons (default)
+                  <div className="flex flex-col gap-2">
+                    {group.options.map((option) => (
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type={group.multiSelect !== false ? 'checkbox' : 'radio'}
+                          name={group.multiSelect !== false ? undefined : group.id}
+                          className="rounded text-blue-500 focus:ring-blue-500"
+                          checked={draftFilters[group.id]?.includes(option.value) || false}
+                          onChange={() => handleOptionChange(group.id, option.value)}
+                        />
+                        <span className="text-sm text-gray-800">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -221,4 +244,3 @@ export default function Filter({
     </div>
   );
 }
-

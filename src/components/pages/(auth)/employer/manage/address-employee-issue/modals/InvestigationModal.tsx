@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useState } from 'react';
+import { Dispatch, Fragment, useRef, useState, DragEvent, ChangeEvent } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -35,6 +35,10 @@ export default function InvestigationModal({
   const [toSaveData, setToSaveData] = useState<any>(null);
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   const cancelButtonRef = useRef(null);
 
@@ -75,6 +79,9 @@ export default function InvestigationModal({
     reset();
     setToSaveData(null);
     setToAddData(null);
+    setFile(null);
+    setIsDragActive(false);
+    setValue('attachments', undefined as unknown as T_Investigation['attachments']);
   };
 
   // Function to handle modal close with unsaved changes check
@@ -101,7 +108,8 @@ export default function InvestigationModal({
       employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation = data.resultOfInvestigation;
       employeeIssueItemsCopy[itemIndex].investigateForm.decision = data.decision;
       employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
-      employeeIssueItemsCopy[itemIndex].investigateForm.attachments = toSaveData.attachments;
+      const attachments = toSaveData?.attachments;
+      employeeIssueItemsCopy[itemIndex].investigateForm.attachments = attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
       employeeIssueItemsCopy[itemIndex].investigatedDate = formatDateToLocal(currentDate.toISOString());
       const copySaveData = {
@@ -134,16 +142,53 @@ export default function InvestigationModal({
     };
     mutate(toSaveData, callbackReq);
   };
-  const uploadOnChange = ({ target }: { target: any }) => {
-    const file = target.files[0];
-    if (!file) return;
-    if (file.size <= 5000000) {
-      setToSaveData({ ...toSaveData, attachments: file });
-    } else {
-      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
+  const handleFileSelection = (selectedFile: File | null) => {
+    if (!selectedFile) return;
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      toast.custom(() => <CustomToast message={'Maximum file size is 10mb.'} type='error' />, {
         duration: 2000,
       });
+      return;
     }
+    setFile(selectedFile);
+    setToSaveData((prev: any) => ({ ...(prev ?? {}), attachments: selectedFile }));
+    setValue('attachments', selectedFile as unknown as T_Investigation['attachments']);
+  };
+
+  const handleDrag = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === 'dragenter' || event.type === 'dragover') {
+      setIsDragActive(true);
+    } else if (event.type === 'dragleave') {
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+    const droppedFile = event.dataTransfer?.files?.[0] ?? null;
+    handleFileSelection(droppedFile);
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    const selectedFile = event.target.files?.[0] ?? null;
+    handleFileSelection(selectedFile);
+    event.target.value = '';
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setToSaveData((prev: any) => {
+      if (!prev) return null;
+      const next = { ...prev };
+      delete next.attachments;
+      return Object.keys(next).length ? next : null;
+    });
+    setValue('attachments', undefined as unknown as T_Investigation['attachments']);
   };
   return (
     <>
@@ -262,7 +307,7 @@ export default function InvestigationModal({
                             {...register('isAttendHearing', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                           >
-                            <option>Select...</option>
+                            <option value=''>Select...</option>
                             <option>YES</option>
                             <option>NO</option>
                           </select>
@@ -300,7 +345,7 @@ export default function InvestigationModal({
                             {...register('decision', { required: true })}
                             className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                           >
-                            <option>Select...</option>
+                            <option value=''>Select...</option>
                             <option>First Warning</option>
                             <option>Second Warning</option>
                             <option>Final Warning</option>
@@ -329,17 +374,62 @@ export default function InvestigationModal({
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachment<span className='text-red-600'>*</span>
+                        Attachment
                         </label>
                         <div className='mt-2'>
-                          <input
-                            id='attachment'
-                            {...register('attachments', { required: true })}
-                            type='file'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                            onChange={uploadOnChange}
-                            accept='image/jpeg, image/png, application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
-                          />
+                          <div
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            className={`block w-full rounded-md border-0 py-14 px-3 text-center text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 ${
+                              isDragActive ? 'bg-blue-50 text-savoy-blue ring-savoy-blue' : ''
+                            }`}
+                          >
+                            <label
+                              className={`${
+                                file === null ? 'file-preview cursor-pointer hover:text-savoy-blue text-base leading-normal' : 'hidden'
+                              }`}
+                            >
+                              Drop file to upload
+                              <input
+                                id='attachment'
+                                {...register('attachments')}
+                                type='file'
+                                className='sr-only'
+                                onChange={handleChange}
+                                accept='image/jpeg, image/png, application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              />
+                            </label>
+
+                            {file !== null && (
+                              <div className='file-preview'>
+                                <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                <div className='flex gap-2 mt-2 justify-center'>
+                                  <a
+                                    href={URL.createObjectURL(file)}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-blue-500 hover:underline text-sm'
+                                    onClick={(event) => event.stopPropagation()}
+                                  >
+                                    View File
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='underline text-blue-500 cursor-pointer text-sm'
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleRemoveFile();
+                                    }}
+                                  >
+                                    Remove File
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <p className='text-xs pl-2 mt-1 text-gray-500'>Maximum file size: 10 mb</p>
                         </div>
                       </div>
                     </div>

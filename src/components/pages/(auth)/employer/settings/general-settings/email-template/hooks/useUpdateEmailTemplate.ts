@@ -24,13 +24,19 @@ async function updateEmailTemplate(email_template_id: number, data: any) {
       
       // Handle email arrays - only append if they have values
       if (data.to && Array.isArray(data.to) && data.to.length > 0) {
-        formData.append('to', data.to.join(','));
+        data.to.forEach((email: string) => {
+          formData.append('to', email);
+        });
       }
       if (data.cc && Array.isArray(data.cc) && data.cc.length > 0) {
-        formData.append('cc', data.cc.join(','));
+        data.cc.forEach((email: string) => {
+          formData.append('cc', email);
+        });
       }
       if (data.bcc && Array.isArray(data.bcc) && data.bcc.length > 0) {
-        formData.append('bcc', data.bcc.join(','));
+        data.bcc.forEach((email: string) => {
+          formData.append('bcc', email);
+        });
       }
       
       config.body = formData;

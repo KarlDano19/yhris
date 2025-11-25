@@ -17,11 +17,13 @@ export default function CreateLocationModal({
   isOpen,
   setIsOpen,
   refetch,
+  hideDescription,
 }: {
   module: string;
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   refetch: any;
+  hideDescription?: boolean;
 }) {
   const cancelButtonRef = useRef(null);
   const { register, handleSubmit, reset, control } = useForm();

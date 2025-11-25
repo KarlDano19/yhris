@@ -246,7 +246,7 @@ export type T_Investigation = {
   other: string;
   isAttendHearing: string;
   briefBackground: string;
-  attachments: File;
+  attachments?: File;
 };
 
 export type T_Directive = {

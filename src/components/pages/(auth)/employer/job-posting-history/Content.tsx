@@ -896,6 +896,16 @@ const Content = () => {
                 </button>
               </div>
             </div>
+            <div className='flex items-center gap-3 lg:ml-auto'>
+              <SeederButton
+                onSeed={handleSeedJobPostings}
+                onUnseed={handleUnseedJobPostings}
+                isLoading={seedJobPostingsMutation.isLoading}
+                isUnseeding={unseedJobPostingsMutation.isLoading}
+                maxCount={1000}
+                defaultCount={5}
+              />
+            </div>
           </div>
           
           {/* Status Filter Tabs and Bulk Actions */}

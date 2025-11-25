@@ -1,12 +1,11 @@
-import { Dispatch, useState, useMemo } from 'react';
+import React, { Dispatch, useState, useMemo } from 'react';
 
 import Select from 'react-select';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import { advertiseOptions } from '@/utils/advertiseOptions';
 import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
-import useGetPositionItems from '../../settings/general-settings/employees/hooks/position/useGetPositionItems';
-import React from 'react';
+import { CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
 interface Field {
   onChange: (value: any) => void;
@@ -21,6 +20,9 @@ export default function CreateJobPageTitleInfo({
   setPageNumber,
   onSubmit,
   errors,
+  positionData,
+  refetchPositions,
+  fourthForm,
 }: {
   control: any;
   Controller: any;
@@ -29,14 +31,11 @@ export default function CreateJobPageTitleInfo({
   setPageNumber: Dispatch<number>;
   onSubmit: (data: any) => void;
   errors?: any;
+  positionData?: any;
+  refetchPositions?: () => void;
+  fourthForm?: any;
 }) {
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
-  
-  // Fetch positions for the dropdown with a large page size to get all positions
-  const { data: positionData, refetch: refetchPositions } = useGetPositionItems({ 
-    pageSize: 1000,  // Large page size to get all positions
-    currentPage: 1
-  });
   
   // Helper function to check if an item was created within 24 hours
   const isWithin24Hours = (createdAt: string | Date): boolean => {
@@ -49,13 +48,14 @@ export default function CreateJobPageTitleInfo({
   
   // Transform position data for react-select with separation for newly added positions
   const positionOptions = useMemo(() => {
-    if (!positionData?.records) return [];
+    if (!positionData) return [];
     
-    const allPositions = positionData.records.map((position: any) => ({
-      value: position.id, // Change back to position.id instead of position.name
+    const allPositions = positionData.map((position: any) => ({
+      value: position.id,
       label: position.name,
       createdAt: position.created_at,
-      id: position.id
+      id: position.id,
+      description: position.description
     }));
     
     // Filter and sort newly added positions (within 24 hours of creation)
@@ -106,7 +106,7 @@ export default function CreateJobPageTitleInfo({
     }
     
     return options;
-  }, [positionData?.records]);
+  }, [positionData]);
 
   const firstFormSubmit = handleSubmit((data: any) => {
     onSubmit(data);
@@ -118,7 +118,9 @@ export default function CreateJobPageTitleInfo({
 
   const handlePositionCreated = () => {
     // Refresh positions list to get the updated data with new creation dates
-    refetchPositions();
+    if (refetchPositions) {
+      refetchPositions();
+    }
   };
 
   const handleJobCompleted = () => {
@@ -216,7 +218,20 @@ export default function CreateJobPageTitleInfo({
                       value={positionOptions.flatMap(group => group.options).find((item: any) => 
                         item.value === value || item.label === value
                       )}
-                      onChange={(val) => onChange(val?.value || '')} // This will send the position ID
+                      onChange={(val) => {
+                        onChange(val?.value || ''); // This will send the position ID
+                        // Immediately update the position description in the job description form
+                        if (fourthForm) {
+                          // ALWAYS update when position changes, regardless of current content
+                          if (val?.description) {
+                            // Use position description if available
+                            fourthForm.setValue('jobDescription', val.description);
+                          } else {
+                            // If position has no description, use the template placeholder
+                            fourthForm.setValue('jobDescription', CREATEJOB_TEMPLATE[0]);
+                          }
+                        }
+                      }}
                       components={{
                         DropdownIndicator: () => (
                           <div className='pointer-events-none px-2'>
@@ -343,6 +358,7 @@ export default function CreateJobPageTitleInfo({
         isOpen={isAddPositionModalOpen}
         setIsOpen={setIsAddPositionModalOpen}
         refetch={handlePositionCreated}
+        hideDescription={true}
       />
     </>
   );

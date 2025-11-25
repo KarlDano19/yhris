@@ -19,7 +19,9 @@ async function addInvestigationReport(investigation: T_Investigation) {
     formData.append('results', investigation.resultOfInvestigation);
     formData.append('decision', investigation.decision);
     formData.append('custom_decision', investigation.other);
-    formData.append('attachments', investigation.attachments);
+    if (investigation.attachments) {
+      formData.append('attachments', investigation.attachments);
+    }
     const config = {
       method: 'POST',
       headers: {
