@@ -47,63 +47,48 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
 
   const initials = getInitials();
   const bgColor = getAvatarColor();
-  const fontSize = Math.max(width, height) * 0.45;
 
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      className={`inline-flex items-center justify-center rounded-xl ${className}`}
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        backgroundColor: bgColor,
+      }}
     >
-      {/* Background circle/rectangle */}
-      <rect
-        width={width}
-        height={height}
-        rx={className.includes('rounded-full') ? width / 2 : width * 0.15}
-        fill={bgColor}
-      />
-      
       {initials ? (
-        // Show initials using SVG text (much more reliable for html2canvas)
-        <text
-          x="50%"
-          y="50%"
-          dy="0.1em"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="white"
-          fontSize={fontSize}
-          fontWeight="700"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          style={{ userSelect: 'none' }}
+        // Show initials if we have names
+        <span
+          className="text-white font-semibold select-none"
+          style={{
+            fontSize: `${Math.max(width, height) * 0.4}px`,
+          }}
         >
           {initials}
-        </text>
+        </span>
       ) : (
         // Show person icon if no names available
-        <g transform={`translate(${width * 0.2}, ${height * 0.2})`}>
-          <svg
-            width={width * 0.6}
-            height={height * 0.6}
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <path
-              d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-              fill="white"
-              fillOpacity="0.8"
-            />
-            <path
-              d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z"
-              fill="white"
-              fillOpacity="0.8"
-            />
-          </svg>
-        </g>
+        <svg
+          width={width * 0.6}
+          height={height * 0.6}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+            fill="white"
+            fillOpacity="0.8"
+          />
+          <path
+            d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z"
+            fill="white"
+            fillOpacity="0.8"
+          />
+        </svg>
       )}
-    </svg>
+    </div>
   );
 };
 

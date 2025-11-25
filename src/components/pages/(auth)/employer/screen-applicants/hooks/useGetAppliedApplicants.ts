@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly?: boolean, dateFrom?: string, dateTo?: string) {
+async function getAppliedApplicants(jobId: any, isArchived?: boolean, thisMonth?: boolean, dateFrom?: string, dateTo?: string) {
   try {
     const token = getCookie('token');
     
@@ -13,8 +13,8 @@ async function getAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly
       params.append('is_archived', isArchived.toString());
     }
     
-    if (recentOnly !== undefined) {
-      params.append('recent_only', recentOnly.toString());
+    if (thisMonth !== undefined) {
+      params.append('this_month', thisMonth.toString());
     }
     
     if (dateFrom) {
@@ -53,10 +53,10 @@ async function getAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly
   }
 }
 
-function useGetAppliedApplicants(jobId: any, isArchived?: boolean, recentOnly?: boolean, dateFrom?: string, dateTo?: string) {
+function useGetAppliedApplicants(jobId: any, isArchived?: boolean, thisMonth?: boolean, dateFrom?: string, dateTo?: string) {
   const query = useQuery(
-    ['appliedApplicantsCache', jobId, isArchived, recentOnly, dateFrom, dateTo], 
-    () => getAppliedApplicants(jobId, isArchived, recentOnly, dateFrom, dateTo), 
+    ['appliedApplicantsCache', jobId, isArchived, thisMonth, dateFrom, dateTo], 
+    () => getAppliedApplicants(jobId, isArchived, thisMonth, dateFrom, dateTo), 
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,

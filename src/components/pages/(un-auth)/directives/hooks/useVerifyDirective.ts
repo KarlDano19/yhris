@@ -1,41 +1,29 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { VerifyDirectiveParams } from '@/types/directives';
-
-async function verifyDirectiveCode({ directiveId, email, code }: VerifyDirectiveParams) {
-  try {
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directiveId}/verify-code/`;
-    
-    const config = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, code }),
-    };
-    
-    const res = await fetch(apiUrl, config);
-    
-    if (!res.ok) {
-      throw res.json();
-    }
-    
-    return res.json();
-  } catch (err: any) {
-    let errStringify = await err;
-    if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
-    }
-    throw errStringify.message;
-  }
-}
-
 /**
  * Hook for verifying verification code for directive
  */
 const useVerifyDirective = () => {
   return useMutation({
-    mutationFn: (params: VerifyDirectiveParams) => verifyDirectiveCode(params)
+    mutationFn: async ({ directiveId, email, code }: VerifyDirectiveParams) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directiveId}/verify-code/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, code }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Invalid verification code');
+      }
+
+      return response.json();
+    }
   });
 };
 

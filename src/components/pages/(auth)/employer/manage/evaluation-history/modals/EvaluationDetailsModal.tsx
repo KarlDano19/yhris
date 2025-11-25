@@ -28,7 +28,40 @@ function EvaluationDetailsModal({
     remove: removeEvaluationHistory,
   } = useGetEvaluationHistoryDetails(isOpen.id);
   const [evaluationHistoryDetails, setEvaluationHistoryDetails] = useState<any>({});
-  const [activeTab, setActiveTab] = useState<'details' | 'responses'>('details');
+  const [evaluationCriterionIndex, setEvaluationCriterionIndex] = useState(0);
+  const [evaluationForm, setEvaluationForm] = useState<any[]>([]);
+  const [currentFormIndex, setCurrentFormIndex] = useState(0);
+
+  const convertToRoman = (num: number): string => {
+    // Define Roman numerals and their corresponding values
+    const romanNumerals: { [key: string]: number } = {
+      M: 1000,
+      CM: 900,
+      D: 500,
+      CD: 400,
+      C: 100,
+      XC: 90,
+      L: 50,
+      XL: 40,
+      X: 10,
+      IX: 9,
+      V: 5,
+      IV: 4,
+      I: 1,
+    };
+
+    let romanNumber = '';
+
+    // Iterate through numerals in descending order
+    for (const key in romanNumerals) {
+      while (num >= romanNumerals[key]) {
+        romanNumber += key;
+        num -= romanNumerals[key];
+      }
+    }
+
+    return romanNumber;
+  };
 
   useEffect(() => {
     if (evaluationHistoryData) {
@@ -42,15 +75,24 @@ function EvaluationDetailsModal({
     }
   }, [isOpen.id]);
 
+  useEffect(() => {
+    if (evaluationHistoryDetails && evaluationHistoryDetails.form_data) {
+      setEvaluationForm(evaluationHistoryDetails.form_data);
+    }
+  }, [evaluationHistoryDetails]);
+
   const customCloseModal = () => {
     removeEvaluationHistory();
-    setActiveTab('details');
     setIsOpen(null);
   };
 
-  const tabs = [
-    { id: 'details', name: 'Evaluation Details' },
-  ];
+  const handleNext = () => {
+    if (currentFormIndex < evaluationForm.length - 1) {
+      setCurrentFormIndex(currentFormIndex + 1);
+    } else {
+      customCloseModal();
+    }
+  };
 
   return (
     <div>
@@ -84,31 +126,59 @@ function EvaluationDetailsModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Performance Evaluation: {evaluationHistoryDetails.employee_name}</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={customCloseModal} />
                   </div>
-                  
-                  {/* Tab Navigation */}
-                  <div className='border-b border-gray-200 mt-4'>
-                    <nav className='flex -mb-px px-4' aria-label='Tabs'>
-                      {tabs.map((tab) => (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id as 'details' | 'responses')}
-                          className={classNames(
-                            activeTab === tab.id
-                              ? 'border-savoy-blue text-savoy-blue'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                            'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'
+                  <div>
+                    {evaluationForm.length > 0 && (
+                      <>
+                        <div className='border-2 rounded-lg mx-4 mt-4 mb-12'>
+                          {evaluationForm[currentFormIndex].section_title && (
+                            <div className='p-6 border-b-2'>
+                              <p className='text-[1.2rem] font-semibold'>
+                                {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
+                                {evaluationForm[currentFormIndex].section_title}
+                              </p>
+                              <p>{evaluationForm[currentFormIndex].section_description}</p>
+                            </div>
                           )}
-                        >
-                          {tab.name}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
-
-                  {/* Tab Content */}
-                  <div className='mt-4'>
-                    {activeTab === 'details' && (
-                      <EvaluationDetails evaluationHistoryDetails={evaluationHistoryDetails} />
+                          {evaluationForm[currentFormIndex].criterion.map((criterionItem: any, index: number) => (
+                            <div key={index} className='px-[1.55rem] py-4 border-b-2'>
+                              <div className='flex justify-between mb-2'>
+                                <div>
+                                  {index + 1}. {criterionItem.title}
+                                </div>
+                                <div>
+                                  <p className='text-base font-semibold'>Score:</p>
+                                  {criterionItem.score}
+                                  <span className='text-base'> / {criterionItem.max_score}</span>
+                                </div>
+                              </div>
+                              <div className='flex justify-between mb-2'>
+                                <div>
+                                  <p className='text-base font-semibold'>Comment:</p>
+                                  {criterionItem.comment}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className='py-4 px-4 flex justify-between'>
+                          {currentFormIndex > 0 && (
+                            <button
+                              className='bg-savoy-blue text-white px-4 py-2 rounded-md'
+                              onClick={() => setCurrentFormIndex(currentFormIndex - 1)}
+                            >
+                              Back
+                            </button>
+                          )}
+                          <div className='flex-1' />
+                          {currentFormIndex < evaluationForm.length - 1 ? (
+                            <button onClick={handleNext} className='bg-savoy-blue text-white px-4 py-2 rounded-md'>
+                              Next
+                            </button>
+                          ) : (
+                            <div className='flex-1' />
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </Dialog.Panel>

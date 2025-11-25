@@ -1,17 +1,21 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function unseedEmailTemplates() {
+async function syncLocation() {
   try {
     const token = getCookie('token');
     const config = {
-      method: 'DELETE',
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/seeder/`, config);
+
+    // Build URL with query parameter
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/locations/sync-third-party-integration/`;
+
+    const res = await fetch(url, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -25,13 +29,12 @@ async function unseedEmailTemplates() {
   }
 }
 
-function useUnseedEmailTemplates() {
-  const mutation = useMutation({
-    mutationFn: () => unseedEmailTemplates(),
+function useSyncLocation() {
+  const query = useMutation({
+    mutationFn: () => syncLocation(),
   });
 
-  return mutation;
+  return query;
 }
 
-export default useUnseedEmailTemplates;
-
+export default useSyncLocation;

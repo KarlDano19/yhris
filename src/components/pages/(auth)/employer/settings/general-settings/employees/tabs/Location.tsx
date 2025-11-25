@@ -19,6 +19,8 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProgressModal from '@/components/ProgressModal';
+import useAddLocationToYP from '../hooks/location/useAddLocationToYP';
+import useSyncLocation from '../hooks/location/useSyncLocation';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -75,9 +77,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetLocationItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const { mutate: deleteLocation, isLoading: isDeleteLocationLoading } = useDeleteLocation();
+  const { mutate: addLocationToYP, isLoading: isAddLocationToYPLoading } = useAddLocationToYP();
+  const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
   const bulkDeleteMutation = useBulkDeleteLocations();
 
   const cachedData: any = cachedProfile?.state?.data;
+
+  const handleSyncLocation = () => {
+    syncLocation(undefined, {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        locationListRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     if (locationListData) {
@@ -238,6 +256,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <DeleteIcon />
               </SmartButton>
+              {/* <SmartButton
+                id="delete-location-btn"
+                onClick={() => addLocationToYP({ id: item.id, data: { name: item.name } })}
+                disabled={selectedLocations.size > 1}
+                className={selectedLocations.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                Sync to YP
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -338,6 +364,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           >
             CREATE
           </SmartButton>
+          {/* <SmartButton
+            id="create-location-btn"
+            onClick={handleSyncLocation}
+            className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+          >
+            SYNC
+          </SmartButton> */}
         </div>
       </div>
       

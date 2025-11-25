@@ -15,7 +15,6 @@ import CreateJobPagePostAs from '../../../modals/ModalPages/CreateJobPagePostAs'
 import CreateJobPagePreview from '../../../modals/ModalPages/CreateJobPagePreview';
 import CreateJobPagePlatform from '../../../modals/ModalPages/CreateJobPagePlatform';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
-import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -72,9 +71,6 @@ export default function CreateJobModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useAddJobPostItems();
-  
-  // Fetch positions data in the parent component
-  const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
 
   const customCloseModal = () => {
     setIsOpen(false);
@@ -93,13 +89,6 @@ export default function CreateJobModal({
   };
 
   const firstFormSubmit = (data: any) => {
-    // Find the selected position and add its description to the data
-    const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
-    
-    if (selectedPosition?.description) {
-      data.positionDescription = selectedPosition.description;
-    }
-    
     setCombinedFormData((prev: any) => ({ ...prev, ...data }));
     setPageNumber(2);
   };
@@ -205,9 +194,6 @@ export default function CreateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={firstFormSubmit}
                       errors={firstForm.formState.errors}
-                      positionData={positionData}
-                      refetchPositions={refetchPositions}
-                      fourthForm={fourthForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
@@ -241,9 +227,6 @@ export default function CreateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}
-                      combinedFormData={combinedFormData}
-                      positionData={positionData}
-                      firstForm={firstForm}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>

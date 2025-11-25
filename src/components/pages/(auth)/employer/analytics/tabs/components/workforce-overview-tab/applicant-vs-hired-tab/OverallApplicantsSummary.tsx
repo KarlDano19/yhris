@@ -8,29 +8,17 @@ interface OverallApplicantsSummaryProps {
   appliedApplicantsData?: any[];
   isLoading?: boolean;
   error?: any;
-  selectedStatusFilter?: string;
-  selectedJobFilter?: string;
 }
 
 const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({ 
   appliedApplicantsData, 
   isLoading = false, 
-  error = null,
-  selectedStatusFilter = 'All Statuses',
-  selectedJobFilter = 'All Jobs'
+  error = null 
 }) => {
   // Calculate applicant status summary using shared utility
   const applicantData = useMemo(() => {
     return calculateOverallApplicantsSummary(appliedApplicantsData);
   }, [appliedApplicantsData]);
-
-  const filteredApplicantData = useMemo(() => {
-    const shouldApplyStatusFilter = selectedStatusFilter !== 'All Statuses' && selectedJobFilter !== 'All Jobs';
-    if (!shouldApplyStatusFilter) {
-      return applicantData;
-    }
-    return applicantData.filter((item) => item.status === selectedStatusFilter);
-  }, [applicantData, selectedStatusFilter, selectedJobFilter]);
 
   // Loading state
   if (isLoading) {
@@ -57,7 +45,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
   }
 
   // No data state
-  if (!filteredApplicantData || filteredApplicantData.length === 0) {
+  if (!applicantData || applicantData.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
@@ -82,7 +70,7 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filteredApplicantData.map((item, index) => (
+            {applicantData.map((item, index) => (
               <tr key={index} className="border-b border-[#CCD8EA]">
                 <td className="text-center  py-3 px-2 text-gray-900 font-medium">{item.status}</td>
                 <td className="text-center py-3 px-2 text-gray-700">{item.count}</td>

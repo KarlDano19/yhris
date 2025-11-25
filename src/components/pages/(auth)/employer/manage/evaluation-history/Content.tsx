@@ -1,116 +1,364 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef, use } from 'react';
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
+
+import CustomToast from '@/components/CustomToast';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import Pagination from '@/components/Pagination';
+import useGetEvaluationHistoryItems from './hooks/useGetEvaluationHistoryItems';
 import IndividualEvaluations from './tabs/IndividualEvaluations';
 import TemplateResponses from './tabs/TemplateResponses';
-import SeederButton from '@/components/SeederButton';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import useSeedEvaluations from './hooks/useSeedEvaluations';
-import useUnseedEvaluations from './hooks/useUnseedEvaluations';
+import EvaluationDetailsModal from './modals/EvaluationDetailsModal';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
-type TabType = 'individual' | 'template-responses';
+type T_ModalData = {
+  id: number;
+  open: boolean;
+};
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('individual');
-  const seedEvaluationsMutation = useSeedEvaluations();
-  const unseedEvaluationsMutation = useUnseedEvaluations();
+  const [evaluationHistoryItems, setEvaluationHistoryItems] = useState<any>([]);
+  const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
+  const [activeTab, setActiveTab] = useState('individual');
+  const [itemsFilter, setItemsFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
+  const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    totalRecords: number;
+    totalPages: number;
+  }>({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const [isSearching, setIsSearching] = useState(false);
 
-  const tabs = [
-    { id: 'individual' as TabType, name: 'Individual Evaluations' },
-    { id: 'template-responses' as TabType, name: 'Template Responses' },
-  ];
+  const {
+    data: dataEvaluationHistoryItems,
+    isLoading: isLoadingEvaluationHistoryItems,
+    refetch: refetchEvaluationHistoryItems,
+  } = useGetEvaluationHistoryItems({
+    ...appliedFilter,
+    pageSize: pageSize,
+    currentPage: currentPage,
+  });
 
-  const handleSeedEvaluations = async (count: number) => {
-    try {
-      const result = await seedEvaluationsMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed evaluations';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
+  useEffect(() => {
+    if (dataEvaluationHistoryItems) {
+      let items = [];
+      let totalPages = 1;
+      let totalRecords = 0;
+
+      // Handle paginated response structure
+      if (dataEvaluationHistoryItems.records) {
+        items = dataEvaluationHistoryItems.records.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+        totalPages = dataEvaluationHistoryItems.total_pages || 1;
+        totalRecords = dataEvaluationHistoryItems.total_records || items.length;
+      }
+      // Handle array response structure (no pagination from backend)
+      else if (Array.isArray(dataEvaluationHistoryItems)) {
+        items = dataEvaluationHistoryItems.map((item: any) => {
+          item['date_of_evaluation'] = Intl.DateTimeFormat('en-US').format(new Date(item.date_of_evaluation));
+          return item;
+        });
+
+        // Calculate pagination locally if backend doesn't support it
+        totalRecords = items.length;
+        totalPages = Math.ceil(totalRecords / pageSize);
+      }
+
+      setEvaluationHistoryItems(items);
+      setPagination({
+        totalPages,
+        totalRecords,
+      });
     }
+  }, [dataEvaluationHistoryItems, pageSize]);
+
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
   };
 
-  const handleUnseedEvaluations = async () => {
-    try {
-      const result = await unseedEvaluationsMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed evaluations';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+  };
+
+  const handleSearch = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, { duration: 5000 });
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        { duration: 5000 }
+      );
+    }
+    setIsSearching(true);
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText,
+    });
+  };
+
+  useEffect(() => {
+    if (!isLoadingEvaluationHistoryItems && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isLoadingEvaluationHistoryItems, isSearching]);
+
+  const renderRows = () => {
+    if (isSearching || isLoadingEvaluationHistoryItems) {
+      return (
+        <tr>
+          <td colSpan={100}>
+            <div className='py-5'>
+              <LoadingSpinner size='lg' color='yellow' />
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (evaluationHistoryItems && evaluationHistoryItems.length > 0) {
+      return evaluationHistoryItems.map((item: any) => (
+        <tr
+          key={item.id}
+          className='cursor-pointer'
+          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
+        >
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_form}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
+              {item.form_total_score}
+            </span>
+            /<span>{item.max_total_score}</span>
+          </td>
+          {/* Still not implemented */}
+          {/* <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button
+              className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+              disabled={!(item.form_total_score < item.passing_score)}
+            >
+              Enroll for Training
+            </button>
+          </td> */}
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+              View
+            </button>
+          </td>
+        </tr>
+      ));
+    } else {
+      return (
+        <tr>
+          <td colSpan={7}>
+            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
+          </td>
+        </tr>
+      );
     }
   };
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh]'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded-md'>
+          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Manage</h4>
           </Link>
         </div>
-        
-        <div className='px-2 md:px-8 lg:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-          <h2 className='text-2xl font-bold text-indigo-dye'>Evaluation History</h2>
-          <SeederButton
-            onSeed={handleSeedEvaluations}
-            onUnseed={handleUnseedEvaluations}
-            isLoading={seedEvaluationsMutation.isLoading}
-            isUnseeding={unseedEvaluationsMutation.isLoading}
-            disabled={!hasActiveSubscription}
-          />
+
+        <div className='px-2 md:px-8 lg:px-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation History</h2>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className='px-2 md:px-8 lg:px-4 mt-6'>
-          <div className='border-b border-gray-200'>
-            <nav className='-mb-px flex space-x-8' aria-label='Tabs'>
-              {tabs.map((tab) => (
+        {/* Content Section with flex-1 */}
+        <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
+          <div
+            className={classNames(
+              'flex flex-col lg:flex-row items-left gap-4',
+              !hasActiveSubscription && 'opacity-50 pointer-events-none'
+            )}
+          >
+            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
+              <div className='relative'>
+                <CustomDatePicker
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: value?.target?.value === '' ? null : value,
+                    });
+                  }}
+                />
+              </div>
+              <p>to</p>
+              <div className='relative'>
+                <CustomDatePicker
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: value?.target?.value === '' ? null : value,
+                    });
+                  }}
+                  minDate={itemsFilter.from}
+                />
+              </div>
+            </div>
+            <div className='flex gap-2 lg:w-1/3'>
+              <div className='flex flex-row w-full items-center gap-2'>
+                <input
+                  type='text'
+                  name='search'
+                  id='search'
+                  data-tooltip-id='search-tooltip'
+                  data-tooltip-content='Search for Employee Name'
+                  data-tooltip-place='bottom'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                  placeholder='Search ...'
+                />
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={classNames(
-                    activeTab === tab.id
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                    'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors duration-200'
-                  )}
-                  aria-current={activeTab === tab.id ? 'page' : undefined}
+                  className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+                  onClick={handleSearch}
                 >
-                  {tab.name}
+                  <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
-              ))}
-            </nav>
+              </div>
+            </div>
+          </div>
+          <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
+            <div
+              className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#2d3e58 #f1f1f1',
+              }}
+            >
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                  <thead>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Employee
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Evaluation Date
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Evaluation Period
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Evaluation Form
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Overall Rating
+                      </th>
+                      {/* Still not implemented */}
+                      {/* <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Recommendation
+                      </th> */}
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+                </table>
+                <hr />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Tab Content */}
         <div className='mt-6'>
           <div style={{ display: activeTab === 'individual' ? 'block' : 'none' }}>
-            <IndividualEvaluations hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'individual'} />
+            <IndividualEvaluations
+              hasActiveSubscription={hasActiveSubscription}
+              isActive={activeTab === 'individual'}
+            />
           </div>
           <div style={{ display: activeTab === 'template-responses' ? 'block' : 'none' }}>
-            <TemplateResponses hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'template-responses'} />
+            <TemplateResponses
+              hasActiveSubscription={hasActiveSubscription}
+              isActive={activeTab === 'template-responses'}
+            />
           </div>
         </div>
+
+        <div className='px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t'>
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
+        </div>
       </div>
+      {isEvaluationDetailsModalOpen && (
+        <EvaluationDetailsModal
+          refetch={refetchEvaluationHistoryItems}
+          isOpen={isEvaluationDetailsModalOpen}
+          setIsOpen={setIsEvaluationDetailsModalOpen}
+        />
+      )}
+
+      <Tooltip id='search-tooltip' />
     </>
   );
 };

@@ -1,19 +1,12 @@
+// D:\YAHSHUA\HRIS\yahshua-hris-fe\src\components\pages\(auth)\employer\settings\general-settings\employees\hooks\employee-id-settings\useGenerateEmployeeId.ts
+
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface OrgStructureExportAuditData {
-  export_format: string;
-  export_data: Record<string, any>;
-}
-
-interface OrgStructureExportAuditResponse {
-  message: string;
-  audit_data: Record<string, any>;
-}
-
-async function logOrgStructureExport(data: OrgStructureExportAuditData): Promise<OrgStructureExportAuditResponse> {
+async function generateEmployeeId(data: any) {
   try {
     const token = getCookie('token');
+
     const config = {
       method: 'POST',
       headers: {
@@ -23,7 +16,7 @@ async function logOrgStructureExport(data: OrgStructureExportAuditData): Promise
       body: JSON.stringify(data),
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/org-structure/export/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings/employee-id/generate/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -37,12 +30,12 @@ async function logOrgStructureExport(data: OrgStructureExportAuditData): Promise
   }
 }
 
-function useOrgStructureExportAudit() {
-  const mutation = useMutation({
-    mutationFn: logOrgStructureExport,
+function useGenerateEmployeeId() {
+  const query = useMutation({
+    mutationFn: (data: any) => generateEmployeeId(data)
   });
-  return mutation;
+
+  return query;
 }
 
-export default useOrgStructureExportAudit;
-
+export default useGenerateEmployeeId;

@@ -85,7 +85,7 @@ export default function ImportModal({
                 if (allowKey) {
                   if (key === 'Date Hired (mm/dd/yyyy)*' || key === 'Date Hired') {
                     const dateValue = value as string;
-                    const [month, day, year] = dateValue.split('/');
+                    const [day, month, year] = dateValue.split('/');
                     importItem[allowKey] = `${month}/${day}/${year}`;
                   } else {
                     importItem[allowKey] = value;
@@ -149,16 +149,12 @@ export default function ImportModal({
       },
     };
     importJSON.forEach((item: any) => {
-      if (item.date_hired) {
-        // Parse mm/dd/yyyy format and convert directly to yyyy-mm-dd
-        const [month, day, year] = item.date_hired.split('/');
-        
-        // Pad month and day with leading zeros if needed
-        const paddedMonth = month.padStart(2, '0');
-        const paddedDay = day.padStart(2, '0');
-        
-        // Create date string directly without Date object to avoid timezone issues
-        item.date_hired = `${year}-${paddedMonth}-${paddedDay}`;
+      const date = new Date(item.date_hired);
+      if (!isNaN(date.getTime())) {
+        item.date_hired = date.toISOString().split('T')[0];
+      } else {
+        console.error(`Invalid date for item: ${JSON.stringify(item)}`);
+        item.date_hired = null;
       }
     });
     const data = {

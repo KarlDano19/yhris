@@ -22,7 +22,6 @@ import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
 import ProgressModal from '@/components/ProgressModal';
-import SeederButton from '@/components/SeederButton';
 import useGetEmployeeItemsList from './hooks/useGetEmployeeItems';
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
 import useGetLocationItems from '@/components/hooks/useGetLocationItems';
@@ -35,10 +34,9 @@ import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
-import useSeedEmployees from './hooks/useSeedEmployees';
-import useUnseedEmployees from './hooks/useUnseedEmployees';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import FloatingProgress from '@/components/FloatingProgress';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -77,6 +75,8 @@ const columnDefinitions = [
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']);
+  const [loginType, setLoginType] = useState<string>('');
   const [employeeItems, setEmployeeItems] = useState<any>([]);
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
@@ -172,8 +172,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
   const { mutate: deleteEmployee, isLoading: isDeleteEmployeeLoading } = useDeleteEmployee();
   const bulkDeleteMutation = useBulkDeleteEmployees();
-  const seedEmployeesMutation = useSeedEmployees();
-  const unseedEmployeesMutation = useUnseedEmployees();
 
   // Combined refetch function to refresh both main list and autocomplete data
   const refetchAllEmployeeData = async () => {
@@ -238,6 +236,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsAgreementAccepted(true);
     }
   }, [hasAgreed]);
+
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType((cachedUserDetails.state.data as any).login_type);
+    }
+  }, [cachedUserDetails]);
 
   // Debounce search input to prevent multiple API calls
   useEffect(() => {
@@ -472,42 +476,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     toast.custom(() => <CustomToast message={`${bulkDeleteCount} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
   };
 
-  const handleSeedEmployees = async (count: number) => {
-    try {
-      const result = await seedEmployeesMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type="success" />, { duration: 3000 });
-      setSelectedEmployees(new Set());
-      setSelectAll(false);
-      await refetchAllEmployeeData();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed employees';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEmployees = async () => {
-    try {
-      const result = await unseedEmployeesMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      setSelectedEmployees(new Set());
-      setSelectAll(false);
-      await refetchAllEmployeeData();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed employees';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   // Update select all state when employees change
   useEffect(() => {
     if (employeeItems) {
@@ -638,7 +606,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+    {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -923,15 +892,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
-              <SeederButton
-                onSeed={handleSeedEmployees}
-                onUnseed={handleUnseedEmployees}
-                isLoading={seedEmployeesMutation.isLoading}
-                isUnseeding={unseedEmployeesMutation.isLoading}
-                maxCount={1000}
-                defaultCount={5}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end'>
               <div className='flex'>
                 <SmartButton
                   id="create-employee-btn"

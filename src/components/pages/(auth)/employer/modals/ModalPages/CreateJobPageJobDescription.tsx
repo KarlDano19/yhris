@@ -1,8 +1,8 @@
-import { Dispatch, useState, useEffect, useRef } from 'react';
+import { Dispatch, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
-import { QUILL_FORMATS, QUILL_MODULES, CREATEJOB_TEMPLATE } from '@/helpers/constants';
+import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -14,9 +14,6 @@ export default function CreateJobPageJobDescription({
   onSubmit,
   setFileProps,
   hasSalaryRange,
-  combinedFormData,
-  positionData,
-  firstForm,
 }: {
   register: any;
   setValue: any;
@@ -25,9 +22,6 @@ export default function CreateJobPageJobDescription({
   onSubmit: () => void;
   setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
   hasSalaryRange?: boolean;
-  combinedFormData?: any;
-  positionData?: any[];
-  firstForm?: any;
 }) {
   const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -41,56 +35,6 @@ export default function CreateJobPageJobDescription({
     fileSize?: number;
     file?: File;
   }>({});
-  
-  // Track the last position to detect changes
-  const lastPositionRef = useRef<string | null>(null);
-
-  // Helper function to get the appropriate description for a position
-  const getPositionDescription = (positionId: string) => {
-    if (!positionData) return CREATEJOB_TEMPLATE[0];
-    
-    const selectedPosition = positionData.find((pos: any) => pos.id === positionId);
-    return selectedPosition?.description || CREATEJOB_TEMPLATE[0];
-  };
-
-  // Helper function to check if field should be populated (empty or contains default content)
-  const shouldPopulateField = (currentContent: string) => {
-    return !currentContent || 
-      currentContent === '<ul><li><br></li></ul>' || 
-      currentContent === '<p><br></p>' ||
-      currentContent === CREATEJOB_TEMPLATE[0] ||
-      currentContent.includes('Ensuring the accounts of the company are accurate and free of error');
-  };
-
-  // Effect to populate role field with selected position description
-  useEffect(() => {
-    const currentJobDescription = getValues('jobDescription');
-    const currentPosition = firstForm?.getValues('position');
-    
-    // Check if position has changed - ALWAYS update when position changes
-    if (currentPosition && currentPosition !== lastPositionRef.current) {
-      lastPositionRef.current = currentPosition;
-      const newDescription = getPositionDescription(currentPosition);
-      setValue('jobDescription', newDescription);
-      return;
-    }
-    
-    // Initial population logic - only run if field is empty or contains default content
-    if (shouldPopulateField(currentJobDescription)) {
-      // Priority order: combinedFormData.positionDescription > currentPosition > combinedFormData.position
-      let descriptionToUse = CREATEJOB_TEMPLATE[0]; // default fallback
-      
-      if (combinedFormData?.positionDescription) {
-        descriptionToUse = combinedFormData.positionDescription;
-      } else if (currentPosition) {
-        descriptionToUse = getPositionDescription(currentPosition);
-      } else if (combinedFormData?.position) {
-        descriptionToUse = getPositionDescription(combinedFormData.position);
-      }
-      
-      setValue('jobDescription', descriptionToUse);
-    }
-  }, [setValue, getValues, combinedFormData, positionData, firstForm]);
 
   return (
     <>

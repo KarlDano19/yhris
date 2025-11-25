@@ -53,21 +53,20 @@ export default function ConfirmEditEmployerProfileModal({
                         Are you sure you want to save the changes?
                     </p>
                 </div>
-                <div className='flex flex-row justify-center w-full gap-3 md:gap-8 px-4 pt-8 md:pt-10 pb-5 md:pb-7'>
+                <div className='lg:flex-row lg:space-x-4 whitespace-nowrap px-8 pt-10 pb-7 flex sm:flex-col'>
                   <button
                     type='button'
-                    className='inline-flex justify-center w-full rounded-md border border-blue-600 px-6 md:px-20 py-2 text-sm md:text-base bg-white leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
-                    onClick={() => setIsOpen(false)}
-                    ref={cancelButtonRef}
-                  >
-                    No
-                  </button>
-                  <button
-                    type='button'
-                    className='inline-flex justify-center w-full rounded-md border border-transparent px-6 md:px-20 py-2 text-sm md:text-base bg-blue-600 leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none transition ease-in-out duration-150'
+                    className='inline-flex justify-center drop-shadow-xl w-full rounded-lg border border-blue-600 px-20 py-3 bg-blue-600 text-lg leading-6 font-bold text-white shadow-sm hover:text-white focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
                     onClick={confirmSubmit}
                   >
                     Yes
+                  </button>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center drop-shadow-xl w-full rounded-lg border border-blue-600 px-20 py-3 bg-blue-600 text-lg leading-6 font-bold text-white shadow-sm hover:text-white focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                    onClick={() => {setIsOpen(false); window.location.href = '/dashboard';}}
+                  >
+                    No
                   </button>
                 </div>
               </Dialog.Panel>

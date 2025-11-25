@@ -76,56 +76,58 @@ export interface DemographicDataItem {
     const femalePercentage = totalApplicants > 0 ? `${((femaleCount / totalApplicants) * 100).toFixed(0)}%` : '0%';
     const malePercentage = totalApplicants > 0 ? `${((maleCount / totalApplicants) * 100).toFixed(0)}%` : '0%';
   
-  // Calculate most common regions using the same logic as DemographicBreakdown
-  const regionGroupCounts: { [key: string]: number } = {};
-
-  const incrementRegion = (region: string | undefined) => {
-    if (!region || !validRegions || !validRegions.includes(region)) {
-      return;
-    }
-    const regionGroup = getRegionGroup(region);
-    if (regionGroup) {
-      regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
-    }
-  };
-
-  const incrementRegionsArray = (regions?: string[]) => {
-    if (!regions || !Array.isArray(regions)) {
-      return;
-    }
-    regions.forEach((region) => incrementRegion(region));
-  };
-
-  const processJobPosting = (job: any) => {
-    if (!job) {
-      return;
-    }
-    incrementRegion(job.advertise_to);
-    incrementRegionsArray(job.advertise_options);
-  };
-
-  if (selectedJobFilter === 'All Jobs') {
-    jobPostData?.records?.forEach(processJobPosting);
-  } else {
-    // For specific jobs, use the job data from applicant records
-    filteredApplicants.forEach((applicant: any) => {
-      if (applicant.job_posting) {
-        processJobPosting(applicant.job_posting);
+    // Calculate most common regions using the same logic as DemographicBreakdown
+    const regionGroupCounts: { [key: string]: number } = {};
+    
+    if (selectedJobFilter === 'All Jobs') {
+      // For "All Jobs", consider both job posting regions and applicant addresses
+      if (jobPostData?.records && Array.isArray(jobPostData.records)) {
+        jobPostData.records.forEach((job: any) => {
+          // Check advertise_to field (single region)
+          if (job.advertise_to && validRegions && validRegions.includes(job.advertise_to)) {
+            const regionGroup = getRegionGroup(job.advertise_to);
+            if (regionGroup) {
+              regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+            }
+          }
+          // Also check advertise_options field (multiple regions) if it exists
+          if (job.advertise_options && Array.isArray(job.advertise_options)) {
+            job.advertise_options.forEach((region: string) => {
+              if (validRegions && validRegions.includes(region)) {
+                const regionGroup = getRegionGroup(region);
+                if (regionGroup) {
+                  regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+                }
+              }
+            });
+          }
+        });
       }
-    });
-
-    // Also include the matching job posting from jobPostData if available
-    const matchingJob =
-      jobPostData?.records && Array.isArray(jobPostData.records)
-        ? jobPostData.records.find(
-            (job: any) => job.job_title === selectedJobFilter || job.id === selectedJobFilter
-          )
-        : null;
-
-    if (matchingJob) {
-      processJobPosting(matchingJob);
+    } else {
+      // For specific jobs, use the job data from applicant records
+      filteredApplicants.forEach((applicant: any) => {
+        if (applicant.job_posting) {
+          // Check advertise_to field (single region)
+          if (applicant.job_posting.advertise_to && validRegions && validRegions.includes(applicant.job_posting.advertise_to)) {
+            const regionGroup = getRegionGroup(applicant.job_posting.advertise_to);
+            if (regionGroup) {
+              regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+            }
+          }
+          // Also check advertise_options field (multiple regions) if it exists
+          if (applicant.job_posting.advertise_options && Array.isArray(applicant.job_posting.advertise_options)) {
+            applicant.job_posting.advertise_options.forEach((region: string) => {
+              if (validRegions && validRegions.includes(region)) {
+                const regionGroup = getRegionGroup(region);
+                if (regionGroup) {
+                  regionGroupCounts[regionGroup] = (regionGroupCounts[regionGroup] || 0) + 1;
+                }
+              }
+            });
+          }
+        }
+      });
     }
-  }
     
     // Always consider applicant addresses for region analysis
     filteredApplicants.forEach((applicant: any) => {
@@ -155,88 +157,69 @@ export interface DemographicDataItem {
       }
     });
   
-  const regionEntries = Object.entries(regionGroupCounts) as Array<[string, number]>;
-  let mostCommonRegions: string[] = ['N/A'];
-
-  if (regionEntries.length > 0) {
-    const maxRegionCount = Math.max(...regionEntries.map(([, count]) => count));
-    const advertiseOrder = ['Metro Manila', 'Luzon', 'Visayas', 'Mindanao'];
-
-    const tiedRegions = regionEntries
-      .filter(([, count]) => count === maxRegionCount)
-      .map(([region, count]) => ({ region, count }));
-
-    tiedRegions.sort((a, b) => {
-      const aIndex = advertiseOrder.indexOf(a.region);
-      const bIndex = advertiseOrder.indexOf(b.region);
-      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
-    });
-
-    mostCommonRegions = tiedRegions.map(({ region, count }) => `${region} (${count})`);
-  }
+    // Get top 3 most common region groups and sort by advertiseOptions order
+    const sortedRegionGroups = Object.entries(regionGroupCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([regionGroup]) => regionGroup);
   
-  // Calculate age distribution dynamically from birth_date
-  const ageGroups = filteredApplicants.reduce((acc: any, applicant: any) => {
-    let age = null;
+    // Sort regions by their order in advertiseOptions
+    const advertiseOptions = [
+      { label: 'Metro Manila' },
+      { label: 'Luzon' },
+      { label: 'Visayas' },
+      { label: 'Mindanao' }
+    ];
     
-    // Calculate age from birth_date (prioritize this method)
-    if (applicant.applicant?.birth_date) {
-      const birthDate = new Date(applicant.applicant.birth_date);
-      const today = new Date();
-      age = today.getFullYear() - birthDate.getFullYear();
-      
-      // Adjust for cases where birthday hasn't occurred this year
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-    }
-    // Fallback to stored age field if birth_date is not available
-    else if (applicant.applicant?.age) {
-      age = applicant.applicant.age;
-    }
-    
-    if (age && age > 0) {
-      let ageGroup;
-      if (age >= 18 && age <= 25) ageGroup = '18-25';
-      else if (age >= 26 && age <= 35) ageGroup = '26-35';
-      else if (age >= 36 && age <= 45) ageGroup = '36-45';
-      else if (age >= 46 && age <= 55) ageGroup = '46-55';
-      else if (age >= 56) ageGroup = '56+';
-      else ageGroup = 'Unknown';
-
-      acc[ageGroup] = (acc[ageGroup] || 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  // Find the most common age group
-  const ageEntries = Object.entries(ageGroups) as Array<[string, number]>;
-  let mostCommonAgeGroup = 'N/A';
-
-  if (ageEntries.length > 0) {
-    const maxAgeCount = Math.max(...ageEntries.map(([, count]) => count));
-    const ageOrder = ['18-25', '26-35', '36-45', '46-55', '56+', 'Unknown'];
-
-    const tiedAgeGroups = ageEntries
-      .filter(([, count]) => count === maxAgeCount)
-      .map(([ageGroup, count]) => ({ ageGroup, count }));
-
-    const prioritizedAgeGroups = tiedAgeGroups.filter(({ ageGroup }) => ageGroup !== 'Unknown');
-    const groupsToDisplay = prioritizedAgeGroups.length > 0 ? prioritizedAgeGroups : tiedAgeGroups;
-
-    groupsToDisplay.sort((a, b) => {
-      const aIndex = ageOrder.indexOf(a.ageGroup);
-      const bIndex = ageOrder.indexOf(b.ageGroup);
-      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    const sortedByAdvertiseOrder = sortedRegionGroups.sort((a, b) => {
+      const aIndex = advertiseOptions.findIndex(option => option.label === a);
+      const bIndex = advertiseOptions.findIndex(option => option.label === b);
+      return aIndex - bIndex;
     });
+  
+    const mostCommonRegions = sortedByAdvertiseOrder.length > 0 ? sortedByAdvertiseOrder.map(region => region.replace(/^- | -$/g, '')) : ['N/A'];
+  
+        // Calculate age distribution dynamically from birth_date
+    const ageGroups = filteredApplicants.reduce((acc: any, applicant: any) => {
+      let age = null;
+      
+      // Calculate age from birth_date (prioritize this method)
+      if (applicant.applicant?.birth_date) {
+        const birthDate = new Date(applicant.applicant.birth_date);
+        const today = new Date();
+        age = today.getFullYear() - birthDate.getFullYear();
+        
+        // Adjust for cases where birthday hasn't occurred this year
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+      }
+      // Fallback to stored age field if birth_date is not available
+      else if (applicant.applicant?.age) {
+        age = applicant.applicant.age;
+      }
+      
+      if (age && age > 0) {
+        let ageGroup;
+        if (age >= 18 && age <= 25) ageGroup = '18-25';
+        else if (age >= 26 && age <= 35) ageGroup = '26-35';
+        else if (age >= 36 && age <= 45) ageGroup = '36-45';
+        else if (age >= 46 && age <= 55) ageGroup = '46-55';
+        else if (age >= 56) ageGroup = '56+';
+        else ageGroup = 'Unknown';
 
-    mostCommonAgeGroup = groupsToDisplay.length > 0
-      ? groupsToDisplay
-          .map(({ ageGroup, count }) => `${ageGroup} (${count} applicant${count === 1 ? '' : 's'})`)
-          .join(', ')
-      : 'N/A';
-  }
+        acc[ageGroup] = (acc[ageGroup] || 0) + 1;
+      }
+      return acc;
+    }, {});
+  
+    // Find the most common age group
+    const maxAgeCount = Math.max(...Object.values(ageGroups).map(count => count as number));
+    const mostCommonAgeGroup = Object.entries(ageGroups)
+      .filter(([_, count]) => (count as number) === maxAgeCount)
+      .map(([ageGroup]) => ageGroup)
+      .filter(ageGroup => ageGroup !== 'Unknown')[0] || 'N/A';
   
     return {
       femalePercentage,

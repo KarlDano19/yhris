@@ -11,49 +11,26 @@ type DemographicBreakdownFilterModalProps = {
   onFilterApply?: (filters: any) => void;
   jobItems?: any[];
   currentSelectedJob?: string;
-  applicantStatusOptions?: string[];
-  currentSelectedStatus?: string;
 };
 
-export default function DemographicBreakdownFilterModal({
-  isOpen,
-  setIsOpen,
-  onFilterApply,
-  jobItems,
-  currentSelectedJob,
-  applicantStatusOptions,
-  currentSelectedStatus,
-}: DemographicBreakdownFilterModalProps) {
+export default function DemographicBreakdownFilterModal({ isOpen, setIsOpen, onFilterApply, jobItems, currentSelectedJob }: DemographicBreakdownFilterModalProps) {
   const [selectedJob, setSelectedJob] = useState(currentSelectedJob || '');
-  const [selectedStatus, setSelectedStatus] = useState(currentSelectedStatus || 'All Statuses');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const jobDropdownRef = useRef<HTMLDivElement>(null);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Use provided job items
   const jobs = jobItems || [];
-  const statusOptions =
-    applicantStatusOptions || ['All Statuses', 'Applied', 'Ongoing', 'Hired', 'Rejected', 'Withdrawn'];
 
   // Update selectedJob when currentSelectedJob prop changes
   useEffect(() => {
     setSelectedJob(currentSelectedJob || '');
   }, [currentSelectedJob]);
 
-  // Update selectedStatus when currentSelectedStatus prop changes
-  useEffect(() => {
-    setSelectedStatus(currentSelectedStatus || 'All Statuses');
-  }, [currentSelectedStatus]);
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (jobDropdownRef.current && !jobDropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
-      }
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
-        setIsStatusDropdownOpen(false);
       }
     };
 
@@ -65,7 +42,7 @@ export default function DemographicBreakdownFilterModal({
 
   const handleSave = () => {
     if (onFilterApply) {
-      onFilterApply({ selectedJob, selectedStatus });
+      onFilterApply({ selectedJob });
     }
     setIsOpen(false);
   };
@@ -73,19 +50,11 @@ export default function DemographicBreakdownFilterModal({
   const handleClose = () => {
     setIsOpen(false);
     setSelectedJob(currentSelectedJob || '');
-    setSelectedStatus(currentSelectedStatus || 'All Statuses');
-    setIsDropdownOpen(false);
-    setIsStatusDropdownOpen(false);
   };
 
   const handleJobSelect = (job: string) => {
     setSelectedJob(job);
     setIsDropdownOpen(false);
-  };
-
-  const handleStatusSelect = (status: string) => {
-    setSelectedStatus(status);
-    setIsStatusDropdownOpen(false);
   };
 
   return (
@@ -116,7 +85,7 @@ export default function DemographicBreakdownFilterModal({
             >
               <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-[500px]'>
                 <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Filter</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Select Job</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={handleClose} />
                 </div>
                 
@@ -124,7 +93,7 @@ export default function DemographicBreakdownFilterModal({
                   <label htmlFor='job' className='block text-sm font-medium leading-6 text-gray-900'>
                     Job
                   </label>
-                  <div className='relative mt-2' ref={jobDropdownRef}>
+                  <div className='relative mt-2' ref={dropdownRef}>
                     <button
                       type='button'
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -157,41 +126,6 @@ export default function DemographicBreakdownFilterModal({
                             }`}
                           >
                             {job.job_title}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className='px-4 pb-6'>
-                  <label htmlFor='status' className='block text-sm font-medium leading-6 text-gray-900'>
-                    Overall Applicants Status Summary
-                  </label>
-                  <div className='relative mt-2' ref={statusDropdownRef}>
-                    <button
-                      type='button'
-                      onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                      className='w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 appearance-none text-left flex items-center justify-between'
-                    >
-                      <span className={selectedStatus ? 'text-gray-900' : 'text-gray-400'}>
-                        {selectedStatus || 'Select a status...'}
-                      </span>
-                      <SelectChevronDown />
-                    </button>
-
-                    {isStatusDropdownOpen && (
-                      <div className='absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto'>
-                        {statusOptions.map((status) => (
-                          <button
-                            key={status}
-                            type='button'
-                            onClick={() => handleStatusSelect(status)}
-                            className={`block w-full text-left px-3 py-2 text-sm hover:bg-savoy-blue hover:text-white focus:bg-savoy-blue focus:text-white focus:outline-none transition-colors duration-150 ${
-                              selectedStatus === status ? 'bg-savoy-blue text-white' : 'text-gray-900'
-                            }`}
-                          >
-                            {status}
                           </button>
                         ))}
                       </div>

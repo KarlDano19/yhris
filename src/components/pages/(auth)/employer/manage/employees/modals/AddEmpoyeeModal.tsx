@@ -205,11 +205,12 @@ export default function AddEmployeeModal({
                           <div>
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                               Nationality
+                              <span className='text-red-600'>*</span>
                             </label>
                             <div className='mt-2'>
                               <input
                                 id='nationality'
-                                {...register('nationality')}
+                                {...register('nationality', { required: true })}
                                 type='text'
                                 className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                               />
@@ -237,11 +238,12 @@ export default function AddEmployeeModal({
                           <div>
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
                               Religion
+                              <span className='text-red-600'>*</span>
                             </label>
                             <div className='mt-2'>
                               <input
                                 id='religion'
-                                {...register('religion')}
+                                {...register('religion', { required: true })}
                                 type='text'
                                 className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                               />

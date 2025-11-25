@@ -11,6 +11,7 @@ import Confetti from 'react-confetti';
 
 import CustomToast from '@/components/CustomToast';
 import ConfirmSubmitModal from '../modals/ConfirmSubmitModal';
+import useGetEmployeeIssueDetails from '../hooks/useGetEmployeeIssueDetails';
 import useGetEmployeeIssueActionDetails from '../hooks/useGetEmployeeIssueActionDetails';
 import useUpdateEmployeeIssueAction from '../hooks/useUpdateEmployeeIssueAction';
 import SignatureModal from '../modals/SignatureModal';
@@ -22,12 +23,15 @@ function Content() {
   const params = useParams<{ employee_issue_id: string }>();
   const [hasIssue, setHasIssue] = useState(false);
   const [isAcknowledged, setIsAcknowledged] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [isConfirmSubmitModalOpen, setIsConfirmSubmitModalOpen] = useState(false);
   const [employeeIssueDetails, setEmployeeIssueDetails] = useState<any>({});
   const [signatureFile, setSignatureFile] = useState<File | string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   
+  const { data: dataEmployeeIssueDetails, isLoading: employeeIssueDetailsLoading } =
+    useGetEmployeeIssueDetails(params.employee_issue_id || null);
   const {
     data: dataEmployeeIssueDecisionDetails,
     isLoading: employeeIssueDecisionDetailsLoading,
@@ -37,14 +41,23 @@ function Content() {
 
   useEffect(() => {
     if (
+      dataEmployeeIssueDetails &&
+      Object.keys(dataEmployeeIssueDetails).length !== 0 &&
+      !employeeIssueDetailsLoading
+    ) {
+      setHasIssue(true);
+      setEmployeeIssueDetails(dataEmployeeIssueDetails);
+    }
+  }, [dataEmployeeIssueDetails, employeeIssueDetailsLoading]);
+
+  useEffect(() => {
+    if (
       dataEmployeeIssueDecisionDetails &&
       Object.keys(dataEmployeeIssueDecisionDetails).length !== 0 &&
       !employeeIssueDecisionDetailsLoading
     ) {
-      setHasIssue(true);
-      setEmployeeIssueDetails(dataEmployeeIssueDecisionDetails);
-
-      if (dataEmployeeIssueDecisionDetails.employee_signature) {
+      // If already acknowledged, show acknowledged state
+      if (dataEmployeeIssueDecisionDetails.is_decision_acknowledged) {
         setIsAcknowledged(true);
       }
     }
@@ -99,14 +112,12 @@ function Content() {
       onSuccess: (data: any) => {
         setIsAcknowledged(true);
         setIsConfirmSubmitModalOpen(false);
-        setIsSubmitting(false);
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
         
         // Refetch decision details to get updated data
         refetchEmployeeIssueDecisionDetails();
       },
       onError: (err: any) => {
-        setIsSubmitting(false);
         const errorMessage = typeof err === 'string' ? err : err.message || 'An error occurred';
         toast.custom(() => <CustomToast message={errorMessage} type='error' />, {
           duration: 7000,
@@ -137,7 +148,17 @@ function Content() {
     }
   };
 
-  if (employeeIssueDecisionDetailsLoading) {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  if (employeeIssueDetailsLoading || employeeIssueDecisionDetailsLoading) {
     return (
       <div className='w-screen h-screen flex justify-center items-center'>
         <div className='fixed z-20 inset-0 overflow-y-auto'>

@@ -89,32 +89,17 @@ export default function ResetPasswordModal({
   };
 
   const generateStrongPassword = () => {
-    const length = 12;
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const digits = '0123456789';
-    const special = '!@#$%^&*()_+';
-    
-    // Ensure at least one character from each required category
+    const length = 12; // Length of the password
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
     let password = '';
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += digits[Math.floor(Math.random() * digits.length)];
-    password += special[Math.floor(Math.random() * special.length)];
-    
-    // Fill the rest with random characters from all categories
-    const allChars = lowercase + uppercase + digits + special;
-    for (let i = password.length; i < length; i++) {
-      password += allChars[Math.floor(Math.random() * allChars.length)];
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
     }
-    
-    // Shuffle the password to avoid predictable patterns (first char always lowercase, etc.)
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
-    
+    // Ensure no spaces in generated password
+    password = password.replace(/\s/g, '');
     setPassword(password);
     setConfirmPassword(password);
-    setPasswordRequirements(getPasswordRequirements(password));
-    setBackendPasswordError('');
   };
 
   return (
@@ -217,15 +202,6 @@ export default function ResetPasswordModal({
                                   </div>
                                 )}
                               </div>
-                              <div className='mt-3'>
-                                <button
-                                  type='button'
-                                  className='inline-flex justify-center rounded-md bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:shadow-md focus:shadow-none disabled:opacity-50'
-                                  onClick={generateStrongPassword}
-                                >
-                                  GENERATE STRONG PASSWORD
-                                </button>
-                              </div>
                             </div>
                             <div className='grid-item'>
                               <div className='mb-4'>
@@ -258,6 +234,13 @@ export default function ResetPasswordModal({
                                 </div>
                               </div>
                             </div>
+                            <button
+                              type='button'
+                              className='mt-3 inline-flex justify-center rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300'
+                              onClick={generateStrongPassword}
+                            >
+                              Generate Strong Password
+                            </button>
                           </div>
                         </div>
                       </div>

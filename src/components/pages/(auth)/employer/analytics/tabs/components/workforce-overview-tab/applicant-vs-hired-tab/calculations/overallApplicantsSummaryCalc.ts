@@ -38,7 +38,7 @@ export const calculateOverallApplicantsSummary = (
   result.push({
     status: 'Applied',
     count: totalApplied.toString(),
-    percentage: totalApplied > 0 ? '100%' : '0%',
+    percentage: '100%',
     label: '(initial total applicants)',
     color: 'text-gray-800 font-bold'
   });

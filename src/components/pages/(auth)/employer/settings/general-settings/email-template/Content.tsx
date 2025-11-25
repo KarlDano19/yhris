@@ -17,10 +17,7 @@ import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
-import useSeedEmailTemplates from './hooks/useSeedEmailTemplates';
-import useUnseedEmailTemplates from './hooks/useUnseedEmailTemplates';
 import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
-import SeederButton from '@/components/SeederButton';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import EditIcon from '@/svg/EditIcon';
@@ -54,7 +51,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [emailTemplatesItems, setEmailTemplatesItems] = useState<any>([]);
   const [actionType, setActionType] = useState<string>('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<number | null>(null);
-  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>(null);
+  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
   const [isDeleteEmailTemplateModalOpen, setIsDeleteEmailTemplateModalOpen] = useState<{ open: boolean; id?: number; templateName?: string } | null>(null);
   
   // Bulk delete states
@@ -76,14 +73,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
-  const seedMutation = useSeedEmailTemplates();
-  const unseedMutation = useUnseedEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
-    setSelectedEmailTemplateId(null);
-    setActionType('');
     // Reset the modal state to close the create/edit modal
-    setEmailTemplateModal(null);
+    setEmailTemplateModal({ id: null, open: false, mode: 'create' });
   };
 
   const paginationChange = (event: any) => {
@@ -190,13 +183,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  useEffect(() => {
-    if (!emailTemplateModal?.open) {
-      setSelectedEmailTemplateId(null);
-      setActionType('');
-    }
-  }, [emailTemplateModal]);
-
   // Handle individual email template selection
   const handleEmailTemplateSelect = (emailTemplateId: number) => {
     setSelectedEmailTemplates(prev => {
@@ -256,52 +242,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setSelectAll(false);
     setBulkDeleteCount(0);
     refetchEmailTemplate();
-  };
-
-  // Handle seeding email templates
-  const handleSeedEmailTemplates = async (count: number) => {
-    try {
-      const result = await seedMutation.mutateAsync({ count });
-      toast.custom(
-        () => <CustomToast message={result.message} type="success" />,
-        { duration: 3000 }
-      );
-      // Clear any selected template and action type to prevent modal from opening
-      setSelectedEmailTemplateId(null);
-      setActionType('');
-      refetchEmailTemplate();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to seed email templates';
-      toast.custom(
-        () => <CustomToast message={errorMessage} type="error" />,
-        { duration: 5000 }
-      );
-      throw error;
-    }
-  };
-
-  // Handle unseeding email templates
-  const handleUnseedEmailTemplates = async () => {
-    try {
-      const result = await unseedMutation.mutateAsync();
-      toast.custom(
-        () => <CustomToast message={result.message} type="success" />,
-        { duration: 3000 }
-      );
-      // Clear all selection states
-      setSelectedEmailTemplates(new Set());
-      setSelectAll(false);
-      setSelectedEmailTemplateId(null);
-      setActionType('');
-      refetchEmailTemplate();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to unseed email templates';
-      toast.custom(
-        () => <CustomToast message={errorMessage} type="error" />,
-        { duration: 5000 }
-      );
-      throw error;
-    }
   };
 
   const renderRows = () => {
@@ -430,13 +370,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3'>
-              <SeederButton
-                onSeed={handleSeedEmailTemplates}
-                onUnseed={handleUnseedEmailTemplates}
-                isLoading={seedMutation.isLoading}
-                isUnseeding={unseedMutation.isLoading}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end'>
               <SmartButton
                 id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'

@@ -1,13 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface SeedEmailTemplatesParams {
-  count?: number;
-}
-
-async function seedEmailTemplates(params: SeedEmailTemplatesParams) {
+async function updateEmployeeToYP(employeeData: { id: string; data: any }) {
   try {
-    const { count = 5 } = params;
+    console.log("updateEmployeeToYP", employeeData);
     const token = getCookie('token');
     const config = {
       method: 'POST',
@@ -15,11 +11,9 @@ async function seedEmailTemplates(params: SeedEmailTemplatesParams) {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify({
-        count,
-      }),
+      body: JSON.stringify(employeeData.data),
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-templates/seeder/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/sync-create/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -33,13 +27,10 @@ async function seedEmailTemplates(params: SeedEmailTemplatesParams) {
   }
 }
 
-function useSeedEmailTemplates() {
-  const mutation = useMutation({
-    mutationFn: (params: SeedEmailTemplatesParams) => seedEmailTemplates(params),
-  });
+function useUpdateEmployeeToYP() {
+  const query = useMutation((employeeData: { id: string; data: any }) => updateEmployeeToYP(employeeData));
 
-  return mutation;
+  return query;
 }
 
-export default useSeedEmailTemplates;
-
+export default useUpdateEmployeeToYP;

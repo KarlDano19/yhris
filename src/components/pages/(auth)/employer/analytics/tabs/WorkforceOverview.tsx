@@ -51,10 +51,8 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   const [rolePipelinePageSize, setRolePipelinePageSize] = useState(5);
   const [rolePipelineCurrentPage, setRolePipelineCurrentPage] = useState(1);
 
-  // State for demographic breakdown filters
+  // State for demographic breakdown job filter
   const [selectedJobFilter, setSelectedJobFilter] = useState<string>('All Jobs');
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('All Statuses');
-  const applicantStatusOptions = ['All Statuses', 'Applied', 'Ongoing', 'Hired', 'Rejected', 'Withdrawn'];
 
   // Fetch overall applicants data across all job postings
   const { data: appliedApplicantsData, isLoading: applicantsLoading, error: applicantsError } = useGetOverallApplicants();
@@ -97,7 +95,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   }, [selectedJobFilter, allJobPostData]);
 
   // Fetch applicants for specific job when selected
-  const { data: specificJobApplicants, isLoading: specificJobLoading, error: specificJobError } = useGetAppliedApplicants(selectedJob?.id);
+  const { data: specificJobApplicants, isLoading: specificJobLoading } = useGetAppliedApplicants(selectedJob?.id);
 
   // Initial fetch when component mounts
   useEffect(() => {
@@ -271,11 +269,9 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
             {/* Overall Applicants Status Summary */}
             <OverallApplicantsSummary 
-              appliedApplicantsData={selectedJobFilter === 'All Jobs' ? appliedApplicantsData : specificJobApplicants}
-              isLoading={selectedJobFilter === 'All Jobs' ? applicantsLoading : specificJobLoading}
-              error={selectedJobFilter === 'All Jobs' ? applicantsError : specificJobError}
-              selectedStatusFilter={selectedStatusFilter}
-              selectedJobFilter={selectedJobFilter}
+              appliedApplicantsData={appliedApplicantsData}
+              isLoading={applicantsLoading}
+              error={applicantsError}
             />
 
             {/* Demographic Breakdown */}
@@ -284,15 +280,9 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
               jobPostData={{ records: allJobPostData }}
               validRegions={getValidRegions().filter((region): region is string => region !== null)}
               isLoading={selectedJobFilter === 'All Jobs' ? applicantsLoading : specificJobLoading}
-              error={selectedJobFilter === 'All Jobs' ? applicantsError : specificJobError}
+              error={applicantsError}
               selectedJobFilter={selectedJobFilter}
-              onJobFilterChange={(job) => {
-                setSelectedJobFilter(job);
-                setSelectedStatusFilter('All Statuses');
-              }}
-              applicantStatusOptions={applicantStatusOptions}
-              selectedStatusFilter={selectedStatusFilter}
-              onStatusFilterChange={setSelectedStatusFilter}
+              onJobFilterChange={setSelectedJobFilter}
             />
           </div>
         );

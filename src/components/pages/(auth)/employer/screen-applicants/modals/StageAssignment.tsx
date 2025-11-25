@@ -22,8 +22,6 @@ interface User {
   id: number;
   name: string;
   email: string;
-  is_admin: boolean;
-  is_current_user: boolean;
 }
 
 interface Assignment {
@@ -55,21 +53,6 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
     }
   }, [currentAssignments]);
 
-  // Always include the creator (current user) in selected users
-  useEffect(() => {
-    if (users && users.length > 0) {
-      const creatorUser = users.find((u: User) => u.is_current_user);
-      if (creatorUser) {
-        setSelectedUsers(prev => {
-          if (!prev.includes(creatorUser.id)) {
-            return [...prev, creatorUser.id];
-          }
-          return prev;
-        });
-      }
-    }
-  }, [users]);
-
   // Show error toast if users fetch fails
   useEffect(() => {
     if (usersError) {
@@ -79,12 +62,7 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
     }
   }, [usersError]);
 
-  const handleUserToggle = (userId: number, isCreator: boolean) => {
-    // Prevent deselecting the creator (creator always has access to their stages)
-    if (isCreator) {
-      return;
-    }
-    
+  const handleUserToggle = (userId: number) => {
     setSelectedUsers(prev => 
       prev.includes(userId) 
         ? prev.filter(id => id !== userId)
@@ -153,15 +131,6 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
               </h4>
               <p className="text-xs text-gray-500 mb-3">
                 Assigned users will have full access to this stage (view, move, and update applicants).
-                <br />
-                <strong className="text-blue-700">Note:</strong> The Creator is automatically assigned and cannot be deselected.
-                <br />
-                <span className="inline-flex items-center gap-1 mt-1">
-                  User badges: 
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Creator</span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Admin</span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">User</span>
-                </span>
               </p>
               
               {isLoadingUsers ? (
@@ -177,59 +146,21 @@ export default function StageAssignment({ title, handleFormSubmit }: StageAssign
                   {users.length === 0 ? (
                     <p className="text-center py-4 text-sm text-gray-500">No users found</p>
                   ) : (
-                    users.map((user: User) => {
-                      // Determine user type badge
-                      const getUserBadge = () => {
-                        if (user.is_current_user) {
-                          return (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                              Creator
-                            </span>
-                          );
-                        }
-                        if (user.is_admin) {
-                          return (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                              Admin
-                            </span>
-                          );
-                        }
-                        return (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                            User
-                          </span>
-                        );
-                      };
-
-                      return (
-                        <div 
-                          key={user.id} 
-                          className={`flex items-center p-3 ${user.is_current_user ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                        >
-                          <input
-                            type="checkbox"
-                            id={`user-${user.id}`}
-                            checked={selectedUsers.includes(user.id)}
-                            onChange={() => handleUserToggle(user.id, user.is_current_user)}
-                            disabled={user.is_current_user}
-                            className={`h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded ${
-                              user.is_current_user ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                            title={user.is_current_user ? 'Creator always has access to their stages' : ''}
-                          />
-                          <label 
-                            htmlFor={`user-${user.id}`} 
-                            className={`ml-3 flex-1 ${user.is_current_user ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                              {getUserBadge()}
-                            </div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
-                          </label>
-                        </div>
-                      );
-                    })
+                    users.map((user: User) => (
+                      <div key={user.id} className="flex items-center p-3 hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          id={`user-${user.id}`}
+                          checked={selectedUsers.includes(user.id)}
+                          onChange={() => handleUserToggle(user.id)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor={`user-${user.id}`} className="ml-3 flex-1 cursor-pointer">
+                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </label>
+                      </div>
+                    ))
                   )}
                 </div>
               )}

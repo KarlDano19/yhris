@@ -41,14 +41,10 @@ export const formatPipelineInfo = (
   if (applicants === 0) return 'No applicants yet';
   
   if (jobId && pipelineData && pipelineData[jobId]) {
-    const stageEntries = Object.entries(pipelineData[jobId]);
-    if (stageEntries.length === 0) {
-      return pipeline;
-    }
-
-    const [stage, count] = stageEntries[0];
-    const firstStage = `${stage}: ${count}`;
-    return stageEntries.length > 1 ? `${firstStage}, ...` : firstStage;
+    const stageBreakdown = Object.entries(pipelineData[jobId])
+      .map(([stage, count]) => `${stage}: ${count}`)
+      .join(', ');
+    return stageBreakdown;
   }
   
   if (applicants === 1) return '1';

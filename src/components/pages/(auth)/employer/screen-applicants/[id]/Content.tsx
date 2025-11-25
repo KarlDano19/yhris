@@ -37,9 +37,6 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
-import useSeedApplicants from '../hooks/useSeedApplicants';
-import useUnseedApplicants from '../hooks/useUnseedApplicants';
-import SeederButton from '@/components/SeederButton';
 
 import { ArrowLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
@@ -61,8 +58,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
-  const seedApplicantsMutation = useSeedApplicants(params.id as string);
-  const unseedApplicantsMutation = useUnseedApplicants(params.id as string);
   
   // Date range filter states - must be declared before hook calls
   const [dateFrom, setDateFrom] = useState<any>('');
@@ -84,19 +79,17 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     isLoading: isGetJobPostDetailsLoading,
     refetch: jobPostDetailsRefetch,
   } = useGetJobPostDetails(params.id);
-  const recentOnly = !useDateFilter;
-
   const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(
-    params.id,
-    false,
-    recentOnly,
+    params.id, 
+    false, 
+    useDateFilter ? false : true,
     useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
     useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
   );
   const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(
-    params.id,
-    true,
-    recentOnly,
+    params.id, 
+    true, 
+    useDateFilter ? false : true,
     useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
     useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
   );
@@ -289,7 +282,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           requirements: item.stage_requirements,
           applicants: [],
           orderBy: item.order_by,
-          is_final_stage: item.is_final_stage || false, // Include is_final_stage from API
           permissions: item.permissions, // Make sure permissions are passed through
         };
         jobStages.push(newData);
@@ -562,40 +554,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     setIsBatchUploadOpen(false);
   };
 
-  const handleSeedApplicants = async (count: number) => {
-    try {
-      const result = await seedApplicantsMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      appliedApplicantRefetch();
-      archivedApplicantRefetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed applicants';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedApplicants = async () => {
-    try {
-      const result = await unseedApplicantsMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      appliedApplicantRefetch();
-      archivedApplicantRefetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed applicants';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   // Handle date range changes
   const handleDateFromChange = (date: any) => {
     setDateFrom(date);
@@ -620,21 +578,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 </Link>
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
-                <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-                  <h2 className='text-xl font-bold text-indigo-dye'>
-                    Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
-                  </h2>
-                  <div className='self-start md:self-center'>
-                    <SeederButton
-                      onSeed={handleSeedApplicants}
-                      onUnseed={handleUnseedApplicants}
-                      isLoading={seedApplicantsMutation.isLoading}
-                      isUnseeding={unseedApplicantsMutation.isLoading}
-                      maxCount={1000}
-                      defaultCount={5}
-                    />
-                  </div>
-                </div>
+                <h2 className='text-xl font-bold text-indigo-dye'>
+                  Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
+                </h2>
                 {whichModal && modals[whichModal].component}
 
                 {/* Desktop Layout */}
@@ -648,7 +594,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           id='from-datepicker'
                           placeholder={'mm/dd/yyyy'}
                           className={
-                            'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                           }
                           selected={dateFrom}
                           pickerOnChange={handleDateFromChange}
@@ -661,7 +607,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           id='to-datepicker'
                           placeholder={'mm/dd/yyyy'}
                           className={
-                            'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                            'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                           }
                           selected={dateTo}
                           pickerOnChange={handleDateToChange}
@@ -676,7 +622,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                       <SmartButton
                         id="upload-resumes-btn"
                         onClick={handleOpenBatchUpload}
-                        className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-2 px-6 font-bold text-[16px] flex items-center gap-2 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
+                        className={`rounded-lg bg-savoy-blue hover:bg-blue-700 text-white py-1.5 px-6 font-bold text-[16px] flex items-center gap-2 ${!hasActiveSubscription ? 'opacity-50 pointer-events-none' : ''}`}
                         disabled={!hasActiveSubscription}
                       >
                         <UploadIcon />

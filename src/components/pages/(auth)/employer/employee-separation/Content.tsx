@@ -6,7 +6,6 @@ import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -18,6 +17,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import useDeleteSeparation from './hooks/useDeleteSeparation';
@@ -45,7 +45,6 @@ import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
-  const queryClient = useQueryClient();
   const [separationItems, setSeparationItems] = useState<any>([]);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
@@ -158,11 +157,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         setSeparationItems([...separationItemsCopy]);
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        
-        // Clear employee cache when quit claim is received (final step in separation)
-        if (emailType === 'quit claim') {
-          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
-        }
       },
       onError: (err: any) => {
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
@@ -248,9 +242,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
           setIsQuitclaimModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          
-          // Clear employee cache when quit claim is sent (approaching final step)
-          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -564,6 +555,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-letters`] || false}
+              refetch={refetch}
+              employerName={item.employer_name}
+              effectiveDate={item.effective_date || item.date_of_separation}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -833,9 +827,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
           defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
-          showDragDropAttachment={true}
-          submitButtonText="Send"
+          showAttachment={true}
+          customAttachmentSection={
+            <SeparationLetterAttachmentSection
+              pdfAttachment={isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.letter_attachment : null}
+              letterType={isLetterModalOpen.type as 'Acceptance' | 'Separation'}
+              onViewAttachment={(url: string) => window.open(url, '_blank')}
+              canShowPreview={true}
+            />
+          }
+          submitButtonText="Send Letter"
           isLoading={isLoading}
+          prePopulatedData={{
+            subject: `Letter of ${isLetterModalOpen.type} - ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'}`,
+            message: `<p>Dear ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`,
+            to: isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : [],
+            cc: [],
+            bcc: []
+          }}
         />
       )}
       {isDocumentModalOpen && (

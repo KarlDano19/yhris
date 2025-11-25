@@ -86,7 +86,7 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as='div' className={`relative z-[10000]`} onClose={() => void(0)}>
+      <Dialog as='div' className={`relative z-10`} onClose={() => void(0)}>
         <Transition.Child
           as={Fragment}
           enter='ease-out duration-300'

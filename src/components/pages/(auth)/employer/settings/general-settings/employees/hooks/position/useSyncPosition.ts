@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function duplicateEvaluationTemplate(evaluation_template_id: number) {
+async function syncPosition() {
   try {
     const token = getCookie('token');
     const config = {
@@ -11,7 +11,11 @@ async function duplicateEvaluationTemplate(evaluation_template_id: number) {
         Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/evaluation-templates/${evaluation_template_id}/`, config);
+
+    // Build URL with query parameter
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/positions/sync-third-party-integration/`;
+
+    const res = await fetch(url, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -25,10 +29,12 @@ async function duplicateEvaluationTemplate(evaluation_template_id: number) {
   }
 }
 
-function useDuplicateEvaluationTemplate() {
-  const query = useMutation((evaluation_template_id: number) => duplicateEvaluationTemplate(evaluation_template_id));
+function useSyncPosition() {
+  const query = useMutation({
+    mutationFn: () => syncPosition(),
+  });
+
   return query;
 }
 
-export default useDuplicateEvaluationTemplate;
-
+export default useSyncPosition;
