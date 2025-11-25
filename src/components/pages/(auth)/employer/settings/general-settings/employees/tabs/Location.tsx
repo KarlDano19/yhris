@@ -409,13 +409,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-        <div
-          className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#2d3e58 #f1f1f1'
-          }}
-        >
+        <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
           <div className='min-w-full py-2 sm:px-6 lg:px-8'>
             <table className='min-w-full divide-y divide-gray-300 text-center'>
               <thead>

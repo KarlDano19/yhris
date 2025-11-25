@@ -25,6 +25,7 @@ export type FilterValues = {
 type FilterProps = {
   filterGroups: FilterGroup[];
   defaultValues?: FilterValues;
+  resetValues?: FilterValues;
   onFilterChange: (filters: FilterValues) => void;
   buttonClassName?: string;
   buttonId?: string;
@@ -38,6 +39,7 @@ type FilterProps = {
 export default function Filter({ 
   filterGroups, 
   defaultValues = {}, 
+  resetValues,
   onFilterChange,
   buttonClassName,
   buttonId = "filter-button",
@@ -50,13 +52,12 @@ export default function Filter({
   const [isOpen, setIsOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState<FilterValues>({});
   const [isHovering, setIsHovering] = useState(false);
-  
-  // Initialize filters with default values
-  const [filters, setFilters] = useState<FilterValues>(() => {
+
+  const buildFilterState = (source?: FilterValues) => {
     const initialFilters: FilterValues = {};
     filterGroups.forEach(group => {
-      if (defaultValues[group.id]) {
-        initialFilters[group.id] = defaultValues[group.id];
+      if (source && source[group.id]) {
+        initialFilters[group.id] = source[group.id];
       } else if (group.allowEmpty) {
         // If allowEmpty is true, start with no options selected
         initialFilters[group.id] = [];
@@ -66,7 +67,10 @@ export default function Filter({
       }
     });
     return initialFilters;
-  });
+  };
+  
+  // Initialize filters with default values
+  const [filters, setFilters] = useState<FilterValues>(() => buildFilterState(defaultValues));
   
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -135,17 +139,8 @@ export default function Filter({
   };
 
   const handleReset = () => {
-    const resetFilters: FilterValues = {};
-    filterGroups.forEach(group => {
-      if (group.allowEmpty) {
-        resetFilters[group.id] = [];
-      } else {
-        resetFilters[group.id] = group.options.map(opt => opt.value);
-      }
-    });
-    setDraftFilters(resetFilters);
-    setFilters(resetFilters);
-    onFilterChange(resetFilters);
+    const resetState = buildFilterState(resetValues ?? defaultValues);
+    setDraftFilters(resetState);
   };
 
   const defaultButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white px-4 h-10 text-sm rounded-md hover:bg-gray-50";

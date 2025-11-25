@@ -332,43 +332,55 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   return (
     <div className="space-y-8">
       {/* Workforce KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {/* Total Active Employees Card */}
-        <TotalActiveEmployeesCard
-          employeeData={employeeData}
-          isLoading={employeeLoading}
-          error={employeeError}
-        />
-        
-        {/* New Hires Card */}
-        <NewHiresCard
-          appliedApplicantsData={appliedApplicantsData}
-          isLoading={applicantsLoading}
-          error={applicantsError}
-        />
-        
-        {/* Separated Employees Card */}
-        <SeparatedEmployeesCard
-          separationData={allSeparationData}
-          isLoading={allSeparationLoading}
-          error={allSeparationError}
-        />
-        
-        {/* Attrition Rate Card */}
-        <AttritionRateCard
-          separationData={allSeparationData}
-          employeeData={employeeData}
-          isLoading={allSeparationLoading || employeeLoading}
-          error={allSeparationError || employeeError}
-        />
-        
-        {/* Average Tenure Card */}
-        <AverageTenureCard
-          employeeData={employeeData}
-          separationData={allSeparationData}
-          isLoading={employeeLoading}
-          error={employeeError}
-        />
+      <div className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4">
+        <div className="flex gap-6 min-w-full w-max">
+          {/* Total Active Employees Card */}
+          <div className="flex-shrink-0">
+            <TotalActiveEmployeesCard
+              employeeData={employeeData}
+              isLoading={employeeLoading}
+              error={employeeError}
+            />
+          </div>
+          
+          {/* New Hires Card */}
+          <div className="flex-shrink-0">
+            <NewHiresCard
+              appliedApplicantsData={appliedApplicantsData}
+              isLoading={applicantsLoading}
+              error={applicantsError}
+            />
+          </div>
+          
+          {/* Separated Employees Card */}
+          <div className="flex-shrink-0">
+            <SeparatedEmployeesCard
+              separationData={allSeparationData}
+              isLoading={allSeparationLoading}
+              error={allSeparationError}
+            />
+          </div>
+          
+          {/* Attrition Rate Card */}
+          <div className="flex-shrink-0">
+            <AttritionRateCard
+              separationData={allSeparationData}
+              employeeData={employeeData}
+              isLoading={allSeparationLoading || employeeLoading}
+              error={allSeparationError || employeeError}
+            />
+          </div>
+          
+          {/* Average Tenure Card */}
+          <div className="flex-shrink-0">
+            <AverageTenureCard
+              employeeData={employeeData}
+              separationData={allSeparationData}
+              isLoading={employeeLoading}
+              error={employeeError}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Sub Tab Navigation */}
@@ -403,10 +415,6 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
         {/* Mobile tabs - horizontal scrollable */}
         <div
           className="md:hidden overflow-x-auto"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#2d3e58 #f1f1f1'
-          }}
         >
           <div className="flex space-x-4 min-w-max px-4">
             {subTabs.map((tab) => (

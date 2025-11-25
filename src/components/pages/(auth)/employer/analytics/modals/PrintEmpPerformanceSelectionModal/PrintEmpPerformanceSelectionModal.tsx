@@ -343,8 +343,8 @@ const PrintEmpPerformanceSelectionModal: React.FC<PrintEmpPerformanceSelectionMo
 
                 <div className="p-6">
                   {/* Progress indicator */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-center space-x-4">
+                  <div className="mb-6 -mx-4 sm:mx-0 overflow-x-auto sm:overflow-visible">
+                    <div className="flex flex-nowrap items-center justify-start sm:justify-center space-x-4 px-4 sm:px-0 w-max sm:w-auto">
                       <div className={`flex items-center ${currentSelectionStep >= 1 ? 'text-savoy-blue' : 'text-gray-400'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                           currentSelectionStep >= 1 ? 'bg-savoy-blue text-white' : 'bg-gray-200 text-gray-500'

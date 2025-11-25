@@ -109,6 +109,12 @@ div.remove-height {
   padding-left: 1em !important;
 }
 
+/* Scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2d3e58 #f1f1f1;
+}
+
 .nested-decimal {
   counter-reset: section;
 }

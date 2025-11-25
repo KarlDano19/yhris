@@ -60,11 +60,8 @@ export default function RiskManagement({
         </div>
         <div
           className="mt-4 w-full overflow-x-auto"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#2d3e58 #f1f1f1'
-          }}
-          ref={tableContainerRef}>
+          ref={tableContainerRef}
+        >
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead className="bg-[#D8E6FB] rounded-lg border-2 border-gray-200">
               <tr>
