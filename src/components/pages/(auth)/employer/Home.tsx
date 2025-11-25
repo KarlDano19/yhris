@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingProgress from '../../../FloatingProgress';
+import FloatingSyncButton from '../../../FloatingSyncButton';
 
 import AddPostLogo from '@/svg/AddPostLogo';
 import ScreenApplicantsLogo from '@/svg/ScreenApplicantsLogo';
@@ -161,7 +162,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
 
   return (
     <>
-      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
+      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
