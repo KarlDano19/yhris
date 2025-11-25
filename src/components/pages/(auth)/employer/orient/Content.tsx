@@ -306,7 +306,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Skip sync employees and enrollment if password login type
       updateOrientationStatus();
     }
-    console.log(orientItemCopy[itemIndex]);
   };
 
 
