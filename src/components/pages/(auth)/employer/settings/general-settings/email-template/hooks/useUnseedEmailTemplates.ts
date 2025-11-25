@@ -34,4 +34,3 @@ function useUnseedEmailTemplates() {
 }
 
 export default useUnseedEmailTemplates;
-

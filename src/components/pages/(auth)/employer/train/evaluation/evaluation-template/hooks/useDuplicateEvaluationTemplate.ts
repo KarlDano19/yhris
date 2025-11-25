@@ -31,4 +31,3 @@ function useDuplicateEvaluationTemplate() {
 }
 
 export default useDuplicateEvaluationTemplate;
-

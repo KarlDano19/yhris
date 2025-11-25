@@ -85,7 +85,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
-  const { mutate: enrollToYP } = useEnrollEmployeeToYP();
+  const { mutate: enrollToYP, isLoading: isEnrolling } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
@@ -279,6 +279,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               first_name: orientItemCopy[itemIndex].firstname,
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
+              department: orientItemCopy[itemIndex].department_id,
+              employment_status: orientItemCopy[itemIndex].employment_status_id,
+              location: orientItemCopy[itemIndex].location_name,
+              position: orientItemCopy[itemIndex].position_id,
+              job_posting_id: Number(params.position),
             }
           }, {
             onSuccess: () => {
@@ -439,7 +444,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setEnrolled={() => {
                   setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
-                isLoading={isLoading}
+                isLoading={isLoading || isEnrolling}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>

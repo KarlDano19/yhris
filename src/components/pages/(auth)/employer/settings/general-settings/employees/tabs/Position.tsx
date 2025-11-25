@@ -7,7 +7,6 @@ import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-import 'react-quill/dist/quill.snow.css';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -20,6 +19,8 @@ import CustomToast from '@/components/CustomToast';
 import ProgressModal from '@/components/ProgressModal';
 import useGetPositionItems from '../hooks/position/useGetPositionItems';
 import useBulkDeletePositions from '../hooks/position/useBulkDeletePositions';
+import useAddPositionToYP from '../hooks/position/useAddPositionToYP';
+import useSyncPosition from '../hooks/position/useSyncPosition';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -77,9 +78,25 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
   } = useGetPositionItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const { mutate: deletePosition, isLoading: isDeletePositionLoading } = useDeletePosition();
+  const { mutate: addPositionToYP, isLoading: isAddPositionToYPLoading } = useAddPositionToYP();
+  const { mutate: syncPosition, isLoading: isSyncPositionLoading } = useSyncPosition();
   const bulkDeleteMutation = useBulkDeletePositions();
 
   const cachedData: any = cachedProfile?.state?.data;
+  
+  const handleSyncPosition = () => {
+    syncPosition(undefined, {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        positionListRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     if (positionListData) {   
@@ -206,7 +223,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     if (isSearching || isPositionListLoading) {
       return (
         <tr>
-          <td colSpan={5}>
+          <td colSpan={100}>
             <div className='py-5'>
               <LoadingSpinner size="lg" color="yellow" />
             </div>
@@ -227,18 +244,6 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDateToLocal(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            {item.description ? (
-              <button
-                onClick={() => setIsPositionEditModalOpen({ id: item.id, open: true })}
-                className='text-blue-600 hover:text-blue-800 hover:underline'
-              >
-                Click to view
-              </button>
-            ) : (
-              '-'
-            )}
-          </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
               <SmartButton
@@ -255,6 +260,14 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
               >
                 <DeleteIcon />
               </SmartButton>
+              {/* <SmartButton
+                id="delete-position-btn"
+                onClick={() => addPositionToYP({ id: item.id, data: { name: item.name } })}
+                disabled={selectedPositions.size > 1}
+                className={selectedPositions.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                Sync to YP
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -262,7 +275,7 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
     } else {
       return (
         <tr>
-          <td colSpan={5}>
+          <td colSpan={4}>
             <h4 className='text-center text-gray-300 text-sm mt-4'>There{`'`}s no data yet.</h4>
             <h4 className='text-center text-gray-300 text-sm mb-4'>Please click create to add position.</h4>
           </td>
@@ -355,6 +368,13 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
           >
             CREATE
           </SmartButton>
+          {/* <SmartButton
+            id="create-position-btn"
+            onClick={handleSyncPosition}
+            className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+          >
+            SYNC
+          </SmartButton> */}
         </div>
       </div>
       
@@ -404,9 +424,6 @@ const Position = ({ hasActiveSubscription }: { hasActiveSubscription: boolean })
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Name
-                  </th>
-                  <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                    Description
                   </th>
                   <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                     Action
