@@ -38,6 +38,22 @@ export default function CreateJobPagePreview({
 
   const cachedData: any = cachedProfile?.state?.data;
 
+  // Combine address fields from cached profile (matching backend serializer format)
+  const getEmployerAddress = () => {
+    if (!cachedData) return "";
+    const addressParts = [
+      cachedData.building,
+      cachedData.street,
+      cachedData.locality,
+      cachedData.city,
+      cachedData.country,
+      cachedData.zip_code
+    ].filter(Boolean); // Remove empty/undefined values
+    
+    const combinedAddress = addressParts.join(', ') || '';
+    return combinedAddress || cachedData.locality || "";
+  };
+
   const renderRoleDescription = (jobDescription: any) => {
     const markup = { __html: jobDescription };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
@@ -67,10 +83,10 @@ export default function CreateJobPagePreview({
                 {firstFormGetValues('jobTitle')}
               </h5>
               <h6 className='text-indigo-dye text-sm'> 
-                for a {cachedData?.industry || 'Technology'} Company
+                for a {cachedData?.type_of_industry || 'Technology'} Company
               </h6>
-              <h6 className='text-indigo-dye text-sm'> 
-                {firstFormGetValues('placeAdvertise')}
+              <h6 className='text-indigo-dye text-sm mt-1'> 
+                {getEmployerAddress()}
               </h6>
             </div>
           </div>
@@ -110,7 +126,9 @@ export default function CreateJobPagePreview({
               Location
             </h6>
             <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
-              {firstFormGetValues('placeAdvertise')}
+              {Array.isArray(firstFormGetValues('placeAdvertise')) 
+                ? firstFormGetValues('placeAdvertise').join(', ') 
+                : firstFormGetValues('placeAdvertise')}
             </p>
             
             {/* Qualifications */}
