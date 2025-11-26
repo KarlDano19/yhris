@@ -54,7 +54,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <h6 className='text-indigo-dye text-sm'> 
               for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
-            <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
+            <h6 className='text-indigo-dye text-sm mt-1'> {!isLoading ? jobDetailData?.address : 'Loading location...'}</h6>
           </div>
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
