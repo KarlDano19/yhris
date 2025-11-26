@@ -110,6 +110,8 @@ function CreateEvaluationSchedulerModal({
                       watch={watch}
                       setValue={setValue}
                       setIsCustomModalOpen={setIsCustomModalOpen}
+                      control={control}
+                      Controller={Controller}
                     />
                   )}
                   {selectedTab === 2 && (

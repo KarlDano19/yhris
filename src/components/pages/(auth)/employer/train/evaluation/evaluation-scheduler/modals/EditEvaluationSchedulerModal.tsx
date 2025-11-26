@@ -186,6 +186,8 @@ function EditEvaluationSchedulerModal({
                       watch={watch}
                       setValue={setValue}
                       setIsCustomModalOpen={setIsCustomModalOpen}
+                      control={control}
+                      Controller={Controller}
                       key={refreshKey} // Add a key prop to force re-render when refreshKey changes
                     />
                   )}
