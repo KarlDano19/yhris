@@ -115,6 +115,15 @@ div.remove-height {
   scrollbar-color: #2d3e58 #f1f1f1;
 }
 
+/* Job content scrollbar - Hidden by default, shown on hover */
+.hide-scrollbar {
+  scrollbar-color: transparent transparent;
+}
+
+.hide-scrollbar:hover {
+  scrollbar-color: #2d3e58 #f1f1f1;
+}
+
 .nested-decimal {
   counter-reset: section;
 }

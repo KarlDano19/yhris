@@ -395,7 +395,7 @@ const Content = () => {
                 <div className='border-t border-gray-300'></div>
                 <div className='max-w-7xl mx-auto'>
                   <div className='lg:flex lg:items-start'>
-                    <div className='lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
+                    <div className='hide-scrollbar lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
                       <div className='px-2 py-2 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                         <>
                           {!isGetJobsLoading
@@ -452,7 +452,7 @@ const Content = () => {
                         )}
                       </div>
                     </div>
-                    <div className='lg:border-l lg:border-gray-300 px-2 py-2 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
+                    <div className='hide-scrollbar lg:border-l lg:border-gray-300 px-2 py-2 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
                         <div
                           className={classNames(
                             'card border border-savoy-blue rounded-md',
