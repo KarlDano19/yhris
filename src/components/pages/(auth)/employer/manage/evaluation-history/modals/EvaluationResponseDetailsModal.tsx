@@ -995,15 +995,15 @@ const EvaluationResponseDetailsModal = ({
                                   </tbody>
                                 </table>
                               </div>
-                              <Pagination
-                                pagination={analyticsPagination}
-                                currentPage={analyticsCurrentPage}
-                                pageSize={analyticsPageSize}
-                                onPageSizeChange={handleAnalyticsPageSizeChange}
-                                onPageChange={handleAnalyticsPaginationChange}
-                              />
                             </div>
                           )}
+                          <Pagination
+                            pagination={analyticsPagination}
+                            currentPage={analyticsCurrentPage}
+                            pageSize={analyticsPageSize}
+                            onPageSizeChange={handleAnalyticsPageSizeChange}
+                            onPageChange={handleAnalyticsPaginationChange}
+                          />
                         </div>
                       )}
                     </div>
