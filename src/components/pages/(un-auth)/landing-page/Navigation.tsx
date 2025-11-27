@@ -64,7 +64,7 @@ const Navigation = () => {
             </Link>
           </div>
           
-          <div className="hidden md:block">
+          <div className="hidden xl:block">
             <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7 safari-nav-container">
               <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Features
@@ -125,7 +125,7 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden xl:flex items-center space-x-4">
             <Link 
               href="/jobs" 
               className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-full"
@@ -161,7 +161,7 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="md:hidden">
+          <div className="xl:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-indigo-dye hover:text-[#FFC107] p-2 rounded-full hover:bg-gray-100/50 transition-colors"
@@ -178,7 +178,7 @@ const Navigation = () => {
 
       {/* Mobile Menu - Separate pill-shaped container */}
       {isMenuOpen && (
-        <div className="md:hidden mt-2">
+        <div className="xl:hidden mt-2">
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
             <div className="px-4 py-4 space-y-1">
               <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">

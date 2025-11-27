@@ -62,7 +62,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             <h6 className='text-indigo-dye text-sm'>
               for a {!isLoading ? jobDetailData?.industry : 'Loading indsutry...'} Company
             </h6>
-            <h6 className='text-indigo-dye text-sm'> {!isLoading ? jobDetailData?.location : 'Loading location...'}</h6>
+            <h6 className='text-indigo-dye text-sm mt-1'> {!isLoading ? jobDetailData?.address : 'Loading location...'}</h6>
           </div>
         </div>
         <div className='col-span-1 lg:col-span-2 px-1'>
@@ -80,7 +80,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
 
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
-        <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
+        <div className='details mx-5 mt-2'>
           {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
             <>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
