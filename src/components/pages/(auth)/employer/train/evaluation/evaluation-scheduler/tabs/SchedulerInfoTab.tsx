@@ -1,11 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import { Tooltip } from 'react-tooltip';
+import Select, { components } from 'react-select';
 
 import useGetEvaluationTemplateItems from '@/components/hooks/useGetEvaluationTemplateItems';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import InfoIcon from '@/svg/InfoIcon';
+
+// Custom MenuList component to hide scrollbar arrows and show 5 items
+const MenuList = (props: any) => {
+  return (
+    <components.MenuList
+      {...props}
+      className="custom-menu-list"
+      style={{
+        ...props.style,
+        maxHeight: '175px',
+      }}
+    >
+      {props.children}
+    </components.MenuList>
+  );
+};
 
 function SchedulerInfoTab({
   register,
@@ -14,6 +31,8 @@ function SchedulerInfoTab({
   watch,
   setValue,
   setIsCustomModalOpen,
+  control,
+  Controller,
 }: {
   register: any;
   handleSubmit: any;
@@ -21,6 +40,8 @@ function SchedulerInfoTab({
   watch: any;
   setValue: any;
   setIsCustomModalOpen: (isOpen: boolean) => void;
+  control: any;
+  Controller: any;
 }) {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const {
@@ -104,6 +125,23 @@ function SchedulerInfoTab({
     }
   }, [dataEvaluation]);
 
+    // Prepare evaluation template options for react-select (sorted alphabetically)
+    const evaluationTemplateOptions = useMemo(() => {
+      if (!Array.isArray(evaluationItems)) return [];
+      return evaluationItems
+        .map((item: any) => ({
+          value: String(item.id),
+          label: item.name,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    }, [evaluationItems]);
+  
+    // Reminder schedule options
+    const reminderScheduleOptions = useMemo(() => [
+      { value: '3 days', label: '3 days before' },
+      { value: '1 day', label: '1 day before' },
+    ], []);
+    
   // Reset frequency value when frequency unit changes to ensure proper value display
   useEffect(() => {
     if (selectedFrequencyUnit) {
@@ -294,26 +332,80 @@ function SchedulerInfoTab({
             Evaluation Template<span className='text-red-600'>*</span>
           </label>
           <div className='relative mt-2'>
-            <select
-              id='evaluation_template'
-              {...register('evaluation_template', { required: true })}
-              className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-              value={selectedEvaluationTemplate !== undefined && selectedEvaluationTemplate !== null ? String(selectedEvaluationTemplate) : ''}
-            >
-              <option value='' disabled>
-                Select...
-              </option>
-              {Array.isArray(evaluationItems) && evaluationItems.map((item: any, index: number) => {
-                return (
-                  <option key={item.id} value={String(item.id)}>
-                    {item.name}
-                  </option>
-                );
-              })}
-            </select>
-            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-              <SelectChevronDown />
-            </div>
+          <Controller
+              name='evaluation_template'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value } }: { field: { onChange: (value: any) => void; value: any } }) => (
+                <Select
+                  className='text-sm'
+                  classNamePrefix='select'
+                  options={evaluationTemplateOptions}
+                  value={evaluationTemplateOptions.find((item: any) => item.value === String(value))}
+                  onChange={(val) => onChange(val?.value || '')}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className='pointer-events-none px-2'>
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                    MenuList: MenuList,
+                  }}
+                  isClearable={false}
+                  noOptionsMessage={() => 'No evaluation templates available'}
+                  placeholder='Select...'
+                  maxMenuHeight={175}
+                  menuPortalTarget={document.body}
+                  menuPosition='fixed'
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      border: '1px solid rgb(209, 213, 219)',
+                      boxShadow: 'none',
+                      borderRadius: '0.375rem',
+                      minHeight: '38px',
+                      '&:hover': {
+                        border: '1px solid rgb(209, 213, 219)',
+                      },
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected
+                        ? 'rgb(59, 130, 246)'
+                        : state.isFocused
+                        ? 'rgb(239, 246, 255)'
+                        : 'white',
+                      color: state.isSelected ? 'white' : 'rgb(17, 24, 39)',
+                      fontSize: '0.75rem',
+                      padding: '8px 12px',
+                      height: '35px',
+                      '&:active': {
+                        backgroundColor: 'rgb(59, 130, 246)',
+                      },
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      fontSize: '0.75rem',
+                    }),
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      padding: '0',
+                      maxHeight: '175px',
+                    }),
+                  }}
+                />
+              )}
+            />
+
           </div>
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
@@ -321,23 +413,73 @@ function SchedulerInfoTab({
             Reminder Schedule<span className='text-red-600'>*</span>
           </label>
           <div className='relative mt-2'>
-            <select
-              id='reminder_schedule'
-              {...register('reminder_schedule', { required: true })}
-              className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-              value={selectedReminderSchedule || ''}
-            >
-              <option value='' disabled>
-                Select...
-              </option>
-              <option value='3 days'>3 days before</option>
-              <option value='1 day'>1 day before</option>
-              {/* <option value='1 hour'>1 hour before</option> */}
-              {/* <option value='30 minutes'>30 minutes before</option> */}
-            </select>
-            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
-              <SelectChevronDown />
-            </div>
+          <Controller
+              name='reminder_schedule'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value } }: { field: { onChange: (value: any) => void; value: any } }) => (
+                <Select
+                  className='text-sm'
+                  classNamePrefix='select'
+                  options={reminderScheduleOptions}
+                  value={reminderScheduleOptions.find((item: any) => item.value === value)}
+                  onChange={(val) => onChange(val?.value || '')}
+                  components={{
+                    DropdownIndicator: () => (
+                      <div className='pointer-events-none px-2'>
+                        <SelectChevronDown />
+                      </div>
+                    ),
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable={false}
+                  noOptionsMessage={() => 'No options available'}
+                  placeholder='Select...'
+                  maxMenuHeight={200}
+                  menuPortalTarget={document.body}
+                  menuPosition='fixed'
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      border: '1px solid rgb(209, 213, 219)',
+                      boxShadow: 'none',
+                      borderRadius: '0.375rem',
+                      minHeight: '38px',
+                      '&:hover': {
+                        border: '1px solid rgb(209, 213, 219)',
+                      },
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected
+                        ? 'rgb(59, 130, 246)'
+                        : state.isFocused
+                        ? 'rgb(239, 246, 255)'
+                        : 'white',
+                      color: state.isSelected ? 'white' : 'rgb(17, 24, 39)',
+                      fontSize: '0.75rem',
+                      padding: '8px 12px',
+                      height: '35px',
+                      '&:active': {
+                        backgroundColor: 'rgb(59, 130, 246)',
+                      },
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      fontSize: '0.75rem',
+                    }),
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
       </div>
