@@ -40,6 +40,7 @@ function useGetSeparationItems(filters: any) {
     () => getSeparationItems(filters),
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 
