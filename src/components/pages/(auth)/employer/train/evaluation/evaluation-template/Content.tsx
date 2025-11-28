@@ -454,21 +454,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
+          <div className='flex items-center justify-between mb-0'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
+            <div className='hidden lg:block -mb-4'>
+              <SeederButton
+                onSeed={handleSeedEvaluationTemplates}
+                onUnseed={handleUnseedEvaluationTemplates}
+                isLoading={seedEvaluationTemplatesMutation.isLoading}
+                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                disabled={!hasActiveSubscription}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            {/* Desktop Layout */}
-            <div className='hidden md:flex flex-none flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -481,14 +489,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p className='text-gray-600'>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -502,49 +508,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                   minDate={itemsFilter.from}
                 />
-              </div>
-            </div>
-
-            {/* Mobile Layout */}
-            <div className='md:hidden flex-none flex flex-col items-left gap-2'>
-              <div className='flex justify-start items-center gap-2 flex-wrap'>
-                <div className='relative flex-1 min-w-[140px]'>
-                  <CustomDatePicker
-                    id='from-datepicker-mobile'
-                    placeholder={'From Date'}
-                    className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
-                    selected={itemsFilter.from}
-                    pickerOnChange={(date: any) => {
-                      if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
-                    }}
-                    inputOnChange={(value: any) => {
-                      setItemsFilter({
-                        ...itemsFilter,
-                        from: value,
-                      });
-                    }}
-                  />
-                </div>
-                <p className='text-gray-600 text-sm'>to</p>
-                <div className='relative flex-1 min-w-[140px]'>
-                  <CustomDatePicker
-                    id='to-datepicker-mobile'
-                    placeholder={'To Date'}
-                    className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
-                    selected={itemsFilter.to}
-                    pickerOnChange={(date: any) => {
-                      if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                      if (!itemsFilter) setItemsFilter(date);
-                    }}
-                    inputOnChange={(value: any) => {
-                      setItemsFilter({
-                        ...itemsFilter,
-                        to: value,
-                      });
-                    }}
-                    minDate={itemsFilter.from}
-                  />
-                </div>
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
@@ -573,14 +536,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
-              <SeederButton
-                onSeed={handleSeedEvaluationTemplates}
-                onUnseed={handleUnseedEvaluationTemplates}
-                isLoading={seedEvaluationTemplatesMutation.isLoading}
-                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
-                disabled={!hasActiveSubscription}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
+              <div className='lg:hidden'>
+                <SeederButton
+                  onSeed={handleSeedEvaluationTemplates}
+                  onUnseed={handleUnseedEvaluationTemplates}
+                  isLoading={seedEvaluationTemplatesMutation.isLoading}
+                  isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                  disabled={!hasActiveSubscription}
+                />
+              </div>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsSelectionModalOpen(true)}

@@ -189,15 +189,12 @@ const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubsc
         {/* <p className='text-sm text-gray-600 mt-2'>View aggregated response data for evaluation templates</p> */}
         
         <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-          {/* Desktop Layout */}
-          <div className='hidden md:flex flex-none flex-col lg:flex-row items-left md:items-center gap-2'>
-            <div className='relative'>
+          <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+            <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
               <CustomDatePicker
                 id='from-datepicker'
                 placeholder={'mm/dd/yyyy'}
-                className={
-                  'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                }
+                className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                 selected={itemsFilter.from}
                 pickerOnChange={(date: any) => {
                   if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -210,14 +207,12 @@ const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubsc
                 }}
               />
             </div>
-            <p className='text-gray-600'>to</p>
-            <div className='relative'>
+            <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+            <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
               <CustomDatePicker
                 id='to-datepicker'
                 placeholder={'mm/dd/yyyy'}
-                className={
-                  'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                }
+                className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                 selected={itemsFilter.to}
                 pickerOnChange={(date: any) => {
                   if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -231,49 +226,6 @@ const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubsc
                 }}
                 minDate={itemsFilter.from}
               />
-            </div>
-          </div>
-
-          {/* Mobile Layout */}
-          <div className='md:hidden flex-none flex flex-col items-left gap-2'>
-            <div className='flex justify-start items-center gap-2 flex-wrap'>
-              <div className='relative flex-1 min-w-[140px]'>
-                <CustomDatePicker
-                  id='from-datepicker-mobile'
-                  placeholder={'From Date'}
-                  className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
-                  selected={itemsFilter.from}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      from: value?.target?.value === '' ? null : value,
-                    });
-                  }}
-                />
-              </div>
-              <p className='text-gray-600 text-sm'>to</p>
-              <div className='relative flex-1 min-w-[140px]'>
-                <CustomDatePicker
-                  id='to-datepicker-mobile'
-                  placeholder={'To Date'}
-                  className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
-                  selected={itemsFilter.to}
-                  pickerOnChange={(date: any) => {
-                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
-                    if (!itemsFilter) setItemsFilter(date);
-                  }}
-                  inputOnChange={(value: any) => {
-                    setItemsFilter({
-                      ...itemsFilter,
-                      to: value?.target?.value === '' ? null : value,
-                    });
-                  }}
-                  minDate={itemsFilter.from}
-                />
-              </div>
             </div>
           </div>
           <div className='flex gap-2 lg:w-1/3'>
