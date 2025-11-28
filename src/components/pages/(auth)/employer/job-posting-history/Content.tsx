@@ -828,13 +828,14 @@ const Content = () => {
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className='flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
+            {/* Desktop Layout */}
+            <div className='hidden md:flex flex-none flex-col lg:flex-row items-left md:items-center gap-2'>
               <div className='relative'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
@@ -845,13 +846,13 @@ const Content = () => {
                   }}
                 />
               </div>
-              <p>to</p>
+              <p className='text-gray-600'>to</p>
               <div className='relative'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                    'appearance-none block w-full rounded-md py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
                   selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
@@ -865,6 +866,45 @@ const Content = () => {
                   }}
                   minDate={pendingFilter.from}
                 />
+              </div>
+            </div>
+
+            {/* Mobile Layout */}
+            <div className='md:hidden flex-none flex flex-col items-left gap-2'>
+              <div className='flex justify-start items-center gap-2 flex-wrap'>
+                <div className='relative flex-1 min-w-[140px]'>
+                  <CustomDatePicker
+                    id='from-datepicker-mobile'
+                    placeholder={'From Date'}
+                    className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
+                    selected={pendingFilter.from}
+                    pickerOnChange={(date: any) => {
+                      setPendingFilter({ ...pendingFilter, from: date });
+                    }}
+                    inputOnChange={(value: any) => {
+                      setPendingFilter({ ...pendingFilter, from: value });
+                    }}
+                  />
+                </div>
+                <p className='text-gray-600 text-sm'>to</p>
+                <div className='relative flex-1 min-w-[140px]'>
+                  <CustomDatePicker
+                    id='to-datepicker-mobile'
+                    placeholder={'To Date'}
+                    className='appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 text-sm leading-6'
+                    selected={pendingFilter.to}
+                    pickerOnChange={(date: any) => {
+                      setPendingFilter({ ...pendingFilter, to: date });
+                    }}
+                    inputOnChange={(value: any) => {
+                      setPendingFilter({
+                        ...pendingFilter,
+                        to: value,
+                      });
+                    }}
+                    minDate={pendingFilter.from}
+                  />
+                </div>
               </div>
             </div>
             <div className='flex gap-2 lg:w-1/3'>
