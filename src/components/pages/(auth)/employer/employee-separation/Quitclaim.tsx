@@ -118,9 +118,9 @@ const Quitclaim = ({
         </div>
       ) : null}
       
-      <Tooltip id='quitclaim-tooltip' />
-      <Tooltip id='quitclaim-received-tooltip' />
-      <Tooltip id='quitclaim-attachment-tooltip' />
+      <Tooltip id='quitclaim-tooltip' style={{ zIndex: 9999 }} />
+      <Tooltip id='quitclaim-received-tooltip' style={{ zIndex: 9999 }} />
+      <Tooltip id='quitclaim-attachment-tooltip' style={{ zIndex: 9999 }} />
     </div>
     
     {isViewModalOpen && (

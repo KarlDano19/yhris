@@ -39,7 +39,7 @@ const LastPay = ({
         )}
         disabled={isDisabled}
         data-tooltip-id='last-pay-tooltip'
-        data-tooltip-content={!isDocumentsReceived ? 'Documents must be sent first' : ''}
+        data-tooltip-content={!isDocumentsReceived ? 'Documents must be received first' : ''}
         data-tooltip-place='bottom'
         onClick={() =>
           !isDisabled &&
@@ -72,8 +72,8 @@ const LastPay = ({
         </div>
       ): null}
       
-      <Tooltip id='last-pay-tooltip' />
-      <Tooltip id='last-pay-attachment-tooltip' />
+      <Tooltip id='last-pay-tooltip' style={{ zIndex: 9999 }} />
+      <Tooltip id='last-pay-attachment-tooltip' style={{ zIndex: 9999 }} />
       
       {isViewModalOpen && (
         <AttachmentViewModal
