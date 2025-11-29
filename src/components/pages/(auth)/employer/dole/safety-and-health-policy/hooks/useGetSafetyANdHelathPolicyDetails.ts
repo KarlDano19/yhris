@@ -29,6 +29,8 @@ function useGetSafetyAndHealthPolicyDetails() {
     const query = useQuery({
         queryKey: ["safetyAndHealthPolicyDetails"],
         queryFn: () => getSafetyAndHealthPolicyDetails(),
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
     });
     return query;
 }

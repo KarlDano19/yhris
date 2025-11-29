@@ -41,6 +41,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
   const [createMemoPolicyItems, setCreateMemoPolicyItems] = useState<any>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isCreateMemoModalOpen, setIsCreateMemoModalOpen] = useState(false);
@@ -64,20 +70,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [bulkDeleteCount, setBulkDeleteCount] = useState(0);
   
   const { data: dataDirectives, isLoading: isGetDirectivesLoading, refetch } = useGetDirectivesItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
-  
-
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    refetch();
-  }, [currentPage, pageSize, refetch]);
 
   useEffect(() => {
     if (dataDirectives) {
@@ -221,8 +217,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    setItemsFilter({ ...itemsFilter }); // This line is just to keep the pattern, but you may want to trigger a refetch or set a filter state
-    refetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText,
+    });
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   useEffect(() => {
@@ -374,7 +373,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for Memo: Title'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSearch();

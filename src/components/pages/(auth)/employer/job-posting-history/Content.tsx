@@ -279,10 +279,6 @@ const Content = () => {
   };
 
   useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
     if (dataJobPost && !isGetJobPostLoading) {
       dataJobPost.records.map((jobPost: any) => {
         jobPost['jobTitle'] = jobPost['job_title'];
@@ -317,9 +313,6 @@ const Content = () => {
     }
   }, [dataJobPost]);
 
-  useEffect(() => {
-    refetch();
-  }, [currentPage, pageSize]);
 
   // Add click outside handler to close menus
   useEffect(() => {

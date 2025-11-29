@@ -52,8 +52,17 @@ async function getHealthAndSafetyReportItems(filters: any) {
 
 function useGetHealthAndSafetyReportItems(filters: any) {
   const query = useQuery({
-    queryKey: ["healthAndSafetyReportItems"],
+    queryKey: [
+      "healthAndSafetyReportItems",
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+    ],
     queryFn: () => getHealthAndSafetyReportItems(filters),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
   return query;
 }

@@ -72,7 +72,7 @@ function useGetEmployeeItemsList(filters: any) {
     ],
     () => getEmployeeItems(filters),
     {
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       keepPreviousData: true,
     }
   );
