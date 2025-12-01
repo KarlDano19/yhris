@@ -96,6 +96,7 @@ export default function ImportModal({
             }
             setImportJSON(importData);
           }
+          console.log(results.data);
         },
       });
     }
@@ -150,15 +151,41 @@ export default function ImportModal({
     };
     importJSON.forEach((item: any) => {
       if (item.date_hired) {
-        // Parse mm/dd/yyyy format and convert directly to yyyy-mm-dd
-        const [month, day, year] = item.date_hired.split('/');
+        const dateValue = item.date_hired;
+        const parts = dateValue.split('/');
         
-        // Pad month and day with leading zeros if needed
-        const paddedMonth = month.padStart(2, '0');
-        const paddedDay = day.padStart(2, '0');
-        
-        // Create date string directly without Date object to avoid timezone issues
-        item.date_hired = `${year}-${paddedMonth}-${paddedDay}`;
+        if (parts.length === 3) {
+          let month, day, year;
+          const firstPart = parseInt(parts[0], 10);
+          const secondPart = parseInt(parts[1], 10);
+          
+          // Detect format: if first part > 12, it must be DD/MM/YYYY
+          // if second part > 12, it must be MM/DD/YYYY
+          // otherwise assume MM/DD/YYYY as per template header
+          if (firstPart > 12) {
+            // DD/MM/YYYY format
+            day = parts[0];
+            month = parts[1];
+            year = parts[2];
+          } else if (secondPart > 12) {
+            // MM/DD/YYYY format
+            month = parts[0];
+            day = parts[1];
+            year = parts[2];
+          } else {
+            // Ambiguous - assume MM/DD/YYYY as per template
+            month = parts[0];
+            day = parts[1];
+            year = parts[2];
+          }
+          
+          // Pad month and day with leading zeros if needed
+          const paddedMonth = month.toString().padStart(2, '0');
+          const paddedDay = day.toString().padStart(2, '0');
+          
+          // Create date string in YYYY-MM-DD format
+          item.date_hired = `${year}-${paddedMonth}-${paddedDay}`;
+        }
       }
     });
     const data = {
