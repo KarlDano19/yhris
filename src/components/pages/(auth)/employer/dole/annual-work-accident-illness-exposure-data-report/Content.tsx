@@ -92,12 +92,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const {
     data: annualAccidentIllnessReportData,
     isLoading: isAnnualAccidentIllnessReportLoading,
     refetch: annualAccidentIllnessReportRefetch,
   } = useGetAnnualAccidentIllnessReportItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -174,10 +179,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [annualAccidentIllnessReportData]);
-
-  useEffect(() => {
-    annualAccidentIllnessReportRefetch();
-  }, [currentPage, pageSize]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -391,7 +392,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    annualAccidentIllnessReportRefetch();
+    setAppliedFilter({
+      ...itemsFilter,
+    });
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const paginationChange = (event: any) => {

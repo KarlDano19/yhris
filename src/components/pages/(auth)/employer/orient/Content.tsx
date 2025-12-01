@@ -44,6 +44,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -78,7 +84,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch,
     isLoading: isGetOrientLoading,
   } = useGetApplicantOrient(Number(params.position), {
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize,
     currentPage,
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
@@ -328,7 +334,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(orientItemCopy[itemIndex], callbackReq);
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -350,7 +356,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    refetch();
+    setAppliedFilter({
+      from: itemsFilter.from,
+      to: itemsFilter.to,
+      search: searchText,
+    });
+    setCurrentPage(1);
   };
 
   const renderRows = () => {
@@ -531,12 +542,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Applicant Name'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                  onClick={checkIfDateIsValid}
+                  onClick={handleSearch}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>

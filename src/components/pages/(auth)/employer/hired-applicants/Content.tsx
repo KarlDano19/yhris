@@ -25,6 +25,10 @@ const Content = () => {
     search: '',
     is_active: 'true', // Only show active job postings
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    search: '',
+    is_active: 'true', // Only show active job postings
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -32,7 +36,7 @@ const Content = () => {
     totalRecords: 0,
   });
   const { data, refetch, isLoading } = useGetHiredApplicants({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -106,7 +110,8 @@ const Content = () => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       setIsSearching(true);
-                      setItemsFilter({ ...itemsFilter, search: inputValue });
+                      setAppliedFilter({ ...appliedFilter, search: inputValue });
+                      setCurrentPage(1);
                     }
                   }}
                   placeholder='Search ...'
@@ -117,7 +122,8 @@ const Content = () => {
               className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
               onClick={() => {
                 setIsSearching(true);
-                setItemsFilter({ ...itemsFilter, search: inputValue });
+                setAppliedFilter({ ...appliedFilter, search: inputValue });
+                setCurrentPage(1);
               }}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />

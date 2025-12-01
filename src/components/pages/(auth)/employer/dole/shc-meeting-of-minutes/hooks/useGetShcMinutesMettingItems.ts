@@ -52,8 +52,17 @@ async function getShcMinutesMeetingItems(filters: any) {
 
 function useGetShcMinutesMeetingItems(filters: any) {
   const query = useQuery({
-    queryKey: ["shcMinutesMeetingItems"],
+    queryKey: [
+      "shcMinutesMeetingItems",
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+    ],
     queryFn: () => getShcMinutesMeetingItems(filters),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
   return query;
 }

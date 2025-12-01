@@ -93,6 +93,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [searchText, setSearchText] = useState('');
   const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [isBulkDeleteConfirmModalOpen, setIsBulkDeleteConfirmModalOpen] = useState<DeleteModalData | null>(null);
@@ -104,7 +110,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isHealthAndSafetyReportItemsLoading,
     refetch: healthAndSafetyReportItemsRefetch,
   } = useGetHealthAndSafetyReportItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -159,10 +165,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [healthAndSafetyReportItemsData]);
-
-  useEffect(() => {
-    healthAndSafetyReportItemsRefetch();
-  }, [currentPage, pageSize, healthAndSafetyReportItemsRefetch]);
 
   useEffect(() => {
     if (!isHealthAndSafetyReportItemsLoading && isSearching) {
@@ -331,7 +333,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    healthAndSafetyReportItemsRefetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText,
+    });
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const paginationChange = (event: any) => {
@@ -604,7 +610,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Safety Committee Type, Chairman/ Officer in Charge'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
                 <button

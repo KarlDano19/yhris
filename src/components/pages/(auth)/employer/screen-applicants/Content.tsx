@@ -106,6 +106,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     if (e.key === 'Enter') {
                       setIsSearching(true);
                       setItemsFilter({ ...itemsFilter, search: inputValue });
+                      setCurrentPage(1);
                     }
                   }}
                   placeholder='Search ...'
@@ -118,6 +119,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               onClick={() => {
                 setIsSearching(true);
                 setItemsFilter({ ...itemsFilter, search: inputValue });
+                setCurrentPage(1);
               }}
             >
               <MagnifyingGlassIcon className='h-5 w-5' />

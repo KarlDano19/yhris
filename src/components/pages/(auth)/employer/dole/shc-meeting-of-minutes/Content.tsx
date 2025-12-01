@@ -106,12 +106,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const {
     data: shcMinutesMeetingData,
     isLoading: isShcMinutesMeetingLoading,
     refetch: shcMinutesMeetingRefetch,
   } = useGetShcMinutesMeetingItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -165,9 +171,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [shcMinutesMeetingData]);
 
-  useEffect(() => {
-    shcMinutesMeetingRefetch();
-  }, [currentPage, pageSize, shcMinutesMeetingRefetch]);
 
   useEffect(() => {
     if (!isShcMinutesMeetingLoading && isSearching) {
@@ -388,7 +391,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    shcMinutesMeetingRefetch();
+    setAppliedFilter({
+      from: itemsFilter.from,
+      to: itemsFilter.to,
+      search: searchText,
+    });
+    setCurrentPage(1);
   };
 
   const paginationChange = (event: any) => {
@@ -577,7 +585,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Venue'
                   data-tooltip-place='bottom'
                   className='block flex-1 rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
                 <button
