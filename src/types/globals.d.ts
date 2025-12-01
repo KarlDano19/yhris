@@ -331,11 +331,16 @@ export type Voucher = {
 
 export type EmailTemplate = {
   subject: string;
-  to: string;
-  cc: string;
-  bcc: string;
+  to: string | string[];
+  cc: string | string[];
+  bcc: string | string[];
   body: string;
-  attachment: string;
+  attachment?: string;
+  attachments?: Array<{
+    id: number;
+    attachment: string;
+    created_at: string;
+  }>;
 }
 
 export type T_ApplicantProfile = {

@@ -21,7 +21,13 @@ export interface DirectiveData {
   position?: string;
   signature?: string | File;
   qr_code?: string | File;
-  attachments?: string | File;
+  attachments?: string | File | Array<{
+    id: number;
+    attachment: string;
+    attachment_name: string;
+    created_at?: string;
+  }>;
+  attachment?: string; // Backward compatibility field - URL of first attachment
 }
 
 export interface PolicyField {

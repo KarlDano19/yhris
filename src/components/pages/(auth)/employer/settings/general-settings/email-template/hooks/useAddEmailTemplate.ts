@@ -18,8 +18,13 @@ async function addEmailTemplate(emailTemplate: EmailTemplate) {
     if (emailTemplate.bcc && Array.isArray(emailTemplate.bcc)) {
       formData.append('bcc', emailTemplate.bcc.join(','));
     }
-    if (emailTemplate.attachment) {
-      formData.append('attachment', emailTemplate.attachment);
+    // Handle multiple attachments
+    if (emailTemplate.attachments && Array.isArray(emailTemplate.attachments)) {
+      emailTemplate.attachments.forEach((attachment: any) => {
+        if (attachment instanceof File) {
+          formData.append('attachments', attachment);
+        }
+      });
     }
     const config = {
       method: 'POST',

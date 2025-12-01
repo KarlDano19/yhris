@@ -633,6 +633,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
           defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send Contract"
         />
       )}
@@ -873,6 +874,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }}
           defaultRecipients={selectedOrientId ? [orientItems.find((item: any) => item.id === selectedOrientId)?.email].filter(Boolean) : []}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send Introduction"
         />
       )}

@@ -13,6 +13,9 @@ import EmailField from '@/components/common/EmailField';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { MinusCircleIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 
+import DeleteIcon from '@/svg/DeleteIcon';
+import EyePassword from '@/svg/EyePassword';
+
 import { DirectiveData, PolicyField } from '@/types/directives';
 
 export default function CreatePolicyModal({
@@ -28,8 +31,9 @@ export default function CreatePolicyModal({
   const [isNextForm, setIsNextForm] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [fieldToRemove, setFieldToRemove] = useState<number | null>(null);
-  const [attachmentExist, setAttachmentExist] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
   const [inputTo, setInputTo] = useState('');
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
   const [isToFocused, setIsToFocused] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
 
@@ -86,7 +90,12 @@ export default function CreatePolicyModal({
     };
     data['to'] = tagsTo;
     data.directive_type = 'policy';
-    mutate({ ...data }, callbackReq);
+    // Add multiple attachments - pass files array directly
+    const payload: any = { ...data };
+    if (files.length > 0) {
+      payload.attachments = files;
+    }
+    mutate(payload, callbackReq);
   });
 
   // Separate handler for the Next button to avoid form submission
@@ -193,20 +202,69 @@ export default function CreatePolicyModal({
     }
   };
 
-  // Handle file attachment upload
-  const handleAttachmentUpload = ({ target }: { target: any }) => {
-    const file = target.files[0];
-    if (!file) return;
-    
-    if (file.size <= 5000000) {
-      // Set the file in the form
-      setValue('attachments', file);
-      setAttachmentExist(true);
-    } else {
-      toast.custom(() => <CustomToast message={'Maximum file size is 5mb.'} type='error' />, {
-        duration: 5000,
-      });
+  // Handle file attachment upload - multiple files
+  const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const selectedFiles = Array.from(event.target.files);
+      const validFiles: File[] = [];
+      
+      for (const file of selectedFiles) {
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 5MB limit.`} type='error' />, {
+            duration: 2000,
+          });
+          continue;
+        }
+        validFiles.push(file);
+      }
+      
+      if (validFiles.length > 0) {
+        // Append to existing files
+        setFiles(prev => [...prev, ...validFiles]);
+      }
+      
+      // Clear the file input
+      if (attachmentInputRef.current) {
+        attachmentInputRef.current.value = '';
+      }
     }
+  };
+
+  // Handle drag and drop
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const droppedFiles = Array.from(e?.dataTransfer?.files || []);
+    
+    if (droppedFiles.length > 0) {
+      const validFiles: File[] = [];
+      
+      for (const file of droppedFiles) {
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 5MB limit.`} type='error' />, {
+            duration: 2000,
+          });
+          continue;
+        }
+        validFiles.push(file);
+      }
+      
+      if (validFiles.length > 0) {
+        // Append to existing files
+        setFiles(prev => [...prev, ...validFiles]);
+      }
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Clear errors when title changes
@@ -250,8 +308,11 @@ export default function CreatePolicyModal({
       setIsNextForm(false);
       setTagsTo([]);
       setInputTo('');
-      setAttachmentExist(false);
+      setFiles([]);
       setIsToFocused(false);
+      if (attachmentInputRef.current) {
+        attachmentInputRef.current.value = '';
+      }
     }
   }, [isOpen]);
 
@@ -539,29 +600,89 @@ export default function CreatePolicyModal({
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
-                          Attachment
+                          Attachments
                         </label>
                         <div className='mt-2'>
-                          <input
-                            id='attachments'
-                            type='file'
-                            onChange={handleAttachmentUpload}
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                          />
-                          {attachmentExist ? (
-                            <button
-                              type='button'
-                              className='underline text-savoy-blue text-sm mt-1'
-                              onClick={() => {
-                                setValue('attachments', undefined as any);
-                                setAttachmentExist(false);
-                              }}
+                          <div
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                          >
+                            <label
+                              className={`${
+                                files.length === 0
+                                  ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                                  : 'hidden'
+                              }`}
                             >
-                              Remove Attachment
-                            </button>
-                          ) : null}
+                              Drop files to upload or click to select
+                              <input
+                                name='attachments'
+                                id='attachments'
+                                ref={attachmentInputRef}
+                                type='file'
+                                multiple
+                                className='sr-only'
+                                onChange={handleAttachmentUpload}
+                                accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              />
+                            </label>
+                            
+                            {/* Show uploaded files */}
+                            {files.length > 0 && (
+                              <div className='mb-4'>
+                                <p className='text-xs text-gray-600 mb-2'>Files to Upload:</p>
+                                {files.map((file, index) => (
+                                  <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
+                                    <div className='flex-1 min-w-0'>
+                                      <p className='text-sm text-slate-800 font-light truncate' title={file.name}>{file.name}</p>
+                                    </div>
+                                    <div className='flex gap-2 items-center'>
+                                      <a 
+                                        href={URL.createObjectURL(file)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className='cursor-pointer'
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <EyePassword visible />
+                                      </a>
+                                      <button
+                                        type='button'
+                                        className='cursor-pointer'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveFile(index);
+                                        }}
+                                      >
+                                        <DeleteIcon />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Show "Add more files" option when files exist */}
+                            {files.length > 0 && (
+                              <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                                + Add more files
+                                <input
+                                  name='attachments-add'
+                                  id='attachments-add'
+                                  type='file'
+                                  multiple
+                                  className='sr-only'
+                                  onChange={handleAttachmentUpload}
+                                  accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                                />
+                              </label>
+                            )}
+                          </div>
+                          <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb per file</p>
                         </div>
-                        <p className='text-xs mt-1 text-gray-400'>Maximum file size: 5mb</p>
                       </div>
                     </div>
                     <hr />
