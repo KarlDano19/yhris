@@ -813,7 +813,7 @@ const Content = () => {
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -822,20 +822,30 @@ const Content = () => {
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+          <div className='flex items-center justify-between mb-0'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+            <div className='hidden lg:block -mb-4'>
+              <SeederButton
+                onSeed={handleSeedJobPostings}
+                onUnseed={handleUnseedJobPostings}
+                isLoading={seedJobPostingsMutation.isLoading}
+                isUnseeding={unseedJobPostingsMutation.isLoading}
+                maxCount={1000}
+                defaultCount={5}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className='flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, from: date });
@@ -845,14 +855,12 @@ const Content = () => {
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, to: date });
@@ -896,15 +904,17 @@ const Content = () => {
                 </button>
               </div>
             </div>
-            <div className='flex items-center gap-3 lg:ml-auto'>
-              <SeederButton
-                onSeed={handleSeedJobPostings}
-                onUnseed={handleUnseedJobPostings}
-                isLoading={seedJobPostingsMutation.isLoading}
-                isUnseeding={unseedJobPostingsMutation.isLoading}
-                maxCount={1000}
-                defaultCount={5}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
+              <div className='lg:hidden'>
+                <SeederButton
+                  onSeed={handleSeedJobPostings}
+                  onUnseed={handleUnseedJobPostings}
+                  isLoading={seedJobPostingsMutation.isLoading}
+                  isUnseeding={unseedJobPostingsMutation.isLoading}
+                  maxCount={1000}
+                  defaultCount={5}
+                />
+              </div>
             </div>
           </div>
           
