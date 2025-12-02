@@ -6,18 +6,20 @@ import Link from 'next/link';
 
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import { formatDateToLocal } from '@/helpers/date';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import classNames from '@/helpers/classNames';
-import { formatDateToLocal } from '@/helpers/date';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
 import DataExportAgreementModal from './modals/DataExportAgreementModal';
@@ -37,13 +39,11 @@ import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusIt
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 import useSeedEmployees from './hooks/useSeedEmployees';
 import useUnseedEmployees from './hooks/useUnseedEmployees';
-import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
-import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import FloatingSyncButton from '@/components/FloatingSyncButton';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
-import { useLegacyPermissions } from '@/hooks/useLegacyPermissions';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
 
 
@@ -74,7 +74,7 @@ const columnDefinitions = [
   { key: 'address', label: 'Address' },
 ];
 
-const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -85,8 +85,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportTemplateModalOpen, setIsExportTemplateModalOpen] = useState<boolean>(false);
   const [isEmployeesDeleteModalOpen, setIsEmployeesDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [isEmployeesEditModalOpen, setIsEmployeesEditModalOpen] = useState<T_ModalData | null>(null);
-  const cachedRights = useLegacyPermissions();
-
+  
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -638,6 +637,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
   return (
     <>
+      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>

@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useGetEmployeeIdSettings from '../hooks/employee-id-settings/useGetEmployeeIdSettings';
 import usePatchEmployeeIdSettings from '../hooks/employee-id-settings/usePatchEmployeeIdSettings';
@@ -17,6 +18,9 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
 const EmployeeId = () => {
+  const queryClient = useQueryClient();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const [loginType, setLoginType] = useState<string>('');
   const [isChecked, setIsChecked] = useState(false);
   const [previewId, setPreviewId] = useState<string>('');
   const [previewDate, setPreviewDate] = useState<string>('');
@@ -47,6 +51,12 @@ const EmployeeId = () => {
     }
     console.log(employeeIdSettings);
   }, [employeeIdSettings]);
+
+  useEffect(() => {
+    if (cachedUserDetails?.state?.data) {
+      setLoginType(cachedUserDetails.state.data.login_type);
+    }
+  }, [cachedUserDetails]);
 
   const generatePreview = () => {
     // Get current form values to determine if date is needed
@@ -297,6 +307,7 @@ const EmployeeId = () => {
             </div>
 
             {/* Sync with Payroll Section */}
+            {loginType !== 'password' && (
             <div className='border-t mt-8 pt-6'>
               <h3 className='text-lg font-semibold text-gray-900 mb-4'>Sync with Payroll System</h3>
               <p className='text-sm text-gray-600 mb-4'>
@@ -326,6 +337,7 @@ const EmployeeId = () => {
                 <p>• <strong>Sync to Payroll:</strong> Update payroll system with current HRIS settings</p>
               </div>
             </div>
+            )}
           </form>
         </div>
       </div>

@@ -10,6 +10,7 @@ import React, {
 
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -51,12 +52,14 @@ export interface ContentProps {
   params: { id: string };
   emp?: Partial<Employee>;
   hasActiveSubscription: boolean;
+  loginType: string;
 }
 
 export default function Employee201Content({
   params,
   emp,
   hasActiveSubscription,
+  loginType,
 }: ContentProps) {
   const router = useRouter();
 
@@ -707,6 +710,7 @@ export default function Employee201Content({
                 ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
                 : (saving ? "Saving…" : "Save")}
             </SmartButton>
+            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
             <button
               id="sync-to-yp-btn"
               disabled={isUpdating}
@@ -721,6 +725,7 @@ export default function Employee201Content({
               <ArrowPathIcon className="w-4 h-4" />
               <span>Sync to YP</span>
             </button>
+            )}
           </div>
         </div>
 

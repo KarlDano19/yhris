@@ -13,8 +13,9 @@ import useBulkSyncToYP from './hooks/useBulkSyncToYP';
 
 import { ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
+import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 
-export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+export default function Content({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) {
   const [q, setQ] = useState('');
 
   // Stable initial options (no 'q' here; search is driven via setSearch)
@@ -126,6 +127,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               applyFilters(vals);
             }}
           />
+          
+          {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
           <button
             className='px-4 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
             onClick={() => {
@@ -134,8 +137,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             disabled={isBulkSyncToYPLoading}
           >
             {isBulkSyncToYPLoading && <ArrowPathIcon className='w-4 h-4 animate-spin' />}
-            <span>Sync to YP</span>
-          </button>
+              <span>Sync to YP</span>
+            </button>
+          )}
         </div>
       </div>
 
