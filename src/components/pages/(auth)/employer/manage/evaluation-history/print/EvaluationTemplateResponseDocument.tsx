@@ -95,8 +95,8 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
     const isFiltered = (dateFilter?.from || dateFilter?.to || (departmentFilter && departmentFilter.length > 0));
     
     return (
-      <div className="mb-4 space-y-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-3">Template Summary</h2>
+      <div className="mb-4">
+        <h2 className="text-sm font-bold text-gray-900 mb-2">Template Summary</h2>
         <table className="w-full border-collapse border border-gray-300 ml-3">
           <thead>
             <tr className="bg-gray-100">
