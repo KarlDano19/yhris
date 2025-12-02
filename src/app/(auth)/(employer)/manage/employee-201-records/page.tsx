@@ -17,8 +17,9 @@ async function getSession() {
 
 const Employee201RecordsPage = async () => {
     const session = await getSession();
+    const loginType = session.loginType;
     const hasActiveSubscription = session.hasActiveSubscription;
-    return <Content hasActiveSubscription={hasActiveSubscription} />;
+    return <Content loginType={loginType} hasActiveSubscription={hasActiveSubscription} />;
 };
 
 export default Employee201RecordsPage;

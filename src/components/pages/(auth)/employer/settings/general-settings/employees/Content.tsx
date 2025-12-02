@@ -30,17 +30,8 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import useGetEmployeeStatusItems from './hooks/employee-status/useGetEmployeeStatusItems';
 import EmployeeId from './tabs/Employee-id';
 
-const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
-  const queryClient = useQueryClient();
-  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
-  const [loginType, setLoginType] = useState<string>('');
-
-  useEffect(() => {
-    if (cachedUserDetails?.state?.data) {
-      setLoginType(cachedUserDetails.state.data.login_type);
-    }
-  }, [cachedUserDetails]);
 
   // Sync hooks
   const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
@@ -302,7 +293,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             
             {/* Sync All Button */}
-            <div className={`flex-shrink-0 ${loginType === 'password' ? 'hidden' : ''}`}>
+            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+            <div>
               <SmartButton
                 id="sync-all-btn"
                 onClick={handleSyncAll}
@@ -323,6 +315,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 )}
               </SmartButton>
             </div>
+            )}
           </div>
         </div>
         {activeTab === 'location' && <Location hasActiveSubscription={hasActiveSubscription} />}
