@@ -158,8 +158,8 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
       : [];
     
     return (
-      <div className="mb-4 ml-3">
-        <h3 className="text-xs font-semibold text-gray-900 mb-2">List of Respondents (Sorted by Date - Newest First)</h3>
+      <div className="mb-2 ml-3">
+        <h3 className="text-xs font-semibold text-gray-900 mb-3">List of Respondents (Sorted by Date - Newest First)</h3>
         
         {sortedRespondents.length > 0 ? (
           <table className="w-full border-collapse border border-gray-300">
@@ -283,8 +283,8 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
     }
 
     return (
-      <div className="mb-4 ml-3">
-        <h3 className="text-xs font-semibold text-gray-900 mb-2">Evaluation Questions & Employee Scores</h3>
+      <div className="mb-2 ml-4">
+        <h3 className="text-xs font-semibold text-gray-900 mb-3">Evaluation Questions & Employee Scores</h3>
         
         {allCriteria.length > 0 ? (
           <div className="space-y-4">
@@ -294,7 +294,7 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
                 <div className="font-semibold text-xs mb-1">
                   {index + 1}. {criterion.title}
                 </div>
-                <div className="text-xs text-gray-600 mb-2">
+                <div className="text-xs text-gray-600 mb-1">
                   Section: {criterion.sectionTitle} | Max Score: {criterion.max_score}
                 </div>
                 
@@ -419,8 +419,8 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
     const allAnalyticsEmployees = templateData.frequently_evaluated_employees || [];
     
     return (
-      <div className="mb-4 ml-3">
-        <h3 className="text-xs font-semibold text-gray-900 mb-2">Employee Evaluation Details</h3>
+      <div className="mb-2 ml-4">
+        <h3 className="text-xs font-semibold text-gray-900 mb-3">Employee Evaluation Details</h3>
         
         {allAnalyticsEmployees.length > 0 ? (
           <table className="w-full border-collapse border border-gray-300">
@@ -479,20 +479,20 @@ const EvaluationTemplateResponseDocument: React.FC<EvaluationTemplateResponseDoc
       {renderTemplateSummary()}
 
       {/* Respondents Section */}
-      <div className="mb-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-2">Respondents</h2>
+      <div className="mb-4 space-y-4">
+        <h2 className="text-sm font-bold text-gray-900 mb-3">Respondents</h2>
         {renderRespondents()}
       </div>
 
       {/* Questions Section */}
-      <div className="mb-4" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-        <h2 className="text-sm font-bold text-gray-900 mb-2">Evaluation Questions</h2>
+      <div className="mb-4 space-y-4">
+        <h2 className="text-sm font-bold text-gray-900 mb-3">Evaluation Questions</h2>
         {renderQuestions()}
       </div>
 
       {/* Analytics Section */}
-      <div className="mb-4" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-        <h2 className="text-sm font-bold text-gray-900 mb-2">Analytics</h2>
+      <div className="mb-4 space-y-4">
+        <h2 className="text-sm font-bold text-gray-900 mb-3">Analytics</h2>
         {renderAnalytics()}
       </div>
     </div>
