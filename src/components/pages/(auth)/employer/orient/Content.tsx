@@ -256,6 +256,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
           setIsEnrollRedirectModalOpen(true);
+          // Clear employee cache when applicant is enrolled (employee becomes available for other operations)
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
