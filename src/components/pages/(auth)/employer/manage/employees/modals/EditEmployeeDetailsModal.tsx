@@ -60,7 +60,13 @@ export default function EditEmployeeDetailsModal({
       setValue('address', employeeDetailsData.address);
       setValue('nationality', employeeDetailsData.nationality);
       setValue('religion', employeeDetailsData.religion);
-      setValue('gender', employeeDetailsData.gender);
+      // Normalize gender to match dropdown options (capitalize first letter)
+      if (employeeDetailsData.gender) {
+        const normalizedGender = employeeDetailsData.gender.charAt(0).toUpperCase() + employeeDetailsData.gender.slice(1).toLowerCase();
+        setValue('gender', normalizedGender);
+      } else {
+        setValue('gender', '');
+      }
       setValue('location', employeeDetailsData.location);
       
       // Find department ID from department name

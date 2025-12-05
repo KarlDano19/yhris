@@ -279,11 +279,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             id,
             data: {
               first_name: orientItemCopy[itemIndex].firstname,
+              middle_name: orientItemCopy[itemIndex].middlename,
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
+              birthdate: orientItemCopy[itemIndex].birth_date,
+              address: orientItemCopy[itemIndex].address,
+              gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
               employment_status: orientItemCopy[itemIndex].employment_status_id,
-              location: orientItemCopy[itemIndex].location_name,
+              location: orientItemCopy[itemIndex].location,
               position: orientItemCopy[itemIndex].position_id,
               job_posting_id: Number(params.position),
             }

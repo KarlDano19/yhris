@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 import { s } from "../utils/_shared";
 
@@ -31,6 +33,10 @@ export default function PersonalInfoForm({
   const [email,      setEmail]      = useState(s(emp?.email));
   const [address,    setAddress]    = useState(s(emp?.address));
   const [mobile,     setMobile]     = useState(s(emp?.mobile));
+  const [birthdate,  setBirthdate]  = useState<Date | null>(
+    emp?.birthdate ? new Date(emp.birthdate) : null
+  );
+  const [gender,     setGender]     = useState(s(emp?.gender));
 
   // government ids
   const [tin,        setTin]        = useState(s(emp?.tin));
@@ -226,6 +232,65 @@ export default function PersonalInfoForm({
             hint="Digits only (11 digits, starts with '09')"
             required
           />
+          
+          {/* Birthdate Field */}
+          <div data-testid="birthdate-field">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Birthdate
+            </label>
+            <div className="relative">
+              <CustomDatePicker
+                id="employee-birthdate-datepicker"
+                placeholder="mm/dd/yyyy"
+                className={`block w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
+                  !editing 
+                    ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed" 
+                    : "border-gray-300 focus:border-[#355fd0]"
+                }`}
+                selected={birthdate}
+                pickerOnChange={(date: Date | null) => {
+                  setBirthdate(date);
+                  emit("birthdate", date ? date.toISOString().split('T')[0] : null);
+                }}
+                inputOnChange={(date: Date | null) => {
+                  setBirthdate(date);
+                  emit("birthdate", date ? date.toISOString().split('T')[0] : null);
+                }}
+                disabled={!editing}
+              />
+            </div>
+          </div>
+
+          {/* Gender Field */}
+          <div data-testid="gender-field">
+            <label htmlFor="gender" className="mb-1 block text-sm font-medium text-gray-700">
+              Gender
+            </label>
+            <div className="relative">
+              <select
+                id="gender"
+                value={gender}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setGender(v);
+                  emit("gender", v);
+                }}
+                disabled={!editing}
+                className={`rounded-md appearance-none w-full border px-3 py-2 text-sm outline-none ${
+                  !editing
+                    ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    : "border-gray-300 focus:border-[#355fd0]"
+                }`}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <div className="absolute right-3 top-[10px] pointer-events-none">
+                <SelectChevronDown />
+              </div>
+            </div>
+          </div>
         </Grid>
       </Section>
 
