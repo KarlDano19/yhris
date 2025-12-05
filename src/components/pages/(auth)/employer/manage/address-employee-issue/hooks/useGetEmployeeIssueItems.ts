@@ -42,7 +42,7 @@ function useGetEmployeeIssueItems(filters: any) {
     ['employeeIssueItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to, filters.status, filters.status_sort],
     () => getEmployeeIssueItems(filters),
     {
-      // enabled: false,
+      refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );

@@ -53,10 +53,17 @@ async function getAnnualAccidentIllnessReportItems(filters: any) {
 
 function useGetAnnualAccidentIllnessReportItems(filters: any) {
   const query = useQuery(
-    ["annualAccidentIllnessReportItemsCache"],
+    [
+      "annualAccidentIllnessReportItemsCache",
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+    ],
     () => getAnnualAccidentIllnessReportItems(filters),
     {
-      enabled: false,
+      refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );

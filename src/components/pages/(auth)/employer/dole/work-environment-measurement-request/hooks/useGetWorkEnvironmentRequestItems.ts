@@ -52,8 +52,17 @@ async function getWorkEnvironmentRequestItems(filters: any) {
 
 function useGetWorkEnvironmentRequestItems(filters: any) {
   const query = useQuery({
-    queryKey: ["workEnvironmentRequestItems"],
+    queryKey: [
+      "workEnvironmentRequestItems",
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+    ],
     queryFn: () => getWorkEnvironmentRequestItems(filters),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
   return query;
 }

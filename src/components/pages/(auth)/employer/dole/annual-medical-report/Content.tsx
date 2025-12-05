@@ -79,6 +79,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: "",
     search: "",
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: "",
+    to: "",
+    search: "",
+  });
   
   // Bulk delete states
   const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
@@ -92,7 +97,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isAnnualMedicalReportLoading,
     refetch: annualMedicalReportRefetch,
   } = useGetAnnualMedicalReportItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -259,9 +264,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [selectedReports, annualMedicalReportItems]);
 
-  useEffect(() => {
-    annualMedicalReportRefetch();
-  }, [currentPage, pageSize]);
+  // Removed duplicate refetch useEffect - React Query will automatically refetch when filters change
+  // because the queryKey includes the filters
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -296,7 +300,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    annualMedicalReportRefetch();
+    setAppliedFilter({
+      ...itemsFilter,
+    });
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const paginationChange = (event: any) => {

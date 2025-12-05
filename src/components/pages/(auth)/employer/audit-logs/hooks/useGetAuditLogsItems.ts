@@ -56,9 +56,19 @@ async function getAuditLogsItems(filters: any) {
 
 function useGetAuditLogsItems(filters: any) {
     const query = useQuery(
-        ['auditLogsItemsCache'],
+        [
+            'auditLogsItemsCache',
+            filters.currentPage,
+            filters.pageSize,
+            filters.search,
+            filters.from,
+            filters.to,
+        ],
         () => getAuditLogsItems(filters),
-        { enabled: false, keepPreviousData: true }
+        { 
+            refetchOnWindowFocus: false,
+            keepPreviousData: true 
+        }
     );
     return query;
 }

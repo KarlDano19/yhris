@@ -47,8 +47,17 @@ async function getAnnualMedicalReportItems(filters: any) {
 
 function useGetAnnualMedicalReportItems(filters: any) {
   const query = useQuery({
-    queryKey: ["annualMedicalReportItems"],
+    queryKey: [
+      "annualMedicalReportItems",
+      filters.currentPage,
+      filters.pageSize,
+      filters.search,
+      filters.from,
+      filters.to,
+    ],
     queryFn: () => getAnnualMedicalReportItems(filters),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
   return query;
 }

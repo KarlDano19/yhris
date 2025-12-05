@@ -117,13 +117,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
 
   const {
     data: workEnvironmentRequestItemsData,
     isLoading: isWorkEnvironmentRequestItemsLoading,
     refetch: workEnvironmentRequestItemsRefetch,
   } = useGetWorkEnvironmentRequestItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -144,10 +150,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [workEnvironmentRequestItemsData]);
-
-  useEffect(() => {
-    workEnvironmentRequestItemsRefetch();
-  }, [currentPage, pageSize, workEnvironmentRequestItemsRefetch]);
 
   useEffect(() => {
     if (!isWorkEnvironmentRequestItemsLoading && isSearching) {
@@ -354,7 +356,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    workEnvironmentRequestItemsRefetch();
+    setAppliedFilter({
+      from: itemsFilter.from,
+      to: itemsFilter.to,
+      search: searchText,
+    });
+    setCurrentPage(1);
   };
 
   const paginationChange = (event: any) => {
@@ -667,7 +674,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Risk Classification, Conducted By'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSearch();
@@ -679,7 +687,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
                   onClick={handleSearch}
                 >
-                    <MagnifyingGlassIcon className='h-5 w-5' />
+                  <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
             </div>
             </div>
