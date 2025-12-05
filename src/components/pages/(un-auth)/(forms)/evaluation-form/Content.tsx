@@ -96,7 +96,6 @@ function Content() {
     let hasError = false;
     let totalScore = 0;
     let scoreErrorShown = false; // Track if score error has been shown
-    let commentErrorShown = false; // Track if comment error has been shown
 
     evaluationForm.map((item: any, index: number) => {
       for (const [criteriaIndex, criteriaItem] of item.criterion.entries()) {
@@ -111,16 +110,6 @@ function Content() {
           scoreErrorShown = true; // Set to true after showing the error
         } else {
           totalScore += criteriaItem.score;
-        }
-        if (!criteriaItem.is_disable_comment && !Object.hasOwn(criteriaItem, 'comment') && !commentErrorShown) {
-          let errorMessage: string = '';
-          if (!item.section_title) {
-            errorMessage = `Section ${convertToRoman(index + 1)} `;
-          }
-          errorMessage += `You missed to comment a question`;
-          toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 4000 });
-          hasError = true;
-          commentErrorShown = true; // Set to true after showing the error
         }
       }
     });
@@ -433,31 +422,39 @@ function Content() {
                             )}
                           </div>
                           {!item.is_disable_comment && (
-                            <textarea
-                              id={`comment-${evaluationCriterionIndex}-${index}`}
-                              className='border rounded px-5 pt-4 pb-12 text-gray-400 w-1/2'
-                              placeholder='Enter comment...'
-                              value={item.comment || ''}
-                              onChange={(event) => {
-                                const newComment = event.target.value;
-                                setEvaluationForm((prevForm: any) => {
-                                  return prevForm.map((criterionItem: any, criterionIndex: number) => {
-                                    if (criterionIndex === evaluationCriterionIndex) {
-                                      return {
-                                        ...criterionItem,
-                                        criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
-                                          if (itemIndex === index) {
-                                            return { ...item, comment: newComment };
-                                          }
-                                          return item;
-                                        }),
-                                      };
-                                    }
-                                    return criterionItem;
+                            <div className='w-1/2'>
+                              <label 
+                                htmlFor={`comment-${evaluationCriterionIndex}-${index}`}
+                                className='block text-sm font-medium text-gray-700 mb-2'
+                              >
+                                Comment <span className='text-gray-400'>(Optional)</span>
+                              </label>
+                              <textarea
+                                id={`comment-${evaluationCriterionIndex}-${index}`}
+                                className='border border-gray-300 rounded px-5 pt-4 pb-12 text-black w-full'
+                                placeholder='Enter comment...'
+                                value={item.comment || ''}
+                                onChange={(event) => {
+                                  const newComment = event.target.value;
+                                  setEvaluationForm((prevForm: any) => {
+                                    return prevForm.map((criterionItem: any, criterionIndex: number) => {
+                                      if (criterionIndex === evaluationCriterionIndex) {
+                                        return {
+                                          ...criterionItem,
+                                          criterion: criterionItem.criterion.map((item: any, itemIndex: number) => {
+                                            if (itemIndex === index) {
+                                              return { ...item, comment: newComment };
+                                            }
+                                            return item;
+                                          }),
+                                        };
+                                      }
+                                      return criterionItem;
+                                    });
                                   });
-                                });
-                              }}
-                            ></textarea>
+                                }}
+                              ></textarea>
+                            </div>
                           )}
                           {index + 1 !== evaluationForm[evaluationCriterionIndex].criterion.length && (
                             <div className='mt-12 border-dashed border-b-2'></div>
