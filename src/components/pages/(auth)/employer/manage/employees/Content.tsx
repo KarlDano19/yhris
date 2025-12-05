@@ -39,7 +39,7 @@ import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusIt
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 import useSeedEmployees from './hooks/useSeedEmployees';
 import useUnseedEmployees from './hooks/useUnseedEmployees';
-import FloatingSyncButton from '@/components/FloatingSyncButton';
+import FloatingProgress from '@/components/FloatingProgress';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -637,7 +637,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   };
   return (
     <>
-      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
+      {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
