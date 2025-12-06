@@ -114,6 +114,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -253,6 +254,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
+    // Set the enrolling ID to track which item is being enrolled
+    setEnrollingId(String(id));
+    
     const updateOrientationStatus = () => {
       orientItemCopy[itemIndex].id = id;
       orientItemCopy[itemIndex].actionType = 'enrolled';
@@ -261,6 +265,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
+          setEnrollingId(null); // Clear enrolling state on success
           setIsEnrollRedirectModalOpen(true);
           // Clear employee cache when applicant is enrolled (employee becomes available for other operations)
           queryClient.invalidateQueries(['employeePaginatedSelectCache']);
@@ -269,6 +274,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -302,6 +308,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               updateOrientationStatus();
             },
             onError: (err: any) => {
+              setEnrollingId(null); // Clear enrolling state on error
               toast.custom(() => <CustomToast message={err} type='error' />, {
                 duration: 7000,
               });
@@ -309,6 +316,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -461,7 +469,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setEnrolled={() => {
                   setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
-                isLoading={isLoading || isEnrolling}
+                isLoading={enrollingId === String(item.id)}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>
