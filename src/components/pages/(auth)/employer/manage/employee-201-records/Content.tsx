@@ -14,6 +14,8 @@ import useBulkSyncToYP from './hooks/useBulkSyncToYP';
 import { ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
+import toast from 'react-hot-toast';
+import CustomToast from '@/components/CustomToast';
 
 export default function Content({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) {
   const [q, setQ] = useState('');
@@ -83,11 +85,24 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
   }, []);
 
   const handleBulkSyncToYP = () => {
-    bulkSyncToYP({
-      sync_type: 'all',
-      sync_mode: 'all',
-      employee_ids: employeeItems?.map((employee: any) => employee.id) ?? [],
-    });
+    bulkSyncToYP(
+      {
+        sync_type: 'all',
+        sync_mode: 'all',
+        employee_ids: employeeItems?.map((employee: any) => employee.id) ?? [],
+      },
+      {
+        onSuccess: (data) => {
+          const { summary } = data;
+          const message = `Sync complete: ${summary.created} created, ${summary.updated} updated${summary.errors > 0 ? `, ${summary.errors} errors` : ''}`;
+          toast.custom(() => <CustomToast message={message} type="success" />);
+        },
+        onError: (error: any) => {
+          const errorMessage = typeof error === 'string' ? error : 'Failed to sync employees to Payroll';
+          toast.custom(() => <CustomToast message={errorMessage} type="error" />);
+        },
+      }
+    );
   };
 
   return (
