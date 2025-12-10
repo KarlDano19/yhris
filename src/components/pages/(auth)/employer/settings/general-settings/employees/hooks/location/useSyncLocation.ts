@@ -1,8 +1,31 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function syncLocation() {
+export interface BulkLocationSyncData {
+  location_ids?: number[];
+}
+
+export interface BulkLocationSyncResponse {
+  message: string;
+  total_sent: number;
+  payroll_response: {
+    message: string;
+    created: number;
+    updated: number;
+    error_count: number;
+    total_processed: number;
+  };
+  summary: {
+    created: number;
+    updated: number;
+    errors: number;
+    total_processed: number;
+  };
+}
+
+async function bulkSyncLocationsToPayroll(syncData: BulkLocationSyncData): Promise<BulkLocationSyncResponse> {
   try {
+    console.log("bulkSyncLocationsToPayroll", syncData);
     const token = getCookie('token');
     const config = {
       method: 'POST',
@@ -10,12 +33,9 @@ async function syncLocation() {
         'content-type': 'application/json',
         Authorization: `Token ${token}`,
       },
+      body: JSON.stringify(syncData),
     };
-
-    // Build URL with query parameter
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/locations/sync-third-party-integration/`;
-
-    const res = await fetch(url, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/locations/bulk-sync-to-payroll/`, config);
     if (!res.ok) {
       throw res.json();
     }
@@ -30,9 +50,7 @@ async function syncLocation() {
 }
 
 function useSyncLocation() {
-  const query = useMutation({
-    mutationFn: () => syncLocation(),
-  });
+  const query = useMutation((syncData: BulkLocationSyncData) => bulkSyncLocationsToPayroll(syncData));
 
   return query;
 }

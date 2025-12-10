@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -17,52 +16,26 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import useSyncLocation from './hooks/location/useSyncLocation';
 import useSyncDepartment from './hooks/department/useSyncDepartment';
 import useSyncPosition from './hooks/position/useSyncPosition';
-import useAddLocationToYP from './hooks/location/useAddLocationToYP';
-import useAddDepartmentToYP from './hooks/department/useAddDepartmentToYP';
-import useAddPositionToYP from './hooks/position/useAddPositionToYP';
-import useGetLocationItems from './hooks/location/useGetLocationItems';
-import useGetDepartmentItems from './hooks/department/useGetDepartmentItems';
-import useGetPositionItems from './hooks/position/useGetPositionItems';
-import useAddEmployeeStatusToYP from './hooks/employee-status/useAddEmployeeStatusToYP';
 import useSyncEmployeeStatus from './hooks/employee-status/useSyncEmployeeStatus';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import useGetEmployeeStatusItems from './hooks/employee-status/useGetEmployeeStatusItems';
 import EmployeeId from './tabs/Employee-id';
 
 const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
 
-  // Sync hooks
+  // Bulk sync hooks
   const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
   const { mutate: syncDepartment, isLoading: isSyncDepartmentLoading } = useSyncDepartment();
   const { mutate: syncPosition, isLoading: isSyncPositionLoading } = useSyncPosition();
   const { mutate: syncEmployeeStatus, isLoading: isSyncEmployeeStatusLoading } = useSyncEmployeeStatus();
-
-  // Add to YP hooks
-  const { mutate: addLocationToYP, isLoading: isAddLocationToYPLoading } = useAddLocationToYP();
-  const { mutate: addDepartmentToYP, isLoading: isAddDepartmentToYPLoading } = useAddDepartmentToYP();
-  const { mutate: addPositionToYP, isLoading: isAddPositionToYPLoading } = useAddPositionToYP();
-  const { mutate: addEmployeeStatusToYP, isLoading: isAddEmployeeStatusToYPLoading } = useAddEmployeeStatusToYP();
-
-  // Data fetching hooks (get all items without pagination)
-  const { data: allLocationsData } = useGetLocationItems({ pageSize: 1000, currentPage: 1 });
-  const { data: allDepartmentsData } = useGetDepartmentItems({ pageSize: 1000, currentPage: 1 });
-  const { data: allPositionsData } = useGetPositionItems({ pageSize: 1000, currentPage: 1 });
-  const { data: allEmployeeStatusesData } = useGetEmployeeStatusItems({ pageSize: 1000, currentPage: 1 });
   
   // Track overall sync state
-  const isSyncingAll = isSyncLocationLoading || isSyncDepartmentLoading || isSyncPositionLoading ||
-                      isAddLocationToYPLoading || isAddDepartmentToYPLoading || isAddPositionToYPLoading;
+  const isSyncingAll = isSyncLocationLoading || isSyncDepartmentLoading || isSyncPositionLoading || isSyncEmployeeStatusLoading;
 
   const handleSyncAll = async () => {
-    // Get all items
-    const locations = allLocationsData?.records || [];
-    const departments = allDepartmentsData?.records || [];
-    const positions = allPositionsData?.records || [];
-    const employeeStatuses = allEmployeeStatusesData?.records || [];
-
-    const totalOperations = locations.length + departments.length + positions.length + employeeStatuses.length + 3; // +3 for sync operations
+    // 4 bulk sync operations (location, department, position, employee status)
+    const totalOperations = 4;
     let completedCount = 0;
     const errors: string[] = [];
     const successes: string[] = [];
@@ -88,133 +61,71 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
       }
     };
 
-    // Add all items to YP first, then sync
-    // Add Locations to YP
-    locations.forEach((location: any) => {
-      addLocationToYP({ id: location.id, data: { name: location.name } }, {
-        onSuccess: (data) => {
-          if (data.status === "already_exists") {
-            toast.custom(() => <CustomToast message={data.message || `Location "${location.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
-            onOperationComplete('Location', `"${location.name}" already exists in YP`, true, data.message);
-          } else {
-            toast.custom(() => <CustomToast message={data.message || `Location "${location.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
-            onOperationComplete('Location', `"${location.name}" added to YP`, true, data.message);
-          }
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={`Failed to add location "${location.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
-          onOperationComplete('Location', `"${location.name}" add failed`, false, err.message || err);
-        },
-      });
-    });
-
-    // Add Departments to YP
-    departments.forEach((department: any) => {
-      addDepartmentToYP({ id: department.id, data: { name: department.name } }, {
-        onSuccess: (data) => {
-          if (data.status === "already_exists") {
-            toast.custom(() => <CustomToast message={data.message || `Department "${department.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
-            onOperationComplete('Department', `"${department.name}" already exists in YP`, true, data.message);
-          } else {
-            toast.custom(() => <CustomToast message={data.message || `Department "${department.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
-            onOperationComplete('Department', `"${department.name}" added to YP`, true, data.message);
-          }
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={`Failed to add department "${department.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
-          onOperationComplete('Department', `"${department.name}" add failed`, false, err.message || err);
-        },
-      });
-    });
-
-    // Add Positions to YP
-    positions.forEach((position: any) => {
-      addPositionToYP({ id: position.id, data: { name: position.name } }, {
-        onSuccess: (data) => {
-          if (data.status === "already_exists") {
-            toast.custom(() => <CustomToast message={data.message || `Position "${position.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
-            onOperationComplete('Position', `"${position.name}" already exists in YP`, true, data.message);
-          } else {
-            toast.custom(() => <CustomToast message={data.message || `Position "${position.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
-            onOperationComplete('Position', `"${position.name}" added to YP`, true, data.message);
-          }
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={`Failed to add position "${position.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
-          onOperationComplete('Position', `"${position.name}" add failed`, false, err.message || err);
-        },
-      });
-    });
-
-    // Add Employee Statuses to YP
-    employeeStatuses.forEach((employeeStatus: any) => {
-      addEmployeeStatusToYP({ id: employeeStatus.id, data: { name: employeeStatus.name } }, {
-        onSuccess: (data) => {
-          if (data.status === "already_exists") {
-            toast.custom(() => <CustomToast message={data.message || `Employee Status "${employeeStatus.name}" already exists in payroll system`} type='info' />, { duration: 3000 });
-            onOperationComplete('Employee Status', `"${employeeStatus.name}" already exists in YP`, true, data.message);
-          } else {
-            toast.custom(() => <CustomToast message={data.message || `Employee Status "${employeeStatus.name}" added to payroll system successfully`} type='success' />, { duration: 3000 });
-            onOperationComplete('Employee Status', `"${employeeStatus.name}" added to YP`, true, data.message);
-          }
-        },
-        onError: (err: any) => {
-          toast.custom(() => <CustomToast message={`Failed to add employee status "${employeeStatus.name}": ${err.message || err}`} type='error' />, { duration: 4000 });
-          onOperationComplete('Employee Status', `"${employeeStatus.name}" add failed`, false, err.message || err);
-        },
-      });
-    });
-
-    // Then perform sync operations
-    syncLocation(undefined, {
+    // Bulk sync locations to payroll (creates/updates all locations in one call)
+    syncLocation({}, {
       onSuccess: (data) => {
-        const message = data.message || 'Location sync completed';
+        const summary = data.summary;
+        const message = summary 
+          ? `Location bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
+          : data.message || 'Location bulk sync completed';
         toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Location', 'sync', true, message);
+        onOperationComplete('Location', 'bulk sync', true, message);
       },
       onError: (err: any) => {
         const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Location sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Location', 'sync', false, errorMessage);
+        toast.custom(() => <CustomToast message={`Location bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Location', 'bulk sync', false, errorMessage);
       },
     });
 
-    syncDepartment(undefined, {
+    // Bulk sync departments to payroll (creates/updates all departments in one call)
+    syncDepartment({}, {
       onSuccess: (data) => {
-        const message = data.message || 'Department sync completed';
+        const summary = data.summary;
+        const message = summary 
+          ? `Department bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
+          : data.message || 'Department bulk sync completed';
         toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Department', 'sync', true, message);
+        onOperationComplete('Department', 'bulk sync', true, message);
       },
       onError: (err: any) => {
         const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Department sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Department', 'sync', false, errorMessage);
+        toast.custom(() => <CustomToast message={`Department bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Department', 'bulk sync', false, errorMessage);
       },
     });
 
-    syncPosition(undefined, {
+    // Bulk sync positions to payroll (creates/updates all positions in one call)
+    syncPosition({}, {
       onSuccess: (data) => {
-        const message = data.message || 'Position sync completed';
+        const summary = data.summary;
+        const message = summary 
+          ? `Position bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
+          : data.message || 'Position bulk sync completed';
         toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Position', 'sync', true, message);
+        onOperationComplete('Position', 'bulk sync', true, message);
       },
       onError: (err: any) => {
         const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Position sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Position', 'sync', false, errorMessage);
+        toast.custom(() => <CustomToast message={`Position bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Position', 'bulk sync', false, errorMessage);
       },
     });
 
-    syncEmployeeStatus(undefined, {
+    // Bulk sync employee statuses to payroll (creates/updates all employee statuses in one call)
+    syncEmployeeStatus({}, {
       onSuccess: (data) => {
-        const message = data.message || 'Employee Status sync completed';
+        const summary = data.summary;
+        const message = summary 
+          ? `Employee Status bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
+          : data.message || 'Employee Status bulk sync completed';
         toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Employee Status', 'sync', true, message);
+        onOperationComplete('Employee Status', 'bulk sync', true, message);
       },
       onError: (err: any) => {
         const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Employee Status sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Employee Status', 'sync', false, errorMessage);
+        toast.custom(() => <CustomToast message={`Employee Status bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
+        onOperationComplete('Employee Status', 'bulk sync', false, errorMessage);
       },
     });
   };
@@ -308,10 +219,10 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                 {isSyncingAll ? (
                   <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Adding & Syncing...
+                    Syncing...
                   </div>
                 ) : (
-                  'Add All & Sync to YP'
+                  'Sync All to YP'
                 )}
               </SmartButton>
             </div>
