@@ -7,7 +7,7 @@ interface InfoIconProps {
 
 const InfoIcon = ({ className, fill = "#2C3F58" }: InfoIconProps) => {
   return (
-    <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
         <mask id="mask0_1302_236" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="15" height="15">
         <rect width="15" height="15" fill="#D9D9D9"/>
         </mask>
