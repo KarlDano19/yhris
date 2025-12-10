@@ -98,4 +98,14 @@ export const issueTypeOptions = [
     value: 'Violation of Safety / OSH Rules',
     label: 'Violation of Safety / OSH Rules',
   },
+  {
+    label: <strong>- OTHERS -</strong>,
+    value: null,
+    isDisabled: true,
+  },
+  {
+    value: 'Others: (Please specify)',
+    label: 'Others: (Please specify)',
+    isCustom: true,
+  },
 ];
