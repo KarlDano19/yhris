@@ -576,6 +576,10 @@ export default function Employee201Content({
         gender: employeeDetails?.gender,
         birthdate: employeeDetails?.birthdate,
         system_id: employeeDetails?.system_id,
+        location: employeeDetails?.location,
+        position: employeeDetails?.position,
+        department: employeeDetails?.department,
+        employment_status: employeeDetails?.employment_status,
       }
     });
     console.log("syncToYP", employeeDetails);
