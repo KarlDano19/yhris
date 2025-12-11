@@ -31,11 +31,13 @@ function Content() {
   const [evaluationEmployeeFormDetails, setEvaluationEmployeeFormDetails] = useState<any>({});
   const [evaluationForm, setEvaluationForm] = useState<any>({});
   const [evaluationCriterionIndex, setEvaluationCriterionIndex] = useState(0);
-  const { data: dataEvaluationTemplateDetails, isLoading: evaluationTemplateDetailsLoading } =
+  const [formError, setFormError] = useState<string | null>(null);
+  const { data: dataEvaluationTemplateDetails, isLoading: evaluationTemplateDetailsLoading, error: templateError } =
     useGetEvaluationTemplateDetails(params.evaluation_template_id || null);
   const {
     data: dateEvaluationEmployeeFormDetails,
     isLoading: evaluationEmployeeFormDetailsLoading,
+    error: formDetailsError,
     refetch: refetchEvaluationEmployeeFormDetails,
   } = useGetEvaluationEmployeeFormDetails(params.form_uuid || null);
   const { mutate, isLoading } = useUpdateEvaluationForm();
@@ -49,6 +51,7 @@ function Content() {
       setHasTemplate(true);
       setEvaluationTemplateDetails(dataEvaluationTemplateDetails);
       setEvaluationForm(dataEvaluationTemplateDetails.evaluation_criterion);
+      setFormError(null);
     }
     if (
       dateEvaluationEmployeeFormDetails &&
@@ -58,8 +61,30 @@ function Content() {
       setHasForm(true);
       dateEvaluationEmployeeFormDetails['date_of_evaluation'] = new Date();
       setEvaluationEmployeeFormDetails(dateEvaluationEmployeeFormDetails);
+      setFormError(null);
     }
   }, [dataEvaluationTemplateDetails, dateEvaluationEmployeeFormDetails]);
+
+  useEffect(() => {
+    if (formDetailsError) {
+      // Extract message from error object if it's an Error, otherwise use as string
+      const errorMessage = formDetailsError instanceof Error 
+        ? formDetailsError.message 
+        : typeof formDetailsError === 'string' 
+          ? formDetailsError 
+          : String(formDetailsError);
+      setFormError(errorMessage);
+    }
+    if (templateError) {
+      // Extract message from error object if it's an Error, otherwise use as string
+      const errorMessage = templateError instanceof Error 
+        ? templateError.message 
+        : typeof templateError === 'string' 
+          ? templateError 
+          : String(templateError);
+      setFormError(errorMessage);
+    }
+  }, [formDetailsError, templateError]);
 
   const convertToRoman = (num: number): string => {
     // Define Roman numerals and their corresponding values
@@ -531,7 +556,7 @@ function Content() {
           )
         ) : (
           <>
-            {evaluationEmployeeFormDetailsLoading && (
+            {evaluationEmployeeFormDetailsLoading && !formError && (
               <div className='w-screen h-screen flex justify-center items-center'>
                 <div className='fixed z-20 inset-0 overflow-y-auto'>
                   <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -557,7 +582,7 @@ function Content() {
                 </div>
               </div>
             )}
-            {!evaluationEmployeeFormDetailsLoading && (
+            {(!evaluationEmployeeFormDetailsLoading || formError) && (
               <div className='w-screen h-screen flex justify-center items-center'>
                 <div className='fixed z-20 inset-0 overflow-y-auto'>
                   <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -582,7 +607,7 @@ function Content() {
                           </svg>
                         </div>
                         <h1 className='text-center text-[#d65846] text-[32px] font-bold'>
-                          Unable to locate the Employee Evaluation Form!
+                          {formError || 'Unable to locate the Employee Evaluation Form!'}
                         </h1>
                       </div>
                     </div>
@@ -594,7 +619,7 @@ function Content() {
         )
       ) : (
         <>
-          {evaluationTemplateDetailsLoading && (
+          {evaluationTemplateDetailsLoading && !formError && (
             <div className='w-screen h-screen flex justify-center items-center'>
               <div className='fixed z-20 inset-0 overflow-y-auto'>
                 <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -620,7 +645,7 @@ function Content() {
               </div>
             </div>
           )}
-          {!evaluationTemplateDetailsLoading && (
+          {(!evaluationTemplateDetailsLoading || formError) && (
             <div className='w-screen h-screen flex justify-center items-center'>
               <div className='fixed z-20 inset-0 overflow-y-auto'>
                 <div className='flex items-center justify-center min-h-screen px-4 pt-2 pb-20 text-center sm:block sm:p-0'>
@@ -645,7 +670,7 @@ function Content() {
                         </svg>
                       </div>
                       <h1 className='text-center text-[#d65846] text-[32px] font-bold'>
-                        Unable to locate the Evaluation Template!
+                        {formError || 'Unable to locate the Evaluation Template!'}
                       </h1>
                     </div>
                   </div>

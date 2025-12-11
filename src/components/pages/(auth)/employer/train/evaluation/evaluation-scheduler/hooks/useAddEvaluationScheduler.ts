@@ -13,6 +13,12 @@ async function addEvaluationScheduler(data: any) {
     formData.append('message', data.message);
     formData.append('name', data.name);
     formData.append('reminder_schedule', data.reminder_schedule);
+    if (data.deadline) {
+      formData.append('deadline', data.deadline);
+    }
+    if (data.close_after_deadline !== undefined) {
+      formData.append('close_after_deadline', data.close_after_deadline ? 'true' : 'false');
+    }
     if (data.attachment && data.attachment.length) {
       formData.append('attachment', data.attachment[0]);
     }

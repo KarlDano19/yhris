@@ -42,6 +42,21 @@ function CreateEvaluationSchedulerModal({
   const { mutate, isLoading } = useAddEvaluationScheduler();
 
   const onSubmit = handleSubmit((data: any) => {
+    // Check if deadline is already a JSON string with day and time
+    if (data.deadline && typeof data.deadline === 'string' && data.deadline.startsWith('{')) {
+      // Already in JSON format, use as is
+      // Backend expects JSON string with day and time
+    } else if (data.deadline_day && data.deadline_time) {
+      // Build JSON object with day and time
+      const deadlineJSON = {
+        day: parseInt(String(data.deadline_day)),
+        time: data.deadline_time
+      };
+      data.deadline = JSON.stringify(deadlineJSON);
+    } else {
+      data.deadline = '';
+    }
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
