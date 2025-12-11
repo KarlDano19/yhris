@@ -14,15 +14,23 @@ async function updateEvaluationForm(form_uuid: string, data: any) {
       config
     );
     if (!res.ok) {
-      throw res.json();
+      const errorData = await res.json();
+      // Extract error message from backend response
+      const errorMessage = errorData.message || errorData.description || errorData.errors || 'Failed to update evaluation form';
+      throw new Error(errorMessage);
     }
     return res.json();
   } catch (err: any) {
+    // If it's already an Error object, re-throw it
+    if (err instanceof Error) {
+      throw err;
+    }
+    // Otherwise, try to extract message
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
+      throw new Error(errStringify.response.data.message);
     }
-    throw errStringify.message;
+    throw new Error(errStringify.message || 'Failed to update evaluation form');
   }
 }
 

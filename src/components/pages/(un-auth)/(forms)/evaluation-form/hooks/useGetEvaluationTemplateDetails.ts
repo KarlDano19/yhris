@@ -13,15 +13,23 @@ async function getEvaluationTemplateDetails(evaluation_template_id: string | nul
       config
     );
     if (!res.ok) {
-      throw res.json();
+      const errorData = await res.json();
+      // Extract error message from backend response
+      const errorMessage = errorData.message || errorData.description || errorData.errors || 'Unable to locate the Evaluation Template!';
+      throw new Error(errorMessage);
     }
     return res.json();
   } catch (err: any) {
+    // If it's already an Error object, re-throw it
+    if (err instanceof Error) {
+      throw err;
+    }
+    // Otherwise, try to extract message
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
-      throw errStringify.response.data.message;
+      throw new Error(errStringify.response.data.message);
     }
-    throw errStringify.message;
+    throw new Error(errStringify.message || 'Unable to locate the Evaluation Template!');
   }
 }
 
@@ -32,6 +40,8 @@ function useGetEvaluationTemplateDetails(evaluation_template_id: string | null) 
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
+      retry: false, // Don't retry failed requests
+      retryOnMount: false, // Don't retry on mount if query failed
     }
   );
 

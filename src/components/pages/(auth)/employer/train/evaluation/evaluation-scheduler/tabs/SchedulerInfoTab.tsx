@@ -7,6 +7,7 @@ import useGetEvaluationTemplateItems from '@/components/hooks/useGetEvaluationTe
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import InfoIcon from '@/svg/InfoIcon';
+import { ClockIcon } from '@heroicons/react/24/outline';
 
 // Custom MenuList component to hide scrollbar arrows and show 5 items
 const MenuList = (props: any) => {
@@ -59,6 +60,20 @@ function SchedulerInfoTab({
   // Add a state to force UI updates when custom frequency changes
   const [customFrequencyUpdateCounter, setCustomFrequencyUpdateCounter] = useState(0);
 
+  // Helper function to update deadline (now uses day and time instead of full date)
+  const updateDeadline = (day: number, time: string) => {
+    if (!day || !time) return;
+    
+    // Store as JSON object with day and time
+    const deadlineJSON = {
+      day: parseInt(String(day)),
+      time: time
+    };
+    
+    // Set the deadline as JSON string
+    setValue('deadline', JSON.stringify(deadlineJSON));
+  };
+
   // Watch for custom frequency value changes
   const customFrequencyValue = watch('frequency_value');
   // Determine if the current frequency_unit is a custom type
@@ -79,6 +94,28 @@ function SchedulerInfoTab({
       setCustomScheduleDetails(null);
     }
   }, [isCustomUnit, customFrequencyValue, customFrequencyUpdateCounter]);
+
+  // Load deadline day and time when editing
+  useEffect(() => {
+    const deadlineValue = watch('deadline');
+    if (deadlineValue) {
+      try {
+        let deadlineJSON: any = {};
+        if (typeof deadlineValue === 'string') {
+          deadlineJSON = JSON.parse(deadlineValue);
+        } else if (typeof deadlineValue === 'object') {
+          deadlineJSON = deadlineValue;
+        }
+        
+        if (deadlineJSON.day && deadlineJSON.time) {
+          setValue('deadline_day', deadlineJSON.day);
+          setValue('deadline_time', deadlineJSON.time);
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  }, [watch('deadline'), setValue]);
 
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -169,6 +206,8 @@ function SchedulerInfoTab({
     } else {
       setValue('frequency_unit', value);
       setValue('frequency_value', '');
+      setValue('deadline_day', ''); // Clear deadline day when frequency unit changes
+      setValue('deadline', ''); // Clear deadline JSON
       setCustomScheduleDetails(null);
     }
   };
@@ -226,11 +265,15 @@ function SchedulerInfoTab({
               >
                 <div>
                   <h2 className='text-[12px] font-medium'>
-                    {(!customFrequencyValue && !selectedFrequencyUnit) ? 'Select week, month, or custom first.' :
-                      selectedFrequencyUnit === 'week' ? 'The week starts with Sunday-1 to Saturday-7' :
-                      selectedFrequencyUnit === 'month' ? 'If you select 31, it will use the last day for months with fewer days.' :
-                      ''
-                    }
+                    {(!customFrequencyValue && !selectedFrequencyUnit)
+                      ? 'Select week, month, or custom first.'
+                      : selectedFrequencyUnit === 'week'
+                        ? 'The week starts with Sunday-1 to Saturday-7'
+                        : selectedFrequencyUnit === 'month'
+                          ? 'If you select 31, it will use the last day for months with fewer days.'
+                          : isCustomUnit
+                            ? 'Custom schedule uses the selected months and day.'
+                            : ''}
                   </h2>
                 </div>
               </Tooltip>
@@ -312,6 +355,170 @@ function SchedulerInfoTab({
               </select>
               <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                 <SelectChevronDown />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className='sm:col-span-4 mt-2 w-full'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div>
+              <label htmlFor='deadline' className='block text-sm font-medium leading-6 text-gray-900'>
+                Evaluation Deadline<span className='text-red-600'>*</span>
+              </label>
+              {isCustomUnit && customScheduleDetails && customScheduleDetails.months.length > 1 ? (
+                // Multiple months - show day and time inputs (applies to all months)
+                <div className='mt-2'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+                    <div>
+                      <label htmlFor='deadline_day' className='block text-sm font-medium text-gray-700 mb-1'>
+                        Day of Month
+                      </label>
+                      <div className='relative'>
+                        <select
+                          id='deadline_day'
+                          {...register('deadline_day', { 
+                            required: "Evaluation deadline day is required"
+                          })}
+                          onChange={(e) => {
+                            const dayValue = parseInt(e.target.value);
+                            const timeValue = watch('deadline_time');
+                            if (dayValue && timeValue) {
+                              updateDeadline(dayValue, timeValue);
+                            }
+                          }}
+                          className='appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          required
+                        >
+                          <option value='' disabled>
+                            -
+                          </option>
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                            <option key={day} value={day}>
+                              {day}
+                            </option>
+                          ))}
+                        </select>
+                        <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
+                          <SelectChevronDown />
+                        </div>
+                      </div>
+                    </div>
+                    <div className='relative'>
+                      <label htmlFor='deadline_time' className='block text-sm font-medium text-gray-700 mb-1'>
+                        Time
+                      </label>
+                      <input
+                        type='time'
+                        {...register('deadline_time', { required: "Evaluation deadline time is required" })}
+                        id='deadline_time'
+                        onChange={(e) => {
+                          const dayValue = watch('deadline_day');
+                          if (dayValue && e.target.value) {
+                            updateDeadline(parseInt(String(dayValue)), e.target.value);
+                          }
+                        }}
+                        className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden'
+                        style={{ WebkitAppearance: 'none' }}
+                        required
+                      />
+                      <div 
+                        className='absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer mt-6'
+                        onClick={() => {
+                          const timeInput = document.getElementById('deadline_time') as HTMLInputElement;
+                          timeInput?.showPicker();
+                        }}
+                      >
+                        <ClockIcon className='h-6 w-6 text-savoy-blue hover:text-indigo-300' />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Single deadline - use day and time for week/month frequencies too
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-2 mt-2'>
+                  <div>
+                    <label htmlFor='deadline_day' className='block text-sm font-medium text-gray-700 mb-1'>
+                      {selectedFrequencyUnit === 'week' ? 'Day of Week' : 'Day of Month'}
+                    </label>
+                    <div className='relative'>
+                      <select
+                        id='deadline_day'
+                        {...register('deadline_day', { 
+                          required: "Evaluation deadline day is required"
+                        })}
+                        onChange={(e) => {
+                          const dayValue = parseInt(e.target.value);
+                          const timeValue = watch('deadline_time');
+                          if (dayValue && timeValue) {
+                            updateDeadline(dayValue, timeValue);
+                          }
+                        }}
+                        className='appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                        required
+                      >
+                        <option value='' disabled>
+                          -
+                        </option>
+                        {selectedFrequencyUnit === 'week' 
+                          ? Array.from({ length: 7 }, (_, i) => i + 1).map((day) => (
+                              <option key={day} value={day}>
+                                {day}
+                              </option>
+                            ))
+                          : Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                              <option key={day} value={day}>
+                                {day}
+                              </option>
+                            ))
+                        }
+                      </select>
+                      <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
+                        <SelectChevronDown />
+                      </div>
+                    </div>
+                  </div>
+                  <div className='relative'>
+                    <label htmlFor='deadline_time' className='block text-sm font-medium text-gray-700 mb-1'>
+                      Time
+                    </label>
+                    <input
+                      type='time'
+                      {...register('deadline_time', { required: "Evaluation deadline time is required" })}
+                      id='deadline_time'
+                      onChange={(e) => {
+                        const dayValue = watch('deadline_day');
+                        if (dayValue && e.target.value) {
+                          updateDeadline(parseInt(String(dayValue)), e.target.value);
+                        }
+                      }}
+                      className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden'
+                      style={{ WebkitAppearance: 'none' }}
+                      required
+                    />
+                    <div 
+                      className='absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer mt-6'
+                      onClick={() => {
+                        const timeInput = document.getElementById('deadline_time') as HTMLInputElement;
+                        timeInput?.showPicker();
+                      }}
+                    >
+                      <ClockIcon className='h-6 w-6 text-savoy-blue hover:text-indigo-300' />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className='flex items-center mt-12'>
+              <div className='flex items-center w-full'>
+                <input
+                  id='close_after_deadline'
+                  type='checkbox'
+                  {...register('close_after_deadline')}
+                  className='h-4 w-4 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue'
+                />
+                <label htmlFor='close_after_deadline' className='ml-2 block text-sm text-gray-900'>
+                  Close evaluation forms after deadline passes
+                </label>
               </div>
             </div>
           </div>
