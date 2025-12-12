@@ -299,7 +299,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
               employment_status: orientItemCopy[itemIndex].employment_status_id,
-              location: orientItemCopy[itemIndex].location,
+              location: orientItemCopy[itemIndex].location_name,
               position: orientItemCopy[itemIndex].position_id,
               job_posting_id: Number(params.position),
             }

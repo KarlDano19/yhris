@@ -606,7 +606,7 @@ function Content() {
                             />
                           </svg>
                         </div>
-                        <h1 className='text-center text-[#d65846] text-[32px] font-bold'>
+                        <h1 className='text-center text-[#d65846] text-[28px] font-bold'>
                           {formError || 'Unable to locate the Employee Evaluation Form!'}
                         </h1>
                       </div>
