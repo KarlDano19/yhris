@@ -671,6 +671,7 @@ const Content = () => {
                   onClick={() => openDuplicateModal(jobPost)}
                   data-tooltip-id="duplicate-tooltip"
                   data-tooltip-content="Duplicate Job"
+                  className="p-1.5 bg-white border border-gray-300 rounded-md"
                 >
                   <DuplicateIcon />
                 </SmartButton>

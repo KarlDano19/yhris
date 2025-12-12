@@ -379,6 +379,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 data-tooltip-id={`duplicate-tooltip-${item.id}`}
                 data-tooltip-content="Duplicate"
                 title='Duplicate'
+                className='p-1.5 bg-white border border-gray-300 rounded-md'
               >
                 <DuplicateIcon />
               </button>
