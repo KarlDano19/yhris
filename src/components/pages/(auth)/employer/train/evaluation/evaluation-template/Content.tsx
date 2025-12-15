@@ -339,7 +339,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         const isLocked = item.can_edit === false;
         return (
         <tr key={item.id}>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>
             <input
               type="checkbox"
               checked={selectedEvaluationTemplates.has(item.id)}
@@ -347,11 +347,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
             />
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.created_at}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_type}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
-          <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
+          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>{item.created_at}</td>
+          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>{item.name}</td>
+          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>{item.evaluation_type}</td>
+          <td className='px-3 py-3 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
+          <td className='px-3 py-3 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
               {isLocked ? (
                 <button
@@ -587,7 +587,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <table className='min-w-full text-center divide-y divide-gray-300'>
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         <input
                           type="checkbox"
                           checked={selectAll}
@@ -596,19 +596,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
                         />
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         Date Created
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         Name
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         Evaluation Type
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         Frequency
                       </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
                         Actions
                       </th>
                     </tr>
