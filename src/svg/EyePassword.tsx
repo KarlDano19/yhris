@@ -2,10 +2,10 @@ import React from 'react';
 
 const EyePassword = ({ visible }: { visible: boolean }) => {
   return (
-    <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0.5" y="0.5" width="37.9423" height="37.9423" rx="4.5" stroke="#ACB9CB"/>
-      <mask id="mask0_eye_icon" style={{maskType: "alpha"}} maskUnits="userSpaceOnUse" x="6" y="7" width="26" height="26">
-        <rect x="6" y="7" width="26" height="26" fill="#D9D9D9"/>
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0.5" y="0.5" width="39" height="39" rx="4.5" stroke="#ACB9CB"/>
+      <mask id="mask0_eye_icon" style={{maskType: "alpha"}} maskUnits="userSpaceOnUse" x="7" y="8" width="25" height="25">
+        <rect x="7" y="8" width="26" height="26" fill="#D9D9D9"/>
       </mask>
       <g mask="url(#mask0_eye_icon)">
         <g transform="translate(7, 8)">
