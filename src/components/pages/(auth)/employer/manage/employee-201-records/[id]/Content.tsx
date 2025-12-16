@@ -581,6 +581,7 @@ export default function Employee201Content({
         position: employeeDetails?.position,
         department: employeeDetails?.department,
         employment_status: employeeDetails?.employment_status,
+        address: employeeDetails?.address,
       }
     });
     console.log("syncToYP", employeeDetails);
