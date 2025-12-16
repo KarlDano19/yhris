@@ -46,9 +46,21 @@ export default function IncidentReportModal({
   const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
+  const [customIssueType, setCustomIssueType] = useState('');
   const briefBackgroundValue = watch('briefBackground') || '';
+  const issueTypeValue = watch('issueType') || '';
+  
+  // Check if the selected option has isCustom flag or if it's the Others value
+  const selectedOption = issueTypeOptions.find((opt: any) => opt.value === issueTypeValue && !opt.isDisabled);
+  const isOtherSelected = issueTypeValue === 'Others: (Please specify)' || selectedOption?.isCustom === true;
   
   const onSubmit = handleSubmit((data) => {
+    // If "Others" is selected and customIssueType has a value, use the custom value
+    const finalData = { ...data };
+    if ((data.issueType === 'Others: (Please specify)' || isOtherSelected) && customIssueType.trim()) {
+      finalData.issueType = customIssueType.trim();
+    }
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={"Successfully created an incident report."} type='success' />, { duration: 5000 });
@@ -66,6 +78,7 @@ export default function IncidentReportModal({
         setValue('position', ''); // Ensure position is cleared
         setEmployeeSearch('');
         setEmployeeSelected(false);
+        setCustomIssueType('');
         refetch();
       },
       onError: (err: any) => {
@@ -74,7 +87,7 @@ export default function IncidentReportModal({
         });
       },
     };
-    mutate(data, callbackReq);
+    mutate(finalData, callbackReq);
   });
 
   // Handle brief background input change with character limit
@@ -132,7 +145,10 @@ export default function IncidentReportModal({
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Incident Report</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
+                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
+                    setIsOpen(false);
+                    setCustomIssueType('');
+                  }} />
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
@@ -283,30 +299,85 @@ export default function IncidentReportModal({
                             control={control}
                             rules={{
                               required: "Please select an issue type",
+                              validate: (value) => {
+                                const selectedOpt = issueTypeOptions.find((opt: any) => opt.value === value && !opt.isDisabled);
+                                if (value === 'Others: (Please specify)' || selectedOpt?.isCustom === true) {
+                                  if (!customIssueType || !customIssueType.trim()) {
+                                    return "Please specify the issue type";
+                                  }
+                                }
+                                return true;
+                              }
                             }}
-                            render={({ field: { onChange, value } }: { field: Field }) => (
-                              <Select
-                                className='text-sm'
-                                classNamePrefix='select'
-                                options={issueTypeOptions}
-                                value={issueTypeOptions.find((item: any) => item.value === value) || null}
-                                onChange={(val: any) => {
-                                  onChange(val ? val.value : '');
-                                }}
-                                components={{
-                                  DropdownIndicator: () => (
-                                    <div className='pointer-events-none px-2'>
-                                      <SelectChevronDown />
+                            render={({ field: { onChange, value } }: { field: Field }) => {
+                              // Check if current value is a custom value (not in predefined options)
+                              const selectedOpt = issueTypeOptions.find((opt: any) => opt.value === value && !opt.isDisabled);
+                              const isCustomValue = value && value !== 'Others: (Please specify)' && !issueTypeOptions.some((opt: any) => opt.value === value && !opt.isDisabled);
+                              const isCustomOption = value === 'Others: (Please specify)' || selectedOpt?.isCustom === true;
+                              const displayValue = isCustomValue ? 'Others: (Please specify)' : value;
+                              
+                              return (
+                                <>
+                                  <Select
+                                    className='text-sm'
+                                    classNamePrefix='select'
+                                    options={issueTypeOptions}
+                                    value={issueTypeOptions.find((item: any) => item.value === displayValue) || null}
+                                    onChange={(val: any) => {
+                                      const newValue = val ? val.value : '';
+                                      onChange(newValue);
+                                      // Clear custom input if switching away from "Others"
+                                      const newOpt = issueTypeOptions.find((opt: any) => opt.value === newValue && !opt.isDisabled);
+                                      if (newValue !== 'Others: (Please specify)' && newOpt?.isCustom !== true) {
+                                        setCustomIssueType('');
+                                      }
+                                    }}
+                                    components={{
+                                      DropdownIndicator: () => (
+                                        <div className='pointer-events-none px-2'>
+                                          <SelectChevronDown />
+                                        </div>
+                                      ),
+                                      IndicatorSeparator: () => null,
+                                    }}
+                                    isClearable={false}
+                                    isOptionDisabled={(option: any) => option.isDisabled}
+                                    noOptionsMessage={() => null}
+                                    placeholder='Select issue type...'
+                                    menuPortalTarget={document.body}
+                                    menuPosition='fixed'
+                                    styles={{
+                                      menuPortal: (base) => ({ ...base, zIndex: 50 }),
+                                      menu: (base) => ({ ...base, zIndex: 50 }),
+                                    }}
+                                  />
+                                  {(isCustomOption || isCustomValue) && (
+                                    <div className='mt-2'>
+                                      <input
+                                        id='customIssueType'
+                                        type='text'
+                                        placeholder='Please specify the issue type...'
+                                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
+                                        value={isCustomValue ? value : customIssueType}
+                                        onChange={(e) => {
+                                          const customValue = e.target.value;
+                                          setCustomIssueType(customValue);
+                                          // Preserve user-entered spacing; only fall back when empty
+                                          if (customValue === '') {
+                                            onChange('Others: (Please specify)');
+                                          } else {
+                                            onChange(customValue);
+                                          }
+                                        }}
+                                        onBlur={async () => {
+                                          await trigger('issueType');
+                                        }}
+                                      />
                                     </div>
-                                  ),
-                                  IndicatorSeparator: () => null,
-                                }}
-                                isClearable={false}
-                                isOptionDisabled={(option: any) => option.isDisabled}
-                                noOptionsMessage={() => null}
-                                placeholder='Select issue type...'
-                              />
-                            )}
+                                  )}
+                                </>
+                              );
+                            }}
                           />
                         </div>
                       </div>
@@ -389,7 +460,10 @@ export default function IncidentReportModal({
                     <button
                       type='button'
                       className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setIsOpen(false);
+                        setCustomIssueType('');
+                      }}
                       ref={cancelButtonRef}
                     >
                       Close
