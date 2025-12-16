@@ -565,6 +565,7 @@ export default function Employee201Content({
         first_name: employeeDetails?.firstname,
         last_name: employeeDetails?.lastname,
         middle_name: employeeDetails?.middlename,
+        mobile: employeeDetails?.mobile,
         email: employeeDetails?.email,
         tin: employeeDetails?.tin,
         sss: employeeDetails?.sss,

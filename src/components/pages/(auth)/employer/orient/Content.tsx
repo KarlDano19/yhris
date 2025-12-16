@@ -301,6 +301,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               employment_status: orientItemCopy[itemIndex].employment_status_id,
               location: orientItemCopy[itemIndex].location_name,
               position: orientItemCopy[itemIndex].position_id,
+              mobile: orientItemCopy[itemIndex].mobile,
               job_posting_id: Number(params.position),
             }
           }, {
