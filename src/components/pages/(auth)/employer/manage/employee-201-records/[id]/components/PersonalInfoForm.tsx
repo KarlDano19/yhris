@@ -308,7 +308,7 @@ export default function PersonalInfoForm({
             }}
             error={showErr("tin")}
             disabled={!editing}
-            hint="Digits only; 9 or 12 digits"
+            hint="Digits only; 12 digits"
             required
           />
           <Field
