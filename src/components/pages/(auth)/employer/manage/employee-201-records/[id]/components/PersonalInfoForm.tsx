@@ -78,7 +78,7 @@ export default function PersonalInfoForm({
       const digits = v.replace(/\D/g, "");
       if (isEmpty(digits)) return "TIN is missing.";
       if (!/^\d+$/.test(digits)) return "TIN must contain digits only.";
-      if (!(digits.length === 9 || digits.length === 12)) return "TIN must be 9 or 12 digits.";
+      if (!(digits.length === 12)) return "TIN must be 12 digits.";
       return null;
     },
     sss: (v: string) => {
