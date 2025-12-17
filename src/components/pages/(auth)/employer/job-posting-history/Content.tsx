@@ -560,7 +560,7 @@ const Content = () => {
           key={jobPost.id}
           className='text-center'
         >
-          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <input
               type="checkbox"
               checked={selectedJobPostings.has(jobPost.id)}
@@ -569,21 +569,21 @@ const Content = () => {
             />
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             <JobPreview id={jobPost.id} jobNumber={jobPost.id} setIsJobPreviewOpen={setIsJobPreviewOpen} />
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.created_at}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
@@ -596,28 +596,28 @@ const Content = () => {
             />
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.position || 'N/A'}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.jobType}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.schedule}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm ${
+            className={`whitespace-nowrap px-3 py-5 text-sm ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
@@ -642,20 +642,20 @@ const Content = () => {
             </div>
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.workSetup}
           </td>
           <td
-            className={`whitespace-nowrap px-3 py-3 text-sm text-gray-500 text-center ${
+            className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center ${
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.assignments_count || 0} users
           </td>
-          <td className='whitespace-nowrap px-3 py-3 text-sm text-gray-500'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex justify-center items-center space-x-2'>
                 <SmartButton 
                   id="edit-job-btn"
@@ -670,7 +670,7 @@ const Content = () => {
                   onClick={() => openDuplicateModal(jobPost)}
                   data-tooltip-id="duplicate-tooltip"
                   data-tooltip-content="Duplicate Job"
-                  className="p-1.5 bg-white border border-gray-300 rounded-md"
+                  className="p-[7px] bg-white border border-gray-300 rounded-md"
                 >
                   <DuplicateIcon />
                 </SmartButton>
@@ -696,8 +696,8 @@ const Content = () => {
                 >
                   <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
                 </SmartButton>
-                <div className="relative more-menu-container">
-                  <button onClick={() => handleMoreMenuClick(jobPost.id)}>
+                <div className="relative more-menu-container flex items-center">
+                  <button onClick={() => handleMoreMenuClick(jobPost.id)} className="flex items-center">
                     <MoreIconWithBorder />
                   </button>
                   {moreMenuOpen[jobPost.id] && (
@@ -993,7 +993,7 @@ const Content = () => {
                 >
                   <thead>
                     <tr>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         <input
                           type="checkbox"
                           checked={selectAll}
@@ -1002,34 +1002,34 @@ const Content = () => {
                           className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
                         />
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job No.
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Date Created
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Title
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Position
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Type
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Job Schedule
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         No. of Hires Needed
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Work Setup
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Assigned Users
                       </th>
-                      <th scope='col' className='px-3 py-3 text-sm font-semibold text-gray-900'>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
                         Actions
                       </th>
                     </tr>
