@@ -559,30 +559,41 @@ export default function Employee201Content({
   const { mutate: updateEmployeeToYP, isLoading: isUpdating } = useUpdateEmployeeToYP();
 
   const syncToYP = useCallback(() => {
-    updateEmployeeToYP({
-      id: employeeDetails?.id as unknown as string,
-      data: {
-        first_name: employeeDetails?.firstname,
-        last_name: employeeDetails?.lastname,
-        middle_name: employeeDetails?.middlename,
-        mobile: employeeDetails?.mobile,
-        email: employeeDetails?.email,
-        tin: employeeDetails?.tin,
-        sss: employeeDetails?.sss,
-        pagibig: employeeDetails?.pagibig,
-        philhealth: employeeDetails?.philhealth,
-        emergency_contact: employeeDetails?.emergency_contact,
-        emergency_contact_name: employeeDetails?.emergency_contact?.name,
-        emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
-        gender: employeeDetails?.gender,
-        birthdate: employeeDetails?.birthdate,
-        system_id: employeeDetails?.system_id,
-        location: employeeDetails?.location,
-        position: employeeDetails?.position,
-        department: employeeDetails?.department,
-        employment_status: employeeDetails?.employment_status,
+    updateEmployeeToYP(
+      {
+        id: employeeDetails?.id as unknown as string,
+        data: {
+          first_name: employeeDetails?.firstname,
+          last_name: employeeDetails?.lastname,
+          middle_name: employeeDetails?.middlename,
+          mobile: employeeDetails?.mobile,
+          email: employeeDetails?.email,
+          tin: employeeDetails?.tin,
+          sss: employeeDetails?.sss,
+          pagibig: employeeDetails?.pagibig,
+          philhealth: employeeDetails?.philhealth,
+          emergency_contact: employeeDetails?.emergency_contact,
+          emergency_contact_name: employeeDetails?.emergency_contact?.name,
+          emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
+          gender: employeeDetails?.gender,
+          birthdate: employeeDetails?.birthdate,
+          system_id: employeeDetails?.system_id,
+          location: employeeDetails?.location,
+          position: employeeDetails?.position,
+          department: employeeDetails?.department,
+          employment_status: employeeDetails?.employment_status,
+          address: employeeDetails?.address,
+        },
+      },
+      {
+        onSuccess: () => {
+          notify.success("Employee synced to YP successfully.");
+        },
+        onError: (error: any) => {
+          notify.error(error?.message || "Failed to sync employee to YP.");
+        },
       }
-    });
+    );
     console.log("syncToYP", employeeDetails);
   }, [updateEmployeeToYP, employeeDetails]);
 

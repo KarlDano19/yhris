@@ -78,7 +78,7 @@ export default function PersonalInfoForm({
       const digits = v.replace(/\D/g, "");
       if (isEmpty(digits)) return "TIN is missing.";
       if (!/^\d+$/.test(digits)) return "TIN must contain digits only.";
-      if (!(digits.length === 12)) return "TIN must be 12 digits.";
+      if (digits.length !== 12) return "TIN must be 12 digits.";
       return null;
     },
     sss: (v: string) => {
@@ -308,7 +308,7 @@ export default function PersonalInfoForm({
             }}
             error={showErr("tin")}
             disabled={!editing}
-            hint="Digits only; 12 digits"
+            hint="12 digits only"
             required
           />
           <Field
@@ -323,7 +323,7 @@ export default function PersonalInfoForm({
             }}
             error={showErr("sss")}
             disabled={!editing}
-            hint="Digits only; 10 digits"
+            hint="10 digits only"
             required
           />
           <Field
@@ -338,7 +338,7 @@ export default function PersonalInfoForm({
             }}
             error={showErr("pagibig")}
             disabled={!editing}
-            hint="Digits only; 12 digits"
+            hint="12 digits only"
             required
           />
           <Field
@@ -353,7 +353,7 @@ export default function PersonalInfoForm({
             }}
             error={showErr("philhealth")}
             disabled={!editing}
-            hint="Digits only; 12 digits"
+            hint="12 digits only"
             required
           />
         </Grid>

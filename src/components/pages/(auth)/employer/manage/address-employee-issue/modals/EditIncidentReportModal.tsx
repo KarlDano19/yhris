@@ -72,7 +72,13 @@ export default function EditIncidentReportModal({
   const maxLength = 430;
   const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [customIssueType, setCustomIssueType] = useState('');
   const briefBackgroundValue = watch('briefBackground') || '';
+  const issueTypeValue = watch('issueType') || '';
+  
+  // Check if the selected option has isCustom flag or if it's the Others value
+  const selectedOption = issueTypeOptions.find((opt: any) => opt.value === issueTypeValue && !opt.isDisabled);
+  const isOtherSelected = issueTypeValue === 'Others: (Please specify)' || selectedOption?.isCustom === true;
   
   // Refetch data when modal opens
   useEffect(() => {
@@ -98,7 +104,21 @@ export default function EditIncidentReportModal({
       setValue('department', employeeIssueDetailsData.department || '');
       setValue('incidentDate', employeeIssueDetailsData.incident_date ? new Date(employeeIssueDetailsData.incident_date).toISOString() : new Date().toISOString());
       setValue('incidentPlace', employeeIssueDetailsData.place_of_incident || '');
-      setValue('issueType', employeeIssueDetailsData.issue_type || '');
+      
+      // Handle issue type: check if it's a custom value (not in predefined options)
+      const issueTypeValue = employeeIssueDetailsData.issue_type || '';
+      const isCustomValue = issueTypeValue && !issueTypeOptions.some((opt: any) => opt.value === issueTypeValue && !opt.isDisabled);
+      
+      if (isCustomValue) {
+        // It's a custom value, set dropdown to "Others" and populate custom input
+        setValue('issueType', 'Others: (Please specify)');
+        setCustomIssueType(issueTypeValue);
+      } else {
+        // It's a predefined option
+        setValue('issueType', issueTypeValue);
+        setCustomIssueType('');
+      }
+      
       setValue('briefBackground', employeeIssueDetailsData.brief_background || '');
     }
   }, [employeeIssueDetailsData, isOpen, setValue, setEmployeeSearch]);
@@ -106,6 +126,7 @@ export default function EditIncidentReportModal({
   const customCloseModal = () => {
     reset();
     setEmployeeSearch('');
+    setCustomIssueType('');
     removeEmployeeIssueDetails();
     setIsOpen(false);
   };
@@ -126,6 +147,12 @@ export default function EditIncidentReportModal({
       },
     };
     
+    // If "Others" is selected and customIssueType has a value, use the custom value
+    let finalIssueType = data.issueType;
+    if ((data.issueType === 'Others: (Please specify)' || isOtherSelected) && customIssueType.trim()) {
+      finalIssueType = customIssueType.trim();
+    }
+    
     // Transform data to match backend API format
     const updateData: EmployeeIssueUpdateData = {
       id: selectedIssue?.id,
@@ -134,7 +161,7 @@ export default function EditIncidentReportModal({
       position: data.position,
       department: data.department,
       place_of_incident: data.incidentPlace,
-      issue_type: data.issueType,
+      issue_type: finalIssueType,
       brief_background: data.briefBackground,
     };
     
@@ -360,33 +387,93 @@ export default function EditIncidentReportModal({
                             control={control}
                             rules={{
                               required: "Please select an issue type",
-                            }}
-                            render={({ field: { onChange, value } }: { field: Field }) => (
-                              <Select
-                                className='text-sm'
-                                classNamePrefix='select'
-                                options={issueTypeOptions}
-                                value={issueTypeOptions.find((item: any) => item.value === value) || null}
-                                onChange={(val: any) => {
-                                  if (canEdit) {
-                                    onChange(val ? val.value : '');
+                              validate: (value) => {
+                                const selectedOpt = issueTypeOptions.find((opt: any) => opt.value === value && !opt.isDisabled);
+                                if ((value === 'Others: (Please specify)' || selectedOpt?.isCustom === true) && canEdit) {
+                                  if (!customIssueType || !customIssueType.trim()) {
+                                    return "Please specify the issue type";
                                   }
-                                }}
-                                components={{
-                                  DropdownIndicator: () => (
-                                    <div className='pointer-events-none px-2'>
-                                      <SelectChevronDown />
+                                }
+                                return true;
+                              }
+                            }}
+                            render={({ field: { onChange, value } }: { field: Field }) => {
+                              // Check if current value is a custom value (not in predefined options)
+                              const selectedOpt = issueTypeOptions.find((opt: any) => opt.value === value && !opt.isDisabled);
+                              const isCustomValue = value && value !== 'Others: (Please specify)' && !issueTypeOptions.some((opt: any) => opt.value === value && !opt.isDisabled);
+                              const isCustomOption = value === 'Others: (Please specify)' || selectedOpt?.isCustom === true;
+                              const displayValue = isCustomValue ? 'Others: (Please specify)' : value;
+                              
+                              return (
+                                <>
+                                  <Select
+                                    className='text-sm'
+                                    classNamePrefix='select'
+                                    options={issueTypeOptions}
+                                    value={issueTypeOptions.find((item: any) => item.value === displayValue) || null}
+                                    onChange={(val: any) => {
+                                      if (canEdit) {
+                                        const newValue = val ? val.value : '';
+                                        onChange(newValue);
+                                        // Clear custom input if switching away from "Others"
+                                        const newOpt = issueTypeOptions.find((opt: any) => opt.value === newValue && !opt.isDisabled);
+                                        if (newValue !== 'Others: (Please specify)' && newOpt?.isCustom !== true) {
+                                          setCustomIssueType('');
+                                        }
+                                      }
+                                    }}
+                                    components={{
+                                      DropdownIndicator: () => (
+                                        <div className='pointer-events-none px-2'>
+                                          <SelectChevronDown />
+                                        </div>
+                                      ),
+                                      IndicatorSeparator: () => null,
+                                    }}
+                                    isClearable={false}
+                                    isDisabled={!canEdit}
+                                    isOptionDisabled={(option: any) => option.isDisabled}
+                                    noOptionsMessage={() => null}
+                                    placeholder='Select issue type...'
+                                    menuPortalTarget={document.body}
+                                    menuPosition='fixed'
+                                    styles={{
+                                      menuPortal: (base) => ({ ...base, zIndex: 50 }),
+                                      menu: (base) => ({ ...base, zIndex: 50 }),
+                                    }}
+                                  />
+                                  {(isCustomOption || isCustomValue) && (
+                                    <div className='mt-2'>
+                                      <input
+                                        id='customIssueType'
+                                        type='text'
+                                        placeholder='Please specify the issue type...'
+                                        className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 ${!canEdit ? 'bg-gray-100' : ''}`}
+                                        value={isCustomValue ? value : customIssueType}
+                                        onChange={(e) => {
+                                          if (canEdit) {
+                                            const customValue = e.target.value;
+                                            setCustomIssueType(customValue);
+                                            // Preserve user-entered spacing; only fall back when empty
+                                            if (customValue === '') {
+                                              onChange('Others: (Please specify)');
+                                            } else {
+                                              onChange(customValue);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={async () => {
+                                          if (canEdit) {
+                                            await trigger('issueType');
+                                          }
+                                        }}
+                                        disabled={!canEdit}
+                                      />
                                     </div>
-                                  ),
-                                  IndicatorSeparator: () => null,
-                                }}
-                                isClearable={false}
-                                isDisabled={!canEdit}
-                                isOptionDisabled={(option: any) => option.isDisabled}
-                                noOptionsMessage={() => null}
-                                placeholder='Select issue type...'
-                              />
-                            )}
+                                  )}
+                                </>
+                              );
+                            }}
                           />
                         </div>
                       </div>
