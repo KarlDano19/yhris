@@ -44,7 +44,7 @@ export default function SeederButton({
       return;
     }
 
-    setIsSeeding(true);
+    setIsSeeding(false);
     try {
       await onSeed(count);
       setIsModalOpen(false);
