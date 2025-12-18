@@ -26,7 +26,7 @@ function Content() {
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const { data: profileData, isLoading: isProfileLoading } = useGetEmployerProfile();
   const [progressBar, setProgressBar] = useState(0);
-  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger } = useForm<T_EmployerProfile>();
+  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger, control } = useForm<T_EmployerProfile>();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [formData, setFormData] = useState<T_EmployerProfile | null>(null);
   const { mutate, isLoading } = useUpdateProfile();
@@ -105,6 +105,8 @@ function Content() {
       setValue('zipCode', data.zip_code || '');
       setValue('language', data.language || '');
       setValue('currency', data.currency || '');
+      setValue('timezone', data.timezone || '');
+      setValue('timeFormat', data.time_format || '12hr');
       setValue('imagePath', data.logo || '');
     }
   }, [cachedProfile, profileData, setValue]);
@@ -217,6 +219,9 @@ function Content() {
                 onSubmit={openConfirmModal} 
                 isLoading={isLoading}
                 onBack={() => setProgressBar(0)}
+                watch={watch}
+                setValue={setValue}
+                control={control}
               />
             </div>
           </>

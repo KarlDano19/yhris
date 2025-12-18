@@ -80,7 +80,7 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
 
       <div className='border-t border-gray-300 my-5 p-4'>
         <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
-        <div className='details mx-5 mt-2 overflow-y-auto max-h-[580px]'>
+        <div className='details mx-5 mt-2'>
           {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
             <>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>

@@ -20,7 +20,7 @@ import { T_EmployerProfile } from '@/types/globals';
 
 const Content = () => {
   const [progressBar, setProgressBar] = useState(0);
-  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger } = useForm<T_EmployerProfile>();
+  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger, control } = useForm<T_EmployerProfile>();
   const { mutate, isLoading } = useSavedProfile();
   const { updateContact } = useLoopsSync(); // Removed sendEvent
 
@@ -155,6 +155,9 @@ const Content = () => {
               onSubmit={onSubmit} 
               isLoading={isLoading}
               onBack={() => setProgressBar(0)}
+              watch={watch}
+              setValue={setValue}
+              control={control}
             />
           </div>
         </div>

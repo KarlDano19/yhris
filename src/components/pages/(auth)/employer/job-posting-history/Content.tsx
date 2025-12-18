@@ -10,6 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -18,6 +19,7 @@ import Pagination from '@/components/Pagination';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
 import SeederButton from '@/components/SeederButton';
+import ConfirmModal from '@/components/ConfirmModal';
 import SetJob from './SetJob';
 import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
@@ -28,6 +30,7 @@ import useBulkDeleteJobPostings from './hooks/useBulkDeleteJobPostings';
 import useDeleteJobPost from './hooks/useDeleteJobPost';
 import useSeedJobPostings from './hooks/useSeedJobPostings';
 import useUnseedJobPostings from './hooks/useUnseedJobPostings';
+import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
 import useUpdateJobPostStatus from './hooks/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/useUpdateJobSalaryStatus';
@@ -41,6 +44,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import DuplicateIcon from '@/svg/DuplicateIcon';
 import AssignUsersModal from './modals/AssignUsersModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
@@ -80,6 +84,8 @@ const Content = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [duplicateJobPostingId, setDuplicateJobPostingId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedJobPostings, setSelectedJobPostings] = useState<Set<number>>(new Set());
@@ -126,6 +132,7 @@ const Content = () => {
   const { mutate: deleteJobPost, isLoading: isDeleteLoading } = useDeleteJobPost();
   const seedJobPostingsMutation = useSeedJobPostings();
   const unseedJobPostingsMutation = useUnseedJobPostings();
+  const { mutate: duplicateJobPosting, isLoading: isDuplicateJobPostingLoading } = useDuplicateJobPosting();
   
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
@@ -303,7 +310,7 @@ const Content = () => {
         jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
         jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['company_logo'] = jobPost['company_logo'];
-        jobPost['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(jobPost['created_at']));
+        jobPost['created_at'] = formatDateToLocal(jobPost['created_at']);
       });
       setJobPostHistoryItems(dataJobPost.records);
       setPagination({
@@ -509,6 +516,29 @@ const Content = () => {
     }
   };
 
+  // Handle duplicate job posting
+  const openDuplicateModal = (jobPost: any) => {
+    setDuplicateJobPostingId(jobPost.id);
+    setIsDuplicateModalOpen(true);
+  };
+
+  const handleDuplicateConfirm = () => {
+    if (!duplicateJobPostingId) return;
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message || 'Job posting duplicated successfully'} type='success' />, { duration: 4000 });
+        setIsDuplicateModalOpen(false);
+        setDuplicateJobPostingId(null);
+        refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err || 'Failed to duplicate job posting'} type='error' />, { duration: 4000 });
+      },
+    };
+    duplicateJobPosting(duplicateJobPostingId, callbackReq);
+  };
+
   const renderRows = () => {
     if (isSearching || isGetJobPostLoading) {
       return (
@@ -591,7 +621,7 @@ const Content = () => {
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-0.5">
               <span className={`font-semibold ${jobPost.isFullyStaffed ? 'text-green-600' : 'text-gray-700'}`}>
                 {jobPost.slotsDisplay}
               </span>
@@ -625,9 +655,8 @@ const Content = () => {
           >
             {jobPost.assignments_count || 0} users
           </td>
-          <td className='flex gap-2 justify-center whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
-              <div className='flex space-x-2'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
+            <div className='flex justify-center items-center space-x-2'>
                 <SmartButton 
                   id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
@@ -635,6 +664,15 @@ const Content = () => {
                   data-tooltip-content="Edit Job"
                 >
                   <EditIcon />
+                </SmartButton>
+                <SmartButton 
+                  id="duplicate-job-btn"
+                  onClick={() => openDuplicateModal(jobPost)}
+                  data-tooltip-id="duplicate-tooltip"
+                  data-tooltip-content="Duplicate Job"
+                  className="p-[7px] bg-white border border-gray-300 rounded-md"
+                >
+                  <DuplicateIcon />
                 </SmartButton>
                 <SmartButton 
                   id="delete-job-btn"
@@ -658,8 +696,8 @@ const Content = () => {
                 >
                   <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
                 </SmartButton>
-                <div className="relative more-menu-container pt-1">
-                  <button onClick={() => handleMoreMenuClick(jobPost.id)}>
+                <div className="relative more-menu-container flex items-center">
+                  <button onClick={() => handleMoreMenuClick(jobPost.id)} className="flex items-center">
                     <MoreIconWithBorder />
                   </button>
                   {moreMenuOpen[jobPost.id] && (
@@ -732,7 +770,6 @@ const Content = () => {
                     </div>
                   )}
                 </div>
-              </div>
             </div>
           </td>
         </tr>
@@ -768,7 +805,7 @@ const Content = () => {
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -777,20 +814,30 @@ const Content = () => {
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+          <div className='flex items-center justify-between mb-0'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
+            <div className='hidden lg:block -mb-4'>
+              <SeederButton
+                onSeed={handleSeedJobPostings}
+                onUnseed={handleUnseedJobPostings}
+                isLoading={seedJobPostingsMutation.isLoading}
+                isUnseeding={unseedJobPostingsMutation.isLoading}
+                maxCount={1000}
+                defaultCount={5}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className='flex flex-col lg:flex-row items-left gap-4'>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, from: date });
@@ -800,14 +847,12 @@ const Content = () => {
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, to: date });
@@ -829,7 +874,7 @@ const Content = () => {
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Job: Title, Type, Schedule'
+                  data-tooltip-content='Search for Job: Title, Postion, Type, Schedule, Work Setup'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={pendingFilter.search}
@@ -851,15 +896,17 @@ const Content = () => {
                 </button>
               </div>
             </div>
-            <div className='flex items-center gap-3 lg:ml-auto'>
-              <SeederButton
-                onSeed={handleSeedJobPostings}
-                onUnseed={handleUnseedJobPostings}
-                isLoading={seedJobPostingsMutation.isLoading}
-                isUnseeding={unseedJobPostingsMutation.isLoading}
-                maxCount={1000}
-                defaultCount={5}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
+              <div className='lg:hidden'>
+                <SeederButton
+                  onSeed={handleSeedJobPostings}
+                  onUnseed={handleUnseedJobPostings}
+                  isLoading={seedJobPostingsMutation.isLoading}
+                  isUnseeding={unseedJobPostingsMutation.isLoading}
+                  maxCount={1000}
+                  defaultCount={5}
+                />
+              </div>
             </div>
           </div>
           
@@ -1078,9 +1125,21 @@ const Content = () => {
         />
       )}
 
+      {/* Duplicate Confirmation Modal */}
+      {isDuplicateModalOpen && (
+        <ConfirmModal
+          message="Are you sure you want to duplicate this job posting?"
+          isOpen={isDuplicateModalOpen}
+          setIsOpen={setIsDuplicateModalOpen}
+          confirmAction={handleDuplicateConfirm}
+          isLoading={isDuplicateJobPostingLoading}
+        />
+      )}
+
       <Tooltip id='search-tooltip' />
       <Tooltip id="edit-tooltip" />
       <Tooltip id="delete-tooltip" />
+      <Tooltip id="duplicate-tooltip" />
       <Tooltip id="assign-tooltip" />
       <Tooltip id="fully-staffed-tooltip" />
     </>

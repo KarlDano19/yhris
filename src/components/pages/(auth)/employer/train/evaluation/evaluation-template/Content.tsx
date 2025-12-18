@@ -18,6 +18,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
+import ViewEvaluationModal from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
@@ -31,6 +32,9 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
 import classNames from '@/helpers/classNames';
+import EyePassword from '@/svg/EyePassword';
+
+import { formatDateToLocal } from '@/helpers/date';
 
 type T_BulkDeleteModalData = DeleteModalData & {
   selectedCount: number;
@@ -41,10 +45,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [actionType, setActionType] = useState<string>('');
   const [selectedEvaluationTemplateId, setSelectedEvaluationTemplateId] = useState<number | null>(null);
   const [isEditEvaluationModalOpen, setIsEditEvaluationModalOpen] = useState(false);
+  const [isViewEvaluationModalOpen, setIsViewEvaluationModalOpen] = useState(false);
   const [isDeleteEvaluationModalOpen, setIsDeleteEvaluationModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [duplicateEvaluationTemplateId, setDuplicateEvaluationTemplateId] = useState<number | null>(null);
+  const [viewEvaluationTemplateId, setViewEvaluationTemplateId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedEvaluationTemplates, setSelectedEvaluationTemplates] = useState<Set<number>>(new Set());
@@ -123,7 +129,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataEvaluation.records) {
         items = dataEvaluation.records.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         totalPages = dataEvaluation.total_pages || 1;
@@ -132,7 +138,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle array response structure (no pagination from backend)
       else if (Array.isArray(dataEvaluation)) {
         items = dataEvaluation.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         
@@ -187,6 +193,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     } else {
       setSelectedEvaluationTemplateId(evaluationDetails.id);
     }
+  };
+  const openViewEvaluationModal = (evaluationDetails: any) => {
+    setViewEvaluationTemplateId(evaluationDetails.id);
+    setIsViewEvaluationModalOpen(true);
   };
 
   const openDeleteEvaluationModal = (evaluationDetails: any) => {
@@ -324,7 +334,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     if (evaluationItems && evaluationItems?.length > 0) {
-      return evaluationItems?.map((item: any) => (
+      return evaluationItems?.map((item: any) => {
+        // Use backend's can_edit value directly - it determines if template has rooms/is in use
+        const isLocked = item.can_edit === false;
+        return (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <input
@@ -340,21 +353,35 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>{item.frequency}</td>
           <td className='px-3 py-5 text-sm text-gray-500 text-ellipsis'>
             <div className='flex justify-center space-x-2'>
-              <button 
-                onClick={() => openEditEvaluationModal(item)}
-                data-tooltip-id={`edit-tooltip-${item.id}`}
-                data-tooltip-content="Edit"
-                title='Edit'
-              >
-                <EditIcon />
-              </button>
-              <button 
-                onClick={() => openDuplicateModal(item)}
-                data-tooltip-id={`duplicate-tooltip-${item.id}`}
-                data-tooltip-content="Duplicate"
-                title='Duplicate'
-              >
-                <DuplicateIcon />
+              {isLocked ? (
+                <button
+                  onClick={() => openViewEvaluationModal(item)}
+                  className='cursor-pointer'
+                  data-tooltip-id={`view-tooltip-${item.id}`}
+                  data-tooltip-content="To edit this template, you need to duplicate it first"
+                  data-tooltip-place='bottom'
+                  title='To edit this template, you need to duplicate it first'
+                >
+                  <EyePassword visible />
+                </button>
+              ) : (
+                <button 
+                  onClick={() => openEditEvaluationModal(item)}
+                  data-tooltip-id={`edit-tooltip-${item.id}`}
+                  data-tooltip-content="Edit"
+                  title='Edit'
+                >
+                  <EditIcon />
+                </button>
+              )}
+                              <button 
+                                onClick={() => openDuplicateModal(item)}
+                                data-tooltip-id={`duplicate-tooltip-${item.id}`}
+                                data-tooltip-content="Duplicate"
+                                title='Duplicate'
+                                className='p-[7px] bg-white border border-gray-300 rounded-md'
+                              >
+                                <DuplicateIcon />
               </button>
               <button 
                 onClick={() => openDeleteEvaluationModal(item)}
@@ -369,7 +396,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
           </td>
         </tr>
-      ));
+        );
+      });
     } else {
       return (
         <>
@@ -418,7 +446,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/train' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -427,20 +455,29 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
+          <div className='flex items-center justify-between mb-0'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
+            <div className='hidden lg:block -mb-4'>
+              <SeederButton
+                onSeed={handleSeedEvaluationTemplates}
+                onUnseed={handleUnseedEvaluationTemplates}
+                isLoading={seedEvaluationTemplatesMutation.isLoading}
+                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                disabled={!hasActiveSubscription}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -453,14 +490,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -483,7 +518,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Evaluation Template Name'
+                  data-tooltip-content='Search for: Name / Eval Type / Frequency'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}
@@ -502,14 +537,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
-              <SeederButton
-                onSeed={handleSeedEvaluationTemplates}
-                onUnseed={handleUnseedEvaluationTemplates}
-                isLoading={seedEvaluationTemplatesMutation.isLoading}
-                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
-                disabled={!hasActiveSubscription}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
+              <div className='lg:hidden'>
+                <SeederButton
+                  onSeed={handleSeedEvaluationTemplates}
+                  onUnseed={handleUnseedEvaluationTemplates}
+                  isLoading={seedEvaluationTemplatesMutation.isLoading}
+                  isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                  disabled={!hasActiveSubscription}
+                />
+              </div>
               <button
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
                 onClick={() => setIsSelectionModalOpen(true)}
@@ -611,6 +648,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationTemplateId={selectedEvaluationTemplateId}
         />
       )}
+      {isViewEvaluationModalOpen && viewEvaluationTemplateId && (
+        <ViewEvaluationModal
+          isOpen={isViewEvaluationModalOpen}
+          setIsOpen={setIsViewEvaluationModalOpen}
+          selectedEvaluationTemplateId={viewEvaluationTemplateId}
+        />
+      )}
       {isDeleteEvaluationModalOpen && (
         <DeleteModal
           isOpen={isDeleteEvaluationModalOpen}
@@ -667,6 +711,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       )}
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip />
     </>
   );
 };

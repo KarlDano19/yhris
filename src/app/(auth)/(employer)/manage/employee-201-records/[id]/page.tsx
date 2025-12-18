@@ -22,11 +22,13 @@ interface PageProps {
 
 const EmployeeDetail = async ({ params }: PageProps) => {
   const session = await getSession();
+  const loginType = session.loginType;
   const hasActiveSubscription = session.hasActiveSubscription;
 
   return (
     <Content
       params={params}
+      loginType={loginType}
       hasActiveSubscription={hasActiveSubscription}
     />
   );

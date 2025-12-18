@@ -223,7 +223,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute }: { hasProf
                         {!isProfileLoading && (
                           <div className=''>
                             <h3 className='text-sm font-bold'>{profile ? profile.name : '...'}</h3>
-                            <p className='text-left text-xs w-32'>
+                            <p className='text-left text-xs min-w-[140px] max-w-[160px]'>
                               <Timer />
                             </p>
                           </div>

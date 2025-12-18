@@ -24,6 +24,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -69,11 +70,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (personelMovementListData) {
-      personelMovementListData.records.map((item: any) => {
-        item.created_at = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
-        return item;
-      });
-      setPersonelMovementList(personelMovementListData.records);
+      const formattedRecords = personelMovementListData.records.map((item: any) => ({
+        ...item,
+        created_at: formatDateToLocal(item.created_at)
+      }));
+      setPersonelMovementList(formattedRecords);
       setPagination({
         totalPages: personelMovementListData.total_pages,
         totalRecords: personelMovementListData.total_records,
@@ -197,7 +198,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -212,14 +213,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.from}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, from: date });
@@ -229,14 +228,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={pendingFilter.to}
                   pickerOnChange={(date: any) => {
                     setPendingFilter({ ...pendingFilter, to: date });
@@ -255,7 +252,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for: Employee Name / Position'
+                  data-tooltip-content='Search for: Name / Position / Reason'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   value={pendingFilter.search}

@@ -5,6 +5,9 @@ interface newFiltersProps {
     search?: string;
     from?: string;
     to?: string;
+    action?: string;
+    user_id?: string | number;
+    module?: string;
     current_page?: number;
     page_size?: number;
 }
@@ -17,8 +20,14 @@ async function getAuditLogsItems(filters: any) {
         if (filters.search) newFilters.search = filters.search;
         if (filters.from) newFilters.from = filters.from.toLocaleDateString('en-CA');
         if (filters.to) newFilters.to = filters.to.toLocaleDateString('en-CA');
+        if (filters.action) newFilters.action = filters.action;
+        if (filters.user) newFilters.user_id = filters.user;
+        if (filters.module) newFilters.module = filters.module;
         if (!newFilters.from) delete newFilters.from;
         if (!newFilters.to) delete newFilters.to;
+        if (!filters.action) delete newFilters.action;
+        if (!filters.user) delete newFilters.user_id;
+        if (!filters.module) delete newFilters.module;
         const searchParams = new URLSearchParams(Object.entries(newFilters).map(([key, value]) => [key, String(value)]));
         const token = getCookie('token');
         const config = {

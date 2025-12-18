@@ -181,6 +181,8 @@ export type T_EmployerProfile = {
   zipCode: string;
   language: string;
   currency: string;
+  timezone: string;
+  timeFormat: string;
   imagePath: any;
 };
 

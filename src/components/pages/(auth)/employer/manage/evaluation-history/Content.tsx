@@ -59,7 +59,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh]'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh]'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded-md'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -103,8 +103,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
         {/* Tab Content */}
         <div className='mt-6'>
-          {activeTab === 'individual' && <IndividualEvaluations hasActiveSubscription={hasActiveSubscription} />}
-          {activeTab === 'template-responses' && <TemplateResponses hasActiveSubscription={hasActiveSubscription} />}
+          <div style={{ display: activeTab === 'individual' ? 'block' : 'none' }}>
+            <IndividualEvaluations hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'individual'} />
+          </div>
+          <div style={{ display: activeTab === 'template-responses' ? 'block' : 'none' }}>
+            <TemplateResponses hasActiveSubscription={hasActiveSubscription} isActive={activeTab === 'template-responses'} />
+          </div>
         </div>
       </div>
     </>

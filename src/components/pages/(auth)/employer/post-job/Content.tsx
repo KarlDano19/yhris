@@ -55,6 +55,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     defaultValues: {
       jobDescription: CREATEJOB_TEMPLATE[0],
       qualifications: QUALIFICATION_TEMPLATE[0],
+      notesRemarks: '', // Initialize with empty string to prevent "undefined" string
     },
   });
   const fifthForm = useForm();

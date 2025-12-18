@@ -9,7 +9,8 @@ import React, {
 } from "react";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -45,17 +46,20 @@ import { useCreateTrainingRecord } from "./hooks/useCreateTrainingRecord";
 import { usePatchTrainingRecord } from "./hooks/usePatchTrainingRecord";
 import { useDeleteTrainingRecord } from "./hooks/useDeleteTrainingRecord";
 import { useEmployeePhotoPatch } from "./hooks/useEmployeePhotoPatch";
+import useUpdateEmployeeToYP from "@/components/hooks/useUpdateEmployeeToYP";
 
 export interface ContentProps {
   params: { id: string };
   emp?: Partial<Employee>;
   hasActiveSubscription: boolean;
+  loginType: string;
 }
 
 export default function Employee201Content({
   params,
   emp,
   hasActiveSubscription,
+  loginType,
 }: ContentProps) {
   const router = useRouter();
 
@@ -255,6 +259,7 @@ export default function Employee201Content({
 
   useEffect(() => {
     setEmployeeDetails(data ?? emp);
+    console.log("employeeDetails", data);
   }, [data, emp]);
 
   // warn on unload when dirty
@@ -381,6 +386,64 @@ export default function Employee201Content({
     return { ok: true };
   }, [createTraining, updateTraining, deleteTraining, params.id]);
 
+  // Helper function to extract user-friendly error messages
+  const extractErrorMessage = useCallback((error: Error): string => {
+    const errorMessage = error.message || "";
+    
+    // Handle Django field format errors (e.g., "Tin: TIN already registered...")
+    if (errorMessage.includes(': ')) {
+      const parts = errorMessage.split(': ');
+      if (parts.length > 1) {
+        const fieldName = parts[0].toLowerCase();
+        const message = parts.slice(1).join(': ');
+        
+        // Check if this is a government ID validation error
+        if (message.includes('TIN') || message.includes('SSS') || 
+            message.includes('PAGIBIG') || message.includes('PhilHealth') ||
+            fieldName === 'tin' || fieldName === 'sss' || 
+            fieldName === 'pagibig' || fieldName === 'philhealth') {
+          return message; // Return just the message without field prefix
+        }
+      }
+    }
+    
+    // Direct check for government ID errors (fallback)
+    if (errorMessage.includes('TIN') || 
+        errorMessage.includes('SSS') || 
+        errorMessage.includes('PAGIBIG') || 
+        errorMessage.includes('PhilHealth')) {
+      return errorMessage;
+    }
+    
+    try {
+      // Try to parse as JSON in case it's a stringified object
+      const parsedError = JSON.parse(errorMessage);
+      
+      // Handle Django serializer validation errors
+      if (typeof parsedError === 'object' && parsedError !== null) {
+        const errors: string[] = [];
+        
+        // Extract specific field validation errors
+        for (const [field, fieldErrors] of Object.entries(parsedError)) {
+          if (Array.isArray(fieldErrors)) {
+            errors.push(...fieldErrors);
+          } else if (typeof fieldErrors === 'string') {
+            errors.push(fieldErrors);
+          }
+        }
+        
+        if (errors.length > 0) {
+          return errors.join(' ');
+        }
+      }
+    } catch {
+      // Not JSON, continue with fallback
+    }
+    
+    // Fallback to original message or generic error
+    return errorMessage || `Failed to save ${labelForTab(activeTab)}.`;
+  }, [activeTab]);
+
   const saveCurrentSection = useCallback(async () => {
     const key = activeTab;
     const s = sections[key];
@@ -389,14 +452,14 @@ export default function Employee201Content({
       setShowConfirm(false);
       return;
     }
-
+  
     setConfirmBusy(true);
     setSections((prev) => ({
       ...prev,
       [key]: { ...prev[key], saving: true },
     }));
-
-    const savePromise = (async () => {
+  
+    try {
       if (key === "personal") {
         await savePersonalTab();
       } else if (key === "employment") {
@@ -406,7 +469,7 @@ export default function Employee201Content({
       } else {
         // fallback demo save for other tabs
         await new Promise<void>((r) => setTimeout(r, 800));
-        // Not calling refetch here because there’s no actual API change
+        // Not calling refetch here because there's no actual API change
       }
 
       setSections((prev) => ({
@@ -418,25 +481,27 @@ export default function Employee201Content({
           savedAt: Date.now(),
         },
       }));
-    })();
 
-    const ok = await notify.promise(savePromise, {
-      success: `${labelForTab(key)} saved successfully.`,
-      error: `Failed to save ${labelForTab(key)}.`,
-    });
-
-    setConfirmBusy(false);
-    if (ok) {
+      // Success notification
+      notify.success(`${labelForTab(key)} saved successfully.`);
+      
+      setConfirmBusy(false);
       if (activeTab === "personal")
         setEditMode((m) => ({ ...m, personal: false }));
       if (activeTab === "employment")
         setEditMode((m) => ({ ...m, employment: false }));
-      setShowConfirm(false); // harmless if not shown
-    } else {
+      setShowConfirm(false);
+
+    } catch (error: any) {
+      // Extract and show specific error message
+      const errorMessage = extractErrorMessage(error);
+      notify.error(errorMessage);
+      
       setSections((prev) => ({
         ...prev,
         [key]: { ...prev[key], saving: false },
       }));
+      setConfirmBusy(false);
     }
   }, [
     activeTab,
@@ -444,6 +509,7 @@ export default function Employee201Content({
     savePersonalTab,
     saveEmploymentTab,
     saveTrainingTab,
+    extractErrorMessage,
   ]);
 
   // ------------------------ Tab click ------------------------
@@ -489,6 +555,47 @@ export default function Employee201Content({
     },
     []
   );
+  
+  const { mutate: updateEmployeeToYP, isLoading: isUpdating } = useUpdateEmployeeToYP();
+
+  const syncToYP = useCallback(() => {
+    updateEmployeeToYP(
+      {
+        id: employeeDetails?.id as unknown as string,
+        data: {
+          first_name: employeeDetails?.firstname,
+          last_name: employeeDetails?.lastname,
+          middle_name: employeeDetails?.middlename,
+          mobile: employeeDetails?.mobile,
+          email: employeeDetails?.email,
+          tin: employeeDetails?.tin,
+          sss: employeeDetails?.sss,
+          pagibig: employeeDetails?.pagibig,
+          philhealth: employeeDetails?.philhealth,
+          emergency_contact: employeeDetails?.emergency_contact,
+          emergency_contact_name: employeeDetails?.emergency_contact?.name,
+          emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
+          gender: employeeDetails?.gender,
+          birthdate: employeeDetails?.birthdate,
+          system_id: employeeDetails?.system_id,
+          location: employeeDetails?.location,
+          position: employeeDetails?.position,
+          department: employeeDetails?.department,
+          employment_status: employeeDetails?.employment_status,
+          address: employeeDetails?.address,
+        },
+      },
+      {
+        onSuccess: () => {
+          notify.success("Employee synced to YP successfully.");
+        },
+        onError: (error: any) => {
+          notify.error(error?.message || "Failed to sync employee to YP.");
+        },
+      }
+    );
+    console.log("syncToYP", employeeDetails);
+  }, [updateEmployeeToYP, employeeDetails]);
 
   // ------------------------ Render ------------------------
   const renderActiveForm = () => {
@@ -597,30 +704,47 @@ export default function Employee201Content({
               </span>
             </h4>
           </a>
-
-        <SmartButton
-          id="edit-employee-201-btn"
-          data-testid="save-btn"
-          onClick={() => {
-            if (requiresEdit && !isEditingTab) {
-              // EDIT: enable fields
-              setEditMode((m) => ({ ...m, [activeTab]: true }));
-              return;
-            }
-            // SAVE: open confirm modal (do NOT save immediately)
-            setShowConfirm(true);
-          }}
-          disabled={
-            requiresEdit
-              ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
-              : !canSave                            // other tabs: Save only when valid+dirty
-          }
-          className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
-        >
-          {requiresEdit
-            ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
-            : (saving ? "Saving…" : "Save")}
-        </SmartButton>
+          <div className="flex items-center gap-2">
+            <SmartButton
+              id="edit-employee-201-btn"
+              data-testid="save-btn"
+              onClick={() => {
+                if (requiresEdit && !isEditingTab) {
+                  // EDIT: enable fields
+                  setEditMode((m) => ({ ...m, [activeTab]: true }));
+                  return;
+                }
+                // SAVE: open confirm modal (do NOT save immediately)
+                setShowConfirm(true);
+              }}
+              disabled={
+                requiresEdit
+                  ? (isEditingTab ? !canSave : false)   // Edit is always enabled; Save requires valid+dirty
+                  : !canSave                            // other tabs: Save only when valid+dirty
+              }
+              className="rounded-md bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#22c55e]/90 disabled:opacity-50"
+            >
+              {requiresEdit
+                ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
+                : (saving ? "Saving…" : "Save")}
+            </SmartButton>
+            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
+            <button
+              id="sync-to-yp-btn"
+              disabled={isUpdating}
+              onClick={() => {
+                syncToYP();
+              }}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            >
+              {isUpdating && (
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+              )}
+              <ArrowPathIcon className="w-4 h-4" />
+              <span>Sync to YP</span>
+            </button>
+            )}
+          </div>
         </div>
 
         <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 py-2">

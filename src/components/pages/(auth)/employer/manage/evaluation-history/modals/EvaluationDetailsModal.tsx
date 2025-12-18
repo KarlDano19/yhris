@@ -3,7 +3,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetEvaluationHistoryDetails from '../hooks/useGetEvaluationHistoryDetails';
-import EvaluationDetails from '../tabs/EvaluationDetails';
+import EvaluationDetails from './components/EvaluationDetails';
 import classNames from '@/helpers/classNames';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';

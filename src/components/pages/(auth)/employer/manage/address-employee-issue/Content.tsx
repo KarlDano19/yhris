@@ -53,6 +53,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [employeeIssueItems, setEmployeeIssueItems] = useState<any>([]);
@@ -157,19 +158,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     employeeIssueItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'nte') {
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
-      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].incidentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'decision') {
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -194,37 +187,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataEmployeeIssues.records) {
         items = dataEmployeeIssues.records.map((employeeIssue: any) => {
-          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['incidentReceivedDate'] =
-            employeeIssue.incident_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
-            ? Intl.DateTimeFormat('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            ? formatDateToLocal(employeeIssue.investigate.date_of_investigation)
             : '';
           employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
           employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
-          employeeIssue['decisionReceivedDate'] =
-            employeeIssue.decision_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['decisionReceivedDate'] = formatDateToLocal(employeeIssue.decision_received_date);
           employeeIssue['investigateForm'] = employeeIssue.investigate || {
             date: '',
             witness: '',
@@ -261,37 +234,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       else if (Array.isArray(dataEmployeeIssues)) {
         items = dataEmployeeIssues.map((employeeIssue: any) => {
           // Same transformation as above
-          employeeIssue.incidentDate = Intl.DateTimeFormat('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(employeeIssue.incident_date));
+          employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['incidentReceivedDate'] =
-            employeeIssue.incident_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.incident_received_date));
+          employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
-            ? Intl.DateTimeFormat('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: 'numeric',
-              }).format(new Date(employeeIssue.investigate.date_of_investigation))
+            ? formatDateToLocal(employeeIssue.investigate.date_of_investigation)
             : '';
           employeeIssue['isDecisionSent'] = employeeIssue.is_decision_sent;
           employeeIssue['isDecisionReceived'] = employeeIssue.is_decision_received;
-          employeeIssue['decisionReceivedDate'] =
-            employeeIssue.decision_received_date &&
-            new Intl.DateTimeFormat('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-            }).format(new Date(employeeIssue.decision_received_date));
+          employeeIssue['decisionReceivedDate'] = formatDateToLocal(employeeIssue.decision_received_date);
           employeeIssue['investigateForm'] = employeeIssue.investigate || {
             date: '',
             witness: '',
@@ -834,7 +787,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <span className="text-yellow-600 font-semibold text-xl">Redirecting to document generator...</span>
         </div>
       )}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -849,14 +802,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -869,14 +820,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -899,7 +848,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Employee Name'
+                  data-tooltip-content='Search for: Ref No. / Name / Prepared by'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}

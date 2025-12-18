@@ -27,7 +27,7 @@ export default function SeederButton({
   defaultCount = 5,
 
   // showSeeder is used to hide the seeder button if it is not needed
-  showSeeder = false,
+  showSeeder = true,
   
 }: SeederButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function SeederButton({
       return;
     }
 
-    setIsSeeding(true);
+    setIsSeeding(false);
     try {
       await onSeed(count);
       setIsModalOpen(false);

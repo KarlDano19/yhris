@@ -11,7 +11,6 @@ import classNames from '@/helpers/classNames';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import useGetTemplateResponses from '../hooks/useGetTemplateResponses';
-import useGetEvaluationResponseHistoryDetails from '../hooks/useGetEvaluationResponseHistoryDetails';
 import EvaluationResponseDetailsModal from '../modals/EvaluationResponseDetailsModal';
 
 import { MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/solid';
@@ -21,7 +20,7 @@ type T_ModalData = {
   open: boolean;
 };
 
-const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubscription: boolean; isActive?: boolean }) => {
   const [templateResponses, setTemplateResponses] = useState<any>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [isTemplateDetailsModalOpen, setIsTemplateDetailsModalOpen] = useState<T_ModalData | null>(null);
@@ -51,18 +50,17 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
     data: dataTemplateResponses,
     isLoading: isLoadingTemplateResponses,
     refetch: refetchTemplateResponses,
-  } = useGetTemplateResponses({
-    from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
-    to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
-    search: appliedFilter.search,
-    pageSize: pageSize,
-    currentPage: currentPage,
-  });
+  } = useGetTemplateResponses(
+    {
+      from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
+      to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
+      search: appliedFilter.search,
+      pageSize: pageSize,
+      currentPage: currentPage,
+    },
+    isActive !== false // Only fetch when tab is active (default to true for backward compatibility)
+  );
 
-  const {
-    data: templateResponseDetails,
-    isLoading: isLoadingTemplateDetails,
-  } = useGetEvaluationResponseHistoryDetails(selectedTemplate?.evaluation_template_id || null);
 
   useEffect(() => {
     if (dataTemplateResponses) {
@@ -154,11 +152,12 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
             </div>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>
-            <span className={classNames('font-semibold', 
-              (parseFloat(template.average_score) / parseFloat(template.average_total_score) * 100) >= 80 ? 'text-green-600' : 
-              (parseFloat(template.average_score) / parseFloat(template.average_total_score) * 100) >= 60 ? 'text-yellow-600' : 
-              'text-red-600')}>
-              {template.average_score} / {template.average_total_score}
+            <span className='font-semibold'>
+              <span className={classNames('text-gray-500', parseFloat(template.average_score) < parseFloat(template.passing_score) && 'text-red-500')}>
+                {template.average_score}
+              </span>
+              {' / '}
+              <span className='text-gray-500'>{template.average_total_score}</span>
             </span>
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-center text-sm text-gray-500'>{template.last_evaluation_date}</td>
@@ -190,14 +189,12 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
         {/* <p className='text-sm text-gray-600 mt-2'>View aggregated response data for evaluation templates</p> */}
         
         <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-          <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-            <div className='relative'>
+          <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+            <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
               <CustomDatePicker
                 id='from-datepicker'
                 placeholder={'mm/dd/yyyy'}
-                className={
-                  'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                }
+                className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                 selected={itemsFilter.from}
                 pickerOnChange={(date: any) => {
                   if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -210,14 +207,12 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
                 }}
               />
             </div>
-            <p>to</p>
-            <div className='relative'>
+            <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+            <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
               <CustomDatePicker
                 id='to-datepicker'
                 placeholder={'mm/dd/yyyy'}
-                className={
-                  'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                }
+                className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                 selected={itemsFilter.to}
                 pickerOnChange={(date: any) => {
                   if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -307,8 +302,6 @@ const TemplateResponses = ({ hasActiveSubscription }: { hasActiveSubscription: b
         isOpen={isTemplateDetailsModalOpen}
         setIsOpen={setIsTemplateDetailsModalOpen}
         selectedTemplate={selectedTemplate}
-        templateResponseDetails={templateResponseDetails}
-        isLoadingTemplateDetails={isLoadingTemplateDetails}
       />
 
       <Tooltip id='search-tooltip'/>

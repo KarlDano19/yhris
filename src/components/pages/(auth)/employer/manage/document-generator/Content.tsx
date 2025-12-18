@@ -7,28 +7,27 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import { toast } from 'react-hot-toast';
-import { getCookie } from 'cookies-next';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import Form from "./Form";
+import Forms from "./Forms";
 import CustomToast from "@/components/CustomToast";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import EmployeeCertificatePreview from "./previews/EmployeeCertificatePreview";
-import EmploymentAgreementPreview from "./previews/EmploymentAgreementPreview";
-import NoticeToExplainPreview from "./previews/NoticeToExplainPreview";
+import EmployeeCertificatePreview from "./form-previews/EmployeeCertificatePreview";
+import EmploymentAgreementPreview from "./form-previews/EmploymentAgreementPreview";
+import NoticeToExplainPreview from "./form-previews/NoticeToExplainPreview";
 import useGetEmployeeIssueDetails from '../address-employee-issue/hooks/useGetEmployeeIssueDetails';
 import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/useUploadEmployeeIssueAttachments';
 import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
 
-import { EmployeeCertificateFormData } from "@/types/document-generator/documents";
-import { EmploymentAgreementFormData } from "@/types/document-generator/documents";
-import { NoticeToExplainFormData } from "@/types/document-generator/documents";
-import { DocumentType } from "@/types/document-generator/form";
-import { print } from './print/index';
+import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
+import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
+import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import { DocumentType } from '@/types/document-generator/form';
+import { print } from './print/print';
 import initColorPolyfill from '@/helpers/colorPolyfill';
-import { handleProceedUtil } from './utils/handleProceed';
+import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
@@ -567,7 +566,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>
             <div className={classNames("grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
               <div className="transition-all duration-300">
-                <Form 
+                <Forms 
                   documentType={documentType}
                   onDocumentTypeChange={handleDocumentTypeChange}
                   onFormChange={handleFormChange} 
@@ -600,36 +599,44 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           </div>
         </div>
       )}
+
+      {/* Modals */}
       
-      <SignatureModal 
-        isOpen={isSignatureModalOpen}
-        onClose={() => setIsSignatureModalOpen(false)}
-        onSave={handleSignatureSave}
-        onTransparencyCheck={handleTransparencyCheck}
-      />
+      {isSignatureModalOpen && (
+        <SignatureModal 
+          isOpen={isSignatureModalOpen}
+          onClose={() => setIsSignatureModalOpen(false)}
+          onSave={handleSignatureSave}
+          onTransparencyCheck={handleTransparencyCheck}
+        />
+      )}
       
-      <LetterheadModal 
-        isOpen={isLetterheadModalOpen}
-        onClose={() => setIsLetterheadModalOpen(false)}
-        onSelect={handleLetterheadSelect}
-        onUpload={handleLetterheadUpload}
-        selectedPath={documentType === 'employee-certificate' ? 
-          (currentData as EmployeeCertificateFormData).sampleLetterheadPath : 
-          ''}
-        showToast={(message, type = 'error') => {
-          toast.custom(() => (
-            <CustomToast message={message} type={type} onClose={() => setToastMessage(null)} />
-          ));
-        }}
-      />
-      
-      <LogoModal 
-        isOpen={isLogoModalOpen}
-        onClose={() => setIsLogoModalOpen(false)}
-        onSelect={handleLogoSelect}
-        onUpload={handleLogoUpload}
-        selectedPath={documentType === 'notice-to-explain' ? (currentData as NoticeToExplainFormData).sampleLogoPath : ''}
-      />
+      {isLetterheadModalOpen && (
+        <LetterheadModal 
+          isOpen={isLetterheadModalOpen}
+          onClose={() => setIsLetterheadModalOpen(false)}
+          onSelect={handleLetterheadSelect}
+          onUpload={handleLetterheadUpload}
+          selectedPath={documentType === 'employee-certificate' ? 
+            (currentData as EmployeeCertificateFormData).sampleLetterheadPath : 
+            ''}
+          showToast={(message, type = 'error') => {
+            toast.custom(() => (
+              <CustomToast message={message} type={type} onClose={() => setToastMessage(null)} />
+            ));
+          }}
+        />
+      )}
+
+      {isLogoModalOpen && (
+        <LogoModal 
+          isOpen={isLogoModalOpen}
+          onClose={() => setIsLogoModalOpen(false)}
+          onSelect={handleLogoSelect}
+          onUpload={handleLogoUpload}
+          selectedPath={documentType === 'notice-to-explain' ? (currentData as NoticeToExplainFormData).sampleLogoPath : ''}
+        />
+      )}
     </div>
   );
 } 

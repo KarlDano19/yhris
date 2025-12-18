@@ -65,7 +65,7 @@ function EditEvaluationSchedulerModal({
   useEffect(() => {
     if (dataEvaluationSchedulerDetails && !isGetEvaluationSchedulerLoading) {
       // Create a complete form data object
-      const formData = {
+      const formData: any = {
         name: dataEvaluationSchedulerDetails.name,
         evaluation_template: dataEvaluationSchedulerDetails.evaluation_template
           ? String(dataEvaluationSchedulerDetails.evaluation_template)
@@ -80,7 +80,66 @@ function EditEvaluationSchedulerModal({
         employees: dataEvaluationSchedulerDetails.employees || [],
         message: dataEvaluationSchedulerDetails.message || '',
         attachment: dataEvaluationSchedulerDetails.attachment || '',
+        close_after_deadline: dataEvaluationSchedulerDetails.close_after_deadline !== undefined 
+          ? dataEvaluationSchedulerDetails.close_after_deadline 
+          : true,
       };
+
+      // Handle deadline - expects JSON object with "day" and "time" (e.g., {"day": 10, "time": "12:31"})
+      const parseDeadline = (deadlineValue: any) => {
+        if (!deadlineValue) {
+          return { day: '', time: '', json: '' };
+        }
+
+        // Already parsed object with day/time
+        if (typeof deadlineValue === 'object' && deadlineValue !== null && !Array.isArray(deadlineValue)) {
+          if (deadlineValue.day && deadlineValue.time) {
+            return {
+              day: deadlineValue.day,
+              time: deadlineValue.time,
+              json: JSON.stringify({ day: deadlineValue.day, time: deadlineValue.time }),
+            };
+          }
+
+          // Legacy map of month -> date string; pick earliest month
+          const firstMonthKey = Object.keys(deadlineValue).sort((a, b) => parseInt(a) - parseInt(b))[0];
+          const legacyDate = firstMonthKey ? deadlineValue[firstMonthKey] : null;
+          if (legacyDate) {
+            const d = new Date(legacyDate);
+            if (!isNaN(d.getTime())) {
+              const day = d.getDate();
+              const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              return { day, time, json: JSON.stringify({ day, time }) };
+            }
+          }
+        }
+
+        // String date (legacy single value)
+        if (typeof deadlineValue === 'string') {
+          // Try parsing JSON string first
+          try {
+            const parsed = JSON.parse(deadlineValue);
+            if (parsed?.day && parsed?.time) {
+              return { day: parsed.day, time: parsed.time, json: JSON.stringify(parsed) };
+            }
+          } catch (_) {
+            // Fallback to Date parse
+            const d = new Date(deadlineValue);
+            if (!isNaN(d.getTime())) {
+              const day = d.getDate();
+              const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              return { day, time, json: JSON.stringify({ day, time }) };
+            }
+          }
+        }
+
+        return { day: '', time: '', json: '' };
+      };
+
+      const { day, time, json } = parseDeadline(dataEvaluationSchedulerDetails.deadline);
+      formData.deadline_day = day;
+      formData.deadline_time = time;
+      formData.deadline = json;
       
       // Reset entire form with all values at once
       reset(formData);
@@ -119,6 +178,21 @@ function EditEvaluationSchedulerModal({
   };
 
   const onSubmit = handleSubmit((data: any) => {
+    // Check if deadline is already a JSON string with day and time
+    if (data.deadline && typeof data.deadline === 'string' && data.deadline.startsWith('{')) {
+      // Already in JSON format, use as is
+      // Backend expects JSON string with day and time
+    } else if (data.deadline_day && data.deadline_time) {
+      // Build JSON object with day and time
+      const deadlineJSON = {
+        day: parseInt(String(data.deadline_day)),
+        time: data.deadline_time
+      };
+      data.deadline = JSON.stringify(deadlineJSON);
+    } else {
+      data.deadline = '';
+    }
+    
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });

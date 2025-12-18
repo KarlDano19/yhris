@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 interface ApplicantFilters {
@@ -60,7 +60,7 @@ const buildSearchQuery = (tags: string[], starredTags: Set<string>): string => {
   return searchTerms.join(' ');
 };
 
-async function getApplicantItems(filters: any) {
+async function getApplicantItems(filters: any, pageParam: number = 1) {
   try {
     let newFilters: ApplicantFilters = {};
 
@@ -94,6 +94,8 @@ async function getApplicantItems(filters: any) {
         }
       }
     });
+    searchParams.append('currentPage', pageParam.toString());
+    searchParams.append('pageSize', '21');
 
     const token = getCookie('token');
     const config = {
@@ -115,10 +117,26 @@ async function getApplicantItems(filters: any) {
         throw res.json();
       }
 
-      return res.json();
+      const responseData = await res.json();
+      const data = responseData.records ? responseData : responseData.data || responseData;
+      const totalPages = Math.max(data.total_pages || 1, 1);
+
+      return {
+        records: data.records || [],
+        total_records: data.total_records ?? data.records?.length ?? 0,
+        total_pages: totalPages,
+        current_page: data.current_page || pageParam,
+        nextPage: pageParam < totalPages ? pageParam + 1 : undefined,
+      };
     }
 
-    return { data: [] };
+    return {
+      records: [],
+      total_records: 0,
+      total_pages: 0,
+      current_page: 1,
+      nextPage: undefined,
+    };
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -129,12 +147,40 @@ async function getApplicantItems(filters: any) {
 }
 
 function useGetApplicantItemsList(filters: any) {
-  const query = useQuery(['applicantListItemsCache', filters], () => getApplicantItems(filters), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  const queryKey = [
+    'applicantListItemsCache',
+    filters.search || '',
+    Array.isArray(filters.location) ? filters.location.join('|') : '',
+    filters.gender || '',
+    filters.salary || '',
+    filters.from ? filters.from.toString() : '',
+    filters.to ? filters.to.toString() : '',
+  ];
 
-  return query;
+  const query = useInfiniteQuery(
+    queryKey,
+    ({ pageParam = 1 }) => getApplicantItems(filters, pageParam),
+    {
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
+
+  const applicants = query.data?.pages.flatMap((page: any) => page.records) || [];
+  const totalRecords = query.data?.pages[0]?.total_records || 0;
+
+  const searchWithFilter = async (currentFilter: any) => {
+    const result = await getApplicantItems(currentFilter, 1);
+    return result.records;
+  };
+
+  return {
+    ...query,
+    data: applicants,
+    totalRecords,
+    searchWithFilter,
+  };
 }
 
 // Export the helper function for use in components

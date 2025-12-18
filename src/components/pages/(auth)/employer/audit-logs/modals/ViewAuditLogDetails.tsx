@@ -3,6 +3,7 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
 import useGetAuditLogDetails from '../hooks/useGetAuditLogDetails';
+import { formatDateTimeSeparate } from '@/helpers/date';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
@@ -26,16 +27,7 @@ export default function EditEmployeeCompensationLogModal({
   const [auditLogDetails, setAuditLogDetails] = useState<any>([]);
   const { data: auditLogData, refetch: refetchAuditLog, remove: removeAuditLog } = useGetAuditLogDetails(isOpen.id);
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = date.toLocaleDateString(undefined, options); // e.g., "January 1, 2023"
-    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, '0')}`;
-    return { formattedDate, formattedTime };
-  };
+  const formatDateTime = formatDateTimeSeparate;
 
   useEffect(() => {
     if (isOpen) {

@@ -15,8 +15,10 @@ import CustomToast from '@/components/CustomToast';
 import ProgressModal from '@/components/ProgressModal';
 import useGetDepartmentItems from '../hooks/department/useGetDepartmentItems';
 import useBulkDeleteDepartments from '../hooks/department/useBulkDeleteDepartments';
+import useAddDepartmentToYP from '../hooks/department/useAddDepartmentToYP';
+import useSyncDepartment from '../hooks/department/useSyncDepartment';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import CreateModal from '../modals/CreateModal';
@@ -24,6 +26,7 @@ import EditModal from '../modals/EditModal';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useDeleteDepartment from '../hooks/department/useDeleteDepartments';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -33,15 +36,6 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
-};
-
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
 };
 
 const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
@@ -83,9 +77,26 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
   } = useGetDepartmentItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
 
   const { mutate: deleteDepartment, isLoading: isDeleteDepartmentLoading } = useDeleteDepartment();
+  const { mutate: addDepartmentToYP, isLoading: isAddDepartmentToYPLoading } = useAddDepartmentToYP();
+  const { mutate: syncDepartment, isLoading: isSyncDepartmentLoading } = useSyncDepartment();
   const bulkDeleteMutation = useBulkDeleteDepartments();
 
   const cachedData: any = cachedProfile?.state?.data;
+
+  const handleSyncDepartment = () => {
+    syncDepartment(undefined, {
+      onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        // Optionally refetch the department list to show updated data
+        departmentListRefetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, {
+          duration: 7000,
+        });
+      },
+    });
+  };
 
   useEffect(() => {
     if (departmentListData) {
@@ -231,7 +242,7 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
             />
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDateToLocal(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
@@ -249,6 +260,14 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               >
                 <DeleteIcon />
               </SmartButton>
+              {/* <SmartButton
+                id="delete-department-btn"
+                onClick={() => addDepartmentToYP({ id: item.id, data: { name: item.name } })}
+                disabled={selectedDepartments.size > 1}
+                className={selectedDepartments.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                Sync to YP
+              </SmartButton> */}
             </div>
           </td>
         </tr>
@@ -272,14 +291,12 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
       
       <div className='flex-1'>
         <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-        <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-          <div className='relative'>
+        <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+          <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
             <CustomDatePicker
               id='from-datepicker'
               placeholder={'mm/dd/yyyy'}
-              className={
-                'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-              }
+              className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
               selected={itemsFilter.from}
               pickerOnChange={(date: any) => {
                 if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -292,14 +309,12 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
               }}
             />
           </div>
-          <p>to</p>
-          <div className='relative'>
+          <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+          <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
             <CustomDatePicker
               id='to-datepicker'
               placeholder={'mm/dd/yyyy'}
-              className={
-                'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-              }
+              className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
               selected={itemsFilter.to}
               pickerOnChange={(date: any) => {
                 if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -342,6 +357,13 @@ const Department = ({ hasActiveSubscription }: { hasActiveSubscription: boolean 
           </div>
         </div>
         <div className='flex-1 flex justify-start lg:justify-end'>
+          {/* <SmartButton
+            id="create-department-btn"
+            onClick={handleSyncDepartment}
+            className='bg-blue-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+          >
+            SYNC
+          </SmartButton> */}
           <SmartButton
             id="create-department-btn"
             onClick={() => setIsAddDepartmentModalOpen(true)}

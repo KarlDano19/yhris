@@ -1,6 +1,9 @@
 import classNames from '@/helpers/classNames';
+
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function EnrollToPayroll({
   id,
@@ -32,7 +35,10 @@ export default function EnrollToPayroll({
             onClick={() => setEnrolled(id, isLocationDepartmentAssigned)} // NEW: Pass assignment status
             disabled={isEnrolled || isLoading}
           >
-            {isEnrolled ? 'Enrolled' : 'Enroll'}
+            {isLoading && (
+              <LoadingSpinner size="sm" color="red" className="inline-flex" />
+            )}
+            {!isLoading && (isEnrolled ? 'Enrolled' : 'Enroll')}
           </SmartButton>
         </div>
       </div>

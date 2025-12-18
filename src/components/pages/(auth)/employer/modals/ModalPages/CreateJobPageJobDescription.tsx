@@ -227,7 +227,7 @@ export default function CreateJobPageJobDescription({
               formats={QUILL_FORMATS}
               modules={QUILL_MODULES}
               style={{ height: '100%', padding: '5px 8px !important' }}
-              value={getValues('notesRemarks')}
+              value={getValues('notesRemarks') || ''}
             />
           </div>
         </div>

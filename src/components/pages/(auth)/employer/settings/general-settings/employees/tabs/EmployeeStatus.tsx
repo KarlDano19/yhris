@@ -24,6 +24,7 @@ import EditModal from '../modals/EditModal';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useDeleteEmployeeStatus from '../hooks/employee-status/useDeleteEmployeeStatus';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type PaginationProps = {
   totalRecords: number;
@@ -33,15 +34,6 @@ type PaginationProps = {
 type T_ModalData = {
   id: number;
   open: boolean;
-};
-
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
 };
 
 const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
@@ -231,7 +223,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
               className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue"
             />
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDate(item.created_at)}</td>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{formatDateToLocal(item.created_at)}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
@@ -272,14 +264,12 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
       
       <div className='flex-1'>
         <div className={classNames('mt-6 flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-        <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-          <div className='relative'>
+        <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+          <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
             <CustomDatePicker
               id='from-datepicker'
               placeholder={'mm/dd/yyyy'}
-              className={
-                'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-              }
+              className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
               selected={itemsFilter.from}
               pickerOnChange={(date: any) => {
                 if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -292,14 +282,12 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
               }}
             />
           </div>
-          <p>to</p>
-          <div className='relative'>
+          <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+          <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
             <CustomDatePicker
               id='to-datepicker'
               placeholder={'mm/dd/yyyy'}
-              className={
-                'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-              }
+              className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
               selected={itemsFilter.to}
               pickerOnChange={(date: any) => {
                 if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });

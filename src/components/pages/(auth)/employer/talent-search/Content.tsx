@@ -28,6 +28,7 @@ import CompareApplicantsModal from './modal/CompareApplicantsModal';
 import FilterModal from './modal/FilterModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowUpIcon } from '@heroicons/react/24/outline';
 import StarIcon from '@heroicons/react/24/outline/StarIcon';
 import StarFilledIcon from '@heroicons/react/24/solid/StarIcon';
 import BookmarkIcon from '@heroicons/react/24/outline/BookmarkIcon';
@@ -72,6 +73,7 @@ const Content = () => {
   });
   const [hasSearched, setHasSearched] = useState(false);
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Helper function to get the most recent work experience
   const getMostRecentWorkExperience = (workExperiences: any[]) => {
@@ -150,8 +152,16 @@ const Content = () => {
     handleRemoveTag: removeTagFromHook,
   } = useTagSearch(searchInput, setSearchInput, []);
 
-  // Use the hook to fetch applicants
-  const { data: applicantsData, isLoading, error, refetch } = useGetApplicantItemsList(filters);
+  // Use the hook to fetch applicants with infinite scrolling
+  const {
+    data: applicants,
+    totalRecords,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useGetApplicantItemsList(filters);
 
   // FAVORITES HOOKS
   const { data: favoriteApplicants, refetch: refetchFavorites } = useGetApplicantFavorites();
@@ -256,6 +266,25 @@ const Content = () => {
       console.error('Error saving hasSearched state:', error);
     }
   }, [hasSearched]);
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   // Clear saved state function
   const clearSavedState = () => {
@@ -528,6 +557,18 @@ const Content = () => {
       </div>
 
       <div className='relative z-10'>
+        {/* Scroll to Top Button */}
+        {showScrollToTop && (
+          <button
+            onClick={scrollToTop}
+            className='fixed bottom-24 right-8 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+            aria-label='Scroll to top'
+            title='Scroll to top'
+          >
+            <ArrowUpIcon className='h-5 w-5' strokeWidth={2.5} />
+          </button>
+        )}
+
         {/* Floating Action Buttons */}
         <div className='fixed bottom-1 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-full shadow-lg border border-gray-200 overflow-hidden'>
           <div className='flex'>
@@ -843,19 +884,47 @@ const Content = () => {
             )}
 
             {/* Search Results */}
-            {hasSearched && (
-              <>
-                {/* Search Results Panel (existing code) */}
-                <div className='mt-8 mb-10'>
-                  <div className='bg-white rounded-lg shadow-md p-6'>
-                    <div className='flex justify-between items-center mb-4'>
-                      <h3 className='text-lg font-semibold'>
-                        {filters.search || filters.location.length > 0 || filters.gender || filters.salary
-                          ? filters.search
-                            ? 'Search Results'
-                            : 'Filtered Results'
-                          : 'All Available Profiles'}
-                      </h3>
+            <div className='mt-8 mb-10'>
+              <div className='bg-white rounded-lg shadow-md p-6'>
+                {!hasSearched ? (
+                  <div className='text-center py-12'>
+                    <p className='text-lg font-semibold text-slate-800'>Ready to find top talent?</p>
+                    <p className='text-gray-600 mt-2 max-w-xl mx-auto'>
+                      Click the{' '}
+                      <span
+                        role='button'
+                        tabIndex={0}
+                        className='font-semibold text-blue-600 hover:underline cursor-pointer'
+                        onClick={handleSearch}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            handleSearch();
+                          }
+                        }}
+                      >
+                        Search
+                      </span>{' '}
+                      button to load available applicants.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-4'>
+                      <div>
+                        <h3 className='text-lg font-semibold'>
+                          {filters.search || filters.location.length > 0 || filters.gender || filters.salary
+                            ? filters.search
+                              ? 'Search Results'
+                              : 'Filtered Results'
+                            : 'All Available Profiles'}
+                        </h3>
+                        <p className='text-sm text-gray-500'>
+                          {totalRecords > 0
+                            ? `${totalRecords} profile${totalRecords === 1 ? '' : 's'} found`
+                            : 'No profiles yet'}
+                        </p>
+                      </div>
                       {selectedApplicants.size > 0 && (
                         <div className='flex items-center gap-2'>
                           <span className='text-sm text-gray-600'>{selectedApplicants.size} selected</span>
@@ -894,9 +963,9 @@ const Content = () => {
                       </div>
                     )}
 
-                    {applicantsData && Array.isArray(applicantsData) && applicantsData.length > 0 ? (
+                    {applicants && applicants.length > 0 ? (
                       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                        {applicantsData.map((applicant: any) => {
+                        {applicants.map((applicant: any) => {
                           // Get the most recent work experience for this applicant
                           const mostRecentExperience = getMostRecentWorkExperience(applicant.work_experience);
 
@@ -1015,10 +1084,25 @@ const Content = () => {
                         </div>
                       )
                     )}
-                  </div>
-                </div>
-              </>
-            )}
+
+                    {hasNextPage && (
+                      <div className='flex justify-center mt-6'>
+                        <button
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                          className='bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-md text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
+                        >
+                          {isFetchingNextPage && (
+                            <span className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600'></span>
+                          )}
+                          {isFetchingNextPage ? 'Loading more' : 'Load More Profiles'}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         {isApplicantProfileModalOpen && (

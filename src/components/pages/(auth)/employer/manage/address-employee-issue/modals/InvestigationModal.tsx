@@ -10,6 +10,7 @@ import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import useAddInvestigationReportItems from '../hooks/useAddInvestigationReportItems';
+import { formatDateToLocal } from '@/helpers/date';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
@@ -110,11 +111,7 @@ export default function InvestigationModal({
       const attachments = toSaveData?.attachments;
       employeeIssueItemsCopy[itemIndex].investigateForm.attachments = attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
-      employeeIssueItemsCopy[itemIndex].investigatedDate = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-      }).format(currentDate);
+      employeeIssueItemsCopy[itemIndex].investigatedDate = formatDateToLocal(currentDate.toISOString());
       const copySaveData = {
         ...employeeIssueItemsCopy[itemIndex].investigateForm,
         attachments,

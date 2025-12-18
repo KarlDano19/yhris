@@ -1,3 +1,4 @@
+
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
@@ -42,4 +43,3 @@ function useSeedEmailTemplates() {
 }
 
 export default useSeedEmailTemplates;
-

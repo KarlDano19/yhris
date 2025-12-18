@@ -18,6 +18,7 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import useDeleteSeparation from './hooks/useDeleteSeparation';
@@ -42,6 +43,7 @@ import {
 } from '@/types/globals';
 
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const queryClient = useQueryClient();
@@ -142,22 +144,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     separationItemsCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'letters') {
       separationItemsCopy[itemIndex].isLetterReceived = true;
-      separationItemsCopy[itemIndex].letterReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].letterReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'sign documents') {
       separationItemsCopy[itemIndex].isDocumentsReceived = true;
-      separationItemsCopy[itemIndex].documentReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].documentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     if (emailType === 'quit claim') {
       separationItemsCopy[itemIndex].isQuitclaimReceived = true;
-      separationItemsCopy[itemIndex].quitclaimReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      separationItemsCopy[itemIndex].quitclaimReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {
         setSeparationItems([...separationItemsCopy]);
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-        
+
         // Clear employee cache when quit claim is received (final step in separation)
         if (emailType === 'quit claim') {
           queryClient.invalidateQueries(['employeePaginatedSelectCache']);
@@ -247,9 +249,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
           setIsQuitclaimModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
-          
-          // Clear employee cache when quit claim is sent (approaching final step)
-          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -311,25 +310,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataSeparation.records) {
         items = dataSeparation.records.map((separation: any) => {
-          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['separationDate'] = formatDateToLocal(separation.date_of_separation);
           separation['name'] = separation.name;
           separation['reasonForLeaving'] = separation.reason_of_leaving;
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
-          separation['letterReceivedDate'] =
-            separation.letter_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
-          separation['documentReceivedDate'] =
-            separation.documents_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['isLastPayReleased'] = separation.is_last_pay_released;
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-          separation['quitclaimReceivedDate'] =
-            separation.quit_claim_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -376,25 +369,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle array response structure (no pagination from backend)
       else if (Array.isArray(dataSeparation)) {
         items = dataSeparation.map((separation: any) => {
-          separation['separationDate'] = Intl.DateTimeFormat('en-US').format(new Date(separation.date_of_separation));
+          separation['separationDate'] = formatDateToLocal(separation.date_of_separation);
           separation['name'] = separation.name;
           separation['reasonForLeaving'] = separation.reason_of_leaving;
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
-          separation['letterReceivedDate'] =
-            separation.letter_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.letter_received_date));
+          separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
-          separation['documentReceivedDate'] =
-            separation.documents_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.documents_received_date));
+          separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['isLastPayReleased'] = separation.is_last_pay_released;
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
-          separation['quitclaimReceivedDate'] =
-            separation.quit_claim_received_date &&
-            new Intl.DateTimeFormat('en-US').format(new Date(separation.quit_claim_received_date));
+          separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -575,6 +562,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-letters`] || false}
+              refetch={refetch}
+              employerName={item.employer_name}
+              effectiveDate={item.effective_date || item.date_of_separation}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -643,7 +633,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -658,14 +648,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -678,14 +666,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -844,9 +830,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
           defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
-          showDragDropAttachment={true}
-          submitButtonText="Send"
+          showAttachment={true}
+          customAttachmentSection={
+            <SeparationLetterAttachmentSection
+              pdfAttachment={isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.letter_attachment : null}
+              letterType={isLetterModalOpen.type as 'Acceptance' | 'Separation'}
+              onViewAttachment={(url: string) => window.open(url, '_blank')}
+              canShowPreview={true}
+            />
+          }
+          submitButtonText="Send Letter"
           isLoading={isLoading}
+          prePopulatedData={{
+            subject: `Letter of ${isLetterModalOpen.type} - ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'}`,
+            message: `<p>Dear ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`,
+            to: isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : [],
+            cc: [],
+            bcc: []
+          }}
         />
       )}
       {isDocumentModalOpen && (

@@ -424,7 +424,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/train' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -447,7 +447,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   name='search'
                   id='search'
                   data-tooltip-id='search-tooltip'
-                  data-tooltip-content='Search for Schedule: Name / Evaluation Template'
+                  data-tooltip-content='Search for Schedule: Name / Template / Period'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                   onChange={(e) => setSearchText(e.target.value)}

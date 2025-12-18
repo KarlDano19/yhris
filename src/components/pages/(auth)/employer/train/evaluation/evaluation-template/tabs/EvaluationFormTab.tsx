@@ -117,11 +117,16 @@ function EvaluationFormTab({
                               }
                             })}
                             onChange={e => {
-                              const value = parseInt(e.target.value);
+                              const value = parseInt(e.target.value) || 0;
                               if (value < 0) {
                                 setValue('total_score', 0);
                               } else {
                                 setValue('total_score', value);
+                                // If passing score exceeds new total score, adjust it
+                                const currentPassingScore = parseInt(watch('passing_score')) || 0;
+                                if (currentPassingScore > value) {
+                                  setValue('passing_score', value);
+                                }
                               }
                             }}
                           />
@@ -144,8 +149,8 @@ function EvaluationFormTab({
                           <div
                             className='hover:cursor-pointer p-2'
                             onClick={() => {
-                              const currentPassingScore = parseInt(watch('passing_score'));
-                              if (currentPassingScore > 1) {
+                              const currentPassingScore = parseInt(watch('passing_score')) || 0;
+                              if (currentPassingScore > 0) {
                                 setValue('passing_score', currentPassingScore - 1);
                               }
                             }}
@@ -153,18 +158,32 @@ function EvaluationFormTab({
                             <MinusIcon />
                           </div>
                           <input
-                            id='max-score'
+                            id='passing-score'
                             type='number'
                             min="0"
+                            max={watch('total_score') || 0}
                             className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none justify-center items-start self-stretch p-2 bg-white rounded-md border border-solid border-slate-400 w-[4rem] text-center'
                             defaultValue={1}
                             {...register('passing_score', {
-                              validate: (value: any) => parseInt(value) >= 0 || "Score cannot be negative"
+                              validate: (value: any) => {
+                                const passingValue = parseInt(value) || 0;
+                                const totalValue = parseInt(watch('total_score')) || 0;
+                                if (passingValue < 0) {
+                                  return "Score cannot be negative";
+                                }
+                                if (passingValue > totalValue) {
+                                  return `Passing score cannot exceed total score (${totalValue})`;
+                                }
+                                return true;
+                              }
                             })}
                             onChange={e => {
-                              const value = parseInt(e.target.value);
+                              const value = parseInt(e.target.value) || 0;
+                              const totalScore = parseInt(watch('total_score')) || 0;
                               if (value < 0) {
                                 setValue('passing_score', 0);
+                              } else if (value > totalScore) {
+                                setValue('passing_score', totalScore);
                               } else {
                                 setValue('passing_score', value);
                               }
@@ -173,8 +192,11 @@ function EvaluationFormTab({
                           <div
                             className='hover:cursor-pointer p-2'
                             onClick={() => {
-                              const currentPassingScore = parseInt(watch('passing_score'));
-                              setValue('passing_score', currentPassingScore + 1);
+                              const currentPassingScore = parseInt(watch('passing_score')) || 0;
+                              const totalScore = parseInt(watch('total_score')) || 0;
+                              if (currentPassingScore < totalScore) {
+                                setValue('passing_score', currentPassingScore + 1);
+                              }
                             }}
                           >
                             <PlusIcon />

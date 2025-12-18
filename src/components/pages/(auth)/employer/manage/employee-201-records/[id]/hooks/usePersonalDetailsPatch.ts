@@ -41,10 +41,36 @@ export function usePersonalDetailsPatch(employeeId?: string) {
           let msg: string;
           try {
             const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.detail || problem?.message || JSON.stringify(problem);
+            
+            // Handle Django serializer validation errors (object with field keys)
+            if (typeof problem === "object" && problem !== null && !Array.isArray(problem)) {
+              const errors: string[] = [];
+              
+              // Extract specific field validation errors
+              for (const [field, fieldErrors] of Object.entries(problem)) {
+                if (field === 'detail' || field === 'message') {
+                  // Skip detail/message fields if they exist alongside field errors
+                  continue;
+                }
+                
+                if (Array.isArray(fieldErrors)) {
+                  errors.push(...fieldErrors);
+                } else if (typeof fieldErrors === 'string') {
+                  errors.push(fieldErrors);
+                }
+              }
+              
+              // If we found field errors, use them. Otherwise fall back to detail/message
+              if (errors.length > 0) {
+                msg = errors.join(' ');
+              } else {
+                msg = problem?.detail || problem?.message || JSON.stringify(problem);
+              }
+            } else if (typeof problem === "string") {
+              msg = problem;
+            } else {
+              msg = problem?.detail || problem?.message || JSON.stringify(problem);
+            }
           } catch {
             msg = res.statusText || `HTTP ${res.status}`;
           }

@@ -85,7 +85,7 @@ export default function ImportModal({
                 if (allowKey) {
                   if (key === 'Date Hired (mm/dd/yyyy)*' || key === 'Date Hired') {
                     const dateValue = value as string;
-                    const [month, day, year] = dateValue.split('/');
+                    const [day, month, year] = dateValue.split('/');
                     importItem[allowKey] = `${month}/${day}/${year}`;
                   } else {
                     importItem[allowKey] = value;

@@ -317,6 +317,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           screeningAnswers: item.screeningAnswers || [],
           created_at: item.created_at,
           updated_at: item.updated_at,
+          is_archived: item.is_archived || false,
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });
@@ -784,20 +785,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="py-1">
-                              {/* <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    onClick={() => setIsAddApplicantModalOpen(true)}
-                                    className={`${
-                                      active ? 'bg-green-50' : 'hover:bg-green-50'
-                                    } group flex items-center gap-3 w-full px-4 py-2 text-sm font-bold transition-colors`}
-                                    style={{ color: '#65c979' }}
-                                  >
-                                    <PlusIconGreen />
-                                    <span className="ml-1">Add Applicant</span>
-                                  </button>
-                                )}
-                              </Menu.Item> */}
                               <Menu.Item>
                                 {({ active }) => (
                                   <button

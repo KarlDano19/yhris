@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import { formatDateToLocal } from '@/helpers/date';
 import ModalLayout from '../../../../../ModalLayout';
 import ArchiveButton from '../ArchiveButton';
 import RestoreApplicationModal from './RestoreApplicationModal';
@@ -163,13 +164,6 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   const currentApplicants = activeTab === 'rejected' ? filteredRejectedApplicants : filteredWithdrawnApplicants;
   const allSelected = currentApplicants.length > 0 && selectedApplicants.length === currentApplicants.length;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -212,7 +206,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                 {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
               </span>
               <span className="text-xs text-gray-400">
-                {applicant.job_stages_title || 'Archived'} • {formatDate(applicant.updated_at)}
+                {applicant.job_stages_title || 'Archived'} • {formatDateToLocal(applicant.updated_at)}
               </span>
             </div>
           </div>

@@ -26,6 +26,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 type T_EmailTemplateModalData = {
   id: number | null;
@@ -116,10 +117,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       if (dataEmailTemplate.records) {
         items = dataEmailTemplate.records.map((item: any) => ({
           ...item,
-          created_at: (() => {
-            const d = new Date(item.created_at);
-            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
-          })(),
+          created_at: formatDateToLocal(item.created_at),
         }));
         totalPages = dataEmailTemplate.total_pages || 1;
         totalRecords = dataEmailTemplate.total_records || items.length;
@@ -128,10 +126,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       else if (Array.isArray(dataEmailTemplate)) {
         items = dataEmailTemplate.map((item: any) => ({
           ...item,
-          created_at: (() => {
-            const d = new Date(item.created_at);
-            return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString('en-US');
-          })(),
+          created_at: formatDateToLocal(item.created_at),
         }));
         
         // Calculate pagination locally if backend doesn't support it
@@ -401,7 +396,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
+          <div className='flex items-center justify-between mb-0'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
+            <div className='hidden lg:block -mb-4'>
+              <SeederButton
+                onSeed={handleSeedEmailTemplates}
+                onUnseed={handleUnseedEmailTemplates}
+                isLoading={seedMutation.isLoading}
+                isUnseeding={unseedMutation.isLoading}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}
@@ -435,13 +440,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 <MagnifyingGlassIcon className='h-5 w-5' />
               </button>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3'>
-              <SeederButton
-                onSeed={handleSeedEmailTemplates}
-                onUnseed={handleUnseedEmailTemplates}
-                isLoading={seedMutation.isLoading}
-                isUnseeding={unseedMutation.isLoading}
-              />
+            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
+              <div className='lg:hidden'>
+                <SeederButton
+                  onSeed={handleSeedEmailTemplates}
+                  onUnseed={handleUnseedEmailTemplates}
+                  isLoading={seedMutation.isLoading}
+                  isUnseeding={unseedMutation.isLoading}
+                />
+              </div>
               <SmartButton
                 id="create-email-template-btn"
                 className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'

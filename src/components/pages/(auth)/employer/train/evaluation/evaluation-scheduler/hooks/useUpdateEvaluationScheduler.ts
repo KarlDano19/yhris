@@ -13,6 +13,14 @@ async function updateEvaluationScheduler(evaluation_scheduler_id: string, data: 
     formData.append('message', data.message);
     formData.append('name', data.name);
     formData.append('reminder_schedule', data.reminder_schedule);
+    if (data.deadline) {
+      formData.append('deadline', data.deadline);
+    } else if (data.deadline === null || data.deadline === '') {
+      formData.append('deadline', '');
+    }
+    if (data.close_after_deadline !== undefined) {
+      formData.append('close_after_deadline', data.close_after_deadline ? 'true' : 'false');
+    }
     if (data.attachment && typeof data.attachment === "object" && data.attachment.length) {
       formData.append('attachment', data.attachment[0]);
     }

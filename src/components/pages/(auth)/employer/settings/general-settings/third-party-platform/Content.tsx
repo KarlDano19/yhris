@@ -11,6 +11,7 @@ import useGetThirdPartyIntegrationItems from './hooks/useGetThirdPartyIntegratio
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const broadcastChannel = new BroadcastChannel('settings-integration-channel');
@@ -72,7 +73,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (dataThirdPartyIntegration.records) {
         items = dataThirdPartyIntegration.records.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         totalPages = dataThirdPartyIntegration.total_pages || 1;
@@ -81,7 +82,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle array response structure (no pagination from backend)
       else if (Array.isArray(dataThirdPartyIntegration)) {
         items = dataThirdPartyIntegration.map((item: any) => {
-          item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           return item;
         });
         

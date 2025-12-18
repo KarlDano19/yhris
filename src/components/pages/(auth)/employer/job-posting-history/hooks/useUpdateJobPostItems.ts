@@ -19,7 +19,8 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('date_required', new Date(jobPost.hireDate).toISOString());
     formData.append('job_description', jobPost.jobDescription);
     formData.append('qualifications', jobPost.qualifications);
-    formData.append('job_remark', jobPost.notesRemarks);
+    // Ensure notesRemarks is never undefined - use empty string if not provided
+    formData.append('job_remark', jobPost.notesRemarks || '');
     formData.append('job_url', jobPost.jobUrl);
     formData.append('poster_type', jobPost.postAs);
     

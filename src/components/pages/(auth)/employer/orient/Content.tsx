@@ -14,6 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
 import SendContract from './SendContract';
 import Orient from './Orient';
 import IntroduceToTeam from './IntroduceToTeam';
@@ -90,7 +91,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
   });
   const { mutate, isLoading } = useUpdateApplicantOrient();
-  const { mutate: enrollToYP } = useEnrollEmployeeToYP();
+  const { mutate: enrollToYP, isLoading: isEnrolling } = useEnrollEmployeeToYP();
   const { mutate: syncEmployees } = useSyncEmployees();
   const [loginType, setLoginType] = useState<string | null>(null);
   const [isSendContractModalOpen, setIsSendContractModalOpen] = useState(false);
@@ -113,6 +114,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -141,12 +143,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle paginated response structure
       if (applicationOrient.records) {
         items = applicationOrient.records.map((item: any) => {
-          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           item['isContractSent'] = item.is_contract_sent;
           item['isContractReceived'] = item.is_contract_received;
-          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
-            new Date(item.contract_received_date && item.contract_received_date)
-          );
+          item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
@@ -171,12 +171,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalRecords = applicationOrient.total_records || items.length;
       } else if (Array.isArray(applicationOrient)) {
         items = applicationOrient.map((item: any) => {
-          item['created_at'] = new Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
+          item['created_at'] = formatDateToLocal(item.created_at);
           item['isContractSent'] = item.is_contract_sent;
           item['isContractReceived'] = item.is_contract_received;
-          item['contractReceivedDate'] = new Intl.DateTimeFormat('en-US').format(
-            new Date(item.contract_received_date && item.contract_received_date)
-          );
+          item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
@@ -228,7 +226,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     orientItemCopy[itemIndex].dateReceived = currentDate;
     if (emailType === 'contract') {
       orientItemCopy[itemIndex].isContractReceived = true;
-      orientItemCopy[itemIndex].contractReceivedDate = new Intl.DateTimeFormat('en-US').format(currentDate);
+      orientItemCopy[itemIndex].contractReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
     const callbackReq = {
       onSuccess: (data: any) => {
@@ -256,6 +254,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
+    // Set the enrolling ID to track which item is being enrolled
+    setEnrollingId(String(id));
+    
     const updateOrientationStatus = () => {
       orientItemCopy[itemIndex].id = id;
       orientItemCopy[itemIndex].actionType = 'enrolled';
@@ -264,12 +265,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
+          setEnrollingId(null); // Clear enrolling state on success
           setIsEnrollRedirectModalOpen(true);
+          // Clear employee cache when applicant is enrolled (employee becomes available for other operations)
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -286,14 +291,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             id,
             data: {
               first_name: orientItemCopy[itemIndex].firstname,
+              middle_name: orientItemCopy[itemIndex].middlename,
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
+              birthdate: orientItemCopy[itemIndex].birth_date,
+              address: orientItemCopy[itemIndex].address,
+              gender: orientItemCopy[itemIndex].gender,
+              department: orientItemCopy[itemIndex].department_id,
+              employment_status: orientItemCopy[itemIndex].employment_status_id,
+              location: orientItemCopy[itemIndex].location_name,
+              position: orientItemCopy[itemIndex].position_id,
+              mobile: orientItemCopy[itemIndex].mobile,
+              job_posting_id: Number(params.position),
             }
           }, {
             onSuccess: () => {
               updateOrientationStatus();
             },
             onError: (err: any) => {
+              setEnrollingId(null); // Clear enrolling state on error
               toast.custom(() => <CustomToast message={err} type='error' />, {
                 duration: 7000,
               });
@@ -301,6 +317,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -453,7 +470,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setEnrolled={() => {
                   setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
-                isLoading={isLoading}
+                isLoading={enrollingId === String(item.id)}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>
@@ -474,7 +491,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -489,14 +506,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -509,14 +524,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });

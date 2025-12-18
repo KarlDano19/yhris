@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import useGetApplicantRecentApplication from './hooks/useGetApplicantRecentApplication';
+import { formatDateTimeToLocal } from '@/helpers/date';
 
 import profileImage from '@/assets/Ellipse 8.png';
 
@@ -41,14 +42,7 @@ const CardRecentApp = () => {
               Status: {recentApplication.job_stages_title}
             </button>
             <p className='text-[#ACB9CB] text-[11px] text-center mt-1 mb-5'>
-              Status as of {new Date(recentApplication.updated_at).toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })}
+              Status as of {formatDateTimeToLocal(recentApplication.updated_at, true)}
             </p>
           </div>
         </div>
