@@ -740,7 +740,6 @@ export default function Employee201Content({
               {isUpdating && (
                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
               )}
-              <ArrowPathIcon className="w-4 h-4" />
               <span>Sync to YP</span>
             </button>
             )}
