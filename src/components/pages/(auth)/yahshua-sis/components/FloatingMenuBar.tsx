@@ -45,19 +45,19 @@ const FloatingMenuBar = () => {
     },
     {
       name: 'Jobs',
-      href: '/yahshua-sis/jobs',
+      href: '/yahshua-sis/personal-mode/jobs',
       icon: BriefcaseIcon,
       iconSolid: BriefcaseIconSolid,
     },
     {
       name: 'Trainings',
-      href: '/yahshua-sis/trainings',
+      href: '/yahshua-sis/personal-mode/trainings',
       icon: AcademicCapIcon,
       iconSolid: AcademicCapIconSolid,
     },
     {
       name: 'Transactions',
-      href: '/yahshua-sis/transactions',
+      href: '/yahshua-sis/personal-mode/transactions',
       icon: DocumentTextIcon,
       iconSolid: DocumentTextIconSolid,
     },

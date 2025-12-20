@@ -171,7 +171,7 @@ const Content = () => {
     <>
       <YahshuaSISHeader />
       <FloatingMenuBar />
-      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
         {/* Three Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
@@ -229,22 +229,28 @@ const Content = () => {
         </div>
       </div>
 
-      {/* Modals */}
-      <MyApplicationsModal
-        isOpen={showApplicationsModal}
-        onClose={() => setShowApplicationsModal(false)}
-        applications={applications}
-      />
-      <SavedJobsModal
-        isOpen={showSavedJobsModal}
-        onClose={() => setShowSavedJobsModal(false)}
-        savedJobs={savedJobs}
-      />
-      <TrainingsInProgressModal
-        isOpen={showTrainingsModal}
-        onClose={() => setShowTrainingsModal(false)}
-        trainings={trainingsInProgress}
-      />
+      {/* Modals - Lazy loaded */}
+      {showApplicationsModal && (
+        <MyApplicationsModal
+          isOpen={showApplicationsModal}
+          onClose={() => setShowApplicationsModal(false)}
+          applications={applications}
+        />
+      )}
+      {showSavedJobsModal && (
+        <SavedJobsModal
+          isOpen={showSavedJobsModal}
+          onClose={() => setShowSavedJobsModal(false)}
+          savedJobs={savedJobs}
+        />
+      )}
+      {showTrainingsModal && (
+        <TrainingsInProgressModal
+          isOpen={showTrainingsModal}
+          onClose={() => setShowTrainingsModal(false)}
+          trainings={trainingsInProgress}
+        />
+      )}
     </>
   );
 };
