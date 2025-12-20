@@ -310,7 +310,9 @@ function CritiriaSubItem({
                                   data-tooltip-place='top' 
                                   onClick={() => currentScoreSum < totalScore && copyCriteria(item, index)}
                                 >
-                                  <DuplicateIcon />
+                                  <div className='p-1.5 bg-white border border-gray-300 rounded-md inline-flex items-center justify-center'>
+                                    <DuplicateIcon />
+                                  </div>
                                   <Tooltip id={`duplicate-criteria-tooltip-${sectionIndex}-${index}`} style={{ fontSize: '10px', }} />
                                 </div>
                                 <div 

@@ -42,7 +42,7 @@ function useGetBenefitItems(filters: any) {
     ['benefitsItemCache', filters.currentPage, filters.pageSize, filters.search, filters.from, filters.to],
     () => getBenefitItems(filters),
     {
-      // enabled: false,
+      refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );

@@ -81,7 +81,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalPages: 1,
     totalRecords: 0,
   });
-  const [pendingFilter, setPendingFilter] = useState<any>({
+  const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
     search: '',
@@ -205,8 +205,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleSearch = () => {
-    const dateFrom = Date.parse(pendingFilter.from);
-    const dateTo = Date.parse(pendingFilter.to);
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
 
     if (dateFrom && !dateTo) {
       return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, { duration: 5000 });
@@ -220,7 +220,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       );
     }
     setIsSearching(true);
-    setAppliedFilter({ ...pendingFilter });
+    setAppliedFilter({ ...itemsFilter });
     setCurrentPage(1);
   };
 
@@ -400,7 +400,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/dole' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -415,46 +415,46 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={pendingFilter.from}
+                  selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
-                    if (pendingFilter) setPendingFilter({ ...pendingFilter, from: date });
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
                   }}
                   inputOnChange={(value: any) => {
-                    setPendingFilter({
-                      ...pendingFilter,
+                    setItemsFilter({
+                      ...itemsFilter,
                       from: value,
                     });
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
                   className={
                     'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
                   }
-                  selected={pendingFilter.to}
+                  selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
-                    if (pendingFilter) setPendingFilter({ ...pendingFilter, to: date });
-                    if (!pendingFilter) setPendingFilter(date);
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
                   }}
                   inputOnChange={(value: any) => {
-                    setPendingFilter({
-                      ...pendingFilter,
+                    setItemsFilter({
+                      ...itemsFilter,
                       to: value,
                     });
                   }}
-                  minDate={pendingFilter.from}
+                  minDate={itemsFilter.from}
                 />
               </div>
             </div>
@@ -468,12 +468,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     data-tooltip-content='Search for Employee Name'
                     data-tooltip-place='bottom'
                     className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                    onChange={(e) => setPendingFilter({ ...pendingFilter, search: e.target.value })}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSearch();
-                      }
-                    }}
+                    onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
                     placeholder='Search ...'
                   />
                   <button

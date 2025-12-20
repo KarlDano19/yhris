@@ -45,6 +45,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: '',
     search: '',
   });
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<{
@@ -79,7 +85,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch,
     isLoading: isGetOrientLoading,
   } = useGetApplicantOrient(Number(params.position), {
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize,
     currentPage,
     enrolled: filters.enrolled?.join(','), // Pass enrollment filter to backend
@@ -108,6 +114,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isLocationDepartmentModalOpen, setIsLocationDepartmentModalOpen] = useState(false);
   const [isLocationDepartmentWarningModalOpen, setIsLocationDepartmentWarningModalOpen] = useState(false);
   const [isEnrollRedirectModalOpen, setIsEnrollRedirectModalOpen] = useState(false);
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilters(newFilters);
@@ -247,6 +254,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const itemIndex = orientItems.findIndex((item: any) => item.id === id);
     const orientItemCopy = JSON.parse(JSON.stringify(orientItems));
     
+    // Set the enrolling ID to track which item is being enrolled
+    setEnrollingId(String(id));
+    
     const updateOrientationStatus = () => {
       orientItemCopy[itemIndex].id = id;
       orientItemCopy[itemIndex].actionType = 'enrolled';
@@ -255,12 +265,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       mutate(orientItemCopy[itemIndex], {
         onSuccess: (data: any) => {
           setOrientItems([...orientItemCopy]);
+          setEnrollingId(null); // Clear enrolling state on success
           setIsEnrollRedirectModalOpen(true);
+          // Clear employee cache when applicant is enrolled (employee becomes available for other operations)
+          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
           toast.custom(() => <CustomToast message={'Applicant successfully enrolled.'} type='success' />, {
             duration: 5000,
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -277,12 +291,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             id,
             data: {
               first_name: orientItemCopy[itemIndex].firstname,
+              middle_name: orientItemCopy[itemIndex].middlename,
               last_name: orientItemCopy[itemIndex].lastname,
               email: orientItemCopy[itemIndex].email,
+              birthdate: orientItemCopy[itemIndex].birth_date,
+              address: orientItemCopy[itemIndex].address,
+              gender: orientItemCopy[itemIndex].gender,
               department: orientItemCopy[itemIndex].department_id,
               employment_status: orientItemCopy[itemIndex].employment_status_id,
               location: orientItemCopy[itemIndex].location_name,
               position: orientItemCopy[itemIndex].position_id,
+              mobile: orientItemCopy[itemIndex].mobile,
               job_posting_id: Number(params.position),
             }
           }, {
@@ -290,6 +309,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               updateOrientationStatus();
             },
             onError: (err: any) => {
+              setEnrollingId(null); // Clear enrolling state on error
               toast.custom(() => <CustomToast message={err} type='error' />, {
                 duration: 7000,
               });
@@ -297,6 +317,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           });
         },
         onError: (err: any) => {
+          setEnrollingId(null); // Clear enrolling state on error
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -330,7 +351,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     mutate(orientItemCopy[itemIndex], callbackReq);
   };
 
-  const checkIfDateIsValid = () => {
+  const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
 
@@ -352,7 +373,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    refetch();
+    setAppliedFilter({
+      from: itemsFilter.from,
+      to: itemsFilter.to,
+      search: searchText,
+    });
+    setCurrentPage(1);
   };
 
   const renderRows = () => {
@@ -444,7 +470,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setEnrolled={() => {
                   setEnrolled(item.id, item.isLocationDepartmentAssigned);
                 }}
-                isLoading={isLoading || isEnrolling}
+                isLoading={enrollingId === String(item.id)}
                 isLocationDepartmentAssigned={item.isLocationDepartmentAssigned}
               />
             </div>
@@ -465,7 +491,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -480,14 +506,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className='px-2 md:px-8 lg:px-4 mt-6 flex-1'>
           <div className={classNames('flex flex-col lg:flex-row items-left gap-4', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='flex-none flex flex-col lg:flex-row items-left md:items-center gap-2'>
-              <div className='relative'>
+            <div className='flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap'>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='from-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
@@ -500,14 +524,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className='relative'>
+              <p className='text-gray-600 text-sm md:text-base self-center'>to</p>
+              <div className='relative flex-1 md:flex-none min-w-[140px] md:min-w-0'>
                 <CustomDatePicker
                   id='to-datepicker'
                   placeholder={'mm/dd/yyyy'}
-                  className={
-                    'appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
-                  }
+                  className='appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6'
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
@@ -533,12 +555,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: Applicant Name'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
                   placeholder='Search ...'
                 />
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                  onClick={checkIfDateIsValid}
+                  onClick={handleSearch}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>

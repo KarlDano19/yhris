@@ -31,6 +31,7 @@ export type Employee = {
   mobile: string | null;
   address: string | null;
   date_hired: string | null;
+  birthdate?: string | null;
   nationality?: string | null;
   gender?: string | null;
   religion?: string | null;

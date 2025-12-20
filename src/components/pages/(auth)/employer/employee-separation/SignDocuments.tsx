@@ -66,7 +66,7 @@ const SignDocuments = ({
           )}
           disabled={isDisabled}
           data-tooltip-id='sign-documents-tooltip'
-          data-tooltip-content={!isLetterReceived ? 'Letter must be sent first' : ''}
+          data-tooltip-content={!isLetterReceived ? 'Letter must be received first' : ''}
           data-tooltip-place='bottom'
           onClick={() =>
             setIsDocumentModalOpen({
@@ -148,10 +148,11 @@ const SignDocuments = ({
         </div>
       ) : null}
       
-      <Tooltip id='sign-documents-tooltip' />
+      <Tooltip id='sign-documents-tooltip' style={{ zIndex: 9999 }} />
+      <Tooltip id='sign-documents-received-tooltip' style={{ zIndex: 9999 }} />
       <Tooltip id='sign-documents-received-tooltip' />
       {attachmentsToDisplay.map((_, index) => (
-        <Tooltip key={index} id={`documents-attachment-tooltip-${index}`} />
+        <Tooltip key={index} id={`documents-attachment-tooltip-${index}`} style={{ zIndex: 9999 }}/>
       ))}
     </div>
     

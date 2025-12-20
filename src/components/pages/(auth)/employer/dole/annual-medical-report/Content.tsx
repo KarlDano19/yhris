@@ -79,6 +79,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     to: "",
     search: "",
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: "",
+    to: "",
+    search: "",
+  });
   
   // Bulk delete states
   const [selectedReports, setSelectedReports] = useState<Set<number>>(new Set());
@@ -92,7 +97,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isAnnualMedicalReportLoading,
     refetch: annualMedicalReportRefetch,
   } = useGetAnnualMedicalReportItems({
-    ...itemsFilter,
+    ...appliedFilter,
     pageSize: pageSize,
     currentPage: currentPage,
   });
@@ -259,9 +264,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [selectedReports, annualMedicalReportItems]);
 
-  useEffect(() => {
-    annualMedicalReportRefetch();
-  }, [currentPage, pageSize]);
+  // Removed duplicate refetch useEffect - React Query will automatically refetch when filters change
+  // because the queryKey includes the filters
 
   const checkIfDateIsValid = () => {
     const dateFrom = Date.parse(itemsFilter.from);
@@ -296,7 +300,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
-    annualMedicalReportRefetch();
+    setAppliedFilter({
+      ...itemsFilter,
+    });
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const paginationChange = (event: any) => {
@@ -431,7 +438,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col">
         <div className="flex p-4">
           <Link
             href="/dole"
@@ -451,14 +458,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {/* Content Section with flex-1 */}
         <div className="px-2 md:px-8 lg:px-4 mt-6 flex-1">
           <div className={classNames("flex flex-col lg:flex-row items-left gap-4", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className="flex-none flex flex-col lg:flex-row items-left md:items-center gap-2">
-              <div className="relative">
+            <div className="flex-none flex flex-col md:flex-row items-left md:items-center gap-2 flex-wrap md:flex-nowrap">
+              <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
                 <CustomDatePicker
                   id="from-datepicker"
                   placeholder={"mm/dd/yyyy"}
-                  className={
-                    "appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
-                  }
+                  className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
                   selected={itemsFilter.from}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter)
@@ -472,14 +477,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   }}
                 />
               </div>
-              <p>to</p>
-              <div className="relative">
+              <p className="text-gray-600 text-sm md:text-base self-center">to</p>
+              <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
                 <CustomDatePicker
                   id="to-datepicker"
                   placeholder={"mm/dd/yyyy"}
-                  className={
-                    "appearance-none block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6"
-                  }
+                  className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
                   selected={itemsFilter.to}
                   pickerOnChange={(date: any) => {
                     if (itemsFilter)

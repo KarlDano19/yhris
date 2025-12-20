@@ -102,30 +102,30 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
         </div>
         
         <div className="p-6">
-          <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-            <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+          <div className='overflow-x-auto -mx-6 sm:-mx-0'>
+            <div className='min-w-full px-6 sm:px-0'>
               <table className="min-w-full divide-y divide-gray-300 text-center">
               <thead>
                 <tr className="border-b-2 border-[#ACB9CB]">
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[120px]">
                     Role
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[80px]">
                     No. of Applicants
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[80px]">
                     Status
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[100px]">
                     Date Job Opened
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[100px]">
                     Date Job Closed
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[100px]">
                     Turnaround Time
                   </th>
-                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap">
+                  <th className="px-2 sm:px-3 py-3 md:pb-4 text-center text-xs sm:text-sm md:text-sm font-semibold text-gray-900 whitespace-nowrap min-w-[150px]">
                     Current Pipeline
                   </th>
                 </tr>
@@ -154,9 +154,9 @@ const RolePipelineTable: React.FC<RolePipelineTableProps> = ({
                       <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center whitespace-nowrap">
                         <span className="font-medium">{formatTurnaroundTime(role.turnaroundTime)}</span>
                       </td>
-                      <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center max-w-xs">
+                      <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center min-w-[150px] max-w-[250px]">
                         <div 
-                          className="truncate cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium" 
+                          className="truncate cursor-pointer text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium px-1" 
                           title="Click to view detailed pipeline information"
                           onClick={() => handlePipelineClick(role)}
                         >

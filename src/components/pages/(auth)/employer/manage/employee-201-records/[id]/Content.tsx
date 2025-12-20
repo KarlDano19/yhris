@@ -10,6 +10,7 @@ import React, {
 
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -51,12 +52,14 @@ export interface ContentProps {
   params: { id: string };
   emp?: Partial<Employee>;
   hasActiveSubscription: boolean;
+  loginType: string;
 }
 
 export default function Employee201Content({
   params,
   emp,
   hasActiveSubscription,
+  loginType,
 }: ContentProps) {
   const router = useRouter();
 
@@ -556,23 +559,41 @@ export default function Employee201Content({
   const { mutate: updateEmployeeToYP, isLoading: isUpdating } = useUpdateEmployeeToYP();
 
   const syncToYP = useCallback(() => {
-    updateEmployeeToYP({
-      id: employeeDetails?.id as unknown as string,
-      data: {
-        first_name: employeeDetails?.firstname,
-        last_name: employeeDetails?.lastname,
-        middle_name: employeeDetails?.middlename,
-        email: employeeDetails?.email,
-        tin: employeeDetails?.tin,
-        sss: employeeDetails?.sss,
-        pagibig: employeeDetails?.pagibig,
-        philhealth: employeeDetails?.philhealth,
-        emergency_contact: employeeDetails?.emergency_contact,
-        emergency_contact_name: employeeDetails?.emergency_contact?.name,
-        emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
-        system_id: employeeDetails?.system_id,
+    updateEmployeeToYP(
+      {
+        id: employeeDetails?.id as unknown as string,
+        data: {
+          first_name: employeeDetails?.firstname,
+          last_name: employeeDetails?.lastname,
+          middle_name: employeeDetails?.middlename,
+          mobile: employeeDetails?.mobile,
+          email: employeeDetails?.email,
+          tin: employeeDetails?.tin,
+          sss: employeeDetails?.sss,
+          pagibig: employeeDetails?.pagibig,
+          philhealth: employeeDetails?.philhealth,
+          emergency_contact: employeeDetails?.emergency_contact,
+          emergency_contact_name: employeeDetails?.emergency_contact?.name,
+          emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
+          gender: employeeDetails?.gender,
+          birthdate: employeeDetails?.birthdate,
+          system_id: employeeDetails?.system_id,
+          location: employeeDetails?.location,
+          position: employeeDetails?.position,
+          department: employeeDetails?.department,
+          employment_status: employeeDetails?.employment_status,
+          address: employeeDetails?.address,
+        },
+      },
+      {
+        onSuccess: () => {
+          notify.success("Employee synced to YP successfully.");
+        },
+        onError: (error: any) => {
+          notify.error(error?.message || "Failed to sync employee to YP.");
+        },
       }
-    });
+    );
     console.log("syncToYP", employeeDetails);
   }, [updateEmployeeToYP, employeeDetails]);
 
@@ -707,6 +728,7 @@ export default function Employee201Content({
                 ? (isEditingTab ? (saving ? "Saving…" : "Save") : "Edit")
                 : (saving ? "Saving…" : "Save")}
             </SmartButton>
+            {['yahshua-payroll', 'yg-payroll'].includes(loginType) && (
             <button
               id="sync-to-yp-btn"
               disabled={isUpdating}
@@ -718,9 +740,9 @@ export default function Employee201Content({
               {isUpdating && (
                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
               )}
-              <ArrowPathIcon className="w-4 h-4" />
               <span>Sync to YP</span>
             </button>
+            )}
           </div>
         </div>
 

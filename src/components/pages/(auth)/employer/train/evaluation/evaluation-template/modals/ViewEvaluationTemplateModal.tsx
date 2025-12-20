@@ -160,7 +160,7 @@ export default function ViewEvaluationModal({
                       data-tooltip-content='To edit this template, you need to duplicate it first'
                       data-tooltip-place='bottom'
                     >
-                      <InfoIcon fill='white' />
+                      <InfoIcon fill='white' className='w-6 h-6' />
                     </div>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={closeModal} />
                   </div>

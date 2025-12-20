@@ -60,7 +60,13 @@ export default function EditEmployeeDetailsModal({
       setValue('address', employeeDetailsData.address);
       setValue('nationality', employeeDetailsData.nationality);
       setValue('religion', employeeDetailsData.religion);
-      setValue('gender', employeeDetailsData.gender);
+      // Normalize gender to match dropdown options (capitalize first letter)
+      if (employeeDetailsData.gender) {
+        const normalizedGender = employeeDetailsData.gender.charAt(0).toUpperCase() + employeeDetailsData.gender.slice(1).toLowerCase();
+        setValue('gender', normalizedGender);
+      } else {
+        setValue('gender', '');
+      }
       setValue('location', employeeDetailsData.location);
       
       // Find department ID from department name
@@ -227,7 +233,7 @@ export default function EditEmployeeDetailsModal({
                                 <input
                                   id='email'
                                   {...register('email', { required: true })}
-                                  type='text'
+                                  type='email'
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
