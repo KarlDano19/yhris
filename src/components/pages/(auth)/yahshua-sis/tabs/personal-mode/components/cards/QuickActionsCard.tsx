@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface QuickAction {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  count: number;
-  href: string;
+  count?: number;
+  href?: string;
+  onClick?: () => void;
 }
 
 interface QuickActionsCardProps {
@@ -20,21 +22,42 @@ const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
       <div className="space-y-2">
         {actions.map((action) => {
           const Icon = action.icon;
-          return (
-            <Link
-              key={action.label}
-              href={action.href}
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-            >
+          const content = (
+            <>
               <div className="text-savoy-blue">
                 <Icon className="h-5 w-5" />
               </div>
               <span className="text-sm font-medium text-gray-700 flex-1 group-hover:text-savoy-blue">
                 {action.label}
               </span>
-              <span className="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                {action.count}
-              </span>
+              {action.count !== undefined && (
+                <span className="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {action.count}
+                </span>
+              )}
+              <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+            </>
+          );
+
+          if (action.onClick) {
+            return (
+              <button
+                key={action.label}
+                onClick={action.onClick}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group text-left"
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return (
+            <Link
+              key={action.label}
+              href={action.href || '#'}
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+            >
+              {content}
             </Link>
           );
         })}

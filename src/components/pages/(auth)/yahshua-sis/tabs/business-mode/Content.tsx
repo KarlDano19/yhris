@@ -1,6 +1,7 @@
 'use client';
 
 import YahshuaSISHeader from '../../YahshuaSISHeader';
+import FloatingMenuBar from '../../components/FloatingMenuBar';
 import ProfileCard from './components/cards/ProfileCard';
 import EarningsCard from './components/cards/EarningsCard';
 import QuickActionsCard from './components/cards/QuickActionsCard';
@@ -81,7 +82,8 @@ const Content = () => {
   return (
     <>
       <YahshuaSISHeader />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+      <FloatingMenuBar />
+      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
         {/* Three Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
@@ -103,25 +105,32 @@ const Content = () => {
             </div>
           </div>
 
-          {/* Center Content */}
-          <div className="lg:col-span-6">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Nearby Job Requests</h2>
-                <p className="text-sm text-gray-600 mb-4">Based on your location and skills</p>
+          {/* Center Content - Single Column */}
+          <div className="lg:col-span-8">
+            <div className="space-y-6">
+              {/* Nearby Job Requests */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">Nearby Job Requests</h2>
+                    <p className="text-sm text-gray-600">Based on your location and skills</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {jobRequests.map((job) => (
+                    <JobRequestCard key={job.id} {...job} />
+                  ))}
+                </div>
               </div>
 
-              {jobRequests.map((job) => (
-                <JobRequestCard key={job.id} {...job} />
-              ))}
-            </div>
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
+              {/* Earnings Chart */}
               <EarningsChartCard data={weeklyData} />
+
+              {/* Upcoming Bookings */}
               <UpcomingBookingsCard bookings={upcomingBookings} />
+
+              {/* Reviews */}
               <ReviewsCard reviews={recentReviews} />
             </div>
           </div>
