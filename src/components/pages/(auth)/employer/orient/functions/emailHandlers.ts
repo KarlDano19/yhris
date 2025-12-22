@@ -6,7 +6,8 @@ export interface EmailData {
   message: string;
   cc?: string[];
   bcc?: string[];
-  attachment?: File | string;
+  attachment?: File | string; // Legacy support
+  attachments?: (File | string)[]; // Multiple attachments
 }
 
 export interface OrientItem {
@@ -18,7 +19,8 @@ export interface OrientItem {
     message: string;
     cc?: string[];
     bcc?: string[];
-    attachment?: File | string;
+    attachment?: File | string; // Legacy support
+    attachments?: (File | string)[]; // Multiple attachments
   };
   introduceTeam: {
     subject: string;
@@ -26,7 +28,8 @@ export interface OrientItem {
     message: string;
     cc?: string[];
     bcc?: string[];
-    attachment?: File | string;
+    attachment?: File | string; // Legacy support
+    attachments?: (File | string)[]; // Multiple attachments
   };
   isContractSent: boolean;
   isIntroduced: boolean;
@@ -62,7 +65,12 @@ export const handleEmailSending = (
     if (data.bcc) {
       orientItemCopy.sendContract.bcc = data.bcc;
     }
-    if (data.attachment) {
+    // Handle multiple attachments (new format)
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      orientItemCopy.sendContract.attachments = data.attachments;
+    }
+    // Legacy support: single attachment
+    else if (data.attachment) {
       orientItemCopy.sendContract.attachment = data.attachment;
     }
     orientItemCopy.isContractSent = true;
@@ -76,7 +84,12 @@ export const handleEmailSending = (
     if (data.bcc) {
       orientItemCopy.introduceTeam.bcc = data.bcc;
     }
-    if (data.attachment) {
+    // Handle multiple attachments (new format)
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      orientItemCopy.introduceTeam.attachments = data.attachments;
+    }
+    // Legacy support: single attachment
+    else if (data.attachment) {
       orientItemCopy.introduceTeam.attachment = data.attachment;
     }
     orientItemCopy.isIntroduced = true;

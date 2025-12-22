@@ -87,17 +87,45 @@ const Content = () => {
   };
   
   // Handle file preview
-  const handlePreviewFile = (fileType: 'qr_code' | 'attachments') => {
+  const handlePreviewFile = (fileType: 'qr_code' | 'attachments', attachmentIndex?: number) => {
     setIsDropdownOpen(false);
     
     if (fileType === 'qr_code' && directive?.qr_code) {
       setFilePreviewUrl(directive.qr_code as string);
       setFilePreviewTitle('QR Code');
       setShowFilePreviewModal(true);
-    } else if (fileType === 'attachments' && directive?.attachments) {
-      setFilePreviewUrl(directive.attachments as string);
-      setFilePreviewTitle('Attachment');
-      setShowFilePreviewModal(true);
+    } else if (fileType === 'attachments') {
+      // Handle multiple attachments (array) or single attachment (backward compatibility)
+      const attachments = directive?.attachments;
+      
+      if (Array.isArray(attachments) && attachments.length > 0) {
+        // Multiple attachments - use index if provided, otherwise use first
+        const attachment = attachmentIndex !== undefined 
+          ? attachments[attachmentIndex] 
+          : attachments[0];
+        
+        // Attachment can be an object with attachment/attachment_name or a string URL
+        const attachmentUrl = typeof attachment === 'object' 
+          ? attachment.attachment 
+          : attachment;
+        const attachmentName = typeof attachment === 'object' 
+          ? attachment.attachment_name || 'Attachment'
+          : 'Attachment';
+        
+        setFilePreviewUrl(attachmentUrl as string);
+        setFilePreviewTitle(attachmentName);
+        setShowFilePreviewModal(true);
+      } else if (attachments && typeof attachments === 'string') {
+        // Backward compatibility: single attachment as string
+        setFilePreviewUrl(attachments);
+        setFilePreviewTitle('Attachment');
+        setShowFilePreviewModal(true);
+      } else if ((directive as any)?.attachment) {
+        // Fallback to backward compatibility field
+        setFilePreviewUrl((directive as any).attachment as string);
+        setFilePreviewTitle('Attachment');
+        setShowFilePreviewModal(true);
+      }
     }
   };
 
@@ -196,7 +224,13 @@ const Content = () => {
   };
   
   // Check if directive has viewable files
-  const hasViewableFiles = directive && (directive.qr_code || directive.signature || directive.attachments);
+  const hasViewableFiles = directive && (
+    directive.qr_code || 
+    directive.signature || 
+    (Array.isArray(directive.attachments) && directive.attachments.length > 0) ||
+    (directive.attachments && typeof directive.attachments === 'string') ||
+    (directive as any)?.attachment
+  );
 
   if (isLoadingDirective) {
     return (
@@ -406,7 +440,7 @@ const Content = () => {
 
             {/* Attachments dropdown menu */}
             {hasViewableFiles && (
-              <div className="mb-6 relative w-48" ref={dropdownRef}>
+              <div className="mb-6 relative w-64 max-w-full" ref={dropdownRef}>
                 <div className="w-full">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -416,29 +450,58 @@ const Content = () => {
                         : 'ring-1 ring-inset ring-gray-300'
                     } rounded-md bg-white hover:bg-gray-50 transition-all`}
                   >
-                    <span>View Attachments</span>
-                    <span className="ml-2">
+                    <span className="truncate">View Attachments</span>
+                    <span className="ml-2 flex-shrink-0">
                       <DropDownArrow />
                     </span>
                   </button>
                 </div>
 
                 {isDropdownOpen && (
-                  <div className="absolute z-10 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="absolute z-10 mt-1 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
                     <div className="py-1" role="menu" aria-orientation="vertical">
                       {directive.qr_code && (
                         <button
-                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 truncate"
                           onClick={() => handlePreviewFile('qr_code')}
+                          title="View QR Code"
                         >
                           View QR Code
                         </button>
                       )}
                       
-                      {directive.attachments && (
+                      {/* Handle multiple attachments */}
+                      {Array.isArray(directive.attachments) && directive.attachments.length > 0 && (
+                        <>
+                          {directive.attachments.map((attachment: any, index: number) => {
+                            const attachmentName = typeof attachment === 'object' 
+                              ? attachment.attachment_name || `Attachment ${index + 1}`
+                              : `Attachment ${index + 1}`;
+                            
+                            const fullText = `View ${attachmentName}`;
+                            
+                            return (
+                              <button
+                                key={index}
+                                className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 overflow-hidden"
+                                onClick={() => handlePreviewFile('attachments', index)}
+                                title={fullText}
+                              >
+                                <span className="block truncate">{fullText}</span>
+                              </button>
+                            );
+                          })}
+                        </>
+                      )}
+                      
+                      {/* Backward compatibility: single attachment as string or attachment field */}
+                      {!Array.isArray(directive.attachments) && (
+                        (directive.attachments && typeof directive.attachments === 'string') || (directive as any)?.attachment
+                      ) && (
                         <button
-                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                          className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 truncate"
                           onClick={() => handlePreviewFile('attachments')}
+                          title="View Uploaded File"
                         >
                           View Uploaded File
                         </button>
