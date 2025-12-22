@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { Popover } from '@headlessui/react';
 
-import { usePathname } from 'next/navigation';
-import { getCookie, deleteCookie } from 'cookies-next';
+import { usePathname, useRouter } from 'next/navigation';
+import {getCookie, deleteCookie } from 'cookies-next';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
@@ -13,7 +13,10 @@ import toast from 'react-hot-toast';
 import classNames from '@/helpers/classNames';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
+import useRefreshToken from '@/components/hooks/useRefreshToken';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
+import SessionExpirationModal from '@/components/SessionExpirationModal';
+import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import CaseSearchIcon from '@/svg/CaseSearchIcon';
@@ -26,14 +29,21 @@ interface ErrorDetail {
   detail: string;
 }
 
-const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
+const AuthorizedHeader = ({ hasProfile, initialTokenExpiresAt }: { hasProfile: boolean; initialTokenExpiresAt?: number }) => {
+  const router = useRouter();
   const pathName = usePathname();
+  const [isExpiring, setIsExpiring] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const {
     data,
     isLoading: isProfileLoading,
     error,
   } = useGetApplicantProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
   const { mutate } = useLogout();
+  const { mutate: refreshToken } = useRefreshToken();
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -70,6 +80,90 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
       logout(true);
     }
   }, []);
+
+  // Initialize token expiration from prop
+  useEffect(() => {
+    if (initialTokenExpiresAt && !tokenExpiresAt) {
+      setTokenExpiresAt(initialTokenExpiresAt);
+    }
+  }, [initialTokenExpiresAt]);
+
+  // Check token expiration every second
+  useEffect(() => {
+    if (!tokenExpiresAt) return;
+    if (isRefreshing) return;
+
+    const checkExpiration = () => {
+      if (isRefreshing) return;
+      
+      const now = Date.now();
+      const expiresAt = tokenExpiresAt;
+      const remaining = Math.floor((expiresAt - now) / 1000);
+
+      if (remaining <= 0) {
+        if (!isRefreshing) {
+          setIsExpiring(false);
+          setTokenExpiresAt(undefined); // Clear expiration to stop checking
+          // Timer reached 0 - session token has expired, logout immediately
+          logout(true);
+        }
+        return;
+      }
+
+      // Show warning before expiration (5 minutes for 3-hour tokens)
+      if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        setIsExpiring(true);
+        setTimeRemaining(remaining);
+      } else {
+        setIsExpiring(false);
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [tokenExpiresAt, router, isRefreshing, isExpiring, deleteCookie, mutate]);
+
+  const handleRenewSession = () => {
+    setIsRefreshing(true);
+    setIsExpiring(false);
+    
+    refreshToken(undefined, {
+      onSuccess: (data: any) => {
+        if (data?.expires_at) {
+          setTokenExpiresAt(data.expires_at);
+        }
+        // Refresh the browser to update all session data
+        window.location.reload();
+      },
+      onError: (error: any) => {
+        // Refresh failed, redirect to login
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsRefreshing(false);
+      },
+    });
+  };
+
+  const handleLogoutFromModal = () => {
+    setIsLoggingOut(true);
+    mutate(void 0, {
+      onSuccess: () => {
+        // Clear token cookie on client side as well (backup)
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onError: (err: any) => {
+        // Clear token cookie even on error
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsLoggingOut(false);
+      },
+    });
+  };
 
   return (
     <>
@@ -272,6 +366,14 @@ const AuthorizedHeader = ({ hasProfile }: { hasProfile: boolean }) => {
           </>
         )}
       </Popover>
+      <SessionExpirationModal
+        isOpen={isExpiring}
+        onRenew={handleRenewSession}
+        onLogout={handleLogoutFromModal}
+        timeRemaining={timeRemaining}
+        isRefreshing={isRefreshing}
+        isLoggingOut={isLoggingOut}
+      />
     </>
   );
 };

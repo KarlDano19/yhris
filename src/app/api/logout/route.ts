@@ -7,6 +7,8 @@ import { sessionOptions, sleep, SessionData } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = cookies();
+  
   try {
     const token = session.token;
     const config = {
@@ -19,27 +21,34 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${process.env.NEXT_API_URL}/api/logout/`, config);
     const data = await res.json();
     if (!res.ok) {
-      throw res.json();
+      throw data;
     }
     
-    // Clear session data but NOT the OTP verification cookie
-    // The OTP verification should persist across logout/login cycles
-    session['otpVerified'] = false;
-    session['otpVerifiedAt'] = '';
-    
+    // Clear session data
     session.destroy();
+    
+    // Clear the token cookie if it exists
+    cookieStore.delete('token');
+    
     await sleep(250);
     
-    // Return response without clearing the OTP verification cookie
-    return NextResponse.json(data, { status: 200 });
+    // Return response with cleared cookies
+    const response = NextResponse.json(data, { status: 200 });
+    response.cookies.delete('token');
+    
+    return response;
   } catch (err: any) {
-    // Clear session data but NOT the OTP verification cookie
-    session['otpVerified'] = false;
-    session['otpVerifiedAt'] = '';
-    
+    // Clear session data even on error
     session.destroy();
+    
+    // Clear the token cookie if it exists
+    cookieStore.delete('token');
+    
     await sleep(250);
     
-    return NextResponse.json(err, { status: 500 });
+    const response = NextResponse.json(err, { status: 500 });
+    response.cookies.delete('token');
+    
+    return response;
   }
 }
