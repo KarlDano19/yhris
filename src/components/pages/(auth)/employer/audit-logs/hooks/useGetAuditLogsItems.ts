@@ -63,6 +63,9 @@ function useGetAuditLogsItems(filters: any) {
             filters.search,
             filters.from,
             filters.to,
+            filters.action,
+            filters.user,
+            filters.module,
         ],
         () => getAuditLogsItems(filters),
         { 

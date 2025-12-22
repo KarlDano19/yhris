@@ -67,6 +67,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     module: persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module,
     user: persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user,
   });
+  const [appliedFilter, setAppliedFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+    action: persistedAdvancedFilter.action === 'ALL' ? '' : persistedAdvancedFilter.action,
+    module: persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module,
+    user: persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user,
+  });
+  const [searchText, setSearchText] = useState('');
   const [advancedFilter, setAdvancedFilter] = useState<AuditLogFilterValues>(persistedAdvancedFilter);
   const [filterDraft, setFilterDraft] = useState<AuditLogFilterValues>(persistedAdvancedFilter);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -76,7 +85,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     isLoading: isAuditLogsLoading,
     isFetching: isAuditLogsFetching,
     refetch: auditLogsRefetch,
-  } = useGetAuditLogsItems({ ...itemsFilter, pageSize: pageSize, currentPage: currentPage });
+  } = useGetAuditLogsItems({ ...appliedFilter, pageSize: pageSize, currentPage: currentPage });
   const {
     data: auditFilterOptions,
     isFetching: isAuditFilterFetching,
@@ -140,12 +149,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [isAuditLogsLoading, isAuditLogsFetching, isSearching]);
 
-  const triggerRefetch = () => {
-    setTimeout(() => {
-      auditLogsRefetch();
-    }, 0);
-  };
-
   const handleSearch = () => {
     const dateFrom = Date.parse(itemsFilter.from);
     const dateTo = Date.parse(itemsFilter.to);
@@ -160,7 +163,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         duration: 5000,
       });
     }
-    if (dateFrom > dateTo) {
+    if (dateFrom && dateTo && dateFrom > dateTo) {
       return toast.custom(
         () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
         {
@@ -170,7 +173,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
     setCurrentPage(1);
     setIsSearching(true);
-    triggerRefetch();
+    setAppliedFilter({
+      ...itemsFilter,
+      search: searchText,
+    });
   };
 
   const paginationChange = (event: any) => {
@@ -220,10 +226,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
     setFilterDraft(persistedAdvancedFilter);
 
+    const normalizedAction = persistedAdvancedFilter.action === 'ALL' ? '' : persistedAdvancedFilter.action;
+    const normalizedModule = persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module;
+    const normalizedUser = persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user;
+
     setItemsFilter((prev: any) => {
-      const normalizedAction = persistedAdvancedFilter.action === 'ALL' ? '' : persistedAdvancedFilter.action;
-      const normalizedModule = persistedAdvancedFilter.module === 'ALL' ? '' : persistedAdvancedFilter.module;
-      const normalizedUser = persistedAdvancedFilter.user === 'ALL' ? '' : persistedAdvancedFilter.user;
+      if (
+        prev.module === normalizedModule &&
+        prev.user === normalizedUser &&
+        prev.action === normalizedAction
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        action: normalizedAction,
+        module: normalizedModule,
+        user: normalizedUser,
+      };
+    });
+
+    setAppliedFilter((prev: any) => {
       if (
         prev.module === normalizedModule &&
         prev.user === normalizedUser &&
@@ -252,9 +275,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       module: normalizedModule,
       user: normalizedUser,
     }));
+    setAppliedFilter((prev: any) => ({
+      ...prev,
+      action: normalizedAction,
+      module: normalizedModule,
+      user: normalizedUser,
+    }));
     setCurrentPage(1);
     setIsSearching(true);
-    triggerRefetch();
   };
 
   const renderRows = () => {
@@ -367,8 +395,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   data-tooltip-content='Search for: User, Module'
                   data-tooltip-place='bottom'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  value={itemsFilter.search}
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSearch();
