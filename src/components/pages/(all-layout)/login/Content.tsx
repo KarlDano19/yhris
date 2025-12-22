@@ -28,6 +28,7 @@ import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Login } from '@/types/globals';
+import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 function Content() {
   const broadcastChannel = new BroadcastChannel('integration-channel');
@@ -167,7 +168,7 @@ function Content() {
 
   const setSession = async (data: any) => {
     setCookie('token', data.token, {
-      maxAge: 60 * 60 * 3,
+      maxAge: ACCESS_TOKEN_LIFETIME_SECONDS,
       sameSite: 'strict',
       httpOnly: false,
       secure: true,

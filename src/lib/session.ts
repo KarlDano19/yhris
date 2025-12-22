@@ -1,14 +1,20 @@
 import { SessionOptions } from 'iron-session';
 
+// Access token lifetime constants (matches backend settings)
+export const ACCESS_TOKEN_LIFETIME_SECONDS = 60 * 60 * 3; // 3 hours
+export const TOKEN_EXPIRATION_WARNING_SECONDS = 30; // Show warning 30 seconds before expiration
+
 export interface SessionData {
   isLoggedIn: boolean;
   token: string;
+  refreshToken: string;
   email: string;
   accountType: string;
   loginType: string;
   hasProfile: boolean;
   hasPendingTransaction: boolean;
   hasActiveSubscription: boolean;
+  tokenExpiresAt?: number; // Unix timestamp when token expires
   // SECURITY FIX: Removed otpVerified and otpVerifiedAt
   // These fields allowed frontend-controlled OTP bypass
 }
@@ -16,6 +22,7 @@ export interface SessionData {
 export const defaultSession: SessionData = {
   isLoggedIn: false,
   token: '',
+  refreshToken: '',
   email: '',
   accountType: '',
   loginType: '',

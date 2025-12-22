@@ -5,8 +5,9 @@ async function updateEmailTemplate(email_template_id: number, data: any) {
   try {
     const token = getCookie('token');
     
-    // Check if there's a file attachment
-    const hasFile = data.attachment && data.attachment instanceof File;
+    // Check if there are file attachments
+    const hasFiles = data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0;
+    const hasFilesToDelete = data.delete_attachment_ids && Array.isArray(data.delete_attachment_ids) && data.delete_attachment_ids.length > 0;
     
     let config: any = {
       method: 'PATCH',
@@ -15,12 +16,27 @@ async function updateEmailTemplate(email_template_id: number, data: any) {
       },
     };
 
-    if (hasFile) {
+    if (hasFiles || hasFilesToDelete) {
       // Use FormData for file uploads
       const formData = new FormData();
       formData.append('subject', data.subject || '');
       formData.append('body', data.body || '');
-      formData.append('attachment', data.attachment);
+      
+      // Handle multiple attachments
+      if (hasFiles) {
+        data.attachments.forEach((file: File) => {
+          if (file instanceof File) {
+            formData.append('attachments', file);
+          }
+        });
+      }
+      
+      // Handle attachment deletion - send as JSON string (backend can parse this)
+      if (hasFilesToDelete) {
+        if (Array.isArray(data.delete_attachment_ids)) {
+          formData.append('delete_attachment_ids', JSON.stringify(data.delete_attachment_ids));
+        }
+      }
       
       // Handle email arrays - only append if they have values
       if (data.to && Array.isArray(data.to) && data.to.length > 0) {

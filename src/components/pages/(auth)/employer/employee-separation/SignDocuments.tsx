@@ -8,12 +8,20 @@ import { T_DocumentsModal } from '@/types/globals';
 import ClipIcon from '@/svg/ClipIcon';
 import AttachmentViewModal from './modals/AttachmentViewModal';
 
+interface DocumentAttachment {
+  id?: number;
+  attachment: string;
+  attachment_name: string;
+  created_at?: string;
+}
+
 const SignDocuments = ({
   id,
   isDocumentsSent,
   isDocumentsReceived,
   documentReceivedDate,
-  documentsAttachment,
+  documentsAttachment,  // Backward compatibility: single attachment
+  documentAttachments = [],  // Multiple attachments
   setIsDocumentModalOpen,
   setReceived,
   isLoading,
@@ -23,16 +31,27 @@ const SignDocuments = ({
   isDocumentsSent: boolean;
   isDocumentsReceived: boolean;
   documentReceivedDate?: string;
-  documentsAttachment?: string | null;
+  documentsAttachment?: string | null;  // Backward compatibility
+  documentAttachments?: DocumentAttachment[];  // Multiple attachments
   setIsDocumentModalOpen: Dispatch<T_DocumentsModal>;
   setReceived: any;
   isLoading: boolean;
   isLetterReceived: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedAttachmentUrl, setSelectedAttachmentUrl] = useState<string | null>(null);
   
   // Disabled if letter hasn't been received yet
   const isDisabled = !isLetterReceived || isDocumentsSent;
+  
+  // Get attachments to display - prefer documentAttachments array, fallback to single documentsAttachment
+  const attachmentsToDisplay: DocumentAttachment[] = documentAttachments && documentAttachments.length > 0
+    ? documentAttachments
+    : documentsAttachment
+      ? [{ attachment: documentsAttachment, attachment_name: 'Document' }]
+      : [];
+  
+  const hasAttachments = attachmentsToDisplay.length > 0;
   
   return (
     <>
@@ -98,36 +117,50 @@ const SignDocuments = ({
         </button>
       </div>
       {isDocumentsReceived ? (
-        <div>
+        <div className='flex flex-col gap-1'>
           <div className='flex gap-1 items-center justify-center'>
-            <div
-              className={documentsAttachment ? 'cursor-pointer' : ''}
-              data-tooltip-id='documents-attachment-tooltip'
-              data-tooltip-content={documentsAttachment ? 'Click to view attachment' : 'No attachment'}
-              data-tooltip-place='bottom'
-              onClick={() => {
-                if (documentsAttachment) {
-                  setIsViewModalOpen(true);
-                }
-              }}
-            >
-              <ClipIcon hasFile={!!documentsAttachment} />
-            </div>
+            {hasAttachments ? (
+              <div className='flex flex-wrap gap-1 justify-center'>
+                {attachmentsToDisplay.map((att, index) => (
+                  <div
+                    key={att.id || index}
+                    className='cursor-pointer'
+                    data-tooltip-id={`documents-attachment-tooltip-${index}`}
+                    data-tooltip-content={`Click to view: ${att.attachment_name || 'Attachment'}`}
+                    data-tooltip-place='bottom'
+                    onClick={() => {
+                      setSelectedAttachmentUrl(att.attachment);
+                      setIsViewModalOpen(true);
+                    }}
+                  >
+                    <ClipIcon hasFile={true} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ClipIcon hasFile={false} />
+            )}
             <p className='ml-2 text-xs'>{documentReceivedDate}</p>
           </div>
+          {hasAttachments && attachmentsToDisplay.length > 1 && (
+            <p className='text-xs text-gray-500 text-center'>{attachmentsToDisplay.length} attachment(s)</p>
+          )}
         </div>
       ) : null}
       
       <Tooltip id='sign-documents-tooltip' style={{ zIndex: 9999 }} />
       <Tooltip id='sign-documents-received-tooltip' style={{ zIndex: 9999 }} />
-      <Tooltip id='documents-attachment-tooltip' style={{ zIndex: 9999 }} />
+      <Tooltip id='sign-documents-received-tooltip' />
+      {attachmentsToDisplay.map((_, index) => (
+        <Tooltip key={index} id={`documents-attachment-tooltip-${index}`} style={{ zIndex: 9999 }}/>
+      ))}
     </div>
     
-    {isViewModalOpen && (
+    {isViewModalOpen && selectedAttachmentUrl && (
       <AttachmentViewModal
         isOpen={isViewModalOpen}
         setIsOpen={setIsViewModalOpen}
-        attachmentUrl={documentsAttachment}
+        attachmentUrl={selectedAttachmentUrl}
         title="Sign Documents Attachment"
       />
     )}

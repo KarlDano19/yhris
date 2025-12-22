@@ -18,6 +18,8 @@ import useTagCc from "@/components/hooks/useTagCc";
 import useTagBcc from "@/components/hooks/useTagBcc";
 
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
+import DeleteIcon from "@/svg/DeleteIcon";
+import EyePassword from "@/svg/EyePassword";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import "react-quill/dist/quill.snow.css";
@@ -56,6 +58,7 @@ export interface SendEmailModalProps {
   showEmailTemplate?: boolean;
   showSubject?: boolean;
   showDragDropAttachment?: boolean;
+  allowMultipleAttachments?: boolean;  // Enable multiple file attachments (default: false for single attachment)
   // Pre-populated data props
   prePopulatedData?: {
     subject?: string;
@@ -82,6 +85,7 @@ export default function SendEmailModal({
   showEmailTemplate = true,
   showSubject = true,
   showDragDropAttachment = false,
+  allowMultipleAttachments = false,  // Default to single attachment mode
   prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
@@ -95,11 +99,11 @@ export default function SendEmailModal({
   const [inputCc, setInputCc] = useState("");
   const [inputBcc, setInputBcc] = useState("");
   const [customSubject, setCustomSubject] = useState("");
-  const [attachment, setAttachment] = useState<File | null>(null);
-  const [attachmentExist, setAttachmentExist] = useState(false);
-  const [attachmentRemoved, setAttachmentRemoved] = useState(false);
-  const [templateAttachment, setTemplateAttachment] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [templateAttachments, setTemplateAttachments] = useState<Array<{id?: number; attachment: string; created_at?: string}>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Internal state to track if multiple attachments should be enabled (based on template or prop)
+  const [effectiveAllowMultiple, setEffectiveAllowMultiple] = useState(allowMultipleAttachments);
   // Simple state for tooltip visibility
   const [showTooltip, setShowTooltip] = useState(true);
   const [isToFocused, setIsToFocused] = useState(false);
@@ -185,15 +189,33 @@ export default function SendEmailModal({
   const emailTemplateOptions = useMemo(() => {
     if (!dataEmailTemplate) return [];
     
+    // Helper function to count attachments for a template
+    const getAttachmentCount = (template: any): number => {
+      if (template.attachments && Array.isArray(template.attachments)) {
+        return template.attachments.length;
+      } else if (template.attachment) {
+        return 1;
+      }
+      return 0;
+    };
+    
     const allTemplates = dataEmailTemplate.map((template: any) => ({
       value: template.id,
       label: template.subject,
       createdAt: template.created_at,
-      template: template
+      template: template,
+      attachmentCount: getAttachmentCount(template)
     }));
     
+    // Filter templates based on attachment mode
+    // In single attachment mode, only show templates with 0 or 1 attachment
+    // In multiple attachment mode, show all templates
+    const filteredTemplates = effectiveAllowMultiple
+      ? allTemplates  // Show all templates in multiple mode
+      : allTemplates.filter((t: any) => t.attachmentCount <= 1);  // Only 0 or 1 attachment in single mode
+    
     // Filter and sort newly added templates (within 24 hours of creation)
-    const newTemplates = allTemplates
+    const newTemplates = filteredTemplates
       .filter((template: any) => isWithin24Hours(template.createdAt))
       .sort((a: any, b: any) => {
         const aDate = new Date(a.createdAt);
@@ -202,7 +224,7 @@ export default function SendEmailModal({
       });
     
     // Filter and sort regular templates alphabetically
-    const regularTemplates = allTemplates
+    const regularTemplates = filteredTemplates
       .filter((template: any) => !isWithin24Hours(template.createdAt))
       .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
     
@@ -240,7 +262,7 @@ export default function SendEmailModal({
     }
     
     return options;
-  }, [dataEmailTemplate]);
+  }, [dataEmailTemplate, effectiveAllowMultiple]);
 
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
@@ -256,7 +278,8 @@ export default function SendEmailModal({
       (tagsCc.length > 0) ||
       (tagsBcc.length > 0) ||
       (formData.message && !isHtmlEmpty(formData.message)) ||
-      ((shouldManageAttachment || showDragDropAttachment) && (attachmentExist || templateAttachment))
+      ((shouldManageAttachment || showDragDropAttachment) && (files.length > 0 || templateAttachments.length > 0)) ||
+      (effectiveAllowMultiple !== allowMultipleAttachments)  // Track if mode changed due to template
     );
   };
 
@@ -294,14 +317,14 @@ export default function SendEmailModal({
     setIsBCCOpen(false);
     setShowTooltip(true);
     if (shouldManageAttachment || showDragDropAttachment) {
-      setAttachment(null);
-      setAttachmentExist(false);
-      setAttachmentRemoved(false);
-      setTemplateAttachment(null);
+      setFiles([]);
+      setTemplateAttachments([]);
       if (inputRef.current) {
         inputRef.current.value = '';
       }
     }
+    // Reset effective multiple attachment mode to prop value
+    setEffectiveAllowMultiple(allowMultipleAttachments);
     clearErrors();
   };
 
@@ -314,6 +337,13 @@ export default function SendEmailModal({
       closeAction();
     }
   };
+
+  // Sync effectiveAllowMultiple with prop when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setEffectiveAllowMultiple(allowMultipleAttachments);
+    }
+  }, [isOpen, allowMultipleAttachments]);
 
   useEffect(() => {
     if (isOpen) {
@@ -388,17 +418,34 @@ export default function SendEmailModal({
       return;
     }
     
-    const file = event.target.files?.[0];
-    if (file) {
-      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-      // Check file size
-      if (file.size > maxSizeInBytes) {
-        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
-        return;
+    if (event.target.files && event.target.files.length > 0) {
+      const selectedFiles = Array.from(event.target.files);
+      const validFiles: File[] = [];
+      
+      // If multiple attachments not allowed, only take the first file
+      const filesToProcess = effectiveAllowMultiple ? selectedFiles : [selectedFiles[0]];
+      
+      for (const file of filesToProcess) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+          continue;
+        }
+        validFiles.push(file);
       }
-      setAttachment(file);
-      setAttachmentExist(true);
-      setAttachmentRemoved(false);
+      
+      if (validFiles.length > 0) {
+        if (effectiveAllowMultiple) {
+          // Multiple mode: append to existing files
+          setFiles(prev => [...prev, ...validFiles]);
+        } else {
+          // Single mode: replace existing file
+          setFiles(validFiles);
+        }
+      }
+      
+      // Clear the file input
+      event.target.value = '';
     }
   };
 
@@ -410,31 +457,63 @@ export default function SendEmailModal({
   const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
+    const droppedFiles = Array.from(e?.dataTransfer?.files || []);
     
-    const file = e?.dataTransfer?.files[0];
-    if (file) {
-      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-      // Check file size
-      if (file.size > maxSizeInBytes) {
-        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
-        return;
+    if (droppedFiles.length > 0) {
+      const validFiles: File[] = [];
+      // If multiple attachments not allowed, only take the first file
+      const filesToProcess = effectiveAllowMultiple ? droppedFiles : [droppedFiles[0]];
+      
+      for (const file of filesToProcess) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+          continue;
+        }
+        validFiles.push(file);
       }
-      setAttachment(file);
-      setAttachmentExist(true);
-      setAttachmentRemoved(false);
+      if (validFiles.length > 0) {
+        if (effectiveAllowMultiple) {
+          // Multiple mode: append to existing files
+          setFiles(prev => [...prev, ...validFiles]);
+        } else {
+          // Single mode: replace existing file
+          setFiles(validFiles);
+        }
+      }
     }
   };
 
-  const handleRemoveAttachment = () => {
-    setAttachment(null);
-    setAttachmentExist(false);
-    setAttachmentRemoved(true);
-    setTemplateAttachment(null);
-    
-    // Reset the file input
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      // Check total attachments (template + files) to determine if we should keep multiple mode
+      const totalAttachments = templateAttachments.length + updated.length;
+      // If we have 1 or fewer total attachments and prop is false, disable multiple mode
+      // Otherwise, enable multiple mode if prop is true or if we still have multiple total attachments
+      if (totalAttachments <= 1 && !allowMultipleAttachments) {
+        setEffectiveAllowMultiple(false);
+      } else {
+        setEffectiveAllowMultiple(totalAttachments > 1 || allowMultipleAttachments);
+      }
+      return updated;
+    });
+  };
+
+  const handleRemoveTemplateAttachment = (index: number) => {
+    setTemplateAttachments(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      // Check total attachments (template + files) to determine if we should keep multiple mode
+      const totalAttachments = updated.length + files.length;
+      // If we have 1 or fewer total attachments and prop is false, disable multiple mode
+      // Otherwise, enable multiple mode if prop is true or if we still have multiple total attachments
+      if (totalAttachments <= 1 && !allowMultipleAttachments) {
+        setEffectiveAllowMultiple(false);
+      } else {
+        setEffectiveAllowMultiple(totalAttachments > 1 || allowMultipleAttachments);
+      }
+      return updated;
+    });
   };
 
   const handleAddEmailTemplate = () => {
@@ -489,6 +568,19 @@ export default function SendEmailModal({
       (item: any) => item.id === parseInt(data.template)
     ) : null;
     
+    // Combine template attachments (URLs) with new files (File objects)
+    // In single attachment mode, only include the first template attachment
+    const allAttachments: (File | string)[] = [];
+    if (templateAttachments.length > 0) {
+      const templateAttsToInclude = effectiveAllowMultiple 
+        ? templateAttachments 
+        : templateAttachments.slice(0, 1);
+      allAttachments.push(...templateAttsToInclude.map(att => att.attachment));
+    }
+    if (files.length > 0) {
+      allAttachments.push(...files);
+    }
+
     const formData = {
       email: tagsTo,
       cc: tagsCc,
@@ -496,8 +588,13 @@ export default function SendEmailModal({
       subject: showSubject ? (customSubject || (template?.subject || '')) : '',
       template: template?.subject || '',
       message: data.message,
-      ...((showAttachment || showDragDropAttachment) && { 
-        attachment: attachment || templateAttachment,
+      ...((showAttachment || showDragDropAttachment) && allAttachments.length > 0 && {
+        // For single attachment mode, use 'attachment' (single), for multiple use 'attachments' (array)
+        // Use effectiveAllowMultiple to handle template-based multiple attachments
+        ...(effectiveAllowMultiple 
+          ? { attachments: allAttachments }
+          : { attachment: allAttachments[0] }
+        ),
       }),
     };
     
@@ -600,12 +697,34 @@ export default function SendEmailModal({
                             clearErrors('subject');
                             clearErrors('message');
                             
-                            // Handle template attachment if drag and drop is enabled
-                            if (showDragDropAttachment && template.attachment) {
-                              setTemplateAttachment(template.attachment);
-                              setAttachment(null);
-                              setAttachmentExist(false);
-                              setAttachmentRemoved(false);
+                            // Handle template attachments if drag and drop is enabled
+                            if (showDragDropAttachment && template.attachments && Array.isArray(template.attachments)) {
+                              const templateAtts = template.attachments.map((att: any) => ({
+                                id: att.id,
+                                attachment: typeof att === 'string' ? att : att.attachment,
+                                created_at: att.created_at
+                              }));
+                              // If template has multiple attachments but prop doesn't allow multiple, only keep first
+                              // Otherwise, keep all attachments
+                              if (templateAtts.length > 1 && !allowMultipleAttachments) {
+                                // Single attachment mode: only keep first attachment
+                                setTemplateAttachments([templateAtts[0]]);
+                                setEffectiveAllowMultiple(false);
+                              } else {
+                                // Multiple attachment mode or single attachment template
+                                setTemplateAttachments(templateAtts);
+                                setEffectiveAllowMultiple(templateAtts.length > 1 || allowMultipleAttachments);
+                              }
+                              setFiles([]);
+                            } else if (showDragDropAttachment && template.attachment) {
+                              // Handle legacy single attachment field
+                              setTemplateAttachments([{ attachment: template.attachment }]);
+                              setFiles([]);
+                              // Reset to prop value for single attachment
+                              setEffectiveAllowMultiple(allowMultipleAttachments);
+                            } else {
+                              // No template attachments, reset to prop value
+                              setEffectiveAllowMultiple(allowMultipleAttachments);
                             }
                           } else {
                             // Clear template-related fields if no template is selected
@@ -616,10 +735,12 @@ export default function SendEmailModal({
                             setValue("subject", "");
                             setCustomSubject("");
                             
-                            // Clear template attachment when no template is selected
+                            // Clear template attachments when no template is selected
                             if (showDragDropAttachment) {
-                              setTemplateAttachment(null);
+                              setTemplateAttachments([]);
                             }
+                            // Reset to prop value when no template is selected
+                            setEffectiveAllowMultiple(allowMultipleAttachments);
                           }
                         }}
                         components={{
@@ -902,7 +1023,7 @@ export default function SendEmailModal({
                   customAttachmentSection
                 ) : showDragDropAttachment ? (
                   <>
-                    <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                    <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
                       Attachments
                     </label>
                     <div>
@@ -911,112 +1032,278 @@ export default function SendEmailModal({
                         onDragLeave={handleDrag}
                         onDragOver={handleDrag}
                         onDrop={handleDrop}
-                        className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                        className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                       >
                         <label
                           className={`${
-                            attachment === null && !templateAttachment
+                            files.length === 0 && templateAttachments.length === 0
                               ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
                               : 'hidden'
                           }`}
                         >
-                          Drop file to upload
+                          {effectiveAllowMultiple ? 'Drop files to upload or click to select' : 'Drop file to upload or click to select'}
                           <input
-                            name='attachment'
-                            id='attachment'
+                            name='attachments'
+                            id='attachments'
                             ref={inputRef}
                             type='file'
+                            multiple={effectiveAllowMultiple}
                             className='sr-only'
                             onChange={handleAttachmentUpload}
                             accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                           />
                         </label>
                         
-                        {/* Show template attachment when available */}
-                        {templateAttachment && (
-                          <div className='file-preview'>
-                            <p className='text-sm text-slate-800 font-light'>
-                              Current: {templateAttachment.split('/').pop()}
-                            </p>
-                            <div className='flex gap-2 mt-2 justify-center'>
-                              <a 
-                                href={templateAttachment} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className='text-blue-500 hover:underline text-sm'
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View File
-                              </a>
-                              <button
-                                type='button'
-                                className='underline text-blue-500 cursor-pointer text-sm'
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveAttachment();
-                                }}
-                              >
-                                Remove File
-                              </button>
-                            </div>
+                        {/* Show replace file option for single attachment mode when file exists */}
+                        {!effectiveAllowMultiple && files.length > 0 && (
+                          <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                            Replace file
+                            <input
+                              name='attachments-replace'
+                              id='attachments-replace'
+                              type='file'
+                              multiple={false}
+                              className='sr-only'
+                              onChange={handleAttachmentUpload}
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            />
+                          </label>
+                        )}
+                        
+                        {/* Show existing template attachments when available */}
+                        {templateAttachments.length > 0 && (
+                          <div className='mb-4'>
+                            <p className='text-xs text-gray-600 mb-2'>Template Attachments:</p>
+                            {(effectiveAllowMultiple ? templateAttachments : templateAttachments.slice(0, 1)).map((attachment, index) => (
+                              <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
+                                <div className='flex-1'>
+                                  <p className='text-sm text-slate-800 font-light'>
+                                    {attachment.attachment.split('/').pop()}
+                                  </p>
+                                </div>
+                                <div className='flex gap-2 items-center'>
+                                  <a 
+                                    href={attachment.attachment} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='cursor-pointer'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <EyePassword visible />
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='cursor-pointer'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveTemplateAttachment(index);
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
                         
-                        {/* Show new file when selected */}
-                        <div className={`${attachment !== null ? 'file-preview' : 'hidden'}`}>
-                          <p className='text-sm text-slate-800 font-light'>{attachment?.name}</p>
-                          <div className='flex gap-2 mt-2 justify-center'>
-                            {attachment && (
-                              <a 
-                                href={URL.createObjectURL(attachment)} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className='text-blue-500 hover:underline text-sm'
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View File
-                              </a>
-                            )}
-                            <button
-                              type='button'
-                              className='underline text-blue-500 cursor-pointer text-sm'
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveAttachment();
-                              }}
-                            >
-                              Remove File
-                            </button>
+                        {/* Show new files when selected */}
+                        {files.length > 0 && (
+                          <div className='mb-4'>
+                            <p className='text-xs text-gray-600 mb-2'>
+                              {effectiveAllowMultiple ? 'New Files to Upload:' : 'File to Upload:'}
+                            </p>
+                            {files.map((file, index) => (
+                              <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
+                                <div className='flex-1'>
+                                  <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                </div>
+                                <div className='flex gap-2 items-center'>
+                                  <a 
+                                    href={URL.createObjectURL(file)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='cursor-pointer'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <EyePassword visible />
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='cursor-pointer'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveFile(index);
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        </div>
+                        )}
+                        
+                        {/* Show upload area if there are files already - only for multiple attachment mode */}
+                        {(files.length > 0 || templateAttachments.length > 0) && effectiveAllowMultiple && (
+                          <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                            + Add more files
+                            <input
+                              name='attachments'
+                              id='attachments-add'
+                              type='file'
+                              multiple
+                              className='sr-only'
+                              onChange={handleAttachmentUpload}
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            />
+                          </label>
+                        )}
                       </div>
-                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
+                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
                     </div>
                   </>
                 ) : (
                   <>
-                    <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
-                      Attachment
+                    <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
+                      Attachments
                     </label>
-                    <div className='mt-2'>
-                      {/* File upload for new attachment */}
-                      <input
-                        id='attachment'
-                        type='file'
-                        onChange={handleAttachmentUpload}
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
-                      />
-                      {attachmentExist ? (
-                        <button
-                          type='button'
-                          className='underline text-savoy-blue text-sm mt-1'
-                          onClick={handleRemoveAttachment}
+                    <div>
+                      <div
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                        className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                      >
+                        <label
+                          className={`${
+                            files.length === 0 && templateAttachments.length === 0
+                              ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                              : 'hidden'
+                          }`}
                         >
-                          Remove Attachment
-                        </button>
-                      ) : null}
+                          {effectiveAllowMultiple ? 'Drop files to upload or click to select' : 'Drop file to upload or click to select'}
+                          <input
+                            name='attachments'
+                            id='attachments'
+                            ref={inputRef}
+                            type='file'
+                            multiple={effectiveAllowMultiple}
+                            className='sr-only'
+                            onChange={handleAttachmentUpload}
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                          />
+                        </label>
+                        
+                        {/* Show replace file option for single attachment mode when file exists */}
+                        {!effectiveAllowMultiple && files.length > 0 && (
+                          <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                            Replace file
+                            <input
+                              name='attachments-replace'
+                              id='attachments-replace'
+                              type='file'
+                              multiple={false}
+                              className='sr-only'
+                              onChange={handleAttachmentUpload}
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            />
+                          </label>
+                        )}
+                        
+                        {/* Show existing template attachments when available */}
+                        {templateAttachments.length > 0 && (
+                          <div className='mb-4'>
+                            <p className='text-xs text-gray-600 mb-2'>Template Attachments:</p>
+                            {(effectiveAllowMultiple ? templateAttachments : templateAttachments.slice(0, 1)).map((attachment, index) => (
+                              <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
+                                <div className='flex-1'>
+                                  <p className='text-sm text-slate-800 font-light'>
+                                    {attachment.attachment.split('/').pop()}
+                                  </p>
+                                </div>
+                                <div className='flex gap-2 items-center'>
+                                  <a 
+                                    href={attachment.attachment} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='cursor-pointer'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <EyePassword visible />
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='cursor-pointer'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveTemplateAttachment(index);
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Show new files when selected */}
+                        {files.length > 0 && (
+                          <div className='mb-4'>
+                            <p className='text-xs text-gray-600 mb-2'>
+                              {effectiveAllowMultiple ? 'New Files to Upload:' : 'File to Upload:'}
+                            </p>
+                            {files.map((file, index) => (
+                              <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
+                                <div className='flex-1'>
+                                  <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                </div>
+                                <div className='flex gap-2 items-center'>
+                                  <a 
+                                    href={URL.createObjectURL(file)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className='cursor-pointer'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <EyePassword visible />
+                                  </a>
+                                  <button
+                                    type='button'
+                                    className='cursor-pointer'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveFile(index);
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Show upload area if there are files already - only for multiple attachment mode */}
+                        {(files.length > 0 || templateAttachments.length > 0) && effectiveAllowMultiple && (
+                          <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                            + Add more files
+                            <input
+                              name='attachments'
+                              id='attachments-add'
+                              type='file'
+                              multiple
+                              className='sr-only'
+                              onChange={handleAttachmentUpload}
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
                     </div>
-                    <p className='text-xs mt-1 text-gray-400'>Maximum file size: 10MB.</p>
                   </>
                 )}
               </div>

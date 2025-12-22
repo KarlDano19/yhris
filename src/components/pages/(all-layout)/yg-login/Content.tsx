@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { setCookie } from 'cookies-next';
 
 import updateSession from '@/helpers/updateSession';
+import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 import SplitLayout from '@/components/SplitView';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 
@@ -21,7 +22,7 @@ function Content() {
 
   const setSession = async (data: any) => {
     setCookie('token', data.token, {
-      maxAge: 60 * 60 * 3,
+      maxAge: ACCESS_TOKEN_LIFETIME_SECONDS,
       sameSite: 'strict',
       httpOnly: false,
       secure: true,

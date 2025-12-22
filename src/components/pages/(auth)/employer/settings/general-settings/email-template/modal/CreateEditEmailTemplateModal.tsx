@@ -16,6 +16,8 @@ import useGetEmailTemplateDetails from '../hooks/useGetEmailTemplateDetails';
 import EmailField from '@/components/common/EmailField';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
+import EyePassword from '@/svg/EyePassword';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
@@ -46,8 +48,9 @@ export default function CreateEditEmailTemplateModal({
   const [inputCc, setInputCc] = useState('');
   const [inputBcc, setInputBcc] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
-  const [file, setFile] = useState<File | null>(null);
-  const [attachmentRemoved, setAttachmentRemoved] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<Array<{id: number; attachment: string; created_at: string}>>([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<number[]>([]);
   const [isToFocused, setIsToFocused] = useState(false);
   const [isCcFocused, setIsCcFocused] = useState(false);
   const [isBccFocused, setIsBccFocused] = useState(false);
@@ -93,12 +96,14 @@ export default function CreateEditEmailTemplateModal({
         setIsBCCOpen(true);
         setTagsBcc(dataEmailTemplateDetail.bcc);
       }
-      // Handle existing attachment
-      if (dataEmailTemplateDetail.attachment) {
-        setFile(null); // Don't set a fake file, just show the existing attachment
-        setAttachmentRemoved(false);
-        setValue('attachment', dataEmailTemplateDetail.attachment);
+      // Handle existing attachments
+      if (dataEmailTemplateDetail.attachments && Array.isArray(dataEmailTemplateDetail.attachments)) {
+        setExistingAttachments(dataEmailTemplateDetail.attachments);
+      } else {
+        setExistingAttachments([]);
       }
+      setFiles([]);
+      setDeletedAttachmentIds([]);
     }
   }, [dataEmailTemplateDetail, setValue, setTagsTo, setTagsCc, setTagsBcc, isEditing]);
 
@@ -142,7 +147,9 @@ export default function CreateEditEmailTemplateModal({
     setTagsBcc([]);
     setIsCCOPen(false);
     setIsBCCOpen(false);
-    setFile(null);
+    setFiles([]);
+    setExistingAttachments([]);
+    setDeletedAttachmentIds([]);
     setShowTooltip(true);
     setIsToFocused(false);
     setIsCcFocused(false);
@@ -158,17 +165,14 @@ export default function CreateEditEmailTemplateModal({
     data.cc = tagsCc;
     data.bcc = tagsBcc;
 
-    // Handle attachment for editing
-    if (isEditing) {
-      // If attachment was removed and no new file is being uploaded, set it to empty string
-      if (attachmentRemoved && !file) {
-        data.attachment = '';
-      }
-      // If no new file and no removal, don't include attachment in the update
-      else if (!file && dataEmailTemplateDetail?.attachment && !attachmentRemoved) {
-        delete data.attachment;
-      }
-      // If a new file is being uploaded, the file will be handled by the FormData logic
+    // Handle multiple attachments
+    if (files.length > 0) {
+      data.attachments = files;
+    }
+    
+    // Handle deletion of existing attachments in edit mode
+    if (isEditing && deletedAttachmentIds.length > 0) {
+      data.delete_attachment_ids = deletedAttachmentIds;
     }
 
     const callbackReq = {
@@ -204,38 +208,55 @@ export default function CreateEditEmailTemplateModal({
   const handleDrop = function (e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    const droppedFile = e?.dataTransfer?.files[0];
+    const droppedFiles = Array.from(e?.dataTransfer?.files || []);
     
-    if (droppedFile) {
-      // Check file size (10MB limit)
-      if (droppedFile.size > 10 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
-        return;
+    if (droppedFiles.length > 0) {
+      const validFiles: File[] = [];
+      for (const file of droppedFiles) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+          continue;
+        }
+        validFiles.push(file);
       }
-      setFile(droppedFile);
-      setValue('attachment', droppedFile);
-      setAttachmentRemoved(false); // Reset removal flag when new file is dropped
+      if (validFiles.length > 0) {
+        setFiles(prev => [...prev, ...validFiles]);
+      }
     }
   };
 
   const handleChange = function (e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      const validFiles: File[] = [];
       
-      // Check file size (10MB limit)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast.custom(() => <CustomToast message='File size must be less than 10MB.' type='error' />, { duration: 2000 });
-        // Clear the file input
-        e.target.value = '';
-        return;
+      for (const file of selectedFiles) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+          continue;
+        }
+        validFiles.push(file);
       }
       
-      setFile(selectedFile);
-      setValue('attachment', selectedFile);
-      setAttachmentRemoved(false); // Reset removal flag when new file is selected
+      if (validFiles.length > 0) {
+        setFiles(prev => [...prev, ...validFiles]);
+      }
+      
+      // Clear the file input
       e.target.value = '';
     }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveExistingAttachment = (attachmentId: number) => {
+    setExistingAttachments(prev => prev.filter(att => att.id !== attachmentId));
+    setDeletedAttachmentIds(prev => [...prev, attachmentId]);
   };
 
   return (
@@ -450,7 +471,7 @@ export default function CreateEditEmailTemplateModal({
                         </div>
                       </div>
                       <div className='sm:col-span-4'>
-                        <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
+                        <label htmlFor='attachments' className='block text-sm font-medium leading-6 text-gray-900'>
                           Attachments
                         </label>
                         <div>
@@ -459,90 +480,119 @@ export default function CreateEditEmailTemplateModal({
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
-                            className='block w-full rounded-md border-0 py-14 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
+                            className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
                             <label
                               className={`${
-                                file === null && (!isEditing || !dataEmailTemplateDetail?.attachment || attachmentRemoved)
+                                files.length === 0 && existingAttachments.length === 0
                                   ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
                                   : 'hidden'
                               }`}
                             >
-                              Drop file to upload
+                              Drop files to upload or click to select
                               <input
-                                {...register('attachment')}
-                                name='attachment'
-                                id='attachment'
+                                {...register('attachments')}
+                                name='attachments'
+                                id='attachments'
                                 ref={inputRef}
                                 type='file'
+                                multiple
                                 className='sr-only'
                                 onChange={handleChange}
                                 accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                               />
                             </label>
                             
-                            {/* Show existing attachment when editing */}
-                            {isEditing && dataEmailTemplateDetail?.attachment && file === null && !attachmentRemoved && (
-                              <div className='file-preview'>
-                                <p className='text-sm text-slate-800 font-light'>
-                                  Current: {dataEmailTemplateDetail.attachment.split('/').pop()}
-                                </p>
-                                <div className='flex gap-2 mt-2 justify-center'>
-                                  <a 
-                                    href={dataEmailTemplateDetail.attachment} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className='text-blue-500 hover:underline text-sm'
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    View File
-                                  </a>
-                                  <button
-                                    type='button'
-                                    className='underline text-blue-500 cursor-pointer text-sm'
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setFile(null);
-                                      setAttachmentRemoved(true);
-                                      setValue('attachment', '');
-                                    }}
-                                  >
-                                    Remove File
-                                  </button>
-                                </div>
+                            {/* Show existing attachments when editing */}
+                            {existingAttachments.length > 0 && (
+                              <div className='mb-4'>
+                                <p className='text-xs text-gray-600 mb-2'>Existing Attachments:</p>
+                                {existingAttachments.map((attachment) => (
+                                  <div key={attachment.id} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
+                                    <div className='flex-1'>
+                                      <p className='text-sm text-slate-800 font-light'>
+                                        {attachment.attachment.split('/').pop()}
+                                      </p>
+                                    </div>
+                                    <div className='flex gap-2 items-center'>
+                                      <a 
+                                        href={attachment.attachment} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className='cursor-pointer'
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <EyePassword visible />
+                                      </a>
+                                      <button
+                                        type='button'
+                                        className='cursor-pointer'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveExistingAttachment(attachment.id);
+                                        }}
+                                      >
+                                        <DeleteIcon />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             )}
                             
-                            {/* Show new file when selected */}
-                            <div className={`${file !== null ? 'file-preview' : 'hidden'}`}>
-                              <p className='text-sm text-slate-800 font-light'>{file?.name}</p>
-                              <div className='flex gap-2 mt-2 justify-center'>
-                                {file && (
-                                  <a 
-                                    href={URL.createObjectURL(file)} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    className='text-blue-500 hover:underline text-sm'
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    View File
-                                  </a>
-                                )}
-                                <button
-                                  type='button'
-                                  className='underline text-blue-500 cursor-pointer text-sm'
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setFile(null);
-                                    setAttachmentRemoved(false);
-                                  }}
-                                >
-                                  Remove File
-                                </button>
+                            {/* Show new files when selected */}
+                            {files.length > 0 && (
+                              <div className='mb-4'>
+                                <p className='text-xs text-gray-600 mb-2'>New Files to Upload:</p>
+                                {files.map((file, index) => (
+                                  <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
+                                    <div className='flex-1'>
+                                      <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                    </div>
+                                    <div className='flex gap-2 items-center'>
+                                      <a 
+                                        href={URL.createObjectURL(file)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className='cursor-pointer'
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <EyePassword visible />
+                                      </a>
+                                      <button
+                                        type='button'
+                                        className='cursor-pointer'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveFile(index);
+                                        }}
+                                      >
+                                        <DeleteIcon />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            </div>
+                            )}
+                            
+                            {/* Show upload area if there are files already */}
+                            {(files.length > 0 || existingAttachments.length > 0) && (
+                              <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
+                                + Add more files
+                                <input
+                                  {...register('attachments')}
+                                  name='attachments'
+                                  id='attachments-add'
+                                  type='file'
+                                  multiple
+                                  className='sr-only'
+                                  onChange={handleChange}
+                                  accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                                />
+                              </label>
+                            )}
                           </div>
-                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb</h1>
+                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
                         </div>
                       </div>
                     </div>

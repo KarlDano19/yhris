@@ -35,7 +35,11 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         data.cc = separationEmail.signDocuments.cc;
         data.bcc = separationEmail.signDocuments.bcc;
         data.context = separationEmail.signDocuments.message;
-        if (separationEmail.signDocuments.attachment) {
+        // Handle multiple attachments for sign documents
+        if (separationEmail.signDocuments.attachments && Array.isArray(separationEmail.signDocuments.attachments) && separationEmail.signDocuments.attachments.length > 0) {
+          data.attachments = separationEmail.signDocuments.attachments;
+        } else if (separationEmail.signDocuments.attachment) {
+          // Backward compatibility: single attachment
           data.attachment = separationEmail.signDocuments.attachment;
         }
       }
@@ -69,12 +73,44 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
     
     let config: any;
     
-    // If attachment exists, use FormData
-    if (data.attachment) {
+    // Check if there are attachments (multiple or single)
+    const hasAttachments = (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) || data.attachment;
+    
+    // If attachments exist, use FormData
+    if (hasAttachments) {
       const formData = new FormData();
+      
+      // Handle multiple attachments for sign documents
+      if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+        const fileAttachments: File[] = [];
+        const urlAttachments: string[] = [];
+        
+        data.attachments.forEach((attachment: File | string) => {
+          if (attachment instanceof File) {
+            fileAttachments.push(attachment);
+          } else if (typeof attachment === 'string') {
+            urlAttachments.push(attachment);
+          }
+        });
+        
+        // Append file attachments
+        fileAttachments.forEach((file) => {
+          formData.append('attachments', file);
+        });
+        
+        // Append URL attachments as JSON
+        if (urlAttachments.length > 0) {
+          formData.append('attachment_urls', JSON.stringify(urlAttachments));
+        }
+      } else if (data.attachment) {
+        // Single attachment (backward compatibility)
+        formData.append('attachment', data.attachment);
+      }
+      
+      // Append other fields
       Object.keys(data).forEach(key => {
-        if (key === 'attachment') {
-          formData.append(key, data[key]);
+        if (key === 'attachment' || key === 'attachments') {
+          return; // Handled separately above
         } else if (key === 'to' || key === 'cc' || key === 'bcc') {
           // Ensure email fields are arrays before stringifying
           const emailArray = Array.isArray(data[key]) ? data[key] : [data[key]];
