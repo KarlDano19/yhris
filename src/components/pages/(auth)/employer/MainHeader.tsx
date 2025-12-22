@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 import { Menu, Popover, Transition } from '@headlessui/react';
 import {getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
+import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
@@ -16,15 +18,13 @@ import useLogout from '../../../hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
 import Timer from '../../../Timer';
 import SessionExpirationModal from '@/components/SessionExpirationModal';
-import { useRouter, usePathname } from 'next/navigation';
-import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
+import useGetUserDetails from '@/components/hooks/useGetUserDetails';
+import useGetNotification from '@/components/hooks/useGetNotification';
+import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
-import useGetUsers from '@/components/hooks/useGetUsers';
-import useGetUserDetails from '@/components/hooks/useGetUserDetails';
-import useGetNotification from '@/components/hooks/useGetNotification';
 
 interface ErrorDetail {
   detail: string;
@@ -54,7 +54,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   } = useGetEmployerProfile() as { data: any; isLoading: boolean; error: ErrorDetail | null };
   const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
   const { mutate } = useLogout();
-  const { data: notificationsData, isLoading: isNotificationsLoading } = useGetNotification() as { data: any; isLoading: boolean };
+  const { data: notificationsData, isLoading: isNotificationsLoading } = useGetNotification({ page_size: 10 });
+  const { mutate: markAsRead } = useMarkNotificationRead();
   const [notifications, setNotifications] = useState<any[]>([]);
   const { mutate: refreshToken } = useRefreshToken();
 
@@ -93,8 +94,12 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   ];
 
   useEffect(() => {
-    if (notificationsData) {
-      setNotifications(notificationsData);
+    if (notificationsData?.pages) {
+      // Updated: access .records directly (no .data wrapper)
+      const flattenedNotifications = notificationsData.pages.flatMap(
+        (page: any) => page?.records || []
+      );
+      setNotifications(flattenedNotifications);
     }
   }, [notificationsData]);
 
@@ -244,24 +249,31 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     );
   };
 
-  const NotificationItem = ({ notification }: { notification: any }) => {
-    const formatTimeAgo = (dateString: string) => {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-      
-      if (diffInSeconds < 60) return 'Just now';
-      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-      return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  const formatTimeAgo = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
+  const NotificationItem = ({ notification, onMarkAsRead }: { notification: any; onMarkAsRead: (id: number) => void }) => {
+    const handleClick = () => {
+      if (!notification.is_read) {
+        onMarkAsRead(notification.id);
+      }
     };
 
     return (
       <Menu.Item>
         {({ active }) => (
           <Link
-            href={notification.link || notification.url || '#'}
+            href={notification.url_path || '#'}
+            onClick={handleClick}
             className={classNames(
               'block px-4 py-3 border-b border-gray-100 last:border-b-0',
               active ? 'bg-gray-50' : '',
@@ -290,6 +302,66 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
           </Link>
         )}
       </Menu.Item>
+    );
+  };
+
+  const NotificationDropdown = () => {
+    const unreadCount = notifications.filter((n: any) => !n.is_read).length;
+
+    return (
+      <Menu as='div' className='relative'>
+        <Menu.Button className='relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'>
+          <span className='sr-only'>Open notification menu</span>
+          <BellIcon className='block h-6 w-6 text-blue-800' aria-hidden='true' />
+          {unreadCount > 0 && (
+            <span className='absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </Menu.Button>
+        <Transition
+          as={Fragment}
+          enter='transition ease-out duration-100'
+          enterFrom='transform opacity-0 scale-95'
+          enterTo='transform opacity-100 scale-100'
+          leave='transition ease-in duration-75'
+          leaveFrom='transform opacity-100 scale-100'
+          leaveTo='transform opacity-0 scale-95'
+        >
+          <Menu.Items className='absolute right-0 z-[1000] mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden'>
+            <div className='px-4 py-3 border-b border-gray-200 flex items-center justify-between'>
+              <h3 className='text-sm font-semibold text-gray-900'>Notifications</h3>
+              <Link href='/notifications' className='text-xs text-blue-600 hover:text-blue-800'>
+                View All
+              </Link>
+            </div>
+            <div className='max-h-80 overflow-y-auto'>
+              {isNotificationsLoading ? (
+                <div className='px-4 py-6 text-center'>
+                  <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto'></div>
+                  <p className='text-sm text-gray-500 mt-2'>Loading...</p>
+                </div>
+              ) : notifications.length > 0 ? (
+                notifications.slice(0, 5).map((notification: any, index: number) => (
+                  <NotificationItem key={notification.id || index} notification={notification} onMarkAsRead={markAsRead} />
+                ))
+              ) : (
+                <div className='px-4 py-6 text-center'>
+                  <BellIcon className='h-8 w-8 text-gray-300 mx-auto' />
+                  <p className='text-sm text-gray-500 mt-2'>No notifications yet</p>
+                </div>
+              )}
+            </div>
+            {notifications.length > 5 && (
+              <div className='px-4 py-3 border-t border-gray-200 text-center'>
+                <Link href='/notifications' className='text-sm text-blue-600 hover:text-blue-800 font-medium'>
+                  See all {notifications.length} notifications
+                </Link>
+              </div>
+            )}
+          </Menu.Items>
+        </Transition>
+      </Menu>
     );
   };
 
@@ -351,7 +423,9 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                     </Link>
                   </div>
                 </div>
-                <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden'>
+                <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden gap-2'>
+                  {/* Mobile Notifications */}
+                  <NotificationDropdown />
                   {/* Mobile menu button */}
                   <Popover.Button className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
                     <span className='sr-only'>Open menu</span>
@@ -363,51 +437,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </Popover.Button>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
-                  <Menu as='div' className='relative ml-5 flex-shrink-0'>
-                    <div>
-                      <Menu.Button className='relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
-                        <span className='sr-only'>Open notification menu</span>
-                        <BellIcon className='block h-6 w-6 text-blue-800' aria-hidden='true' />
-                        {notifications.filter((n: any) => !n.is_read).length > 0 && (
-                          <span className='absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
-                            {notifications.filter((n: any) => !n.is_read).length > 9 ? '9+' : notifications.filter((n: any) => !n.is_read).length}
-                          </span>
-                        )}
-                      </Menu.Button>
-                    </div>
-                    <Transition
-                      as={Fragment}
-                      enter='transition ease-out duration-100'
-                      enterFrom='transform opacity-0 scale-95'
-                      enterTo='transform opacity-100 scale-100'
-                      leave='transition ease-in duration-75'
-                      leaveFrom='transform opacity-100 scale-100'
-                      leaveTo='transform opacity-0 scale-95'
-                    >
-                      <Menu.Items className='absolute right-0 z-[1000] mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden'>
-                        <div className='px-4 py-3 border-b border-gray-200'>
-                          <h3 className='text-sm font-semibold text-gray-900'>Notifications</h3>
-                        </div>
-                        <div className='max-h-80 overflow-y-auto'>
-                          {isNotificationsLoading ? (
-                            <div className='px-4 py-6 text-center'>
-                              <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto'></div>
-                              <p className='text-sm text-gray-500 mt-2'>Loading...</p>
-                            </div>
-                          ) : notifications.length > 0 ? (
-                            notifications.map((notification: any, index: number) => (
-                              <NotificationItem key={notification.id || index} notification={notification} />
-                            ))
-                          ) : (
-                            <div className='px-4 py-6 text-center'>
-                              <BellIcon className='h-8 w-8 text-gray-300 mx-auto' />
-                              <p className='text-sm text-gray-500 mt-2'>No notifications yet</p>
-                            </div>
-                          )}
-                        </div>
-                      </Menu.Items>
-                    </Transition>
-                  </Menu>
+                  {/* Notifications */}
+                  <NotificationDropdown />
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>
