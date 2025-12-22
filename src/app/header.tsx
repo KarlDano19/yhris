@@ -8,7 +8,14 @@ import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader'
 import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
 import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
 
-function Header({ type, hasProfile, hasActiveSubscription }: { type: string; hasProfile: boolean; hasActiveSubscription: boolean }) {
+interface HeaderProps {
+  type: string;
+  hasProfile: boolean;
+  hasActiveSubscription: boolean;
+  tokenExpiresAt?: number;
+}
+
+function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: HeaderProps) {
   const pathname = usePathname();
   const listPathname = pathname?.split('/') || [];
   const slicePaths = listPathname.slice(1);
@@ -53,8 +60,20 @@ function Header({ type, hasProfile, hasActiveSubscription }: { type: string; has
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
           {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
-          {type === 'employer' && employerRoutes.includes(firstRoute) && <MainHeader hasProfile={hasProfile} hasActiveSubscription={hasActiveSubscription} firstRoute={firstRoute} />}
-          {type === 'applicant' && applicantRoutes.includes(firstRoute) && <AuthorizedHeader hasProfile={hasProfile} />}
+          {type === 'employer' && employerRoutes.includes(firstRoute) && (
+            <MainHeader
+              hasProfile={hasProfile}
+              hasActiveSubscription={hasActiveSubscription}
+              firstRoute={firstRoute}
+              initialTokenExpiresAt={tokenExpiresAt}
+            />
+          )}
+          {type === 'applicant' && applicantRoutes.includes(firstRoute) && (
+            <AuthorizedHeader
+              hasProfile={hasProfile}
+              initialTokenExpiresAt={tokenExpiresAt}
+            />
+          )}
         </>
       )}
     </>

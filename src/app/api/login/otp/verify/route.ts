@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import { sessionOptions, sleep, SessionData } from '@/lib/session';
+import { sessionOptions, sleep, SessionData, ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,9 +26,14 @@ export async function POST(request: NextRequest) {
     }
     
     // OTP verification successful
+    // Access token expiration matches backend exactly (no buffer needed since we properly update cookie on refresh)
+    const expiresAt = Date.now() + (ACCESS_TOKEN_LIFETIME_SECONDS * 1000);
+    
     session['isLoggedIn'] = true;
     session['email'] = payload.email || session.email;
     session['token'] = data.token;
+    session['refreshToken'] = data.refresh_token || '';
+    session['tokenExpiresAt'] = expiresAt;
     session['accountType'] = data.account_type;
     session['hasPendingTransaction'] = data.has_pending_transaction;
     session['hasActiveSubscription'] = data.has_active_subscription;
@@ -39,6 +44,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       token: data.token,
+      refresh_token: data.refresh_token,
+      expires_at: expiresAt,
       is_valid: true,
       account_type: data.account_type,
       has_profile: data.has_profile,
