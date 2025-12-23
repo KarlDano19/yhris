@@ -1,4 +1,4 @@
-import { Dispatch, useState, useEffect, useRef } from 'react';
+import React, { Dispatch, useState, useEffect, useRef } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -42,6 +42,11 @@ export default function CreateJobPageJobDescription({
     file?: File;
   }>({});
   
+  // Skills state management
+  const [skillsInput, setSkillsInput] = useState('');
+  const [tagsSkill, setTagsSkill] = useState<string[]>([]);
+  const isSkillsInitialized = useRef(false);
+  
   // Track the last position to detect changes
   const lastPositionRef = useRef<string | null>(null);
 
@@ -60,6 +65,47 @@ export default function CreateJobPageJobDescription({
       currentContent === '<p><br></p>' ||
       currentContent === CREATEJOB_TEMPLATE[0] ||
       currentContent.includes('Ensuring the accounts of the company are accurate and free of error');
+  };
+
+  // Initialize skills tags only once when formData.skills is available
+  useEffect(() => {
+    if (!isSkillsInitialized.current) {
+      const currentSkills = getValues('skills');
+      let skillsArray = [];
+      if (Array.isArray(currentSkills)) {
+        skillsArray = currentSkills;
+      } else if (typeof currentSkills === 'string') {
+        skillsArray = currentSkills
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
+      }
+      if (skillsArray.length > 0) {
+        setTagsSkill(skillsArray);
+        setValue('skills', skillsArray);
+      }
+      isSkillsInitialized.current = true;
+    }
+  }, [getValues, setValue]);
+
+  // Handle skills input key down
+  const handleKeyDownSkill = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' || event.key === 'Tab' || event.key === ',') {
+      event.preventDefault();
+      const newTag = skillsInput.trim();
+      if (newTag !== '' && !tagsSkill.some((tag) => tag.toLowerCase() === newTag.toLowerCase())) {
+        const newTags = [...tagsSkill, newTag];
+        setTagsSkill(newTags);
+        setValue('skills', newTags);
+        setSkillsInput('');
+      }
+    }
+  };
+
+  const handleRemoveTagSkill = (tag: string) => {
+    const newTags = tagsSkill.filter((t) => t !== tag);
+    setTagsSkill(newTags);
+    setValue('skills', newTags);
   };
 
   // Effect to populate role field with selected position description
@@ -191,6 +237,56 @@ export default function CreateJobPageJobDescription({
           <label htmlFor='is_show_roles' className='ml-2'>
             Show Roles
           </label>
+        </div>
+        <div className='sm:col-span-4 mt-4'>
+          <div className='flex items-center gap-2 mb-2'>
+            <label htmlFor='skills' className='block text-sm font-medium leading-6 text-gray-900'>
+              Skills
+            </label>
+            <div className='inline-flex items-center px-2 py-1 rounded-md bg-blue-50 border border-blue-200'>
+              <svg className='w-3 h-3 text-blue-600 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+              </svg>
+              <span className='text-xs font-medium text-blue-600'>Affects Search</span>
+            </div>
+          </div>
+          <p className='text-sm text-gray-600 mb-2'>
+            Add relevant skills for this position. Applicants can search by these skills to find your job posting.
+          </p>
+          <div className='mt-2'>
+            <div className='relative flex items-center'>
+              <input
+                type='text'
+                id='skills'
+                value={skillsInput}
+                onChange={(e) => setSkillsInput(e.target.value)}
+                onKeyDown={handleKeyDownSkill}
+                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6'
+                placeholder='Enter skills and press Enter, Tab, or comma to add...'
+              />
+            </div>
+            {/* Skills Tags Display */}
+            {tagsSkill.length > 0 && (
+              <div className='mt-3 flex flex-wrap gap-2'>
+                {tagsSkill.map((tagSkill: string) => (
+                  <div
+                    key={tagSkill}
+                    className='flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm'
+                  >
+                    <span>{tagSkill}</span>
+                    <button
+                      type='button'
+                      onClick={() => handleRemoveTagSkill(tagSkill)}
+                      className='text-blue-600 hover:text-blue-800 font-bold text-lg leading-none'
+                      title='Remove skill'
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className={`sm:col-span-4 mt-4 ${manualInputFocus.qualifications ? 'border-2 border-blue-700' : ''}`}>
           <div className='flex items-center gap-2 mb-2'>

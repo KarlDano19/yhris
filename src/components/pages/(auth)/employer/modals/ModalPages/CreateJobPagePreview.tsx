@@ -1,6 +1,6 @@
 import { Dispatch } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -130,6 +130,19 @@ export default function CreateJobPagePreview({
                 ? firstFormGetValues('placeAdvertise').join(', ') 
                 : firstFormGetValues('placeAdvertise')}
             </p>
+            
+            {/* Skills */}
+            {fourthFormGetValues('skills') && Array.isArray(fourthFormGetValues('skills')) && fourthFormGetValues('skills').length > 0 && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                  <StarIcon className='h-5 w-5 mr-1' />
+                  Skills
+                </h6>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                  {fourthFormGetValues('skills').join(', ')}
+                </p>
+              </>
+            )}
             
             {/* Qualifications */}
             <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>

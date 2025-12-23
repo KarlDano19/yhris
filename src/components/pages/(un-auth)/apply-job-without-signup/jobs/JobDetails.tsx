@@ -11,6 +11,7 @@ import {
   ClipboardDocumentIcon,
   LinkIcon,
   HomeIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -161,6 +162,19 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             </>
           )}
           {/* Role section - only show if is_show_roles is true */}
+
+          {/* skills */}
+          {jobDetailData?.skills && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <StarIcon className='h-5 w-5 mr-1' />
+                Skills
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? jobDetailData.skills : 'Loading skills...'}
+              </p>
+            </>
+          )}
 
           {/* qualifications */}
           <div className='border-t mt-4'>
