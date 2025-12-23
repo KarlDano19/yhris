@@ -683,13 +683,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                         Upload Resumes
                       </SmartButton>
 
-                      <button
+                      {/* <button
                         onClick={() => setIsAddApplicantModalOpen(true)}
                         className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
                         title="Add Applicant"
                       >
                         <PlusIconGreen />
-                      </button>
+                      </button> */}
 
                       <div className='border-l-2 border-gray-300 h-10'></div>
 
