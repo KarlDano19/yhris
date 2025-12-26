@@ -43,6 +43,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'analytics',
     'audit-logs',
     'talent-search',
+    'notifications',
   ];
   const applicantRoutes: string[] = [
     'application-tracker',
