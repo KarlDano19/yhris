@@ -23,7 +23,12 @@ async function updateApplicantOrient(data: any) {
         payload.cc = data.sendContract.cc;
         payload.bcc = data.sendContract.bcc;
         payload.context = data.sendContract.message;
-        if (data.sendContract.attachment) {
+        // Handle multiple attachments (new format)
+        if (data.sendContract.attachments && Array.isArray(data.sendContract.attachments) && data.sendContract.attachments.length > 0) {
+          payload.attachments = data.sendContract.attachments;
+        }
+        // Legacy support: single attachment
+        else if (data.sendContract.attachment) {
           payload.attachment = data.sendContract.attachment;
         }
       }
@@ -35,7 +40,12 @@ async function updateApplicantOrient(data: any) {
         payload.cc = data.introduceTeam.cc;
         payload.bcc = data.introduceTeam.bcc;
         payload.context = data.introduceTeam.message;
-        if (data.introduceTeam.attachment) {
+        // Handle multiple attachments (new format)
+        if (data.introduceTeam.attachments && Array.isArray(data.introduceTeam.attachments) && data.introduceTeam.attachments.length > 0) {
+          payload.attachments = data.introduceTeam.attachments;
+        }
+        // Legacy support: single attachment
+        else if (data.introduceTeam.attachment) {
           payload.attachment = data.introduceTeam.attachment;
         }
       }
@@ -63,12 +73,38 @@ async function updateApplicantOrient(data: any) {
     const token = getCookie('token');
     let config: any;
     
-    // If attachment exists, use FormData
-    if (payload.attachment) {
+    // Check if there are attachments (multiple or single) or other file uploads
+    const hasAttachments = (payload.attachments && Array.isArray(payload.attachments) && payload.attachments.length > 0) || payload.attachment;
+    
+    // If attachments exist, use FormData
+    if (hasAttachments) {
       const formData = new FormData();
+      
+      // Separate File objects from URL strings
+      const fileAttachments: File[] = [];
+      const urlAttachments: string[] = [];
+      
+      if (payload.attachments && Array.isArray(payload.attachments)) {
+        payload.attachments.forEach((attachment: File | string) => {
+          if (attachment instanceof File) {
+            fileAttachments.push(attachment);
+          } else if (typeof attachment === 'string') {
+            urlAttachments.push(attachment);
+          }
+        });
+      } else if (payload.attachment) {
+        if (payload.attachment instanceof File) {
+          fileAttachments.push(payload.attachment);
+        } else if (typeof payload.attachment === 'string') {
+          urlAttachments.push(payload.attachment);
+        }
+      }
+      
+      // Append all fields to FormData (excluding attachment fields - handled separately)
       Object.keys(payload).forEach(key => {
-        if (key === 'attachment') {
-          formData.append(key, payload[key]);
+        if (key === 'attachment' || key === 'attachments') {
+          // Skip these - we handle them separately below
+          return;
         } else if (key === 'to' || key === 'cc' || key === 'bcc') {
           // Ensure email fields are arrays before stringifying
           const emailArray = Array.isArray(payload[key]) ? payload[key] : [payload[key]];
@@ -77,6 +113,17 @@ async function updateApplicantOrient(data: any) {
           formData.append(key, payload[key]);
         }
       });
+      
+      // Append file attachments as files (these go to request.FILES)
+      fileAttachments.forEach((file) => {
+        formData.append('attachments', file);
+      });
+      
+      // Append URL attachments as JSON array string (these go to payload)
+      if (urlAttachments.length > 0) {
+        // Always use 'attachment_urls' key for URL strings to distinguish from files
+        formData.append('attachment_urls', JSON.stringify(urlAttachments));
+      }
       
       config = {
         method: 'PATCH',
