@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+
 import { useRouter } from 'next/navigation';
-import { DocumentTextIcon, BookmarkIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+
 import YahshuaSISHeader from '../../YahshuaSISHeader';
 import FloatingMenuBar from '../../components/FloatingMenuBar';
 import ProfileCard from './components/cards/ProfileCard';
@@ -16,7 +17,9 @@ import BirdsEyeViewCard from './components/cards/BirdsEyeViewCard';
 import MyApplicationsModal from '../../modals/MyApplicationsModal';
 import SavedJobsModal from '../../modals/SavedJobsModal';
 import TrainingsInProgressModal from '../../modals/TrainingsInProgressModal';
+
 import { UserIcon } from '@heroicons/react/24/solid';
+import { DocumentTextIcon, BookmarkIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 
 const Content = () => {
   const router = useRouter();
