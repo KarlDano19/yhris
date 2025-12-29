@@ -64,7 +64,7 @@ const Content = () => {
     {
       icon: UserIcon,
       label: 'Edit Profile',
-      onClick: () => router.push('/yahshua-sis/profile'),
+      onClick: () => router.push('/yahshua-sis/personal-mode/profile'),
     },
     {
       icon: DocumentTextIcon,

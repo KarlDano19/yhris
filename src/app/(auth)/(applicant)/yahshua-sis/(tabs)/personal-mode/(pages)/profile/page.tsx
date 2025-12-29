@@ -1,4 +1,4 @@
-import Content from "@/components/pages/(auth)/yahshua-sis/pages/profile/Content";
+import Content from "@/components/pages/(auth)/yahshua-sis/tabs/personal-mode/pages/profile/Content";
 
 export const metadata = {
   title: "Profile - YAHSHUA SIS",

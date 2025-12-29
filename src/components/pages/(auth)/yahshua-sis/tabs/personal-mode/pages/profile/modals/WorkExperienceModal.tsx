@@ -1,6 +1,6 @@
 'use client';
 
-import Modal from '../../../components/Modal';
+import Modal from '../../../../../components/Modal';
 import { PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface WorkExperience {

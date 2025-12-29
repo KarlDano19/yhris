@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRightIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import YahshuaSISHeader from '../../YahshuaSISHeader';
-import FloatingMenuBar from '../../components/FloatingMenuBar';
-import ProfileCard from '../../tabs/personal-mode/components/cards/ProfileCard';
-import QuickActionsCard from '../../tabs/personal-mode/components/cards/QuickActionsCard';
-import BirdsEyeViewCard from '../../tabs/personal-mode/components/cards/BirdsEyeViewCard';
-import MyApplicationsModal from '../../modals/MyApplicationsModal';
-import SavedJobsModal from '../../modals/SavedJobsModal';
-import TrainingsInProgressModal from '../../modals/TrainingsInProgressModal';
+import YahshuaSISHeader from '../../../../YahshuaSISHeader';
+import FloatingMenuBar from '../../../../components/FloatingMenuBar';
+import ProfileCard from '../../components/cards/ProfileCard';
+import QuickActionsCard from '../../components/cards/QuickActionsCard';
+import BirdsEyeViewCard from '../../components/cards/BirdsEyeViewCard';
+import MyApplicationsModal from '../../../../modals/MyApplicationsModal';
+import SavedJobsModal from '../../../../modals/SavedJobsModal';
+import TrainingsInProgressModal from '../../../../modals/TrainingsInProgressModal';
 import BasicInformationModal from './modals/BasicInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';
 import EducationModal from './modals/EducationModal';
@@ -232,7 +232,7 @@ const Content = () => {
     <>
       <YahshuaSISHeader />
       <FloatingMenuBar />
-      <div className="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
         {/* Three Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}

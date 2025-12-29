@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '../../../components/Modal';
+import Modal from '../../../../../components/Modal';
 import { XMarkIcon, PencilIcon, PlusIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 interface Certification {

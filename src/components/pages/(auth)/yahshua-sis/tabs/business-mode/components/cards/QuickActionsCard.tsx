@@ -8,17 +8,17 @@ const QuickActionsCard = () => {
     {
       icon: MagnifyingGlassIcon,
       label: 'Browse Requests',
-      href: '/yahshua-sis/browse-requests',
+      href: '/yahshua-sis/business-mode/browse-requests',
     },
     {
       icon: BriefcaseIcon,
       label: 'Active Jobs',
-      href: '/yahshua-sis/active-jobs',
+      href: '/yahshua-sis/business-mode/active-jobs',
     },
     {
       icon: CurrencyDollarIcon,
       label: 'Earnings',
-      href: '/yahshua-sis/earnings',
+      href: '/yahshua-sis/business-mode/earnings',
     },
   ];
 

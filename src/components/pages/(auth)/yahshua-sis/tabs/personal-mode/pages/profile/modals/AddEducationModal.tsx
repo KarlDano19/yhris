@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Modal from '../../../components/Modal';
+import Modal from '../../../../../components/Modal';
 
 interface Education {
   id?: number;
