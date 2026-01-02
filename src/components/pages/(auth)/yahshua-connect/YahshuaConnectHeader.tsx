@@ -1,17 +1,27 @@
 'use client';
 
 import { useState } from 'react';
+
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import classNames from '@/helpers/classNames';
-import YahshuaConnectLogo from '@/svg/YahshuaConnectLogo';
-import ChatIcon from '@/svg/ChatIcon';
-import NotificationsIcon from '@/svg/NotificationsIcon';
-import ProfileDropdownIcon from '@/svg/ProfileDropdownIcon';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { deleteCookie } from 'cookies-next';
+
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import useLogout from '@/components/hooks/useLogout';
 import MessagesModal from './modals/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
 import ChatModal from './modals/ChatModal';
+
+import classNames from '@/helpers/classNames';
+
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import YahshuaConnectLogo from '@/svg/YahshuaConnectLogo';
+import NotificationsIcon from '@/svg/NotificationsIcon';
+import ProfileDropdownIcon from '@/svg/ProfileDropdownIcon';
+import ChatIcon from '@/svg/ChatIcon';
+import ExitIcon from '@/svg/ExitIcon';
 
 const YahshuaConnectHeader = () => {
   const pathname = usePathname();
@@ -21,15 +31,39 @@ const YahshuaConnectHeader = () => {
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedChat, setSelectedChat] = useState<{ name: string; initials: string } | null>(null);
+  const { mutate } = useLogout();
   
   // Determine active mode from pathname
   const activeMode = pathname?.includes('business-mode') ? 'business' : 'personal';
   
   const handleModeChange = (mode: 'personal' | 'business') => {
     const targetPath = mode === 'personal' 
-      ? '/yahshua-connect/personal-mode' 
-      : '/yahshua-connect/business-mode';
+      ? '/personal-mode' 
+      : '/business-mode';
     router.push(targetPath);
+  };
+
+  const logout = (isExpired: boolean) => {
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        if (isExpired) {
+          toast.custom(() => <CustomToast message={'Session is expired.'} type='error' />, {
+            duration: 4000,
+          });
+        } else {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+        }
+        deleteCookie('token');
+        location.href = '/login';
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err || 'Session is expired.'} type='error' />, {
+          duration: 4000,
+        });
+        location.href = '/login';
+      },
+    };
+    mutate(void 0, callbackReq);
   };
 
   // Dummy data for messages
@@ -83,7 +117,7 @@ const YahshuaConnectHeader = () => {
         <div className="hidden md:flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/yahshua-connect/personal-mode">
+            <Link href="/personal-mode">
               <YahshuaConnectLogo />
             </Link>
           </div>
@@ -153,6 +187,15 @@ const YahshuaConnectHeader = () => {
                 1
               </span>
             </button>
+
+            {/* Logout Button */}
+            <button
+              onClick={() => logout(false)}
+              className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              title="Sign Out"
+            >
+              <ExitIcon className="h-5 w-5 fill-gray-600" />
+            </button>
           </div>
         </div>
 
@@ -162,7 +205,7 @@ const YahshuaConnectHeader = () => {
           <div className="flex items-center justify-between h-14 gap-2">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/yahshua-connect/personal-mode">
+              <Link href="/personal-mode">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
                     <span className="text-white font-bold text-sm">Y</span>
@@ -208,6 +251,15 @@ const YahshuaConnectHeader = () => {
                 <div className="absolute bottom-0 right-0">
                   <ProfileDropdownIcon fill="#2C3F58" />
                 </div>
+              </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={() => logout(false)}
+                className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                title="Sign Out"
+              >
+                <ExitIcon className="h-4 w-4 fill-gray-600" />
               </button>
             </div>
           </div>

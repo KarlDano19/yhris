@@ -1,4 +1,5 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/Content";
+import PersonalModeLayout from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/PersonalModeLayout";
 
 export const metadata = {
   title: "Personal Mode - YAHSHUA CONNECT",
@@ -6,7 +7,11 @@ export const metadata = {
 };
 
 const YahshuaConnectPersonalMode = async () => {
-  return <Content />;
+  return (
+    <PersonalModeLayout>
+      <Content />
+    </PersonalModeLayout>
+  );
 };
 
 export default YahshuaConnectPersonalMode;

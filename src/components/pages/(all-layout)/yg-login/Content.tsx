@@ -37,7 +37,7 @@ function Content() {
       }
     } else {
       if (data.has_profile) {
-        location.href = '/apply-for-a-job';
+        location.href = '/personal-mode';
       } else {
         location.href = '/setup-applicant-profile';
       }

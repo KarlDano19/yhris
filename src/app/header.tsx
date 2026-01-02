@@ -53,7 +53,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'setup-applicant-profile',
     'job-applicant-form',
   ];
-  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page', 'yahshua-connect'];
+  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page', 'personal-mode'];
 
   return (
     <>

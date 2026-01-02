@@ -1,4 +1,5 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/pages/trainings/Content";
+import PersonalModeLayout from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/PersonalModeLayout";
 
 export const metadata = {
   title: "Trainings - YAHSHUA CONNECT",
@@ -6,7 +7,11 @@ export const metadata = {
 };
 
 const TrainingsPage = async () => {
-  return <Content />;
+  return (
+    <PersonalModeLayout>
+      <Content />
+    </PersonalModeLayout>
+  );
 };
 
 export default TrainingsPage;

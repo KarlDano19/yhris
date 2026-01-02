@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation','yahshua-connect'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -42,6 +42,9 @@ export async function middleware(request: NextRequest) {
     'notifications',
   ];
   const applicantRoutes: any = [
+    'personal-mode',
+    'business-mode',
+
     'application-tracker',
     'apply-for-a-job',
     'edit-profile',
@@ -100,6 +103,10 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
+        if (firstRoute === 'personal-mode') {
+          // Allow access to personal-mode
+          return NextResponse.next();
+        }
         if (
           firstRoute === 'application-tracker' ||
           firstRoute === 'apply-for-a-job' ||
@@ -110,8 +117,10 @@ export async function middleware(request: NextRequest) {
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+              return NextResponse.redirect(new URL('/personal-mode', request.url));
             }
+            // Redirect old applicant routes to personal-mode
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
           }
           if (!hasProfile) {
             if (firstRoute !== 'setup-applicant-profile') {
@@ -120,7 +129,7 @@ export async function middleware(request: NextRequest) {
           }
         }
       } else {
-        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+        return NextResponse.redirect(new URL('/personal-mode', request.url));
       }
     }
   } else {

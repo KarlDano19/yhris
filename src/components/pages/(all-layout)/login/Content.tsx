@@ -61,7 +61,7 @@ function Content() {
             const returnTo = searchParams.get('redirect') || '/dashboard';
             window.location.href = returnTo;
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
+            window.location.href = '/personal-mode';
           } else if (sessionData.accountType === 'admin') {
             window.location.href = '/admin/dashboard';
           }
@@ -183,7 +183,7 @@ function Content() {
       }
     } else {
       if (data.has_profile) {
-        location.href = '/apply-for-a-job';
+        location.href = '/personal-mode';
       } else {
         location.href = '/setup-applicant-profile';
       }
@@ -514,7 +514,7 @@ function Content() {
                   {/* YAHSHUA CONNECT Quick Access */}
                   <div className='mt-6 pt-6 border-t border-gray-200'>
                     <Link
-                      href='/yahshua-connect'
+                      href='/personal-mode'
                       className='flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg'
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

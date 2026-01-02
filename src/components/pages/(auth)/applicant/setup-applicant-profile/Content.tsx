@@ -63,7 +63,7 @@ const Content = () => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         // Restore redirect after successful save
         setTimeout(() => {
-          location.href = '/apply-for-a-job';
+          location.href = '/personal-mode';
         }, 2000);
       },
       onError: (err: any) => {

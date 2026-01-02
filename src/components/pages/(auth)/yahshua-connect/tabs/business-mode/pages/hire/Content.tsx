@@ -68,14 +68,14 @@ const Content = () => {
                   {
                     icon: UserIcon,
                     label: 'Edit Profile',
-                    href: '/yahshua-connect/business-mode/edit-profile',
+                    href: '/personal-mode/business-mode/edit-profile',
                   },
                   {
                     icon: BriefcaseIcon,
                     label: 'Active Jobs',
                     count: activeJobs.length,
                     badgeColor: 'green',
-                    href: '/yahshua-connect/business-mode/my-jobs',
+                    href: '/personal-mode/business-mode/my-jobs',
                   },
                   {
                     icon: CalendarIcon,
@@ -87,7 +87,7 @@ const Content = () => {
                   {
                     icon: CurrencyDollarIcon,
                     label: 'View Earnings',
-                    href: '/yahshua-connect/business-mode/earnings',
+                    href: '/personal-mode/business-mode/earnings',
                   },
                 ]}
               />

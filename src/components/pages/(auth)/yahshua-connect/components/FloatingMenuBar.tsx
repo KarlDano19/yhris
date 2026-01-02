@@ -39,25 +39,25 @@ const FloatingMenuBar = () => {
   const personalMenuItems: MenuItem[] = [
     {
       name: 'Home',
-      href: '/yahshua-connect/personal-mode',
+      href: '/personal-mode',
       icon: HomeIcon,
       iconSolid: HomeIconSolid,
     },
     {
       name: 'Jobs',
-      href: '/yahshua-connect/personal-mode/jobs',
+      href: '/personal-mode/jobs',
       icon: BriefcaseIcon,
       iconSolid: BriefcaseIconSolid,
     },
     {
       name: 'Trainings',
-      href: '/yahshua-connect/personal-mode/trainings',
+      href: '/personal-mode/trainings',
       icon: AcademicCapIcon,
       iconSolid: AcademicCapIconSolid,
     },
     {
       name: 'Transactions',
-      href: '/yahshua-connect/personal-mode/transactions',
+      href: '/personal-mode/transactions',
       icon: DocumentTextIcon,
       iconSolid: DocumentTextIconSolid,
     },
@@ -67,31 +67,31 @@ const FloatingMenuBar = () => {
   const businessMenuItems: MenuItem[] = [
     {
       name: 'Home',
-      href: '/yahshua-connect/business-mode',
+      href: '/business-mode',
       icon: HomeIcon,
       iconSolid: HomeIconSolid,
     },
     {
       name: 'Find Work',
-      href: '/yahshua-connect/business-mode/find-work',
+      href: '/business-mode/find-work',
       icon: MagnifyingGlassIcon,
       iconSolid: MagnifyingGlassIconSolid,
     },
     {
       name: 'Hire',
-      href: '/yahshua-connect/business-mode/hire',
+      href: '/business-mode/hire',
       icon: UserPlusIcon,
       iconSolid: UserPlusIconSolid,
     },
     {
       name: 'My Jobs',
-      href: '/yahshua-connect/business-mode/my-jobs',
+      href: '/business-mode/my-jobs',
       icon: BriefcaseIcon,
       iconSolid: BriefcaseIconSolid,
     },
     {
       name: 'Earnings',
-      href: '/yahshua-connect/business-mode/earnings',
+      href: '/business-mode/earnings',
       icon: CurrencyDollarIcon,
       iconSolid: CurrencyDollarIconSolid,
     },
@@ -112,7 +112,7 @@ const FloatingMenuBar = () => {
               const routeSegment = item.href.split('/').pop();
               if (routeSegment === 'business-mode') {
                 // For home, check if pathname ends with business-mode
-                isActive = pathname?.endsWith('/business-mode') || pathname === '/yahshua-connect/business-mode';
+                isActive = pathname?.endsWith('/business-mode') || pathname === '/personal-mode/business-mode';
               } else if (routeSegment) {
                 // For other routes, check if pathname includes the route segment
                 isActive = pathname?.includes(`/business-mode/${routeSegment}`) || pathname?.endsWith(`/${routeSegment}`);

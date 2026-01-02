@@ -12,6 +12,7 @@ interface JobCardProps {
   salary: string;
   tags: string[];
   logo: string;
+  logoUrl?: string; // Optional company logo URL
   saved?: boolean;
   match?: number;
   applied?: boolean;
@@ -27,6 +28,7 @@ const JobCard = ({
   salary,
   tags,
   logo,
+  logoUrl,
   saved = false,
   match,
   applied = false,
@@ -44,8 +46,25 @@ const JobCard = ({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">{logo}</span>
+          <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt={company}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to initials if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `<span class="text-white font-bold text-sm">${logo}</span>`;
+                  }
+                }}
+              />
+            ) : (
+              <span className="text-white font-bold text-sm">{logo}</span>
+            )}
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">{title}</h3>
