@@ -17,9 +17,10 @@ interface UpcomingBookingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookings: Booking[];
+  onMessage?: (booking: Booking) => void;
 }
 
-const UpcomingBookingsModal = ({ isOpen, onClose, bookings }: UpcomingBookingsModalProps) => {
+const UpcomingBookingsModal = ({ isOpen, onClose, bookings, onMessage }: UpcomingBookingsModalProps) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -93,18 +94,18 @@ const UpcomingBookingsModal = ({ isOpen, onClose, bookings }: UpcomingBookingsMo
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-700">
                           <CurrencyDollarIcon className="h-4 w-4 text-gray-500" />
-                          <span className="font-semibold">{booking.priceRange}</span>
+                          <span className="font-semibold text-green-600">{booking.priceRange}</span>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => onMessage?.(booking)}
+                          className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center justify-center gap-2"
+                        >
                           <ChatBubbleLeftRightIcon className="h-5 w-5" />
                           Message
-                        </button>
-                        <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                          Start
                         </button>
                       </div>
                     </div>

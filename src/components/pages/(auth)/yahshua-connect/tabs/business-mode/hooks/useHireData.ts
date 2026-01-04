@@ -21,6 +21,17 @@ export interface Review {
   rating: number;
 }
 
+export interface Applicant {
+  id: number;
+  name: string;
+  initials: string;
+  rating: number;
+  reviewsCount: number;
+  description: string;
+  services: string[];
+  appliedDate: string;
+}
+
 export const useHireData = () => {
   const jobPostings: JobPosting[] = [
     {
@@ -58,9 +69,33 @@ export const useHireData = () => {
     },
   ];
 
+  const applicants: Applicant[] = [
+    {
+      id: 1,
+      name: 'Ana Garcia',
+      initials: 'AG',
+      rating: 4.7,
+      reviewsCount: 15,
+      description: 'I have 5 years of experience in house cleaning. I bring my own equipment and supplies.',
+      services: ['House Cleaning', 'Deep Cleaning', 'Laundry', 'Organizing'],
+      appliedDate: 'Dec 15, 2025',
+    },
+    {
+      id: 2,
+      name: 'Pedro Santos',
+      initials: 'PS',
+      rating: 4.9,
+      reviewsCount: 28,
+      description: 'Professional cleaner with 8 years experience. I specialize in deep cleaning and post-construction cleanup.',
+      services: ['House Cleaning', 'Deep Cleaning', 'Post-Construction Cleanup', 'Window Cleaning', 'Carpet Cleaning'],
+      appliedDate: 'Dec 14, 2025',
+    },
+  ];
+
   return {
     jobPostings,
     reviews,
+    applicants,
   };
 };
 

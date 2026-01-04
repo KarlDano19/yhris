@@ -1,20 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircleIcon, ClockIcon, MapPinIcon, CurrencyDollarIcon, ChatBubbleLeftRightIcon, UserIcon, BriefcaseIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, MapPinIcon, CurrencyDollarIcon, ChatBubbleLeftRightIcon, CalendarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import YahshuaConnectHeader from '../../../../YahshuaConnectHeader';
 import FloatingMenuBar from '../../../../components/FloatingMenuBar';
 import ProfileCard from '../../components/cards/ProfileCard';
 import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import EarningsCard from '../../components/cards/EarningsCard';
-import BirdsEyeViewCard from '../../components/cards/BirdsEyeViewCard';
 import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
+import MyHiresModal from '../../components/modals/MyHiresModal';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 
 const Content = () => {
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
+  const [isMyHiresModalOpen, setIsMyHiresModalOpen] = useState(false);
 
   const { activeJobs, reviews } = useMyJobsData();
+
+  const handleSendPaymentProof = (hireId: number) => {
+    // TODO: Implement payment proof upload
+    console.log('Send payment proof for hire:', hireId);
+  };
+
+  // Mock hired applicants data
+  const hiredApplicants = [
+    {
+      id: 1,
+      serviceName: 'Garden Landscaping',
+      providerName: 'Carlos Mendez',
+      providerInitials: 'CM',
+      status: 'in-progress' as const,
+      price: 1500,
+    },
+  ];
 
   // Transform activeJobs for the modal
   const upcomingBookings = activeJobs.map((job) => ({
@@ -30,8 +47,8 @@ const Content = () => {
     <>
       <YahshuaConnectHeader />
       <FloatingMenuBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Three Column Layout */}
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+        {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="lg:col-span-3">
@@ -43,22 +60,14 @@ const Content = () => {
                 reviewsCount={27}
                 initial="JD"
                 availableForBookings={true}
+                earnings={45230}
+                spending={12800}
+                onAvailabilityChange={(isAvailable) => {
+                  console.log('Availability changed:', isAvailable);
+                }}
               />
-              <EarningsCard thisMonth={45230} jobsDone={23} />
               <QuickActionsCard
                 actions={[
-                  {
-                    icon: UserIcon,
-                    label: 'Edit Profile',
-                    href: '/personal-mode/edit-profile',
-                  },
-                  {
-                    icon: BriefcaseIcon,
-                    label: 'Active Jobs',
-                    count: activeJobs.length,
-                    badgeColor: 'green',
-                    href: '/personal-mode/business-mode/my-jobs',
-                  },
                   {
                     icon: CalendarIcon,
                     label: 'Upcoming Bookings',
@@ -67,24 +76,17 @@ const Content = () => {
                     onClick: () => setIsUpcomingBookingsModalOpen(true),
                   },
                   {
-                    icon: CurrencyDollarIcon,
-                    label: 'View Earnings',
-                    href: '/personal-mode/business-mode/earnings',
+                    icon: UserGroupIcon,
+                    label: 'My Hires',
+                    onClick: () => setIsMyHiresModalOpen(true),
                   },
                 ]}
-              />
-              <BirdsEyeViewCard
-                userName="John Doe"
-                userInitial="JD"
-                rating={4.9}
-                reviewCount={27}
-                reviews={reviews}
               />
             </div>
           </div>
 
-          {/* Center Content */}
-          <div className="lg:col-span-8">
+          {/* Main Content */}
+          <div className="lg:col-span-9">
             <div className="space-y-6">
               {/* My Jobs Header */}
               <div className="bg-white rounded-lg shadow-sm p-5">
@@ -171,6 +173,14 @@ const Content = () => {
         isOpen={isUpcomingBookingsModalOpen}
         onClose={() => setIsUpcomingBookingsModalOpen(false)}
         bookings={upcomingBookings}
+      />
+
+      {/* My Hires Modal */}
+      <MyHiresModal
+        isOpen={isMyHiresModalOpen}
+        onClose={() => setIsMyHiresModalOpen(false)}
+        hires={hiredApplicants}
+        onSendPaymentProof={handleSendPaymentProof}
       />
     </>
   );

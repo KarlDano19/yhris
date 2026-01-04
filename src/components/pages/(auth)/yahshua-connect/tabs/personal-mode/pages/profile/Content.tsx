@@ -12,6 +12,7 @@ import AddWorkExperienceModal from './modals/AddWorkExperienceModal';
 import AddEducationModal from './modals/AddEducationModal';
 import AddCertificationModal from './modals/AddCertificationModal';
 import AddProjectModal from './modals/AddProjectModal';
+import Profile from '../../../../components/Profile';
 
 const Content = () => {
   const [showBasicInfoModal, setShowBasicInfoModal] = useState(false);
@@ -164,17 +165,20 @@ const Content = () => {
               </div>
 
               {/* Profile Sections */}
+              <Profile 
+                mode="personal"
+                basicInfo={{
+                  fullName: userProfile.basicInfo.name,
+                  email: userProfile.basicInfo.email,
+                  phone: userProfile.basicInfo.phone,
+                  location: userProfile.basicInfo.location,
+                }}
+                onSave={(data) => {
+                  // Update userProfile.basicInfo with data
+                  console.log('Save basic info:', data);
+                }}
+              />
               <div className="space-y-4">
-                {/* Basic Information */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <button
-                    onClick={() => setShowBasicInfoModal(true)}
-                    className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
-                  >
-                    <span className="text-lg font-semibold text-gray-800">Basic Information</span>
-                    <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
-                  </button>
-                </div>
 
                 {/* Work Experience */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
@@ -222,15 +226,6 @@ const Content = () => {
               </div>
 
       {/* Profile Section Modals */}
-      <BasicInformationModal
-        isOpen={showBasicInfoModal}
-        onClose={() => setShowBasicInfoModal(false)}
-        basicInfo={userProfile.basicInfo}
-        onSave={(data) => {
-          // Update userProfile.basicInfo with data
-          console.log('Save basic info:', data);
-        }}
-      />
 
       <WorkExperienceModal
         isOpen={showWorkExperienceModal}

@@ -35,6 +35,7 @@ export const useFindWorkData = () => {
     id: job.id,
     title: job.title,
     clientName: job.clientName,
+    clientInitials: job.clientInitials,
     clientLocation: job.clientLocation,
     distance: job.distance || '',
     rating: job.rating,

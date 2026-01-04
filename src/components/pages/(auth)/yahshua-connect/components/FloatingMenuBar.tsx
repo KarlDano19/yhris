@@ -11,6 +11,7 @@ import {
   MagnifyingGlassIcon,
   UserPlusIcon,
   CurrencyDollarIcon,
+  WalletIcon,
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
@@ -20,6 +21,7 @@ import {
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
   UserPlusIcon as UserPlusIconSolid,
   CurrencyDollarIcon as CurrencyDollarIconSolid,
+  WalletIcon as WalletIconSolid,
 } from '@heroicons/react/24/solid';
 
 interface MenuItem {
@@ -95,13 +97,19 @@ const FloatingMenuBar = () => {
       icon: CurrencyDollarIcon,
       iconSolid: CurrencyDollarIconSolid,
     },
+    {
+      name: 'Spending',
+      href: '/yahshua-connect/business-mode/spending',
+      icon: WalletIcon,
+      iconSolid: WalletIconSolid,
+    },
   ];
 
   const menuItems = isBusinessMode ? businessMenuItems : personalMenuItems;
 
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40">
-      <div className="bg-white rounded-full shadow-lg border border-gray-200 px-4 py-2">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-2">
         <nav className="flex items-center gap-1">
           {menuItems.map((item, index) => {
             // Check if current path matches the href exactly
@@ -112,7 +120,7 @@ const FloatingMenuBar = () => {
               const routeSegment = item.href.split('/').pop();
               if (routeSegment === 'business-mode') {
                 // For home, check if pathname ends with business-mode
-                isActive = pathname?.endsWith('/business-mode') || pathname === '/personal-mode/business-mode';
+                isActive = pathname?.endsWith('/business-mode') || pathname === '/business-mode';
               } else if (routeSegment) {
                 // For other routes, check if pathname includes the route segment
                 isActive = pathname?.includes(`/business-mode/${routeSegment}`) || pathname?.endsWith(`/${routeSegment}`);

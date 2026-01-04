@@ -1,22 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { PlusIcon, PencilIcon, EyeIcon, UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, ClockIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, EyeIcon, CalendarIcon, UserGroupIcon, CurrencyDollarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import YahshuaConnectHeader from '../../../../YahshuaConnectHeader';
 import FloatingMenuBar from '../../../../components/FloatingMenuBar';
 import ProfileCard from '../../components/cards/ProfileCard';
 import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import EarningsCard from '../../components/cards/EarningsCard';
-import BirdsEyeViewCard from '../../components/cards/BirdsEyeViewCard';
 import PostJobModal from '../../components/modals/PostJobModal';
 import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
+import MyHiresModal from '../../components/modals/MyHiresModal';
+import ViewApplicantsModal from './modals/ViewApplicantsModal';
+import ConfirmHireModal from './modals/ConfirmHireModal';
 import { useHireData } from '../../hooks/useHireData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 
 const Content = () => {
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
-  const { jobPostings, reviews } = useHireData();
+  const [isMyHiresModalOpen, setIsMyHiresModalOpen] = useState(false);
+  const [isViewApplicantsModalOpen, setIsViewApplicantsModalOpen] = useState(false);
+  const [isConfirmHireModalOpen, setIsConfirmHireModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [selectedApplicantId, setSelectedApplicantId] = useState<number | null>(null);
+  const { jobPostings, reviews, applicants } = useHireData();
   const { activeJobs } = useMyJobsData();
 
   // Transform activeJobs for the modal
@@ -44,12 +50,72 @@ const Content = () => {
     // For now, just log the data
   };
 
+  const handleViewApplicants = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsViewApplicantsModalOpen(true);
+  };
+
+  const handleViewProfile = (applicantId: number) => {
+    // TODO: Navigate to applicant profile page or open profile modal
+    console.log('View profile for applicant:', applicantId);
+  };
+
+  const handleHireClick = (applicantId: number) => {
+    setSelectedApplicantId(applicantId);
+    setIsViewApplicantsModalOpen(false);
+    setIsConfirmHireModalOpen(true);
+  };
+
+  const handleConfirmHire = (message?: string) => {
+    // TODO: Implement API call to hire applicant
+    console.log('Hiring applicant:', selectedApplicantId, 'with message:', message);
+    setIsConfirmHireModalOpen(false);
+    setSelectedApplicantId(null);
+    setSelectedJobId(null);
+  };
+
+  const handleSendPaymentProof = (hireId: number) => {
+    // TODO: Implement payment proof upload
+    console.log('Send payment proof for hire:', hireId);
+  };
+
+  // Mock hired applicants data
+  const hiredApplicants = [
+    {
+      id: 1,
+      serviceName: 'Garden Landscaping',
+      providerName: 'Carlos Mendez',
+      providerInitials: 'CM',
+      status: 'in-progress' as const,
+      price: 1500,
+    },
+    {
+      id: 2,
+      serviceName: 'House Cleaning',
+      providerName: 'Ana Garcia',
+      providerInitials: 'AG',
+      status: 'completed' as const,
+      price: 800,
+    },
+    {
+      id: 3,
+      serviceName: 'Install Ceiling Fan',
+      providerName: 'Pedro Santos',
+      providerInitials: 'PS',
+      status: 'pending' as const,
+      price: 700,
+    },
+  ];
+
+  const selectedJob = jobPostings.find((job) => job.id === selectedJobId);
+  const selectedApplicant = applicants.find((app) => app.id === selectedApplicantId);
+
   return (
     <>
       <YahshuaConnectHeader />
       <FloatingMenuBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Three Column Layout */}
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+        {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Sidebar */}
           <div className="lg:col-span-3">
@@ -61,22 +127,14 @@ const Content = () => {
                 reviewsCount={27}
                 initial="JD"
                 availableForBookings={true}
+                earnings={45230}
+                spending={12800}
+                onAvailabilityChange={(isAvailable) => {
+                  console.log('Availability changed:', isAvailable);
+                }}
               />
-              <EarningsCard thisMonth={45230} jobsDone={23} />
               <QuickActionsCard
                 actions={[
-                  {
-                    icon: UserIcon,
-                    label: 'Edit Profile',
-                    href: '/personal-mode/business-mode/edit-profile',
-                  },
-                  {
-                    icon: BriefcaseIcon,
-                    label: 'Active Jobs',
-                    count: activeJobs.length,
-                    badgeColor: 'green',
-                    href: '/personal-mode/business-mode/my-jobs',
-                  },
                   {
                     icon: CalendarIcon,
                     label: 'Upcoming Bookings',
@@ -85,24 +143,17 @@ const Content = () => {
                     onClick: () => setIsUpcomingBookingsModalOpen(true),
                   },
                   {
-                    icon: CurrencyDollarIcon,
-                    label: 'View Earnings',
-                    href: '/personal-mode/business-mode/earnings',
+                    icon: UserGroupIcon,
+                    label: 'My Hires',
+                    onClick: () => setIsMyHiresModalOpen(true),
                   },
                 ]}
-              />
-              <BirdsEyeViewCard
-                userName="John Doe"
-                userInitial="JD"
-                rating={4.9}
-                reviewCount={27}
-                reviews={reviews}
               />
             </div>
           </div>
 
-          {/* Center Content */}
-          <div className="lg:col-span-8">
+          {/* Main Content */}
+          <div className="lg:col-span-9">
             <div className="space-y-6">
               {/* Hire Header */}
               <div className="bg-white rounded-lg shadow-sm  p-5">
@@ -159,7 +210,10 @@ const Content = () => {
 
                       {/* Action Buttons */}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors">
+                        <button
+                          onClick={() => handleViewApplicants(job.id)}
+                          className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                        >
                           View Applicants
                         </button>
                         <button className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
@@ -187,6 +241,48 @@ const Content = () => {
         isOpen={isUpcomingBookingsModalOpen}
         onClose={() => setIsUpcomingBookingsModalOpen(false)}
         bookings={upcomingBookings}
+      />
+
+      {/* View Applicants Modal */}
+      {selectedJob && (
+        <ViewApplicantsModal
+          isOpen={isViewApplicantsModalOpen}
+          onClose={() => {
+            setIsViewApplicantsModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobTitle={selectedJob.title}
+          applicants={applicants}
+          onViewProfile={handleViewProfile}
+          onHire={handleHireClick}
+        />
+      )}
+
+      {/* Confirm Hire Modal */}
+      {selectedJob && selectedApplicant && (
+        <ConfirmHireModal
+          isOpen={isConfirmHireModalOpen}
+          onClose={() => {
+            setIsConfirmHireModalOpen(false);
+            setSelectedApplicantId(null);
+          }}
+          applicant={selectedApplicant}
+          jobDetails={{
+            title: selectedJob.title,
+            scheduledDate: selectedJob.date,
+            scheduledTime: selectedJob.time,
+            priceRange: selectedJob.priceRange,
+          }}
+          onConfirm={handleConfirmHire}
+        />
+      )}
+
+      {/* My Hires Modal */}
+      <MyHiresModal
+        isOpen={isMyHiresModalOpen}
+        onClose={() => setIsMyHiresModalOpen(false)}
+        hires={hiredApplicants}
+        onSendPaymentProof={handleSendPaymentProof}
       />
     </>
   );
