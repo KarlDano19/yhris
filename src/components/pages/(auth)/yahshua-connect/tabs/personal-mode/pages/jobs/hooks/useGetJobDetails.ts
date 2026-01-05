@@ -1,18 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
 
-async function getJobDetails(jobId: any) {
+async function getYahshuaConnectJobDetails(jobId: any) {
   try {
+    const token = getCookie('token');
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
     const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
+        Authorization: `Token ${token}`,
       },
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${jobId}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/yahshua-connect/jobs/${jobId}/`, config);
     if (!res.ok) {
       throw res.json();
     }
-    return res.json();
+    const responseData = await res.json();
+    
+    // Handle response structure (data might be wrapped in 'data' field or at root level)
+    return responseData.data || responseData;
   } catch (err: any) {
     let errStringify = await err;
     if (Object.hasOwn(errStringify, 'response')) {
@@ -22,10 +32,10 @@ async function getJobDetails(jobId: any) {
   }
 }
 
-function useGetJobDetails(jobId: any) {
+function useGetYahshuaConnectJobDetails(jobId: any) {
   const query = useQuery(
-    ['jobPostDetailPublicCache', jobId], 
-    () => getJobDetails(jobId), 
+    ['yahshuaConnectJobDetailCache', jobId], 
+    () => getYahshuaConnectJobDetails(jobId), 
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
@@ -36,4 +46,5 @@ function useGetJobDetails(jobId: any) {
   return query;
 }
 
-export default useGetJobDetails;
+export default useGetYahshuaConnectJobDetails;
+

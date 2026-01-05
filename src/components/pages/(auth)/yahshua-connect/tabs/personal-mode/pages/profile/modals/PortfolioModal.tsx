@@ -1,13 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
-import { PlusIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowTopRightOnSquareIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 interface Portfolio {
   id: number;
-  title: string;
+  name: string;
   image: string;
-  type: string;
   link: string;
   description?: string;
 }
@@ -22,8 +22,18 @@ interface PortfolioModalProps {
 }
 
 const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: PortfolioModalProps) => {
+  const [localPortfolio, setLocalPortfolio] = useState<Portfolio[]>(portfolio);
+
+  useEffect(() => {
+    setLocalPortfolio(portfolio);
+  }, [portfolio, isOpen]);
+
+  const handleDelete = (id: number) => {
+    setLocalPortfolio(localPortfolio.filter((project) => project.id !== id));
+  };
+
   const handleSave = () => {
-    onSave(portfolio);
+    onSave(localPortfolio);
     onClose();
   };
 
@@ -55,15 +65,27 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: P
       footerContent={footerContent}
     >
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {portfolio.map((project) => (
+        {localPortfolio.map((project) => (
           <div
             key={project.id}
-            className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onEdit(project.id)}
+            className="relative p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
           >
+            <div className="absolute top-2 right-2 flex gap-2 z-10">
+              <button
+                onClick={() => onEdit(project.id)}
+                className="p-2 bg-white text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors shadow-sm"
+              >
+                <PencilIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(project.id)}
+                className="p-2 bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shadow-sm"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
             <div className="text-4xl mb-3 text-center">{project.image}</div>
-            <h4 className="font-semibold text-gray-900 mb-1">{project.title}</h4>
-            <p className="text-sm text-gray-600 mb-2">{project.type}</p>
+            <h4 className="font-semibold text-gray-900 mb-2">{project.name}</h4>
             {project.description && (
               <p className="text-sm text-gray-500 mb-3">{project.description}</p>
             )}
@@ -72,7 +94,6 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: P
                 href={project.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 text-sm text-savoy-blue hover:underline"
               >
                 View Project

@@ -1,13 +1,15 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
 
 interface JobFilters {
   job_title?: string;
   location?: string | string[];
   search_type?: 'job_title' | 'location';
-  view_type?: 'jobs_select' | 'location_select' | 'listing';
+  view_type?: 'jobs_select' | 'location_select' | 'listing' | 'applicant_personal';
   current_page?: number;
   page_size?: number;
   search?: string;
+  useApplicantPersonal?: boolean; // Flag to use applicant_personal view type
 }
 
 /**
@@ -24,9 +26,14 @@ async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode
     const searchParams = new URLSearchParams();
     
     if (mode === 'listing') {
-      // For job listings, no view_type needed (default behavior)
+      // For job listings
       searchParams.append('current_page', pageParam.toString());
       searchParams.append('page_size', '200'); // 200 jobs per page for listings
+      
+      // Use applicant_personal view type if flag is set (for personal mode with match percentage)
+      if (filters?.useApplicantPersonal || filters?.view_type === 'applicant_personal') {
+        searchParams.append('view_type', 'applicant_personal');
+      }
       
       // Use new search_type + search format for job title search
       if (filters?.job_title) {
@@ -69,15 +76,23 @@ async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode
       }
     }
     
+    // Get authentication token (required for yahshua-connect endpoint)
+    const token = getCookie('token');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
     const config = {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
+        Authorization: `Token ${token}`,
       },
     };
     
     const queryString = searchParams.toString();
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/public/jobs/${queryString ? `?${queryString}` : ''}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/yahshua-connect/jobs/${queryString ? `?${queryString}` : ''}`;
     
     const res = await fetch(url, config);
     if (!res.ok) {
@@ -128,6 +143,7 @@ function useFindJobs(itemsFilter: JobFilters | null) {
       Array.isArray(itemsFilter?.location)
         ? itemsFilter?.location.join('|')
         : itemsFilter?.location,
+      itemsFilter?.useApplicantPersonal || itemsFilter?.view_type === 'applicant_personal', // Include in cache key
     ], 
     ({ pageParam = 1 }) => fetchJobs(itemsFilter, pageParam, 'listing'),
     {

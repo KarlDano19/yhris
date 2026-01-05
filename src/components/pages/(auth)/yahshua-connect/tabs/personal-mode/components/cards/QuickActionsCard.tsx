@@ -1,6 +1,5 @@
-'use client';
-
 import Link from 'next/link';
+
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface QuickAction {
@@ -13,28 +12,24 @@ interface QuickAction {
 
 interface QuickActionsCardProps {
   actions: QuickAction[];
+  onViewFullProfile?: () => void;
 }
 
-const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
+const QuickActionsCard = ({ actions, onViewFullProfile }: QuickActionsCardProps) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h3>
-      <div className="space-y-2">
+      <h3 className="text-base font-bold text-gray-900 mb-4">Quick Actions</h3>
+      <div className="space-y-1">
         {actions.map((action) => {
           const Icon = action.icon;
           const content = (
             <>
-              <div className="text-savoy-blue">
+              <div className="text-blue-400">
                 <Icon className="h-5 w-5" />
               </div>
-              <span className="text-sm font-medium text-gray-700 flex-1 group-hover:text-savoy-blue">
+              <span className="text-sm font-medium text-gray-700 flex-1">
                 {action.label}
               </span>
-              {action.count !== undefined && (
-                <span className="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                  {action.count}
-                </span>
-              )}
               <ChevronRightIcon className="h-5 w-5 text-gray-400" />
             </>
           );
@@ -44,7 +39,7 @@ const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
               <button
                 key={action.label}
                 onClick={action.onClick}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
               >
                 {content}
               </button>
@@ -55,22 +50,25 @@ const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
             <Link
               key={action.label}
               href={action.href || '#'}
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               {content}
             </Link>
           );
         })}
       </div>
+      
       {/* View Full Profile Button */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <Link
-          href="/yahshua-connect/personal-mode/profile"
-          className="w-full flex items-center justify-center px-4 py-2.5 bg-white border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
-        >
-          View Full Profile
-        </Link>
-      </div>
+      {onViewFullProfile && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <button
+            onClick={onViewFullProfile}
+            className="w-full py-2.5 px-4 border border-blue-600 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            View Full Profile
+          </button>
+        </div>
+      )}
     </div>
   );
 };

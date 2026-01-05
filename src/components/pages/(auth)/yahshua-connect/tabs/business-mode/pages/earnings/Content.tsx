@@ -96,7 +96,7 @@ const Content = () => {
 
   return (
     <>
-      <YahshuaConnectHeader />
+      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
       <FloatingMenuBar />
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
         {/* Two Column Layout */}

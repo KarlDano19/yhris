@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
-import { XMarkIcon, PencilIcon, PlusIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PencilIcon, PlusIcon, CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Certification {
   id: number;
@@ -36,6 +36,11 @@ const SkillsAndCertificationModal = ({
   const [certifications, setCertifications] = useState<Certification[]>(initialCertifications);
   const [newSkill, setNewSkill] = useState('');
 
+  useEffect(() => {
+    setSkills(initialSkills);
+    setCertifications(initialCertifications);
+  }, [initialSkills, initialCertifications, isOpen]);
+
   const handleAddSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
       setSkills([...skills, newSkill.trim()]);
@@ -50,6 +55,10 @@ const SkillsAndCertificationModal = ({
   const handleEditCertification = (id: number) => {
     // This would typically open another modal or form
     console.log('Edit certification', id);
+  };
+
+  const handleDeleteCertification = (id: number) => {
+    setCertifications(certifications.filter((cert) => cert.id !== id));
   };
 
   const handleSave = () => {
@@ -173,12 +182,20 @@ const SkillsAndCertificationModal = ({
                     <p className="text-sm text-gray-500">ID: {cert.idNumber}</p>
                   )}
                 </div>
-                <button
-                  onClick={() => handleEditCertification(cert.id)}
-                  className="ml-4 p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
-                >
-                  <PencilIcon className="h-5 w-5" />
-                </button>
+                <div className="ml-4 flex gap-2">
+                  <button
+                    onClick={() => handleEditCertification(cert.id)}
+                    className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
+                  >
+                    <PencilIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCertification(cert.id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

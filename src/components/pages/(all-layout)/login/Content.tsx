@@ -512,7 +512,7 @@ function Content() {
                   </div>
                   
                   {/* YAHSHUA CONNECT Quick Access */}
-                  <div className='mt-6 pt-6 border-t border-gray-200'>
+                  {/* <div className='mt-6 pt-6 border-t border-gray-200'>
                     <Link
                       href='/personal-mode'
                       className='flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg'
@@ -522,7 +522,7 @@ function Content() {
                       </svg>
                       Access YAHSHUA CONNECT (No Login Required)
                     </Link>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <EmailVerificationModal

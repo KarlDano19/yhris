@@ -8,7 +8,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl';
   showCloseButton?: boolean;
   headerContent?: ReactNode;
   footerContent?: ReactNode;
@@ -33,20 +33,23 @@ const Modal = ({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '4xl': 'max-w-4xl',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal Content */}
-      <div
-        className={`relative bg-white rounded-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl flex flex-col`}
-      >
+      {/* Modal Container */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        {/* Modal Content */}
+        <div
+          className={`relative bg-white rounded-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl flex flex-col`}
+        >
         {/* Header */}
         {(title || showCloseButton || headerContent) && (
           <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
@@ -78,6 +81,7 @@ const Modal = ({
             {footerContent}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
