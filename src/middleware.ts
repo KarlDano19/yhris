@@ -44,13 +44,12 @@ export async function middleware(request: NextRequest) {
   const applicantRoutes: any = [
     'personal-mode',
     'business-mode',
-
-    // 'application-tracker',
-    // 'apply-for-a-job',
-    // 'edit-profile',
-    // 'notification',
-    // 'setup-applicant-profile',
-    // 'job-applicant-form',
+    'setup-applicant-profile',
+    'application-tracker',
+    'apply-for-a-job',
+    'edit-profile',
+    'notification',
+    'job-applicant-form',
   ];
 
   if (bypassRoutes.includes(firstRoute)) {
@@ -103,37 +102,43 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
-        if (firstRoute === 'personal-mode') {
-          // Allow access to personal-mode
+        if (firstRoute === 'personal-mode' || firstRoute === 'business-mode') {
+          if (!hasProfile) {
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+          }
+          // Allow access to personal-mode and business-mode if profile exists
           return NextResponse.next();
         }
-        if (firstRoute === 'business-mode') {
-          // Allow access to business-mode
+        if (firstRoute === 'setup-applicant-profile') {
+          if (hasProfile) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          // Allow access to setup-applicant-profile if no profile exists
           return NextResponse.next();
         }
+        // Handle old applicant routes
         if (
           firstRoute === 'application-tracker' ||
           firstRoute === 'apply-for-a-job' ||
           firstRoute === 'edit-profile' ||
           firstRoute === 'notification' ||
-          firstRoute === 'setup-applicant-profile' ||
           firstRoute === 'job-applicant-form'
         ) {
           if (hasProfile) {
-            if (firstRoute === 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/personal-mode', request.url));
-            }
             // Redirect old applicant routes to personal-mode
             return NextResponse.redirect(new URL('/personal-mode', request.url));
           }
           if (!hasProfile) {
-            if (firstRoute !== 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
-            }
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
           }
         }
       } else {
-        return NextResponse.redirect(new URL('/personal-mode', request.url));
+        // Route not in applicantRoutes - redirect based on profile status
+        if (hasProfile) {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        }
       }
     }
   } else {
