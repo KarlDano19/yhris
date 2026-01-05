@@ -1,6 +1,7 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { Fragment, ReactNode } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ModalProps {
@@ -24,8 +25,6 @@ const Modal = ({
   headerContent,
   footerContent,
 }: ModalProps) => {
-  if (!isOpen) return null;
-
   // Size classes
   const sizeClasses = {
     sm: 'max-w-sm',
@@ -37,53 +36,75 @@ const Modal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        {/* Modal Content */}
-        <div
-          className={`relative bg-white rounded-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl flex flex-col`}
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        {/* Backdrop */}
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
         >
-        {/* Header */}
-        {(title || showCloseButton || headerContent) && (
-          <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
-            <div className="flex items-center gap-3 flex-1">
-              {headerContent}
-              {title && (
-                <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-              )}
-            </div>
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
+        </Transition.Child>
+
+        {/* Modal Container */}
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel
+                className={`w-full ${sizeClasses[size]} transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all flex flex-col max-h-[90vh]`}
               >
-                <XMarkIcon className="h-5 w-5 text-gray-500" />
-              </button>
-            )}
-          </div>
-        )}
+                {/* Header */}
+                {(title || showCloseButton || headerContent) && (
+                  <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
+                    <div className="flex items-center gap-3 flex-1">
+                      {headerContent}
+                      {title && (
+                        <Dialog.Title as="h2" className="text-lg font-semibold text-gray-800">
+                          {title}
+                        </Dialog.Title>
+                      )}
+                    </div>
+                    {showCloseButton && (
+                      <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <XMarkIcon className="h-6 w-6" />
+                      </button>
+                    )}
+                  </div>
+                )}
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5">
-          {children}
-        </div>
+                {/* Body */}
+                <div className="flex-1 overflow-visible p-5">
+                  {children}
+                </div>
 
-        {/* Footer */}
-        {footerContent && (
-          <div className="flex-shrink-0 border-t border-gray-100 p-5">
-            {footerContent}
+                {/* Footer */}
+                {footerContent && (
+                  <div className="flex-shrink-0 border-t border-gray-100 p-5">
+                    {footerContent}
+                  </div>
+                )}
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-        )}
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition>
   );
 };
 

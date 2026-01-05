@@ -1,16 +1,20 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+
 import { useRouter } from 'next/navigation';
-import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
+
 import useGetApplicationByUser from '@/components/pages/(auth)/applicant/application-tracker/hooks/useGetApplicationByUser';
 import useGetHighMatchJobs from '../../hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
-import formatPrice from '@/helpers/currencyFormat';
 import JobCard from './pages/jobs/components/JobCard';
-import JobDetails from './pages/jobs/components/JobDetails';
+import JobDetailsModal from '../../modals/JobDetailsModal';
 import AlmostThereJobCard from './components/cards/AlmostThereJobCard';
 import TrainingCard from './components/cards/TrainingCard';
+
+import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
+
+import formatPrice from '@/helpers/currencyFormat';
 
 interface ContentProps {
   averageRating?: number | null;
@@ -244,21 +248,13 @@ const Content = ({ averageRating }: ContentProps) => {
         ) : (
           <div className="space-y-4">
             {jobsMatched.map((job) => (
-              <div key={job.id}>
-                <JobCard
-                  {...job}
-                  isSelected={selectedJobId === job.id}
-                  onCardClick={() => handleJobCardClick(job.id)}
-                  onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
-                />
-                {/* Show job details below the card when selected */}
-                {selectedJobId === job.id && (
-                  <JobDetails 
-                    jobId={job.id} 
-                    onClose={handleCloseJobDetails}
-                  />
-                )}
-              </div>
+              <JobCard
+                key={job.id}
+                {...job}
+                isSelected={selectedJobId === job.id}
+                onCardClick={() => handleJobCardClick(job.id)}
+                onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
+              />
             ))}
           </div>
         )}
@@ -269,6 +265,13 @@ const Content = ({ averageRating }: ContentProps) => {
         <AlmostThereJobCard {...almostThereJob} />
         <TrainingCard {...recommendedTraining} />
       </div> */}
+
+      {/* Job Details Modal */}
+      <JobDetailsModal
+        isOpen={selectedJobId !== null}
+        onClose={handleCloseJobDetails}
+        jobId={selectedJobId}
+      />
     </div>
   );
 };

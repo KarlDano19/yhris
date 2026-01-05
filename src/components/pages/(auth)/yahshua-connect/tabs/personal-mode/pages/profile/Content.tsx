@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+
 import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
 import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from '../../../../hooks/useUpdateApplicantProfile';
-import { formatDateToLocal } from '@/helpers/date';
-import CustomToast from '@/components/CustomToast';
-
 import BasicInformationModal from './modals/BasicInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';
 import EducationModal from './modals/EducationModal';
@@ -21,6 +20,8 @@ import AddProjectModal from './modals/AddProjectModal';
 
 import { ChevronRightIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+
+import { formatDateToLocal } from '@/helpers/date';
 
 const Content = () => {
   const [isBasicInfoModalOpen, setIsBasicInfoModalOpen] = useState(false);
