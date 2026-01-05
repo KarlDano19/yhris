@@ -1,5 +1,3 @@
-'use client';
-
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 
 interface AlmostThereJobCardProps {

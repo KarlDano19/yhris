@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 
 import Modal from '../components/Modal';
 import useGetApplicationByUser from '../hooks/useGetApplicationByUser';
@@ -6,6 +8,7 @@ import useGetApplicationByUser from '../hooks/useGetApplicationByUser';
 import { formatDateToLocal } from '@/helpers/date';
 
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import { T_Application } from '@/types/personal-mode';
 
 interface MyApplicationsModalProps {
   isOpen: boolean;
@@ -14,12 +17,23 @@ interface MyApplicationsModalProps {
 
 const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
   const { data: applicationsData, isLoading } = useGetApplicationByUser({});
+  const [transformedApplications, setTransformedApplications] = useState<T_Application[]>([]);
 
   // Transform API data to match the display format
-  const transformedApplications = useMemo(() => {
-    if (!applicationsData || !Array.isArray(applicationsData)) return [];
+  useEffect(() => {
+    if (!applicationsData) {
+      setTransformedApplications([]);
+      return;
+    }
 
-    return applicationsData.map((application: any) => {
+    // Handle response structure (data might be wrapped in 'data' field or at root level)
+    const applications = applicationsData.data || applicationsData;
+    if (!Array.isArray(applications)) {
+      setTransformedApplications([]);
+      return;
+    }
+
+    const transformed = applications.map((application: any) => {
       // Get company initials for logo
       const getCompanyInitials = (companyName: string) => {
         if (!companyName) return '?';
@@ -39,6 +53,8 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
         status: application.job_stages_title || application.status || 'Pending',
       };
     });
+
+    setTransformedApplications(transformed);
   }, [applicationsData]);
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {

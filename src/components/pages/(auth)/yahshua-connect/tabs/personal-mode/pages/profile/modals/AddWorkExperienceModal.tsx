@@ -1,24 +1,51 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import Modal from '../../../../../components/Modal';
-import { CalendarIcon } from '@heroicons/react/24/outline';
 
-interface WorkExperience {
-  id?: number;
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
+import Modal from '../../../../../components/Modal';
+import CustomDatePicker from '@/components/CustomDatePicker';
+
+import { T_WorkExperience } from '@/types/personal-mode';
+
+// Helper function to parse date string to Date object
+const parseDateString = (dateStr: string | null | undefined): Date | null => {
+  if (!dateStr) return null;
+  try {
+    // Try parsing as ISO date first
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+    // Try parsing "MMM YYYY" format (e.g., "Jan 2022")
+    const parts = dateStr.trim().split(' ');
+    if (parts.length === 2) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthIndex = monthNames.indexOf(parts[0]);
+      if (monthIndex !== -1) {
+        return new Date(parseInt(parts[1]), monthIndex, 1);
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Helper function to format Date to "MMM YYYY" string
+const formatDateToString = (date: Date | null): string => {
+  if (!date) return '';
+  try {
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+  } catch {
+    return '';
+  }
+};
 
 interface AddWorkExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: WorkExperience) => void;
-  initialData?: WorkExperience | null;
+  onSave: (data: T_WorkExperience) => void;
+  initialData?: T_WorkExperience | null;
 }
 
 const AddWorkExperienceModal = ({
@@ -27,7 +54,7 @@ const AddWorkExperienceModal = ({
   onSave,
   initialData = null,
 }: AddWorkExperienceModalProps) => {
-  const [formData, setFormData] = useState<WorkExperience>({
+  const [formData, setFormData] = useState<T_WorkExperience>({
     title: '',
     company: '',
     startDate: '',
@@ -36,9 +63,15 @@ const AddWorkExperienceModal = ({
     description: '',
   });
 
+  // Date objects for the date pickers
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
+      setStartDate(parseDateString(initialData.startDate));
+      setEndDate(parseDateString(initialData.endDate));
     } else {
       setFormData({
         title: '',
@@ -48,16 +81,24 @@ const AddWorkExperienceModal = ({
         current: false,
         description: '',
       });
+      setStartDate(null);
+      setEndDate(null);
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    // Convert Date objects back to string format before saving
+    const dataToSave = {
+      ...formData,
+      startDate: formatDateToString(startDate),
+      endDate: formatDateToString(endDate),
+    };
+    onSave(dataToSave);
     onClose();
   };
 
-  const handleChange = (field: keyof WorkExperience, value: string | boolean) => {
+  const handleChange = (field: keyof T_WorkExperience, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -126,13 +167,20 @@ const AddWorkExperienceModal = ({
               Start Date
             </label>
             <div className="relative">
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => handleChange('startDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all pr-10"
+              <CustomDatePicker
+                id="work-experience-start-date"
+                placeholder="mm/dd/yyyy"
+                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                selected={startDate}
+                pickerOnChange={(date: Date | null) => {
+                  setStartDate(date);
+                }}
+                inputOnChange={(value: any) => {
+                  if (value instanceof Date) {
+                    setStartDate(value);
+                  }
+                }}
               />
-              <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
@@ -143,13 +191,21 @@ const AddWorkExperienceModal = ({
                 End Date
               </label>
               <div className="relative">
-                <input
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => handleChange('endDate', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all pr-10"
+                <CustomDatePicker
+                  id="work-experience-end-date"
+                  placeholder="mm/dd/yyyy"
+                  className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                  selected={endDate}
+                  minDate={startDate || undefined}
+                  pickerOnChange={(date: Date | null) => {
+                    setEndDate(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    if (value instanceof Date) {
+                      setEndDate(value);
+                    }
+                  }}
                 />
-                <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
           )}
@@ -160,7 +216,12 @@ const AddWorkExperienceModal = ({
               type="checkbox"
               id="current-work"
               checked={formData.current}
-              onChange={(e) => handleChange('current', e.target.checked)}
+              onChange={(e) => {
+                handleChange('current', e.target.checked);
+                if (e.target.checked) {
+                  setEndDate(null);
+                }
+              }}
               className="w-4 h-4 text-savoy-blue border-gray-300 rounded focus:ring-savoy-blue"
             />
             <label htmlFor="current-work" className="text-sm text-gray-700">

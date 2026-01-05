@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -11,6 +13,7 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 
 import formatPrice from '@/helpers/currencyFormat';
+import { T_SavedJob } from '@/types/personal-mode';
 
 interface SavedJobsModalProps {
   isOpen: boolean;
@@ -20,12 +23,16 @@ interface SavedJobsModalProps {
 const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
   const { data: savedJobsData, isLoading, refetch } = useGetSavedJobs();
   const deleteSavedJobMutation = useUpdateSavedJobs();
+  const [transformedSavedJobs, setTransformedSavedJobs] = useState<T_SavedJob[]>([]);
 
   // Transform API data to match the display format
-  const transformedSavedJobs = useMemo(() => {
-    if (!savedJobsData || !Array.isArray(savedJobsData)) return [];
+  useEffect(() => {
+    if (!savedJobsData || !Array.isArray(savedJobsData)) {
+      setTransformedSavedJobs([]);
+      return;
+    }
 
-    return savedJobsData.map((savedJob: any) => {
+    const transformed = savedJobsData.map((savedJob: any) => {
       const job = savedJob.job_posting || {};
       
       // Get company initials for logo
@@ -62,6 +69,8 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
         saved: true,
       };
     });
+
+    setTransformedSavedJobs(transformed);
   }, [savedJobsData]);
 
   const handleUnsave = (jobPostingId: number) => {

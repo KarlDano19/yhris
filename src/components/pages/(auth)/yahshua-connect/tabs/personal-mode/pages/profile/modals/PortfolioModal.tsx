@@ -1,28 +1,22 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
+
 import { PlusIcon, ArrowTopRightOnSquareIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
-interface Portfolio {
-  id: number;
-  name: string;
-  image: string;
-  link: string;
-  description?: string;
-}
+import { T_Portfolio } from '@/types/personal-mode';
 
 interface PortfolioModalProps {
   isOpen: boolean;
   onClose: () => void;
-  portfolio: Portfolio[];
+  portfolio: T_Portfolio[];
   onEdit: (id: number) => void;
   onAdd: () => void;
-  onSave: (data: Portfolio[]) => void;
+  onSave: (data: T_Portfolio[]) => void;
 }
 
 const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: PortfolioModalProps) => {
-  const [localPortfolio, setLocalPortfolio] = useState<Portfolio[]>(portfolio);
+  const [localPortfolio, setLocalPortfolio] = useState<T_Portfolio[]>(portfolio);
 
   useEffect(() => {
     setLocalPortfolio(portfolio);
@@ -72,13 +66,13 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: P
           >
             <div className="absolute top-2 right-2 flex gap-2 z-10">
               <button
-                onClick={() => onEdit(project.id)}
+                onClick={() => project.id && onEdit(project.id)}
                 className="p-2 bg-white text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors shadow-sm"
               >
                 <PencilIcon className="h-4 w-4" />
               </button>
               <button
-                onClick={() => handleDelete(project.id)}
+                onClick={() => project.id && handleDelete(project.id)}
                 className="p-2 bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shadow-sm"
               >
                 <TrashIcon className="h-4 w-4" />

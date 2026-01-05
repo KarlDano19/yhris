@@ -1,24 +1,44 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import Modal from '../../../../../components/Modal';
-import { CalendarIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
-interface Certification {
-  id?: number;
-  name: string;
-  issuer: string;
-  issuedDate?: string;
-  expiresDate?: string;
-  idNumber?: string;
-  verified?: boolean;
-}
+import Modal from '../../../../../components/Modal';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+
+import { T_Certification } from '@/types/personal-mode';
+
+// Helper function to parse date string to Date object
+const parseDateString = (dateStr: string | null | undefined): Date | null => {
+  if (!dateStr) return null;
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Helper function to format Date to ISO string (YYYY-MM-DD)
+const formatDateToISO = (date: Date | null): string => {
+  if (!date) return '';
+  try {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch {
+    return '';
+  }
+};
 
 interface AddCertificationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Certification) => void;
-  initialData?: Certification | null;
+  onSave: (data: T_Certification) => void;
+  initialData?: T_Certification | null;
 }
 
 const AddCertificationModal = ({
@@ -27,7 +47,7 @@ const AddCertificationModal = ({
   onSave,
   initialData = null,
 }: AddCertificationModalProps) => {
-  const [formData, setFormData] = useState<Certification>({
+  const [formData, setFormData] = useState<T_Certification>({
     name: '',
     issuer: '',
     issuedDate: '',
@@ -36,9 +56,15 @@ const AddCertificationModal = ({
     verified: false,
   });
 
+  // Date objects for the date pickers
+  const [issuedDate, setIssuedDate] = useState<Date | null>(null);
+  const [expiresDate, setExpiresDate] = useState<Date | null>(null);
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
+      setIssuedDate(parseDateString(initialData.issuedDate));
+      setExpiresDate(parseDateString(initialData.expiresDate));
     } else {
       setFormData({
         name: '',
@@ -48,16 +74,24 @@ const AddCertificationModal = ({
         idNumber: '',
         verified: false,
       });
+      setIssuedDate(null);
+      setExpiresDate(null);
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    // Convert Date objects back to ISO string format before saving
+    const dataToSave = {
+      ...formData,
+      issuedDate: formatDateToISO(issuedDate),
+      expiresDate: formatDateToISO(expiresDate),
+    };
+    onSave(dataToSave);
     onClose();
   };
 
-  const handleChange = (field: keyof Certification, value: string | boolean) => {
+  const handleChange = (field: keyof T_Certification, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -134,13 +168,20 @@ const AddCertificationModal = ({
               Issue Date
             </label>
             <div className="relative">
-              <input
-                type="date"
-                value={formData.issuedDate}
-                onChange={(e) => handleChange('issuedDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all pr-10"
+              <CustomDatePicker
+                id="certification-issue-date"
+                placeholder="mm/dd/yyyy"
+                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                selected={issuedDate}
+                pickerOnChange={(date: Date | null) => {
+                  setIssuedDate(date);
+                }}
+                inputOnChange={(value: any) => {
+                  if (value instanceof Date) {
+                    setIssuedDate(value);
+                  }
+                }}
               />
-              <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
@@ -150,13 +191,21 @@ const AddCertificationModal = ({
               Expiry Date
             </label>
             <div className="relative">
-              <input
-                type="date"
-                value={formData.expiresDate}
-                onChange={(e) => handleChange('expiresDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all pr-10"
+              <CustomDatePicker
+                id="certification-expiry-date"
+                placeholder="mm/dd/yyyy"
+                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                selected={expiresDate}
+                minDate={issuedDate || undefined}
+                pickerOnChange={(date: Date | null) => {
+                  setExpiresDate(date);
+                }}
+                inputOnChange={(value: any) => {
+                  if (value instanceof Date) {
+                    setExpiresDate(value);
+                  }
+                }}
               />
-              <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             </div>
           </div>
 

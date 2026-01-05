@@ -1,5 +1,3 @@
-'use client';
-
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { CheckCircleIcon as CheckCircleOutlineIcon } from '@heroicons/react/24/outline';
 

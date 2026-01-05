@@ -1,10 +1,9 @@
-'use client';
+import { useState, Fragment } from 'react';
 
-import { useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+
 import { EyeIcon, XMarkIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 
 interface Review {
   id: number;

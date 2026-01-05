@@ -1,26 +1,18 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-interface WorkExperience {
-  id: number;
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
+import { T_WorkExperience } from '@/types/personal-mode';
 
 interface WorkExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  workExperience: WorkExperience[];
+  workExperience: T_WorkExperience[];
   onEdit: (id: number) => void;
   onAdd: () => void;
-  onSave: (data: WorkExperience[]) => void;
+  onSave: (data: T_WorkExperience[]) => void;
 }
 
 const WorkExperienceModal = ({
@@ -31,7 +23,7 @@ const WorkExperienceModal = ({
   onAdd,
   onSave,
 }: WorkExperienceModalProps) => {
-  const [localWorkExperience, setLocalWorkExperience] = useState<WorkExperience[]>(workExperience);
+  const [localWorkExperience, setLocalWorkExperience] = useState<T_WorkExperience[]>(workExperience);
 
   useEffect(() => {
     setLocalWorkExperience(workExperience);
@@ -90,13 +82,13 @@ const WorkExperienceModal = ({
             </div>
             <div className="ml-4 flex gap-2">
               <button
-                onClick={() => onEdit(exp.id)}
+                onClick={() => exp.id && onEdit(exp.id)}
                 className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
               >
                 <PencilIcon className="h-5 w-5" />
               </button>
               <button
-                onClick={() => handleDelete(exp.id)}
+                onClick={() => exp.id && handleDelete(exp.id)}
                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <TrashIcon className="h-5 w-5" />

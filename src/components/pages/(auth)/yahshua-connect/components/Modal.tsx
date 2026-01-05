@@ -64,7 +64,7 @@ const Modal = ({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel
-                className={`w-full ${sizeClasses[size]} transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all flex flex-col max-h-[90vh]`}
+                className={`w-full ${sizeClasses[size]} transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl transition-all sm:my-8`}
               >
                 {/* Header */}
                 {(title || showCloseButton || headerContent) && (
@@ -89,7 +89,7 @@ const Modal = ({
                 )}
 
                 {/* Body */}
-                <div className="flex-1 overflow-visible p-5">
+                <div className="p-5">
                   {children}
                 </div>
 

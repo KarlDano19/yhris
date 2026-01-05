@@ -1,21 +1,14 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
 
-interface Portfolio {
-  id?: number;
-  name: string;
-  description: string;
-  link: string;
-  image?: string;
-}
+import { T_Portfolio } from '@/types/personal-mode';
 
 interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Portfolio) => void;
-  initialData?: Portfolio | null;
+  onSave: (data: T_Portfolio) => void;
+  initialData?: T_Portfolio | null;
 }
 
 const AddProjectModal = ({
@@ -24,7 +17,7 @@ const AddProjectModal = ({
   onSave,
   initialData = null,
 }: AddProjectModalProps) => {
-  const [formData, setFormData] = useState<Portfolio>({
+  const [formData, setFormData] = useState<T_Portfolio>({
     name: '',
     description: '',
     link: '',
@@ -50,7 +43,7 @@ const AddProjectModal = ({
     onClose();
   };
 
-  const handleChange = (field: keyof Portfolio, value: string) => {
+  const handleChange = (field: keyof T_Portfolio, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 

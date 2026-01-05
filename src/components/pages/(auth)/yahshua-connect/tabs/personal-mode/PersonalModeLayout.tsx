@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, cloneElement, isValidElement, useMemo } from 'react';
+import { ReactNode, useState, cloneElement, isValidElement, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -32,15 +32,32 @@ const PersonalModeLayout = ({ children }: PersonalModeLayoutProps) => {
   
   // Fetch saved jobs for count
   const { data: savedJobsData } = useGetSavedJobs();
-  const savedJobsCount = savedJobsData && Array.isArray(savedJobsData) ? savedJobsData.length : 0;
+  const [savedJobsCount, setSavedJobsCount] = useState(0);
 
   // Fetch applications data for count
   const { data: applicationsData } = useGetApplicationByUser({});
-  const applicationsCount = useMemo(() => {
-    if (!applicationsData) return 0;
+  const [applicationsCount, setApplicationsCount] = useState(0);
+
+  // Populate counts when data is loaded
+  useEffect(() => {
+    if (savedJobsData && Array.isArray(savedJobsData)) {
+      setSavedJobsCount(savedJobsData.length);
+    } else {
+      setSavedJobsCount(0);
+    }
+  }, [savedJobsData]);
+
+  useEffect(() => {
+    if (!applicationsData) {
+      setApplicationsCount(0);
+      return;
+    }
     const applications = applicationsData.data || applicationsData;
-    if (!Array.isArray(applications)) return 0;
-    return applications.length;
+    if (Array.isArray(applications)) {
+      setApplicationsCount(applications.length);
+    } else {
+      setApplicationsCount(0);
+    }
   }, [applicationsData]);
 
   const quickActions = [

@@ -1,6 +1,5 @@
-'use client';
-
 import Modal from '../../../../../components/Modal';
+
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 interface ViewDocumentModalProps {

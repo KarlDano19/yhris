@@ -1,23 +1,17 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
-import { DocumentTextIcon, EyeIcon } from '@heroicons/react/24/outline';
+
 import ViewDocumentModal from './ViewDocumentModal';
 
-interface EmploymentDocument {
-  id: string;
-  name: string;
-  required: boolean;
-  uploaded: boolean;
-  fileUrl?: string;
-  file?: File;
-}
+import { DocumentTextIcon, EyeIcon } from '@heroicons/react/24/outline';
+
+import { T_EmploymentDocument } from '@/types/personal-mode';
 
 interface EmploymentDocumentsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  documents: EmploymentDocument[];
+  documents: T_EmploymentDocument[];
   onSave: (files: { [key: string]: File }) => void;
 }
 
@@ -27,7 +21,7 @@ const EmploymentDocumentsModal = ({
   documents,
   onSave,
 }: EmploymentDocumentsModalProps) => {
-  const [localDocuments, setLocalDocuments] = useState<EmploymentDocument[]>(documents);
+  const [localDocuments, setLocalDocuments] = useState<T_EmploymentDocument[]>(documents);
   const [viewingDocument, setViewingDocument] = useState<{ name: string; url: string } | null>(null);
 
   useEffect(() => {
@@ -51,7 +45,7 @@ const EmploymentDocumentsModal = ({
     );
   };
 
-  const handleViewDocument = (document: EmploymentDocument) => {
+  const handleViewDocument = (document: T_EmploymentDocument) => {
     if (document.fileUrl) {
       setViewingDocument({
         name: document.name,
