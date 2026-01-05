@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FunnelIcon, BoltIcon, SparklesIcon, UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import YahshuaConnectHeader from '../../YahshuaConnectHeader';
+// import YahshuaConnectHeader from '../../YahshuaConnectHeader'; // Moved to header.tsx
 import FloatingMenuBar from '../../components/FloatingMenuBar';
 import ProfileCard from './components/cards/ProfileCard';
 import EarningsCard from './components/cards/EarningsCard';
@@ -43,7 +43,7 @@ const Content = () => {
 
   return (
     <>
-      <YahshuaConnectHeader />
+      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
       <FloatingMenuBar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
         {/* Three Column Layout */}

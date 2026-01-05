@@ -1,0 +1,258 @@
+import { useState, useEffect } from 'react';
+
+import formatPrice from '@/helpers/currencyFormat';
+import useGetYahshuaConnectJobDetails from '../hooks/useGetJobDetails';
+
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import BenefitsIcon from '@/svg/BenefitsIcon';
+import FileCaseIcon from '@/svg/FileCaseIcon';
+
+import * as DOMPurify from 'dompurify';
+import JobDetailsLocation from '@/svg/JobDetailLocation';
+import 'react-quill/dist/quill.snow.css';
+
+interface JobDetailsProp {
+  jobId: any;
+  onClose?: () => void;
+}
+
+const JobDetails = ({ jobId, onClose }: JobDetailsProp) => {
+  const { data, isLoading } = useGetYahshuaConnectJobDetails(jobId);
+  const [jobDetailData, setJobDetailData] = useState<any>({});
+
+  useEffect(() => {
+    if (data) {
+      setJobDetailData(data);
+    }
+  }, [data]);
+
+  const renderRoleDescription = (jobDescription: any) => {
+    const markup = { __html: jobDescription };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
+  const renderQualificationsDescription = (qualifications: any) => {
+    const markup = { __html: qualifications };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+  
+  const renderNotesRemarks = (notesRemarks: any) => {
+    const markup = { __html: notesRemarks };
+    return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
+  };
+
+  const getMatchColor = (matchValue?: number) => {
+    if (!matchValue) return 'bg-gray-200';
+    if (matchValue === 100) return 'bg-green-500';
+    return 'bg-yellow-400';
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mt-4">
+      {/* Close button */}
+      {onClose && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
+      <div className='grid grid-cols-4 px-4 mt-5'>
+        <div className='col-span-3 lg:col-span-2 flex'>
+          <span className='mt-1 ml-1'>
+            <FileCaseIcon className='h-6 w-6' />
+          </span>
+          <div className='ml-6'>
+            <h5 className='text-xl font-semibold text-indigo-dye'>
+              {!isLoading ? jobDetailData?.job_title : 'Loading job title...'}
+            </h5>
+            <h6 className='text-indigo-dye text-sm'> 
+              for a {!isLoading ? jobDetailData?.industry : 'Loading industry...'} Company
+            </h6>
+            <h6 className='text-indigo-dye text-sm mt-1'> {!isLoading ? jobDetailData?.address : 'Loading location...'}</h6>
+          </div>
+        </div>
+        <div className='col-span-1 lg:col-span-2 px-1'>
+          <div
+            className='lg:w-40 lg:mx-auto bg-gray-300 h-[150px] rounded-md hidden lg:block'
+            style={{
+              backgroundImage: `url(${jobDetailData.company_logo})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Match Percentage - Only show if available */}
+      {jobDetailData?.match_percentage !== undefined && jobDetailData?.match_percentage !== null && (
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <h5 className='text-xl font-semibold text-indigo-dye mb-3'>Skill Match</h5>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${getMatchColor(jobDetailData.match_percentage)}`}
+                style={{ width: `${jobDetailData.match_percentage}%` }}
+              />
+            </div>
+            <span className="text-base font-semibold text-gray-700">{jobDetailData.match_percentage}%</span>
+          </div>
+        </div>
+      )}
+      
+      <div className='border-t border-gray-300 my-5 p-4'>
+        <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
+        <div className='details mx-5 mt-2'>
+          {/* Role section - only show if is_show_roles is true */}
+          {!isLoading && jobDetailData?.is_show_roles && jobDetailData?.job_description && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Role
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {renderRoleDescription(jobDetailData?.job_description)}
+              </div>
+            </>
+          )}
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+            <JobDetailsLocation className='h-3.5 w-3.5 mb-2 mr-1.5 ml-1' />
+            Location
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
+            {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
+          </p>
+          
+          {/* skills */}
+          {jobDetailData?.skills && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <StarIcon className='h-5 w-5 mr-1' />
+                Skills
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? (Array.isArray(jobDetailData.skills) ? jobDetailData.skills.join(', ') : jobDetailData.skills) : 'Loading skills...'}
+              </p>
+            </>
+          )}
+
+          {/* qualifications */}
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+            <CheckCircleIcon className='h-5 w-5 mr-1' />
+            Qualifications
+          </h6>
+          <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+            {!isLoading
+              ? renderQualificationsDescription(jobDetailData?.qualifications)
+              : 'Loading qualifications...'}
+          </div>
+          {/* job type */}
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+            <BriefcaseIcon className='h-5 w-5 mr-1' />
+            Job Type
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+            {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
+          </p>
+          {/* work setup */}
+          {jobDetailData?.work_setup && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <HomeIcon className='h-5 w-5 mr-1' />
+                Work Setup
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? jobDetailData?.work_setup : 'Loading work setup...'}
+              </p>
+            </>
+          )}
+          {/* schedule */}
+          <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+            <ClockIcon className='h-5 w-5 mr-1' />
+            Schedule
+          </h6>
+          <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+            {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
+          </p>
+          {/* salary range */}
+          {jobDetailData?.is_show_salary && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <BanknotesIcon className='h-5 w-5 mr-1' />
+                Salary Range
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading && jobDetailData?.salary_range_type == 'Range' && (
+                  <>
+                    PHP {formatPrice(jobDetailData?.minimum_amount)} - {formatPrice(jobDetailData?.maximum_amount)}
+                  </>
+                )}
+                {!isLoading && jobDetailData?.salary_range_type != 'Range' && (
+                  <>PHP {formatPrice(jobDetailData?.exact_amount)}</>
+                )}
+                &nbsp;/ {jobDetailData.rate}
+              </p>
+            </>
+          )}
+          {/* benefits */}
+          {jobDetailData?.is_show_benefits && jobDetailData.offered_benefits && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
+                Benefits
+              </h6>
+              <ul className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
+              </ul>
+            </>
+          )}
+          
+          {/* notes/remarks - only show if is_show_remarks is true */}
+          {!isLoading && jobDetailData?.is_show_remarks && jobDetailData.job_remark && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Notes/Remarks
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {renderNotesRemarks(jobDetailData?.job_remark)}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+      {!isLoading && jobDetailData?.uploaded_job_description && jobDetailData?.uploaded_job_description.length > 0 && (
+        <div className='border-t border-gray-300 my-5 p-4'>
+          <>
+            <h5 className='text-xl font-semibold text-indigo-dye'>Job Description File</h5>
+            <div className='details mx-5 mt-2'>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
+                Job Description Document
+              </h6>
+              <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                <a 
+                  href={jobDetailData?.uploaded_job_description} 
+                  target='_blank' 
+                  rel='noopener noreferrer'
+                  className='text-savoy-blue underline hover:text-blue-700 flex items-center'
+                >
+                  <ClipboardDocumentIcon className='h-4 w-4 mr-1' />
+                  View Job Description PDF
+                </a>
+              </div>
+            </div>
+          </>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default JobDetails;
+

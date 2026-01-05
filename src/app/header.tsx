@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
 import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
-import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
+// import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader'; // Commented out for rollback - replaced with YahshuaConnectHeader
+import YahshuaConnectHeader from '@/components/pages/(auth)/yahshua-connect/YahshuaConnectHeader';
 import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
 
 interface HeaderProps {
@@ -53,7 +54,15 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'setup-applicant-profile',
     'job-applicant-form',
   ];
-  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page', 'personal-mode'];
+  const yahshuaConnectRoutes: string[] = [
+    'personal-mode',
+    'business-mode',
+    'job-applicant-form',
+  ];
+  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page'];
+  
+  // Check if current route is a yahshua-connect route
+  const isYahshuaConnectRoute = yahshuaConnectRoutes.some(route => pathname?.includes(route));
 
   return (
     <>
@@ -69,12 +78,17 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
               initialTokenExpiresAt={tokenExpiresAt}
             />
           )}
-          {type === 'applicant' && applicantRoutes.includes(firstRoute) && (
+          {/* Yahshua Connect Header - for personal-mode and business-mode routes */}
+          {type === 'applicant' && isYahshuaConnectRoute && (
+            <YahshuaConnectHeader />
+          )}
+          {/* Old Applicant Header - commented out for rollback option */}
+          {/* {type === 'applicant' && applicantRoutes.includes(firstRoute) && (
             <AuthorizedHeader
               hasProfile={hasProfile}
               initialTokenExpiresAt={tokenExpiresAt}
             />
-          )}
+          )} */}
         </>
       )}
     </>

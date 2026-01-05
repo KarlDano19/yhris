@@ -5,9 +5,11 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 import formatPrice from '@/helpers/currencyFormat';
-import useFindJobs from '@/components/pages/(auth)/applicant/apply-for-job/hooks/useFindJobs';
+import useFindJobs from './hooks/useFindJobs';
+import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
 
-import JobCard from '../../components/cards/JobCard';
+import JobCard from './components/JobCard';
+import JobDetails from './components/JobDetails';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
@@ -15,8 +17,9 @@ const Content = () => {
   const router = useRouter();
   const [showFilters, setShowFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState<number>(20);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  // Fetch jobs - empty search to get all jobs with match percentage
+  // Fetch jobs - empty search to get all jobs with match percentage using applicant_personal view type
   const { 
     data: jobsData, 
     isLoading: isGetJobsLoading, 
@@ -24,7 +27,23 @@ const Content = () => {
     hasNextPage,
     isFetchingNextPage,
     totalRecords
-  } = useFindJobs(null); // null means fetch all jobs
+  } = useFindJobs({ useApplicantPersonal: true }); // Use applicant_personal view type for match percentage
+
+  // Fetch saved jobs to check which jobs are saved
+  const { data: savedJobsData } = useGetSavedJobs();
+  
+  // Create a Set of saved job IDs for quick lookup
+  const savedJobIds = useMemo(() => {
+    if (!savedJobsData || !Array.isArray(savedJobsData)) return new Set<number>();
+    return new Set(
+      savedJobsData
+        .map((savedJob: any) => {
+          // Handle both response formats: job_posting object or job_posting_id
+          return savedJob.job_posting?.id || savedJob.job_posting_id || savedJob.job_posting;
+        })
+        .filter((id: any) => id != null && id !== undefined)
+    );
+  }, [savedJobsData]);
 
 
   // Transform API jobs data to JobCard format
@@ -90,23 +109,38 @@ const Content = () => {
         tags: getTags(),
         logo: getCompanyInitials(job.company || '?'),
         logoUrl: job.company_logo || undefined,
-        saved: false, // TODO: Implement saved jobs functionality
+        saved: savedJobIds.has(job.id), // Check if job is saved
         match: job.match_percentage || 0,
         applied: false, // TODO: Check if user has applied
       };
     });
-  }, [jobsData, displayCount]);
+  }, [jobsData, displayCount, savedJobIds]);
 
   const handleLoadMore = () => {
+    // Check if there are more jobs in the current fetched batch
     const jobsInCurrentBatch = jobsData?.length || 0;
     const nextDisplayCount = displayCount + 20;
     
+    // If we can show more from current batch (haven't shown all 200 from current page)
     if (nextDisplayCount <= jobsInCurrentBatch) {
+      // Show next 20 jobs from current batch (client-side pagination)
       setDisplayCount(nextDisplayCount);
     } else if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-      setDisplayCount(nextDisplayCount);
+      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
+      fetchNextPage().then(() => {
+        // Update displayCount after new data is fetched
+        setDisplayCount(nextDisplayCount);
+      });
     }
+  };
+
+  const handleJobCardClick = (jobId: number) => {
+    // Toggle: if same job is clicked, close it; otherwise, open the new one
+    setSelectedJobId(selectedJobId === jobId ? null : jobId);
+  };
+
+  const handleCloseJobDetails = () => {
+    setSelectedJobId(null);
   };
 
 
@@ -114,63 +148,69 @@ const Content = () => {
     <div className="space-y-6">
       {/* Browse Jobs Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">Browse Jobs</h2>
-                  </div>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <FunnelIcon className="h-5 w-5" />
-                    Filters
-                  </button>
-                </div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Browse Jobs</h2>
+          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <FunnelIcon className="h-5 w-5" />
+            Filters
+          </button>
+        </div>
 
-                {/* Jobs List - Single Column */}
-                {isGetJobsLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-gray-500">Loading jobs...</div>
-                  </div>
-                ) : transformedJobs.length === 0 ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-gray-500">No jobs available at the moment.</div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-4">
-                      {transformedJobs.map((job) => (
-                        <JobCard 
-                          key={job.id} 
-                          {...job}
-                          onApply={() => router.push(`/job-applicant-form/${job.id}`)}
-                          onSave={() => {
-                            // TODO: Implement save job functionality
-                            console.log('Save job:', job.id);
-                          }}
-                        />
-                      ))}
-                    </div>
-                    {/* Load More Button */}
-                    {(displayCount < (jobsData?.length || 0) || hasNextPage) && (
-                      <div className="flex justify-center mt-6">
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={isFetchingNextPage}
-                          className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
-                        </button>
-                      </div>
-                    )}
-                    {totalRecords > 0 && (
-                      <div className="text-sm text-gray-600 text-center mt-4">
-                        Showing {Math.min(displayCount, totalRecords)} of {totalRecords} jobs
-                      </div>
-                    )}
-                  </>
-                )}
+        {/* Jobs List - Single Column */}
+        {isGetJobsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">Loading jobs...</div>
+          </div>
+        ) : transformedJobs.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No jobs available at the moment.</div>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {transformedJobs.map((job) => (
+                <div key={job.id}>
+                  <JobCard 
+                    {...job}
+                    isSelected={selectedJobId === job.id}
+                    onCardClick={() => handleJobCardClick(job.id)}
+                    onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
+                  />
+                  {/* Show job details below the card when selected */}
+                  {selectedJobId === job.id && (
+                    <JobDetails 
+                      jobId={job.id} 
+                      onClose={handleCloseJobDetails}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Load More Button */}
+            {(displayCount < (jobsData?.length || 0) || hasNextPage) && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+                </button>
               </div>
+            )}
+            {totalRecords > 0 && (
+              <div className="text-sm text-gray-600 text-center mt-4">
+                Showing {Math.min(displayCount, totalRecords)} of {totalRecords} jobs
+              </div>
+            )}
+          </>
+        )}
+        </div>
     </div>
   );
 };

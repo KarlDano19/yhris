@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
-import { PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface WorkExperience {
   id: number;
@@ -30,8 +31,18 @@ const WorkExperienceModal = ({
   onAdd,
   onSave,
 }: WorkExperienceModalProps) => {
+  const [localWorkExperience, setLocalWorkExperience] = useState<WorkExperience[]>(workExperience);
+
+  useEffect(() => {
+    setLocalWorkExperience(workExperience);
+  }, [workExperience, isOpen]);
+
+  const handleDelete = (id: number) => {
+    setLocalWorkExperience(localWorkExperience.filter((exp) => exp.id !== id));
+  };
+
   const handleSave = () => {
-    onSave(workExperience);
+    onSave(localWorkExperience);
     onClose();
   };
 
@@ -63,7 +74,7 @@ const WorkExperienceModal = ({
       footerContent={footerContent}
     >
       <div className="space-y-4 mb-6">
-        {workExperience.map((exp) => (
+        {localWorkExperience.map((exp) => (
           <div
             key={exp.id}
             className="flex items-start justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
@@ -77,12 +88,20 @@ const WorkExperienceModal = ({
                 <p className="text-sm text-gray-500">{exp.description}</p>
               )}
             </div>
-            <button
-              onClick={() => onEdit(exp.id)}
-              className="ml-4 p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
+            <div className="ml-4 flex gap-2">
+              <button
+                onClick={() => onEdit(exp.id)}
+                className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
+              >
+                <PencilIcon className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => handleDelete(exp.id)}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

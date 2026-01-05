@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
-import { ArrowUpTrayIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface Portfolio {
   id?: number;
-  title: string;
-  type: string;
+  name: string;
   description: string;
   link: string;
   image?: string;
@@ -27,22 +25,18 @@ const AddProjectModal = ({
   initialData = null,
 }: AddProjectModalProps) => {
   const [formData, setFormData] = useState<Portfolio>({
-    title: '',
-    type: '',
+    name: '',
     description: '',
     link: '',
     image: '',
   });
-
-  const projectTypes = ['Mobile App', 'Web App', 'Desktop App', 'Other'];
 
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
     } else {
       setFormData({
-        title: '',
-        type: '',
+        name: '',
         description: '',
         link: '',
         image: '',
@@ -107,34 +101,12 @@ const AddProjectModal = ({
             </label>
             <input
               type="text"
-              value={formData.title}
-              onChange={(e) => handleChange('title', e.target.value)}
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
               placeholder="e.g., E-commerce App Redesign"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
               required
             />
-          </div>
-
-          {/* Project Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Project Type
-            </label>
-            <div className="relative">
-              <select
-                value={formData.type}
-                onChange={(e) => handleChange('type', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all appearance-none bg-white"
-              >
-                <option value="">Select type</option>
-                {projectTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-            </div>
           </div>
 
           {/* Description */}

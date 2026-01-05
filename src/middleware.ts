@@ -45,12 +45,12 @@ export async function middleware(request: NextRequest) {
     'personal-mode',
     'business-mode',
 
-    'application-tracker',
-    'apply-for-a-job',
-    'edit-profile',
-    'notification',
-    'setup-applicant-profile',
-    'job-applicant-form',
+    // 'application-tracker',
+    // 'apply-for-a-job',
+    // 'edit-profile',
+    // 'notification',
+    // 'setup-applicant-profile',
+    // 'job-applicant-form',
   ];
 
   if (bypassRoutes.includes(firstRoute)) {
@@ -105,6 +105,10 @@ export async function middleware(request: NextRequest) {
       if (applicantRoutes.includes(firstRoute)) {
         if (firstRoute === 'personal-mode') {
           // Allow access to personal-mode
+          return NextResponse.next();
+        }
+        if (firstRoute === 'business-mode') {
+          // Allow access to business-mode
           return NextResponse.next();
         }
         if (

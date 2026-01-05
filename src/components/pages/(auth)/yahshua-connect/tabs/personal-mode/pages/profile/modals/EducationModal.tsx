@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
-import { PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Education {
   id: number;
@@ -22,8 +23,18 @@ interface EducationModalProps {
 }
 
 const EducationModal = ({ isOpen, onClose, education, onEdit, onAdd, onSave }: EducationModalProps) => {
+  const [localEducation, setLocalEducation] = useState<Education[]>(education);
+
+  useEffect(() => {
+    setLocalEducation(education);
+  }, [education, isOpen]);
+
+  const handleDelete = (id: number) => {
+    setLocalEducation(localEducation.filter((edu) => edu.id !== id));
+  };
+
   const handleSave = () => {
-    onSave(education);
+    onSave(localEducation);
     onClose();
   };
 
@@ -55,7 +66,7 @@ const EducationModal = ({ isOpen, onClose, education, onEdit, onAdd, onSave }: E
       footerContent={footerContent}
     >
       <div className="space-y-4 mb-6">
-        {education.map((edu) => (
+        {localEducation.map((edu) => (
           <div
             key={edu.id}
             className="flex items-start justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
@@ -67,12 +78,20 @@ const EducationModal = ({ isOpen, onClose, education, onEdit, onAdd, onSave }: E
               </p>
               {edu.note && <p className="text-sm text-gray-500">{edu.note}</p>}
             </div>
-            <button
-              onClick={() => onEdit(edu.id)}
-              className="ml-4 p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
+            <div className="ml-4 flex gap-2">
+              <button
+                onClick={() => onEdit(edu.id)}
+                className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
+              >
+                <PencilIcon className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => handleDelete(edu.id)}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

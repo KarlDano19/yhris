@@ -1,5 +1,15 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
+import Link from 'next/link';
+
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import useAddSavedJobs from '../hooks/useAddSavedJobs';
+import useUpdateSavedJobs from '../../../../../hooks/useUpdateSavedJobs';
+
 import { BookmarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 
@@ -17,10 +27,12 @@ interface JobCardProps {
   match?: number;
   applied?: boolean;
   onApply?: () => void;
-  onSave?: () => void;
+  onCardClick?: () => void;
+  isSelected?: boolean;
 }
 
 const JobCard = ({
+  id,
   title,
   company,
   location,
@@ -33,17 +45,87 @@ const JobCard = ({
   match,
   applied = false,
   onApply,
-  onSave,
+  onCardClick,
+  isSelected = false,
 }: JobCardProps) => {
+  const [isSaved, setIsSaved] = useState(saved);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const addSavedJobMutation = useAddSavedJobs();
+  const deleteSavedJobMutation = useUpdateSavedJobs();
+
+  // Sync saved state from props
+  useEffect(() => {
+    setIsSaved(saved);
+  }, [saved]);
+
   const getMatchColor = (matchValue?: number) => {
     if (!matchValue) return 'bg-gray-200';
-    if (matchValue >= 85) return 'bg-green-500';
-    if (matchValue >= 70) return 'bg-yellow-400';
-    return 'bg-gray-300';
+    if (matchValue === 100) return 'bg-green-500';
+    return 'bg-yellow-400';
+  };
+
+  const handleSaveToggle = () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    const wasSaved = isSaved;
+
+    // Optimistically update UI
+    setIsSaved(!wasSaved);
+
+    if (wasSaved) {
+      // Unsave the job
+      deleteSavedJobMutation.mutate(id, {
+        onSuccess: () => {
+          toast.custom(
+            () => <CustomToast message="Job removed from saved jobs" type="success" />,
+            { duration: 3000 }
+          );
+        },
+        onError: (error: any) => {
+          setIsSaved(wasSaved); // Revert on error
+          const errorMessage = error?.message || error || 'Failed to remove job from saved jobs';
+          toast.custom(
+            () => <CustomToast message={errorMessage} type="error" />,
+            { duration: 4000 }
+          );
+        },
+        onSettled: () => {
+          setIsSaving(false);
+        },
+      });
+    } else {
+      // Save the job
+      addSavedJobMutation.mutate(id, {
+        onSuccess: () => {
+          toast.custom(
+            () => <CustomToast message="Job saved successfully" type="success" />,
+            { duration: 3000 }
+          );
+        },
+        onError: (error: any) => {
+          setIsSaved(wasSaved); // Revert on error
+          const errorMessage = error?.message || error || 'Failed to save job';
+          toast.custom(
+            () => <CustomToast message={errorMessage} type="error" />,
+            { duration: 4000 }
+          );
+        },
+        onSettled: () => {
+          setIsSaving(false);
+        },
+      });
+    }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div 
+      className={`bg-white rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow cursor-pointer ${
+        isSelected ? 'border-savoy-blue border-2' : 'border-gray-200'
+      }`}
+      onClick={onCardClick}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 flex-1">
           <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -72,10 +154,15 @@ const JobCard = ({
           </div>
         </div>
         <button
-          onClick={onSave}
-          className="text-gray-400 hover:text-savoy-blue transition-colors flex-shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSaveToggle();
+          }}
+          disabled={isSaving}
+          className="text-gray-400 hover:text-savoy-blue transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={isSaved ? 'Remove from saved jobs' : 'Save job'}
         >
-          {saved ? (
+          {isSaved ? (
             <BookmarkIconSolid className="h-5 w-5 text-savoy-blue" />
           ) : (
             <BookmarkIcon className="h-5 w-5" />
@@ -121,12 +208,16 @@ const JobCard = ({
             <span className="text-sm font-medium">Applied</span>
           </div>
         ) : (
-          <button
-            onClick={onApply}
-            className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+          <Link 
+            href={`/personal-mode/job-applicant-form/${id}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onApply?.();
+            }}
+            className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm inline-block text-center"
           >
             Apply Now
-          </button>
+          </Link>
         )}
       </div>
     </div>
