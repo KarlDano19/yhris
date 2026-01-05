@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useRef, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronDownIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import { categories, locationSuggestions } from '../../hooks/usePostJobData';
 
@@ -14,22 +14,72 @@ interface PostJobModalProps {
     category: string;
     description: string;
     location: string;
+    budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
     scheduleDate: string;
-    scheduleTime: string;
+    scheduleTimeFrom: string;
+    scheduleTimeTo: string;
   }) => void;
+  initialData?: {
+    jobTitle: string;
+    category: string;
+    description: string;
+    location: string;
+    budgetType: 'fixed' | 'hourly';
+    budgetMin: string;
+    budgetMax: string;
+    scheduleDate: string;
+    scheduleTimeFrom: string;
+    scheduleTimeTo: string;
+  };
 }
 
-const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
+const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalProps) => {
   const [jobTitle, setJobTitle] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
-  const [budgetMin, setBudgetMin] = useState('');
-  const [budgetMax, setBudgetMax] = useState('');
+  const [budgetType, setBudgetType] = useState<'fixed' | 'hourly'>('fixed');
+  const [budgetMin, setBudgetMin] = useState('500');
+  const [budgetMax, setBudgetMax] = useState('1000');
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
-  const [scheduleTime, setScheduleTime] = useState('');
+  const [scheduleTimeFrom, setScheduleTimeFrom] = useState('');
+  const [scheduleTimeTo, setScheduleTimeTo] = useState('');
+
+  // Load initial data when modal opens or initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setJobTitle(initialData.jobTitle);
+      setCategory(initialData.category);
+      setDescription(initialData.description);
+      setLocation(initialData.location);
+      setBudgetType(initialData.budgetType);
+      setBudgetMin(initialData.budgetMin);
+      setBudgetMax(initialData.budgetMax);
+      // Parse scheduleDate string to Date
+      if (initialData.scheduleDate) {
+        const date = new Date(initialData.scheduleDate);
+        if (!isNaN(date.getTime())) {
+          setScheduleDate(date);
+        }
+      }
+      setScheduleTimeFrom(initialData.scheduleTimeFrom);
+      setScheduleTimeTo(initialData.scheduleTimeTo);
+    } else {
+      // Reset to defaults when no initial data
+      setJobTitle('');
+      setCategory('');
+      setDescription('');
+      setLocation('');
+      setBudgetType('fixed');
+      setBudgetMin('500');
+      setBudgetMax('1000');
+      setScheduleDate(null);
+      setScheduleTimeFrom('');
+      setScheduleTimeTo('');
+    }
+  }, [initialData, isOpen]);
 
   // Location dropdown state
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -117,7 +167,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
   };
 
   const handleSubmit = () => {
-    if (!jobTitle.trim() || !description.trim()) {
+    if (!jobTitle.trim() || !description.trim() || !location.trim()) {
       return; // Basic validation
     }
 
@@ -130,10 +180,12 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
       category,
       description: description.trim(),
       location: location.trim(),
+      budgetType,
       budgetMin: budgetMin.trim(),
       budgetMax: budgetMax.trim(),
       scheduleDate: formattedDate,
-      scheduleTime: scheduleTime.trim(),
+      scheduleTimeFrom: scheduleTimeFrom.trim(),
+      scheduleTimeTo: scheduleTimeTo.trim(),
     });
 
     // Reset form
@@ -146,10 +198,12 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
     setCategory('');
     setDescription('');
     setLocation('');
-    setBudgetMin('');
-    setBudgetMax('');
+    setBudgetType('fixed');
+    setBudgetMin('500');
+    setBudgetMax('1000');
     setScheduleDate(null);
-    setScheduleTime('');
+    setScheduleTimeFrom('');
+    setScheduleTimeTo('');
   };
 
   const handleClose = () => {
@@ -183,7 +237,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-3xl bg-white px-6 py-6 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
                 {/* Close Button */}
                 <div className="absolute top-4 right-4">
                   <button
@@ -196,8 +250,8 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
 
                 {/* Title */}
                 <div className="text-left mb-6">
-                  <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
-                    Post a Job
+                  <Dialog.Title as="h3" className="text-lg font-bold text-gray-900">
+                    {initialData ? 'Edit Job' : 'Post a New Job'}
                   </Dialog.Title>
                 </div>
 
@@ -214,7 +268,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
                       value={jobTitle}
                       onChange={(e) => setJobTitle(e.target.value)}
                       placeholder="e.g., House Cleaning Service"
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+                      className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
                       required
                     />
                   </div>
@@ -228,7 +282,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
                       <button
                         type="button"
                         onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                        className="w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 text-left bg-white flex items-center justify-between"
+                        className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 text-left bg-white flex items-center justify-between"
                       >
                         <span className={category ? 'text-gray-900' : 'text-gray-400'}>
                           {category || 'Select category'}
@@ -261,80 +315,119 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
                       id="description"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Describe what you need done..."
+                      placeholder="Describe the job in detail..."
                       rows={4}
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+                      className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
                       required
                     />
                   </div>
 
-                  {/* Location and Budget */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Location */}
-                    <div className="relative" ref={locationDropdownRef}>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-                        Location
-                      </label>
-                      <div className="relative">
-                        <input
-                          ref={locationInputRef}
-                          type="text"
-                          id="location"
-                          value={location}
-                          onChange={handleLocationInputChange}
-                          onFocus={() => setShowLocationDropdown(true)}
-                          onKeyDown={handleLocationKeyDown}
-                          placeholder="e.g., Carmen, CDO"
-                          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                        />
-                        {showLocationDropdown && filteredLocations.length > 0 && (
-                          <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
-                            {filteredLocations.map((loc, index) => (
-                              <button
-                                key={loc}
-                                type="button"
-                                onClick={() => handleLocationSelect(loc)}
-                                className={`block w-full text-left px-4 py-2 text-sm ${
-                                  index === selectedLocationIndex
-                                    ? 'bg-savoy-blue text-white'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                              >
-                                {loc}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                  {/* Location */}
+                  <div className="relative" ref={locationDropdownRef}>
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                      Location <span className="text-red-600">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        ref={locationInputRef}
+                        type="text"
+                        id="location"
+                        value={location}
+                        onChange={handleLocationInputChange}
+                        onFocus={() => setShowLocationDropdown(true)}
+                        onKeyDown={handleLocationKeyDown}
+                        placeholder="Select location"
+                        className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                      />
+                      <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      {showLocationDropdown && filteredLocations.length > 0 && (
+                        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
+                          {filteredLocations.map((loc, index) => (
+                            <button
+                              key={loc}
+                              type="button"
+                              onClick={() => handleLocationSelect(loc)}
+                              className={`block w-full text-left px-4 py-2 text-sm ${
+                                index === selectedLocationIndex
+                                  ? 'bg-savoy-blue text-white'
+                                  : 'text-gray-700 hover:bg-gray-100'
+                              }`}
+                            >
+                              {loc}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Budget */}
+                  {/* Budget Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Budget Type <span className="text-red-600">*</span>
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setBudgetType('fixed')}
+                        className={`flex-1 px-4 py-2 rounded-lg border text-sm transition-colors ${
+                          budgetType === 'fixed'
+                            ? 'border-savoy-blue text-savoy-blue bg-savoy-blue/5'
+                            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        Fixed Rate
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBudgetType('hourly')}
+                        className={`flex-1 px-4 py-2 rounded-lg border text-sm transition-colors ${
+                          budgetType === 'hourly'
+                            ? 'border-savoy-blue text-savoy-blue bg-savoy-blue/5'
+                            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        Hourly Rate
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Budget Amounts */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={budgetMin}
-                          onChange={(e) => setBudgetMin(e.target.value)}
-                          placeholder="Min"
-                          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                        />
-                        <span className="text-gray-500">-</span>
-                        <input
-                          type="text"
-                          value={budgetMax}
-                          onChange={(e) => setBudgetMax(e.target.value)}
-                          placeholder="Max"
-                          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                        />
-                      </div>
+                      <label htmlFor="budgetMin" className="block text-sm font-medium text-gray-700 mb-2">
+                        {budgetType === 'fixed' ? 'Min Amount (₱)' : 'Min Rate/Hour (₱)'}
+                      </label>
+                      <input
+                        type="text"
+                        id="budgetMin"
+                        value={budgetMin}
+                        onChange={(e) => setBudgetMin(e.target.value)}
+                        placeholder="500"
+                        className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="budgetMax" className="block text-sm font-medium text-gray-700 mb-2">
+                        {budgetType === 'fixed' ? 'Max Amount (₱)' : 'Max Rate/Hour (₱)'} <span className="text-gray-500 text-xs">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="budgetMax"
+                        value={budgetMax}
+                        onChange={(e) => setBudgetMax(e.target.value)}
+                        placeholder="1000"
+                        className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+                      />
                     </div>
                   </div>
 
                   {/* Schedule */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Schedule</label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Schedule <span className="text-red-600">*</span>
+                    </label>
+                    <div className="space-y-3">
                       {/* Date */}
                       <div className="relative">
                         <CustomDatePicker
@@ -343,18 +436,41 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
                           pickerOnChange={(date: Date | null) => setScheduleDate(date)}
                           inputOnChange={(date: Date | null) => setScheduleDate(date)}
                           placeholder="mm/dd/yyyy"
-                          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                          className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
                         />
+                        <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                       </div>
 
-                      {/* Time */}
-                      <div>
-                        <input
-                          type="time"
-                          value={scheduleTime}
-                          onChange={(e) => setScheduleTime(e.target.value)}
-                          className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                        />
+                      {/* Time From and To */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative">
+                          <label htmlFor="timeFrom" className="block text-xs text-gray-600 mb-1">
+                            Time From
+                          </label>
+                          <input
+                            type="time"
+                            id="timeFrom"
+                            value={scheduleTimeFrom}
+                            onChange={(e) => setScheduleTimeFrom(e.target.value)}
+                            placeholder="--:--"
+                            className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                          />
+                          <ClockIcon className="absolute right-3 bottom-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                        </div>
+                        <div className="relative">
+                          <label htmlFor="timeTo" className="block text-xs text-gray-600 mb-1">
+                            Time To
+                          </label>
+                          <input
+                            type="time"
+                            id="timeTo"
+                            value={scheduleTimeTo}
+                            onChange={(e) => setScheduleTimeTo(e.target.value)}
+                            placeholder="--:--"
+                            className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                          />
+                          <ClockIcon className="absolute right-3 bottom-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -365,16 +481,16 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none"
+                    className="inline-flex justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={handleSubmit}
-                    className="inline-flex justify-center rounded-md border border-transparent bg-savoy-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none"
+                    className="inline-flex justify-center rounded-lg border border-transparent bg-savoy-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none"
                   >
-                    Post Job
+                    {initialData ? 'Update Job' : 'Post Job'}
                   </button>
                 </div>
               </Dialog.Panel>
@@ -387,4 +503,3 @@ const PostJobModal = ({ isOpen, onClose, onSubmit }: PostJobModalProps) => {
 };
 
 export default PostJobModal;
-

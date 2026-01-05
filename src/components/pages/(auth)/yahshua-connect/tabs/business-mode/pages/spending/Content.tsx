@@ -6,18 +6,15 @@ import YahshuaConnectHeader from '../../../../YahshuaConnectHeader';
 import FloatingMenuBar from '../../../../components/FloatingMenuBar';
 import ProfileCard from '../../components/cards/ProfileCard';
 import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import EarningsChartCard from '../../components/cards/EarningsChartCard';
-import TransactionDetailsModal from './TransactionDetailsModal';
+import SpendingChartCard from '../../components/cards/SpendingChartCard';
 import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
 import MyHiresModal from '../../components/modals/MyHiresModal';
 import JobChatModal from '../../components/modals/JobChatModal';
-import { useEarningsData, type Transaction } from '../../hooks/useEarningsData';
+import { useSpendingData, type SpendingTransaction } from '../../hooks/useSpendingData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 import { useHireData } from '../../hooks/useHireData';
 
 const Content = () => {
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
   const [isMyHiresModalOpen, setIsMyHiresModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -30,7 +27,7 @@ const Content = () => {
     priceRange: string;
   } | null>(null);
 
-  const { thisMonthEarnings, jobsCompleted, weeklyData, recentPayments, reviews } = useEarningsData();
+  const { totalSpentThisMonth, servicesHired, weeklySpendingData, recentPayments } = useSpendingData();
   const { activeJobs } = useMyJobsData();
   const { hiredApplicants } = useHireData();
 
@@ -61,22 +58,6 @@ const Content = () => {
     setSelectedBookingForMessage(booking);
     setIsUpcomingBookingsModalOpen(false);
     setIsChatModalOpen(true);
-  };
-
-  const handleTransactionClick = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedTransaction(null);
-  };
-
-  const handleDownloadReceipt = () => {
-    // TODO: Implement receipt download functionality
-    console.log('Downloading receipt for transaction:', selectedTransaction?.id);
-    // You can implement the actual download logic here
   };
 
   const formatDate = (dateString: string) => {
@@ -111,8 +92,8 @@ const Content = () => {
                 reviewsCount={27}
                 initial="JD"
                 availableForBookings={true}
-                earnings={thisMonthEarnings}
-                spending={12800}
+                earnings={45230}
+                spending={totalSpentThisMonth}
                 onAvailabilityChange={(isAvailable) => {
                   console.log('Availability changed:', isAvailable);
                 }}
@@ -139,48 +120,49 @@ const Content = () => {
           {/* Main Content */}
           <div className="lg:col-span-9">
             <div className="space-y-6">
-              {/* Earnings Title */}
-              <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
+              {/* Spending Title */}
+              <h2 className="text-xl font-bold text-gray-900">Spending on Hires</h2>
 
-              {/* Earnings Summary Cards - Separate Cards */}
+              {/* Spending Summary Cards - Separate Cards */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <p className="text-sm text-gray-600 mb-2">This Month</p>
-                  <p className="text-3xl font-bold text-green-600" title={`₱${thisMonthEarnings.toLocaleString()}`}>
-                    {formatAmount(thisMonthEarnings)}
+                  <p className="text-sm text-gray-600 mb-2">Total Spent This Month</p>
+                  <p className="text-3xl font-bold text-orange-600" title={`₱${totalSpentThisMonth.toLocaleString()}`}>
+                    {formatAmount(totalSpentThisMonth)}
                   </p>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <p className="text-sm text-gray-600 mb-2">Jobs Completed</p>
-                  <p className="text-3xl font-bold text-blue-600">{jobsCompleted}</p>
+                  <p className="text-sm text-gray-600 mb-2">Services Hired</p>
+                  <p className="text-3xl font-bold text-blue-600">{servicesHired}</p>
                 </div>
               </div>
 
-              {/* Weekly Breakdown - Using Chart */}
-              <EarningsChartCard data={weeklyData} />
-
-              {/* Recent Payments */}
+              {/* Weekly Spending - Using Chart */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                <h2 className="text-lg font-bold text-gray-900 mb-6">Recent Payments</h2>
+                <SpendingChartCard data={weeklySpendingData} />
+              </div>
+
+              {/* Recent Payments Made */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                <h2 className="text-lg font-bold text-gray-900 mb-6">Recent Payments Made</h2>
                 <div className="divide-y divide-gray-200">
-                  {recentPayments.map((payment, index) => (
-                    <button
+                  {recentPayments.map((payment) => (
+                    <div
                       key={payment.id}
-                      onClick={() => handleTransactionClick(payment)}
-                      className="w-full flex items-center justify-between py-4 hover:bg-gray-50 transition-colors text-left first:pt-0 last:pb-0"
+                      className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
                     >
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">
-                          {payment.description} - {payment.clientName}
+                          {payment.description}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">{formatDate(payment.date)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-green-600">
-                          +₱{payment.amount.toLocaleString()}
+                        <p className="text-sm font-semibold text-orange-600">
+                          ₱{payment.amount.toLocaleString()}
                         </p>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -188,14 +170,6 @@ const Content = () => {
           </div>
         </div>
       </div>
-
-      {/* Transaction Details Modal */}
-      <TransactionDetailsModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        transaction={selectedTransaction}
-        onDownloadReceipt={handleDownloadReceipt}
-      />
 
       {/* Upcoming Bookings Modal */}
       <UpcomingBookingsModal
@@ -231,6 +205,4 @@ const Content = () => {
 };
 
 export default Content;
-
-
 
