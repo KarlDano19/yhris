@@ -23,7 +23,11 @@ import ProfileDropdownIcon from '@/svg/ProfileDropdownIcon';
 import ChatIcon from '@/svg/ChatIcon';
 import ExitIcon from '@/svg/ExitIcon';
 
-const YahshuaConnectHeader = () => {
+interface YahshuaConnectHeaderProps {
+  disabled?: boolean;
+}
+
+const YahshuaConnectHeader = ({ disabled = false }: YahshuaConnectHeaderProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +41,7 @@ const YahshuaConnectHeader = () => {
   const activeMode = pathname?.includes('business-mode') ? 'business' : 'personal';
   
   const handleModeChange = (mode: 'personal' | 'business') => {
+    if (disabled) return;
     const targetPath = mode === 'personal' 
       ? '/personal-mode' 
       : '/business-mode';
@@ -117,9 +122,15 @@ const YahshuaConnectHeader = () => {
         <div className="hidden md:flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/personal-mode">
-              <YahshuaConnectLogo />
-            </Link>
+            {disabled ? (
+              <div className="cursor-not-allowed opacity-50">
+                <YahshuaConnectLogo />
+              </div>
+            ) : (
+              <Link href="/personal-mode">
+                <YahshuaConnectLogo />
+              </Link>
+            )}
           </div>
 
           {/* Search Bar */}
@@ -133,7 +144,13 @@ const YahshuaConnectHeader = () => {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                disabled={disabled}
+                className={classNames(
+                  "block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                  disabled 
+                    ? "bg-gray-100 cursor-not-allowed opacity-50" 
+                    : "bg-gray-50 focus:bg-white"
+                )}
               />
             </div>
           </div>
@@ -141,25 +158,29 @@ const YahshuaConnectHeader = () => {
           {/* Right Section */}
           <div className="flex items-center gap-3">
             {/* Mode Toggle */}
-            <div className="flex items-center bg-gray-100 rounded-xl p-1">
+            <div className={classNames("flex items-center bg-gray-100 rounded-xl p-1", disabled && "opacity-50")}>
               <button
                 onClick={() => handleModeChange('personal')}
+                disabled={disabled}
                 className={classNames(
                   'px-4 py-2 rounded-lg text-sm font-medium transition-all',
                   activeMode === 'personal'
                     ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600'
+                    : 'text-gray-600',
+                  disabled && 'cursor-not-allowed'
                 )}
               >
                 Personal
               </button>
               <button
                 onClick={() => handleModeChange('business')}
+                disabled={disabled}
                 className={classNames(
                   'px-4 py-2 rounded-lg text-sm font-medium transition-all',
                   activeMode === 'business'
                     ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600'
+                    : 'text-gray-600',
+                  disabled && 'cursor-not-allowed'
                 )}
               >
                 Business
@@ -168,8 +189,14 @@ const YahshuaConnectHeader = () => {
 
             {/* Messages Button */}
             <button
-              onClick={() => setShowMessagesModal(true)}
-              className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              onClick={() => !disabled && setShowMessagesModal(true)}
+              disabled={disabled}
+              className={classNames(
+                "relative p-2.5 text-gray-600 rounded-xl transition-colors",
+                disabled 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : "hover:bg-gray-100"
+              )}
             >
               <ChatIcon />
               <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
@@ -179,8 +206,14 @@ const YahshuaConnectHeader = () => {
 
             {/* Notifications Button */}
             <button
-              onClick={() => setShowNotificationsModal(true)}
-              className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              onClick={() => !disabled && setShowNotificationsModal(true)}
+              disabled={disabled}
+              className={classNames(
+                "relative p-2.5 text-gray-600 rounded-xl transition-colors",
+                disabled 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : "hover:bg-gray-100"
+              )}
             >
               <NotificationsIcon fill="#6B7280" />
               <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
@@ -205,22 +238,37 @@ const YahshuaConnectHeader = () => {
           <div className="flex items-center justify-between h-14 gap-2">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/personal-mode">
-                <div className="flex items-center gap-2">
+              {disabled ? (
+                <div className="flex items-center gap-2 cursor-not-allowed opacity-50">
                   <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
                     <span className="text-white font-bold text-sm">Y</span>
                   </div>
                   <span className="text-sm font-bold text-indigo-dye">SIS</span>
                 </div>
-              </Link>
+              ) : (
+                <Link href="/personal-mode">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">Y</span>
+                    </div>
+                    <span className="text-sm font-bold text-indigo-dye">SIS</span>
+                  </div>
+                </Link>
+              )}
             </div>
 
             {/* Right Side Icons */}
             <div className="flex items-center gap-1">
               {/* Messages */}
               <button
-                onClick={() => setShowMessagesModal(true)}
-                className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                onClick={() => !disabled && setShowMessagesModal(true)}
+                disabled={disabled}
+                className={classNames(
+                  "relative p-2.5 text-gray-600 rounded-xl transition-colors",
+                  disabled 
+                    ? "opacity-50 cursor-not-allowed" 
+                    : "hover:bg-gray-100"
+                )}
               >
                 <ChatIcon />
                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
@@ -230,8 +278,14 @@ const YahshuaConnectHeader = () => {
 
               {/* Notifications */}
               <button
-                onClick={() => setShowNotificationsModal(true)}
-                className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                onClick={() => !disabled && setShowNotificationsModal(true)}
+                disabled={disabled}
+                className={classNames(
+                  "relative p-2.5 text-gray-600 rounded-xl transition-colors",
+                  disabled 
+                    ? "opacity-50 cursor-not-allowed" 
+                    : "hover:bg-gray-100"
+                )}
               >
                 <NotificationsIcon fill="#6B7280" />
                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
@@ -240,7 +294,15 @@ const YahshuaConnectHeader = () => {
               </button>
 
               {/* Profile */}
-              <button className="relative p-2 hover:bg-gray-100 rounded-xl transition-colors">
+              <button 
+                disabled={disabled}
+                className={classNames(
+                  "relative p-2 rounded-xl transition-colors",
+                  disabled 
+                    ? "opacity-50 cursor-not-allowed" 
+                    : "hover:bg-gray-100"
+                )}
+              >
                 <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                   <img 
                     src="https://via.placeholder.com/32" 
@@ -266,25 +328,29 @@ const YahshuaConnectHeader = () => {
 
           {/* Middle Row - Mode Toggle Buttons */}
           <div className="pb-2">
-            <div className="flex items-center justify-center gap-2 bg-gray-100 rounded-xl p-1">
+            <div className={classNames("flex items-center justify-center gap-2 bg-gray-100 rounded-xl p-1", disabled && "opacity-50")}>
               <button
                 onClick={() => handleModeChange('personal')}
+                disabled={disabled}
                 className={classNames(
                   'flex-1 px-4 py-1.5 rounded-lg text-xs font-medium transition-all',
                   activeMode === 'personal'
                     ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600'
+                    : 'text-gray-600',
+                  disabled && 'cursor-not-allowed'
                 )}
               >
                 Personal
               </button>
               <button
                 onClick={() => handleModeChange('business')}
+                disabled={disabled}
                 className={classNames(
                   'flex-1 px-4 py-1.5 rounded-lg text-xs font-medium transition-all',
                   activeMode === 'business'
                     ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600'
+                    : 'text-gray-600',
+                  disabled && 'cursor-not-allowed'
                 )}
               >
                 Business
@@ -303,7 +369,13 @@ const YahshuaConnectHeader = () => {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-11 pr-4 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 placeholder-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                disabled={disabled}
+                className={classNames(
+                  "block w-full pl-11 pr-4 py-2 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                  disabled 
+                    ? "bg-gray-100 cursor-not-allowed opacity-50" 
+                    : "bg-gray-50 focus:bg-white"
+                )}
               />
             </div>
           </div>
