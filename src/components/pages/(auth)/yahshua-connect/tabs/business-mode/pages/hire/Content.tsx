@@ -42,8 +42,11 @@ const Content = () => {
     clientName: string;
     clientInitials?: string;
   } | null>(null);
-  const { jobPostings, reviews, applicants, hiredApplicants, getApplicantProfileData } = useHireData();
+  const { jobPostings: initialJobPostings, reviews, applicants, hiredApplicants, getApplicantProfileData } = useHireData();
   const { activeJobs } = useMyJobsData();
+  
+  // State to manage job postings (combine initial data with newly created jobs)
+  const [jobPostings, setJobPostings] = useState(initialJobPostings);
 
   // Transform activeJobs for the modal
   const upcomingBookings = activeJobs.map((job) => ({
@@ -76,6 +79,16 @@ const Content = () => {
     setIsChatModalOpen(true);
   };
 
+  // Helper function to format time from 24-hour to 12-hour format
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   const handlePostJob = (data: {
     jobTitle: string;
     category: string;
@@ -88,15 +101,61 @@ const Content = () => {
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => {
+    // Format date
+    const date = new Date(data.scheduleDate);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedDate = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+    
+    // Format time
+    let formattedTime = '';
+    if (data.scheduleTimeFrom && data.scheduleTimeTo) {
+      formattedTime = `${formatTime(data.scheduleTimeFrom)} - ${formatTime(data.scheduleTimeTo)}`;
+    } else if (data.scheduleTimeFrom) {
+      formattedTime = formatTime(data.scheduleTimeFrom);
+    }
+    
+    // Format price range
+    const priceRange = data.budgetMax && data.budgetMax !== data.budgetMin
+      ? `₱${parseInt(data.budgetMin).toLocaleString()} - ₱${parseInt(data.budgetMax).toLocaleString()}`
+      : `₱${parseInt(data.budgetMin).toLocaleString()}`;
+
     if (editingJobId) {
-      // TODO: Implement API call to update job
-      console.log('Updating job:', editingJobId, data);
+      // Update existing job
+      setJobPostings(prev => prev.map(job => {
+        if (job.id === editingJobId) {
+          return {
+            ...job,
+            title: data.jobTitle,
+            category: data.category || job.category,
+            description: data.description,
+            location: data.location,
+            date: formattedDate,
+            time: formattedTime,
+            priceRange,
+          };
+        }
+        return job;
+      }));
       setEditingJobId(null);
     } else {
-      // TODO: Implement API call to post job
-      console.log('Posting job:', data);
+      // Create new job
+      const newId = Math.max(...jobPostings.map(j => j.id), 0) + 1;
+      
+      const newJob = {
+        id: newId,
+        title: data.jobTitle,
+        category: data.category || 'Other',
+        location: data.location,
+        description: data.description,
+        date: formattedDate,
+        time: formattedTime,
+        priceRange,
+        applicants: 0,
+        status: 'active',
+      };
+      
+      setJobPostings(prev => [newJob, ...prev]);
     }
-    // For now, just log the data
   };
 
   // Get initial data for editing

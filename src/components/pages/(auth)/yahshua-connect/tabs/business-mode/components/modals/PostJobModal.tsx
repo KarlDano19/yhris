@@ -1,7 +1,7 @@
 
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDownIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Modal from '../../../../components/Modal';
 import { categories, locationSuggestions } from '../../hooks/usePostJobData';
@@ -46,38 +46,49 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [scheduleTimeFrom, setScheduleTimeFrom] = useState('');
   const [scheduleTimeTo, setScheduleTimeTo] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{
+    jobTitle?: string;
+    description?: string;
+    location?: string;
+    scheduleDate?: string;
+  }>({});
 
   // Load initial data when modal opens or initialData changes
   useEffect(() => {
-    if (initialData) {
-      setJobTitle(initialData.jobTitle);
-      setCategory(initialData.category);
-      setDescription(initialData.description);
-      setLocation(initialData.location);
-      setBudgetType(initialData.budgetType);
-      setBudgetMin(initialData.budgetMin);
-      setBudgetMax(initialData.budgetMax);
-      // Parse scheduleDate string to Date
-      if (initialData.scheduleDate) {
-        const date = new Date(initialData.scheduleDate);
-        if (!isNaN(date.getTime())) {
-          setScheduleDate(date);
+    if (isOpen) {
+      // Clear validation errors when modal opens
+      setValidationErrors({});
+      
+      if (initialData) {
+        setJobTitle(initialData.jobTitle);
+        setCategory(initialData.category);
+        setDescription(initialData.description);
+        setLocation(initialData.location);
+        setBudgetType(initialData.budgetType);
+        setBudgetMin(initialData.budgetMin);
+        setBudgetMax(initialData.budgetMax);
+        // Parse scheduleDate string to Date
+        if (initialData.scheduleDate) {
+          const date = new Date(initialData.scheduleDate);
+          if (!isNaN(date.getTime())) {
+            setScheduleDate(date);
+          }
         }
+        setScheduleTimeFrom(initialData.scheduleTimeFrom);
+        setScheduleTimeTo(initialData.scheduleTimeTo);
+      } else {
+        // Reset to defaults when opening without initial data
+        setJobTitle('');
+        setCategory('');
+        setDescription('');
+        setLocation('');
+        setBudgetType('fixed');
+        setBudgetMin('500');
+        setBudgetMax('1000');
+        setScheduleDate(null);
+        setScheduleTimeFrom('');
+        setScheduleTimeTo('');
       }
-      setScheduleTimeFrom(initialData.scheduleTimeFrom);
-      setScheduleTimeTo(initialData.scheduleTimeTo);
-    } else {
-      // Reset to defaults when no initial data
-      setJobTitle('');
-      setCategory('');
-      setDescription('');
-      setLocation('');
-      setBudgetType('fixed');
-      setBudgetMin('500');
-      setBudgetMax('1000');
-      setScheduleDate(null);
-      setScheduleTimeFrom('');
-      setScheduleTimeTo('');
     }
   }, [initialData, isOpen]);
 
@@ -167,9 +178,31 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
   };
 
   const handleSubmit = () => {
-    if (!jobTitle.trim() || !description.trim() || !location.trim()) {
-      return; // Basic validation
+    // Reset validation errors
+    const errors: typeof validationErrors = {};
+
+    // Validate required fields
+    if (!jobTitle.trim()) {
+      errors.jobTitle = 'Job title is required';
     }
+    if (!description.trim()) {
+      errors.description = 'Description is required';
+    }
+    if (!location.trim()) {
+      errors.location = 'Location is required';
+    }
+    if (!scheduleDate) {
+      errors.scheduleDate = 'Schedule date is required';
+    }
+
+    // If there are validation errors, set them and return
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    // Clear validation errors
+    setValidationErrors({});
 
     const formattedDate = scheduleDate
       ? `${scheduleDate.getFullYear()}-${String(scheduleDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleDate.getDate()).padStart(2, '0')}`
@@ -204,6 +237,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
     setScheduleDate(null);
     setScheduleTimeFrom('');
     setScheduleTimeTo('');
+    setValidationErrors({});
   };
 
   const handleClose = () => {
@@ -247,11 +281,21 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
             type="text"
             id="jobTitle"
             value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
+            onChange={(e) => {
+              setJobTitle(e.target.value);
+              if (validationErrors.jobTitle) {
+                setValidationErrors(prev => ({ ...prev, jobTitle: undefined }));
+              }
+            }}
             placeholder="e.g., House Cleaning Service"
-            className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+            className={`block w-full rounded-lg border shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 ${
+              validationErrors.jobTitle ? 'border-red-500' : 'border-gray-300'
+            }`}
             required
           />
+          {validationErrors.jobTitle && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.jobTitle}</p>
+          )}
         </div>
 
         {/* Category */}
@@ -295,12 +339,22 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
           <textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (validationErrors.description) {
+                setValidationErrors(prev => ({ ...prev, description: undefined }));
+              }
+            }}
             placeholder="Describe the job in detail..."
             rows={4}
-            className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+            className={`block w-full rounded-lg border shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 ${
+              validationErrors.description ? 'border-red-500' : 'border-gray-300'
+            }`}
             required
           />
+          {validationErrors.description && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+          )}
         </div>
 
         {/* Location */}
@@ -314,11 +368,18 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
               type="text"
               id="location"
               value={location}
-              onChange={handleLocationInputChange}
+              onChange={(e) => {
+                handleLocationInputChange(e);
+                if (validationErrors.location) {
+                  setValidationErrors(prev => ({ ...prev, location: undefined }));
+                }
+              }}
               onFocus={() => setShowLocationDropdown(true)}
               onKeyDown={handleLocationKeyDown}
               placeholder="Select location"
-              className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+              className={`block w-full rounded-lg border shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10 ${
+                validationErrors.location ? 'border-red-500' : 'border-gray-300'
+              }`}
             />
             <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             {showLocationDropdown && filteredLocations.length > 0 && (
@@ -340,6 +401,9 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
               </div>
             )}
           </div>
+          {validationErrors.location && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.location}</p>
+          )}
         </div>
 
         {/* Budget Type */}
@@ -414,11 +478,26 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
               <CustomDatePicker
                 id="scheduleDate"
                 selected={scheduleDate}
-                pickerOnChange={(date: Date | null) => setScheduleDate(date)}
-                inputOnChange={(date: Date | null) => setScheduleDate(date)}
+                pickerOnChange={(date: Date | null) => {
+                  setScheduleDate(date);
+                  if (validationErrors.scheduleDate) {
+                    setValidationErrors(prev => ({ ...prev, scheduleDate: undefined }));
+                  }
+                }}
+                inputOnChange={(date: Date | null) => {
+                  setScheduleDate(date);
+                  if (validationErrors.scheduleDate) {
+                    setValidationErrors(prev => ({ ...prev, scheduleDate: undefined }));
+                  }
+                }}
                 placeholder="mm/dd/yyyy"
-                className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                className={`block w-full rounded-lg border shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10 ${
+                  validationErrors.scheduleDate ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {validationErrors.scheduleDate && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.scheduleDate}</p>
+              )}
             </div>
 
             {/* Time From and To */}
