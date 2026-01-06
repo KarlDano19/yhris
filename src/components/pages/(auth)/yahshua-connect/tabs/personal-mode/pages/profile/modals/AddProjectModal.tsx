@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+
+import { useForm } from 'react-hook-form';
 
 import Modal from '../../../../../components/Modal';
 
@@ -9,6 +11,8 @@ interface AddProjectModalProps {
   onClose: () => void;
   onSave: (data: T_Portfolio) => void;
   initialData?: T_Portfolio | null;
+  onAddToLocal: (data: T_Portfolio) => void;
+  onUpdateLocal: (data: T_Portfolio) => void;
 }
 
 const AddProjectModal = ({
@@ -16,35 +20,45 @@ const AddProjectModal = ({
   onClose,
   onSave,
   initialData = null,
+  onAddToLocal,
+  onUpdateLocal,
 }: AddProjectModalProps) => {
-  const [formData, setFormData] = useState<T_Portfolio>({
-    name: '',
-    description: '',
-    link: '',
-    image: '',
+  const { register, handleSubmit, reset } = useForm<T_Portfolio>({
+    defaultValues: {
+      name: '',
+      description: '',
+      link: '',
+      image: '',
+    },
   });
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        link: '',
-        image: '',
-      });
+    if (isOpen) {
+      if (initialData) {
+        reset(initialData);
+      } else {
+        reset({
+          name: '',
+          description: '',
+          link: '',
+          image: '',
+        });
+      }
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
+  const onSubmit = (data: T_Portfolio) => {
+    // Update local state in parent modal (no API call)
+    if (initialData && initialData.id) {
+      // Update existing
+      onUpdateLocal(data);
+    } else {
+      // Add new - generate ID
+      const newId = Date.now(); // Temporary ID
+      onAddToLocal({ ...data, id: newId });
+    }
+    
     onClose();
-  };
-
-  const handleChange = (field: keyof T_Portfolio, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +99,7 @@ const AddProjectModal = ({
       size="2xl"
       footerContent={footerContent}
     >
-      <form id="project-form" onSubmit={handleSubmit}>
+      <form id="project-form" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-5">
           {/* Project Title */}
           <div>
@@ -94,11 +108,9 @@ const AddProjectModal = ({
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              {...register('name', { required: true })}
               placeholder="e.g., E-commerce App Redesign"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
-              required
             />
           </div>
 
@@ -108,8 +120,7 @@ const AddProjectModal = ({
               Description
             </label>
             <textarea
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+              {...register('description')}
               placeholder="Describe the project..."
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all resize-none"
@@ -123,8 +134,7 @@ const AddProjectModal = ({
             </label>
             <input
               type="url"
-              value={formData.link}
-              onChange={(e) => handleChange('link', e.target.value)}
+              {...register('link')}
               placeholder="https://..."
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />

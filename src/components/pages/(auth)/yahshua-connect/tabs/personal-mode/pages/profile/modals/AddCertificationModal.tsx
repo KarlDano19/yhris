@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+import { useForm, Controller } from 'react-hook-form';
+
 import Modal from '../../../../../components/Modal';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -39,60 +41,80 @@ interface AddCertificationModalProps {
   onClose: () => void;
   onSave: (data: T_Certification) => void;
   initialData?: T_Certification | null;
+  onAddToLocal: (data: T_Certification) => void;
+  onUpdateLocal: (data: T_Certification) => void;
 }
+
+// Form data type with Date objects for date pickers
+type CertificationFormData = Omit<T_Certification, 'issuedDate' | 'expiresDate'> & {
+  issuedDate: Date | null;
+  expiresDate: Date | null;
+};
 
 const AddCertificationModal = ({
   isOpen,
   onClose,
   onSave,
   initialData = null,
+  onAddToLocal,
+  onUpdateLocal,
 }: AddCertificationModalProps) => {
-  const [formData, setFormData] = useState<T_Certification>({
-    name: '',
-    issuer: '',
-    issuedDate: '',
-    expiresDate: '',
-    idNumber: '',
-    verified: false,
+  const { register, handleSubmit, control, reset, watch, setValue } = useForm<CertificationFormData>({
+    defaultValues: {
+      name: '',
+      issuer: '',
+      issuedDate: null,
+      expiresDate: null,
+      idNumber: '',
+      verified: false,
+    },
   });
 
-  // Date objects for the date pickers
-  const [issuedDate, setIssuedDate] = useState<Date | null>(null);
-  const [expiresDate, setExpiresDate] = useState<Date | null>(null);
+  const issuedDateValue = watch('issuedDate');
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-      setIssuedDate(parseDateString(initialData.issuedDate));
-      setExpiresDate(parseDateString(initialData.expiresDate));
-    } else {
-      setFormData({
-        name: '',
-        issuer: '',
-        issuedDate: '',
-        expiresDate: '',
-        idNumber: '',
-        verified: false,
-      });
-      setIssuedDate(null);
-      setExpiresDate(null);
+    if (isOpen) {
+      if (initialData) {
+        reset({
+          name: initialData.name || '',
+          issuer: initialData.issuer || '',
+          issuedDate: parseDateString(initialData.issuedDate),
+          expiresDate: parseDateString(initialData.expiresDate),
+          idNumber: initialData.idNumber || '',
+          verified: initialData.verified || false,
+        });
+      } else {
+        reset({
+          name: '',
+          issuer: '',
+          issuedDate: null,
+          expiresDate: null,
+          idNumber: '',
+          verified: false,
+        });
+      }
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: CertificationFormData) => {
     // Convert Date objects back to ISO string format before saving
-    const dataToSave = {
-      ...formData,
-      issuedDate: formatDateToISO(issuedDate),
-      expiresDate: formatDateToISO(expiresDate),
+    const dataToSave: T_Certification = {
+      ...data,
+      issuedDate: formatDateToISO(data.issuedDate),
+      expiresDate: formatDateToISO(data.expiresDate),
     };
-    onSave(dataToSave);
+    
+    // Update local state in parent modal (no API call)
+    if (initialData && initialData.id) {
+      // Update existing
+      onUpdateLocal(dataToSave);
+    } else {
+      // Add new - generate ID
+      const newId = Date.now(); // Temporary ID
+      onAddToLocal({ ...dataToSave, id: newId });
+    }
+    
     onClose();
-  };
-
-  const handleChange = (field: keyof T_Certification, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,7 +152,7 @@ const AddCertificationModal = ({
       size="2xl"
       footerContent={footerContent}
     >
-      <form id="certification-form" onSubmit={handleSubmit}>
+      <form id="certification-form" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-5">
           {/* Certification Name */}
           <div>
@@ -139,11 +161,9 @@ const AddCertificationModal = ({
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              {...register('name', { required: true })}
               placeholder="e.g., AWS Certified Developer"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
-              required
             />
           </div>
 
@@ -154,11 +174,9 @@ const AddCertificationModal = ({
             </label>
             <input
               type="text"
-              value={formData.issuer}
-              onChange={(e) => handleChange('issuer', e.target.value)}
+              {...register('issuer', { required: true })}
               placeholder="e.g., Amazon Web Services"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
-              required
             />
           </div>
 
@@ -168,19 +186,23 @@ const AddCertificationModal = ({
               Issue Date
             </label>
             <div className="relative">
-              <CustomDatePicker
-                id="certification-issue-date"
-                placeholder="mm/dd/yyyy"
-                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
-                selected={issuedDate}
-                pickerOnChange={(date: Date | null) => {
-                  setIssuedDate(date);
-                }}
-                inputOnChange={(value: any) => {
-                  if (value instanceof Date) {
-                    setIssuedDate(value);
-                  }
-                }}
+              <Controller
+                control={control}
+                name="issuedDate"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    id="certification-issue-date"
+                    placeholder="mm/dd/yyyy"
+                    className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                    selected={field.value}
+                    pickerOnChange={(date: Date | null) => field.onChange(date)}
+                    inputOnChange={(value: any) => {
+                      if (value instanceof Date) {
+                        field.onChange(value);
+                      }
+                    }}
+                  />
+                )}
               />
             </div>
           </div>
@@ -191,20 +213,24 @@ const AddCertificationModal = ({
               Expiry Date
             </label>
             <div className="relative">
-              <CustomDatePicker
-                id="certification-expiry-date"
-                placeholder="mm/dd/yyyy"
-                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
-                selected={expiresDate}
-                minDate={issuedDate || undefined}
-                pickerOnChange={(date: Date | null) => {
-                  setExpiresDate(date);
-                }}
-                inputOnChange={(value: any) => {
-                  if (value instanceof Date) {
-                    setExpiresDate(value);
-                  }
-                }}
+              <Controller
+                control={control}
+                name="expiresDate"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    id="certification-expiry-date"
+                    placeholder="mm/dd/yyyy"
+                    className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                    selected={field.value}
+                    minDate={issuedDateValue || undefined}
+                    pickerOnChange={(date: Date | null) => field.onChange(date)}
+                    inputOnChange={(value: any) => {
+                      if (value instanceof Date) {
+                        field.onChange(value);
+                      }
+                    }}
+                  />
+                )}
               />
             </div>
           </div>
@@ -216,8 +242,7 @@ const AddCertificationModal = ({
             </label>
             <input
               type="text"
-              value={formData.idNumber}
-              onChange={(e) => handleChange('idNumber', e.target.value)}
+              {...register('idNumber')}
               placeholder="e.g., ABC-123-XYZ"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />

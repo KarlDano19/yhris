@@ -10,9 +10,10 @@ interface WorkExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
   workExperience: T_WorkExperience[];
-  onEdit: (id: number) => void;
+  onEdit: (id: number, experience: T_WorkExperience) => void;
   onAdd: () => void;
   onSave: (data: T_WorkExperience[]) => void;
+  onUpdateLocal: (data: T_WorkExperience[]) => void;
 }
 
 const WorkExperienceModal = ({
@@ -22,6 +23,7 @@ const WorkExperienceModal = ({
   onEdit,
   onAdd,
   onSave,
+  onUpdateLocal,
 }: WorkExperienceModalProps) => {
   const [localWorkExperience, setLocalWorkExperience] = useState<T_WorkExperience[]>(workExperience);
 
@@ -30,12 +32,21 @@ const WorkExperienceModal = ({
   }, [workExperience, isOpen]);
 
   const handleDelete = (id: number) => {
-    setLocalWorkExperience(localWorkExperience.filter((exp) => exp.id !== id));
+    const updated = localWorkExperience.filter((exp) => exp.id !== id);
+    setLocalWorkExperience(updated);
+    onUpdateLocal(updated);
   };
 
   const handleSave = () => {
     onSave(localWorkExperience);
     onClose();
+  };
+
+  const handleEdit = (id: number) => {
+    const exp = localWorkExperience.find((e) => e.id === id);
+    if (exp) {
+      onEdit(id, exp);
+    }
   };
 
   const footerContent = (
@@ -82,7 +93,7 @@ const WorkExperienceModal = ({
             </div>
             <div className="ml-4 flex gap-2">
               <button
-                onClick={() => exp.id && onEdit(exp.id)}
+                onClick={() => exp.id && handleEdit(exp.id)}
                 className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
               >
                 <PencilIcon className="h-5 w-5" />

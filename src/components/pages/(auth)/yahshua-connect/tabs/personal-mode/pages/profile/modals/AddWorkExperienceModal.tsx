@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+
+import { useForm, Controller } from 'react-hook-form';
 
 import Modal from '../../../../../components/Modal';
 import CustomDatePicker from '@/components/CustomDatePicker';
@@ -46,60 +48,81 @@ interface AddWorkExperienceModalProps {
   onClose: () => void;
   onSave: (data: T_WorkExperience) => void;
   initialData?: T_WorkExperience | null;
+  onAddToLocal: (data: T_WorkExperience) => void;
+  onUpdateLocal: (data: T_WorkExperience) => void;
 }
+
+// Form data type with Date objects for date pickers
+type WorkExperienceFormData = Omit<T_WorkExperience, 'startDate' | 'endDate'> & {
+  startDate: Date | null;
+  endDate: Date | null;
+};
 
 const AddWorkExperienceModal = ({
   isOpen,
   onClose,
   onSave,
   initialData = null,
+  onAddToLocal,
+  onUpdateLocal,
 }: AddWorkExperienceModalProps) => {
-  const [formData, setFormData] = useState<T_WorkExperience>({
-    title: '',
-    company: '',
-    startDate: '',
-    endDate: '',
-    current: false,
-    description: '',
+  const { register, handleSubmit, control, reset, watch, setValue } = useForm<WorkExperienceFormData>({
+    defaultValues: {
+      title: '',
+      company: '',
+      startDate: null,
+      endDate: null,
+      current: false,
+      description: '',
+    },
   });
 
-  // Date objects for the date pickers
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const currentValue = watch('current');
+  const startDateValue = watch('startDate');
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-      setStartDate(parseDateString(initialData.startDate));
-      setEndDate(parseDateString(initialData.endDate));
-    } else {
-      setFormData({
-        title: '',
-        company: '',
-        startDate: '',
-        endDate: '',
-        current: false,
-        description: '',
-      });
-      setStartDate(null);
-      setEndDate(null);
+    if (isOpen) {
+      if (initialData) {
+        reset({
+          title: initialData.title || '',
+          company: initialData.company || '',
+          startDate: parseDateString(initialData.startDate),
+          endDate: parseDateString(initialData.endDate),
+          current: initialData.current || false,
+          description: initialData.description || '',
+        });
+      } else {
+        reset({
+          title: '',
+          company: '',
+          startDate: null,
+          endDate: null,
+          current: false,
+          description: '',
+        });
+      }
     }
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: WorkExperienceFormData) => {
     // Convert Date objects back to string format before saving
-    const dataToSave = {
-      ...formData,
-      startDate: formatDateToString(startDate),
-      endDate: formatDateToString(endDate),
+    const dataToSave: T_WorkExperience = {
+      ...data,
+      startDate: formatDateToString(data.startDate),
+      endDate: formatDateToString(data.endDate),
     };
-    onSave(dataToSave);
+    
+    // Update local state in parent modal (no API call)
+    if (initialData && initialData.id) {
+      // Update existing
+      onUpdateLocal(dataToSave);
+    } else {
+      // Add new - generate ID
+      const newId = Date.now(); // Temporary ID
+      onAddToLocal({ ...dataToSave, id: newId });
+    }
+    
     onClose();
-  };
-
-  const handleChange = (field: keyof T_WorkExperience, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const footerContent = (
@@ -129,7 +152,7 @@ const AddWorkExperienceModal = ({
       size="2xl"
       footerContent={footerContent}
     >
-      <form id="work-experience-form" onSubmit={handleSubmit}>
+      <form id="work-experience-form" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-5">
           {/* Job Title */}
           <div>
@@ -138,11 +161,9 @@ const AddWorkExperienceModal = ({
             </label>
             <input
               type="text"
-              value={formData.title}
-              onChange={(e) => handleChange('title', e.target.value)}
+              {...register('title', { required: true })}
               placeholder="e.g., UX Designer"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
-              required
             />
           </div>
 
@@ -153,11 +174,9 @@ const AddWorkExperienceModal = ({
             </label>
             <input
               type="text"
-              value={formData.company}
-              onChange={(e) => handleChange('company', e.target.value)}
+              {...register('company', { required: true })}
               placeholder="e.g., Google"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
-              required
             />
           </div>
 
@@ -167,44 +186,52 @@ const AddWorkExperienceModal = ({
               Start Date
             </label>
             <div className="relative">
-              <CustomDatePicker
-                id="work-experience-start-date"
-                placeholder="mm/dd/yyyy"
-                className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
-                selected={startDate}
-                pickerOnChange={(date: Date | null) => {
-                  setStartDate(date);
-                }}
-                inputOnChange={(value: any) => {
-                  if (value instanceof Date) {
-                    setStartDate(value);
-                  }
-                }}
+              <Controller
+                control={control}
+                name="startDate"
+                render={({ field }) => (
+                  <CustomDatePicker
+                    id="work-experience-start-date"
+                    placeholder="mm/dd/yyyy"
+                    className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                    selected={field.value}
+                    pickerOnChange={(date: Date | null) => field.onChange(date)}
+                    inputOnChange={(value: any) => {
+                      if (value instanceof Date) {
+                        field.onChange(value);
+                      }
+                    }}
+                  />
+                )}
               />
             </div>
           </div>
 
           {/* End Date */}
-          {!formData.current && (
+          {!currentValue && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 End Date
               </label>
               <div className="relative">
-                <CustomDatePicker
-                  id="work-experience-end-date"
-                  placeholder="mm/dd/yyyy"
-                  className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
-                  selected={endDate}
-                  minDate={startDate || undefined}
-                  pickerOnChange={(date: Date | null) => {
-                    setEndDate(date);
-                  }}
-                  inputOnChange={(value: any) => {
-                    if (value instanceof Date) {
-                      setEndDate(value);
-                    }
-                  }}
+                <Controller
+                  control={control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      id="work-experience-end-date"
+                      placeholder="mm/dd/yyyy"
+                      className="block w-full rounded-lg py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all sm:text-sm sm:leading-6"
+                      selected={field.value}
+                      minDate={startDateValue || undefined}
+                      pickerOnChange={(date: Date | null) => field.onChange(date)}
+                      inputOnChange={(value: any) => {
+                        if (value instanceof Date) {
+                          field.onChange(value);
+                        }
+                      }}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -215,11 +242,11 @@ const AddWorkExperienceModal = ({
             <input
               type="checkbox"
               id="current-work"
-              checked={formData.current}
+              {...register('current')}
               onChange={(e) => {
-                handleChange('current', e.target.checked);
+                setValue('current', e.target.checked);
                 if (e.target.checked) {
-                  setEndDate(null);
+                  setValue('endDate', null);
                 }
               }}
               className="w-4 h-4 text-savoy-blue border-gray-300 rounded focus:ring-savoy-blue"
@@ -235,8 +262,7 @@ const AddWorkExperienceModal = ({
               Description
             </label>
             <textarea
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+              {...register('description')}
               placeholder="Describe your responsibilities..."
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all resize-none"
