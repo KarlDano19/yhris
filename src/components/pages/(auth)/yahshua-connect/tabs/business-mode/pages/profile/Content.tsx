@@ -901,8 +901,8 @@ const Content = () => {
             setSelectedBookingForMessage(null);
           }}
           jobTitle={selectedBookingForMessage.title}
-          recipientName={selectedBookingForMessage.clientName}
-          recipientInitials={selectedBookingForMessage.clientName.split(' ').map(n => n[0]).join('').toUpperCase()}
+          clientName={selectedBookingForMessage.clientName}
+          clientInitials={selectedBookingForMessage.clientName.split(' ').map(n => n[0]).join('').toUpperCase()}
         />
       )}
     </>

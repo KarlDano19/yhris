@@ -1,4 +1,4 @@
-'use client';
+
 
 interface BusinessOverviewCardProps {
   userName: string;

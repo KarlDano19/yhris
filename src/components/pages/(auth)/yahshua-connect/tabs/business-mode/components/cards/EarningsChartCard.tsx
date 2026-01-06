@@ -1,4 +1,4 @@
-'use client';
+
 
 interface EarningsChartCardProps {
   data: Array<{

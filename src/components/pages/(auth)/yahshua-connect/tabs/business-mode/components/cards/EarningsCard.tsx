@@ -1,4 +1,4 @@
-'use client';
+
 
 interface EarningsCardProps {
   thisMonth: number;
