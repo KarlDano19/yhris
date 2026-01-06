@@ -1,26 +1,19 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
+
 import { XMarkIcon, PencilIcon, PlusIcon, CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-interface Certification {
-  id: number;
-  name: string;
-  issuer: string;
-  verified: boolean;
-  issuedDate?: string;
-  expiresDate?: string;
-  idNumber?: string;
-}
+import { T_Certification } from '@/types/personal-mode';
 
 interface SkillsAndCertificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   skills: string[];
-  certifications: Certification[];
-  onSave: (skills: string[], certifications: Certification[]) => void;
+  certifications: T_Certification[];
+  onSave: (skills: string[], certifications: T_Certification[]) => void;
   onAddCertification: () => void;
+  onEditCertification: (certification: T_Certification) => void;
 }
 
 const SkillsAndCertificationModal = ({
@@ -30,10 +23,11 @@ const SkillsAndCertificationModal = ({
   certifications: initialCertifications,
   onSave,
   onAddCertification,
+  onEditCertification,
 }: SkillsAndCertificationModalProps) => {
   const [activeTab, setActiveTab] = useState<'skills' | 'certifications'>('skills');
   const [skills, setSkills] = useState<string[]>(initialSkills);
-  const [certifications, setCertifications] = useState<Certification[]>(initialCertifications);
+  const [certifications, setCertifications] = useState<T_Certification[]>(initialCertifications);
   const [newSkill, setNewSkill] = useState('');
 
   useEffect(() => {
@@ -53,8 +47,10 @@ const SkillsAndCertificationModal = ({
   };
 
   const handleEditCertification = (id: number) => {
-    // This would typically open another modal or form
-    console.log('Edit certification', id);
+    const certification = certifications.find((cert) => cert.id === id);
+    if (certification) {
+      onEditCertification(certification);
+    }
   };
 
   const handleDeleteCertification = (id: number) => {
@@ -184,13 +180,13 @@ const SkillsAndCertificationModal = ({
                 </div>
                 <div className="ml-4 flex gap-2">
                   <button
-                    onClick={() => handleEditCertification(cert.id)}
+                    onClick={() => cert.id && handleEditCertification(cert.id)}
                     className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteCertification(cert.id)}
+                    onClick={() => cert.id && handleDeleteCertification(cert.id)}
                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <TrashIcon className="h-5 w-5" />

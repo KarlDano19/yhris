@@ -1,29 +1,23 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+
 import Modal from '../../../../../components/Modal';
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-interface Education {
-  id: number;
-  degree: string;
-  school: string;
-  startYear: string;
-  endYear: string;
-  note?: string;
-}
+
+import { T_Education } from '@/types/personal-mode';
 
 interface EducationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  education: Education[];
+  education: T_Education[];
   onEdit: (id: number) => void;
   onAdd: () => void;
-  onSave: (data: Education[]) => void;
+  onSave: (data: T_Education[]) => void;
 }
 
 const EducationModal = ({ isOpen, onClose, education, onEdit, onAdd, onSave }: EducationModalProps) => {
-  const [localEducation, setLocalEducation] = useState<Education[]>(education);
+  const [localEducation, setLocalEducation] = useState<T_Education[]>(education);
 
   useEffect(() => {
     setLocalEducation(education);
@@ -72,21 +66,25 @@ const EducationModal = ({ isOpen, onClose, education, onEdit, onAdd, onSave }: E
             className="flex items-start justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
           >
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-1">{edu.degree}</h4>
+              {edu.educationalAttainment && (
+                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">
+                  {edu.educationalAttainment}
+                </p>
+              )}
+              <h4 className="font-semibold text-gray-900 mb-1">{edu.degree || 'No degree specified'}</h4>
               <p className="text-sm text-gray-600 mb-1">
                 {edu.school} • {edu.startYear} - {edu.endYear}
               </p>
-              {edu.note && <p className="text-sm text-gray-500">{edu.note}</p>}
             </div>
             <div className="ml-4 flex gap-2">
               <button
-                onClick={() => onEdit(edu.id)}
+                onClick={() => edu.id && onEdit(edu.id)}
                 className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
               >
                 <PencilIcon className="h-5 w-5" />
               </button>
               <button
-                onClick={() => handleDelete(edu.id)}
+                onClick={() => edu.id && handleDelete(edu.id)}
                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <TrashIcon className="h-5 w-5" />

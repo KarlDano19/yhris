@@ -7,27 +7,37 @@ import { useRouter } from 'next/navigation';
 import formatPrice from '@/helpers/currencyFormat';
 import useFindJobs from './hooks/useFindJobs';
 import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
+import JobFiltersModal from '../../../../modals/JobFIltersModal';
 
 import JobCard from './components/JobCard';
-import JobDetails from './components/JobDetails';
+import JobDetailsModal from '../../../../modals/JobDetailsModal';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
+interface JobFilters {
+  job_title?: string;
+  location?: string[];
+}
+
 const Content = () => {
   const router = useRouter();
-  const [showFilters, setShowFilters] = useState(false);
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<JobFilters>({});
 
-  // Fetch jobs - empty search to get all jobs with match percentage using applicant_personal view type
-  const { 
-    data: jobsData, 
-    isLoading: isGetJobsLoading, 
+  // Fetch jobs with filters and match percentage using applicant_personal view type
+  const {
+    data: jobsData,
+    isLoading: isGetJobsLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     totalRecords
-  } = useFindJobs({ useApplicantPersonal: true }); // Use applicant_personal view type for match percentage
+  } = useFindJobs({
+    ...filters,
+    useApplicantPersonal: true, // Use applicant_personal view type for match percentage
+  });
 
   // Fetch saved jobs to check which jobs are saved
   const { data: savedJobsData } = useGetSavedJobs();
@@ -153,7 +163,7 @@ const Content = () => {
             <h2 className="text-lg font-bold text-gray-900">Browse Jobs</h2>
           </div>
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => setIsFiltersModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <FunnelIcon className="h-5 w-5" />
@@ -174,21 +184,13 @@ const Content = () => {
           <>
             <div className="space-y-4">
               {transformedJobs.map((job) => (
-                <div key={job.id}>
-                  <JobCard 
-                    {...job}
-                    isSelected={selectedJobId === job.id}
-                    onCardClick={() => handleJobCardClick(job.id)}
-                    onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
-                  />
-                  {/* Show job details below the card when selected */}
-                  {selectedJobId === job.id && (
-                    <JobDetails 
-                      jobId={job.id} 
-                      onClose={handleCloseJobDetails}
-                    />
-                  )}
-                </div>
+                <JobCard 
+                  key={job.id}
+                  {...job}
+                  isSelected={selectedJobId === job.id}
+                  onCardClick={() => handleJobCardClick(job.id)}
+                  onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
+                />
               ))}
             </div>
             {/* Load More Button */}
@@ -211,6 +213,25 @@ const Content = () => {
           </>
         )}
         </div>
+
+      {/* Job Filters Modal */}
+      <JobFiltersModal
+        isOpen={isFiltersModalOpen}
+        onClose={() => setIsFiltersModalOpen(false)}
+        filters={filters}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters);
+          setDisplayCount(20); // Reset display count when filters change
+          setSelectedJobId(null); // Reset selected job when filters change
+        }}
+      />
+
+      {/* Job Details Modal */}
+      <JobDetailsModal
+        isOpen={selectedJobId !== null}
+        onClose={handleCloseJobDetails}
+        jobId={selectedJobId}
+      />
     </div>
   );
 };

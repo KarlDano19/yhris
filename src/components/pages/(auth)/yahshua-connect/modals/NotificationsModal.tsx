@@ -1,6 +1,5 @@
-'use client';
-
 import Modal from '../components/Modal';
+
 import { BriefcaseIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
 interface Notification {

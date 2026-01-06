@@ -1,6 +1,5 @@
-'use client';
-
 import Image from 'next/image';
+
 import { StarIcon } from '@heroicons/react/24/solid';
 
 interface ProfileCardProps {

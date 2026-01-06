@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import Content from '@/components/pages/(auth)/employer/manage-subscriptions/Content';
+import Content from '@/components/pages/(auth)/employer/modals/manage-subscriptions/Content';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 

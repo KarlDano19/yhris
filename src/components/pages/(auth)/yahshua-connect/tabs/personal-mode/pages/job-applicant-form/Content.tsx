@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import CustomToast from '@/components/CustomToast';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
@@ -104,7 +106,13 @@ const Content = () => {
 
   return (
     <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
-      <div className='px-4 pt-24'>
+      <div className="flex p-4 pt-24">
+        <Link href="/personal-mode" className="flex-none flex gap-3 items-center hover:bg-gray-200">
+          <ArrowLeftIcon className="h-5 w-5" />
+          <h4>Go back</h4>
+        </Link>
+      </div>
+      <div className='px-4 md:px-5'>
         <h4 className='text-lg md:text-2xl font-bold md:font-semibold'>
           Jobs - {jobDetailData?.job_title} | Application Form
         </h4>

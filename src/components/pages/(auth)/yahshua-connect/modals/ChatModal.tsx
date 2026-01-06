@@ -1,7 +1,7 @@
-'use client';
-
 import { useState } from 'react';
+
 import Modal from '../components/Modal';
+
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 interface ChatMessage {

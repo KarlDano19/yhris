@@ -58,11 +58,13 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'personal-mode',
     'business-mode',
     'job-applicant-form',
+    'setup-applicant-profile',
   ];
   const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page'];
   
   // Check if current route is a yahshua-connect route
   const isYahshuaConnectRoute = yahshuaConnectRoutes.some(route => pathname?.includes(route));
+  const isSetupProfileRoute = pathname?.includes('setup-applicant-profile');
 
   return (
     <>
@@ -80,7 +82,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
           )}
           {/* Yahshua Connect Header - for personal-mode and business-mode routes */}
           {type === 'applicant' && isYahshuaConnectRoute && (
-            <YahshuaConnectHeader />
+            <YahshuaConnectHeader disabled={isSetupProfileRoute} />
           )}
           {/* Old Applicant Header - commented out for rollback option */}
           {/* {type === 'applicant' && applicantRoutes.includes(firstRoute) && (

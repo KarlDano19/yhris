@@ -1,5 +1,3 @@
-'use client';
-
 interface TrainingCardProps {
   title: string;
   duration: string;

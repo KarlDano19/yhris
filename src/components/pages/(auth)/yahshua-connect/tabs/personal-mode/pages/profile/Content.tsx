@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+
 import toast from 'react-hot-toast';
 
+import CustomToast from '@/components/CustomToast';
 import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from '../../../../hooks/useUpdateApplicantProfile';
-import { formatDateToLocal } from '@/helpers/date';
-import CustomToast from '@/components/CustomToast';
-
 import BasicInformationModal from './modals/BasicInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';
 import EducationModal from './modals/EducationModal';
@@ -22,6 +21,9 @@ import AddProjectModal from './modals/AddProjectModal';
 import { ChevronRightIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
+import { formatDateToLocal } from '@/helpers/date';
+import { T_BasicInfo, T_WorkExperience, T_Education, T_Certification, T_Portfolio, T_EmploymentDocument } from '@/types/personal-mode';
+
 const Content = () => {
   const [isBasicInfoModalOpen, setIsBasicInfoModalOpen] = useState(false);
   const [isWorkExperienceModalOpen, setIsWorkExperienceModalOpen] = useState(false);
@@ -33,10 +35,31 @@ const Content = () => {
   const [isAddEducationModalOpen, setIsAddEducationModalOpen] = useState(false);
   const [isAddCertificationModalOpen, setIsAddCertificationModalOpen] = useState(false);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
-  const [editingWorkExperience, setEditingWorkExperience] = useState<any>(null);
-  const [editingEducation, setEditingEducation] = useState<any>(null);
-  const [editingCertification, setEditingCertification] = useState<any>(null);
-  const [editingProject, setEditingProject] = useState<any>(null);
+  const [editingWorkExperience, setEditingWorkExperience] = useState<T_WorkExperience | null>(null);
+  const [editingEducation, setEditingEducation] = useState<T_Education | null>(null);
+  const [editingCertification, setEditingCertification] = useState<T_Certification | null>(null);
+  const [editingProject, setEditingProject] = useState<T_Portfolio | null>(null);
+
+  // Profile state
+  const [basicInfo, setBasicInfo] = useState<T_BasicInfo>({
+    firstname: '',
+    middlename: '',
+    lastname: '',
+    email: '',
+    phone: '',
+    location: '',
+    birthday: null,
+    gender: '',
+    religion: '',
+    nationality: '',
+    civilStatus: '',
+  });
+  const [workExperience, setWorkExperience] = useState<T_WorkExperience[]>([]);
+  const [education, setEducation] = useState<T_Education[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<T_Certification[]>([]);
+  const [portfolio, setPortfolio] = useState<T_Portfolio[]>([]);
+  const [employmentDocuments, setEmploymentDocuments] = useState<T_EmploymentDocument[]>([]);
 
   // Fetch applicant profile data
   const { data: applicantDetails, isLoading } = useGetApplicantProfile();
@@ -45,38 +68,25 @@ const Content = () => {
   // Update profile mutation
   const { mutate: updateProfile, isLoading: isUpdatingProfile } = useUpdateApplicantProfile();
 
-  // Transform API data to match modal interfaces
-  const userProfile = useMemo(() => {
-    if (!profileData) {
-      return {
-        basicInfo: {
-          name: '',
-          email: '',
-          phone: '',
-          location: '',
-          birthday: '',
-        },
-        workExperience: [],
-        education: [],
-        skills: [],
-        certifications: [],
-        portfolio: [],
-        employmentDocuments: [],
-      };
-    }
+  // Populate form data when profile data is loaded (similar to reference pattern)
+  useEffect(() => {
+    if (profileData) {
+      // Set basic info
+      setBasicInfo({
+        firstname: profileData.firstname || '',
+        middlename: profileData.middlename || '',
+        lastname: profileData.lastname || '',
+        email: profileData.email || '',
+        phone: profileData.mobile || '',
+        location: profileData.address || '',
+        birthday: profileData.birth_date ? new Date(profileData.birth_date) : null,
+        gender: profileData.gender || '',
+        religion: profileData.religion || '',
+        nationality: profileData.nationality || '',
+        civilStatus: profileData.civil_status || '',
+      });
 
-    // Transform basic info
-    const fullName = `${profileData.firstname || ''} ${profileData.middlename || ''} ${profileData.lastname || ''}`.trim();
-    const basicInfo = {
-      name: fullName,
-      email: profileData.email || '',
-      phone: profileData.mobile || '',
-      location: profileData.address || '',
-      birthday: profileData.birth_date ? formatDateToLocal(profileData.birth_date) : '',
-    };
-
-    // Transform work experience
-    const workExperience = (profileData.work_experience || []).map((exp: any, index: number) => {
+      // Transform and set work experience
       const formatMonthYear = (dateString: string | null) => {
         if (!dateString) return '';
         try {
@@ -88,8 +98,8 @@ const Content = () => {
           return '';
         }
       };
-      
-      return {
+
+      const transformedWorkExperience = (profileData.work_experience || []).map((exp: any, index: number) => ({
         id: index + 1,
         title: exp.position || '',
         company: exp.companyOrg || '',
@@ -97,98 +107,95 @@ const Content = () => {
         endDate: formatMonthYear(exp.dateTo),
         current: exp.currentlyEmployed || false,
         description: exp.responsibilities ? exp.responsibilities.replace(/<[^>]*>/g, '') : '',
-      };
-    });
+      }));
+      setWorkExperience(transformedWorkExperience);
 
-    // Transform education (API has single object, convert to array for modal)
-    const education = profileData.education || profileData.college ? [{
-      id: 1,
-      degree: profileData.education || '',
-      school: profileData.college || '',
-      startYear: profileData.education_start_date ? new Date(profileData.education_start_date).getFullYear().toString() : '',
-      endYear: profileData.education_end_date ? new Date(profileData.education_end_date).getFullYear().toString() : '',
-      note: profileData.educational_attainment || undefined,
-    }] : [];
+      // Transform and set education
+      const transformedEducation = profileData.education || profileData.college ? [{
+        id: 1,
+        educationalAttainment: profileData.educational_attainment || undefined,
+        degree: profileData.education || '',
+        school: profileData.college || '',
+        startYear: profileData.education_start_date ? new Date(profileData.education_start_date).getFullYear().toString() : '',
+        endYear: profileData.education_end_date ? new Date(profileData.education_end_date).getFullYear().toString() : '',
+      }] : [];
+      setEducation(transformedEducation);
 
-    // Skills and certifications (already in correct format)
-    const skills = profileData.skills || [];
-    const certifications = (profileData.certifications || []).map((cert: any, index: number) => ({
-      id: index + 1,
-      ...cert,
-    }));
+      // Set skills
+      setSkills(profileData.skills || []);
 
-    // Portfolio (already in correct format, but add id if missing)
-    const portfolio = (profileData.portfolio || []).map((item: any, index: number) => ({
-      id: item.id || index + 1,
-      ...item,
-    }));
+      // Transform and set certifications
+      const transformedCertifications = (profileData.certifications || []).map((cert: any, index: number) => ({
+        id: index + 1,
+        ...cert,
+      }));
+      setCertifications(transformedCertifications);
 
-    // Employment documents (map file URLs from API)
-    const employmentDocuments = [
-      {
-        id: 'medical-certificate',
-        name: 'Medical Certificate',
-        required: true,
-        uploaded: !!profileData.medical_certificate,
-        fileUrl: profileData.medical_certificate || undefined,
-      },
-      {
-        id: 'certificate-of-employment',
-        name: 'Certificate of Employment',
-        required: true,
-        uploaded: !!profileData.certificate_of_employment,
-        fileUrl: profileData.certificate_of_employment || undefined,
-      },
-      {
-        id: 'birth-certificate',
-        name: 'Birth Certificate',
-        required: true,
-        uploaded: !!profileData.birth_certificate,
-        fileUrl: profileData.birth_certificate || undefined,
-      },
-      {
-        id: 'diploma',
-        name: 'Diploma',
-        required: true,
-        uploaded: !!profileData.diploma,
-        fileUrl: profileData.diploma || undefined,
-      },
-      {
-        id: 'transcript-of-records',
-        name: 'Transcript of Records (TOR)',
-        required: true,
-        uploaded: !!profileData.transcript_of_records,
-        fileUrl: profileData.transcript_of_records || undefined,
-      },
-      {
-        id: 'nbi-police-clearance',
-        name: 'NBI/Police Clearance',
-        required: true,
-        uploaded: !!profileData.nbi_police_clearance,
-        fileUrl: profileData.nbi_police_clearance || undefined,
-      },
-    ];
+      // Transform and set portfolio
+      const transformedPortfolio = (profileData.portfolio || []).map((item: any, index: number) => ({
+        id: item.id || index + 1,
+        ...item,
+      }));
+      setPortfolio(transformedPortfolio);
 
-    return {
-      basicInfo,
-      workExperience,
-      education,
-      skills,
-      certifications,
-      portfolio,
-      employmentDocuments,
-    };
+      // Set employment documents
+      const transformedEmploymentDocuments = [
+        {
+          id: 'medical-certificate',
+          name: 'Medical Certificate',
+          required: true,
+          uploaded: !!profileData.medical_certificate,
+          fileUrl: profileData.medical_certificate || undefined,
+        },
+        {
+          id: 'certificate-of-employment',
+          name: 'Certificate of Employment',
+          required: true,
+          uploaded: !!profileData.certificate_of_employment,
+          fileUrl: profileData.certificate_of_employment || undefined,
+        },
+        {
+          id: 'birth-certificate',
+          name: 'Birth Certificate',
+          required: true,
+          uploaded: !!profileData.birth_certificate,
+          fileUrl: profileData.birth_certificate || undefined,
+        },
+        {
+          id: 'diploma',
+          name: 'Diploma',
+          required: true,
+          uploaded: !!profileData.diploma,
+          fileUrl: profileData.diploma || undefined,
+        },
+        {
+          id: 'transcript-of-records',
+          name: 'Transcript of Records (TOR)',
+          required: true,
+          uploaded: !!profileData.transcript_of_records,
+          fileUrl: profileData.transcript_of_records || undefined,
+        },
+        {
+          id: 'nbi-police-clearance',
+          name: 'NBI/Police Clearance',
+          required: true,
+          uploaded: !!profileData.nbi_police_clearance,
+          fileUrl: profileData.nbi_police_clearance || undefined,
+        },
+      ];
+      setEmploymentDocuments(transformedEmploymentDocuments);
+    }
   }, [profileData]);
 
-  // Helper function to parse date string (e.g., "January 15, 1995") to ISO format (YYYY-MM-DD)
-  const parseDateToISO = (dateString: string): string => {
-    if (!dateString) return '';
+  // Helper function to parse Date object or date string to ISO format (YYYY-MM-DD)
+  const parseDateToISO = (date: Date | string | null): string => {
+    if (!date) return '';
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return '';
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     } catch {
       return '';
@@ -209,20 +216,6 @@ const Content = () => {
     }
   };
 
-  // Helper function to split full name into firstname, middlename, lastname
-  const splitName = (fullName: string) => {
-    const parts = fullName.trim().split(/\s+/);
-    if (parts.length === 1) {
-      return { firstname: parts[0], middlename: '', lastname: '' };
-    } else if (parts.length === 2) {
-      return { firstname: parts[0], middlename: '', lastname: parts[1] };
-    } else {
-      const lastname = parts[parts.length - 1];
-      const firstname = parts[0];
-      const middlename = parts.slice(1, -1).join(' ');
-      return { firstname, middlename, lastname };
-    }
-  };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => {
@@ -311,16 +304,21 @@ const Content = () => {
         <BasicInformationModal
           isOpen={isBasicInfoModalOpen}
           onClose={() => setIsBasicInfoModalOpen(false)}
-          basicInfo={userProfile.basicInfo}
+          basicInfo={basicInfo}
           onSave={(data) => {
-            const nameParts = splitName(data.name);
             updateProfile(
               {
-                ...nameParts,
+                firstname: data.firstname,
+                middlename: data.middlename,
+                lastname: data.lastname,
                 email: data.email,
                 mobile: data.phone,
                 address: data.location,
                 birth_date: parseDateToISO(data.birthday),
+                gender: data.gender,
+                religion: data.religion,
+                nationality: data.nationality,
+                civil_status: data.civilStatus,
               },
               {
                 onSuccess: () => {
@@ -340,7 +338,7 @@ const Content = () => {
         <EmploymentDocumentsModal
           isOpen={isEmploymentDocumentsModalOpen}
           onClose={() => setIsEmploymentDocumentsModalOpen(false)}
-          documents={userProfile.employmentDocuments}
+          documents={employmentDocuments}
           onSave={(files) => {
             updateProfile(
               files,
@@ -362,10 +360,12 @@ const Content = () => {
         <WorkExperienceModal
           isOpen={isWorkExperienceModalOpen}
           onClose={() => setIsWorkExperienceModalOpen(false)}
-          workExperience={userProfile.workExperience}
+          workExperience={workExperience}
           onEdit={(id) => {
-            const exp = userProfile.workExperience.find((e: any) => e.id === id);
-            setEditingWorkExperience(exp);
+            const exp = workExperience.find((e: any) => e.id === id);
+            if (exp) {
+              setEditingWorkExperience(exp);
+            }
             setIsWorkExperienceModalOpen(false);
             setIsAddWorkExperienceModalOpen(true);
           }}
@@ -425,7 +425,7 @@ const Content = () => {
           initialData={editingWorkExperience}
           onSave={(data) => {
             // Get current work experience array
-            const currentWorkExperience = [...userProfile.workExperience];
+            const currentWorkExperience = [...workExperience];
             let updatedWorkExperience;
             
             if (editingWorkExperience) {
@@ -482,10 +482,12 @@ const Content = () => {
         <EducationModal
           isOpen={isEducationModalOpen}
           onClose={() => setIsEducationModalOpen(false)}
-          education={userProfile.education}
+          education={education}
           onEdit={(id) => {
-            const edu = userProfile.education.find((e: any) => e.id === id);
-            setEditingEducation(edu);
+            const edu = education.find((e: any) => e.id === id);
+            if (edu) {
+              setEditingEducation(edu);
+            }
             setIsEducationModalOpen(false);
             setIsAddEducationModalOpen(true);
           }}
@@ -536,7 +538,7 @@ const Content = () => {
                 college: edu.school,
                 education_start_date: parseYearToDate(edu.startYear),
                 education_end_date: parseYearToDate(edu.endYear),
-                educational_attainment: edu.note || '',
+                educational_attainment: edu.educationalAttainment || '',
               },
               {
                 onSuccess: () => {
@@ -577,7 +579,7 @@ const Content = () => {
                 college: data.school,
                 education_start_date: parseYearToDate(data.startYear),
                 education_end_date: parseYearToDate(data.endYear),
-                educational_attainment: data.note || '',
+                educational_attainment: data.educationalAttainment || '',
               },
               {
                 onSuccess: () => {
@@ -598,10 +600,15 @@ const Content = () => {
         <SkillsAndCertificationModal
           isOpen={isSkillsCertModalOpen}
           onClose={() => setIsSkillsCertModalOpen(false)}
-          skills={userProfile.skills}
-          certifications={userProfile.certifications}
+          skills={skills}
+          certifications={certifications}
           onAddCertification={() => {
             setEditingCertification(null);
+            setIsSkillsCertModalOpen(false);
+            setIsAddCertificationModalOpen(true);
+          }}
+          onEditCertification={(certification) => {
+            setEditingCertification(certification);
             setIsSkillsCertModalOpen(false);
             setIsAddCertificationModalOpen(true);
           }}
@@ -641,7 +648,7 @@ const Content = () => {
           initialData={editingCertification}
           onSave={(data) => {
             // Get current certifications array
-            const currentCertifications = [...userProfile.certifications];
+            const currentCertifications = [...certifications];
             let updatedCertifications;
 
             if (editingCertification) {
@@ -684,10 +691,12 @@ const Content = () => {
         <PortfolioModal
           isOpen={isPortfolioModalOpen}
           onClose={() => setIsPortfolioModalOpen(false)}
-          portfolio={userProfile.portfolio}
+          portfolio={portfolio}
           onEdit={(id) => {
-            const project = userProfile.portfolio.find((p: any) => p.id === id);
-            setEditingProject(project);
+            const project = portfolio.find((p: any) => p.id === id);
+            if (project) {
+              setEditingProject(project);
+            }
             setIsPortfolioModalOpen(false);
             setIsAddProjectModalOpen(true);
           }}
@@ -731,7 +740,7 @@ const Content = () => {
           initialData={editingProject}
           onSave={(data) => {
             // Get current portfolio array
-            const currentPortfolio = [...userProfile.portfolio];
+            const currentPortfolio = [...portfolio];
             let updatedPortfolio;
 
             if (editingProject) {
