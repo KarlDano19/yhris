@@ -10,12 +10,13 @@ interface PortfolioModalProps {
   isOpen: boolean;
   onClose: () => void;
   portfolio: T_Portfolio[];
-  onEdit: (id: number) => void;
+  onEdit: (id: number, project: T_Portfolio) => void;
   onAdd: () => void;
   onSave: (data: T_Portfolio[]) => void;
+  onUpdateLocal: (data: T_Portfolio[]) => void;
 }
 
-const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: PortfolioModalProps) => {
+const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave, onUpdateLocal }: PortfolioModalProps) => {
   const [localPortfolio, setLocalPortfolio] = useState<T_Portfolio[]>(portfolio);
 
   useEffect(() => {
@@ -23,12 +24,21 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: P
   }, [portfolio, isOpen]);
 
   const handleDelete = (id: number) => {
-    setLocalPortfolio(localPortfolio.filter((project) => project.id !== id));
+    const updated = localPortfolio.filter((project) => project.id !== id);
+    setLocalPortfolio(updated);
+    onUpdateLocal(updated);
   };
 
   const handleSave = () => {
     onSave(localPortfolio);
     onClose();
+  };
+
+  const handleEdit = (id: number) => {
+    const project = localPortfolio.find((p) => p.id === id);
+    if (project) {
+      onEdit(id, project);
+    }
   };
 
   const footerContent = (
@@ -66,7 +76,7 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave }: P
           >
             <div className="absolute top-2 right-2 flex gap-2 z-10">
               <button
-                onClick={() => project.id && onEdit(project.id)}
+                onClick={() => project.id && handleEdit(project.id)}
                 className="p-2 bg-white text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors shadow-sm"
               >
                 <PencilIcon className="h-4 w-4" />

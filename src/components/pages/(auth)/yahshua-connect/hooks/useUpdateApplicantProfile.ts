@@ -10,7 +10,7 @@ async function updateApplicantProfile(data: any) {
     if (data.firstname !== undefined) finalData.firstname = data.firstname;
     if (data.middlename !== undefined) finalData.middlename = data.middlename;
     if (data.lastname !== undefined) finalData.lastname = data.lastname;
-    if (data.email !== undefined) finalData.email = data.email;
+    // Email is not editable, so we don't include it in the update
     if (data.mobile !== undefined) finalData.mobile = data.mobile;
     if (data.address !== undefined) finalData.address = data.address;
     if (data.landline !== undefined) finalData.landline = data.landline;
@@ -45,6 +45,9 @@ async function updateApplicantProfile(data: any) {
 
     // Salary Information
     if (data.expected_salary !== undefined) finalData.expected_salary = data.expected_salary;
+
+    // About/Resume Summary
+    if (data.resume_summary !== undefined) finalData.resume_summary = data.resume_summary;
 
     const formData = new FormData();
     formData.append('profile_form', JSON.stringify(finalData));

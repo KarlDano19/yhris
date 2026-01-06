@@ -14,6 +14,7 @@ interface SkillsAndCertificationModalProps {
   onSave: (skills: string[], certifications: T_Certification[]) => void;
   onAddCertification: () => void;
   onEditCertification: (certification: T_Certification) => void;
+  onUpdateLocal: (skills: string[], certifications: T_Certification[]) => void;
 }
 
 const SkillsAndCertificationModal = ({
@@ -24,6 +25,7 @@ const SkillsAndCertificationModal = ({
   onSave,
   onAddCertification,
   onEditCertification,
+  onUpdateLocal,
 }: SkillsAndCertificationModalProps) => {
   const [activeTab, setActiveTab] = useState<'skills' | 'certifications'>('skills');
   const [skills, setSkills] = useState<string[]>(initialSkills);
@@ -37,13 +39,17 @@ const SkillsAndCertificationModal = ({
 
   const handleAddSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
+      const updated = [...skills, newSkill.trim()];
+      setSkills(updated);
       setNewSkill('');
+      onUpdateLocal(updated, certifications);
     }
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
+    const updated = skills.filter((skill) => skill !== skillToRemove);
+    setSkills(updated);
+    onUpdateLocal(updated, certifications);
   };
 
   const handleEditCertification = (id: number) => {
@@ -54,7 +60,9 @@ const SkillsAndCertificationModal = ({
   };
 
   const handleDeleteCertification = (id: number) => {
-    setCertifications(certifications.filter((cert) => cert.id !== id));
+    const updated = certifications.filter((cert) => cert.id !== id);
+    setCertifications(updated);
+    onUpdateLocal(skills, updated);
   };
 
   const handleSave = () => {

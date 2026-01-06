@@ -39,12 +39,22 @@ export type T_BasicInfo = {
   lastname: string;
   email: string;
   phone: string;
+  landline?: string;
   location: string;
   birthday: Date | null;
   gender: string;
   religion: string;
   nationality: string;
   civilStatus: string;
+  expectedSalary?: number | null;
+  contactPersonName?: string;
+  contactPersonAddress?: string;
+  contactPersonMobile?: string;
+  contactPersonRelationship?: string;
+  contactPersonAge?: number | null;
+  photo?: File | null;
+  photoUrl?: string | null;
+  about?: string;
 };
 
 // Portfolio Types

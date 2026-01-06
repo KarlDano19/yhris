@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 
+import toast from 'react-hot-toast';
+
 import Modal from '../../../../../components/Modal';
+import CustomToast from '@/components/CustomToast';
 
 import ViewDocumentModal from './ViewDocumentModal';
 
@@ -31,6 +34,13 @@ const EmploymentDocumentsModal = ({
   }, [documents, isOpen]);
 
   const handleFileUpload = (documentId: string, file: File) => {
+    // Check file size (10MB limit)
+    const maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+    if (file.size > maxFileSize) {
+      toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+      return;
+    }
+    
     setLocalDocuments((prev) =>
       prev.map((doc) =>
         doc.id === documentId
@@ -106,6 +116,9 @@ const EmploymentDocumentsModal = ({
         <p className="text-sm text-gray-600">
           Upload documents required for employment verification
         </p>
+        <p className="text-xs text-gray-500 mt-1">
+          Maximum file size: 10 MB per file
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -121,8 +134,7 @@ const EmploymentDocumentsModal = ({
 
             {/* Document Info */}
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-gray-900 mb-0.5">{document.name}</h4>
-              <p className="text-xs text-gray-500">Required</p>
+              <h4 className="font-semibold text-gray-900">{document.name}</h4>
             </div>
 
             {/* Upload/View Buttons */}

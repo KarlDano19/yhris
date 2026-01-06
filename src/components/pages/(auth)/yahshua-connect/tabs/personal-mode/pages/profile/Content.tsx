@@ -8,13 +8,13 @@ import CustomToast from '@/components/CustomToast';
 import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from '../../../../hooks/useUpdateApplicantProfile';
 import BasicInformationModal from './modals/BasicInformationModal';
+import ContactInformationModal from './modals/ContactInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';
 import EducationModal from './modals/EducationModal';
 import SkillsAndCertificationModal from './modals/SkillsAndCertificationModal';
 import PortfolioModal from './modals/PortfolioModal';
 import EmploymentDocumentsModal from './modals/EmploymentDocumentsModal';
 import AddWorkExperienceModal from './modals/AddWorkExperienceModal';
-import AddEducationModal from './modals/AddEducationModal';
 import AddCertificationModal from './modals/AddCertificationModal';
 import AddProjectModal from './modals/AddProjectModal';
 
@@ -26,19 +26,22 @@ import { T_BasicInfo, T_WorkExperience, T_Education, T_Certification, T_Portfoli
 
 const Content = () => {
   const [isBasicInfoModalOpen, setIsBasicInfoModalOpen] = useState(false);
+  const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isWorkExperienceModalOpen, setIsWorkExperienceModalOpen] = useState(false);
   const [isEducationModalOpen, setIsEducationModalOpen] = useState(false);
   const [isSkillsCertModalOpen, setIsSkillsCertModalOpen] = useState(false);
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [isEmploymentDocumentsModalOpen, setIsEmploymentDocumentsModalOpen] = useState(false);
   const [isAddWorkExperienceModalOpen, setIsAddWorkExperienceModalOpen] = useState(false);
-  const [isAddEducationModalOpen, setIsAddEducationModalOpen] = useState(false);
   const [isAddCertificationModalOpen, setIsAddCertificationModalOpen] = useState(false);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [editingWorkExperience, setEditingWorkExperience] = useState<T_WorkExperience | null>(null);
-  const [editingEducation, setEditingEducation] = useState<T_Education | null>(null);
+  const [localWorkExperience, setLocalWorkExperience] = useState<T_WorkExperience[]>([]);
   const [editingCertification, setEditingCertification] = useState<T_Certification | null>(null);
   const [editingProject, setEditingProject] = useState<T_Portfolio | null>(null);
+  const [localSkills, setLocalSkills] = useState<string[]>([]);
+  const [localCertifications, setLocalCertifications] = useState<T_Certification[]>([]);
+  const [localPortfolio, setLocalPortfolio] = useState<T_Portfolio[]>([]);
 
   // Profile state
   const [basicInfo, setBasicInfo] = useState<T_BasicInfo>({
@@ -47,15 +50,25 @@ const Content = () => {
     lastname: '',
     email: '',
     phone: '',
+    landline: '',
     location: '',
     birthday: null,
     gender: '',
     religion: '',
     nationality: '',
     civilStatus: '',
+    expectedSalary: null,
+    contactPersonName: '',
+    contactPersonAddress: '',
+    contactPersonMobile: '',
+    contactPersonRelationship: '',
+    contactPersonAge: null,
+    photo: null,
+    photoUrl: null,
+    about: '',
   });
   const [workExperience, setWorkExperience] = useState<T_WorkExperience[]>([]);
-  const [education, setEducation] = useState<T_Education[]>([]);
+  const [education, setEducation] = useState<T_Education | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
   const [certifications, setCertifications] = useState<T_Certification[]>([]);
   const [portfolio, setPortfolio] = useState<T_Portfolio[]>([]);
@@ -78,12 +91,22 @@ const Content = () => {
         lastname: profileData.lastname || '',
         email: profileData.email || '',
         phone: profileData.mobile || '',
+        landline: profileData.landline || '',
         location: profileData.address || '',
         birthday: profileData.birth_date ? new Date(profileData.birth_date) : null,
         gender: profileData.gender || '',
         religion: profileData.religion || '',
         nationality: profileData.nationality || '',
         civilStatus: profileData.civil_status || '',
+        expectedSalary: profileData.expected_salary || null,
+        contactPersonName: profileData.contact_person_name || '',
+        contactPersonAddress: profileData.contact_person_address || '',
+        contactPersonMobile: profileData.contact_person_mobile || '',
+        contactPersonRelationship: profileData.contact_person_relationship || '',
+        contactPersonAge: profileData.contact_person_age || null,
+        photo: null,
+        photoUrl: profileData.photo || null,
+        about: profileData.resume_summary || '',
       });
 
       // Transform and set work experience
@@ -109,20 +132,21 @@ const Content = () => {
         description: exp.responsibilities ? exp.responsibilities.replace(/<[^>]*>/g, '') : '',
       }));
       setWorkExperience(transformedWorkExperience);
+      setLocalWorkExperience(transformedWorkExperience);
 
-      // Transform and set education
-      const transformedEducation = profileData.education || profileData.college ? [{
-        id: 1,
+      // Transform and set education (single object, not array)
+      const transformedEducation = (profileData.education || profileData.college) ? {
         educationalAttainment: profileData.educational_attainment || undefined,
         degree: profileData.education || '',
         school: profileData.college || '',
         startYear: profileData.education_start_date ? new Date(profileData.education_start_date).getFullYear().toString() : '',
         endYear: profileData.education_end_date ? new Date(profileData.education_end_date).getFullYear().toString() : '',
-      }] : [];
+      } : null;
       setEducation(transformedEducation);
 
       // Set skills
       setSkills(profileData.skills || []);
+      setLocalSkills(profileData.skills || []);
 
       // Transform and set certifications
       const transformedCertifications = (profileData.certifications || []).map((cert: any, index: number) => ({
@@ -130,6 +154,7 @@ const Content = () => {
         ...cert,
       }));
       setCertifications(transformedCertifications);
+      setLocalCertifications(transformedCertifications);
 
       // Transform and set portfolio
       const transformedPortfolio = (profileData.portfolio || []).map((item: any, index: number) => ({
@@ -137,6 +162,7 @@ const Content = () => {
         ...item,
       }));
       setPortfolio(transformedPortfolio);
+      setLocalPortfolio(transformedPortfolio);
 
       // Set employment documents
       const transformedEmploymentDocuments = [
@@ -232,13 +258,35 @@ const Content = () => {
     <div className="space-y-6">
       {/* Profile Sections */}
       <div className="space-y-4">
-        {/* Basic Information */}
+        {/* Profile */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <button
             onClick={() => setIsBasicInfoModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Basic Information</span>
+            <span className="text-lg font-semibold text-gray-800">Profile</span>
+            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
+          </button>
+        </div>
+
+        {/* Education */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <button
+            onClick={() => setIsEducationModalOpen(true)}
+            className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
+          >
+            <span className="text-lg font-semibold text-gray-800">Education</span>
+            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
+          </button>
+        </div>
+
+        {/* Contacts */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <button
+            onClick={() => setIsContactInfoModalOpen(true)}
+            className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
+          >
+            <span className="text-lg font-semibold text-gray-800">Contacts</span>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -257,7 +305,11 @@ const Content = () => {
         {/* Work Experience */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <button
-            onClick={() => setIsWorkExperienceModalOpen(true)}
+            onClick={() => {
+              // Initialize local state when opening modal
+              setLocalWorkExperience(workExperience);
+              setIsWorkExperienceModalOpen(true);
+            }}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
             <span className="text-lg font-semibold text-gray-800">Work Experience</span>
@@ -265,21 +317,15 @@ const Content = () => {
           </button>
         </div>
 
-        {/* Education */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-          <button
-            onClick={() => setIsEducationModalOpen(true)}
-            className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
-          >
-            <span className="text-lg font-semibold text-gray-800">Education</span>
-            <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
-          </button>
-        </div>
-
         {/* Skills & Certifications */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <button
-            onClick={() => setIsSkillsCertModalOpen(true)}
+            onClick={() => {
+              // Initialize local state when opening modal
+              setLocalSkills(skills);
+              setLocalCertifications(certifications);
+              setIsSkillsCertModalOpen(true);
+            }}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
             <span className="text-lg font-semibold text-gray-800">Skills & Certifications</span>
@@ -290,7 +336,11 @@ const Content = () => {
         {/* Portfolio */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <button
-            onClick={() => setIsPortfolioModalOpen(true)}
+            onClick={() => {
+              // Initialize local state when opening modal
+              setLocalPortfolio(portfolio);
+              setIsPortfolioModalOpen(true);
+            }}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
             <span className="text-lg font-semibold text-gray-800">Portfolio</span>
@@ -306,27 +356,65 @@ const Content = () => {
           onClose={() => setIsBasicInfoModalOpen(false)}
           basicInfo={basicInfo}
           onSave={(data) => {
-            updateProfile(
-              {
-                firstname: data.firstname,
-                middlename: data.middlename,
-                lastname: data.lastname,
-                email: data.email,
-                mobile: data.phone,
-                address: data.location,
-                birth_date: parseDateToISO(data.birthday),
-                gender: data.gender,
-                religion: data.religion,
-                nationality: data.nationality,
-                civil_status: data.civilStatus,
-              },
+            const updateData: any = {
+              firstname: data.firstname,
+              middlename: data.middlename,
+              lastname: data.lastname,
+              address: data.location,
+              birth_date: parseDateToISO(data.birthday),
+              gender: data.gender,
+              religion: data.religion,
+              nationality: data.nationality,
+              civil_status: data.civilStatus,
+              expected_salary: data.expectedSalary || null,
+              resume_summary: data.about || '',
+            };
+
+            // Handle photo upload
+            if (data.photo) {
+              updateData.photo = [data.photo];
+            }
+
+            updateProfile(updateData,
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Basic information updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Profile updated successfully' type='success' />, { duration: 4000 });
                   setIsBasicInfoModalOpen(false);
                 },
                 onError: (error: any) => {
-                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update basic information'} type='error' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update profile'} type='error' />, { duration: 4000 });
+                },
+              }
+            );
+          }}
+        />
+      )}
+
+      {isContactInfoModalOpen && (
+        <ContactInformationModal
+          isOpen={isContactInfoModalOpen}
+          onClose={() => setIsContactInfoModalOpen(false)}
+          basicInfo={basicInfo}
+          onSave={(data) => {
+            const updateData: any = {
+              email: data.email,
+              mobile: data.phone,
+              landline: data.landline || '',
+              contact_person_name: data.contactPersonName || '',
+              contact_person_address: data.contactPersonAddress || '',
+              contact_person_mobile: data.contactPersonMobile || '',
+              contact_person_relationship: data.contactPersonRelationship || '',
+              contact_person_age: data.contactPersonAge || null,
+            };
+
+            updateProfile(updateData,
+              {
+                onSuccess: () => {
+                  toast.custom(() => <CustomToast message='Contact information updated successfully' type='success' />, { duration: 4000 });
+                  setIsContactInfoModalOpen(false);
+                },
+                onError: (error: any) => {
+                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update contact information'} type='error' />, { duration: 4000 });
                 },
               }
             );
@@ -359,13 +447,14 @@ const Content = () => {
       {isWorkExperienceModalOpen && (
         <WorkExperienceModal
           isOpen={isWorkExperienceModalOpen}
-          onClose={() => setIsWorkExperienceModalOpen(false)}
-          workExperience={workExperience}
-          onEdit={(id) => {
-            const exp = workExperience.find((e: any) => e.id === id);
-            if (exp) {
-              setEditingWorkExperience(exp);
-            }
+          onClose={() => {
+            setIsWorkExperienceModalOpen(false);
+            // Reset local state when closing
+            setLocalWorkExperience([]);
+          }}
+          workExperience={localWorkExperience.length > 0 ? localWorkExperience : workExperience}
+          onEdit={(id, experience) => {
+            setEditingWorkExperience(experience);
             setIsWorkExperienceModalOpen(false);
             setIsAddWorkExperienceModalOpen(true);
           }}
@@ -405,12 +494,17 @@ const Content = () => {
                 onSuccess: () => {
                   toast.custom(() => <CustomToast message='Work experience updated successfully' type='success' />, { duration: 4000 });
                   setIsWorkExperienceModalOpen(false);
+                  // Sync the local state with the saved state
+                  setWorkExperience(data);
                 },
                 onError: (error: any) => {
                   toast.custom(() => <CustomToast message={error?.message || 'Failed to update work experience'} type='error' />, { duration: 4000 });
                 },
               }
             );
+          }}
+          onUpdateLocal={(data) => {
+            setLocalWorkExperience(data);
           }}
         />
       )}
@@ -421,59 +515,30 @@ const Content = () => {
           onClose={() => {
             setIsAddWorkExperienceModalOpen(false);
             setEditingWorkExperience(null);
+            setIsWorkExperienceModalOpen(true);
           }}
           initialData={editingWorkExperience}
           onSave={(data) => {
-            // Get current work experience array
-            const currentWorkExperience = [...workExperience];
-            let updatedWorkExperience;
-            
-            if (editingWorkExperience) {
-              // Update existing item
-              updatedWorkExperience = currentWorkExperience.map((exp: any) =>
-                exp.id === editingWorkExperience.id ? data : exp
-              );
-            } else {
-              // Add new item
-              const newId = Math.max(...currentWorkExperience.map((exp: any) => exp.id || 0), 0) + 1;
-              updatedWorkExperience = [...currentWorkExperience, { ...data, id: newId }];
-            }
-
-            // Transform to backend format
-            const workExperienceBackend = updatedWorkExperience.map((exp: any) => {
-              const parseDate = (dateStr: string) => {
-                if (!dateStr) return null;
-                try {
-                  // Handle "Jan 2022" format
-                  const date = new Date(dateStr);
-                  return date.toISOString();
-                } catch {
-                  return null;
-                }
-              };
-              return {
-                position: exp.title,
-                companyOrg: exp.company,
-                dateFrom: parseDate(exp.startDate),
-                dateTo: exp.current ? null : parseDate(exp.endDate),
-                currentlyEmployed: exp.current,
-                responsibilities: exp.description,
-              };
+            // This is now a no-op since we're using onAddToLocal/onUpdateLocal
+          }}
+          onAddToLocal={(data) => {
+            // Use a function to get the current state
+            setLocalWorkExperience((current) => {
+              const base = current.length > 0 ? current : workExperience;
+              const newId = Math.max(...base.map((exp: any) => exp.id || 0), 0) + 1;
+              return [...base, { ...data, id: newId }];
             });
-
-            updateProfile(
-              { work_experience: workExperienceBackend },
-              {
-                onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Work experience updated successfully' type='success' />, { duration: 4000 });
-                  setIsAddWorkExperienceModalOpen(false);
-                  setEditingWorkExperience(null);
-                },
-                onError: (error: any) => {
-                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update work experience'} type='error' />, { duration: 4000 });
-                },
-              }
-            );
+          }}
+          onUpdateLocal={(data) => {
+            // Use a function to get the current state
+            if (editingWorkExperience && editingWorkExperience.id) {
+              setLocalWorkExperience((current) => {
+                const base = current.length > 0 ? current : workExperience;
+                return base.map((exp: any) =>
+                  exp.id === editingWorkExperience.id ? { ...data, id: editingWorkExperience.id } : exp
+                );
+              });
+            }
           }}
         />
       )}
@@ -483,85 +548,6 @@ const Content = () => {
           isOpen={isEducationModalOpen}
           onClose={() => setIsEducationModalOpen(false)}
           education={education}
-          onEdit={(id) => {
-            const edu = education.find((e: any) => e.id === id);
-            if (edu) {
-              setEditingEducation(edu);
-            }
-            setIsEducationModalOpen(false);
-            setIsAddEducationModalOpen(true);
-          }}
-          onAdd={() => {
-            setEditingEducation(null);
-            setIsEducationModalOpen(false);
-            setIsAddEducationModalOpen(true);
-          }}
-          onSave={(data) => {
-            // Take first item from array (backend only stores single education)
-            const edu = data && data.length > 0 ? data[0] : null;
-            if (!edu) {
-              // Clear education if array is empty
-              updateProfile(
-                {
-                  education: '',
-                  college: '',
-                  education_start_date: null,
-                  education_end_date: null,
-                  educational_attainment: '',
-                },
-                {
-                  onSuccess: () => {
-                    toast.custom(() => <CustomToast message='Education updated successfully' type='success' />, { duration: 4000 });
-                    setIsEducationModalOpen(false);
-                  },
-                  onError: (error: any) => {
-                    toast.custom(() => <CustomToast message={error?.message || 'Failed to update education'} type='error' />, { duration: 4000 });
-                  },
-                }
-              );
-              return;
-            }
-
-            // Transform to backend format
-            const parseYearToDate = (year: string) => {
-              if (!year) return null;
-              try {
-                return `${year}-01-01`;
-              } catch {
-                return null;
-              }
-            };
-
-            updateProfile(
-              {
-                education: edu.degree,
-                college: edu.school,
-                education_start_date: parseYearToDate(edu.startYear),
-                education_end_date: parseYearToDate(edu.endYear),
-                educational_attainment: edu.educationalAttainment || '',
-              },
-              {
-                onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Education updated successfully' type='success' />, { duration: 4000 });
-                  setIsEducationModalOpen(false);
-                },
-                onError: (error: any) => {
-                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update education'} type='error' />, { duration: 4000 });
-                },
-              }
-            );
-          }}
-        />
-      )}
-
-      {isAddEducationModalOpen && (
-        <AddEducationModal
-          isOpen={isAddEducationModalOpen}
-          onClose={() => {
-            setIsAddEducationModalOpen(false);
-            setEditingEducation(null);
-          }}
-          initialData={editingEducation}
           onSave={(data) => {
             // Transform to backend format
             const parseYearToDate = (year: string) => {
@@ -584,8 +570,7 @@ const Content = () => {
               {
                 onSuccess: () => {
                   toast.custom(() => <CustomToast message='Education updated successfully' type='success' />, { duration: 4000 });
-                  setIsAddEducationModalOpen(false);
-                  setEditingEducation(null);
+                  setIsEducationModalOpen(false);
                 },
                 onError: (error: any) => {
                   toast.custom(() => <CustomToast message={error?.message || 'Failed to update education'} type='error' />, { duration: 4000 });
@@ -599,9 +584,14 @@ const Content = () => {
       {isSkillsCertModalOpen && (
         <SkillsAndCertificationModal
           isOpen={isSkillsCertModalOpen}
-          onClose={() => setIsSkillsCertModalOpen(false)}
-          skills={skills}
-          certifications={certifications}
+          onClose={() => {
+            setIsSkillsCertModalOpen(false);
+            // Reset local state when closing
+            setLocalSkills([]);
+            setLocalCertifications([]);
+          }}
+          skills={localSkills.length > 0 ? localSkills : skills}
+          certifications={localCertifications.length > 0 ? localCertifications : certifications}
           onAddCertification={() => {
             setEditingCertification(null);
             setIsSkillsCertModalOpen(false);
@@ -612,28 +602,35 @@ const Content = () => {
             setIsSkillsCertModalOpen(false);
             setIsAddCertificationModalOpen(true);
           }}
-          onSave={(skills, certifications) => {
+          onSave={(skillsData, certificationsData) => {
             // Remove id fields from certifications for backend
-            const certificationsBackend = certifications.map((cert: any) => {
+            const certificationsBackend = certificationsData.map((cert: any) => {
               const { id, ...certData } = cert;
               return certData;
             });
 
             updateProfile(
               {
-                skills,
+                skills: skillsData,
                 certifications: certificationsBackend,
               },
               {
                 onSuccess: () => {
                   toast.custom(() => <CustomToast message='Skills and certifications updated successfully' type='success' />, { duration: 4000 });
                   setIsSkillsCertModalOpen(false);
+                  // Sync the local state with the saved state
+                  setSkills(skillsData);
+                  setCertifications(certificationsData);
                 },
                 onError: (error: any) => {
                   toast.custom(() => <CustomToast message={error?.message || 'Failed to update skills and certifications'} type='error' />, { duration: 4000 });
                 },
               }
             );
+          }}
+          onUpdateLocal={(skillsData, certificationsData) => {
+            setLocalSkills(skillsData);
+            setLocalCertifications(certificationsData);
           }}
         />
       )}
@@ -644,45 +641,30 @@ const Content = () => {
           onClose={() => {
             setIsAddCertificationModalOpen(false);
             setEditingCertification(null);
+            setIsSkillsCertModalOpen(true);
           }}
           initialData={editingCertification}
           onSave={(data) => {
-            // Get current certifications array
-            const currentCertifications = [...certifications];
-            let updatedCertifications;
-
-            if (editingCertification) {
-              // Update existing certification
-              updatedCertifications = currentCertifications.map((cert: any) =>
-                cert.id === editingCertification.id ? { ...data, id: cert.id } : cert
-              );
-            } else {
-              // Add new certification
-              const newId = Math.max(...currentCertifications.map((cert: any) => cert.id || 0), 0) + 1;
-              updatedCertifications = [...currentCertifications, { ...data, id: newId }];
-            }
-
-            // Remove id fields for backend
-            const certificationsBackend = updatedCertifications.map((cert: any) => {
-              const { id, ...certData } = cert;
-              return certData;
+            // This is now a no-op since we're using onAddToLocal/onUpdateLocal
+          }}
+          onAddToLocal={(data) => {
+            // Use a function to get the current state
+            setLocalCertifications((current) => {
+              const base = current.length > 0 ? current : (localCertifications.length > 0 ? localCertifications : certifications);
+              const newId = Math.max(...base.map((cert: any) => cert.id || 0), 0) + 1;
+              return [...base, { ...data, id: newId }];
             });
-
-            updateProfile(
-              {
-                certifications: certificationsBackend,
-              },
-              {
-                onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Certification updated successfully' type='success' />, { duration: 4000 });
-                  setIsAddCertificationModalOpen(false);
-                  setEditingCertification(null);
-                },
-                onError: (error: any) => {
-                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update certification'} type='error' />, { duration: 4000 });
-                },
-              }
-            );
+          }}
+          onUpdateLocal={(data) => {
+            // Use a function to get the current state
+            if (editingCertification && editingCertification.id) {
+              setLocalCertifications((current) => {
+                const base = current.length > 0 ? current : (localCertifications.length > 0 ? localCertifications : certifications);
+                return base.map((cert: any) =>
+                  cert.id === editingCertification.id ? { ...data, id: editingCertification.id } : cert
+                );
+              });
+            }
           }}
         />
       )}
@@ -690,13 +672,14 @@ const Content = () => {
       {isPortfolioModalOpen && (
         <PortfolioModal
           isOpen={isPortfolioModalOpen}
-          onClose={() => setIsPortfolioModalOpen(false)}
-          portfolio={portfolio}
-          onEdit={(id) => {
-            const project = portfolio.find((p: any) => p.id === id);
-            if (project) {
-              setEditingProject(project);
-            }
+          onClose={() => {
+            setIsPortfolioModalOpen(false);
+            // Reset local state when closing
+            setLocalPortfolio([]);
+          }}
+          portfolio={localPortfolio.length > 0 ? localPortfolio : portfolio}
+          onEdit={(id, project) => {
+            setEditingProject(project);
             setIsPortfolioModalOpen(false);
             setIsAddProjectModalOpen(true);
           }}
@@ -720,12 +703,17 @@ const Content = () => {
                 onSuccess: () => {
                   toast.custom(() => <CustomToast message='Portfolio updated successfully' type='success' />, { duration: 4000 });
                   setIsPortfolioModalOpen(false);
+                  // Sync the local state with the saved state
+                  setPortfolio(data);
                 },
                 onError: (error: any) => {
                   toast.custom(() => <CustomToast message={error?.message || 'Failed to update portfolio'} type='error' />, { duration: 4000 });
                 },
               }
             );
+          }}
+          onUpdateLocal={(data) => {
+            setLocalPortfolio(data);
           }}
         />
       )}
@@ -736,45 +724,30 @@ const Content = () => {
           onClose={() => {
             setIsAddProjectModalOpen(false);
             setEditingProject(null);
+            setIsPortfolioModalOpen(true);
           }}
           initialData={editingProject}
           onSave={(data) => {
-            // Get current portfolio array
-            const currentPortfolio = [...portfolio];
-            let updatedPortfolio;
-
-            if (editingProject) {
-              // Update existing project
-              updatedPortfolio = currentPortfolio.map((project: any) =>
-                project.id === editingProject.id ? { ...data, id: project.id } : project
-              );
-            } else {
-              // Add new project
-              const newId = Math.max(...currentPortfolio.map((project: any) => project.id || 0), 0) + 1;
-              updatedPortfolio = [...currentPortfolio, { ...data, id: newId }];
-            }
-
-            // Remove id and image fields for backend
-            const portfolioBackend = updatedPortfolio.map((item: any) => {
-              const { id, image, ...itemData } = item;
-              return itemData;
+            // This is now a no-op since we're using onAddToLocal/onUpdateLocal
+          }}
+          onAddToLocal={(data) => {
+            // Use a function to get the current state
+            setLocalPortfolio((current) => {
+              const base = current.length > 0 ? current : (localPortfolio.length > 0 ? localPortfolio : portfolio);
+              const newId = Math.max(...base.map((project: any) => project.id || 0), 0) + 1;
+              return [...base, { ...data, id: newId }];
             });
-
-            updateProfile(
-              {
-                portfolio: portfolioBackend,
-              },
-              {
-                onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Project updated successfully' type='success' />, { duration: 4000 });
-                  setIsAddProjectModalOpen(false);
-                  setEditingProject(null);
-                },
-                onError: (error: any) => {
-                  toast.custom(() => <CustomToast message={error?.message || 'Failed to update project'} type='error' />, { duration: 4000 });
-                },
-              }
-            );
+          }}
+          onUpdateLocal={(data) => {
+            // Use a function to get the current state
+            if (editingProject && editingProject.id) {
+              setLocalPortfolio((current) => {
+                const base = current.length > 0 ? current : (localPortfolio.length > 0 ? localPortfolio : portfolio);
+                return base.map((project: any) =>
+                  project.id === editingProject.id ? { ...data, id: editingProject.id } : project
+                );
+              });
+            }
           }}
         />
       )}
