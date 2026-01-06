@@ -107,7 +107,7 @@ const Content = () => {
                   {
                     icon: CalendarIcon,
                     label: 'Upcoming Bookings',
-                    count: activeJobs.length,
+                    count: upcomingBookings.length,
                     badgeColor: 'purple',
                     onClick: () => setIsUpcomingBookingsModalOpen(true),
                   },

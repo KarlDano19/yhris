@@ -59,16 +59,37 @@ const Content = () => {
     },
   ];
 
-  // Transform activeJobs for the modal
-  const upcomingBookings = activeJobs.map((job) => ({
-    id: job.id,
-    title: job.title,
-    clientName: job.clientName,
-    location: job.location,
-    time: job.time,
-    priceRange: job.priceRange,
-    clientInitials: job.clientInitials,
-  }));
+  // Transform activeJobs for the modal, and also include newly accepted jobs from jobRequests
+  const acceptedJobsFromRequests = jobRequests
+    .filter((job) => acceptedJobIds.has(job.id))
+    .map((job) => ({
+      id: job.id,
+      title: job.title,
+      clientName: job.clientName,
+      location: job.clientLocation,
+      time: job.time,
+      priceRange: job.priceRange,
+      clientInitials: job.clientInitials,
+    }));
+
+  // Combine activeJobs (from hardcoded data) with newly accepted jobs
+  const allUpcomingBookings = [
+    ...activeJobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      clientName: job.clientName,
+      location: job.location,
+      time: job.time,
+      priceRange: job.priceRange,
+      clientInitials: job.clientInitials,
+    })),
+    // Add newly accepted jobs that aren't already in activeJobs
+    ...acceptedJobsFromRequests.filter(
+      (newJob) => !activeJobs.some((existingJob) => existingJob.id === newJob.id)
+    ),
+  ];
+
+  const upcomingBookings = allUpcomingBookings;
 
   const handleApplyFilters = (filters: {
     location: string;
@@ -152,7 +173,7 @@ const Content = () => {
                   {
                     icon: CalendarIcon,
                     label: 'Upcoming Bookings',
-                    count: activeJobs.length,
+                    count: upcomingBookings.length,
                     badgeColor: 'purple',
                     onClick: () => setIsUpcomingBookingsModalOpen(true),
                   },

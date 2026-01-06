@@ -419,12 +419,11 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
                 placeholder="mm/dd/yyyy"
                 className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
               />
-              <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             </div>
 
             {/* Time From and To */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="relative">
+              <div>
                 <label htmlFor="timeFrom" className="block text-xs text-gray-600 mb-1">
                   Time From
                 </label>
@@ -433,12 +432,10 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
                   id="timeFrom"
                   value={scheduleTimeFrom}
                   onChange={(e) => setScheduleTimeFrom(e.target.value)}
-                  placeholder="--:--"
-                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
                 />
-                <ClockIcon className="absolute right-3 bottom-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
               </div>
-              <div className="relative">
+              <div>
                 <label htmlFor="timeTo" className="block text-xs text-gray-600 mb-1">
                   Time To
                 </label>
@@ -447,10 +444,8 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
                   id="timeTo"
                   value={scheduleTimeTo}
                   onChange={(e) => setScheduleTimeTo(e.target.value)}
-                  placeholder="--:--"
-                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10"
+                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
                 />
-                <ClockIcon className="absolute right-3 bottom-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
