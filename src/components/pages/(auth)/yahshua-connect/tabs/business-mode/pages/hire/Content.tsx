@@ -13,6 +13,7 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from '../../components/modals/SubmitPaymentProofModal';
+import JobChatModal from '../../components/modals/JobChatModal';
 import { useHireData } from '../../hooks/useHireData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 
@@ -34,6 +35,13 @@ const Content = () => {
     priceRange: string;
   } | null>(null);
   const [hiredApplicantsByJob, setHiredApplicantsByJob] = useState<Map<number, { applicantId: number; applicantName: string; paymentProofSubmitted?: boolean }>>(new Map());
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<{
+    id: number;
+    title: string;
+    clientName: string;
+    clientInitials?: string;
+  } | null>(null);
   const { jobPostings, reviews, applicants, hiredApplicants, getApplicantProfileData } = useHireData();
   const { activeJobs } = useMyJobsData();
 
@@ -45,7 +53,28 @@ const Content = () => {
     location: job.location,
     time: job.time,
     priceRange: job.priceRange,
+    clientInitials: job.clientInitials,
   }));
+
+  // Handler for booking messages from Upcoming Bookings Modal
+  const handleBookingMessage = (booking: {
+    id: number;
+    title: string;
+    clientName: string;
+    location: string;
+    time: string;
+    priceRange: string;
+    clientInitials?: string;
+  }) => {
+    setSelectedBookingForMessage({
+      id: booking.id,
+      clientName: booking.clientName,
+      clientInitials: booking.clientInitials,
+      title: booking.title,
+    });
+    setIsUpcomingBookingsModalOpen(false);
+    setIsChatModalOpen(true);
+  };
 
   const handlePostJob = (data: {
     jobTitle: string;
@@ -383,6 +412,7 @@ const Content = () => {
         isOpen={isUpcomingBookingsModalOpen}
         onClose={() => setIsUpcomingBookingsModalOpen(false)}
         bookings={upcomingBookings}
+        onMessage={handleBookingMessage}
       />
 
       {/* View Applicants Modal */}
@@ -455,6 +485,20 @@ const Content = () => {
           providerName={selectedHireForPayment.providerName}
           priceRange={selectedHireForPayment.priceRange}
           onSubmit={handleSubmitPaymentProof}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {selectedBookingForMessage && (
+        <JobChatModal
+          isOpen={isChatModalOpen}
+          onClose={() => {
+            setIsChatModalOpen(false);
+            setSelectedBookingForMessage(null);
+          }}
+          clientName={selectedBookingForMessage.clientName}
+          clientInitials={selectedBookingForMessage.clientInitials || selectedBookingForMessage.clientName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+          jobTitle={selectedBookingForMessage.title}
         />
       )}
     </>

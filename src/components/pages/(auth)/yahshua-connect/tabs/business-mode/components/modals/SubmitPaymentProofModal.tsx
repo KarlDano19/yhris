@@ -1,9 +1,9 @@
-'use client';
 
-import { Fragment, useState, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
+
+import { useState, useEffect } from 'react';
+import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import { useDropzone } from 'react-dropzone';
+import Modal from '../../../../components/Modal';
 
 interface SubmitPaymentProofModalProps {
   isOpen: boolean;
@@ -68,115 +68,74 @@ const SubmitPaymentProofModal = ({
   }, [isOpen]);
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <Dialog.Title as="h3" className="text-lg font-bold text-gray-900">
-                    Submit Payment Proof
-                  </Dialog.Title>
-                  <button
-                    onClick={handleClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <XMarkIcon className="h-6 w-6" />
-                  </button>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  {/* Service Information */}
-                  <div className="mb-6">
-                    <p className="text-base font-bold text-gray-900 mb-1">{serviceName}</p>
-                    <p className="text-sm text-gray-600 mb-2">Hired: {providerName}</p>
-                    <p className="text-base font-semibold text-green-600">{priceRange}</p>
-                  </div>
-
-                  {/* Upload Section */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Upload Payment Screenshot/Receipt
-                    </label>
-                    <div
-                      {...getRootProps()}
-                      className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                        isDragActive
-                          ? 'border-savoy-blue bg-blue-50'
-                          : selectedFile
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-300 bg-gray-50 hover:border-gray-400'
-                      }`}
-                    >
-                      <input {...getInputProps()} />
-                      {selectedFile ? (
-                        <div className="space-y-2">
-                          <CloudArrowUpIcon className="h-12 w-12 text-green-500 mx-auto" />
-                          <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto" />
-                          <p className="text-sm font-medium text-gray-700">
-                            Click to upload or drag and drop
-                          </p>
-                          <p className="text-xs text-gray-500">PNG, JPG, PDF up to 5MB</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="px-6 pb-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={!selectedFile}
-                    className="px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    Submit Proof
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Submit Payment Proof"
+      size="md"
+      footerContent={
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!selectedFile}
+            className="px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            Submit Proof
+          </button>
         </div>
-      </Dialog>
-    </Transition>
+      }
+    >
+      {/* Service Information */}
+      <div className="mb-6">
+        <p className="text-base font-bold text-gray-900 mb-1">{serviceName}</p>
+        <p className="text-sm text-gray-600 mb-2">Hired: {providerName}</p>
+        <p className="text-base font-semibold text-green-600">{priceRange}</p>
+      </div>
+
+      {/* Upload Section */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Upload Payment Screenshot/Receipt
+        </label>
+        <div
+          {...getRootProps()}
+          className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+            isDragActive
+              ? 'border-savoy-blue bg-blue-50'
+              : selectedFile
+              ? 'border-green-500 bg-green-50'
+              : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+          }`}
+        >
+          <input {...getInputProps()} />
+          {selectedFile ? (
+            <div className="space-y-2">
+              <CloudArrowUpIcon className="h-12 w-12 text-green-500 mx-auto" />
+              <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+              <p className="text-xs text-gray-500">
+                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto" />
+              <p className="text-sm font-medium text-gray-700">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-500">PNG, JPG, PDF up to 5MB</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
   );
 };
 

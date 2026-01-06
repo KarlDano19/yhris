@@ -56,7 +56,28 @@ const Content = () => {
     location: job.location,
     time: job.time,
     priceRange: job.priceRange,
+    clientInitials: job.clientInitials,
   }));
+
+  // Handler for booking messages from Upcoming Bookings Modal
+  const handleBookingMessage = (booking: {
+    id: number;
+    title: string;
+    clientName: string;
+    location: string;
+    time: string;
+    priceRange: string;
+    clientInitials?: string;
+  }) => {
+    setSelectedJobForMessage({
+      id: booking.id,
+      clientName: booking.clientName,
+      clientInitials: booking.clientInitials,
+      title: booking.title,
+    });
+    setIsUpcomingBookingsModalOpen(false);
+    setIsChatModalOpen(true);
+  };
 
   return (
     <>
@@ -212,6 +233,7 @@ const Content = () => {
         isOpen={isUpcomingBookingsModalOpen}
         onClose={() => setIsUpcomingBookingsModalOpen(false)}
         bookings={upcomingBookings}
+        onMessage={handleBookingMessage}
       />
 
       {/* My Hires Modal */}
@@ -221,6 +243,20 @@ const Content = () => {
         hires={hiredApplicants}
         onSendPaymentProof={handleSendPaymentProof}
       />
+
+      {/* Chat Modal */}
+      {selectedJobForMessage && (
+        <JobChatModal
+          isOpen={isChatModalOpen}
+          onClose={() => {
+            setIsChatModalOpen(false);
+            setSelectedJobForMessage(null);
+          }}
+          clientName={selectedJobForMessage.clientName}
+          clientInitials={selectedJobForMessage.clientInitials || selectedJobForMessage.clientName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+          jobTitle={selectedJobForMessage.title}
+        />
+      )}
     </>
   );
 };
