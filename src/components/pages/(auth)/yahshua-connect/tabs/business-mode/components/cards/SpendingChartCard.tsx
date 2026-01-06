@@ -39,3 +39,4 @@ const SpendingChartCard = ({ data, showTitle = true }: SpendingChartCardProps) =
 
 export default SpendingChartCard;
 
+

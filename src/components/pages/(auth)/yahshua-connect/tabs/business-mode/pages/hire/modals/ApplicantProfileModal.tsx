@@ -344,3 +344,4 @@ const ApplicantProfileModal = ({
 export default ApplicantProfileModal;
 
 
+
