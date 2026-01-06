@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useRef, useState, useEffect, useCallback, Fragment } from 'react';
+import React, { useReducer, useRef, useState, useEffect, useCallback, Fragment, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import { useParams } from 'next/navigation';
@@ -41,7 +41,7 @@ import useSeedApplicants from '../hooks/useSeedApplicants';
 import useUnseedApplicants from '../hooks/useUnseedApplicants';
 import SeederButton from '@/components/SeederButton';
 
-import { ArrowLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
@@ -65,9 +65,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const unseedApplicantsMutation = useUnseedApplicants(params.id as string);
   
   // Date range filter states - must be declared before hook calls
-  const [dateFrom, setDateFrom] = useState<any>('');
-  const [dateTo, setDateTo] = useState<any>('');
+  // "pending" dates are what the user selects, "applied" dates are what's used in the query
+  const [dateFrom, setDateFrom] = useState<any>('');  // Pending date from
+  const [dateTo, setDateTo] = useState<any>('');      // Pending date to
+  const [appliedDateFrom, setAppliedDateFrom] = useState<any>('');  // Applied date from
+  const [appliedDateTo, setAppliedDateTo] = useState<any>('');      // Applied date to
   const [useDateFilter, setUseDateFilter] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // Format date to YYYY-MM-DD for API
   const formatDateForAPI = useCallback((date: any) => {
@@ -86,19 +90,19 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   } = useGetJobPostDetails(params.id);
   const recentOnly = !useDateFilter;
 
-  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch } = useGetAppliedApplicants(
+  const { data: dataAppliedApplicants, refetch: appliedApplicantRefetch, isFetching: isFetchingApplicants } = useGetAppliedApplicants(
     params.id,
     false,
     recentOnly,
-    useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
-    useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
+    useDateFilter && appliedDateFrom ? formatDateForAPI(appliedDateFrom) : undefined,
+    useDateFilter && appliedDateTo ? formatDateForAPI(appliedDateTo) : undefined
   );
   const { data: dataArchivedApplicants, refetch: archivedApplicantRefetch } = useGetAppliedApplicants(
     params.id,
     true,
     recentOnly,
-    useDateFilter && dateFrom ? formatDateForAPI(dateFrom) : undefined,
-    useDateFilter && dateTo ? formatDateForAPI(dateTo) : undefined
+    useDateFilter && appliedDateFrom ? formatDateForAPI(appliedDateFrom) : undefined,
+    useDateFilter && appliedDateTo ? formatDateForAPI(appliedDateTo) : undefined
   );
   const {
     CLEAR_STAGE,
@@ -111,6 +115,24 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     SET_APPLICANT,
     ARCHIVED_APPLICANTS,
   } = actionTypes;
+
+  // Calculate count of archived applicants in the last 30 days
+  const recentArchivedCount = useMemo(() => {
+    if (!dataArchivedApplicants || !Array.isArray(dataArchivedApplicants)) return 0;
+    
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    return dataArchivedApplicants.filter((applicant: any) => {
+      // Only count if actually archived with rejected/withdrawn status
+      const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+      if (!isArchivedStatus) return false;
+      
+      // Check if archived within the last 30 days
+      const archivedDate = new Date(applicant.updated_at || applicant.created_at);
+      return archivedDate >= thirtyDaysAgo;
+    }).length;
+  }, [dataArchivedApplicants]);
   const [state, dispatch] = useReducer(stageReducer, INITIAL_STATE);
   const [actionState, setActionState] = useState(initialActionState);
   const { title, whichModal } = actionState.modal;
@@ -596,16 +618,38 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   };
 
-  // Handle date range changes
+  // Handle date range changes - only update local state, don't trigger fetch
   const handleDateFromChange = (date: any) => {
     setDateFrom(date);
-    setUseDateFilter(true);
   };
 
   const handleDateToChange = (date: any) => {
     setDateTo(date);
-    setUseDateFilter(true);
   };
+
+  // Handle search button click - apply the date filter
+  const handleDateSearch = useCallback(() => {
+    if (!dateFrom && !dateTo) {
+      // If both dates are cleared, reset to default (recent only)
+      setAppliedDateFrom('');
+      setAppliedDateTo('');
+      setUseDateFilter(false);
+      return;
+    }
+    
+    // Apply the pending dates
+    setAppliedDateFrom(dateFrom);
+    setAppliedDateTo(dateTo);
+    setUseDateFilter(true);
+    setIsSearching(true);
+  }, [dateFrom, dateTo]);
+
+  // Reset search state when fetching completes
+  useEffect(() => {
+    if (!isFetchingApplicants && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isFetchingApplicants, isSearching]);
 
   return (
     <>
@@ -669,6 +713,22 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           minDate={dateFrom}
                         />
                       </div>
+                      {/* Search Button */}
+                      <button
+                        onClick={handleDateSearch}
+                        disabled={isSearching || isFetchingApplicants}
+                        className="rounded-lg bg-white hover:bg-gray-100 border-2 border-gray-300 disabled:bg-blue-400 disabled:cursor-not-allowed text-blue-700 py-1.5 px-3 flex items-center justify-center transition-colors"
+                        title="Search by date range"
+                      >
+                        {isSearching || isFetchingApplicants ? (
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <MagnifyingGlassIcon className="h-5 w-5" />
+                        )}
+                      </button>
                     </div>
 
                     {/* Action Buttons - Right Side */}
@@ -695,9 +755,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
                       <button
                         onClick={() => setIsArchivedApplicantsModalOpen(true)}
-                        className="rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 py-1.5 px-2 flex items-center justify-center w-12 transition-colors"
+                        className="relative rounded-lg border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-gray-700 py-1.5 px-2 flex items-center justify-center w-12 transition-colors"
                       >
                         <ArchiveIcon />
+                        {recentArchivedCount > 0 && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+                            {recentArchivedCount > 99 ? '99+' : recentArchivedCount}
+                          </span>
+                        )}
                       </button>
 
                       <Filter 
@@ -749,6 +814,22 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                           minDate={dateFrom}
                         />
                       </div>
+                      {/* Search Button - Mobile */}
+                      <button
+                        onClick={handleDateSearch}
+                        disabled={isSearching || isFetchingApplicants}
+                        className="rounded-lg bg-savoy-blue hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-1.5 px-3 flex items-center justify-center transition-colors"
+                        title="Search by date range"
+                      >
+                        {isSearching || isFetchingApplicants ? (
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <MagnifyingGlassIcon className="h-5 w-5" />
+                        )}
+                      </button>
                     </div>
 
                     {/* Action Buttons Row */}
@@ -794,7 +875,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                                     } group flex items-center gap-3 w-full px-3 py-2 text-sm font-bold transition-colors`}
                                     style={{ color: '#6b7280' }}
                                   >
-                                    <ArchiveIcon />
+                                    <div className="relative">
+                                      <ArchiveIcon />
+                                      {recentArchivedCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
+                                          {recentArchivedCount > 99 ? '99+' : recentArchivedCount}
+                                        </span>
+                                      )}
+                                    </div>
                                     Archived
                                   </button>
                                 )}
