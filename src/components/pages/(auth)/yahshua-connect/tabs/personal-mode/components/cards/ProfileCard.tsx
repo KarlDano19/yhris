@@ -4,7 +4,7 @@ import { StarIcon } from '@heroicons/react/24/solid';
 
 interface ProfileCardProps {
   name: string;
-  skills?: string[];
+  about?: string | null;
   initial: string;
   profileCompletion: number;
   rating?: number | null;
@@ -14,15 +14,15 @@ interface ProfileCardProps {
 
 const ProfileCard = ({ 
   name, 
-  skills = [], 
+  about = null, 
   initial, 
   profileCompletion, 
   rating = null, 
   reviewCount = 0,
   profilePhoto = null 
 }: ProfileCardProps) => {
-  // Format skills with bullet points
-  const skillsDisplay = skills.length > 0 ? skills.join(' • ') : 'Aspiring Professional';
+  // Format about text - truncate if too long
+  const aboutDisplay = about && about.trim() ? about.trim() : 'No description available';
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Gradient Header - Muted blue/purple to muted yellow/orange */}
@@ -55,9 +55,9 @@ const ProfileCard = ({
           <h3 className="text-xl font-bold text-gray-900">{name}</h3>
         </div>
 
-        {/* Skills - Centered, Smaller, Light Gray */}
+        {/* About - Centered, Smaller, Light Gray */}
         <div className="text-center mb-4">
-          <p className="text-sm text-gray-600">{skillsDisplay}</p>
+          <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
         </div>
 
         {/* Rating - Centered with Star, Rating, and Review Count */}

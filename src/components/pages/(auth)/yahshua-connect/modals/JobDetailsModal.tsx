@@ -53,7 +53,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
   if (!jobId) return null;
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment} appear={true}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         {/* Backdrop */}
         <Transition.Child
@@ -69,22 +69,20 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
         </Transition.Child>
 
         {/* Slide-in panel from right */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-y-0 right-0 flex">
-            <Transition.Child
-              as={Fragment}
-              enter="transform transition ease-out duration-500"
-              enterFrom="translate-x-full"
-              enterTo="translate-x-0"
-              leave="transform transition ease-in duration-400"
-              leaveFrom="translate-x-0"
-              leaveTo="translate-x-full"
-            >
-              <Dialog.Panel 
-                className="pointer-events-auto h-full w-full md:w-[50vw] lg:w-[50vw]"
-                style={{ maxWidth: 'none' }}
+        <div className="fixed inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+              <Transition.Child
+                as={Fragment}
+                enter="transform transition ease-in-out duration-500"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
+                leave="transform transition ease-in-out duration-300"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
               >
-                <div className="flex h-full flex-col overflow-hidden bg-white shadow-2xl">
+                <Dialog.Panel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
+                  <div className="flex h-screen flex-col overflow-hidden bg-white shadow-2xl">
                   {/* Header with Apply Now button and Close button */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <Link 
@@ -312,10 +310,11 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                 </div>
               </Dialog.Panel>
             </Transition.Child>
+            </div>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 
