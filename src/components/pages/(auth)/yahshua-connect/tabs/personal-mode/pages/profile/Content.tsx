@@ -264,6 +264,65 @@ const Content = () => {
     });
   };
 
+  // Calculate section completion percentages
+  const calculateBasicInfoCompletion = () => {
+    const requiredFields = ['gender', 'religion', 'nationality', 'civilStatus'];
+    const filledCount = requiredFields.filter(field => {
+      const value = basicInfo[field as keyof T_BasicInfo];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateEducationCompletion = () => {
+    if (!education) return 0;
+    const requiredFields = ['educationalAttainment', 'school'];
+    const filledCount = requiredFields.filter(field => {
+      const value = education[field as keyof T_Education];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateContactsCompletion = () => {
+    const requiredFields = [
+      'phone',
+      'contactPersonName',
+      'contactPersonAddress',
+      'contactPersonAge',
+      'contactPersonMobile',
+      'contactPersonRelationship',
+    ];
+    const filledCount = requiredFields.filter(field => {
+      const value = basicInfo[field as keyof T_BasicInfo];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateEmploymentDocumentsCompletion = () => {
+    const uploadedCount = employmentDocuments.filter(doc => doc.uploaded).length;
+    const totalDocuments = employmentDocuments.length;
+    if (totalDocuments === 0) return 100;
+    return Math.round((uploadedCount / totalDocuments) * 100);
+  };
+
+  // Render completion badge
+  const renderCompletionBadge = (percentage: number) => {
+    if (percentage === 100) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Complete
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+        {percentage}% Complete
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Profile Sections */}
@@ -274,7 +333,10 @@ const Content = () => {
             onClick={() => setIsBasicInfoModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Profile</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Profile</span>
+              {renderCompletionBadge(calculateBasicInfoCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -285,7 +347,10 @@ const Content = () => {
             onClick={() => setIsEducationModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Education</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Education</span>
+              {renderCompletionBadge(calculateEducationCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -296,7 +361,10 @@ const Content = () => {
             onClick={() => setIsContactInfoModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Contacts</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Contacts</span>
+              {renderCompletionBadge(calculateContactsCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -307,7 +375,10 @@ const Content = () => {
             onClick={() => setIsEmploymentDocumentsModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Employment Documents</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Employment Documents</span>
+              {renderCompletionBadge(calculateEmploymentDocumentsCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
