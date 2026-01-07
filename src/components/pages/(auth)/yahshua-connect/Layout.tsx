@@ -152,11 +152,15 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     {
       icon: DocumentTextIcon,
       label: 'My Applications',
+      count: applicationsCount,
+      badgeColor: 'blue' as const,
       onClick: () => setIsApplicationsModalOpen(true),
     },
     {
       icon: BookmarkIcon,
       label: 'Saved Jobs',
+      count: savedJobsCount,
+      badgeColor: 'blue' as const,
       onClick: () => setIsSavedJobsModalOpen(true),
     },
     {
@@ -350,14 +354,16 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
       {/* Business Mode Modals */}
       {isBusinessMode && (
         <>
-          <UpcomingBookingsModal
-            isOpen={isUpcomingBookingsModalOpen}
-            onClose={() => setIsUpcomingBookingsModalOpen(false)}
-            bookings={upcomingBookings}
-            onMessage={handleBookingMessage}
-          />
+          {isUpcomingBookingsModalOpen && (
+            <UpcomingBookingsModal
+              isOpen={isUpcomingBookingsModalOpen}
+              onClose={() => setIsUpcomingBookingsModalOpen(false)}
+              bookings={upcomingBookings}
+              onMessage={handleBookingMessage}
+            />
+          )}
 
-          {selectedBookingForMessage && (
+          {isChatModalOpen && selectedBookingForMessage && (
             <JobChatModal
               isOpen={isChatModalOpen}
               onClose={() => {
@@ -377,12 +383,14 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
             />
           )}
 
-          <MyHiresModal
-            isOpen={isMyHiresModalOpen}
-            onClose={() => setIsMyHiresModalOpen(false)}
-            hires={hiredApplicants}
-            onSendPaymentProof={handleSendPaymentProof}
-          />
+          {isMyHiresModalOpen && (
+            <MyHiresModal
+              isOpen={isMyHiresModalOpen}
+              onClose={() => setIsMyHiresModalOpen(false)}
+              hires={hiredApplicants}
+              onSendPaymentProof={handleSendPaymentProof}
+            />
+          )}
         </>
       )}
 

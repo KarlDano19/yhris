@@ -188,14 +188,16 @@ const Content = () => {
       </div>
 
       {/* Page-specific Modals */}
-      <FilterRequestsModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        onApplyFilters={handleApplyFilters}
-      />
+      {isFilterModalOpen && (
+        <FilterRequestsModal
+          isOpen={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          onApplyFilters={handleApplyFilters}
+        />
+      )}
 
       {/* Job Accepted Modal */}
-      {selectedJobFull && (
+      {isJobAcceptedModalOpen && selectedJobFull && (
         <JobAcceptedModal
           isOpen={isJobAcceptedModalOpen}
           onClose={() => {
@@ -213,7 +215,7 @@ const Content = () => {
       )}
 
       {/* Job Request Details Modal */}
-      {selectedJobFull && (
+      {isJobDetailsModalOpen && selectedJobFull && (
         <JobRequestDetailsModal
           isOpen={isJobDetailsModalOpen}
           onClose={() => {
@@ -226,7 +228,7 @@ const Content = () => {
       )}
 
       {/* Chat Modal */}
-      {selectedJobFull && (
+      {isChatModalOpen && selectedJobFull && (
         <JobChatModal
           isOpen={isChatModalOpen}
           onClose={() => {

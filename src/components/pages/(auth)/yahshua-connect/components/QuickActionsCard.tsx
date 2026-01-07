@@ -6,7 +6,7 @@ interface QuickAction {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   count?: number;
-  badgeColor?: 'green' | 'purple';
+  badgeColor?: 'green' | 'purple' | 'blue';
   href?: string;
   onClick?: () => void;
   tooltip?: string;
@@ -19,15 +19,18 @@ interface QuickActionsCardProps {
 }
 
 const QuickActionsCard = ({ actions, onViewFullProfile }: QuickActionsCardProps) => {
-  // Determine if business mode (has badge colors)
-  const isBusinessMode = actions.some(action => action.badgeColor !== undefined);
+  // Determine if business mode (has purple or green badge colors, not blue)
+  const isBusinessMode = actions.some(action => action.badgeColor === 'purple' || action.badgeColor === 'green');
 
-  const getBadgeColorClass = (color?: 'green' | 'purple') => {
+  const getBadgeColorClass = (color?: 'green' | 'purple' | 'blue') => {
     if (color === 'green') {
       return 'bg-green-100 text-green-700';
     }
     if (color === 'purple') {
       return 'bg-purple-100 text-purple-700';
+    }
+    if (color === 'blue') {
+      return 'bg-blue-100 text-blue-700';
     }
     return 'bg-gray-100 text-gray-500';
   };
@@ -46,7 +49,7 @@ const QuickActionsCard = ({ actions, onViewFullProfile }: QuickActionsCardProps)
               <span className={`text-sm font-medium ${isBusinessMode ? 'text-gray-700 flex-1 group-hover:text-savoy-blue' : 'text-gray-700 flex-1'}`}>
                 {action.label}
               </span>
-              {isBusinessMode && action.count !== undefined && (
+              {action.count !== undefined && (
                 <span className={`text-xs font-semibold ${getBadgeColorClass(action.badgeColor)} px-2 py-1 rounded-full`}>
                   {action.count}
                 </span>

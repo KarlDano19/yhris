@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useMemo } from 'react';
 
 import Modal from '../components/Modal';
@@ -212,39 +214,37 @@ const JobFiltersModal = ({
       size="2xl"
       footerContent={footerContent}
     >
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Job Title Search */}
-        <div className="[&>div]:!w-full [&_div.flex.items-center]:!justify-between [&_div.flex.items-center]:!gap-3">
-          <JobSearchAutocomplete
-            value={pendingFilter.job_title || ''}
-            onChange={(value) =>
-              setPendingFilter({ ...pendingFilter, job_title: value })
-            }
-            debouncedValue={debouncedJobTitle}
-            isDebouncing={isDebouncingJobTitle}
-            autocompleteResults={jobTitleAutocompleteResults}
-            isLoading={isJobTitleAutocompleteLoading}
-            showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
-            selectedIndex={selectedJobTitleIndex}
-            limit={jobTitleAutocompleteLimit}
-            onSelectedIndexChange={setSelectedJobTitleIndex}
-            onLimitChange={setJobTitleAutocompleteLimit}
-            onShowAutocompleteChange={(show) => {
-              setShowJobTitleAutocomplete(show);
-              setShouldShowJobTitleAutocomplete(show);
-            }}
-            onResetLimit={() => setJobTitleAutocompleteLimit(20)}
-            onSearchSubmit={handleSearch}
-            onFocus={() => setIsJobTitleFocused(true)}
-            onBlur={() => setIsJobTitleFocused(false)}
-            label="Job Title"
-            placeholder="Enter job title, company, or keywords"
-            inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
-          />
-        </div>
+        <JobSearchAutocomplete
+          value={pendingFilter.job_title || ''}
+          onChange={(value) =>
+            setPendingFilter({ ...pendingFilter, job_title: value })
+          }
+          debouncedValue={debouncedJobTitle}
+          isDebouncing={isDebouncingJobTitle}
+          autocompleteResults={jobTitleAutocompleteResults}
+          isLoading={isJobTitleAutocompleteLoading}
+          showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
+          selectedIndex={selectedJobTitleIndex}
+          limit={jobTitleAutocompleteLimit}
+          onSelectedIndexChange={setSelectedJobTitleIndex}
+          onLimitChange={setJobTitleAutocompleteLimit}
+          onShowAutocompleteChange={(show) => {
+            setShowJobTitleAutocomplete(show);
+            setShouldShowJobTitleAutocomplete(show);
+          }}
+          onResetLimit={() => setJobTitleAutocompleteLimit(20)}
+          onSearchSubmit={handleSearch}
+          onFocus={() => setIsJobTitleFocused(true)}
+          onBlur={() => setIsJobTitleFocused(false)}
+          label="Job Title"
+          placeholder="Enter job title, company, or keywords"
+          inputClassName="w-full text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
+        />
 
         {/* Location Search */}
-        <div className="[&>div]:!w-full [&>div]:!mt-0 [&_div.flex.items-center]:!gap-3">
+        <div className="[&>div]:!mt-0">
           <LocationSearchAutocomplete
             value={locationInput}
             onChange={(value) => setLocationInput(value)}
@@ -270,8 +270,8 @@ const JobFiltersModal = ({
               setPendingFilter((prev) => ({ ...prev, location: values }))
             }
             label="Location"
-            placeholder="Enter locations, country"
-            inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
+            placeholder="Locations, Country"
+            inputClassName="w-full text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
           />
         </div>
       </div>
@@ -280,4 +280,5 @@ const JobFiltersModal = ({
 };
 
 export default JobFiltersModal;
+
 
