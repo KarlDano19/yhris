@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
 
-  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation', 'yahshua-sis'];
+  const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
   const adminRoutes: any = ['admin'];
   const employerRoutes: any = [
@@ -42,11 +42,13 @@ export async function middleware(request: NextRequest) {
     'notifications',
   ];
   const applicantRoutes: any = [
+    'personal-mode',
+    'business-mode',
+    'setup-applicant-profile',
     'application-tracker',
     'apply-for-a-job',
     'edit-profile',
     'notification',
-    'setup-applicant-profile',
     'job-applicant-form',
   ];
 
@@ -100,27 +102,43 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
+        if (firstRoute === 'personal-mode' || firstRoute === 'business-mode') {
+          if (!hasProfile) {
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+          }
+          // Allow access to personal-mode and business-mode if profile exists
+          return NextResponse.next();
+        }
+        if (firstRoute === 'setup-applicant-profile') {
+          if (hasProfile) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          // Allow access to setup-applicant-profile if no profile exists
+          return NextResponse.next();
+        }
+        // Handle old applicant routes
         if (
           firstRoute === 'application-tracker' ||
           firstRoute === 'apply-for-a-job' ||
           firstRoute === 'edit-profile' ||
           firstRoute === 'notification' ||
-          firstRoute === 'setup-applicant-profile' ||
           firstRoute === 'job-applicant-form'
         ) {
           if (hasProfile) {
-            if (firstRoute === 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
-            }
+            // Redirect old applicant routes to personal-mode
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
           }
           if (!hasProfile) {
-            if (firstRoute !== 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
-            }
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
           }
         }
       } else {
-        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+        // Route not in applicantRoutes - redirect based on profile status
+        if (hasProfile) {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        }
       }
     }
   } else {
