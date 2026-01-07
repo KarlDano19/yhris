@@ -283,12 +283,13 @@ const EducationModal = ({ isOpen, onClose, education, onSave }: EducationModalPr
           {/* Course/Degree */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Course/Degree
+              Course/Degree <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Controller
                 control={control}
                 name="degree"
+                rules={{ required: true }}
                 render={({ field }) => (
                   <>
                     <input
@@ -424,11 +425,11 @@ const EducationModal = ({ isOpen, onClose, education, onSave }: EducationModalPr
           {/* Start Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Start Year
+              Start Year <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              {...register('startYear')}
+              {...register('startYear', { required: true })}
               placeholder="e.g., 2016"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />
@@ -437,11 +438,11 @@ const EducationModal = ({ isOpen, onClose, education, onSave }: EducationModalPr
           {/* End Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              End Year
+              End Year <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              {...register('endYear')}
+              {...register('endYear', { required: true })}
               placeholder="e.g., 2020"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />

@@ -34,7 +34,8 @@ const ProfileCard = ({
   onAvailabilityChange,
 }: ProfileCardProps) => {
   const [availableForBookings, setAvailableForBookings] = useState(initialAvailableForBookings);
-  const isBusinessMode = earnings !== undefined || spending !== undefined || availableForBookings !== undefined;
+  // Determine business mode: only if earnings, spending, or onAvailabilityChange are explicitly provided
+  const isBusinessMode = earnings !== undefined || spending !== undefined || onAvailabilityChange !== undefined;
 
   const handleToggle = () => {
     const newValue = !availableForBookings;
@@ -136,8 +137,8 @@ const ProfileCard = ({
           </div>
         )}
 
-        {/* Personal Mode: Profile Completion - Hidden when 100% complete */}
-        {!isBusinessMode && profileCompletion !== undefined && profileCompletion < 100 && (
+        {/* Personal Mode: Profile Completion - Show when not 100% complete */}
+        {!isBusinessMode && profileCompletion !== undefined && profileCompletion !== null && profileCompletion < 100 && (
           <div className="pt-4 border-t border-gray-200">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-600 flex-shrink-0">Profile Completion</span>

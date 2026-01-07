@@ -276,7 +276,7 @@ const Content = () => {
 
   const calculateEducationCompletion = () => {
     if (!education) return 0;
-    const requiredFields = ['educationalAttainment', 'school'];
+    const requiredFields = ['educationalAttainment', 'degree', 'school', 'startYear', 'endYear'];
     const filledCount = requiredFields.filter(field => {
       const value = education[field as keyof T_Education];
       return value !== null && value !== undefined && value !== '';
