@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CurrencyDollarIcon, ChatBubbleLeftRightIcon, CalendarIcon, MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import JobChatModal from '../../components/modals/JobChatModal';
+import JobChatModal from '../find-work/modals/JobChatModal';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 
 const Content = () => {

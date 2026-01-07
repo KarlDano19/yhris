@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect } from 'react';
 import Link from 'next/link';
 
 import { Dialog, Transition } from '@headlessui/react';
-import useGetYahshuaConnectJobDetails from '../tabs/personal-mode/pages/jobs/hooks/useGetJobDetails';
+import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
 
 import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon } from '@heroicons/react/24/outline';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -164,7 +164,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <ClipboardDocumentIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                                 Role
                               </h6>
-                              <div className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                              <div className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                                 {renderRoleDescription(jobDetailData?.job_description)}
                               </div>
                             </div>
@@ -174,7 +174,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                               <JobDetailsLocation className='h-3.5 w-3.5 md:h-4 md:w-4 mr-2 flex-shrink-0' />
                               Location
                             </h6>
-                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6 break-words'>
+                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words'>
                               {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
                             </p>
                           </div>
@@ -186,7 +186,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <StarIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                                 Skills
                               </h6>
-                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6 break-words'>
+                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words'>
                                 {!isLoading ? (Array.isArray(jobDetailData.skills) ? jobDetailData.skills.join(', ') : jobDetailData.skills) : 'Loading skills...'}
                               </p>
                             </div>
@@ -198,7 +198,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                               <CheckCircleIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                               Qualifications
                             </h6>
-                            <div className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                            <div className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                               {!isLoading
                                 ? renderQualificationsDescription(jobDetailData?.qualifications)
                                 : 'Loading qualifications...'}
@@ -210,7 +210,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                               <BriefcaseIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                               Job Type
                             </h6>
-                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                               {!isLoading ? jobDetailData?.job_type : 'Loading job type...'}
                             </p>
                           </div>
@@ -221,7 +221,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <HomeIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                                 Work Setup
                               </h6>
-                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                                 {!isLoading ? jobDetailData?.work_setup : 'Loading work setup...'}
                               </p>
                             </div>
@@ -232,7 +232,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                               <ClockIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                               Schedule
                             </h6>
-                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                            <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                               {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
                             </p>
                           </div>
@@ -243,7 +243,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <BanknotesIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                                 Salary Range
                               </h6>
-                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6 break-words'>
+                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words'>
                                 {!isLoading && jobDetailData?.salary_range_type == 'Range' && (
                                   <>
                                     PHP {formatPrice(jobDetailData?.minimum_amount)} - {formatPrice(jobDetailData?.maximum_amount)}
@@ -263,7 +263,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <BenefitsIcon className='h-3.5 w-3.5 md:h-4 md:w-4 mr-2 flex-shrink-0' />
                                 Benefits
                               </h6>
-                              <ul className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                              <ul className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                                 {!isLoading ? jobDetailData.offered_benefits : 'Loading benefits...'}
                               </ul>
                             </div>
@@ -276,7 +276,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                                 <ClipboardDocumentIcon className='h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0' />
                                 Notes/Remarks
                               </h6>
-                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-6'>
+                              <p className='text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]'>
                                 {renderNotesRemarks(jobDetailData?.job_remark)}
                               </p>
                             </div>

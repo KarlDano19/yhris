@@ -1,14 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { FunnelIcon } from '@heroicons/react/24/outline';
-import JobRequestCard from '../../components/cards/JobRequestCard';
-import JobAcceptedModal from '../../components/modals/JobAcceptedModal';
-import JobChatModal from '../../components/modals/JobChatModal';
-import JobRequestDetailsModal from '../../components/modals/JobRequestDetailsModal';
+import { useState, useMemo } from 'react';
+
+import BusinessJobCard from './components/BusinessJobCard';
+import JobAcceptedModal from './modals/JobAcceptedModal';
+import JobChatModal from './modals/JobChatModal';
+import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../../components/modals/FilterRequestsModal';
-import { useFindWorkData } from '../../hooks/useFindWorkData';
-import { useJobState } from '../../contexts/JobStateContext';
+import useFindBusinessJobs from './hooks/useFindBusinessJobs';
+
+import { FunnelIcon } from '@heroicons/react/24/outline';
+
+import formatPrice from '@/helpers/currencyFormat';
+
+interface BusinessJobFilters {
+  category?: string;
+  location?: string | string[];
+  date_from?: string;
+  date_to?: string;
+  min_budget?: number;
+  max_budget?: number;
+  is_urgent?: boolean;
+  status?: string;
+}
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -16,28 +30,170 @@ const Content = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [displayCount, setDisplayCount] = useState<number>(20);
+  const [filters, setFilters] = useState<BusinessJobFilters>({});
 
-  const { jobRequests: initialJobRequests, reviews } = useFindWorkData();
-  const { acceptedJobIds, acceptJob } = useJobState();
+  // Fetch business jobs with filters
+  const {
+    data: jobsData,
+    isLoading: isGetJobsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useFindBusinessJobs(filters);
 
-  // Merge initial job requests with accepted status
-  const jobRequests = initialJobRequests.map((job) => ({
-    ...job,
-    status: acceptedJobIds.has(job.id) ? ('accepted' as const) : job.status,
-  }));
+  // Transform API business jobs data to BusinessJobCard format
+  const transformedJobs = useMemo(() => {
+    if (!jobsData || jobsData.length === 0) return [];
 
+    return jobsData.slice(0, displayCount).map((job: any) => {
+      // Get client initials from created_by_name
+      const getClientInitials = (clientName: string) => {
+        if (!clientName) return '?';
+        const words = clientName.trim().split(/\s+/);
+        if (words.length >= 2) {
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return clientName.substring(0, 2).toUpperCase();
+      };
 
-  const handleApplyFilters = (filters: {
-    location: string;
-    skills: string[];
-    urgentOnly: boolean;
+      // Format price range
+      const formatPriceRange = () => {
+        if (job.budget_type === 'Range' && job.min_amount && job.max_amount) {
+          return `₱ ${formatPrice(job.min_amount)} - ₱ ${formatPrice(job.max_amount)}`;
+        } else if (job.hourly_rate) {
+          return `₱ ${formatPrice(job.hourly_rate)}/hour`;
+        } else if (job.min_amount) {
+          return `₱ ${formatPrice(job.min_amount)}`;
+        } else if (job.max_amount) {
+          return `₱ ${formatPrice(job.max_amount)}`;
+        }
+        return 'Price not specified';
+      };
+
+      // Format date and time
+      const formatTime = () => {
+        if (!job.date) return 'Date not specified';
+        
+        const dateStr = job.date;
+        const date = new Date(dateStr);
+        const dateFormatted = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+        
+        if (job.time_from && job.time_to) {
+          return `${dateFormatted}, ${job.time_from} - ${job.time_to}`;
+        } else if (job.time_from) {
+          return `${dateFormatted}, ${job.time_from}`;
+        }
+        return dateFormatted;
+      };
+
+      // Format distance
+      const formatDistance = () => {
+        if (job.distance_km !== null && job.distance_km !== undefined) {
+          return `${job.distance_km} km away`;
+        }
+        return '';
+      };
+
+      // Get category as tags
+      const getTags = () => {
+        const tags = [];
+        if (job.category) {
+          tags.push(job.category);
+        }
+        return tags;
+      };
+
+      // Determine status - check if user has applied
+      const getStatus = () => {
+        if (job.has_applied) {
+          return 'pending' as const;
+        }
+        return 'pending' as const;
+      };
+
+      return {
+        id: job.id,
+        title: job.job_title || 'Untitled Job',
+        clientName: job.created_by_name || 'Unknown Client',
+        clientInitials: getClientInitials(job.created_by_name || ''),
+        clientLocation: job.location || 'Location not specified',
+        distance: formatDistance(),
+        rating: job.created_by_rating || 0,
+        hiresCount: job.created_by_reviews_count || 0,
+        description: job.description || 'No description provided',
+        time: formatTime(),
+        priceRange: formatPriceRange(),
+        tags: getTags(),
+        urgent: job.is_urgent || false,
+        status: getStatus(),
+      };
+    });
+  }, [jobsData, displayCount]);
+
+  const handleLoadMore = () => {
+    // Check if there are more jobs in the current fetched batch
+    const jobsInCurrentBatch = jobsData?.length || 0;
+    const nextDisplayCount = displayCount + 20;
+    
+    // If there are more jobs to show from current batch
+    if (displayCount < jobsInCurrentBatch) {
+      // Show next 20 jobs (or remaining jobs if less than 20)
+      setDisplayCount(Math.min(nextDisplayCount, jobsInCurrentBatch));
+    } else if (hasNextPage && !isFetchingNextPage) {
+      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
+      fetchNextPage().then(() => {
+        // Update displayCount after new data is fetched
+        setDisplayCount(nextDisplayCount);
+      });
+    }
+  };
+
+  const handleApplyFilters = (newFilters: {
+    location?: string;
+    skills?: string[];
+    urgentOnly?: boolean;
+    category?: string;
+    min_budget?: number;
+    max_budget?: number;
+    date_from?: string;
+    date_to?: string;
   }) => {
-    // TODO: Implement filter logic
-    console.log('Applied filters:', filters);
+    const businessFilters: BusinessJobFilters = {};
+    
+    if (newFilters.location) {
+      businessFilters.location = newFilters.location;
+    }
+    if (newFilters.category) {
+      businessFilters.category = newFilters.category;
+    }
+    if (newFilters.urgentOnly) {
+      businessFilters.is_urgent = true;
+    }
+    if (newFilters.min_budget !== undefined) {
+      businessFilters.min_budget = newFilters.min_budget;
+    }
+    if (newFilters.max_budget !== undefined) {
+      businessFilters.max_budget = newFilters.max_budget;
+    }
+    if (newFilters.date_from) {
+      businessFilters.date_from = newFilters.date_from;
+    }
+    if (newFilters.date_to) {
+      businessFilters.date_to = newFilters.date_to;
+    }
+    
+    setFilters(businessFilters);
+    setDisplayCount(20); // Reset display count when filters change
+    setSelectedJobId(null); // Reset selected job when filters change
   };
 
   const handleAcceptJob = (jobId: number) => {
-    acceptJob(jobId);
     setSelectedJobId(jobId);
     setIsJobAcceptedModalOpen(true);
   };
@@ -59,7 +215,7 @@ const Content = () => {
 
 
   const selectedJobFull = selectedJobId
-    ? jobRequests.find((job) => job.id === selectedJobId)
+    ? transformedJobs.find((job) => job.id === selectedJobId)
     : null;
 
   return (
@@ -81,17 +237,46 @@ const Content = () => {
         </div>
 
         {/* Job Requests List */}
-        <div className="space-y-4">
-          {jobRequests.map((job) => (
-            <JobRequestCard
-              key={job.id}
-              {...job}
-              onAcceptJob={handleAcceptJob}
-              onMessage={handleMessage}
-              onViewDetails={handleViewDetails}
-            />
-          ))}
-        </div>
+        {isGetJobsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">Loading jobs...</div>
+          </div>
+        ) : transformedJobs.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No jobs available at the moment.</div>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {transformedJobs.map((job) => (
+                <BusinessJobCard
+                  key={job.id}
+                  {...job}
+                  onAcceptJob={handleAcceptJob}
+                  onMessage={handleMessage}
+                  onViewDetails={handleViewDetails}
+                />
+              ))}
+            </div>
+            {/* Load More Button */}
+            {(displayCount < (totalRecords || 0) || displayCount < (jobsData?.length || 0) || hasNextPage) && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+                </button>
+              </div>
+            )}
+            {totalRecords > 0 && (
+              <div className="text-sm text-gray-600 text-center mt-4">
+                Showing {Math.min(displayCount, totalRecords)} of {totalRecords} jobs
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Page-specific Modals */}
@@ -102,7 +287,7 @@ const Content = () => {
       />
 
       {/* Job Accepted Modal */}
-      {selectedJobFull && (
+      {selectedJobFull && selectedJobId && (
         <JobAcceptedModal
           isOpen={isJobAcceptedModalOpen}
           onClose={() => {
@@ -119,15 +304,15 @@ const Content = () => {
         />
       )}
 
-      {/* Job Request Details Modal */}
-      {selectedJobFull && (
-        <JobRequestDetailsModal
+      {/* Business Job Details Modal */}
+      {selectedJobId && (
+        <BusinessJobDetailsModal
           isOpen={isJobDetailsModalOpen}
           onClose={() => {
             setIsJobDetailsModalOpen(false);
             setSelectedJobId(null);
           }}
-          job={selectedJobFull}
+          jobId={selectedJobId}
           onAcceptJob={handleAcceptJob}
         />
       )}

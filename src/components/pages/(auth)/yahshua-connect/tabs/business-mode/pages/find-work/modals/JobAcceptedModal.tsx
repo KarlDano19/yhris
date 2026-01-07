@@ -1,7 +1,6 @@
-
+import Modal from '../../../../../components/Modal';
 
 import { CheckIcon } from '@heroicons/react/24/outline';
-import Modal from '../../../../components/Modal';
 
 interface JobDetails {
   title: string;

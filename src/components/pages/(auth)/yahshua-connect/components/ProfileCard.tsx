@@ -34,7 +34,7 @@ const ProfileCard = ({
   onAvailabilityChange,
 }: ProfileCardProps) => {
   const [availableForBookings, setAvailableForBookings] = useState(initialAvailableForBookings);
-  const isBusinessMode = title !== undefined || earnings !== undefined || spending !== undefined;
+  const isBusinessMode = earnings !== undefined || spending !== undefined || availableForBookings !== undefined;
 
   const handleToggle = () => {
     const newValue = !availableForBookings;
@@ -56,11 +56,11 @@ const ProfileCard = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Gradient Header - Different styles for business vs personal mode */}
-      <div className={`${isBusinessMode ? 'h-24' : 'h-28'} ${isBusinessMode ? 'bg-gradient-to-r from-blue-400 to-cyan-300' : 'bg-gradient-to-r from-blue-300/60 via-purple-300/60 to-amber-200/60'} relative`}>
-        {/* Profile Picture - Square for personal, round for business */}
+      {/* Gradient Header - Same style for both modes */}
+      <div className="h-28 bg-gradient-to-r from-blue-300/60 via-purple-300/60 to-amber-200/60 relative">
+        {/* Profile Picture - Square with shadow for both modes */}
         <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
-          <div className={`w-24 h-24 ${isBusinessMode ? 'rounded-full' : 'rounded-lg'} border-4 border-white bg-gray-200 overflow-hidden ${!isBusinessMode ? 'shadow-lg' : ''}`}>
+          <div className="w-24 h-24 rounded-lg border-4 border-white bg-gray-200 overflow-hidden shadow-lg">
             {profilePhoto && profilePhoto !== '/assets/no-user.png' ? (
               <Image
                 src={profilePhoto}
@@ -71,7 +71,7 @@ const ProfileCard = ({
                 unoptimized
               />
             ) : (
-              <div className={`w-full h-full ${isBusinessMode ? 'bg-gradient-to-br from-blue-500 to-blue-700' : 'bg-gradient-to-br from-purple-400 to-pink-400'} flex items-center justify-center text-white text-3xl font-bold`}>
+              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-3xl font-bold">
                 {initial}
               </div>
             )}
@@ -80,46 +80,26 @@ const ProfileCard = ({
       </div>
 
       {/* Profile Info */}
-      <div className={`${isBusinessMode ? 'pt-14 px-6 pb-4' : 'pt-14 px-6 pb-6'} ${isBusinessMode ? 'text-center' : ''}`}>
+      <div className="pt-14 px-6 pb-6 text-center">
         {/* Name - Centered, Bold, Dark */}
-        <div className={`${isBusinessMode ? 'mb-1' : 'text-center mb-2'}`}>
-          <h3 className={`${isBusinessMode ? 'text-lg font-bold text-indigo-dye' : 'text-xl font-bold text-gray-900'}`}>{name}</h3>
+        <div className="text-center mb-2">
+          <h3 className="text-xl font-bold text-gray-900">{name}</h3>
         </div>
 
-        {/* Title (Business Mode) or About (Personal Mode) */}
-        {isBusinessMode ? (
-          title && (
-            <div className="text-center mb-2">
-              <p className="text-sm text-gray-600">{title}</p>
-            </div>
-          )
-        ) : (
-          <div className="text-center mb-4">
-            <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
-          </div>
-        )}
-
-        {/* Rating - Centered with Star, Rating, and Review Count */}
-        <div className={`flex items-center ${isBusinessMode ? 'justify-center gap-2 mb-4' : `justify-center gap-1.5 ${profileCompletion !== undefined && profileCompletion < 100 ? 'mb-6' : ''}`}`}>
-          {isBusinessMode ? (
-            <>
-              <div className="flex items-center gap-1">
-                <StarIcon className="h-4 w-4 text-yellow-400" />
-                <span className="text-sm font-semibold text-gray-700">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
-              </div>
-              <span className="text-xs text-gray-500">({reviewCount} reviews)</span>
-            </>
-          ) : (
-            <>
-              <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-              <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
-              <span className="text-sm text-gray-500">({reviewCount} reviews)</span>
-            </>
-          )}
+        {/* Description - Same for both modes */}
+        <div className="text-center mb-4">
+          <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
         </div>
 
-        {/* Business Mode: Available Toggle */}
-        {isBusinessMode && (
+        {/* Rating - Centered with Star, Rating, and Review Count - Same style for both modes */}
+        <div className={`flex items-center justify-center gap-1.5 ${isBusinessMode ? 'mb-4' : profileCompletion !== undefined && profileCompletion < 100 ? 'mb-6' : ''}`}>
+          <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+          <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
+          <span className="text-sm text-gray-500">({reviewCount} reviews)</span>
+        </div>
+
+        {/* Business Mode: Available Toggle - Only show if onAvailabilityChange is provided */}
+        {isBusinessMode && onAvailabilityChange !== undefined && (
           <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
             <span className="text-sm font-medium text-gray-700">Available for bookings</span>
             <button

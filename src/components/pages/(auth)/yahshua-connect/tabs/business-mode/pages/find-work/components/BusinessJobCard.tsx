@@ -1,9 +1,8 @@
 
-
 import { MapPinIcon, StarIcon, ClockIcon, CurrencyDollarIcon, ChatBubbleLeftRightIcon, CheckIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
-interface JobRequestCardProps {
+interface BusinessJobCardProps {
   id: number;
   title: string;
   clientName: string;
@@ -23,7 +22,7 @@ interface JobRequestCardProps {
   onViewDetails?: (jobId: number) => void;
 }
 
-const JobRequestCard = ({
+const BusinessJobCard = ({
   id,
   title,
   clientName,
@@ -41,7 +40,7 @@ const JobRequestCard = ({
   onAcceptJob,
   onMessage,
   onViewDetails,
-}: JobRequestCardProps) => {
+}: BusinessJobCardProps) => {
   const isAccepted = status === 'accepted' || status === 'scheduled';
   
   // Generate initials from client name if not provided
@@ -147,5 +146,5 @@ const JobRequestCard = ({
   );
 };
 
-export default JobRequestCard;
+export default BusinessJobCard;
 

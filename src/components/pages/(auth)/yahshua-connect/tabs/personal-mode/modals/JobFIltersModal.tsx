@@ -1,11 +1,9 @@
-'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 
-import Modal from '../components/Modal';
-import { useGetJobAutocomplete } from '../tabs/personal-mode/pages/jobs/hooks/useFindJobs';
-import JobSearchAutocomplete from '../tabs/personal-mode/pages/jobs/components/JobSearchAutocomplete';
-import LocationSearchAutocomplete from '../tabs/personal-mode/pages/jobs/components/LocationSearchAutocomplete';
+import Modal from '../../../components/Modal';
+import { useGetJobAutocomplete } from '../pages/jobs/hooks/useFindJobs';
+import JobSearchAutocomplete from '../pages/jobs/components/JobSearchAutocomplete';
+import LocationSearchAutocomplete from '../pages/jobs/components/LocationSearchAutocomplete';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -214,37 +212,39 @@ const JobFiltersModal = ({
       size="2xl"
       footerContent={footerContent}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="space-y-4">
         {/* Job Title Search */}
-        <JobSearchAutocomplete
-          value={pendingFilter.job_title || ''}
-          onChange={(value) =>
-            setPendingFilter({ ...pendingFilter, job_title: value })
-          }
-          debouncedValue={debouncedJobTitle}
-          isDebouncing={isDebouncingJobTitle}
-          autocompleteResults={jobTitleAutocompleteResults}
-          isLoading={isJobTitleAutocompleteLoading}
-          showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
-          selectedIndex={selectedJobTitleIndex}
-          limit={jobTitleAutocompleteLimit}
-          onSelectedIndexChange={setSelectedJobTitleIndex}
-          onLimitChange={setJobTitleAutocompleteLimit}
-          onShowAutocompleteChange={(show) => {
-            setShowJobTitleAutocomplete(show);
-            setShouldShowJobTitleAutocomplete(show);
-          }}
-          onResetLimit={() => setJobTitleAutocompleteLimit(20)}
-          onSearchSubmit={handleSearch}
-          onFocus={() => setIsJobTitleFocused(true)}
-          onBlur={() => setIsJobTitleFocused(false)}
-          label="Job Title"
-          placeholder="Enter job title, company, or keywords"
-          inputClassName="w-full text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
-        />
+        <div className="[&>div]:!w-full [&_div.flex.items-center]:!justify-between [&_div.flex.items-center]:!gap-3">
+          <JobSearchAutocomplete
+            value={pendingFilter.job_title || ''}
+            onChange={(value) =>
+              setPendingFilter({ ...pendingFilter, job_title: value })
+            }
+            debouncedValue={debouncedJobTitle}
+            isDebouncing={isDebouncingJobTitle}
+            autocompleteResults={jobTitleAutocompleteResults}
+            isLoading={isJobTitleAutocompleteLoading}
+            showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
+            selectedIndex={selectedJobTitleIndex}
+            limit={jobTitleAutocompleteLimit}
+            onSelectedIndexChange={setSelectedJobTitleIndex}
+            onLimitChange={setJobTitleAutocompleteLimit}
+            onShowAutocompleteChange={(show) => {
+              setShowJobTitleAutocomplete(show);
+              setShouldShowJobTitleAutocomplete(show);
+            }}
+            onResetLimit={() => setJobTitleAutocompleteLimit(20)}
+            onSearchSubmit={handleSearch}
+            onFocus={() => setIsJobTitleFocused(true)}
+            onBlur={() => setIsJobTitleFocused(false)}
+            label="Job Title"
+            placeholder="Enter job title, company, or keywords"
+            inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
+          />
+        </div>
 
         {/* Location Search */}
-        <div className="[&>div]:!mt-0">
+        <div className="[&>div]:!w-full [&>div]:!mt-0 [&_div.flex.items-center]:!gap-3">
           <LocationSearchAutocomplete
             value={locationInput}
             onChange={(value) => setLocationInput(value)}
@@ -270,8 +270,8 @@ const JobFiltersModal = ({
               setPendingFilter((prev) => ({ ...prev, location: values }))
             }
             label="Location"
-            placeholder="Locations, Country"
-            inputClassName="w-full text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
+            placeholder="Enter locations, country"
+            inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
           />
         </div>
       </div>
@@ -280,5 +280,4 @@ const JobFiltersModal = ({
 };
 
 export default JobFiltersModal;
-
 

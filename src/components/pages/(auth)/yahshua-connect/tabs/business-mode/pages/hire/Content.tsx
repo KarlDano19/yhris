@@ -9,7 +9,7 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from '../../components/modals/SubmitPaymentProofModal';
-import JobChatModal from '../../components/modals/JobChatModal';
+import JobChatModal from '../find-work/modals/JobChatModal';
 import { useHireData } from '../../hooks/useHireData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 

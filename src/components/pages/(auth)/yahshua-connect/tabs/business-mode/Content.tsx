@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { FunnelIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import JobRequestCard from './components/cards/JobRequestCard';
+import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import EarningsChartCard from './components/cards/EarningsChartCard';
 import FilterRequestsModal from './components/modals/FilterRequestsModal';
-import JobAcceptedModal from './components/modals/JobAcceptedModal';
-import JobChatModal from './components/modals/JobChatModal';
-import JobRequestDetailsModal from './components/modals/JobRequestDetailsModal';
+import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
+import JobChatModal from './pages/find-work/modals/JobChatModal';
+import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
 import ToolsIcon from '@/svg/ToolsIcons';
 import { useHomeData } from './hooks/useHomeData';
-import { useJobState } from './contexts/JobStateContext';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -18,15 +17,11 @@ const Content = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const { acceptedJobIds, acceptJob } = useJobState();
 
   const { thisMonthEarnings, weeklyData, jobRequests: initialJobRequests, trendingServices } = useHomeData();
 
-  // Merge initial job requests with accepted status
-  const jobRequests = initialJobRequests.map((job) => ({
-    ...job,
-    status: acceptedJobIds.has(job.id) ? ('accepted' as const) : job.status,
-  }));
+  // Use job requests as-is from the data
+  const jobRequests = initialJobRequests;
 
   // Calculate urgent requests count
   const urgentRequestsCount = jobRequests.filter((job) => job.urgent && job.status !== 'accepted').length;
@@ -41,7 +36,6 @@ const Content = () => {
   };
 
   const handleAcceptJob = (jobId: number) => {
-    acceptJob(jobId);
     setSelectedJobId(jobId);
     setIsJobAcceptedModalOpen(true);
   };
@@ -110,7 +104,7 @@ const Content = () => {
           {/* Urgent Requests */}
           <div className="bg-blue-500/30 backdrop-blur-sm rounded-lg p-4">
             <p className="text-2xl font-bold mb-1">{urgentRequestsCount}</p>
-            <p className="text-blue-100 text-xs">Urgent Requests</p>
+            <p className="text-blue-100 text-xs">Urgent Jobs</p>
           </div>
 
           {/* Rating */}
@@ -124,7 +118,7 @@ const Content = () => {
       {/* Nearby Job Requests */}
       <div className="bg-white rounded-lg shadow-sm  p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900">Nearby Job Requests</h2>
+          <h2 className="text-lg font-bold text-gray-900">Nearby Business Jobs</h2>
           <button
             onClick={() => setIsFilterModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -136,7 +130,7 @@ const Content = () => {
 
         <div className="space-y-4">
           {jobRequests.map((job) => (
-            <JobRequestCard
+            <BusinessJobCard
               key={job.id}
               {...job}
               onAcceptJob={handleAcceptJob}
@@ -214,15 +208,15 @@ const Content = () => {
         />
       )}
 
-      {/* Job Request Details Modal */}
-      {isJobDetailsModalOpen && selectedJobFull && (
-        <JobRequestDetailsModal
+      {/* Business Job Details Modal */}
+      {isJobDetailsModalOpen && selectedJobId && (
+        <BusinessJobDetailsModal
           isOpen={isJobDetailsModalOpen}
           onClose={() => {
             setIsJobDetailsModalOpen(false);
             setSelectedJobId(null);
           }}
-          job={selectedJobFull}
+          jobId={selectedJobId}
           onAcceptJob={handleAcceptJob}
         />
       )}

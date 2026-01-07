@@ -19,58 +19,15 @@ import SavedJobsModal from './modals/SavedJobsModal';
 import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 
 // Business mode imports
-import { JobStateProvider, useJobState } from './tabs/business-mode/contexts/JobStateContext';
 import { useMyJobsData } from './tabs/business-mode/hooks/useMyJobsData';
 import { useHomeData } from './tabs/business-mode/hooks/useHomeData';
 import UpcomingBookingsModal from './tabs/business-mode/components/modals/UpcomingBookingsModal';
 import MyHiresModal from './tabs/business-mode/components/modals/MyHiresModal';
-import JobChatModal from './tabs/business-mode/components/modals/JobChatModal';
+import JobChatModal from './tabs/business-mode/pages/find-work/modals/JobChatModal';
 
 interface YahshuaConnectLayoutProps {
   children: ReactNode;
 }
-
-// Business mode content component that uses hooks requiring JobStateProvider
-const BusinessModeContent = ({ 
-  children, 
-  onBookingsDataReady 
-}: { 
-  children: ReactNode;
-  onBookingsDataReady: (data: {
-    activeJobs: any[];
-    acceptedJobIds: Set<number>;
-    jobRequests: any[];
-  }) => void;
-}) => {
-  const { activeJobs } = useMyJobsData();
-  const { acceptedJobIds } = useJobState();
-  const { jobRequests: initialJobRequests } = useHomeData();
-
-  // Convert Set to array for stable comparison in useEffect
-  const acceptedJobIdsArray = Array.from(acceptedJobIds).sort().join(',');
-  // Create stable string representations for arrays
-  const activeJobsKey = activeJobs.map(j => j.id).sort().join(',');
-  const jobRequestsKey = initialJobRequests.map(j => j.id).sort().join(',');
-  
-  // Use ref to track previous values and prevent unnecessary calls
-  const prevDataRef = useRef<string>('');
-  const currentDataKey = `${activeJobsKey}|${acceptedJobIdsArray}|${jobRequestsKey}`;
-
-  useEffect(() => {
-    // Only call if data actually changed
-    if (prevDataRef.current !== currentDataKey) {
-      try {
-        onBookingsDataReady({ activeJobs, acceptedJobIds, jobRequests: initialJobRequests });
-        prevDataRef.current = currentDataKey;
-      } catch (error) {
-        console.error('Error in onBookingsDataReady:', error);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDataKey, onBookingsDataReady]);
-
-  return <>{children}</>;
-};
 
 const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const pathname = usePathname();
@@ -79,25 +36,12 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   // Determine mode from pathname
   const isBusinessMode = pathname?.includes('business-mode') || false;
 
-  // Business mode data state
-  const [businessModeData, setBusinessModeData] = useState<{
-    activeJobs: any[];
-    acceptedJobIds: Set<number>;
-    jobRequests: any[];
-  }>({
-    activeJobs: [],
-    acceptedJobIds: new Set(),
-    jobRequests: [],
-  });
-
-  // Memoize the callback to prevent infinite re-renders
-  const handleBookingsDataReady = useCallback((data: {
-    activeJobs: any[];
-    acceptedJobIds: Set<number>;
-    jobRequests: any[];
-  }) => {
-    setBusinessModeData(data);
-  }, []);
+  // Business mode data hooks (always call hooks, but only use data if in business mode)
+  const { activeJobs: allActiveJobs } = useMyJobsData();
+  const { jobRequests: allJobRequests } = useHomeData();
+  
+  const activeJobs = isBusinessMode ? allActiveJobs : [];
+  const initialJobRequests = isBusinessMode ? allJobRequests : [];
 
   // Personal mode state
   const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
@@ -173,32 +117,16 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   ];
 
   // Business mode bookings calculation
-  const acceptedJobsFromRequests = isBusinessMode ? businessModeData.jobRequests
-    .filter((job: any) => businessModeData.acceptedJobIds.has(job.id))
-    .map((job: any) => ({
-      id: job.id,
-      title: job.title,
-      clientName: job.clientName,
-      location: job.clientLocation,
-      time: job.time,
-      priceRange: job.priceRange,
-      clientInitials: job.clientInitials,
-    })) : [];
-
-  const allUpcomingBookings = isBusinessMode ? [
-    ...businessModeData.activeJobs.map((job: any) => ({
-      id: job.id,
-      title: job.title,
-      clientName: job.clientName,
-      location: job.location,
-      time: job.time,
-      priceRange: job.priceRange,
-      clientInitials: job.clientInitials,
-    })),
-    ...acceptedJobsFromRequests.filter(
-      (newJob: any) => !businessModeData.activeJobs.some((existingJob: any) => existingJob.id === newJob.id)
-    ),
-  ] : [];
+  // Use activeJobs from useMyJobsData (which already filters for accepted/scheduled jobs)
+  const allUpcomingBookings = isBusinessMode ? activeJobs.map((job: any) => ({
+    id: job.id,
+    title: job.title,
+    clientName: job.clientName,
+    location: job.location,
+    time: job.time,
+    priceRange: job.priceRange,
+    clientInitials: job.clientInitials,
+  })) : [];
 
   const upcomingBookings = allUpcomingBookings;
 
@@ -258,7 +186,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const reviewCount = profileData?.reviews_count ?? 0;
 
   // Business mode specific data (mock for now, can be replaced with real data)
-  const businessTitle = 'Plumber • Electrician';
   const businessEarnings = 45230;
   const businessSpending = 12800;
 
@@ -294,8 +221,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
             <div className="space-y-6">
               <ProfileCard
                 name={userName}
-                about={isBusinessMode ? undefined : userAbout}
-                title={isBusinessMode ? businessTitle : undefined}
+                about={userAbout}
                 initial={userInitial}
                 profileCompletion={isBusinessMode ? undefined : profileCompletion}
                 rating={averageRating}
@@ -397,17 +323,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
       <Tooltip id="quick-actions-tooltip" />
     </>
   );
-
-  // Wrap with JobStateProvider if in business mode
-  if (isBusinessMode) {
-    return (
-      <JobStateProvider>
-        <BusinessModeContent onBookingsDataReady={handleBookingsDataReady}>
-          {layoutContent}
-        </BusinessModeContent>
-      </JobStateProvider>
-    );
-  }
 
   return layoutContent;
 };

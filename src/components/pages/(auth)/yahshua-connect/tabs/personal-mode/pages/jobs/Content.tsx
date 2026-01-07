@@ -4,15 +4,16 @@ import { useState, useMemo } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import formatPrice from '@/helpers/currencyFormat';
 import useFindJobs from './hooks/useFindJobs';
 import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
-import JobFiltersModal from '../../../../modals/JobFIltersModal';
-
+import JobFiltersModal from '../../modals/JobFIltersModal';
 import JobCard from './components/JobCard';
-import JobDetailsModal from '../../../../modals/JobDetailsModal';
+import JobDetailsModal from '../../modals/JobDetailsModal';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
+
+import formatPrice from '@/helpers/currencyFormat';
+
 
 interface JobFilters {
   job_title?: string;
