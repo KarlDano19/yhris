@@ -1,4 +1,5 @@
 import { getAllJobs, type Job } from './useJobsData';
+import { useJobState } from '../contexts/JobStateContext';
 
 export interface ActiveJob {
   id: number;
@@ -23,14 +24,26 @@ export interface Review {
 }
 
 export const useMyJobsData = () => {
+  const { acceptedJobIds } = useJobState();
+  
   // Get all jobs and filter to show ONLY accepted/scheduled jobs
   const allJobs = getAllJobs();
-  const acceptedJobsData = allJobs.filter(
+  
+  // Filter jobs that are hardcoded as 'accepted' or 'scheduled'
+  const hardcodedAcceptedJobs = allJobs.filter(
     (job) => job.status === 'accepted' || job.status === 'scheduled'
   );
   
+  // Filter jobs that are newly accepted via the JobStateContext
+  const newlyAcceptedJobs = allJobs.filter(
+    (job) => acceptedJobIds.has(job.id) && !hardcodedAcceptedJobs.some(h => h.id === job.id)
+  );
+  
+  // Combine both sets of accepted jobs
+  const combinedAcceptedJobs = [...hardcodedAcceptedJobs, ...newlyAcceptedJobs];
+  
   // Transform to ActiveJob format for My Jobs page
-  const activeJobs: ActiveJob[] = acceptedJobsData.map((job) => ({
+  const activeJobs: ActiveJob[] = combinedAcceptedJobs.map((job) => ({
     id: job.id,
     title: job.title,
     clientName: job.clientName,
@@ -38,7 +51,7 @@ export const useMyJobsData = () => {
     location: job.location,
     time: job.time,
     priceRange: job.priceRange,
-    status: job.status,
+    status: job.status || 'accepted', // Default to 'accepted' for newly accepted jobs
     urgent: job.urgent,
   }));
 

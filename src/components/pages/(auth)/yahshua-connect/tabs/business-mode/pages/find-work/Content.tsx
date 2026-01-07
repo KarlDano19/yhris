@@ -1,35 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { FunnelIcon, UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-// import YahshuaConnectHeader from '../../../../YahshuaConnectHeader'; // Moved to header.tsx
-import FloatingMenuBar from '../../../../components/FloatingMenuBar';
-import ProfileCard from '../../components/cards/ProfileCard';
-import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import EarningsCard from '../../components/cards/EarningsCard';
-import BirdsEyeViewCard from '../../components/cards/BirdsEyeViewCard';
+import { FunnelIcon } from '@heroicons/react/24/outline';
+import BusinessModeLayout from '../../BusinessModeLayout';
 import JobRequestCard from '../../components/cards/JobRequestCard';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
+import JobAcceptedModal from '../../components/modals/JobAcceptedModal';
+import JobChatModal from '../../components/modals/JobChatModal';
+import JobRequestDetailsModal from '../../components/modals/JobRequestDetailsModal';
 import FilterRequestsModal from '../../components/modals/FilterRequestsModal';
 import { useFindWorkData } from '../../hooks/useFindWorkData';
-import { useMyJobsData } from '../../hooks/useMyJobsData';
+import { useJobState } from '../../contexts/JobStateContext';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
+  const [isJobAcceptedModalOpen, setIsJobAcceptedModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  const { jobRequests, reviews } = useFindWorkData();
-  const { activeJobs } = useMyJobsData();
+  const { jobRequests: initialJobRequests, reviews } = useFindWorkData();
+  const { acceptedJobIds, acceptJob } = useJobState();
 
-  // Transform activeJobs for the modal
-  const upcomingBookings = activeJobs.map((job) => ({
-    id: job.id,
-    title: job.title,
-    clientName: job.clientName,
-    location: job.location,
-    time: job.time,
-    priceRange: job.priceRange,
+  // Merge initial job requests with accepted status
+  const jobRequests = initialJobRequests.map((job) => ({
+    ...job,
+    status: acceptedJobIds.has(job.id) ? ('accepted' as const) : job.status,
   }));
+
 
   const handleApplyFilters = (filters: {
     location: string;
@@ -40,66 +37,35 @@ const Content = () => {
     console.log('Applied filters:', filters);
   };
 
-  return (
-    <>
-      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
-      <FloatingMenuBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Three Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
-              <ProfileCard
-                name="John Doe"
-                title="Plumber • Electrician"
-                rating={4.9}
-                reviewsCount={27}
-                initial="JD"
-                availableForBookings={true}
-              />
-              <EarningsCard thisMonth={45230} jobsDone={23} />
-              <QuickActionsCard
-                actions={[
-                  {
-                    icon: UserIcon,
-                    label: 'Edit Profile',
-                    href: '/personal-mode/business-mode/edit-profile',
-                  },
-                  {
-                    icon: BriefcaseIcon,
-                    label: 'Active Jobs',
-                    count: activeJobs.length,
-                    badgeColor: 'green',
-                    href: '/personal-mode/business-mode/my-jobs',
-                  },
-                  {
-                    icon: CalendarIcon,
-                    label: 'Upcoming Bookings',
-                    count: activeJobs.length,
-                    badgeColor: 'purple',
-                    onClick: () => setIsUpcomingBookingsModalOpen(true),
-                  },
-                  {
-                    icon: CurrencyDollarIcon,
-                    label: 'View Earnings',
-                    href: '/personal-mode/business-mode/earnings',
-                  },
-                ]}
-              />
-              <BirdsEyeViewCard
-                userName="John Doe"
-                userInitial="JD"
-                rating={4.9}
-                reviewCount={27}
-                reviews={reviews}
-              />
-            </div>
-          </div>
+  const handleAcceptJob = (jobId: number) => {
+    acceptJob(jobId);
+    setSelectedJobId(jobId);
+    setIsJobAcceptedModalOpen(true);
+  };
 
-          {/* Center Content */}
-          <div className="lg:col-span-8">
-            <div className="space-y-6">
+  const handleMessage = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsChatModalOpen(true);
+  };
+
+  const handleViewDetails = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsJobDetailsModalOpen(true);
+  };
+
+  const handleMessageClient = () => {
+    setIsJobAcceptedModalOpen(false);
+    setIsChatModalOpen(true);
+  };
+
+
+  const selectedJobFull = selectedJobId
+    ? jobRequests.find((job) => job.id === selectedJobId)
+    : null;
+
+  return (
+    <BusinessModeLayout>
+      <div className="space-y-6">
               {/* Find Work Header */}
               <div className="bg-white rounded-lg shadow-sm p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -119,29 +85,70 @@ const Content = () => {
                 {/* Job Requests List */}
                 <div className="space-y-4">
                   {jobRequests.map((job) => (
-                    <JobRequestCard key={job.id} {...job} />
+                    <JobRequestCard
+                      key={job.id}
+                      {...job}
+                      onAcceptJob={handleAcceptJob}
+                      onMessage={handleMessage}
+                      onViewDetails={handleViewDetails}
+                    />
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Filter Requests Modal */}
+      {/* Page-specific Modals */}
       <FilterRequestsModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onApplyFilters={handleApplyFilters}
       />
 
-      {/* Upcoming Bookings Modal */}
-      <UpcomingBookingsModal
-        isOpen={isUpcomingBookingsModalOpen}
-        onClose={() => setIsUpcomingBookingsModalOpen(false)}
-        bookings={upcomingBookings}
-      />
-    </>
+      {/* Job Accepted Modal */}
+      {selectedJobFull && (
+        <JobAcceptedModal
+          isOpen={isJobAcceptedModalOpen}
+          onClose={() => {
+            setIsJobAcceptedModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobDetails={{
+            title: selectedJobFull.title,
+            clientName: selectedJobFull.clientName,
+            time: selectedJobFull.time,
+            priceRange: selectedJobFull.priceRange,
+          }}
+          onMessageClient={handleMessageClient}
+        />
+      )}
+
+      {/* Job Request Details Modal */}
+      {selectedJobFull && (
+        <JobRequestDetailsModal
+          isOpen={isJobDetailsModalOpen}
+          onClose={() => {
+            setIsJobDetailsModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          job={selectedJobFull}
+          onAcceptJob={handleAcceptJob}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {selectedJobFull && (
+        <JobChatModal
+          isOpen={isChatModalOpen}
+          onClose={() => {
+            setIsChatModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          clientName={selectedJobFull.clientName}
+          clientInitials={selectedJobFull.clientInitials || ''}
+          jobTitle={selectedJobFull.title}
+        />
+      )}
+    </BusinessModeLayout>
   );
 };
 

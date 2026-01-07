@@ -1,5 +1,6 @@
-'use client';
 
+
+import { useState } from 'react';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 interface ProfileCardProps {
@@ -8,7 +9,10 @@ interface ProfileCardProps {
   rating: number;
   reviewsCount: number;
   initial: string;
-  availableForBookings: boolean;
+  availableForBookings?: boolean;
+  earnings?: number;
+  spending?: number;
+  onAvailabilityChange?: (isAvailable: boolean) => void;
 }
 
 const ProfileCard = ({ 
@@ -17,8 +21,28 @@ const ProfileCard = ({
   rating, 
   reviewsCount, 
   initial,
-  availableForBookings 
+  availableForBookings: initialAvailableForBookings = true,
+  earnings,
+  spending,
+  onAvailabilityChange,
 }: ProfileCardProps) => {
+  const [availableForBookings, setAvailableForBookings] = useState(initialAvailableForBookings);
+
+  const handleToggle = () => {
+    const newValue = !availableForBookings;
+    setAvailableForBookings(newValue);
+    onAvailabilityChange?.(newValue);
+  };
+
+  // Format amount with K notation
+  const formatAmount = (amount: number): string => {
+    if (amount >= 1000) {
+      const kValue = amount / 1000;
+      return `₱${kValue % 1 === 0 ? kValue.toFixed(0) : kValue.toFixed(1)}k`;
+    }
+    return `₱${amount.toLocaleString()}`;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Cover Image */}
@@ -47,16 +71,40 @@ const ProfileCard = ({
         </div>
 
         {/* Available Toggle */}
-        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
           <span className="text-sm font-medium text-gray-700">Available for bookings</span>
-          <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            availableForBookings ? 'bg-green-500' : 'bg-gray-300'
-          }`}>
+          <button
+            type="button"
+            onClick={handleToggle}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:ring-offset-2 ${
+              availableForBookings ? 'bg-green-500' : 'bg-gray-300'
+            }`}
+            role="switch"
+            aria-checked={availableForBookings}
+          >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
               availableForBookings ? 'translate-x-6' : 'translate-x-1'
             }`} />
-          </div>
+          </button>
         </div>
+
+        {/* Earnings and Spending */}
+        {(earnings !== undefined || spending !== undefined) && (
+          <div className="grid grid-cols-2 gap-3">
+            {earnings !== undefined && (
+              <div className="bg-green-50 rounded-lg p-3">
+                <p className="text-lg font-bold text-green-600">{formatAmount(earnings)}</p>
+                <p className="text-xs text-green-700 font-medium">Earnings</p>
+              </div>
+            )}
+            {spending !== undefined && (
+              <div className="bg-red-50 rounded-lg p-3">
+                <p className="text-lg font-bold text-red-600">{formatAmount(spending)}</p>
+                <p className="text-xs text-red-700 font-medium">Spending</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

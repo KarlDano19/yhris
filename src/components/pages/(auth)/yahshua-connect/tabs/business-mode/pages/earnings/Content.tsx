@@ -1,36 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { UserIcon, BriefcaseIcon, CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-// import YahshuaConnectHeader from '../../../../YahshuaConnectHeader'; // Moved to header.tsx
-import FloatingMenuBar from '../../../../components/FloatingMenuBar';
-import ProfileCard from '../../components/cards/ProfileCard';
-import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import EarningsCard from '../../components/cards/EarningsCard';
+import BusinessModeLayout from '../../BusinessModeLayout';
 import EarningsChartCard from '../../components/cards/EarningsChartCard';
-import BirdsEyeViewCard from '../../components/cards/BirdsEyeViewCard';
 import TransactionDetailsModal from './TransactionDetailsModal';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
 import { useEarningsData, type Transaction } from '../../hooks/useEarningsData';
-import { useMyJobsData } from '../../hooks/useMyJobsData';
 
 const Content = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
 
-  const { thisMonthEarnings, jobsCompleted, weeklyData, recentPayments, reviews } = useEarningsData();
-  const { activeJobs } = useMyJobsData();
-
-  // Transform activeJobs for the modal
-  const upcomingBookings = activeJobs.map((job) => ({
-    id: job.id,
-    title: job.title,
-    clientName: job.clientName,
-    location: job.location,
-    time: job.time,
-    priceRange: job.priceRange,
-  }));
+  const { thisMonthEarnings, jobsCompleted, weeklyData, recentPayments } = useEarningsData();
 
   const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -64,65 +44,8 @@ const Content = () => {
   };
 
   return (
-    <>
-      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
-      <FloatingMenuBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Three Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
-              <ProfileCard
-                name="John Doe"
-                title="Plumber • Electrician"
-                rating={4.9}
-                reviewsCount={27}
-                initial="JD"
-                availableForBookings={true}
-              />
-              <EarningsCard thisMonth={thisMonthEarnings} jobsDone={jobsCompleted} />
-              <QuickActionsCard
-                actions={[
-                  {
-                    icon: UserIcon,
-                    label: 'Edit Profile',
-                    href: '/personal-mode/business-mode/edit-profile',
-                  },
-                  {
-                    icon: BriefcaseIcon,
-                    label: 'Active Jobs',
-                    count: activeJobs.length,
-                    badgeColor: 'green',
-                    href: '/personal-mode/business-mode/my-jobs',
-                  },
-                  {
-                    icon: CalendarIcon,
-                    label: 'Upcoming Bookings',
-                    count: activeJobs.length,
-                    badgeColor: 'purple',
-                    onClick: () => setIsUpcomingBookingsModalOpen(true),
-                  },
-                  {
-                    icon: CurrencyDollarIcon,
-                    label: 'View Earnings',
-                    href: '/personal-mode/business-mode/earnings',
-                  },
-                ]}
-              />
-              <BirdsEyeViewCard
-                userName="John Doe"
-                userInitial="JD"
-                rating={4.9}
-                reviewCount={27}
-                reviews={reviews}
-              />
-            </div>
-          </div>
-
-          {/* Center Content */}
-          <div className="lg:col-span-8">
-            <div className="space-y-6">
+    <BusinessModeLayout>
+      <div className="space-y-6">
               {/* Earnings Title */}
               <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
 
@@ -168,11 +91,9 @@ const Content = () => {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
       </div>
 
+      {/* Page-specific Modals */}
       {/* Transaction Details Modal */}
       <TransactionDetailsModal
         isOpen={isModalOpen}
@@ -180,14 +101,7 @@ const Content = () => {
         transaction={selectedTransaction}
         onDownloadReceipt={handleDownloadReceipt}
       />
-
-      {/* Upcoming Bookings Modal */}
-      <UpcomingBookingsModal
-        isOpen={isUpcomingBookingsModalOpen}
-        onClose={() => setIsUpcomingBookingsModalOpen(false)}
-        bookings={upcomingBookings}
-      />
-    </>
+    </BusinessModeLayout>
   );
 };
 

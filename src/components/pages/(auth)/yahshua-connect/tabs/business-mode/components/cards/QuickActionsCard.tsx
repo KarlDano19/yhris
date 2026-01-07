@@ -1,11 +1,9 @@
-'use client';
+
 
 import Link from 'next/link';
 import { 
-  UserIcon, 
-  BriefcaseIcon, 
   CalendarIcon, 
-  CurrencyDollarIcon,
+  UserGroupIcon,
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
 
@@ -25,18 +23,6 @@ interface QuickActionsCardProps {
 const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
   const defaultActions: QuickAction[] = [
     {
-      icon: UserIcon,
-      label: 'Edit Profile',
-      href: '/personal-mode/business-mode/edit-profile',
-    },
-    {
-      icon: BriefcaseIcon,
-      label: 'Active Jobs',
-      count: 1,
-      badgeColor: 'green',
-      href: '/personal-mode/business-mode/my-jobs',
-    },
-    {
       icon: CalendarIcon,
       label: 'Upcoming Bookings',
       count: 1,
@@ -44,9 +30,9 @@ const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
       href: '#', // Placeholder - should be provided via actions prop with onClick
     },
     {
-      icon: CurrencyDollarIcon,
-      label: 'View Earnings',
-      href: '/personal-mode/business-mode/earnings',
+      icon: UserGroupIcon,
+      label: 'My Hires',
+      href: '/business-mode/hire',
     },
   ];
 
@@ -107,6 +93,15 @@ const QuickActionsCard = ({ actions }: QuickActionsCardProps) => {
             </Link>
           );
         })}
+      </div>
+      {/* View Full Profile Button */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <Link
+          href="/business-mode/profile"
+          className="w-full flex items-center justify-center px-4 py-2.5 bg-white border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
+        >
+          View Full Profile
+        </Link>
       </div>
     </div>
   );

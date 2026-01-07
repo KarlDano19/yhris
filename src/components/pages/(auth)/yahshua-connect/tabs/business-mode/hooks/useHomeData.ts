@@ -4,6 +4,7 @@ export interface JobRequest {
   id: number;
   title: string;
   clientName: string;
+  clientInitials?: string;
   clientLocation: string;
   distance: string;
   rating: number;
@@ -13,6 +14,7 @@ export interface JobRequest {
   priceRange: string;
   tags: string[];
   urgent: boolean;
+  status?: 'pending' | 'accepted' | 'scheduled' | 'completed' | 'cancelled';
 }
 
 export interface WeeklyData {
@@ -48,6 +50,7 @@ export const useHomeData = () => {
     id: job.id,
     title: job.title,
     clientName: job.clientName,
+    clientInitials: job.clientInitials,
     clientLocation: job.clientLocation,
     distance: job.distance || '',
     rating: job.rating,
