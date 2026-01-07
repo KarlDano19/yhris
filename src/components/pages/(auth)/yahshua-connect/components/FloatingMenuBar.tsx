@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
 
@@ -29,6 +30,8 @@ interface MenuItem {
   href: string;
   icon: any;
   iconSolid: any;
+  disabled?: boolean;
+  tooltip?: string;
 }
 
 const FloatingMenuBar = () => {
@@ -56,12 +59,16 @@ const FloatingMenuBar = () => {
       href: '/personal-mode/trainings',
       icon: AcademicCapIcon,
       iconSolid: AcademicCapIconSolid,
+      disabled: true,
+      tooltip: 'Coming soon',
     },
     {
       name: 'Transactions',
       href: '/personal-mode/transactions',
       icon: DocumentTextIcon,
       iconSolid: DocumentTextIconSolid,
+      disabled: true,
+      tooltip: 'Coming soon',
     },
   ];
 
@@ -129,10 +136,37 @@ const FloatingMenuBar = () => {
             
             const Icon = isActive ? item.iconSolid : item.icon;
 
+            const linkContent = (
+              <>
+                <Icon className="h-5 w-5 mb-0.5" />
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </>
+            );
+
+            if (item.disabled) {
+              return (
+                <div
+                  key={item.name}
+                  data-tooltip-id="floating-menu-tooltip"
+                  data-tooltip-content={item.tooltip || ''}
+                  data-tooltip-place="top"
+                  className={classNames(
+                    'flex flex-col items-center justify-center px-3 py-1.5 rounded-lg transition-all opacity-50 cursor-not-allowed',
+                    'text-gray-400'
+                  )}
+                >
+                  {linkContent}
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                data-tooltip-id="floating-menu-tooltip"
+                data-tooltip-content={item.tooltip || ''}
+                data-tooltip-place="top"
                 className={classNames(
                   'flex flex-col items-center justify-center px-3 py-1.5 rounded-lg transition-all',
                   isActive
@@ -140,13 +174,13 @@ const FloatingMenuBar = () => {
                     : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
                 )}
               >
-                <Icon className="h-5 w-5 mb-0.5" />
-                <span className="text-[10px] font-medium">{item.name}</span>
+                {linkContent}
               </Link>
             );
           })}
         </nav>
       </div>
+      <Tooltip id="floating-menu-tooltip" />
     </div>
   );
 };

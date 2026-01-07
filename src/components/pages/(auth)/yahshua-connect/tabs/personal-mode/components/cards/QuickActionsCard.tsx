@@ -8,6 +8,8 @@ interface QuickAction {
   count?: number;
   href?: string;
   onClick?: () => void;
+  tooltip?: string;
+  disabled?: boolean;
 }
 
 interface QuickActionsCardProps {
@@ -38,8 +40,16 @@ const QuickActionsCard = ({ actions, onViewFullProfile }: QuickActionsCardProps)
             return (
               <button
                 key={action.label}
-                onClick={action.onClick}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                onClick={action.disabled ? undefined : action.onClick}
+                disabled={action.disabled}
+                data-tooltip-id="quick-actions-tooltip"
+                data-tooltip-content={action.tooltip || ''}
+                data-tooltip-place="bottom"
+                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
+                  action.disabled 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-50'
+                }`}
               >
                 {content}
               </button>
@@ -50,6 +60,9 @@ const QuickActionsCard = ({ actions, onViewFullProfile }: QuickActionsCardProps)
             <Link
               key={action.label}
               href={action.href || '#'}
+              data-tooltip-id="quick-actions-tooltip"
+              data-tooltip-content={action.tooltip || ''}
+              data-tooltip-place="bottom"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               {content}

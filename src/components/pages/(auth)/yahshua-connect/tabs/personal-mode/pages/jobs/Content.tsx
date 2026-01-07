@@ -131,10 +131,10 @@ const Content = () => {
     const jobsInCurrentBatch = jobsData?.length || 0;
     const nextDisplayCount = displayCount + 20;
     
-    // If we can show more from current batch (haven't shown all 200 from current page)
-    if (nextDisplayCount <= jobsInCurrentBatch) {
-      // Show next 20 jobs from current batch (client-side pagination)
-      setDisplayCount(nextDisplayCount);
+    // If there are more jobs to show from current batch
+    if (displayCount < jobsInCurrentBatch) {
+      // Show next 20 jobs (or remaining jobs if less than 20)
+      setDisplayCount(Math.min(nextDisplayCount, jobsInCurrentBatch));
     } else if (hasNextPage && !isFetchingNextPage) {
       // We've shown all jobs from current batch, fetch next page (next 200 jobs)
       fetchNextPage().then(() => {
@@ -194,7 +194,7 @@ const Content = () => {
               ))}
             </div>
             {/* Load More Button */}
-            {(displayCount < (jobsData?.length || 0) || hasNextPage) && (
+            {(displayCount < (totalRecords || 0) || displayCount < (jobsData?.length || 0) || hasNextPage) && (
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleLoadMore}
