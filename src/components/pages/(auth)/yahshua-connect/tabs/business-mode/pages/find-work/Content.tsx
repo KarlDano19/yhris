@@ -122,6 +122,7 @@ const Content = () => {
         title: job.job_title || 'Untitled Job',
         clientName: job.created_by_name || 'Unknown Client',
         clientInitials: getClientInitials(job.created_by_name || ''),
+        clientPhoto: job.created_by_photo || null,
         clientLocation: job.location || 'Location not specified',
         distance: formatDistance(),
         rating: job.created_by_rating || 0,

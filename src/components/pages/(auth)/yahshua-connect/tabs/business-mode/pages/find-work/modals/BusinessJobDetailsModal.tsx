@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
+import Image from 'next/image';
 
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -189,9 +190,22 @@ const BusinessJobDetailsModal = ({
                           <div className="border-t border-gray-300 my-4 pt-4">
                             <h5 className="text-lg md:text-xl font-semibold text-indigo-dye mb-3">Client Information</h5>
                             <div className="flex items-start gap-4">
-                              <div className="w-14 h-14 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
-                                {getInitials(jobDetailData.created_by_name)}
-                              </div>
+                              {jobDetailData.created_by_photo && jobDetailData.created_by_photo !== '/assets/no-user.png' ? (
+                                <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                                  <Image
+                                    src={jobDetailData.created_by_photo}
+                                    alt={jobDetailData.created_by_name}
+                                    width={56}
+                                    height={56}
+                                    className="w-full h-full object-cover"
+                                    unoptimized
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-14 h-14 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
+                                  {getInitials(jobDetailData.created_by_name)}
+                                </div>
+                              )}
                               <div className="flex-1">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
                                   {jobDetailData.created_by_name}

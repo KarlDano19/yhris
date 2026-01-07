@@ -1,4 +1,5 @@
 
+import Image from 'next/image';
 import { MapPinIcon, StarIcon, ClockIcon, CurrencyDollarIcon, ChatBubbleLeftRightIcon, CheckIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -7,6 +8,7 @@ interface BusinessJobCardProps {
   title: string;
   clientName: string;
   clientInitials?: string;
+  clientPhoto?: string | null;
   clientLocation: string;
   distance: string;
   rating: number;
@@ -27,6 +29,7 @@ const BusinessJobCard = ({
   title,
   clientName,
   clientInitials,
+  clientPhoto,
   clientLocation,
   distance,
   rating,
@@ -57,9 +60,22 @@ const BusinessJobCard = ({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-5 relative">
       {/* Client Avatar - Top Right */}
       <div className="absolute top-5 right-5">
-        <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm">
-          {getInitials()}
-        </div>
+        {clientPhoto && clientPhoto !== '/assets/no-user.png' ? (
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
+            <Image
+              src={clientPhoto}
+              alt={clientName}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          </div>
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm">
+            {getInitials()}
+          </div>
+        )}
       </div>
 
       {/* Header */}

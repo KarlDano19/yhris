@@ -148,7 +148,7 @@ const Content = () => {
       </div> */}
 
       {/* Trending Services */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
         <h2 className="text-lg font-bold text-gray-900 mb-6">Trending Services</h2>
         <div className="space-y-4">
           {trendingServices.map((service) => (
@@ -179,7 +179,7 @@ const Content = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Page-specific Modals */}
       {isFilterModalOpen && (
