@@ -3,6 +3,7 @@
 import { ReactNode, useState, cloneElement, isValidElement, useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { Tooltip } from 'react-tooltip';
 
 import useGetApplicantProfile from '../../hooks/useGetApplicantProfile';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
@@ -71,11 +72,13 @@ const PersonalModeLayout = ({ children }: PersonalModeLayoutProps) => {
       label: 'Saved Jobs',
       onClick: () => setIsSavedJobsModalOpen(true),
     },
-    // {
-    //   icon: AcademicCapIcon,
-    //   label: 'Trainings in Progress',
-    //   onClick: () => setIsTrainingsModalOpen(true),
-    // },
+    {
+      icon: AcademicCapIcon,
+      label: 'Trainings in Progress',
+      onClick: () => setIsTrainingsModalOpen(true),
+      tooltip: 'Coming soon',
+      disabled: true,
+    },
   ];
 
   const trainingsInProgress = [
@@ -176,6 +179,8 @@ const PersonalModeLayout = ({ children }: PersonalModeLayoutProps) => {
           trainings={trainingsInProgress}
         />
       )}
+
+      <Tooltip id="quick-actions-tooltip" />
     </>
   );
 };

@@ -9,7 +9,6 @@ import useGetHighMatchJobs from '../../hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import JobCard from './pages/jobs/components/JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
-import AlmostThereJobCard from './components/cards/AlmostThereJobCard';
 import TrainingCard from './components/cards/TrainingCard';
 
 import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
@@ -146,14 +145,6 @@ const Content = ({ averageRating }: ContentProps) => {
     });
   }, [highMatchJobsData, savedJobIds, appliedJobIds]);
 
-  const almostThereJob = {
-    title: 'Senior UX/UI Designer',
-    company: 'The ABBA Initiative, OPC',
-    matchPercentage: 85,
-    missingSkills: ['Design System', 'UX Psychology'],
-    logo: 'A',
-  };
-
   const recommendedTraining = {
     title: 'Mastering Design System',
     duration: '3 hrs',
@@ -260,11 +251,10 @@ const Content = ({ averageRating }: ContentProps) => {
         )}
       </div>
 
-      {/* Single Column Layout for Almost-There Jobs and Recommended Training */}
-      {/* <div className="space-y-6">
-        <AlmostThereJobCard {...almostThereJob} />
-        <TrainingCard {...recommendedTraining} />
-      </div> */}
+      {/* Recommended Training */}
+      <div className="space-y-6">
+        {/* <TrainingCard {...recommendedTraining} /> */}
+      </div>
 
       {/* Job Details Modal */}
       <JobDetailsModal
