@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { deleteCookie } from 'cookies-next';
+import { getCookie, deleteCookie } from 'cookies-next';
 
 import toast from 'react-hot-toast';
 
+import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
+import useRefreshToken from '@/components/hooks/useRefreshToken';
+import SessionExpirationModal from '@/components/SessionExpirationModal';
 import MessagesModal from './modals/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
 import ChatModal from './modals/ChatModal';
@@ -25,9 +28,11 @@ import ExitIcon from '@/svg/ExitIcon';
 
 interface YahshuaConnectHeaderProps {
   disabled?: boolean;
+  hasProfile: boolean;
+  initialTokenExpiresAt?: number;
 }
 
-const YahshuaConnectHeader = ({ disabled = false }: YahshuaConnectHeaderProps) => {
+const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpiresAt }: YahshuaConnectHeaderProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,10 +40,108 @@ const YahshuaConnectHeader = ({ disabled = false }: YahshuaConnectHeaderProps) =
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedChat, setSelectedChat] = useState<{ name: string; initials: string } | null>(null);
+  const [isExpiring, setIsExpiring] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { mutate } = useLogout();
+  const { mutate: refreshToken } = useRefreshToken();
   
   // Determine active mode from pathname
   const activeMode = pathname?.includes('business-mode') ? 'business' : 'personal';
+  
+  // Check token on mount
+  useEffect(() => {
+    const token = getCookie('token');
+    if (!token) {
+      logout(true);
+    }
+  }, []);
+
+  // Initialize token expiration from prop
+  useEffect(() => {
+    if (initialTokenExpiresAt && !tokenExpiresAt) {
+      setTokenExpiresAt(initialTokenExpiresAt);
+    }
+  }, [initialTokenExpiresAt]);
+
+  // Check token expiration every second
+  useEffect(() => {
+    if (!tokenExpiresAt) return;
+    if (isRefreshing) return;
+
+    const checkExpiration = () => {
+      if (isRefreshing) return;
+      
+      const now = Date.now();
+      const expiresAt = tokenExpiresAt;
+      const remaining = Math.floor((expiresAt - now) / 1000);
+
+      if (remaining <= 0) {
+        if (!isRefreshing) {
+          setIsExpiring(false);
+          setTokenExpiresAt(undefined); // Clear expiration to stop checking
+          // Timer reached 0 - session token has expired, logout immediately
+          logout(true);
+        }
+        return;
+      }
+
+      // Show warning before expiration (30 seconds for 3-hour tokens)
+      if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        setIsExpiring(true);
+        setTimeRemaining(remaining);
+      } else {
+        setIsExpiring(false);
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [tokenExpiresAt, router, isRefreshing, isExpiring, deleteCookie, mutate]);
+
+  const handleRenewSession = () => {
+    setIsRefreshing(true);
+    setIsExpiring(false);
+    
+    refreshToken(undefined, {
+      onSuccess: (data: any) => {
+        if (data?.expires_at) {
+          setTokenExpiresAt(data.expires_at);
+        }
+        // Refresh the browser to update all session data
+        window.location.reload();
+      },
+      onError: (error: any) => {
+        // Refresh failed, redirect to login
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsRefreshing(false);
+      },
+    });
+  };
+
+  const handleLogoutFromModal = () => {
+    setIsLoggingOut(true);
+    mutate(void 0, {
+      onSuccess: () => {
+        // Clear token cookie on client side as well (backup)
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onError: (err: any) => {
+        // Clear token cookie even on error
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsLoggingOut(false);
+      },
+    });
+  };
   
   const handleModeChange = (mode: 'personal' | 'business') => {
     if (disabled) return;
@@ -407,6 +510,16 @@ const YahshuaConnectHeader = ({ disabled = false }: YahshuaConnectHeaderProps) =
           recipientInitials={selectedChat.initials}
         />
       )}
+
+      {/* Session Expiration Modal */}
+      <SessionExpirationModal
+        isOpen={isExpiring}
+        onRenew={handleRenewSession}
+        onLogout={handleLogoutFromModal}
+        timeRemaining={timeRemaining}
+        isRefreshing={isRefreshing}
+        isLoggingOut={isLoggingOut}
+      />
     </header>
   );
 };

@@ -100,8 +100,8 @@ const PersonalModeLayout = ({ children }: PersonalModeLayoutProps) => {
     : 'Loading...';
   const userInitial = profileData?.firstname?.[0]?.toUpperCase() || 'U';
   
-  // Get skills from applicant profile
-  const userSkills = profileData?.skills || [];
+  // Get about/description from applicant profile
+  const userAbout = profileData?.description || null;
   
   // Get average rating from applicant profile
   const averageRating = profileData?.average_rating ?? null;
@@ -130,7 +130,7 @@ const PersonalModeLayout = ({ children }: PersonalModeLayoutProps) => {
             <div className="space-y-6">
               <ProfileCard
                 name={userName}
-                skills={userSkills}
+                about={userAbout}
                 initial={userInitial}
                 profileCompletion={profileCompletion}
                 rating={averageRating}

@@ -46,8 +46,8 @@ async function updateApplicantProfile(data: any) {
     // Salary Information
     if (data.expected_salary !== undefined) finalData.expected_salary = data.expected_salary;
 
-    // About/Resume Summary
-    if (data.resume_summary !== undefined) finalData.resume_summary = data.resume_summary;
+    // About/Description
+    if (data.description !== undefined) finalData.description = data.description;
 
     const formData = new FormData();
     formData.append('profile_form', JSON.stringify(finalData));
@@ -74,6 +74,26 @@ async function updateApplicantProfile(data: any) {
     }
     if (data.nbi_police_clearance) {
       formData.append('nbi_police_clearance', data.nbi_police_clearance);
+    }
+
+    // Certification proof file uploads
+    if (data.certificationProofFiles) {
+      Object.keys(data.certificationProofFiles).forEach((key) => {
+        const file = data.certificationProofFiles[key];
+        if (file instanceof File) {
+          formData.append(key, file);
+        }
+      });
+    }
+
+    // Portfolio image file uploads
+    if (data.portfolioImageFiles) {
+      Object.keys(data.portfolioImageFiles).forEach((key) => {
+        const file = data.portfolioImageFiles[key];
+        if (file instanceof File) {
+          formData.append(key, file);
+        }
+      });
     }
 
     const token = getCookie('token');

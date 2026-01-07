@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 
 import Modal from '../../../../../components/Modal';
 
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
+
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 import { T_WorkExperience } from '@/types/personal-mode';
 
@@ -94,15 +97,15 @@ const WorkExperienceModal = ({
             <div className="ml-4 flex gap-2">
               <button
                 onClick={() => exp.id && handleEdit(exp.id)}
-                className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
+                className="cursor-pointer"
               >
-                <PencilIcon className="h-5 w-5" />
+                <EditIcon />
               </button>
               <button
                 onClick={() => exp.id && handleDelete(exp.id)}
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="cursor-pointer"
               >
-                <TrashIcon className="h-5 w-5" />
+                <DeleteIcon />
               </button>
             </div>
           </div>

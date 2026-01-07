@@ -30,6 +30,8 @@ export type T_Certification = {
   expiresDate?: string;
   idNumber?: string;
   verified?: boolean;
+  proofFile?: File | null;
+  proofUrl?: string | null;
 };
 
 // Basic Information Types
@@ -62,6 +64,8 @@ export type T_Portfolio = {
   id?: number;
   name: string;
   image?: string;
+  imageFile?: File | null;
+  imageUrl?: string | null;
   link: string;
   description?: string;
 };

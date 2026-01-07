@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 
 import Modal from '../../../../../components/Modal';
 
-import { XMarkIcon, PencilIcon, PlusIcon, CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, CheckIcon, DocumentIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
+import ViewDocumentModal from './ViewDocumentModal';
 
 import { T_Certification } from '@/types/personal-mode';
 
@@ -31,6 +35,7 @@ const SkillsAndCertificationModal = ({
   const [skills, setSkills] = useState<string[]>(initialSkills);
   const [certifications, setCertifications] = useState<T_Certification[]>(initialCertifications);
   const [newSkill, setNewSkill] = useState('');
+  const [viewingDocument, setViewingDocument] = useState<{ name: string; url: string } | null>(null);
 
   useEffect(() => {
     setSkills(initialSkills);
@@ -98,10 +103,10 @@ const SkillsAndCertificationModal = ({
       footerContent={footerContent}
     >
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 -mt-5 -mx-5 mb-5">
+      <div className="flex gap-2 border-gray-200 -mt-2 -mx-5 mb-5 px-5 pb-1">
         <button
           onClick={() => setActiveTab('skills')}
-          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+          className={`flex-1 px-6 py-4 text-sm font-medium transition-colors rounded-lg ${
             activeTab === 'skills'
               ? 'bg-savoy-blue text-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -111,7 +116,7 @@ const SkillsAndCertificationModal = ({
         </button>
         <button
           onClick={() => setActiveTab('certifications')}
-          className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+          className={`flex-1 px-6 py-4 text-sm font-medium transition-colors rounded-lg ${
             activeTab === 'certifications'
               ? 'bg-savoy-blue text-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -185,19 +190,30 @@ const SkillsAndCertificationModal = ({
                   {cert.idNumber && (
                     <p className="text-sm text-gray-500">ID: {cert.idNumber}</p>
                   )}
+                  {cert.proofUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setViewingDocument({ name: cert.name, url: cert.proofUrl! })}
+                      className="inline-flex items-center gap-1 text-sm text-savoy-blue hover:text-savoy-blue/80 mt-2"
+                    >
+                      <DocumentIcon className="h-4 w-4" />
+                      <span>View Certificate Proof</span>
+                      <ArrowTopRightOnSquareIcon className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
                 <div className="ml-4 flex gap-2">
                   <button
                     onClick={() => cert.id && handleEditCertification(cert.id)}
-                    className="p-2 text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
+                    className="cursor-pointer"
                   >
-                    <PencilIcon className="h-5 w-5" />
+                    <EditIcon />
                   </button>
                   <button
                     onClick={() => cert.id && handleDeleteCertification(cert.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="cursor-pointer"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <DeleteIcon />
                   </button>
                 </div>
               </div>
@@ -213,6 +229,15 @@ const SkillsAndCertificationModal = ({
             <span className="font-medium">Add Certification</span>
           </button>
         </div>
+      )}
+
+      {viewingDocument && (
+        <ViewDocumentModal
+          isOpen={!!viewingDocument}
+          onClose={() => setViewingDocument(null)}
+          documentName={viewingDocument.name}
+          fileUrl={viewingDocument.url}
+        />
       )}
     </Modal>
   );

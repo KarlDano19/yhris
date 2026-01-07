@@ -4,7 +4,7 @@ import { StarIcon } from '@heroicons/react/24/solid';
 
 interface ProfileCardProps {
   name: string;
-  skills?: string[];
+  about?: string | null;
   initial: string;
   profileCompletion: number;
   rating?: number | null;
@@ -14,15 +14,15 @@ interface ProfileCardProps {
 
 const ProfileCard = ({ 
   name, 
-  skills = [], 
+  about = null, 
   initial, 
   profileCompletion, 
   rating = null, 
   reviewCount = 0,
   profilePhoto = null 
 }: ProfileCardProps) => {
-  // Format skills with bullet points
-  const skillsDisplay = skills.length > 0 ? skills.join(' • ') : 'Aspiring Professional';
+  // Format about text - truncate if too long
+  const aboutDisplay = about && about.trim() ? about.trim() : 'No description available';
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Gradient Header - Muted blue/purple to muted yellow/orange */}
@@ -55,31 +55,33 @@ const ProfileCard = ({
           <h3 className="text-xl font-bold text-gray-900">{name}</h3>
         </div>
 
-        {/* Skills - Centered, Smaller, Light Gray */}
+        {/* About - Centered, Smaller, Light Gray */}
         <div className="text-center mb-4">
-          <p className="text-sm text-gray-600">{skillsDisplay}</p>
+          <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
         </div>
 
         {/* Rating - Centered with Star, Rating, and Review Count */}
-        <div className="flex items-center justify-center gap-1.5 mb-6">
+        <div className={`flex items-center justify-center gap-1.5 ${profileCompletion < 100 ? 'mb-6' : ''}`}>
           <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
           <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
           <span className="text-sm text-gray-500">({reviewCount} reviews)</span>
         </div>
 
-        {/* Profile Completion - Label left, progress bar middle, percentage right */}
-        <div className="pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-600 flex-shrink-0">Profile Completion</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full transition-all"
-                style={{ width: `${profileCompletion}%` }}
-              ></div>
+        {/* Profile Completion - Hidden when 100% complete */}
+        {profileCompletion < 100 && (
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-600 flex-shrink-0">Profile Completion</span>
+              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all"
+                  style={{ width: `${profileCompletion}%` }}
+                ></div>
+              </div>
+              <span className="text-sm font-semibold text-indigo-700 flex-shrink-0">{profileCompletion}%</span>
             </div>
-            <span className="text-sm font-semibold text-indigo-700 flex-shrink-0">{profileCompletion}%</span>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

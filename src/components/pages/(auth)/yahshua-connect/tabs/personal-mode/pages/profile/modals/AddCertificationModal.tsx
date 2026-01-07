@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 
 import { useForm, Controller } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 
 import Modal from '../../../../../components/Modal';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
-import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import CustomToast from '@/components/CustomToast';
+import EyePassword from '@/svg/EyePassword';
+import DeleteIcon from '@/svg/DeleteIcon';
+import ViewDocumentModal from './ViewDocumentModal';
+import { ArrowUpTrayIcon, XMarkIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 import { T_Certification } from '@/types/personal-mode';
 
@@ -59,6 +64,10 @@ const AddCertificationModal = ({
   onAddToLocal,
   onUpdateLocal,
 }: AddCertificationModalProps) => {
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [existingProofUrl, setExistingProofUrl] = useState<string | null>(null);
+  const [viewingDocument, setViewingDocument] = useState<{ name: string; url: string } | null>(null);
+
   const { register, handleSubmit, control, reset, watch, setValue } = useForm<CertificationFormData>({
     defaultValues: {
       name: '',
@@ -83,6 +92,8 @@ const AddCertificationModal = ({
           idNumber: initialData.idNumber || '',
           verified: initialData.verified || false,
         });
+        setProofFile(initialData.proofFile || null);
+        setExistingProofUrl(initialData.proofUrl || null);
       } else {
         reset({
           name: '',
@@ -92,6 +103,8 @@ const AddCertificationModal = ({
           idNumber: '',
           verified: false,
         });
+        setProofFile(null);
+        setExistingProofUrl(null);
       }
     }
   }, [initialData, isOpen, reset]);
@@ -102,6 +115,8 @@ const AddCertificationModal = ({
       ...data,
       issuedDate: formatDateToISO(data.issuedDate),
       expiresDate: formatDateToISO(data.expiresDate),
+      proofFile: proofFile,
+      proofUrl: proofFile ? undefined : existingProofUrl, // Keep existing URL if no new file
     };
     
     // Update local state in parent modal (no API call)
@@ -117,12 +132,61 @@ const AddCertificationModal = ({
     onClose();
   };
 
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const droppedFile = e?.dataTransfer?.files?.[0];
+    
+    if (droppedFile) {
+      processFile(droppedFile);
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Handle file upload logic here
-      console.log('File uploaded:', file);
+      processFile(file);
     }
+    // Clear the file input
+    e.target.value = '';
+  };
+
+  const processFile = (file: File) => {
+    // Validate file size (10MB limit)
+    const maxFileSize = 10 * 1024 * 1024; // 10 MB
+    if (file.size > maxFileSize) {
+      toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.custom(() => <CustomToast message={`${file.name}: Invalid file type. Only PDF, PNG, and JPG files are allowed.`} type='error' />, { duration: 2000 });
+      return;
+    }
+
+    setProofFile(file);
+    // Clear existing proof URL when new file is uploaded
+    setExistingProofUrl(null);
+  };
+
+  const handleRemoveFile = () => {
+    setProofFile(null);
+    // Reset the file input
+    const fileInput = document.getElementById('certification-proof-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleRemoveExistingProof = () => {
+    setExistingProofUrl(null);
   };
 
   const footerContent = (
@@ -253,24 +317,118 @@ const AddCertificationModal = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload Certificate (Proof)
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-savoy-blue hover:bg-savoy-blue/5 transition-colors">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <ArrowUpTrayIcon className="w-10 h-10 mb-3 text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">Click to upload</span>
-                </p>
-                <p className="text-xs text-gray-500">PDF, PNG, JPG up to 5MB</p>
+            <div>
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                className="block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center"
+              >
+                <label
+                  className={`${
+                    !proofFile && !existingProofUrl
+                      ? 'file-preview cursor-pointer hover:bg-blue hover:text-blue-600 text-base leading-normal'
+                      : 'hidden'
+                  }`}
+                >
+                  Drop file to upload or click to select
+                  <input
+                    {...register('proofFile')}
+                    name="proofFile"
+                    id="certification-proof-upload"
+                    type="file"
+                    className="sr-only"
+                    onChange={handleFileUpload}
+                    accept=".pdf,.png,.jpg,.jpeg"
+                  />
+                </label>
+                
+                {/* Show existing proof when editing */}
+                {existingProofUrl && !proofFile && (
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-600 mb-2">Existing Certificate Proof:</p>
+                    <div className="flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded">
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-800 font-light">
+                          {existingProofUrl.split('/').pop()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewingDocument({ name: 'Certificate Proof', url: existingProofUrl });
+                          }}
+                        >
+                          <EyePassword visible />
+                        </button>
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveExistingProof();
+                          }}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show new file when selected */}
+                {proofFile && (
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-600 mb-2">New File to Upload:</p>
+                    <div className="flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded">
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-800 font-light">{proofFile.name}</p>
+                        <p className="text-xs text-gray-500">{(proofFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewingDocument({ name: proofFile.name, url: URL.createObjectURL(proofFile) });
+                          }}
+                        >
+                          <EyePassword visible />
+                        </button>
+                        <button
+                          type="button"
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile();
+                          }}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.png,.jpg,.jpeg"
-                onChange={handleFileUpload}
-              />
-            </label>
+              <p className="text-xs pl-2 mt-1 text-gray-500">Maximum file size: 10 MB per file</p>
+            </div>
           </div>
         </div>
       </form>
+
+      {viewingDocument && (
+        <ViewDocumentModal
+          isOpen={!!viewingDocument}
+          onClose={() => setViewingDocument(null)}
+          documentName={viewingDocument.name}
+          fileUrl={viewingDocument.url}
+        />
+      )}
     </Modal>
   );
 };

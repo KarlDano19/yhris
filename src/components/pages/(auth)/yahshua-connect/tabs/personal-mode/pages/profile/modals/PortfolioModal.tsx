@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 
 import Modal from '../../../../../components/Modal';
 
-import { PlusIcon, ArrowTopRightOnSquareIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+
+import EditIcon from '@/svg/EditIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
+import ViewDocumentModal from './ViewDocumentModal';
 
 import { T_Portfolio } from '@/types/personal-mode';
 
@@ -18,6 +22,7 @@ interface PortfolioModalProps {
 
 const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave, onUpdateLocal }: PortfolioModalProps) => {
   const [localPortfolio, setLocalPortfolio] = useState<T_Portfolio[]>(portfolio);
+  const [viewingDocument, setViewingDocument] = useState<{ name: string; url: string } | null>(null);
 
   useEffect(() => {
     setLocalPortfolio(portfolio);
@@ -74,36 +79,48 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave, onU
             key={project.id}
             className="relative p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
           >
-            <div className="absolute top-2 right-2 flex gap-2 z-10">
-              <button
-                onClick={() => project.id && handleEdit(project.id)}
-                className="p-2 bg-white text-gray-400 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors shadow-sm"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => project.id && handleDelete(project.id)}
-                className="p-2 bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shadow-sm"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="text-4xl mb-3 text-center">{project.image}</div>
+            {project.image || project.imageUrl ? (
+              <div className="mb-3 cursor-pointer" onClick={() => setViewingDocument({ name: project.name, url: project.imageUrl || project.image! })}>
+                <img
+                  src={project.imageUrl || project.image}
+                  alt={project.name}
+                  className="w-full h-32 object-cover rounded-lg hover:opacity-90 transition-opacity"
+                />
+              </div>
+            ) : (
+              <div className="text-4xl mb-3 text-center text-gray-300">📷</div>
+            )}
             <h4 className="font-semibold text-gray-900 mb-2">{project.name}</h4>
             {project.description && (
               <p className="text-sm text-gray-500 mb-3">{project.description}</p>
             )}
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-savoy-blue hover:underline"
-              >
-                View Project
-                <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-              </a>
-            )}
+            <div className="flex items-center justify-between">
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-savoy-blue hover:underline"
+                >
+                  View Project
+                  <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                </a>
+              )}
+              <div className="flex gap-2 ml-auto">
+                <button
+                  onClick={() => project.id && handleEdit(project.id)}
+                  className="cursor-pointer"
+                >
+                  <EditIcon />
+                </button>
+                <button
+                  onClick={() => project.id && handleDelete(project.id)}
+                  className="cursor-pointer"
+                >
+                  <DeleteIcon />
+                </button>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -116,6 +133,15 @@ const PortfolioModal = ({ isOpen, onClose, portfolio, onEdit, onAdd, onSave, onU
         <PlusIcon className="h-5 w-5" />
         <span className="font-medium">Add Project</span>
       </button>
+
+      {viewingDocument && (
+        <ViewDocumentModal
+          isOpen={!!viewingDocument}
+          onClose={() => setViewingDocument(null)}
+          documentName={viewingDocument.name}
+          fileUrl={viewingDocument.url}
+        />
+      )}
     </Modal>
   );
 };

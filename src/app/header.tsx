@@ -46,14 +46,14 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'talent-search',
     'notifications',
   ];
-  const applicantRoutes: string[] = [
-    'application-tracker',
-    'apply-for-a-job',
-    'edit-profile',
-    'notification',
-    'setup-applicant-profile',
-    'job-applicant-form',
-  ];
+  // const applicantRoutes: string[] = [
+  //   'application-tracker',
+  //   'apply-for-a-job',
+  //   'edit-profile',
+  //   'notification',
+  //   'setup-applicant-profile',
+  //   'job-applicant-form',
+  // ];
   const yahshuaConnectRoutes: string[] = [
     'personal-mode',
     'business-mode',
@@ -82,7 +82,11 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
           )}
           {/* Yahshua Connect Header - for personal-mode and business-mode routes */}
           {type === 'applicant' && isYahshuaConnectRoute && (
-            <YahshuaConnectHeader disabled={isSetupProfileRoute} />
+            <YahshuaConnectHeader 
+              disabled={isSetupProfileRoute}
+              hasProfile={hasProfile}
+              initialTokenExpiresAt={tokenExpiresAt}
+            />
           )}
           {/* Old Applicant Header - commented out for rollback option */}
           {/* {type === 'applicant' && applicantRoutes.includes(firstRoute) && (

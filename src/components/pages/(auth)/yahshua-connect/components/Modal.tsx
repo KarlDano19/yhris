@@ -73,7 +73,7 @@ const Modal = ({
               >
                 {/* Header */}
                 {(title || showCloseButton || headerContent) && (
-                  <div className="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
+                  <div className="flex items-center justify-between p-5 border-b border-gray-200 flex-shrink-0">
                     <div className="flex items-center gap-3 flex-1">
                       {headerContent}
                       {title && (
@@ -98,9 +98,10 @@ const Modal = ({
                   {children}
                 </div>
 
+                <hr />
                 {/* Footer */}
                 {footerContent && (
-                  <div className="flex-shrink-0 border-t border-gray-100 p-5">
+                  <div className="flex-shrink-0 p-5">
                     {footerContent}
                   </div>
                 )}

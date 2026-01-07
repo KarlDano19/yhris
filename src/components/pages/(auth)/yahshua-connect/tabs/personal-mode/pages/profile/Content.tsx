@@ -106,7 +106,7 @@ const Content = () => {
         contactPersonAge: profileData.contact_person_age || null,
         photo: null,
         photoUrl: profileData.photo || null,
-        about: profileData.resume_summary || '',
+        about: profileData.description || '',
       });
 
       // Transform and set work experience
@@ -151,7 +151,13 @@ const Content = () => {
       // Transform and set certifications
       const transformedCertifications = (profileData.certifications || []).map((cert: any, index: number) => ({
         id: index + 1,
-        ...cert,
+        name: cert.name || '',
+        issuer: cert.issuer || '',
+        issuedDate: cert.issuedDate || undefined,
+        expiresDate: cert.expiresDate || undefined,
+        idNumber: cert.idNumber || undefined,
+        verified: cert.verified || false,
+        proofUrl: cert.proofUrl || undefined,
       }));
       setCertifications(transformedCertifications);
       setLocalCertifications(transformedCertifications);
@@ -159,7 +165,11 @@ const Content = () => {
       // Transform and set portfolio
       const transformedPortfolio = (profileData.portfolio || []).map((item: any, index: number) => ({
         id: item.id || index + 1,
-        ...item,
+        name: item.name || '',
+        description: item.description || undefined,
+        link: item.link || '',
+        image: item.image || undefined,
+        imageUrl: item.image || undefined,
       }));
       setPortfolio(transformedPortfolio);
       setLocalPortfolio(transformedPortfolio);
@@ -254,6 +264,65 @@ const Content = () => {
     });
   };
 
+  // Calculate section completion percentages
+  const calculateBasicInfoCompletion = () => {
+    const requiredFields = ['gender', 'religion', 'nationality', 'civilStatus'];
+    const filledCount = requiredFields.filter(field => {
+      const value = basicInfo[field as keyof T_BasicInfo];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateEducationCompletion = () => {
+    if (!education) return 0;
+    const requiredFields = ['educationalAttainment', 'school'];
+    const filledCount = requiredFields.filter(field => {
+      const value = education[field as keyof T_Education];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateContactsCompletion = () => {
+    const requiredFields = [
+      'phone',
+      'contactPersonName',
+      'contactPersonAddress',
+      'contactPersonAge',
+      'contactPersonMobile',
+      'contactPersonRelationship',
+    ];
+    const filledCount = requiredFields.filter(field => {
+      const value = basicInfo[field as keyof T_BasicInfo];
+      return value !== null && value !== undefined && value !== '';
+    }).length;
+    return Math.round((filledCount / requiredFields.length) * 100);
+  };
+
+  const calculateEmploymentDocumentsCompletion = () => {
+    const uploadedCount = employmentDocuments.filter(doc => doc.uploaded).length;
+    const totalDocuments = employmentDocuments.length;
+    if (totalDocuments === 0) return 100;
+    return Math.round((uploadedCount / totalDocuments) * 100);
+  };
+
+  // Render completion badge
+  const renderCompletionBadge = (percentage: number) => {
+    if (percentage === 100) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Complete
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+        {percentage}% Complete
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Profile Sections */}
@@ -264,7 +333,10 @@ const Content = () => {
             onClick={() => setIsBasicInfoModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Profile</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Profile</span>
+              {renderCompletionBadge(calculateBasicInfoCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -275,7 +347,10 @@ const Content = () => {
             onClick={() => setIsEducationModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Education</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Education</span>
+              {renderCompletionBadge(calculateEducationCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -286,7 +361,10 @@ const Content = () => {
             onClick={() => setIsContactInfoModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Contacts</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Contacts</span>
+              {renderCompletionBadge(calculateContactsCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -297,7 +375,10 @@ const Content = () => {
             onClick={() => setIsEmploymentDocumentsModalOpen(true)}
             className="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-3 transition-colors group"
           >
-            <span className="text-lg font-semibold text-gray-800">Employment Documents</span>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-gray-800">Employment Documents</span>
+              {renderCompletionBadge(calculateEmploymentDocumentsCompletion())}
+            </div>
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
@@ -367,7 +448,7 @@ const Content = () => {
               nationality: data.nationality,
               civil_status: data.civilStatus,
               expected_salary: data.expectedSalary || null,
-              resume_summary: data.about || '',
+              description: data.about || '',
             };
 
             // Handle photo upload
@@ -603,9 +684,21 @@ const Content = () => {
             setIsAddCertificationModalOpen(true);
           }}
           onSave={(skillsData, certificationsData) => {
-            // Remove id fields from certifications for backend
-            const certificationsBackend = certificationsData.map((cert: any) => {
-              const { id, ...certData } = cert;
+            // Extract proof files from certifications
+            const certificationProofFiles: { [key: string]: File } = {};
+            const certificationsBackend = certificationsData.map((cert: any, index: number) => {
+              const { id, proofFile, ...certData } = cert;
+              
+              // If there's a proof file, add it to the files object
+              if (proofFile instanceof File) {
+                certificationProofFiles[`certification_proof_${index}`] = proofFile;
+                // Remove proofFile from certData as it can't be serialized to JSON
+                // The proofUrl will be set by the backend after file upload
+              } else if (cert.proofUrl) {
+                // Keep existing proofUrl if no new file is uploaded
+                certData.proofUrl = cert.proofUrl;
+              }
+              
               return certData;
             });
 
@@ -613,6 +706,7 @@ const Content = () => {
               {
                 skills: skillsData,
                 certifications: certificationsBackend,
+                certificationProofFiles: certificationProofFiles,
               },
               {
                 onSuccess: () => {
@@ -689,15 +783,28 @@ const Content = () => {
             setIsAddProjectModalOpen(true);
           }}
           onSave={(data) => {
-            // Remove id and image fields for backend
-            const portfolioBackend = data.map((item: any) => {
-              const { id, image, ...itemData } = item;
+            // Extract image files from portfolio
+            const portfolioImageFiles: { [key: string]: File } = {};
+            const portfolioBackend = data.map((item: any, index: number) => {
+              const { id, image, imageFile, ...itemData } = item;
+              
+              // If there's an image file, add it to the files object
+              if (imageFile instanceof File) {
+                portfolioImageFiles[`portfolio_image_${index}`] = imageFile;
+                // Remove imageFile from itemData as it can't be serialized to JSON
+                // The imageUrl will be set by the backend after file upload
+              } else if (item.imageUrl || item.image) {
+                // Keep existing image URL if no new file is uploaded
+                itemData.image = item.imageUrl || item.image;
+              }
+              
               return itemData;
             });
 
             updateProfile(
               {
                 portfolio: portfolioBackend,
+                portfolioImageFiles: portfolioImageFiles,
               },
               {
                 onSuccess: () => {

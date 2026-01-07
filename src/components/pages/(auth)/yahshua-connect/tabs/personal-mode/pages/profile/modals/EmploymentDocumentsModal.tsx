@@ -7,7 +7,8 @@ import CustomToast from '@/components/CustomToast';
 
 import ViewDocumentModal from './ViewDocumentModal';
 
-import { DocumentTextIcon, EyeIcon } from '@heroicons/react/24/outline';
+import EyePassword from '@/svg/EyePassword';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 import { T_EmploymentDocument } from '@/types/personal-mode';
 
@@ -139,19 +140,19 @@ const EmploymentDocumentsModal = ({
 
             {/* Upload/View Buttons */}
             <div className="flex-shrink-0 flex items-center gap-2">
-              {document.uploaded && document.fileUrl && (
-                <button
-                  type="button"
-                  onClick={() => handleViewDocument(document)}
-                  className="p-2 text-gray-600 hover:text-savoy-blue hover:bg-savoy-blue/10 rounded-lg transition-colors"
-                  title="View document"
-                >
-                  <EyeIcon className="h-5 w-5" />
-                </button>
-              )}
               {document.uploaded ? (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-green-600 font-medium">Uploaded</span>
+                  {document.fileUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleViewDocument(document)}
+                      className="cursor-pointer"
+                      title="View document"
+                    >
+                      <EyePassword visible />
+                    </button>
+                  )}
                   <label className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer">
                     <input
                       type="file"
