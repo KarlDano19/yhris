@@ -1,20 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { CurrencyDollarIcon, ChatBubbleLeftRightIcon, CalendarIcon, UserGroupIcon, MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import YahshuaConnectHeader from '../../../../YahshuaConnectHeader';
-import FloatingMenuBar from '../../../../components/FloatingMenuBar';
-import ProfileCard from '../../components/cards/ProfileCard';
-import QuickActionsCard from '../../components/cards/QuickActionsCard';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
-import MyHiresModal from '../../components/modals/MyHiresModal';
+import { CurrencyDollarIcon, ChatBubbleLeftRightIcon, CalendarIcon, MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import BusinessModeLayout from '../../BusinessModeLayout';
 import JobChatModal from '../../components/modals/JobChatModal';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
-import { useHireData } from '../../hooks/useHireData';
 
 const Content = () => {
-  const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
-  const [isMyHiresModalOpen, setIsMyHiresModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedJobForMessage, setSelectedJobForMessage] = useState<{
     id: number;
@@ -25,12 +17,6 @@ const Content = () => {
   const [startedJobIds, setStartedJobIds] = useState<Set<number>>(new Set());
 
   const { activeJobs, reviews } = useMyJobsData();
-  const { hiredApplicants } = useHireData();
-
-  const handleSendPaymentProof = (hireId: number) => {
-    // TODO: Implement payment proof upload
-    console.log('Send payment proof for hire:', hireId);
-  };
 
   const handleMessageJob = (job: { id: number; clientName: string; clientInitials?: string; title: string }) => {
     setSelectedJobForMessage({
@@ -48,82 +34,10 @@ const Content = () => {
     console.log('Starting job:', jobId);
   };
 
-  // Transform activeJobs for the modal
-  const upcomingBookings = activeJobs.map((job) => ({
-    id: job.id,
-    title: job.title,
-    clientName: job.clientName,
-    location: job.location,
-    time: job.time,
-    priceRange: job.priceRange,
-    clientInitials: job.clientInitials,
-  }));
-
-  // Handler for booking messages from Upcoming Bookings Modal
-  const handleBookingMessage = (booking: {
-    id: number;
-    title: string;
-    clientName: string;
-    location: string;
-    time: string;
-    priceRange: string;
-    clientInitials?: string;
-  }) => {
-    setSelectedJobForMessage({
-      id: booking.id,
-      clientName: booking.clientName,
-      clientInitials: booking.clientInitials,
-      title: booking.title,
-    });
-    setIsUpcomingBookingsModalOpen(false);
-    setIsChatModalOpen(true);
-  };
 
   return (
-    <>
-      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
-      <FloatingMenuBar />
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
-              <ProfileCard
-                name="John Doe"
-                title="Plumber • Electrician"
-                rating={4.9}
-                reviewsCount={27}
-                initial="JD"
-                availableForBookings={true}
-                earnings={45230}
-                spending={12800}
-                onAvailabilityChange={(isAvailable) => {
-                  console.log('Availability changed:', isAvailable);
-                }}
-              />
-              <QuickActionsCard
-                actions={[
-                  {
-                    icon: CalendarIcon,
-                    label: 'Upcoming Bookings',
-                    count: upcomingBookings.length,
-                    badgeColor: 'purple',
-                    onClick: () => setIsUpcomingBookingsModalOpen(true),
-                  },
-                  {
-                    icon: UserGroupIcon,
-                    label: 'My Hires',
-                    onClick: () => setIsMyHiresModalOpen(true),
-                  },
-                ]}
-              />
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-9">
-            <div className="space-y-6">
+    <BusinessModeLayout>
+      <div className="space-y-6">
               {/* My Jobs Header */}
               <div className="bg-white rounded-lg shadow-sm p-5">
                 <div className="mb-4">
@@ -223,27 +137,9 @@ const Content = () => {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Upcoming Bookings Modal */}
-      <UpcomingBookingsModal
-        isOpen={isUpcomingBookingsModalOpen}
-        onClose={() => setIsUpcomingBookingsModalOpen(false)}
-        bookings={upcomingBookings}
-        onMessage={handleBookingMessage}
-      />
-
-      {/* My Hires Modal */}
-      <MyHiresModal
-        isOpen={isMyHiresModalOpen}
-        onClose={() => setIsMyHiresModalOpen(false)}
-        hires={hiredApplicants}
-        onSendPaymentProof={handleSendPaymentProof}
-      />
-
+      {/* Page-specific Modals */}
       {/* Chat Modal */}
       {selectedJobForMessage && (
         <JobChatModal
@@ -257,7 +153,7 @@ const Content = () => {
           jobTitle={selectedJobForMessage.title}
         />
       )}
-    </>
+    </BusinessModeLayout>
   );
 };
 

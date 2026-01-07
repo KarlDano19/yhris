@@ -165,15 +165,44 @@ const Content = () => {
     if (!job) return undefined;
 
     // Parse price range to extract min and max
-    const priceMatch = job.priceRange.match(/₱(\d+)\s*-\s*₱(\d+)/);
-    const budgetMin = priceMatch ? priceMatch[1] : '500';
-    const budgetMax = priceMatch ? priceMatch[2] : '1000';
+    const priceMatch = job.priceRange.match(/₱([\d,]+)(?:\s*-\s*₱([\d,]+))?/);
+    const budgetMin = priceMatch ? priceMatch[1].replace(/,/g, '') : '';
+    const budgetMax = priceMatch && priceMatch[2] ? priceMatch[2].replace(/,/g, '') : '';
     
-    // Parse date and time
-    const dateMatch = job.date.match(/(\w+\s+\d+)/);
-    const timeMatch = job.time.match(/(\d+):(\d+)\s*(AM|PM)/);
+    // Parse date - format is "Dec 20" or similar
+    let scheduleDate = '';
+    if (job.date) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const dateParts = job.date.trim().split(' ');
+      if (dateParts.length >= 2) {
+        const monthName = dateParts[0];
+        const day = dateParts[1];
+        const monthIndex = monthNames.indexOf(monthName);
+        if (monthIndex !== -1) {
+          const currentYear = new Date().getFullYear();
+          const date = new Date(currentYear, monthIndex, parseInt(day));
+          if (!isNaN(date.getTime())) {
+            scheduleDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          }
+        }
+      }
+    }
     
-    // For now, using defaults - TODO: Parse actual date/time from job data
+    // Parse time - format is "8:00 AM - 5:00 PM" or "8:00 AM"
+    let scheduleTimeFrom = '';
+    let scheduleTimeTo = '';
+    if (job.time) {
+      const timeParts = job.time.split(' - ');
+      if (timeParts.length === 2) {
+        // Has both from and to times
+        scheduleTimeFrom = convert12To24Hour(timeParts[0].trim());
+        scheduleTimeTo = convert12To24Hour(timeParts[1].trim());
+      } else if (timeParts.length === 1) {
+        // Only from time
+        scheduleTimeFrom = convert12To24Hour(timeParts[0].trim());
+      }
+    }
+    
     return {
       jobTitle: job.title,
       category: job.category,
@@ -182,10 +211,29 @@ const Content = () => {
       budgetType: 'fixed' as const, // Default to fixed, could be stored in job data
       budgetMin,
       budgetMax,
-      scheduleDate: '', // TODO: Parse from job.date
-      scheduleTimeFrom: '', // TODO: Parse from job.time
-      scheduleTimeTo: '', // TODO: Parse from job.time if available
+      scheduleDate,
+      scheduleTimeFrom,
+      scheduleTimeTo,
     };
+  };
+
+  // Helper function to convert 12-hour format to 24-hour format
+  const convert12To24Hour = (time12h: string): string => {
+    if (!time12h) return '';
+    const match = time12h.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return '';
+    
+    let hours = parseInt(match[1]);
+    const minutes = match[2];
+    const ampm = match[3].toUpperCase();
+    
+    if (ampm === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (ampm === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
   };
 
   const handleViewApplicants = (jobId: number) => {
