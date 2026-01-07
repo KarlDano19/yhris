@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FunnelIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import BusinessModeLayout from './BusinessModeLayout';
 import JobRequestCard from './components/cards/JobRequestCard';
 import EarningsChartCard from './components/cards/EarningsChartCard';
 import BusinessOverviewCard from './components/cards/BusinessOverviewCard';
@@ -68,8 +67,7 @@ const Content = () => {
     : null;
 
   return (
-    <BusinessModeLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
               {/* Business Overview */}
               <BusinessOverviewCard
                 userName="John Doe"
@@ -144,7 +142,6 @@ const Content = () => {
                   ))}
                 </div>
               </div>
-      </div>
 
       {/* Page-specific Modals */}
       <FilterRequestsModal
@@ -197,7 +194,7 @@ const Content = () => {
           jobTitle={selectedJobFull.title}
         />
       )}
-    </BusinessModeLayout>
+    </div>
   );
 };
 

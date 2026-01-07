@@ -1,4 +1,4 @@
-import Content from "@/components/pages/(auth)/yahshua-connect/tabs/business-mode/pages/profile/Content";
+import Content from "@/components/pages/(auth)/yahshua-connect/tabs/profile/Content";
 
 export const metadata = {
   title: "Profile - YAHSHUA CONNECT",
@@ -10,5 +10,4 @@ const ProfilePage = async () => {
 };
 
 export default ProfilePage;
-
 

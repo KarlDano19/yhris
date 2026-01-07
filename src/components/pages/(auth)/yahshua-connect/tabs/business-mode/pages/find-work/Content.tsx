@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FunnelIcon } from '@heroicons/react/24/outline';
-import BusinessModeLayout from '../../BusinessModeLayout';
 import JobRequestCard from '../../components/cards/JobRequestCard';
 import JobAcceptedModal from '../../components/modals/JobAcceptedModal';
 import JobChatModal from '../../components/modals/JobChatModal';
@@ -64,37 +63,35 @@ const Content = () => {
     : null;
 
   return (
-    <BusinessModeLayout>
-      <div className="space-y-6">
-              {/* Find Work Header */}
-              <div className="bg-white rounded-lg shadow-sm p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">Find Work</h2>
-                    <p className="text-sm text-gray-600">Browse available job requests near you</p>
-                  </div>
-                  <button
-                    onClick={() => setIsFilterModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <FunnelIcon className="h-5 w-5 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">Filters</span>
-                  </button>
-                </div>
+    <div className="space-y-6">
+      {/* Find Work Header */}
+      <div className="bg-white rounded-lg shadow-sm p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Find Work</h2>
+            <p className="text-sm text-gray-600">Browse available job requests near you</p>
+          </div>
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FunnelIcon className="h-5 w-5 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">Filters</span>
+          </button>
+        </div>
 
-                {/* Job Requests List */}
-                <div className="space-y-4">
-                  {jobRequests.map((job) => (
-                    <JobRequestCard
-                      key={job.id}
-                      {...job}
-                      onAcceptJob={handleAcceptJob}
-                      onMessage={handleMessage}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
-              </div>
+        {/* Job Requests List */}
+        <div className="space-y-4">
+          {jobRequests.map((job) => (
+            <JobRequestCard
+              key={job.id}
+              {...job}
+              onAcceptJob={handleAcceptJob}
+              onMessage={handleMessage}
+              onViewDetails={handleViewDetails}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Page-specific Modals */}
@@ -148,7 +145,7 @@ const Content = () => {
           jobTitle={selectedJobFull.title}
         />
       )}
-    </BusinessModeLayout>
+    </div>
   );
 };
 

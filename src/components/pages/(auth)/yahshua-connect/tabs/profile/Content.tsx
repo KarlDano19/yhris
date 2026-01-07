@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
-import useUpdateApplicantProfile from '../../../../hooks/useUpdateApplicantProfile';
+import useGetApplicantProfile from '../../hooks/useGetApplicantProfile';
+import useUpdateApplicantProfile from '../../hooks/useUpdateApplicantProfile';
 import BasicInformationModal from './modals/BasicInformationModal';
 import ContactInformationModal from './modals/ContactInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';

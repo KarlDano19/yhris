@@ -106,7 +106,7 @@ const FloatingMenuBar = () => {
     },
     {
       name: 'Spending',
-      href: '/yahshua-connect/business-mode/spending',
+      href: '/business-mode/spending',
       icon: WalletIcon,
       iconSolid: WalletIconSolid,
     },

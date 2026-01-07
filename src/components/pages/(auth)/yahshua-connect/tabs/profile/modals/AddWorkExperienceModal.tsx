@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { useForm, Controller } from 'react-hook-form';
 
-import Modal from '../../../../../components/Modal';
+import Modal from '../../../components/Modal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
 import { T_WorkExperience } from '@/types/personal-mode';

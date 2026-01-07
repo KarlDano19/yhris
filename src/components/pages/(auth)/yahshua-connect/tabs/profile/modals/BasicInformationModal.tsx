@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
-import Modal from '../../../../../components/Modal';
+import Modal from '../../../components/Modal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import BusinessModeLayout from '../../BusinessModeLayout';
 import EarningsChartCard from '../../components/cards/EarningsChartCard';
 import TransactionDetailsModal from './TransactionDetailsModal';
 import { useEarningsData, type Transaction } from '../../hooks/useEarningsData';
@@ -44,53 +43,51 @@ const Content = () => {
   };
 
   return (
-    <BusinessModeLayout>
-      <div className="space-y-6">
-              {/* Earnings Title */}
-              <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
+    <div className="space-y-6">
+      {/* Earnings Title */}
+      <h2 className="text-xl font-bold text-gray-900">Earnings</h2>
 
-              {/* Earnings Summary Cards - Separate Cards */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <p className="text-sm text-gray-600 mb-2">This Month</p>
-                  <p className="text-3xl font-bold text-green-600" title={`₱${thisMonthEarnings.toLocaleString()}`}>
-                    {formatAmount(thisMonthEarnings)}
-                  </p>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                  <p className="text-sm text-gray-600 mb-2">Jobs Completed</p>
-                  <p className="text-3xl font-bold text-blue-600">{jobsCompleted}</p>
-                </div>
+      {/* Earnings Summary Cards - Separate Cards */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <p className="text-sm text-gray-600 mb-2">This Month</p>
+          <p className="text-3xl font-bold text-green-600" title={`₱${thisMonthEarnings.toLocaleString()}`}>
+            {formatAmount(thisMonthEarnings)}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <p className="text-sm text-gray-600 mb-2">Jobs Completed</p>
+          <p className="text-3xl font-bold text-blue-600">{jobsCompleted}</p>
+        </div>
+      </div>
+
+      {/* Weekly Breakdown - Using Chart */}
+      <EarningsChartCard data={weeklyData} />
+
+      {/* Recent Payments */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h2 className="text-lg font-bold text-gray-900 mb-6">Recent Payments</h2>
+        <div className="divide-y divide-gray-200">
+          {recentPayments.map((payment, index) => (
+            <button
+              key={payment.id}
+              onClick={() => handleTransactionClick(payment)}
+              className="w-full flex items-center justify-between py-4 hover:bg-gray-50 transition-colors text-left first:pt-0 last:pb-0"
+            >
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  {payment.description} - {payment.clientName}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">{formatDate(payment.date)}</p>
               </div>
-
-              {/* Weekly Breakdown - Using Chart */}
-              <EarningsChartCard data={weeklyData} />
-
-              {/* Recent Payments */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-                <h2 className="text-lg font-bold text-gray-900 mb-6">Recent Payments</h2>
-                <div className="divide-y divide-gray-200">
-                  {recentPayments.map((payment, index) => (
-                    <button
-                      key={payment.id}
-                      onClick={() => handleTransactionClick(payment)}
-                      className="w-full flex items-center justify-between py-4 hover:bg-gray-50 transition-colors text-left first:pt-0 last:pb-0"
-                    >
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {payment.description} - {payment.clientName}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">{formatDate(payment.date)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-green-600">
-                          +₱{payment.amount.toLocaleString()}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold text-green-600">
+                  +₱{payment.amount.toLocaleString()}
+                </p>
               </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Page-specific Modals */}
@@ -101,7 +98,7 @@ const Content = () => {
         transaction={selectedTransaction}
         onDownloadReceipt={handleDownloadReceipt}
       />
-    </BusinessModeLayout>
+    </div>
   );
 };
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { useForm, Controller } from 'react-hook-form';
 
-import Modal from '../../../../../components/Modal';
+import Modal from '../../../components/Modal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
 
