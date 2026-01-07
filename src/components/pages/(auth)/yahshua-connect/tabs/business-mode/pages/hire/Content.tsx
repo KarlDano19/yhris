@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { PlusIcon, PencilIcon, EyeIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import PostJobModal from '../../components/modals/PostJobModal';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
-import MyHiresModal from '../../components/modals/MyHiresModal';
+import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
+import MyHiresModal from '../../../../modals/MyHiresModal';
 import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';

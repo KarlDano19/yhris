@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import useGetApplicationByUser from '@/components/pages/(auth)/applicant/application-tracker/hooks/useGetApplicationByUser';
 import useGetHighMatchJobs from '../../hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
-import JobCard from './pages/jobs/components/JobCard';
+import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
 
 import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';

@@ -5,8 +5,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useAddSavedJobs from '../hooks/useAddSavedJobs';
-import useUpdateSavedJobs from '../../../../../hooks/useUpdateSavedJobs';
+import useAddSavedJobs from '../pages/jobs/hooks/useAddSavedJobs';
+import useUpdateSavedJobs from '../../../hooks/useUpdateSavedJobs';
 
 import { BookmarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
@@ -207,7 +207,7 @@ const JobCard = ({
           </div>
         ) : (
           <Link 
-            href={`/personal-mode/job-applicant-form/${id}`}
+            href={`/job-applicant-form/${id}`}
             onClick={(e) => {
               e.stopPropagation();
               onApply?.();

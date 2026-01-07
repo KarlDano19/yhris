@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import useFindJobs from './hooks/useFindJobs';
 import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
 import JobFiltersModal from '../../modals/JobFIltersModal';
-import JobCard from './components/JobCard';
+import JobCard from '../../components/JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';

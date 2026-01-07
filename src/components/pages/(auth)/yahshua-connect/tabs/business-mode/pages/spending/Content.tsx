@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import SpendingChartCard from '../../components/cards/SpendingChartCard';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
-import MyHiresModal from '../../components/modals/MyHiresModal';
+import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
+import MyHiresModal from '../../../../modals/MyHiresModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
 import { useSpendingData, type SpendingTransaction } from '../../hooks/useSpendingData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';

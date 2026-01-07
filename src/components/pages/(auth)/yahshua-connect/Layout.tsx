@@ -21,8 +21,8 @@ import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 // Business mode imports
 import { useMyJobsData } from './tabs/business-mode/hooks/useMyJobsData';
 import { useHomeData } from './tabs/business-mode/hooks/useHomeData';
-import UpcomingBookingsModal from './tabs/business-mode/components/modals/UpcomingBookingsModal';
-import MyHiresModal from './tabs/business-mode/components/modals/MyHiresModal';
+import UpcomingBookingsModal from './modals/UpcomingBookingsModal';
+import MyHiresModal from './modals/MyHiresModal';
 import JobChatModal from './tabs/business-mode/pages/find-work/modals/JobChatModal';
 
 interface YahshuaConnectLayoutProps {

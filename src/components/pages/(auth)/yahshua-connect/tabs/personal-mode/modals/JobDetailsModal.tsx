@@ -86,7 +86,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                   {/* Header with Apply Now button and Close button */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <Link 
-                      href={`/personal-mode/job-applicant-form/${jobId}`}
+                      href={`/job-applicant-form/${jobId}`}
                       className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
                     >
                       Apply Now
