@@ -1,6 +1,17 @@
-import { categories } from '../../../../hooks/usePostJobData';
 import DropDownArrow from '@/svg/DropDownArrow';
 import LocationPickerMap, { LocationData } from '@/components/LocationPickerMap';
+
+// Categories
+const categories = [
+  'Plumbing',
+  'Electrical',
+  'Cleaning',
+  'Carpentry',
+  'Painting',
+  'Landscaping',
+  'General Maintenance',
+  'Other',
+];
 
 interface JobInfoTabProps {
   jobTitle: string;

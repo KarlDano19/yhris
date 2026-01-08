@@ -11,6 +11,7 @@ import { CalendarIcon, UserGroupIcon, DocumentTextIcon, BookmarkIcon, AcademicCa
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useGetSavedJobs from './hooks/useGetSavedJobs';
 import useGetApplicationByUser from './hooks/useGetApplicationByUser';
+import useGetMyHires from './hooks/useGetMyHires';
 import FloatingMenuBar from './components/FloatingMenuBar';
 import ProfileCard from './components/ProfileCard';
 import QuickActionsCard from './components/QuickActionsCard';
@@ -19,8 +20,6 @@ import SavedJobsModal from './modals/SavedJobsModal';
 import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 
 // Business mode imports
-import { useMyJobsData } from './tabs/business-mode/hooks/useMyJobsData';
-import { useHomeData } from './tabs/business-mode/hooks/useHomeData';
 import UpcomingBookingsModal from './modals/UpcomingBookingsModal';
 import MyHiresModal from './modals/MyHiresModal';
 import JobChatModal from './tabs/business-mode/pages/find-work/modals/JobChatModal';
@@ -36,12 +35,25 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   // Determine mode from pathname
   const isBusinessMode = pathname?.includes('business-mode') || false;
 
-  // Business mode data hooks (always call hooks, but only use data if in business mode)
-  const { activeJobs: allActiveJobs } = useMyJobsData();
-  const { jobRequests: allJobRequests } = useHomeData();
+  // Business mode data (only active/accepted jobs for quick actions)
+  const allActiveJobs = [
+    {
+      id: 1,
+      title: 'Fix Leaking Kitchen Sink',
+      clientName: 'Maria Santos',
+      clientInitials: 'MS',
+      location: 'Carmen, Cagayan de Oro',
+      time: 'Today, 2:00 PM',
+      priceRange: '₱800 - ₱1,200',
+      status: 'accepted',
+      urgent: true,
+    },
+  ];
+  
+  // My Hires data hook (for business mode)
+  const { data: myHiresData, isLoading: isMyHiresLoading } = useGetMyHires();
   
   const activeJobs = isBusinessMode ? allActiveJobs : [];
-  const initialJobRequests = isBusinessMode ? allJobRequests : [];
 
   // Personal mode state
   const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
@@ -130,6 +142,50 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
 
   const upcomingBookings = allUpcomingBookings;
 
+  // Transform my hires data from API to the format expected by MyHiresModal
+  const hiredApplicants = isBusinessMode && myHiresData?.records
+    ? myHiresData.records.map((hire) => {
+        // Map work_status to modal status
+        let status: 'in-progress' | 'completed' | 'pending' = 'pending';
+        if (hire.application_work_status === 'started') {
+          status = 'in-progress';
+        } else if (hire.application_work_status === 'completed') {
+          status = 'completed';
+        } else if (hire.application_work_status === 'not_started') {
+          status = 'pending';
+        }
+        
+        // Calculate price from job posting budget
+        let price = 0;
+        if (hire.application_payment_amount) {
+          price = hire.application_payment_amount;
+        } else if (hire.budget_type === 'fixed_rate') {
+          price = hire.max_amount || hire.min_amount || 0;
+        } else if (hire.budget_type === 'hourly_rate') {
+          price = hire.hourly_rate || 0;
+        }
+        
+        // Generate initials from hired applicant name
+        const providerInitials = hire.hired_applicant_name
+          ? hire.hired_applicant_name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .substring(0, 2)
+              .toUpperCase()
+          : 'UN';
+        
+        return {
+          id: hire.application_id,
+          serviceName: hire.job_title,
+          providerName: hire.hired_applicant_name || 'Unknown',
+          providerInitials,
+          status,
+          price,
+        };
+      })
+    : [];
+
   // Business mode quick actions
   const businessQuickActions = [
     {
@@ -142,19 +198,9 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     {
       icon: UserGroupIcon,
       label: 'My Hires',
+      count: hiredApplicants.length,
+      badgeColor: 'purple' as const,
       onClick: () => setIsMyHiresModalOpen(true),
-    },
-  ];
-
-  // Mock hired applicants data for business mode
-  const hiredApplicants = [
-    {
-      id: 1,
-      serviceName: 'Garden Landscaping',
-      providerName: 'Carlos Mendez',
-      providerInitials: 'CM',
-      status: 'in-progress' as const,
-      price: 1500,
     },
   ];
 
@@ -328,4 +374,3 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
 };
 
 export default YahshuaConnectLayout;
-

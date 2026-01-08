@@ -1,13 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import SpendingChartCard from '../../components/cards/SpendingChartCard';
 import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
 import MyHiresModal from '../../../../modals/MyHiresModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
-import { useSpendingData, type SpendingTransaction } from '../../hooks/useSpendingData';
-import { useMyJobsData } from '../../hooks/useMyJobsData';
-import { useHireData } from '../../hooks/useHireData';
+
+interface SpendingTransaction {
+  id: number;
+  description: string;
+  providerName: string;
+  amount: number;
+  date: string;
+  category: string;
+}
+
+interface HiredApplicant {
+  id: number;
+  serviceName: string;
+  providerName: string;
+  providerInitials: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  price: number;
+}
 
 const Content = () => {
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
@@ -22,9 +36,78 @@ const Content = () => {
     priceRange: string;
   } | null>(null);
 
-  const { totalSpentThisMonth, servicesHired, weeklySpendingData, recentPayments } = useSpendingData();
-  const { activeJobs } = useMyJobsData();
-  const { hiredApplicants } = useHireData();
+  // Spending Data
+  const totalSpentThisMonth = 12800;
+  const servicesHired = 2;
+
+  const weeklySpendingData = [
+    { day: 'W1', amount: 2500 },
+    { day: 'W2', amount: 800 },
+    { day: 'W3', amount: 3200 },
+    { day: 'W4', amount: 1500 },
+  ];
+
+  const recentPayments: SpendingTransaction[] = [
+    {
+      id: 1,
+      description: 'Hired: Home Cleaning Service',
+      providerName: 'Ana Garcia',
+      amount: 800,
+      date: '2025-12-03',
+      category: 'Service',
+    },
+    {
+      id: 2,
+      description: 'Hired: Garden Landscaping',
+      providerName: 'Carlos Mendez',
+      amount: 1500,
+      date: '2025-12-01',
+      category: 'Service',
+    },
+  ];
+
+  // Active Jobs (accepted/scheduled jobs only)
+  const activeJobs = [
+    {
+      id: 1,
+      title: 'Fix Leaking Kitchen Sink',
+      clientName: 'Maria Santos',
+      clientInitials: 'MS',
+      location: 'Carmen, Cagayan de Oro',
+      time: 'Today, 2:00 PM',
+      priceRange: '₱800 - ₱1,200',
+      status: 'accepted',
+      urgent: true,
+    },
+  ];
+
+  // Hired Applicants
+  const hiredApplicants: HiredApplicant[] = [
+    {
+      id: 1,
+      serviceName: 'Garden Landscaping',
+      providerName: 'Carlos Mendez',
+      providerInitials: 'CM',
+      status: 'in-progress',
+      price: 1500,
+    },
+    {
+      id: 2,
+      serviceName: 'House Cleaning',
+      providerName: 'Ana Garcia',
+      providerInitials: 'AG',
+      status: 'completed',
+      price: 800,
+    },
+    {
+      id: 3,
+      serviceName: 'Install Ceiling Fan',
+      providerName: 'Pedro Santos',
+      providerInitials: 'PS',
+      status: 'pending',
+      price: 700,
+    },
+  ];
 
   const handleSendPaymentProof = (hireId: number) => {
     // TODO: Implement payment proof upload
@@ -90,9 +173,29 @@ const Content = () => {
           </div>
         </div>
 
-        {/* Weekly Spending - Using Chart */}
+        {/* Weekly Spending Chart */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-          <SpendingChartCard data={weeklySpendingData} />
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Weekly Spending</h3>
+          
+          {/* Simple Bar Chart */}
+          <div className="flex items-end justify-between gap-2 h-32">
+            {weeklySpendingData.map((item, index) => {
+              const maxAmount = Math.max(...weeklySpendingData.map((d) => d.amount));
+              const height = (item.amount / maxAmount) * 100;
+              return (
+                <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="relative flex-1 w-full flex items-end">
+                    <div
+                      className="w-full bg-orange-500 rounded-t transition-all hover:bg-orange-600"
+                      style={{ height: `${height}%` }}
+                      title={`₱${item.amount.toLocaleString()}`}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium">{item.day}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Recent Payments Made */}

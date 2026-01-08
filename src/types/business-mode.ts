@@ -167,6 +167,7 @@ export type T_ApplicantProfileData = {
   phone: string;
   location: string;
   dateOfBirth: string;
+  status: T_ApplicationStatus;
   skills: string[];
   workExperience: {
     position: string;

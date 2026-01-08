@@ -98,7 +98,6 @@ const Modal = ({
                   {children}
                 </div>
 
-                <hr />
                 {/* Footer */}
                 {footerContent && (
                   <div className="flex-shrink-0 p-5">

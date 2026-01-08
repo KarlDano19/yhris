@@ -4,9 +4,9 @@ import Modal from '../../../../../components/Modal';
 import JobInfoTab from './tabs/JobInfoTab';
 import JobBudgetTab from './tabs/JobBudgetTab';
 import JobPreviewTab from './tabs/JobPreviewTab';
+import { LocationData } from '@/components/LocationPickerMap';
 
 import classNames from '@/helpers/classNames';
-import { LocationData } from '@/components/LocationPickerMap';
 
 interface UpdateBusinessJobModalProps {
   isOpen: boolean;

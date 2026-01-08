@@ -1,9 +1,10 @@
-
-
 import { useState, useEffect } from 'react';
-import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
+
 import { useDropzone } from 'react-dropzone';
-import Modal from '../../../../components/Modal';
+
+import Modal from '../../../../../components/Modal';
+
+import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 
 interface SubmitPaymentProofModalProps {
   isOpen: boolean;

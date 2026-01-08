@@ -1,15 +1,50 @@
 'use client';
 
 import { useState } from 'react';
-import EarningsChartCard from '../../components/cards/EarningsChartCard';
 import TransactionDetailsModal from './TransactionDetailsModal';
-import { useEarningsData, type Transaction } from '../../hooks/useEarningsData';
+
+interface Transaction {
+  id: number;
+  description: string;
+  clientName: string;
+  amount: number;
+  date: string;
+  category: string;
+}
 
 const Content = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { thisMonthEarnings, jobsCompleted, weeklyData, recentPayments } = useEarningsData();
+  // Data
+  const thisMonthEarnings = 45230;
+  const jobsCompleted = 23;
+
+  const weeklyData = [
+    { day: 'W1', amount: 12500 },
+    { day: 'W2', amount: 9800 },
+    { day: 'W3', amount: 15200 },
+    { day: 'W4', amount: 7700 },
+  ];
+
+  const recentPayments: Transaction[] = [
+    {
+      id: 1,
+      description: 'Fix Leaking Sink',
+      clientName: 'Maria Santos',
+      amount: 1000,
+      date: '2025-12-12',
+      category: 'Service',
+    },
+    {
+      id: 2,
+      description: 'Install Ceiling Fan',
+      clientName: 'Juan Cruz',
+      amount: 750,
+      date: '2025-12-10',
+      category: 'Service',
+    },
+  ];
 
   const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -61,8 +96,30 @@ const Content = () => {
         </div>
       </div>
 
-      {/* Weekly Breakdown - Using Chart */}
-      <EarningsChartCard data={weeklyData} />
+      {/* Weekly Breakdown Chart */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Weekly Breakdown</h3>
+        
+        {/* Simple Bar Chart */}
+        <div className="flex items-end justify-between gap-2 h-32">
+          {weeklyData.map((item, index) => {
+            const maxAmount = Math.max(...weeklyData.map((d) => d.amount));
+            const height = (item.amount / maxAmount) * 100;
+            return (
+              <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                <div className="relative flex-1 w-full flex items-end">
+                  <div
+                    className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
+                    style={{ height: `${height}%` }}
+                    title={`₱${item.amount.toLocaleString()}`}
+                  />
+                </div>
+                <span className="text-xs text-gray-600 font-medium">{item.day}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Recent Payments */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">

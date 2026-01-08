@@ -12,6 +12,7 @@ interface ViewApplicantsModalProps {
   applicants: T_ApplicantData[];
   onViewProfile?: (applicantId: number) => void;
   onHire?: (applicantId: number) => void;
+  onReject?: (applicantId: number) => void;
 }
 
 const ViewApplicantsModal = ({
@@ -21,6 +22,7 @@ const ViewApplicantsModal = ({
   applicants,
   onViewProfile,
   onHire,
+  onReject,
 }: ViewApplicantsModalProps) => {
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => {
@@ -42,6 +44,12 @@ const ViewApplicantsModal = ({
   const handleHire = (applicantId: number) => {
     if (onHire) {
       onHire(applicantId);
+    }
+  };
+
+  const handleReject = (applicantId: number) => {
+    if (onReject) {
+      onReject(applicantId);
     }
   };
 
@@ -125,16 +133,24 @@ const ViewApplicantsModal = ({
                     Hired
                   </div>
                 ) : applicant.status === 'rejected' ? (
-                  <div className="flex-1 px-4 py-2 bg-gray-100 text-gray-500 rounded-lg font-medium text-center">
+                  <div className="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium text-center">
                     Rejected
                   </div>
                 ) : (
-                  <button
-                    onClick={() => handleHire(applicant.id)}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-                  >
-                    Hire
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleReject(applicant.id)}
+                      className="flex-1 px-4 py-2 border border-red-500 text-red-600 bg-white rounded-lg font-medium hover:bg-red-50 transition-colors"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleHire(applicant.id)}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                    >
+                      Hire
+                    </button>
+                  </>
                 )}
               </div>
             </div>

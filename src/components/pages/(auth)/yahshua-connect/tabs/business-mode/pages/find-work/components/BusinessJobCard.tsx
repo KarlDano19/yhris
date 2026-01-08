@@ -1,5 +1,5 @@
-
 import Image from 'next/image';
+
 import { MapPinIcon, ClockIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 

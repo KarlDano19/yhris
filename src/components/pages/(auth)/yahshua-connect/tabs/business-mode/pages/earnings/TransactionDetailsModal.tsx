@@ -1,6 +1,3 @@
-
-'use client';
-
 import { ArrowDownTrayIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import Modal from '../../../../components/Modal';
 

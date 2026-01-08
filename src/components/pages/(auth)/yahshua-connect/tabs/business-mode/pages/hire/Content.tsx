@@ -12,10 +12,10 @@ import UpdateBusinessJobModal from './modals/UpdateBusinessJobModal';
 import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
-import SubmitPaymentProofModal from '../../components/modals/SubmitPaymentProofModal';
+import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
-import { useUpdateBusinessJob } from './hooks/useUpdateBusinessJob';
+import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
 import { useGetMyBusinessJobs } from './hooks/useGetMyBusinessJobs';
 import { useUpdateApplicationStatus } from './hooks/useUpdateApplicationStatus';
@@ -151,6 +151,7 @@ const transformApplicationToProfile = (application: T_BusinessJobApplication): T
     dateOfBirth: application.applicant_birth_date 
       ? new Date(application.applicant_birth_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
       : '',
+    status: application.status,
     skills: application.applicant_skills || [],
     workExperience: workExperience,
     education: education,
@@ -169,6 +170,7 @@ const Content = () => {
   const [isViewApplicantsModalOpen, setIsViewApplicantsModalOpen] = useState(false);
   const [isApplicantProfileModalOpen, setIsApplicantProfileModalOpen] = useState(false);
   const [isConfirmHireModalOpen, setIsConfirmHireModalOpen] = useState(false);
+  const [isConfirmRejectModalOpen, setIsConfirmRejectModalOpen] = useState(false);
   const [isSubmitPaymentProofModalOpen, setIsSubmitPaymentProofModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
@@ -198,7 +200,7 @@ const Content = () => {
   // API Hooks
   const { data: myJobsData, isLoading: isLoadingJobs, refetch: refetchJobs } = useGetMyBusinessJobs({ page_size: 100 });
   const createJobMutation = useCreateBusinessJob();
-  const updateJobMutation = useUpdateBusinessJob();
+  const updateJobMutation = useUpdateBusinessJobDetails();
   const deleteJobMutation = useDeleteBusinessJob();
   const updateStatusMutation = useUpdateApplicationStatus();
 
@@ -429,24 +431,55 @@ const Content = () => {
   const handleHireClick = (applicationId: number) => {
     setSelectedApplicationId(applicationId);
     setIsApplicantProfileModalOpen(false);
+    setIsViewApplicantsModalOpen(false);
     setIsConfirmHireModalOpen(true);
   };
 
-  const handleConfirmHire = (_message?: string) => {
-    if (!selectedApplicationId) return;
+  const handleRejectClick = (applicationId: number) => {
+    setSelectedApplicationId(applicationId);
+    setIsApplicantProfileModalOpen(false);
+    setIsViewApplicantsModalOpen(false);
+    setIsConfirmRejectModalOpen(true);
+  };
 
+  const handleConfirmHire = () => {
+    if (!selectedApplicationId) return;
+    
     updateStatusMutation.mutate(
       { applicationId: selectedApplicationId, status: 'accepted' },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.custom(() => <CustomToast message="Applicant hired successfully!" type="success" />, { duration: 5000 });
           setIsConfirmHireModalOpen(false);
           setSelectedApplicationId(null);
-          setSelectedJobId(null);
-          refetchJobs();
+          // Refetch and then reopen the ViewApplicantsModal with updated data
+          await refetchJobs();
+          setIsViewApplicantsModalOpen(true);
         },
         onError: (err: unknown) => {
           const message = err instanceof Error ? err.message : 'Failed to hire applicant';
+          toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
+        },
+      }
+    );
+  };
+
+  const handleConfirmReject = () => {
+    if (!selectedApplicationId) return;
+
+    updateStatusMutation.mutate(
+      { applicationId: selectedApplicationId, status: 'rejected' },
+      {
+        onSuccess: async () => {
+          toast.custom(() => <CustomToast message="Applicant rejected" type="success" />, { duration: 5000 });
+          setIsConfirmRejectModalOpen(false);
+          setSelectedApplicationId(null);
+          // Refetch and then reopen the ViewApplicantsModal with updated data
+          await refetchJobs();
+          setIsViewApplicantsModalOpen(true);
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to reject applicant';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -733,6 +766,7 @@ const Content = () => {
           applicants={selectedJobApplicants}
           onViewProfile={handleViewProfile}
           onHire={handleHireClick}
+          onReject={handleRejectClick}
         />
       )}
 
@@ -770,6 +804,7 @@ const Content = () => {
           onBack={handleBackToApplicants}
           onMessage={handleMessageApplicant}
           onHire={handleHireClick}
+          onReject={handleRejectClick}
         />
       )}
 
@@ -820,6 +855,18 @@ const Content = () => {
         confirmAction={handleConfirmDelete}
         message="Are you sure you want to delete this job posting? This action cannot be undone."
         isLoading={deleteJobMutation.isLoading}
+      />
+
+      {/* Reject Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isConfirmRejectModalOpen}
+        setIsOpen={(open) => {
+          setIsConfirmRejectModalOpen(open);
+          if (!open) setSelectedApplicationId(null);
+        }}
+        confirmAction={handleConfirmReject}
+        message="Are you sure you want to reject this applicant? This action cannot be undone."
+        isLoading={updateStatusMutation.isLoading}
       />
 
       {/* Tooltips */}

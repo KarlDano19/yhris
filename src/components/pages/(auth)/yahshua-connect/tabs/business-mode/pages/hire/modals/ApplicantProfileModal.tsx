@@ -31,6 +31,7 @@ interface ApplicantProfileData {
   phone: string;
   location: string;
   dateOfBirth: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
   skills: string[];
   workExperience: {
     position: string;
@@ -68,6 +69,7 @@ interface ApplicantProfileModalProps {
   onBack: () => void;
   onMessage: (applicantId: number) => void;
   onHire: (applicantId: number) => void;
+  onReject: (applicantId: number) => void;
 }
 
 const ApplicantProfileModal = ({
@@ -79,6 +81,7 @@ const ApplicantProfileModal = ({
   onBack,
   onMessage,
   onHire,
+  onReject,
 }: ApplicantProfileModalProps) => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const renderStars = (rating: number) => {
@@ -147,12 +150,30 @@ const ApplicantProfileModal = ({
                         <ChatBubbleLeftRightIcon className="h-5 w-5" />
                         Message
                       </button>
-                      <button
-                        onClick={() => onHire(applicant.id)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-                      >
-                        Hire
-                      </button>
+                      {applicant.status === 'accepted' ? (
+                        <div className="px-6 py-2 bg-green-100 text-green-700 rounded-lg font-semibold text-center flex items-center">
+                          Hired
+                        </div>
+                      ) : applicant.status === 'rejected' ? (
+                        <div className="px-6 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-center flex items-center">
+                          Rejected
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => onReject(applicant.id)}
+                            className="px-4 py-2 border border-red-500 text-red-600 bg-white rounded-lg font-medium hover:bg-red-50 transition-colors"
+                          >
+                            Reject
+                          </button>
+                          <button
+                            onClick={() => onHire(applicant.id)}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                          >
+                            Hire
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
 

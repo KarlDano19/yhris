@@ -1,25 +1,113 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+
+import ChatModal from '../../../../modals/ChatModal';
+import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
+
 import { CurrencyDollarIcon, ChatBubbleLeftRightIcon, CalendarIcon, MapPinIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import JobChatModal from '../find-work/modals/JobChatModal';
-import { useMyJobsData } from '../../hooks/useMyJobsData';
+
+interface ActiveJob {
+  id: number;
+  applicationId: number;
+  title: string;
+  clientName: string;
+  clientInitials: string;
+  clientPhoto: string | null;
+  clientId: number;
+  location: string;
+  time: string;
+  priceRange: string;
+  status: string;
+  workStatus: string;
+  paymentStatus: string;
+  urgent: boolean;
+}
 
 const Content = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedJobForMessage, setSelectedJobForMessage] = useState<{
     id: number;
+    clientId: number;
     clientName: string;
-    clientInitials?: string;
+    clientInitials: string;
     title: string;
   } | null>(null);
-  const [startedJobIds, setStartedJobIds] = useState<Set<number>>(new Set());
 
-  const { activeJobs, reviews } = useMyJobsData();
+  // Fetch my applied jobs where I've been accepted (hired)
+  // Note: Remove application_status filter to show all applied jobs for now
+  const { data, isLoading, isError } = useGetMyAppliedJobs({
+    page_size: 50,
+  });
 
-  const handleMessageJob = (job: { id: number; clientName: string; clientInitials?: string; title: string }) => {
+  // Transform API data to ActiveJob format
+  const activeJobs: ActiveJob[] = useMemo(() => {
+    if (!data?.records) return [];
+
+    return data.records.map((job: any) => {
+      // Format time
+      let timeStr = '';
+      if (job.date) {
+        const date = new Date(job.date);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        });
+        
+        if (job.time_from && job.time_to) {
+          timeStr = `${formattedDate}, ${job.time_from} - ${job.time_to}`;
+        } else {
+          timeStr = formattedDate;
+        }
+      }
+
+      // Format price range
+      let priceRange = '';
+      if (job.budget_type === 'fixed_rate') {
+        if (job.min_amount && job.max_amount) {
+          priceRange = `₱${job.min_amount.toLocaleString()} - ₱${job.max_amount.toLocaleString()}`;
+        } else if (job.min_amount) {
+          priceRange = `₱${job.min_amount.toLocaleString()}`;
+        }
+      } else if (job.budget_type === 'hourly_rate' && job.hourly_rate) {
+        priceRange = `₱${job.hourly_rate.toLocaleString()}/hr`;
+      }
+
+      // Get initials from client name
+      const getInitials = (name: string) => {
+        if (!name) return 'NA';
+        return name
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase();
+      };
+
+      return {
+        id: job.id,
+        applicationId: job.application_id,
+        title: job.job_title,
+        clientName: job.created_by_name || 'Unknown',
+        clientInitials: getInitials(job.created_by_name || 'NA'),
+        clientPhoto: job.created_by_photo || null,
+        clientId: job.created_by,
+        location: job.location || 'Location not specified',
+        time: timeStr,
+        priceRange: priceRange || 'Budget not specified',
+        status: job.application_status,
+        workStatus: job.application_work_status || 'not_started',
+        paymentStatus: job.application_payment_status || 'pending',
+        urgent: job.is_urgent || false,
+      };
+    });
+  }, [data]);
+
+  const handleMessageJob = (job: ActiveJob) => {
     setSelectedJobForMessage({
       id: job.id,
+      clientId: job.clientId,
       clientName: job.clientName,
       clientInitials: job.clientInitials,
       title: job.title,
@@ -27,10 +115,9 @@ const Content = () => {
     setIsChatModalOpen(true);
   };
 
-  const handleStartJob = (jobId: number) => {
-    setStartedJobIds(prev => new Set(prev).add(jobId));
+  const handleStartJob = (applicationId: number) => {
     // TODO: Implement API call to start job
-    console.log('Starting job:', jobId);
+    console.log('Starting job with application ID:', applicationId);
   };
 
 
@@ -39,13 +126,35 @@ const Content = () => {
       {/* My Jobs Header */}
       <div className="bg-white rounded-lg shadow-sm p-5">
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-gray-900">My Active Jobs</h2>
-          <p className="text-sm text-gray-600">Manage your active and upcoming jobs</p>
+          <h2 className="text-lg font-bold text-gray-900">My Jobs</h2>
+          <p className="text-sm text-gray-600">Manage your job applications and active jobs</p>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-savoy-blue"></div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-red-800">Failed to load jobs. Please try again later.</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !isError && activeJobs.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No job applications found</p>
+            <p className="text-gray-400 text-sm mt-1">Apply to jobs in the Find Work section</p>
+          </div>
+        )}
 
         {/* Active Jobs List */}
         <div className="space-y-4">
-          {activeJobs.map((job) => (
+          {!isLoading && !isError && activeJobs.map((job) => (
             <div
               key={job.id}
               className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
@@ -64,22 +173,42 @@ const Content = () => {
                     )}
                   </div>
                 </div>
-                {startedJobIds.has(job.id) ? (
+                {job.status === 'pending' ? (
+                  <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded">
+                    Pending Approval
+                  </span>
+                ) : job.workStatus === 'started' ? (
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
                     In Progress
                   </span>
-                ) : job.status === 'accepted' && (
+                ) : job.workStatus === 'completed' ? (
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">
+                    Completed
+                  </span>
+                ) : job.status === 'accepted' ? (
                   <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
                     Scheduled
+                  </span>
+                ) : (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded">
+                    {job.status}
                   </span>
                 )}
               </div>
 
               {/* Client Info */}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-semibold">
-                  {job.clientInitials}
-                </div>
+                {job.clientPhoto ? (
+                  <img
+                    src={job.clientPhoto}
+                    alt={job.clientName}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-semibold">
+                    {job.clientInitials}
+                  </div>
+                )}
                 <div>
                   <p className="text-sm font-medium text-gray-900">{job.clientName}</p>
                 </div>
@@ -101,11 +230,18 @@ const Content = () => {
                 </div>
               </div>
 
-              {/* Payment Waiting Banner */}
-              {startedJobIds.has(job.id) && (
+              {/* Payment Status Banner */}
+              {job.workStatus === 'completed' && job.paymentStatus === 'pending' && (
                 <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-2">
                   <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
-                  <p className="text-sm text-yellow-800">Waiting for client payment before completion</p>
+                  <p className="text-sm text-yellow-800">Waiting for client payment</p>
+                </div>
+              )}
+
+              {job.workStatus === 'completed' && job.paymentStatus === 'paid' && (
+                <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <p className="text-sm text-green-800">Payment received - Job completed!</p>
                 </div>
               )}
 
@@ -116,15 +252,26 @@ const Content = () => {
                   className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center justify-center gap-2"
                 >
                   <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                  Message
+                  Message Client
                 </button>
-                {startedJobIds.has(job.id) ? (
-                  <button className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg font-medium cursor-not-allowed">
-                    Awaiting Payment
+                {job.status === 'pending' ? (
+                  <button className="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                    Awaiting Client Response
+                  </button>
+                ) : job.workStatus === 'completed' ? (
+                  <button className="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
+                    {job.paymentStatus === 'paid' ? 'Completed' : 'Awaiting Payment'}
+                  </button>
+                ) : job.workStatus === 'started' ? (
+                  <button
+                    onClick={() => handleStartJob(job.applicationId)}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Mark as Complete
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleStartJob(job.id)}
+                    onClick={() => handleStartJob(job.applicationId)}
                     className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                   >
                     Start Job
@@ -139,14 +286,16 @@ const Content = () => {
       {/* Page-specific Modals */}
       {/* Chat Modal */}
       {selectedJobForMessage && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
             setSelectedJobForMessage(null);
           }}
-          clientName={selectedJobForMessage.clientName}
-          clientInitials={selectedJobForMessage.clientInitials || selectedJobForMessage.clientName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+          recipientId={selectedJobForMessage.clientId}
+          recipientName={selectedJobForMessage.clientName}
+          recipientInitials={selectedJobForMessage.clientInitials}
+          jobId={selectedJobForMessage.id}
           jobTitle={selectedJobForMessage.title}
         />
       )}

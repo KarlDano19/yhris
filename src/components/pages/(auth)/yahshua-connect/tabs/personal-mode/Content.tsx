@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import useGetApplicationByUser from '@/components/pages/(auth)/applicant/application-tracker/hooks/useGetApplicationByUser';
-import useGetHighMatchJobs from '../../hooks/useGetHighMatchJobs';
+import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';

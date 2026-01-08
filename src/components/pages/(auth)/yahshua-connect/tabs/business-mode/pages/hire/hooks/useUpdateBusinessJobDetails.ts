@@ -3,7 +3,7 @@ import { getCookie } from 'cookies-next';
 
 import { T_UpdateBusinessJobData, T_BusinessJobResponse } from '@/types/business-mode';
 
-async function updateBusinessJob(data: T_UpdateBusinessJobData): Promise<T_BusinessJobResponse> {
+async function updateBusinessJobDetails(data: T_UpdateBusinessJobData): Promise<T_BusinessJobResponse> {
   const token = getCookie('token');
   
   const { jobId, ...updateData } = data;
@@ -29,11 +29,11 @@ async function updateBusinessJob(data: T_UpdateBusinessJobData): Promise<T_Busin
   return responseData.data || responseData;
 }
 
-export function useUpdateBusinessJob() {
+export function useUpdateBusinessJobDetails() {
   const queryClient = useQueryClient();
 
   return useMutation<T_BusinessJobResponse, Error, T_UpdateBusinessJobData>(
-    (data: T_UpdateBusinessJobData) => updateBusinessJob(data),
+    (data: T_UpdateBusinessJobData) => updateBusinessJobDetails(data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['myBusinessJobsCache']);
@@ -42,3 +42,4 @@ export function useUpdateBusinessJob() {
     }
   );
 }
+

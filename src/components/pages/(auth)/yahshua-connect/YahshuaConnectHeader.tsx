@@ -19,7 +19,7 @@ import ChatModal from './modals/ChatModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from './tabs/business-mode/hooks/chat/useApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
-import useUpdateApplicantProfile from './hooks/useUpdateApplicantProfile';
+import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
 
 import classNames from '@/helpers/classNames';
 
