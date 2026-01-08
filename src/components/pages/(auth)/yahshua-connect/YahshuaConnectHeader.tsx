@@ -16,6 +16,10 @@ import SessionExpirationModal from '@/components/SessionExpirationModal';
 import MessagesModal from './modals/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
 import ChatModal from './modals/ChatModal';
+import LocationPermissionModal from './modals/LocationPermissionModal';
+import { useApplicantChatsList } from './tabs/business-mode/hooks/chat/useApplicantChatsList';
+import useGetApplicantProfile from './hooks/useGetApplicantProfile';
+import useUpdateApplicantProfile from './hooks/useUpdateApplicantProfile';
 
 import classNames from '@/helpers/classNames';
 
@@ -39,7 +43,18 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<{ name: string; initials: string } | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{ id?: number; name: string; initials: string; jobId?: number; jobTitle?: string } | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  // Fetch applicant profile to check for location data
+  const { data: profileData, isLoading: isProfileLoading } = useGetApplicantProfile();
+  const { mutate: updateProfile } = useUpdateApplicantProfile();
+
+  // Fetch chats to get unread count
+  const { data: chatsData } = useApplicantChatsList(undefined, true);
+  const totalUnreadCount = chatsData?.records.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
   const [isExpiring, setIsExpiring] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
@@ -58,6 +73,63 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       logout(true);
     }
   }, []);
+
+  // Check if applicant has location data, show modal if not
+  useEffect(() => {
+    // Don't check if already checked, still loading, or disabled
+    if (hasCheckedLocation || isProfileLoading || disabled) return;
+
+    // Wait for profile data to be available
+    if (!profileData) return;
+
+    // Check if profile has valid latitude and longitude (non-zero values)
+    const hasValidLocation =
+      profileData?.latitude !== null &&
+      profileData?.latitude !== undefined &&
+      profileData?.latitude !== 0 &&
+      profileData?.longitude !== null &&
+      profileData?.longitude !== undefined &&
+      profileData?.longitude !== 0;
+
+    if (!hasValidLocation && hasProfile) {
+      // Show location permission modal after a short delay to not overwhelm user
+      const timer = setTimeout(() => {
+        setShowLocationModal(true);
+        setHasCheckedLocation(true);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    } else {
+      // User already has location or doesn't have a profile yet
+      setHasCheckedLocation(true);
+    }
+  }, [profileData, isProfileLoading, hasCheckedLocation, hasProfile, disabled]);
+
+  // Handle location obtained from permission modal
+  const handleLocationObtained = (latitude: number, longitude: number) => {
+    // Round to 6 decimal places to stay within backend's 9-digit total limit
+    // 6 decimal places gives ~0.1 meter precision which is sufficient
+    const roundedLatitude = Math.round(latitude * 1000000) / 1000000;
+    const roundedLongitude = Math.round(longitude * 1000000) / 1000000;
+
+    updateProfile(
+      { latitude: roundedLatitude, longitude: roundedLongitude },
+      {
+        onSuccess: () => {
+          toast.custom(
+            () => <CustomToast message="Location saved successfully!" type="success" />,
+            { duration: 3000 }
+          );
+        },
+        onError: () => {
+          toast.custom(
+            () => <CustomToast message="Failed to save location. Please try again." type="error" />,
+            { duration: 4000 }
+          );
+        },
+      }
+    );
+  };
 
   // Initialize token expiration from prop
   useEffect(() => {
@@ -174,24 +246,6 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     mutate(void 0, callbackReq);
   };
 
-  // Dummy data for messages
-  const messages = [
-    {
-      id: 1,
-      senderName: 'Maria Santos',
-      senderInitials: 'MS',
-      preview: 'Thank you!',
-      unreadCount: 2,
-    },
-    {
-      id: 2,
-      senderName: 'HR - ABBA Initiative',
-      senderInitials: 'AI',
-      preview: 'We reviewed...',
-      unreadCount: 1,
-    },
-  ];
-
   // Dummy data for notifications
   const notifications = [
     {
@@ -210,10 +264,13 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     },
   ];
 
-  const handleSelectMessage = (message: typeof messages[0]) => {
+  const handleSelectMessage = (chat: { id: number; name: string; initials: string; recipientId: number; jobId?: number; jobTitle?: string }) => {
     setSelectedChat({
-      name: message.senderName,
-      initials: message.senderInitials,
+      id: chat.recipientId,
+      name: chat.name,
+      initials: chat.initials,
+      jobId: chat.jobId,
+      jobTitle: chat.jobTitle,
     });
     setShowChatModal(true);
   };
@@ -302,9 +359,11 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               )}
             >
               <ChatIcon />
-              <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
-                2
-              </span>
+              {totalUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
+                  {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                </span>
+              )}
             </button>
 
             {/* Notifications Button */}
@@ -324,14 +383,65 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               </span>
             </button>
 
-            {/* Logout Button */}
-            <button
-              onClick={() => logout(false)}
-              className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-              title="Sign Out"
-            >
-              <ExitIcon className="h-5 w-5 fill-gray-600" />
-            </button>
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
+                disabled={disabled}
+                className={classNames(
+                  "relative p-2 rounded-xl transition-colors",
+                  disabled 
+                    ? "opacity-50 cursor-not-allowed" 
+                    : "hover:bg-gray-100"
+                )}
+              >
+                <div className="h-9 w-9 rounded-full bg-gray-200 overflow-hidden">
+                  <img 
+                    src={profileData?.photo || "https://via.placeholder.com/36"} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute bottom-0 right-0">
+                  <ProfileDropdownIcon fill="#2C3F58" />
+                </div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showProfileDropdown && (
+                <>
+                  {/* Backdrop to close dropdown */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowProfileDropdown(false)}
+                  />
+                  
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {/* Profile Info */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {profileData?.first_name} {profileData?.last_name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {profileData?.email}
+                      </p>
+                    </div>
+                    
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        setShowProfileDropdown(false);
+                        logout(false);
+                      }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                    >
+                      <ExitIcon className="h-4 w-4 fill-red-600" />
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -340,22 +450,14 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
           {/* Top Row - Logo and Icons */}
           <div className="flex items-center justify-between h-14 gap-2">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 scale-75 origin-left">
               {disabled ? (
-                <div className="flex items-center gap-2 cursor-not-allowed opacity-50">
-                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">Y</span>
-                  </div>
-                  <span className="text-sm font-bold text-indigo-dye">SIS</span>
+                <div className="cursor-not-allowed opacity-50">
+                  <YahshuaConnectLogo />
                 </div>
               ) : (
                 <Link href="/personal-mode">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">Y</span>
-                    </div>
-                    <span className="text-sm font-bold text-indigo-dye">SIS</span>
-                  </div>
+                  <YahshuaConnectLogo />
                 </Link>
               )}
             </div>
@@ -374,9 +476,11 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 )}
               >
                 <ChatIcon />
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
-                  2
-                </span>
+                {totalUnreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
+                    {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                  </span>
+                )}
               </button>
 
               {/* Notifications */}
@@ -396,36 +500,65 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 </span>
               </button>
 
-              {/* Profile */}
-              <button 
-                disabled={disabled}
-                className={classNames(
-                  "relative p-2 rounded-xl transition-colors",
-                  disabled 
-                    ? "opacity-50 cursor-not-allowed" 
-                    : "hover:bg-gray-100"
-                )}
-              >
-                <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
-                  <img 
-                    src="https://via.placeholder.com/32" 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute bottom-0 right-0">
-                  <ProfileDropdownIcon fill="#2C3F58" />
-                </div>
-              </button>
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
+                  disabled={disabled}
+                  className={classNames(
+                    "relative p-2 rounded-xl transition-colors",
+                    disabled 
+                      ? "opacity-50 cursor-not-allowed" 
+                      : "hover:bg-gray-100"
+                  )}
+                >
+                  <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
+                    <img 
+                      src={profileData?.photo || "https://via.placeholder.com/32"} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="absolute bottom-0 right-0">
+                    <ProfileDropdownIcon fill="#2C3F58" />
+                  </div>
+                </button>
 
-              {/* Logout Button */}
-              <button
-                onClick={() => logout(false)}
-                className="p-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-                title="Sign Out"
-              >
-                <ExitIcon className="h-4 w-4 fill-gray-600" />
-              </button>
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <>
+                    {/* Backdrop to close dropdown */}
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowProfileDropdown(false)}
+                    />
+                    
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      {/* Profile Info */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {profileData?.first_name} {profileData?.last_name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {profileData?.email}
+                        </p>
+                      </div>
+                      
+                      {/* Logout Button */}
+                      <button
+                        onClick={() => {
+                          setShowProfileDropdown(false);
+                          logout(false);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                      >
+                        <ExitIcon className="h-4 w-4 fill-red-600" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
@@ -489,7 +622,6 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       <MessagesModal
         isOpen={showMessagesModal}
         onClose={() => setShowMessagesModal(false)}
-        messages={messages}
         onSelectMessage={handleSelectMessage}
       />
 
@@ -506,8 +638,11 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
             setShowChatModal(false);
             setSelectedChat(null);
           }}
+          recipientId={selectedChat.id}
           recipientName={selectedChat.name}
           recipientInitials={selectedChat.initials}
+          jobId={selectedChat.jobId}
+          jobTitle={selectedChat.jobTitle}
         />
       )}
 
@@ -519,6 +654,13 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
         timeRemaining={timeRemaining}
         isRefreshing={isRefreshing}
         isLoggingOut={isLoggingOut}
+      />
+
+      {/* Location Permission Modal */}
+      <LocationPermissionModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationObtained={handleLocationObtained}
       />
     </header>
   );

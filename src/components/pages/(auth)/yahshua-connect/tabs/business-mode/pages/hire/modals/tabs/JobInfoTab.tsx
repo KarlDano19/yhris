@@ -1,5 +1,6 @@
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { categories } from '../../../hooks/usePostJobData';
+import { categories } from '../../../../hooks/usePostJobData';
+import DropDownArrow from '@/svg/DropDownArrow';
+import LocationPickerMap, { LocationData } from '@/components/LocationPickerMap';
 
 interface JobInfoTabProps {
   jobTitle: string;
@@ -8,22 +9,16 @@ interface JobInfoTabProps {
   setCategory: (value: string) => void;
   description: string;
   setDescription: (value: string) => void;
-  location: string;
-  setLocation: (value: string) => void;
+  locationData: LocationData | null;
+  setLocationData: (value: LocationData | null) => void;
   showCategoryDropdown: boolean;
   setShowCategoryDropdown: (value: boolean) => void;
-  showLocationDropdown: boolean;
-  setShowLocationDropdown: (value: boolean) => void;
-  filteredLocations: string[];
-  selectedLocationIndex: number;
-  setSelectedLocationIndex: (value: number) => void;
-  locationInputRef: React.RefObject<HTMLInputElement>;
-  locationDropdownRef: React.RefObject<HTMLDivElement>;
   categoryDropdownRef: React.RefObject<HTMLDivElement>;
-  handleLocationInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleLocationSelect: (selectedLocation: string) => void;
-  handleLocationKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleCategorySelect: (selectedCategory: string) => void;
+  isOtherCategory: boolean;
+  setIsOtherCategory: (value: boolean) => void;
+  customCategory: string;
+  setCustomCategory: (value: string) => void;
   validationErrors: {
     jobTitle?: string;
     description?: string;
@@ -47,45 +42,44 @@ export default function JobInfoTab({
   setCategory,
   description,
   setDescription,
-  location,
-  setLocation,
+  locationData,
+  setLocationData,
   showCategoryDropdown,
   setShowCategoryDropdown,
-  showLocationDropdown,
-  setShowLocationDropdown,
-  filteredLocations,
-  selectedLocationIndex,
-  setSelectedLocationIndex,
-  locationInputRef,
-  locationDropdownRef,
   categoryDropdownRef,
-  handleLocationInputChange,
-  handleLocationSelect,
-  handleLocationKeyDown,
   handleCategorySelect,
+  isOtherCategory,
+  setIsOtherCategory,
+  customCategory,
+  setCustomCategory,
   validationErrors,
   setValidationErrors,
   onNext,
 }: JobInfoTabProps) {
   const handleNext = () => {
     const errors: typeof validationErrors = {};
-    
+
     if (!jobTitle.trim()) {
       errors.jobTitle = 'Job title is required';
     }
     if (!description.trim()) {
       errors.description = 'Description is required';
     }
-    if (!location.trim()) {
+    if (!locationData?.address || !locationData.address.trim()) {
       errors.location = 'Location is required';
     }
 
     if (Object.keys(errors).length > 0) {
-      setValidationErrors(prev => ({ ...prev, ...errors }));
+      setValidationErrors((prev) => ({ ...prev, ...errors }));
+      // Scroll to first error
+      const firstErrorField = document.querySelector('.border-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
-    setValidationErrors(prev => {
+    setValidationErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors.jobTitle;
       delete newErrors.description;
@@ -93,6 +87,13 @@ export default function JobInfoTab({
       return newErrors;
     });
     onNext();
+  };
+
+  const handleLocationChange = (location: LocationData) => {
+    setLocationData(location);
+    if (validationErrors.location) {
+      setValidationErrors((prev) => ({ ...prev, location: undefined }));
+    }
   };
 
   return (
@@ -110,7 +111,7 @@ export default function JobInfoTab({
             onChange={(e) => {
               setJobTitle(e.target.value);
               if (validationErrors.jobTitle) {
-                setValidationErrors(prev => ({ ...prev, jobTitle: undefined }));
+                setValidationErrors((prev) => ({ ...prev, jobTitle: undefined }));
               }
             }}
             placeholder="e.g., House Cleaning Service"
@@ -136,9 +137,9 @@ export default function JobInfoTab({
               className="w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 text-left bg-white flex items-center justify-between"
             >
               <span className={category ? 'text-gray-900' : 'text-gray-400'}>
-                {category || 'Select category'}
+                {isOtherCategory ? 'Other' : category || 'Select category'}
               </span>
-              <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+              <DropDownArrow />
             </button>
             {showCategoryDropdown && (
               <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
@@ -146,7 +147,18 @@ export default function JobInfoTab({
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => handleCategorySelect(cat)}
+                    onClick={() => {
+                      if (cat === 'Other') {
+                        setIsOtherCategory(true);
+                        setCategory('');
+                        setCustomCategory('');
+                      } else {
+                        setIsOtherCategory(false);
+                        setCustomCategory('');
+                        handleCategorySelect(cat);
+                      }
+                      setShowCategoryDropdown(false);
+                    }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   >
                     {cat}
@@ -155,6 +167,21 @@ export default function JobInfoTab({
               </div>
             )}
           </div>
+          {/* Custom Category Input when "Other" is selected */}
+          {isOtherCategory && (
+            <div className="mt-2">
+              <input
+                type="text"
+                value={customCategory}
+                onChange={(e) => {
+                  setCustomCategory(e.target.value);
+                  setCategory(e.target.value);
+                }}
+                placeholder="Enter custom category"
+                className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
+              />
+            </div>
+          )}
         </div>
 
         {/* Description */}
@@ -168,7 +195,7 @@ export default function JobInfoTab({
             onChange={(e) => {
               setDescription(e.target.value);
               if (validationErrors.description) {
-                setValidationErrors(prev => ({ ...prev, description: undefined }));
+                setValidationErrors((prev) => ({ ...prev, description: undefined }));
               }
             }}
             placeholder="Describe the job in detail..."
@@ -183,53 +210,17 @@ export default function JobInfoTab({
           )}
         </div>
 
-        {/* Location */}
-        <div className="relative" ref={locationDropdownRef}>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+        {/* Location with Map Picker */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Location <span className="text-red-600">*</span>
           </label>
-          <div className="relative">
-            <input
-              ref={locationInputRef}
-              type="text"
-              id="location"
-              value={location}
-              onChange={(e) => {
-                handleLocationInputChange(e);
-                if (validationErrors.location) {
-                  setValidationErrors(prev => ({ ...prev, location: undefined }));
-                }
-              }}
-              onFocus={() => setShowLocationDropdown(true)}
-              onKeyDown={handleLocationKeyDown}
-              placeholder="Select location"
-              className={`block w-full rounded-lg border shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 pr-10 ${
-                validationErrors.location ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-            {showLocationDropdown && filteredLocations.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none">
-                {filteredLocations.map((loc, index) => (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => handleLocationSelect(loc)}
-                    className={`block w-full text-left px-4 py-2 text-sm ${
-                      index === selectedLocationIndex
-                        ? 'bg-savoy-blue text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {loc}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          {validationErrors.location && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.location}</p>
-          )}
+          <LocationPickerMap
+            value={locationData}
+            onChange={handleLocationChange}
+            placeholder="Search for a location or click on the map..."
+            error={validationErrors.location}
+          />
         </div>
       </div>
 
@@ -246,4 +237,3 @@ export default function JobInfoTab({
     </div>
   );
 }
-

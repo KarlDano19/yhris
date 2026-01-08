@@ -1,4 +1,7 @@
+import { useState } from 'react';
 
+import Modal from '../../../../../components/Modal';
+import ChatModal from '../../../../../modals/ChatModal';
 
 import { 
   StarIcon, 
@@ -14,10 +17,10 @@ import {
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import Modal from '../../../../../components/Modal';
 
 interface ApplicantProfileData {
   id: number;
+  applicantId: number;
   name: string;
   initials: string;
   rating: number;
@@ -60,6 +63,7 @@ interface ApplicantProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   jobTitle: string;
+  jobId: number;
   applicant: ApplicantProfileData;
   onBack: () => void;
   onMessage: (applicantId: number) => void;
@@ -70,11 +74,13 @@ const ApplicantProfileModal = ({
   isOpen,
   onClose,
   jobTitle,
+  jobId,
   applicant,
   onBack,
   onMessage,
   onHire,
 }: ApplicantProfileModalProps) => {
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -135,7 +141,7 @@ const ApplicantProfileModal = ({
                     {/* Action Buttons */}
                     <div className="flex gap-3">
                       <button
-                        onClick={() => onMessage(applicant.id)}
+                        onClick={() => setIsChatModalOpen(true)}
                         className="px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center gap-2"
                       >
                         <ChatBubbleLeftRightIcon className="h-5 w-5" />
@@ -151,10 +157,12 @@ const ApplicantProfileModal = ({
                   </div>
 
                   {/* Application Message */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-2">Application Message</h3>
-                    <p className="text-sm text-gray-700">{applicant.applicationMessage}</p>
-                  </div>
+                  {applicant.applicationMessage && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-2">Application Message</h3>
+                      <p className="text-sm text-gray-700">{applicant.applicationMessage}</p>
+                    </div>
+                  )}
 
                   {/* Basic Information */}
                   <div className="mb-6">
@@ -180,120 +188,143 @@ const ApplicantProfileModal = ({
                   </div>
 
                   {/* Skills */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {applicant.skills.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-200"
-                        >
-                          {skill}
-                        </span>
-                      ))}
+                  {applicant.skills && applicant.skills.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Skills</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {applicant.skills.map((skill, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-200"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Work Experience */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Work Experience</h3>
-                    <div className="space-y-3">
-                      {applicant.workExperience.map((exp, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <BuildingOfficeIcon className="h-5 w-5 text-gray-400 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">{exp.position}</p>
-                            <p className="text-sm text-gray-600">{exp.company}</p>
-                            <p className="text-sm text-gray-500">{exp.period}</p>
+                  {applicant.workExperience && applicant.workExperience.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Work Experience</h3>
+                      <div className="space-y-3">
+                        {applicant.workExperience.map((exp, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <BuildingOfficeIcon className="h-5 w-5 text-gray-400 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{exp.position}</p>
+                              <p className="text-sm text-gray-600">{exp.company}</p>
+                              {exp.period && <p className="text-sm text-gray-500">{exp.period}</p>}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Education */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Education</h3>
-                    <div className="space-y-3">
-                      {applicant.education.map((edu, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <AcademicCapIcon className="h-5 w-5 text-gray-400 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">{edu.degree}</p>
-                            <p className="text-sm text-gray-600">{edu.school}</p>
-                            <p className="text-sm text-gray-500">{edu.year}</p>
+                  {applicant.education && applicant.education.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Education</h3>
+                      <div className="space-y-3">
+                        {applicant.education.map((edu, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <AcademicCapIcon className="h-5 w-5 text-gray-400 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{edu.degree}</p>
+                              {edu.school && <p className="text-sm text-gray-600">{edu.school}</p>}
+                              {edu.year && <p className="text-sm text-gray-500">{edu.year}</p>}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Certifications */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Certifications</h3>
-                    <div className="space-y-3">
-                      {applicant.certifications.map((cert, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <DocumentTextIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-sm text-gray-700">{cert.name}</span>
+                  {applicant.certifications && applicant.certifications.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Certifications</h3>
+                      <div className="space-y-3">
+                        {applicant.certifications.map((cert, index) => (
+                          <div key={index} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <DocumentTextIcon className="h-5 w-5 text-gray-400" />
+                              <span className="text-sm text-gray-700">{cert.name}</span>
+                            </div>
+                            {cert.verified && (
+                              <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                                <CheckCircleIcon className="h-4 w-4" />
+                                Verified
+                              </span>
+                            )}
                           </div>
-                          {cert.verified && (
-                            <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                              <CheckCircleIcon className="h-4 w-4" />
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Resume */}
-                  <div className="mb-6">
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Resume</h3>
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <DocumentTextIcon className="h-8 w-8 text-red-500" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{applicant.resume.filename}</p>
-                          <p className="text-xs text-gray-500">{applicant.resume.type}</p>
+                  {applicant.resume && applicant.resume.filename && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Resume</h3>
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <DocumentTextIcon className="h-8 w-8 text-red-500" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{applicant.resume.filename}</p>
+                            <p className="text-xs text-gray-500">{applicant.resume.type}</p>
+                          </div>
                         </div>
+                        <button
+                          onClick={handleDownloadResume}
+                          className="px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center gap-2"
+                        >
+                          <DocumentArrowDownIcon className="h-5 w-5" />
+                          Download
+                        </button>
                       </div>
-                      <button
-                        onClick={handleDownloadResume}
-                        className="px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center gap-2"
-                      >
-                        <DocumentArrowDownIcon className="h-5 w-5" />
-                        Download
-                      </button>
                     </div>
-                  </div>
+                  )}
 
                   {/* Reviews */}
-                  <div>
-                    <h3 className="text-base font-bold text-gray-900 mb-3">Reviews ({applicant.reviews.length})</h3>
-                    <div className="space-y-4">
-                      {applicant.reviews.map((review, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                            {review.reviewerInitials}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-semibold text-gray-900">{review.reviewerName}</span>
-                              <div className="flex items-center gap-1">
-                                {renderStars(review.rating)}
-                              </div>
+                  {applicant.reviews && applicant.reviews.length > 0 && (
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900 mb-3">Reviews ({applicant.reviews.length})</h3>
+                      <div className="space-y-4">
+                        {applicant.reviews.map((review, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                              {review.reviewerInitials}
                             </div>
-                            <p className="text-sm text-gray-700 mb-1">{review.quote}</p>
-                            <p className="text-xs text-gray-500">{review.date}</p>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-semibold text-gray-900">{review.reviewerName}</span>
+                                <div className="flex items-center gap-1">
+                                  {renderStars(review.rating)}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-1">{review.quote}</p>
+                              <p className="text-xs text-gray-500">{review.date}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
       </div>
+
+      {/* Chat Modal */}
+      <ChatModal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        recipientId={applicant.applicantId}
+        recipientName={applicant.name}
+        recipientInitials={applicant.initials}
+        jobId={jobId}
+        jobTitle={jobTitle}
+      />
     </Modal>
   );
 };

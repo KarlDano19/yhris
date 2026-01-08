@@ -49,6 +49,10 @@ async function updateApplicantProfile(data: any) {
     // About/Description
     if (data.description !== undefined) finalData.description = data.description;
 
+    // Location coordinates
+    if (data.latitude !== undefined) finalData.latitude = data.latitude;
+    if (data.longitude !== undefined) finalData.longitude = data.longitude;
+
     const formData = new FormData();
     formData.append('profile_form', JSON.stringify(finalData));
 

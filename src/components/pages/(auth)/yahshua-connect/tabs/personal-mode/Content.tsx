@@ -289,11 +289,13 @@ const Content = ({ averageRating }: ContentProps) => {
       </div> */}
 
       {/* Job Details Modal */}
-      <JobDetailsModal
-        isOpen={selectedJobId !== null}
-        onClose={handleCloseJobDetails}
-        jobId={selectedJobId}
-      />
+      {selectedJobId !== null && (
+        <JobDetailsModal
+          isOpen={selectedJobId !== null}
+          onClose={handleCloseJobDetails}
+          jobId={selectedJobId}
+        />
+      )}
     </div>
   );
 };

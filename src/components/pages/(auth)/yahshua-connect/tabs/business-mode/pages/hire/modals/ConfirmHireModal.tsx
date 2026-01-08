@@ -1,10 +1,17 @@
-
-
 import { useState } from 'react';
+
 import Modal from '../../../../../components/Modal';
+
 import { StarIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline';
-import { Applicant } from '../../../hooks/useHireData';
+
+interface ApplicantData {
+  id: number;
+  name: string;
+  initials: string;
+  rating: number;
+  reviewsCount: number;
+}
 
 interface JobDetails {
   title: string;
@@ -16,9 +23,10 @@ interface JobDetails {
 interface ConfirmHireModalProps {
   isOpen: boolean;
   onClose: () => void;
-  applicant: Applicant;
+  applicant: ApplicantData;
   jobDetails: JobDetails;
   onConfirm: (message?: string) => void;
+  isLoading?: boolean;
 }
 
 const ConfirmHireModal = ({
@@ -27,6 +35,7 @@ const ConfirmHireModal = ({
   applicant,
   jobDetails,
   onConfirm,
+  isLoading = false,
 }: ConfirmHireModalProps) => {
   const [message, setMessage] = useState('');
 
@@ -56,16 +65,21 @@ const ConfirmHireModal = ({
       <button
         type="button"
         onClick={handleClose}
-        className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+        disabled={isLoading}
+        className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Cancel
       </button>
       <button
         type="button"
         onClick={handleConfirm}
-        className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+        disabled={isLoading}
+        className="px-6 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
       >
-        Confirm Hire
+        {isLoading && (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+        )}
+        {isLoading ? 'Hiring...' : 'Confirm Hire'}
       </button>
     </div>
   );

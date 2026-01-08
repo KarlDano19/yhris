@@ -1,16 +1,15 @@
-
-
-import { useState } from 'react';
 import Modal from '../../../../../components/Modal';
+
 import { StarIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline';
-import { Applicant } from '../../../hooks/useHireData';
+
+import { T_ApplicantData } from '@/types/business-mode';
 
 interface ViewApplicantsModalProps {
   isOpen: boolean;
   onClose: () => void;
   jobTitle: string;
-  applicants: Applicant[];
+  applicants: T_ApplicantData[];
   onViewProfile?: (applicantId: number) => void;
   onHire?: (applicantId: number) => void;
 }
@@ -121,12 +120,22 @@ const ViewApplicantsModal = ({
                 >
                   View Full Profile
                 </button>
-                <button
-                  onClick={() => handleHire(applicant.id)}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-                >
-                  Hire
-                </button>
+                {applicant.status === 'accepted' ? (
+                  <div className="flex-1 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-center">
+                    Hired
+                  </div>
+                ) : applicant.status === 'rejected' ? (
+                  <div className="flex-1 px-4 py-2 bg-gray-100 text-gray-500 rounded-lg font-medium text-center">
+                    Rejected
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleHire(applicant.id)}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Hire
+                  </button>
+                )}
               </div>
             </div>
           ))

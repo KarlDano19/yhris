@@ -216,23 +216,27 @@ const Content = () => {
         </div>
 
       {/* Job Filters Modal */}
-      <JobFiltersModal
-        isOpen={isFiltersModalOpen}
-        onClose={() => setIsFiltersModalOpen(false)}
-        filters={filters}
-        onApplyFilters={(newFilters) => {
-          setFilters(newFilters);
-          setDisplayCount(20); // Reset display count when filters change
-          setSelectedJobId(null); // Reset selected job when filters change
-        }}
-      />
+      {isFiltersModalOpen && (
+        <JobFiltersModal
+          isOpen={isFiltersModalOpen}
+          onClose={() => setIsFiltersModalOpen(false)}
+          filters={filters}
+          onApplyFilters={(newFilters) => {
+            setFilters(newFilters);
+            setDisplayCount(20); // Reset display count when filters change
+            setSelectedJobId(null); // Reset selected job when filters change
+          }}
+        />
+      )}
 
       {/* Job Details Modal */}
-      <JobDetailsModal
-        isOpen={selectedJobId !== null}
-        onClose={handleCloseJobDetails}
-        jobId={selectedJobId}
-      />
+      {selectedJobId !== null && (
+        <JobDetailsModal
+          isOpen={selectedJobId !== null}
+          onClose={handleCloseJobDetails}
+          jobId={selectedJobId}
+        />
+      )}
     </div>
   );
 };

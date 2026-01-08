@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FunnelIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import EarningsChartCard from './components/cards/EarningsChartCard';
-import FilterRequestsModal from './components/modals/FilterRequestsModal';
+import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import JobChatModal from './pages/find-work/modals/JobChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';

@@ -1,4 +1,5 @@
 import CustomDatePicker from '@/components/CustomDatePicker';
+import { ClockIcon } from '@heroicons/react/24/outline';
 
 interface JobBudgetTabProps {
   budgetType: 'fixed' | 'hourly';
@@ -209,25 +210,49 @@ export default function JobBudgetTab({
                 <label htmlFor="timeFrom" className="block text-xs text-gray-600 mb-1">
                   Time From
                 </label>
-                <input
-                  type="time"
-                  id="timeFrom"
-                  value={scheduleTimeFrom}
-                  onChange={(e) => setScheduleTimeFrom(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                />
+                <div className="relative">
+                  <input
+                    type="time"
+                    id="timeFrom"
+                    value={scheduleTimeFrom}
+                    onChange={(e) => setScheduleTimeFrom(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 [&::-webkit-calendar-picker-indicator]:hidden"
+                    style={{ WebkitAppearance: 'none' }}
+                  />
+                  <div 
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                    onClick={() => {
+                      const timeInput = document.getElementById('timeFrom') as HTMLInputElement;
+                      timeInput?.showPicker();
+                    }}
+                  >
+                    <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                  </div>
+                </div>
               </div>
               <div>
                 <label htmlFor="timeTo" className="block text-xs text-gray-600 mb-1">
                   Time To
                 </label>
-                <input
-                  type="time"
-                  id="timeTo"
-                  value={scheduleTimeTo}
-                  onChange={(e) => setScheduleTimeTo(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2"
-                />
+                <div className="relative">
+                  <input
+                    type="time"
+                    id="timeTo"
+                    value={scheduleTimeTo}
+                    onChange={(e) => setScheduleTimeTo(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-savoy-blue focus:ring-savoy-blue sm:text-sm px-3 py-2 [&::-webkit-calendar-picker-indicator]:hidden"
+                    style={{ WebkitAppearance: 'none' }}
+                  />
+                  <div 
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                    onClick={() => {
+                      const timeInput = document.getElementById('timeTo') as HTMLInputElement;
+                      timeInput?.showPicker();
+                    }}
+                  >
+                    <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -1,15 +1,14 @@
-
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
-import classNames from '@/helpers/classNames';
-import Modal from '../../../../components/Modal';
-import { locationSuggestions } from '../../hooks/usePostJobData';
+
+import Modal from '../../../../../components/Modal';
 import JobInfoTab from './tabs/JobInfoTab';
 import JobBudgetTab from './tabs/JobBudgetTab';
 import JobPreviewTab from './tabs/JobPreviewTab';
 
-interface PostJobModalProps {
+import classNames from '@/helpers/classNames';
+import { LocationData } from '@/components/LocationPickerMap';
+
+interface CreateBusinessJobModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: {
@@ -17,6 +16,8 @@ interface PostJobModalProps {
     category: string;
     description: string;
     location: string;
+    latitude: number | null;
+    longitude: number | null;
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
@@ -24,26 +25,16 @@ interface PostJobModalProps {
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => void;
-  initialData?: {
-    jobTitle: string;
-    category: string;
-    description: string;
-    location: string;
-    budgetType: 'fixed' | 'hourly';
-    budgetMin: string;
-    budgetMax: string;
-    scheduleDate: string;
-    scheduleTimeFrom: string;
-    scheduleTimeTo: string;
-  };
 }
 
-const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalProps) => {
+const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJobModalProps) => {
   const [selectedTab, setSelectedTab] = useState(1);
   const [jobTitle, setJobTitle] = useState('');
   const [category, setCategory] = useState('');
+  const [isOtherCategory, setIsOtherCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
+  const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [budgetType, setBudgetType] = useState<'fixed' | 'hourly'>('fixed');
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
@@ -59,81 +50,19 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
     budgetMax?: string;
   }>({});
 
-  // Load initial data when modal opens or initialData changes
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Reset to first tab when opening
-      setSelectedTab(1);
-      // Clear validation errors when modal opens
-      setValidationErrors({});
-      
-      if (initialData) {
-        setJobTitle(initialData.jobTitle);
-        setCategory(initialData.category);
-        setDescription(initialData.description);
-        setLocation(initialData.location);
-        setBudgetType(initialData.budgetType);
-        setBudgetMin(initialData.budgetMin);
-        setBudgetMax(initialData.budgetMax);
-        // Parse scheduleDate string to Date
-        if (initialData.scheduleDate) {
-          const date = new Date(initialData.scheduleDate);
-          if (!isNaN(date.getTime())) {
-            setScheduleDate(date);
-          }
-        }
-        setScheduleTimeFrom(initialData.scheduleTimeFrom);
-        setScheduleTimeTo(initialData.scheduleTimeTo);
-      } else {
-        // Reset to defaults when opening without initial data
-        setJobTitle('');
-        setCategory('');
-        setDescription('');
-        setLocation('');
-        setBudgetType('fixed');
-        setBudgetMin('');
-        setBudgetMax('');
-        setScheduleDate(null);
-        setScheduleTimeFrom('');
-        setScheduleTimeTo('');
-      }
+      handleReset();
     }
-  }, [initialData, isOpen]);
-
-  // Location dropdown state
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [filteredLocations, setFilteredLocations] = useState<string[]>(locationSuggestions);
-  const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
-  const locationInputRef = useRef<HTMLInputElement>(null);
-  const locationDropdownRef = useRef<HTMLDivElement>(null);
+  }, [isOpen]);
 
   // Category dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Filter locations based on input
-    if (location.trim() === '') {
-      setFilteredLocations(locationSuggestions);
-    } else {
-      const filtered = locationSuggestions.filter((loc) =>
-        loc.toLowerCase().includes(location.toLowerCase())
-      );
-      setFilteredLocations(filtered);
-    }
-    setSelectedLocationIndex(-1);
-  }, [location]);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        locationDropdownRef.current &&
-        !locationDropdownRef.current.contains(event.target as Node) &&
-        locationInputRef.current &&
-        !locationInputRef.current.contains(event.target as Node)
-      ) {
-        setShowLocationDropdown(false);
-      }
       if (
         categoryDropdownRef.current &&
         !categoryDropdownRef.current.contains(event.target as Node)
@@ -145,40 +74,6 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocation(e.target.value);
-    setShowLocationDropdown(true);
-  };
-
-  const handleLocationSelect = (selectedLocation: string) => {
-    setLocation(selectedLocation);
-    setShowLocationDropdown(false);
-    setSelectedLocationIndex(-1);
-  };
-
-  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedLocationIndex((prev) =>
-        prev < filteredLocations.length - 1 ? prev + 1 : prev
-      );
-      setShowLocationDropdown(true);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedLocationIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (selectedLocationIndex >= 0 && filteredLocations[selectedLocationIndex]) {
-        handleLocationSelect(filteredLocations[selectedLocationIndex]);
-      } else {
-        setShowLocationDropdown(false);
-      }
-    } else if (e.key === 'Escape') {
-      setShowLocationDropdown(false);
-      setSelectedLocationIndex(-1);
-    }
-  };
 
   const handleCategorySelect = (selectedCategory: string) => {
     setCategory(selectedCategory);
@@ -196,7 +91,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
     if (!description.trim()) {
       errors.description = 'Description is required';
     }
-    if (!location.trim()) {
+    if (!locationData?.address) {
       errors.location = 'Location is required';
     }
     if (!scheduleDate) {
@@ -237,7 +132,9 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
       jobTitle: jobTitle.trim(),
       category,
       description: description.trim(),
-      location: location.trim(),
+      location: locationData?.address.trim() || '',
+      latitude: locationData?.latitude || null,
+      longitude: locationData?.longitude || null,
       budgetType,
       budgetMin: budgetMin.trim(),
       budgetMax: budgetMax.trim(),
@@ -254,8 +151,10 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
   const handleReset = () => {
     setJobTitle('');
     setCategory('');
+    setIsOtherCategory(false);
+    setCustomCategory('');
     setDescription('');
-    setLocation('');
+    setLocationData(null);
     setBudgetType('fixed');
     setBudgetMin('');
     setBudgetMax('');
@@ -275,7 +174,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={initialData ? 'Edit Job' : 'Post a New Job'}
+      title="Post a New Job"
       size="5xl"
     >
       {/* Tab Navigation */}
@@ -284,7 +183,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
           <div className="w-full bg-gray-200 rounded-full h-1">
             <div
               className={classNames(
-                'bg-gray-600 h-1 rounded-full transition-all duration-300',
+                'bg-savoy-blue h-1 rounded-full transition-all duration-300',
                 selectedTab === 1 && 'w-0',
                 selectedTab === 2 && 'w-[50%]',
                 selectedTab === 3 && 'w-[100%]',
@@ -296,25 +195,29 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
           className="mb-px flex relative justify-between w-[90%] mx-auto mt-[-9px]"
           aria-label="post-job-tabs"
         >
-          <li className="text-center text-sm font-semibold list-none flex flex-col items-center text-gray-900">
+          <li 
+            onClick={() => setSelectedTab(1)}
+            className="text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-pointer hover:opacity-80 transition-opacity"
+          >
             <div className="bg-white px-2">
-              <div className="h-8 w-8 bg-gray-900 border-2 mb-2 rounded-lg flex justify-center items-center border-gray-900">
+              <div className="h-8 w-8 bg-savoy-blue border-2 mb-2 rounded-lg flex justify-center items-center border-savoy-blue">
                 <h1 className="text-white">1</h1>
               </div>
             </div>
             Job Info
           </li>
           <li
+            onClick={() => setSelectedTab(2)}
             className={classNames(
-              'text-center text-sm font-semibold list-none flex flex-col items-center',
-              selectedTab >= 2 ? 'text-gray-900' : 'text-gray-500'
+              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity',
+              selectedTab >= 2 ? 'text-savoy-blue' : 'text-gray-500'
             )}
           >
             <div className="bg-white px-2">
               <div
                 className={classNames(
                   'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
-                  selectedTab >= 2 ? 'border-gray-900 bg-gray-900' : 'border-gray-500 bg-gray-500'
+                  selectedTab >= 2 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                 )}
               >
                 <h1 className="text-white">2</h1>
@@ -323,16 +226,17 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
             Budget & Schedule
           </li>
           <li
+            onClick={() => setSelectedTab(3)}
             className={classNames(
-              'text-center text-sm font-semibold list-none flex flex-col items-center',
-              selectedTab >= 3 ? 'text-gray-900' : 'text-gray-500'
+              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity',
+              selectedTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
             )}
           >
             <div className="bg-white px-2">
               <div
                 className={classNames(
                   'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
-                  selectedTab >= 3 ? 'border-gray-900 bg-gray-900' : 'border-gray-500 bg-gray-500'
+                  selectedTab >= 3 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                 )}
               >
                 <h1 className="text-white">3</h1>
@@ -352,22 +256,16 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
           setCategory={setCategory}
           description={description}
           setDescription={setDescription}
-          location={location}
-          setLocation={setLocation}
+          locationData={locationData}
+          setLocationData={setLocationData}
           showCategoryDropdown={showCategoryDropdown}
           setShowCategoryDropdown={setShowCategoryDropdown}
-          showLocationDropdown={showLocationDropdown}
-          setShowLocationDropdown={setShowLocationDropdown}
-          filteredLocations={filteredLocations}
-          selectedLocationIndex={selectedLocationIndex}
-          setSelectedLocationIndex={setSelectedLocationIndex}
-          locationInputRef={locationInputRef}
-          locationDropdownRef={locationDropdownRef}
           categoryDropdownRef={categoryDropdownRef}
-          handleLocationInputChange={handleLocationInputChange}
-          handleLocationSelect={handleLocationSelect}
-          handleLocationKeyDown={handleLocationKeyDown}
           handleCategorySelect={handleCategorySelect}
+          isOtherCategory={isOtherCategory}
+          setIsOtherCategory={setIsOtherCategory}
+          customCategory={customCategory}
+          setCustomCategory={setCustomCategory}
           validationErrors={validationErrors}
           setValidationErrors={setValidationErrors}
           onNext={() => setSelectedTab(2)}
@@ -400,7 +298,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
           jobTitle={jobTitle}
           category={category}
           description={description}
-          location={location}
+          location={locationData?.address || ''}
           budgetType={budgetType}
           budgetMin={budgetMin}
           budgetMax={budgetMax}
@@ -415,4 +313,5 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
   );
 };
 
-export default PostJobModal;
+export default CreateBusinessJobModal;
+

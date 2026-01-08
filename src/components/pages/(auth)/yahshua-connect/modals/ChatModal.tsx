@@ -1,38 +1,90 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import Modal from '../components/Modal';
 
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-
-interface ChatMessage {
-  id: number;
-  sender: 'user' | 'other';
-  message: string;
-  timestamp: string;
-}
+import { useGetApplicantChat } from '../tabs/business-mode/hooks/chat/useGetApplicantChat';
+import { useGetChatMessages } from '../tabs/business-mode/hooks/chat/useGetChatMessages';
+import useSendChatMessage from '../tabs/business-mode/hooks/chat/useSendChatMessage';
+import useMarkChatMessagesRead from '../tabs/business-mode/hooks/chat/useMarkChatMessagesRead';
+import toast from 'react-hot-toast';
 
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
+  recipientId?: number;
   recipientName: string;
   recipientInitials: string;
-  messages?: ChatMessage[];
+  jobId?: number;
+  jobTitle?: string;
 }
 
 const ChatModal = ({
   isOpen,
   onClose,
+  recipientId,
   recipientName,
   recipientInitials,
-  messages = [],
+  jobId,
+  jobTitle,
 }: ChatModalProps) => {
   const [messageInput, setMessageInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (messageInput.trim()) {
-      // Handle send message logic here
-      console.log('Sending message:', messageInput);
-      setMessageInput('');
+  // Get or create chat
+  const { data: chatData, isLoading: isChatLoading } = useGetApplicantChat(
+    recipientId,
+    jobId,
+    isOpen && !!recipientId
+  );
+
+  // Get job ID from chatData if not provided as prop
+  const effectiveJobId = jobId || chatData?.business_job_posting_id;
+  
+  // Get messages
+  const { data: messagesData, isLoading: isMessagesLoading } = useGetChatMessages(
+    chatData?.id,
+    effectiveJobId,
+    isOpen && !!chatData?.id
+  );
+
+  // Send message mutation
+  const sendMessageMutation = useSendChatMessage();
+
+  // Mark messages as read
+  const markReadMutation = useMarkChatMessagesRead();
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messagesData?.records]);
+
+  // Mark messages as read when modal opens
+  useEffect(() => {
+    if (isOpen && chatData?.id) {
+      markReadMutation.mutate(chatData.id);
+    }
+  }, [isOpen, chatData?.id]);
+
+  const messages = messagesData?.records || [];
+  
+  // Get job title from chatData if not provided as prop
+  const displayJobTitle = jobTitle || chatData?.business_job_posting?.job_title;
+  const displayJobId = jobId || chatData?.business_job_posting_id;
+
+  const handleSend = async () => {
+    if (messageInput.trim() && chatData?.id) {
+      try {
+        await sendMessageMutation.mutateAsync({
+          chatId: chatData.id,
+          message: messageInput.trim(),
+          jobPostingId: effectiveJobId,
+        });
+        setMessageInput('');
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      } catch (error: any) {
+        toast.error(error?.message || 'Failed to send message');
+      }
     }
   };
 
@@ -56,9 +108,20 @@ const ChatModal = ({
       }
     >
       <div className="flex flex-col h-[500px]">
+        {/* Job Title (if provided) */}
+        {displayJobTitle && (
+          <div className="mb-4 pb-4 border-b border-gray-200">
+            <p className="text-sm text-gray-600">Job: <span className="font-semibold text-gray-900">{displayJobTitle}</span></p>
+          </div>
+        )}
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto mb-4">
-          {messages.length === 0 ? (
+          {(isChatLoading || isMessagesLoading) ? (
+            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="text-sm">Loading messages...</div>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <svg
@@ -79,29 +142,40 @@ const ChatModal = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+              {messages.map((msg: any) => {
+                const isSentByMe = msg.is_sent_by_me;
+                const timestamp = msg.created_at
+                  ? new Date(msg.created_at).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '';
+
+                return (
                   <div
-                    className={`max-w-[70%] rounded-lg p-3 ${
-                      msg.sender === 'user'
-                        ? 'bg-savoy-blue text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
+                    key={msg.id}
+                    className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
                   >
-                    <p className="text-sm">{msg.message}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        msg.sender === 'user' ? 'text-white/70' : 'text-gray-500'
+                    <div
+                      className={`max-w-[70%] rounded-lg p-3 ${
+                        isSentByMe
+                          ? 'bg-savoy-blue text-white'
+                          : 'bg-gray-100 text-gray-900'
                       }`}
                     >
-                      {msg.timestamp}
-                    </p>
+                      <p className="text-sm">{msg.message}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          isSentByMe ? 'text-white/70' : 'text-gray-500'
+                        }`}
+                      >
+                        {timestamp}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
@@ -118,7 +192,7 @@ const ChatModal = ({
           />
           <button
             onClick={handleSend}
-            disabled={!messageInput.trim()}
+            disabled={!messageInput.trim() || sendMessageMutation.isLoading || !chatData?.id}
             className="p-2.5 bg-savoy-blue text-white rounded-lg hover:bg-savoy-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <PaperAirplaneIcon className="h-5 w-5" />

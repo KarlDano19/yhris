@@ -1,4 +1,17 @@
-import { HiredApplicant, ApplicantProfileData } from './types/hireTypes';
+import { T_ApplicantProfileData } from '@/types/business-mode';
+
+// Type alias for backward compatibility
+type ApplicantProfileData = T_ApplicantProfileData;
+
+// Hired Applicant type (for mock data)
+interface HiredApplicant {
+  id: number;
+  serviceName: string;
+  providerName: string;
+  providerInitials: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  price: number;
+}
 
 export interface JobPosting {
   id: number;
