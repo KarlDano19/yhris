@@ -44,8 +44,8 @@ export const useHomeData = () => {
   // Get all jobs (both pending and accepted/scheduled) - same as Find Work
   const allJobs = getAllJobs();
   
-  // Transform to JobRequest format for JobRequestCard component
-  // Include status so JobRequestCard can show "Scheduled" badge for accepted jobs
+  // Transform to JobRequest format for BusinessJobCard component
+  // Include status so BusinessJobCard can show "Scheduled" badge for accepted jobs
   const jobRequests = allJobs.map((job) => ({
     id: job.id,
     title: job.title,

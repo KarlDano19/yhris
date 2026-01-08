@@ -1,19 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { PlusIcon, PencilIcon, EyeIcon, CalendarIcon, UserGroupIcon, CurrencyDollarIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import YahshuaConnectHeader from '../../../../YahshuaConnectHeader';
-import FloatingMenuBar from '../../../../components/FloatingMenuBar';
-import ProfileCard from '../../components/cards/ProfileCard';
-import QuickActionsCard from '../../components/cards/QuickActionsCard';
+import { PlusIcon, PencilIcon, EyeIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import PostJobModal from '../../components/modals/PostJobModal';
-import UpcomingBookingsModal from '../../components/modals/UpcomingBookingsModal';
-import MyHiresModal from '../../components/modals/MyHiresModal';
+import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
+import MyHiresModal from '../../../../modals/MyHiresModal';
 import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from '../../components/modals/SubmitPaymentProofModal';
-import JobChatModal from '../../components/modals/JobChatModal';
+import JobChatModal from '../find-work/modals/JobChatModal';
 import { useHireData } from '../../hooks/useHireData';
 import { useMyJobsData } from '../../hooks/useMyJobsData';
 
@@ -353,152 +349,107 @@ const Content = () => {
 
   return (
     <>
-      {/* <YahshuaConnectHeader /> */} {/* Moved to header.tsx */}
-      <FloatingMenuBar />
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
-              <ProfileCard
-                name="John Doe"
-                title="Plumber • Electrician"
-                rating={4.9}
-                reviewsCount={27}
-                initial="JD"
-                availableForBookings={true}
-                earnings={45230}
-                spending={12800}
-                onAvailabilityChange={(isAvailable) => {
-                  console.log('Availability changed:', isAvailable);
-                }}
-              />
-              <QuickActionsCard
-                actions={[
-                  {
-                    icon: CalendarIcon,
-                    label: 'Upcoming Bookings',
-                    count: activeJobs.length,
-                    badgeColor: 'purple',
-                    onClick: () => setIsUpcomingBookingsModalOpen(true),
-                  },
-                  {
-                    icon: UserGroupIcon,
-                    label: 'My Hires',
-                    onClick: () => setIsMyHiresModalOpen(true),
-                  },
-                ]}
-              />
-            </div>
+      <div className="space-y-6">
+        {/* Hire Header */}
+        <div className="bg-white rounded-lg shadow-sm  p-5">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-gray-900">Hire Someone</h2>
+            <button
+              onClick={() => setIsPostJobModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span>Post a Job</span>
+            </button>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-9">
-            <div className="space-y-6">
-              {/* Hire Header */}
-              <div className="bg-white rounded-lg shadow-sm  p-5">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-bold text-gray-900">Hire Someone</h2>
+          {/* Job Postings List */}
+          <div className="space-y-4">
+            {jobPostings.map((job) => {
+              const hireInfo = hiredApplicantsByJob.get(job.id);
+              const isHired = !!hireInfo;
+              
+              return (
+              <div
+                key={job.id}
+                className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{job.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {job.category} • {job.location}
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4">{job.description}</p>
+                  </div>
+                  {isHired ? (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                      Hired
+                    </span>
+                  ) : job.status === 'active' && (
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Job Details */}
+                <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <ClockIcon className="h-4 w-4" />
+                    <span>
+                      {job.date}, {job.time}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CurrencyDollarIcon className="h-4 w-4" />
+                    <span className="font-semibold text-green-600">{job.priceRange}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <UserGroupIcon className="h-4 w-4" />
+                    <span>{applicants.length} applicant{applicants.length !== 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+
+                {/* Hired Info */}
+                {isHired && hireInfo && (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-savoy-blue mb-2">
+                      Hired: {hireInfo.applicantName}
+                    </p>
+                    {hireInfo.paymentProofSubmitted ? (
+                      <p className="text-sm text-gray-700 flex items-center gap-1">
+                        Payment proof submitted <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                      </p>
+                    ) : (
+                      <button
+                        onClick={() => handleSubmitPaymentProofFromJob(job.id)}
+                        className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
+                      >
+                        Submit Payment Proof
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
                   <button
-                    onClick={() => setIsPostJobModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    onClick={() => handleViewApplicants(job.id)}
+                    className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
                   >
-                    <PlusIcon className="h-5 w-5" />
-                    <span>Post a Job</span>
+                    View Applicants ({applicants.length})
+                  </button>
+                  <button
+                    onClick={() => handleEditPost(job.id)}
+                    className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Edit Post
                   </button>
                 </div>
-
-                {/* Job Postings List */}
-                <div className="space-y-4">
-                  {jobPostings.map((job) => {
-                    const hireInfo = hiredApplicantsByJob.get(job.id);
-                    const isHired = !!hireInfo;
-                    
-                    return (
-                    <div
-                      key={job.id}
-                      className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">{job.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            {job.category} • {job.location}
-                          </p>
-                          <p className="text-sm text-gray-700 mb-4">{job.description}</p>
-                        </div>
-                        {isHired ? (
-                          <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                            Hired
-                          </span>
-                        ) : job.status === 'active' && (
-                          <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                            Active
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Job Details */}
-                      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <ClockIcon className="h-4 w-4" />
-                          <span>
-                            {job.date}, {job.time}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CurrencyDollarIcon className="h-4 w-4" />
-                          <span className="font-semibold text-green-600">{job.priceRange}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <UserGroupIcon className="h-4 w-4" />
-                          <span>{applicants.length} applicant{applicants.length !== 1 ? 's' : ''}</span>
-                        </div>
-                      </div>
-
-                      {/* Hired Info */}
-                      {isHired && hireInfo && (
-                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                          <p className="text-sm text-savoy-blue mb-2">
-                            Hired: {hireInfo.applicantName}
-                          </p>
-                          {hireInfo.paymentProofSubmitted ? (
-                            <p className="text-sm text-gray-700 flex items-center gap-1">
-                              Payment proof submitted <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                            </p>
-                          ) : (
-                            <button
-                              onClick={() => handleSubmitPaymentProofFromJob(job.id)}
-                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
-                            >
-                              Submit Payment Proof
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleViewApplicants(job.id)}
-                          className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
-                        >
-                          View Applicants ({applicants.length})
-                        </button>
-                        <button
-                          onClick={() => handleEditPost(job.id)}
-                          className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                        >
-                          Edit Post
-                        </button>
-                      </div>
-                    </div>
-                  );
-                  })}
-                </div>
               </div>
-            </div>
+            );
+            })}
           </div>
         </div>
       </div>

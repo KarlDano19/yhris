@@ -1,5 +1,4 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/pages/jobs/Content";
-import PersonalModeLayout from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/PersonalModeLayout";
 
 export const metadata = {
   title: "Jobs - YAHSHUA CONNECT",
@@ -7,11 +6,7 @@ export const metadata = {
 };
 
 const JobsPage = async () => {
-  return (
-    <PersonalModeLayout>
-      <Content />
-    </PersonalModeLayout>
-  );
+  return <Content />;
 };
 
 export default JobsPage;

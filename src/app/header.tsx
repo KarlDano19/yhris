@@ -57,6 +57,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
   const yahshuaConnectRoutes: string[] = [
     'personal-mode',
     'business-mode',
+    'profile',
     'job-applicant-form',
     'setup-applicant-profile',
   ];
