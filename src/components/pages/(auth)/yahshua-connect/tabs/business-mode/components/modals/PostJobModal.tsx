@@ -67,35 +67,35 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
       // Clear validation errors when modal opens
       setValidationErrors({});
       
-      if (initialData) {
-        setJobTitle(initialData.jobTitle);
-        setCategory(initialData.category);
-        setDescription(initialData.description);
-        setLocation(initialData.location);
-        setBudgetType(initialData.budgetType);
-        setBudgetMin(initialData.budgetMin);
-        setBudgetMax(initialData.budgetMax);
-        // Parse scheduleDate string to Date
-        if (initialData.scheduleDate) {
-          const date = new Date(initialData.scheduleDate);
-          if (!isNaN(date.getTime())) {
-            setScheduleDate(date);
-          }
+    if (initialData) {
+      setJobTitle(initialData.jobTitle);
+      setCategory(initialData.category);
+      setDescription(initialData.description);
+      setLocation(initialData.location);
+      setBudgetType(initialData.budgetType);
+      setBudgetMin(initialData.budgetMin);
+      setBudgetMax(initialData.budgetMax);
+      // Parse scheduleDate string to Date
+      if (initialData.scheduleDate) {
+        const date = new Date(initialData.scheduleDate);
+        if (!isNaN(date.getTime())) {
+          setScheduleDate(date);
         }
-        setScheduleTimeFrom(initialData.scheduleTimeFrom);
-        setScheduleTimeTo(initialData.scheduleTimeTo);
-      } else {
+      }
+      setScheduleTimeFrom(initialData.scheduleTimeFrom);
+      setScheduleTimeTo(initialData.scheduleTimeTo);
+    } else {
         // Reset to defaults when opening without initial data
-        setJobTitle('');
-        setCategory('');
-        setDescription('');
-        setLocation('');
-        setBudgetType('fixed');
+      setJobTitle('');
+      setCategory('');
+      setDescription('');
+      setLocation('');
+      setBudgetType('fixed');
         setBudgetMin('');
         setBudgetMax('');
-        setScheduleDate(null);
-        setScheduleTimeFrom('');
-        setScheduleTimeTo('');
+      setScheduleDate(null);
+      setScheduleTimeFrom('');
+      setScheduleTimeTo('');
       }
     }
   }, [initialData, isOpen]);
@@ -277,7 +277,7 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
       onClose={handleClose}
       title={initialData ? 'Edit Job' : 'Post a New Job'}
       size="5xl"
-    >
+        >
       {/* Tab Navigation */}
       <div className="hidden sm:block pt-6 pb-6">
         <div className="md:w-[76%] lg:w-[80%] mx-auto translate-y-[10px]">
@@ -290,8 +290,8 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
                 selectedTab === 3 && 'w-[100%]',
               )}
             ></div>
-          </div>
-        </div>
+                </div>
+                </div>
         <nav
           className="mb-px flex relative justify-between w-[90%] mx-auto mt-[-9px]"
           aria-label="post-job-tabs"
@@ -300,8 +300,8 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
             <div className="bg-white px-2">
               <div className="h-8 w-8 bg-gray-900 border-2 mb-2 rounded-lg flex justify-center items-center border-gray-900">
                 <h1 className="text-white">1</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Job Info
           </li>
           <li
@@ -318,8 +318,8 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
                 )}
               >
                 <h1 className="text-white">2</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Budget & Schedule
           </li>
           <li
@@ -327,21 +327,21 @@ const PostJobModal = ({ isOpen, onClose, onSubmit, initialData }: PostJobModalPr
               'text-center text-sm font-semibold list-none flex flex-col items-center',
               selectedTab >= 3 ? 'text-gray-900' : 'text-gray-500'
             )}
-          >
+                      >
             <div className="bg-white px-2">
               <div
                 className={classNames(
                   'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
                   selectedTab >= 3 ? 'border-gray-900 bg-gray-900' : 'border-gray-500 bg-gray-500'
                 )}
-              >
+                      >
                 <h1 className="text-white">3</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Preview
           </li>
         </nav>
-      </div>
+                  </div>
 
       {/* Tab Content */}
       {selectedTab === 1 && (

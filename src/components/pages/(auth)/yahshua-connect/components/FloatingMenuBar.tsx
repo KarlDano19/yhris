@@ -93,6 +93,12 @@ const FloatingMenuBar = () => {
       iconSolid: UserPlusIconSolid,
     },
     {
+      name: 'Search Talent',
+      href: '/business-mode/search-talent',
+      icon: MagnifyingGlassIcon,
+      iconSolid: MagnifyingGlassIconSolid,
+    },
+    {
       name: 'My Jobs',
       href: '/business-mode/my-jobs',
       icon: BriefcaseIcon,
