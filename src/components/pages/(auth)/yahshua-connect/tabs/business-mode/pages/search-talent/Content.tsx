@@ -16,6 +16,7 @@ const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isBookNowModalOpen, setIsBookNowModalOpen] = useState(false);
+  const [openedFromDetails, setOpenedFromDetails] = useState(false);
 
   const talentList = useMemo(() => talents, [talents]);
 
@@ -130,6 +131,7 @@ const Content = () => {
                   <button
                     onClick={() => {
                       setSelectedTalent(talent);
+                      setOpenedFromDetails(false);
                       setIsChatModalOpen(true);
                     }}
                     className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
@@ -139,6 +141,7 @@ const Content = () => {
                   <button
                     onClick={() => {
                       setSelectedTalent(talent);
+                      setOpenedFromDetails(false);
                       setIsBookNowModalOpen(true);
                     }}
                     className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
@@ -165,14 +168,17 @@ const Content = () => {
           onClose={() => {
             setIsDetailsOpen(false);
             setSelectedTalent(null);
+            setOpenedFromDetails(false);
           }}
           talent={selectedTalent}
           onMessage={() => {
             setIsDetailsOpen(false);
+            setOpenedFromDetails(true);
             setIsChatModalOpen(true);
           }}
           onBookNow={() => {
             setIsDetailsOpen(false);
+            setOpenedFromDetails(true);
             setIsBookNowModalOpen(true);
           }}
         />
@@ -184,7 +190,12 @@ const Content = () => {
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
-            setSelectedTalent(null);
+            if (openedFromDetails) {
+              setIsDetailsOpen(true);
+              setOpenedFromDetails(false);
+            } else {
+              setSelectedTalent(null);
+            }
           }}
           clientName={selectedTalent.name}
           clientInitials={selectedTalent.name
@@ -203,14 +214,24 @@ const Content = () => {
           isOpen={isBookNowModalOpen}
           onClose={() => {
             setIsBookNowModalOpen(false);
-            setSelectedTalent(null);
+            if (openedFromDetails) {
+              setIsDetailsOpen(true);
+              setOpenedFromDetails(false);
+            } else {
+              setSelectedTalent(null);
+            }
           }}
           talent={selectedTalent}
           onConfirm={(bookingData) => {
             // TODO: Handle booking submission
             console.log('Booking data:', bookingData);
             setIsBookNowModalOpen(false);
-            setSelectedTalent(null);
+            if (openedFromDetails) {
+              setIsDetailsOpen(true);
+              setOpenedFromDetails(false);
+            } else {
+              setSelectedTalent(null);
+            }
           }}
         />
       )}
