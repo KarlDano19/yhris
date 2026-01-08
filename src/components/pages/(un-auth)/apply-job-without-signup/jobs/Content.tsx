@@ -5,11 +5,11 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import Image from 'next/image';
 
 import JobDetails from './JobDetails';
-import JobDetailsModal from './modals/JobDetailsModal';
 import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
 import JobSearchAutocomplete from './components/JobSearchAutocomplete';
 import LocationSearchAutocomplete from './components/LocationSearchAutocomplete';
 import JobCard from './components/JobCard';
+import TabsContent from './tabs/Content';
 
 import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import jobIllustration from '@/assets/find-job-illustration.svg';
@@ -57,6 +57,8 @@ const Content = () => {
   const previousDataJobsRef = useRef<string>('');
   // Track how many jobs to display (20 per batch, fetches 200 per page)
   const [displayCount, setDisplayCount] = useState<number>(20);
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'company-jobs' | 'gig-opportunities' | 'hire-talent'>('company-jobs');
   
   // Separate state for the actual search query (only updates on form submit)
   const [searchQuery, setSearchQuery] = useState<any>({
@@ -345,6 +347,10 @@ const Content = () => {
             </form>
           </div>
         </div>
+      </div>
+      {/* Tabs Navigation */}
+      <div className="mt-6">
+        <TabsContent activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
       {hasJob ? (
         <div className='mt-4'>

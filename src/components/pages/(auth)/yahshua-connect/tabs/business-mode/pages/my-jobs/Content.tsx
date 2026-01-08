@@ -148,7 +148,7 @@ const Content = () => {
           clientName={selectedJobForMessage.clientName}
           clientInitials={selectedJobForMessage.clientInitials || selectedJobForMessage.clientName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
           jobTitle={selectedJobForMessage.title}
-        />
+      />
       )}
     </div>
   );
