@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
 import useSearchTalentData, { type Talent } from '../../hooks/useSearchTalentData';
-import FilterRequestsModal from '../../components/modals/FilterRequestsModal';
+import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import TalentDetailsModal from './modals/TalentDetailsModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
 import BookNowModal from './modals/BookNowModal';
