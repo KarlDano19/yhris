@@ -214,7 +214,7 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
       onClose={handleClose}
       title="Edit Job"
       size="5xl"
-    >
+        >
       {/* Tab Navigation */}
       <div className="hidden sm:block pt-6 pb-6">
         <div className="md:w-[76%] lg:w-[80%] mx-auto translate-y-[10px]">
@@ -227,8 +227,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
                 selectedTab === 3 && 'w-[100%]',
               )}
             ></div>
-          </div>
-        </div>
+                </div>
+                </div>
         <nav
           className="mb-px flex relative justify-between w-[90%] mx-auto mt-[-9px]"
           aria-label="post-job-tabs"
@@ -240,8 +240,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
             <div className="bg-white px-2">
               <div className="h-8 w-8 bg-savoy-blue border-2 mb-2 rounded-lg flex justify-center items-center border-savoy-blue">
                 <h1 className="text-white">1</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Job Info
           </li>
           <li
@@ -259,8 +259,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
                 )}
               >
                 <h1 className="text-white">2</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Budget & Schedule
           </li>
           <li
@@ -269,21 +269,21 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
               'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity',
               selectedTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
             )}
-          >
+                      >
             <div className="bg-white px-2">
               <div
                 className={classNames(
                   'h-8 w-8 border-2 mb-2 rounded-lg flex justify-center items-center',
                   selectedTab >= 3 ? 'border-savoy-blue bg-savoy-blue' : 'border-gray-500 bg-gray-500'
                 )}
-              >
+                      >
                 <h1 className="text-white">3</h1>
-              </div>
-            </div>
+                    </div>
+                  </div>
             Preview
           </li>
         </nav>
-      </div>
+                  </div>
 
       {/* Tab Content */}
       {selectedTab === 1 && (

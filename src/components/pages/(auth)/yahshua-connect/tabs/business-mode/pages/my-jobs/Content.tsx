@@ -297,7 +297,7 @@ const Content = () => {
           recipientInitials={selectedJobForMessage.clientInitials}
           jobId={selectedJobForMessage.id}
           jobTitle={selectedJobForMessage.title}
-        />
+      />
       )}
     </div>
   );
