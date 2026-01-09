@@ -129,10 +129,11 @@ function useGetMyHires(filters: MyHiresFilters = {}) {
     () => getMyHires(filters),
     {
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
       keepPreviousData: true,
     }
   );
-  
+
   return query;
 }
 

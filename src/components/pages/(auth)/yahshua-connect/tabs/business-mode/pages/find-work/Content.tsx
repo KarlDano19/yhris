@@ -232,17 +232,19 @@ const Content = () => {
           setSelectedClientId(job.created_by);
         }
         setIsChatModalOpen(true);
+        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
         return;
       }
       
       await applyToBusinessJobMutation.mutateAsync(jobId);
-      
+
       // Get client ID from job data
       if (job?.created_by) {
         setSelectedClientId(job.created_by);
       }
-      
+
       setIsJobAcceptedModalOpen(true);
+      setIsJobDetailsModalOpen(false); // Close details modal after accepting job
       toast.custom(() => (
         <CustomToast message="Application submitted successfully!" type="success" />
       ), { duration: 2000 });
@@ -256,6 +258,7 @@ const Content = () => {
           setSelectedClientId(job.created_by);
         }
         setIsChatModalOpen(true);
+        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
         // Refetch jobs to update has_applied status
         // This will be handled by the query invalidation in the mutation
       } else {
@@ -274,16 +277,19 @@ const Content = () => {
       setSelectedClientId(job.created_by);
     }
     setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
   };
 
   const handleViewDetails = (jobId: number) => {
     setSelectedJobId(jobId);
     setIsJobDetailsModalOpen(true);
+    setIsChatModalOpen(false); // Ensure chat modal is closed
   };
 
   const handleMessageClient = () => {
     setIsJobAcceptedModalOpen(false);
     setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
   };
 
 

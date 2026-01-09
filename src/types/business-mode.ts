@@ -15,6 +15,23 @@ export type T_WorkStatus = 'not_started' | 'started' | 'completed';
 // Payment Status Type
 export type T_PaymentStatus = 'pending' | 'paid' | 'cancelled';
 
+// Daily Progress Status Type
+export type T_DailyProgressStatus = 'submitted' | 'approved' | 'rejected';
+
+// Daily Progress Types
+export type T_DailyProgress = {
+  id: number;
+  business_job_application_id: number;
+  progress_date: string;
+  proof_file: string | null;
+  notes: string | null;
+  hours_worked: number | null;
+  status: T_DailyProgressStatus;
+  client_feedback: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+};
+
 // Business Job Application Types
 export type T_BusinessJobApplication = {
   id: number;
@@ -49,6 +66,15 @@ export type T_BusinessJobApplication = {
   proof_of_completion: string | null;
   created_at: string;
   updated_at: string;
+  // Contractual job fields
+  is_contractual_job: boolean;
+  total_contract_days: number;
+  submitted_progress_count: number;
+  approved_progress_count: number;
+  is_all_progress_submitted: boolean;
+  daily_progresses: T_DailyProgress[];
+  // Review tracking
+  has_client_reviewed: boolean;
 };
 
 // Applicant Work Experience (from API)
@@ -80,7 +106,8 @@ export type T_BusinessJob = {
   min_amount: number | null;
   max_amount: number | null;
   hourly_rate: number | null;
-  date: string;
+  contract_start_date: string;
+  contract_end_date: string | null;
   time_from: string | null;
   time_to: string | null;
   status: T_JobStatus;
@@ -110,7 +137,8 @@ export type T_CreateBusinessJobData = {
   min_amount?: number | null;
   max_amount?: number | null;
   hourly_rate?: number | null;
-  date: string; // YYYY-MM-DD format
+  contract_start_date: string; // YYYY-MM-DD format
+  contract_end_date?: string | null; // YYYY-MM-DD format
   time_from?: string | null; // HH:MM format
   time_to?: string | null; // HH:MM format
   is_urgent?: boolean;
@@ -263,4 +291,64 @@ export type T_ApplicationStatusResponse = {
   payment_status: string;
   created_at: string;
   updated_at: string;
+};
+
+// Start Job Data
+export type T_StartJobData = {
+  applicationId: number;
+};
+
+// Submit Daily Progress Data
+export type T_SubmitDailyProgressData = {
+  applicationId: number;
+  progress_date: string;
+  proof_file: File;
+  notes?: string;
+  hours_worked?: number;
+};
+
+// Review Daily Progress Data
+export type T_ReviewDailyProgressData = {
+  progressId: number;
+  status: 'approved' | 'rejected';
+  client_feedback?: string;
+};
+
+// Submit Payment Data
+export type T_SubmitPaymentData = {
+  applicationId: number;
+  payment_amount?: number;
+  payment_proof?: File;
+};
+
+// Daily Progress Response (Paginated)
+export type T_DailyProgressResponse = {
+  records: T_DailyProgress[];
+  totalPages: number;
+  totalRecords: number;
+  currentPage: number;
+  pageSize: number;
+  starting: number;
+  ending: number;
+};
+
+// Applicant Review Types
+export type T_ApplicantReview = {
+  id: number;
+  reviewer_applicant: number;
+  reviewer_name: string;
+  reviewed_applicant: number;
+  reviewed_applicant_name: string;
+  business_job_application: number;
+  rating: number;
+  review_text: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+// Submit Applicant Review Data
+export type T_SubmitApplicantReviewData = {
+  applicationId: number;
+  rating: number;
+  review_text?: string;
 };

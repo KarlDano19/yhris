@@ -21,7 +21,8 @@ interface CreateBusinessJobModalProps {
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
-    scheduleDate: string;
+    scheduleStartDate: string;
+    scheduleEndDate: string;
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => void;
@@ -38,14 +39,16 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
   const [budgetType, setBudgetType] = useState<'fixed' | 'hourly'>('fixed');
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
-  const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
+  const [scheduleStartDate, setScheduleStartDate] = useState<Date | null>(null);
+  const [scheduleEndDate, setScheduleEndDate] = useState<Date | null>(null);
   const [scheduleTimeFrom, setScheduleTimeFrom] = useState('');
   const [scheduleTimeTo, setScheduleTimeTo] = useState('');
   const [validationErrors, setValidationErrors] = useState<{
     jobTitle?: string;
     description?: string;
     location?: string;
-    scheduleDate?: string;
+    scheduleStartDate?: string;
+    scheduleEndDate?: string;
     budgetMin?: string;
     budgetMax?: string;
   }>({});
@@ -94,8 +97,15 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
     if (!locationData?.address) {
       errors.location = 'Location is required';
     }
-    if (!scheduleDate) {
-      errors.scheduleDate = 'Schedule date is required';
+    if (!scheduleStartDate) {
+      errors.scheduleStartDate = 'Contract start date is required';
+    }
+
+    // Validate end date is not before start date
+    if (scheduleStartDate && scheduleEndDate) {
+      if (scheduleEndDate < scheduleStartDate) {
+        errors.scheduleEndDate = 'End date cannot be before start date';
+      }
     }
 
     // Validate budget amounts
@@ -124,8 +134,12 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
     // Clear validation errors
     setValidationErrors({});
 
-    const formattedDate = scheduleDate
-      ? `${scheduleDate.getFullYear()}-${String(scheduleDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleDate.getDate()).padStart(2, '0')}`
+    const formattedStartDate = scheduleStartDate
+      ? `${scheduleStartDate.getFullYear()}-${String(scheduleStartDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleStartDate.getDate()).padStart(2, '0')}`
+      : '';
+
+    const formattedEndDate = scheduleEndDate
+      ? `${scheduleEndDate.getFullYear()}-${String(scheduleEndDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleEndDate.getDate()).padStart(2, '0')}`
       : '';
 
     onSubmit({
@@ -138,7 +152,8 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
       budgetType,
       budgetMin: budgetMin.trim(),
       budgetMax: budgetMax.trim(),
-      scheduleDate: formattedDate,
+      scheduleStartDate: formattedStartDate,
+      scheduleEndDate: formattedEndDate,
       scheduleTimeFrom: scheduleTimeFrom.trim(),
       scheduleTimeTo: scheduleTimeTo.trim(),
     });
@@ -158,7 +173,8 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
     setBudgetType('fixed');
     setBudgetMin('');
     setBudgetMax('');
-    setScheduleDate(null);
+    setScheduleStartDate(null);
+    setScheduleEndDate(null);
     setScheduleTimeFrom('');
     setScheduleTimeTo('');
     setValidationErrors({});
@@ -280,8 +296,10 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
           setBudgetMin={setBudgetMin}
           budgetMax={budgetMax}
           setBudgetMax={setBudgetMax}
-          scheduleDate={scheduleDate}
-          setScheduleDate={setScheduleDate}
+          scheduleStartDate={scheduleStartDate}
+          setScheduleStartDate={setScheduleStartDate}
+          scheduleEndDate={scheduleEndDate}
+          setScheduleEndDate={setScheduleEndDate}
           scheduleTimeFrom={scheduleTimeFrom}
           setScheduleTimeFrom={setScheduleTimeFrom}
           scheduleTimeTo={scheduleTimeTo}
@@ -302,7 +320,8 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
           budgetType={budgetType}
           budgetMin={budgetMin}
           budgetMax={budgetMax}
-          scheduleDate={scheduleDate}
+          scheduleStartDate={scheduleStartDate}
+          scheduleEndDate={scheduleEndDate}
           scheduleTimeFrom={scheduleTimeFrom}
           scheduleTimeTo={scheduleTimeTo}
           onBack={() => setSelectedTab(2)}

@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 async function addSavedJob(jobPostingId: number) {
@@ -28,7 +28,17 @@ async function addSavedJob(jobPostingId: number) {
 }
 
 function useAddSavedJobs() {
-  const query = useMutation((jobPostingId: number) => addSavedJob(jobPostingId));
+  const queryClient = useQueryClient();
+
+  const query = useMutation(
+    (jobPostingId: number) => addSavedJob(jobPostingId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['savedJobsCache']);
+      },
+    }
+  );
+
   return query;
 }
 

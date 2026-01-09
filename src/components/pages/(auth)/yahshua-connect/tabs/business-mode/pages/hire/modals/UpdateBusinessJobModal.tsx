@@ -21,7 +21,8 @@ interface UpdateBusinessJobModalProps {
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
-    scheduleDate: string;
+    scheduleStartDate: string;
+    scheduleEndDate: string;
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => void;
@@ -35,7 +36,8 @@ interface UpdateBusinessJobModalProps {
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
-    scheduleDate: string;
+    scheduleStartDate: string;
+    scheduleEndDate: string;
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   };
@@ -52,14 +54,16 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
   const [budgetType, setBudgetType] = useState<'fixed' | 'hourly'>('fixed');
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
-  const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
+  const [scheduleStartDate, setScheduleStartDate] = useState<Date | null>(null);
+  const [scheduleEndDate, setScheduleEndDate] = useState<Date | null>(null);
   const [scheduleTimeFrom, setScheduleTimeFrom] = useState('');
   const [scheduleTimeTo, setScheduleTimeTo] = useState('');
   const [validationErrors, setValidationErrors] = useState<{
     jobTitle?: string;
     description?: string;
     location?: string;
-    scheduleDate?: string;
+    scheduleStartDate?: string;
+    scheduleEndDate?: string;
     budgetMin?: string;
     budgetMax?: string;
   }>({});
@@ -71,8 +75,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
   useEffect(() => {
     if (isOpen && initialData) {
       // Create a unique identifier for this job data
-      const jobDataId = `${initialData.jobTitle}-${initialData.scheduleDate}`;
-      
+      const jobDataId = `${initialData.jobTitle}-${initialData.scheduleStartDate}`;
+
       // Only reload if this is different data than what we last loaded
       if (lastLoadedJobRef.current !== jobDataId) {
         setJobTitle(initialData.jobTitle);
@@ -91,12 +95,21 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
         setBudgetType(initialData.budgetType);
         setBudgetMin(initialData.budgetMin);
         setBudgetMax(initialData.budgetMax);
-        // Parse scheduleDate string to Date
-        if (initialData.scheduleDate) {
-          const date = new Date(initialData.scheduleDate);
+        // Parse scheduleStartDate string to Date
+        if (initialData.scheduleStartDate) {
+          const date = new Date(initialData.scheduleStartDate);
           if (!isNaN(date.getTime())) {
-            setScheduleDate(date);
+            setScheduleStartDate(date);
           }
+        }
+        // Parse scheduleEndDate string to Date
+        if (initialData.scheduleEndDate) {
+          const date = new Date(initialData.scheduleEndDate);
+          if (!isNaN(date.getTime())) {
+            setScheduleEndDate(date);
+          }
+        } else {
+          setScheduleEndDate(null);
         }
         setScheduleTimeFrom(initialData.scheduleTimeFrom);
         setScheduleTimeTo(initialData.scheduleTimeTo);
@@ -106,7 +119,7 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
         lastLoadedJobRef.current = jobDataId;
       }
     }
-    
+
     // Reset ref when modal closes
     if (!isOpen) {
       lastLoadedJobRef.current = '';
@@ -150,8 +163,15 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
     if (!locationData?.address) {
       errors.location = 'Location is required';
     }
-    if (!scheduleDate) {
-      errors.scheduleDate = 'Schedule date is required';
+    if (!scheduleStartDate) {
+      errors.scheduleStartDate = 'Contract start date is required';
+    }
+
+    // Validate end date is not before start date
+    if (scheduleStartDate && scheduleEndDate) {
+      if (scheduleEndDate < scheduleStartDate) {
+        errors.scheduleEndDate = 'End date cannot be before start date';
+      }
     }
 
     // Validate budget amounts
@@ -180,8 +200,12 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
     // Clear validation errors
     setValidationErrors({});
 
-    const formattedDate = scheduleDate
-      ? `${scheduleDate.getFullYear()}-${String(scheduleDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleDate.getDate()).padStart(2, '0')}`
+    const formattedStartDate = scheduleStartDate
+      ? `${scheduleStartDate.getFullYear()}-${String(scheduleStartDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleStartDate.getDate()).padStart(2, '0')}`
+      : '';
+
+    const formattedEndDate = scheduleEndDate
+      ? `${scheduleEndDate.getFullYear()}-${String(scheduleEndDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleEndDate.getDate()).padStart(2, '0')}`
       : '';
 
     onSubmit({
@@ -194,7 +218,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
       budgetType,
       budgetMin: budgetMin.trim(),
       budgetMax: budgetMax.trim(),
-      scheduleDate: formattedDate,
+      scheduleStartDate: formattedStartDate,
+      scheduleEndDate: formattedEndDate,
       scheduleTimeFrom: scheduleTimeFrom.trim(),
       scheduleTimeTo: scheduleTimeTo.trim(),
     });
@@ -318,8 +343,10 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
           setBudgetMin={setBudgetMin}
           budgetMax={budgetMax}
           setBudgetMax={setBudgetMax}
-          scheduleDate={scheduleDate}
-          setScheduleDate={setScheduleDate}
+          scheduleStartDate={scheduleStartDate}
+          setScheduleStartDate={setScheduleStartDate}
+          scheduleEndDate={scheduleEndDate}
+          setScheduleEndDate={setScheduleEndDate}
           scheduleTimeFrom={scheduleTimeFrom}
           setScheduleTimeFrom={setScheduleTimeFrom}
           scheduleTimeTo={scheduleTimeTo}
@@ -340,7 +367,8 @@ const UpdateBusinessJobModal = ({ isOpen, onClose, onSubmit, initialData }: Upda
           budgetType={budgetType}
           budgetMin={budgetMin}
           budgetMax={budgetMax}
-          scheduleDate={scheduleDate}
+          scheduleStartDate={scheduleStartDate}
+          scheduleEndDate={scheduleEndDate}
           scheduleTimeFrom={scheduleTimeFrom}
           scheduleTimeTo={scheduleTimeTo}
           onBack={() => setSelectedTab(2)}

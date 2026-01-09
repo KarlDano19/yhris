@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import Modal from '../components/Modal';
 import useGetApplicationByUser from '../hooks/useGetApplicationByUser';
@@ -16,7 +16,9 @@ interface MyApplicationsModalProps {
 }
 
 const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
-  const { data: applicationsData, isLoading } = useGetApplicationByUser({});
+  // Memoize empty filters object to prevent unnecessary re-renders
+  const applicationFilters = useMemo(() => ({}), []);
+  const { data: applicationsData, isLoading } = useGetApplicationByUser(applicationFilters);
   const [transformedApplications, setTransformedApplications] = useState<T_Application[]>([]);
 
   // Transform API data to match the display format

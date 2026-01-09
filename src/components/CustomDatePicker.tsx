@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState, useEffect, useRef } from 'react';
 
 import DatePicker from 'react-datepicker';
 import DateCalendar from '@/svg/DateCalendar';
@@ -21,6 +21,8 @@ const CustomDatePicker = ({
   pickerOnChange,
   inputOnChange,
   minDate,
+  maxDate,
+  excludeDates,
   placeholder,
   disabled,
   className,
@@ -33,6 +35,8 @@ const CustomDatePicker = ({
   inputOnChange: any;
   selected?: any;
   minDate?: any;
+  maxDate?: any;
+  excludeDates?: Date[];
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -107,6 +111,8 @@ const CustomDatePicker = ({
           }
         }}
         minDate={minDate}
+        maxDate={maxDate}
+        excludeDates={excludeDates}
         customInput={<CustomInput />}
         popperModifiers={[
           {

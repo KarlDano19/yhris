@@ -45,7 +45,8 @@ const BusinessJobDetailsModal = ({
   const handleAcceptJob = () => {
     if (jobId) {
       onAcceptJob(jobId);
-      onClose();
+      // Don't close the modal here - let the parent component handle modal state transitions
+      // Parent will close this modal and open chat modal if already applied
     }
   };
 
@@ -139,9 +140,13 @@ const BusinessJobDetailsModal = ({
                       <button
                         type="button"
                         onClick={handleAcceptJob}
-                        className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                        className={`px-6 py-2 text-white rounded-lg font-medium transition-colors text-sm ${
+                          jobDetailData?.has_applied
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'bg-savoy-blue hover:bg-blue-700'
+                        }`}
                       >
-                        Accept This Job
+                        {jobDetailData?.has_applied ? 'Message Client' : 'Accept This Job'}
                       </button>
                       <button
                         type="button"

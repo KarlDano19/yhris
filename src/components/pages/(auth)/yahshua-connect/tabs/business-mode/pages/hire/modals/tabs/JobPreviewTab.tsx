@@ -10,7 +10,8 @@ interface JobPreviewTabProps {
   budgetType: 'fixed' | 'hourly';
   budgetMin: string;
   budgetMax: string;
-  scheduleDate: Date | null;
+  scheduleStartDate: Date | null;
+  scheduleEndDate: Date | null;
   scheduleTimeFrom: string;
   scheduleTimeTo: string;
   onBack: () => void;
@@ -25,7 +26,8 @@ export default function JobPreviewTab({
   budgetType,
   budgetMin,
   budgetMax,
-  scheduleDate,
+  scheduleStartDate,
+  scheduleEndDate,
   scheduleTimeFrom,
   scheduleTimeTo,
   onBack,
@@ -35,6 +37,16 @@ export default function JobPreviewTab({
     if (!date) return 'Not set';
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[date.getMonth()]} ${date.getDate()}`;
+  };
+
+  const formatDateRange = () => {
+    if (!scheduleStartDate) return 'Not set';
+    const startDateStr = formatDate(scheduleStartDate);
+    if (scheduleEndDate) {
+      const endDateStr = formatDate(scheduleEndDate);
+      return `${startDateStr} - ${endDateStr}`;
+    }
+    return `${startDateStr} (Flexible/Ongoing)`;
   };
 
   const formatTime = (timeStr: string) => {
@@ -121,14 +133,14 @@ export default function JobPreviewTab({
             </p>
           </div>
 
-          {/* Schedule */}
+          {/* Contract Period */}
           <div>
             <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
               <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-              Schedule
+              Contract Period
             </h6>
             <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-              {formatDate(scheduleDate)}
+              {formatDateRange()}
             </p>
           </div>
 

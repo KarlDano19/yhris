@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, cloneElement, isValidElement, useEffect, useCallback, useRef } from 'react';
+import { ReactNode, useState, cloneElement, isValidElement, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -49,10 +49,10 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
       urgent: true,
     },
   ];
-  
+
   // My Hires data hook (for business mode)
   const { data: myHiresData, isLoading: isMyHiresLoading } = useGetMyHires();
-  
+
   const activeJobs = isBusinessMode ? allActiveJobs : [];
 
   // Personal mode state
@@ -77,7 +77,11 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   // Personal mode data hooks
   const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
   const { data: savedJobsData } = useGetSavedJobs();
-  const { data: applicationsData } = useGetApplicationByUser({});
+
+  // Memoize empty filters object to prevent unnecessary re-renders
+  const applicationFilters = useMemo(() => ({}), []);
+  const { data: applicationsData } = useGetApplicationByUser(applicationFilters);
+
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [applicationsCount, setApplicationsCount] = useState(0);
 

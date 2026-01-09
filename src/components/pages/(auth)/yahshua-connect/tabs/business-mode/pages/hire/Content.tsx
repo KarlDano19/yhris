@@ -13,16 +13,21 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
+import ViewDailyProgressModal from './modals/ViewDailyProgressModal';
+import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
 import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
 import { useGetMyBusinessJobs } from './hooks/useGetMyBusinessJobs';
 import { useUpdateApplicationStatus } from './hooks/useUpdateApplicationStatus';
+import { useReviewDailyProgress } from './hooks/useReviewDailyProgress';
+import { useSubmitPayment } from './hooks/useSubmitPayment';
+import { useSubmitApplicantReview } from './hooks/useSubmitApplicantReview';
 
 import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData } from '@/types/business-mode';
 
-import { PlusIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 
 // Helper to format date from API (YYYY-MM-DD) to display format (Dec 20)
@@ -172,6 +177,8 @@ const Content = () => {
   const [isConfirmHireModalOpen, setIsConfirmHireModalOpen] = useState(false);
   const [isConfirmRejectModalOpen, setIsConfirmRejectModalOpen] = useState(false);
   const [isSubmitPaymentProofModalOpen, setIsSubmitPaymentProofModalOpen] = useState(false);
+  const [isViewDailyProgressModalOpen, setIsViewDailyProgressModalOpen] = useState(false);
+  const [isReviewApplicantModalOpen, setIsReviewApplicantModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
   const [editingJobId, setEditingJobId] = useState<number | null>(null);
@@ -180,6 +187,11 @@ const Content = () => {
     serviceName: string;
     providerName: string;
     priceRange: string;
+  } | null>(null);
+  const [selectedHireForReview, setSelectedHireForReview] = useState<{
+    id: number;
+    applicantName: string;
+    jobTitle: string;
   } | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<{
@@ -195,7 +207,7 @@ const Content = () => {
 
   // More menu state for dropdown
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   // API Hooks
   const { data: myJobsData, isLoading: isLoadingJobs, refetch: refetchJobs } = useGetMyBusinessJobs({ page_size: 100 });
@@ -203,6 +215,9 @@ const Content = () => {
   const updateJobMutation = useUpdateBusinessJobDetails();
   const deleteJobMutation = useDeleteBusinessJob();
   const updateStatusMutation = useUpdateApplicationStatus();
+  const { mutate: reviewDailyProgress, isLoading: isReviewingProgress } = useReviewDailyProgress();
+  const { mutate: submitPayment, isLoading: isSubmittingPayment } = useSubmitPayment();
+  const { mutate: submitApplicantReview, isLoading: isSubmittingReview } = useSubmitApplicantReview();
 
   // Get job postings from API
   const jobPostings = myJobsData?.records || [];
@@ -210,7 +225,13 @@ const Content = () => {
   // Close more menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Check if click is outside all menu containers
+      const isClickOutsideAllMenus = Object.values(menuRefs.current).every(
+        (ref) => !ref || !ref.contains(target)
+      );
+      
+      if (isClickOutsideAllMenus) {
         setMoreMenuOpen({});
       }
     };
@@ -281,7 +302,8 @@ const Content = () => {
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
-    scheduleDate: string;
+    scheduleStartDate: string;
+    scheduleEndDate: string;
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => {
@@ -298,7 +320,8 @@ const Content = () => {
       latitude: roundedLatitude,
       longitude: roundedLongitude,
       budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
-      date: data.scheduleDate,
+      contract_start_date: data.scheduleStartDate,
+      contract_end_date: data.scheduleEndDate || null,
       time_from: data.scheduleTimeFrom || null,
       time_to: data.scheduleTimeTo || null,
     };
@@ -335,7 +358,8 @@ const Content = () => {
     budgetType: 'fixed' | 'hourly';
     budgetMin: string;
     budgetMax: string;
-    scheduleDate: string;
+    scheduleStartDate: string;
+    scheduleEndDate: string;
     scheduleTimeFrom: string;
     scheduleTimeTo: string;
   }) => {
@@ -354,7 +378,8 @@ const Content = () => {
       latitude: roundedLatitude,
       longitude: roundedLongitude,
       budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
-      date: data.scheduleDate,
+      contract_start_date: data.scheduleStartDate,
+      contract_end_date: data.scheduleEndDate || null,
       time_from: data.scheduleTimeFrom || null,
       time_to: data.scheduleTimeTo || null,
     };
@@ -401,7 +426,8 @@ const Content = () => {
       budgetType: job.budget_type === 'hourly_rate' ? ('hourly' as const) : ('fixed' as const),
       budgetMin: job.budget_type === 'hourly_rate' ? (job.hourly_rate?.toString() || '') : (job.min_amount?.toString() || ''),
       budgetMax: job.max_amount?.toString() || '',
-      scheduleDate: job.date || '',
+      scheduleStartDate: job.contract_start_date || '',
+      scheduleEndDate: job.contract_end_date || '',
       scheduleTimeFrom: job.time_from || '',
       scheduleTimeTo: job.time_to || '',
     };
@@ -509,12 +535,89 @@ const Content = () => {
   };
 
 
-  const handleSubmitPaymentProof = (file: File) => {
-    // TODO: Implement payment proof upload API
-    console.log('Submit payment proof for hire:', selectedHireForPayment?.id, file);
-    toast.custom(() => <CustomToast message="Payment proof submitted successfully" type="success" />, { duration: 5000 });
-    setSelectedHireForPayment(null);
-    setIsSubmitPaymentProofModalOpen(false);
+  const handleSubmitPaymentProof = (data: { payment_proof: File; payment_amount?: number }) => {
+    if (!selectedHireForPayment) return;
+
+    submitPayment(
+      {
+        applicationId: selectedHireForPayment.id,
+        payment_proof: data.payment_proof,
+        payment_amount: data.payment_amount,
+      },
+      {
+        onSuccess: () => {
+          toast.custom(() => <CustomToast message="Payment proof submitted successfully! Payment marked as paid." type="success" />, { duration: 5000 });
+          setSelectedHireForPayment(null);
+          setIsSubmitPaymentProofModalOpen(false);
+          refetchJobs();
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to submit payment proof';
+          toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
+        },
+      }
+    );
+  };
+
+  const handleReviewApplicantFromJob = (jobId: number) => {
+    const job = jobPostings.find((j) => j.id === jobId);
+    if (!job) return;
+
+    // Find accepted application
+    const acceptedApp = job.applications?.find((app) => app.status === 'accepted');
+    if (!acceptedApp) return;
+
+    setSelectedHireForReview({
+      id: acceptedApp.id,
+      applicantName: acceptedApp.applicant_name || 'Unknown',
+      jobTitle: job.job_title,
+    });
+    setIsReviewApplicantModalOpen(true);
+  };
+
+  const handleSubmitApplicantReview = (data: { rating: number; review_text?: string }) => {
+    if (!selectedHireForReview) return;
+
+    submitApplicantReview(
+      {
+        applicationId: selectedHireForReview.id,
+        rating: data.rating,
+        review_text: data.review_text,
+      },
+      {
+        onSuccess: () => {
+          toast.custom(() => <CustomToast message="Review submitted successfully! Thank you for your feedback." type="success" />, { duration: 5000 });
+          setSelectedHireForReview(null);
+          setIsReviewApplicantModalOpen(false);
+          refetchJobs();
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to submit review';
+          toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
+        },
+      }
+    );
+  };
+
+  const handleViewDailyProgress = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsViewDailyProgressModalOpen(true);
+  };
+
+  const handleReviewDailyProgress = (progressId: number, status: 'approved' | 'rejected', feedback: string) => {
+    reviewDailyProgress(
+      { progressId, status, client_feedback: feedback },
+      {
+        onSuccess: () => {
+          toast.custom(() => <CustomToast message={`Progress ${status} successfully!`} type="success" />, { duration: 5000 });
+          refetchJobs();
+        },
+        onError: (err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to review progress';
+          toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
+        },
+      }
+    );
   };
 
   // Get selected job data
@@ -537,6 +640,7 @@ const Content = () => {
       applicantName: acceptedApp.applicant_name || 'Unknown',
       paymentStatus: acceptedApp.payment_status,
       workStatus: acceptedApp.work_status,
+      hasClientReviewed: acceptedApp.has_client_reviewed || false,
     };
   };
 
@@ -627,7 +731,8 @@ const Content = () => {
                     <div className="flex items-center gap-2">
                       <ClockIcon className="h-4 w-4" />
                       <span>
-                        {formatDateForDisplay(job.date)}
+                        {formatDateForDisplay(job.contract_start_date)}
+                        {job.contract_end_date && ` - ${formatDateForDisplay(job.contract_end_date)}`}
                         {job.time_from && `, ${formatTimeForDisplay(job.time_from, job.time_to)}`}
                       </span>
                     </div>
@@ -649,10 +754,32 @@ const Content = () => {
                   {isHired && hireInfo && (
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <p className="text-sm text-savoy-blue mb-2">Hired: {hireInfo.applicantName}</p>
+                      
+                      {/* Contractual Job - View Daily Progress */}
+                      {job.contract_end_date && hireInfo.workStatus !== 'not_started' && (
+                        <button
+                          onClick={() => handleViewDailyProgress(job.id)}
+                          className="mb-2 text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
+                        >
+                          <DocumentTextIcon className="h-4 w-4" />
+                          View Daily Progress
+                        </button>
+                      )}
+
                       {hireInfo.paymentStatus === 'paid' ? (
-                        <p className="text-sm text-gray-700 flex items-center gap-1">
-                          Payment completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                        </p>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-700 flex items-center gap-1">
+                            Payment completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                          </p>
+                          {!hireInfo.hasClientReviewed && (
+                            <button
+                              onClick={() => handleReviewApplicantFromJob(job.id)}
+                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
+                            >
+                              Review Applicant
+                            </button>
+                          )}
+                        </div>
                       ) : hireInfo.workStatus === 'completed' ? (
                         <button
                           onClick={() => handleSubmitPaymentProofFromJob(job.id)}
@@ -678,7 +805,12 @@ const Content = () => {
                     </button>
 
                     {/* More Menu Dropdown */}
-                    <div className="relative more-menu-container" ref={menuRef}>
+                    <div 
+                      className="relative more-menu-container" 
+                      ref={(el) => {
+                        menuRefs.current[job.id] = el;
+                      }}
+                    >
                       <button
                         onClick={() => handleMoreMenuClick(job.id)}
                         className="flex items-center"
@@ -735,11 +867,13 @@ const Content = () => {
       </div>
 
       {/* Create Job Modal */}
-      <CreateBusinessJobModal
-        isOpen={isCreateJobModalOpen}
-        onClose={() => setIsCreateJobModalOpen(false)}
-        onSubmit={handleCreateJob}
-      />
+      {isCreateJobModalOpen && (
+        <CreateBusinessJobModal
+          isOpen={isCreateJobModalOpen}
+          onClose={() => setIsCreateJobModalOpen(false)}
+          onSubmit={handleCreateJob}
+        />
+      )}
 
       {/* Update Job Modal */}
       {isUpdateJobModalOpen && editingJobId && (
@@ -781,7 +915,7 @@ const Content = () => {
           applicant={selectedApplicantForHire}
           jobDetails={{
             title: selectedJob.job_title,
-            scheduledDate: formatDateForDisplay(selectedJob.date),
+            scheduledDate: formatDateForDisplay(selectedJob.contract_start_date) + (selectedJob.contract_end_date ? ` - ${formatDateForDisplay(selectedJob.contract_end_date)}` : ''),
             scheduledTime: formatTimeForDisplay(selectedJob.time_from, selectedJob.time_to),
             priceRange: formatPriceRange(selectedJob),
           }}
@@ -819,6 +953,7 @@ const Content = () => {
           serviceName={selectedHireForPayment.serviceName}
           providerName={selectedHireForPayment.providerName}
           priceRange={selectedHireForPayment.priceRange}
+          isSubmitting={isSubmittingPayment}
           onSubmit={handleSubmitPaymentProof}
         />
       )}
@@ -846,28 +981,66 @@ const Content = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        setIsOpen={(open) => {
-          setIsDeleteModalOpen(open);
-          if (!open) setDeleteJobId(null);
-        }}
-        confirmAction={handleConfirmDelete}
-        message="Are you sure you want to delete this job posting? This action cannot be undone."
-        isLoading={deleteJobMutation.isLoading}
-      />
+      {isDeleteModalOpen && (
+        <ConfirmModal
+          isOpen={isDeleteModalOpen}
+          setIsOpen={(open) => {
+            setIsDeleteModalOpen(open);
+            if (!open) setDeleteJobId(null);
+          }}
+          confirmAction={handleConfirmDelete}
+          message="Are you sure you want to delete this job posting? This action cannot be undone."
+          isLoading={deleteJobMutation.isLoading}
+        />
+      )}
 
       {/* Reject Confirmation Modal */}
-      <ConfirmModal
-        isOpen={isConfirmRejectModalOpen}
-        setIsOpen={(open) => {
-          setIsConfirmRejectModalOpen(open);
-          if (!open) setSelectedApplicationId(null);
-        }}
-        confirmAction={handleConfirmReject}
-        message="Are you sure you want to reject this applicant? This action cannot be undone."
-        isLoading={updateStatusMutation.isLoading}
-      />
+      {isConfirmRejectModalOpen && (
+        <ConfirmModal
+          isOpen={isConfirmRejectModalOpen}
+          setIsOpen={(open) => {
+            setIsConfirmRejectModalOpen(open);
+            if (!open) setSelectedApplicationId(null);
+          }}
+          confirmAction={handleConfirmReject}
+          message="Are you sure you want to reject this applicant? This action cannot be undone."
+          isLoading={updateStatusMutation.isLoading}
+        />
+      )}
+
+      {/* View Daily Progress Modal */}
+      {isViewDailyProgressModalOpen && selectedJob && (
+        <ViewDailyProgressModal
+          isOpen={isViewDailyProgressModalOpen}
+          onClose={() => {
+            setIsViewDailyProgressModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobTitle={selectedJob.job_title}
+          dailyProgresses={
+            selectedJob.applications
+              ?.find((app) => app.status === 'accepted')
+              ?.daily_progresses || []
+          }
+          isClient={true}
+          onReview={handleReviewDailyProgress}
+        />
+      )}
+
+      {/* Review Applicant Modal */}
+      {isReviewApplicantModalOpen && selectedHireForReview && (
+        <ReviewApplicantModal
+          isOpen={isReviewApplicantModalOpen}
+          onClose={() => {
+            setIsReviewApplicantModalOpen(false);
+            setSelectedHireForReview(null);
+          }}
+          applicantName={selectedHireForReview.applicantName}
+          jobTitle={selectedHireForReview.jobTitle}
+          isSubmitting={isSubmittingReview}
+          onSubmit={handleSubmitApplicantReview}
+        />
+      )}
 
       {/* Tooltips */}
       <Tooltip id="edit-job-tooltip" />

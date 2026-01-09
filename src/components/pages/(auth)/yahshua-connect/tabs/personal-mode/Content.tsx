@@ -22,8 +22,11 @@ const Content = ({ averageRating }: ContentProps) => {
   const router = useRouter();
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
+  // Memoize empty filters object to prevent unnecessary re-renders
+  const applicationFilters = useMemo(() => ({}), []);
+
   // Fetch applications data
-  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser({});
+  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser(applicationFilters);
 
   // Fetch matched jobs (only jobs with matching skills, sorted by match)
   const { data: highMatchJobsData, isLoading: isHighMatchJobsLoading } = useGetHighMatchJobs({
