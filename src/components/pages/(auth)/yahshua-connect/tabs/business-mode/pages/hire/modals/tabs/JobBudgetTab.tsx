@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { Controller } from "react-hook-form";
 
-import DateCalendar from "@/svg/DateCalendar";
+import CustomDatePicker from "@/components/CustomDatePicker";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
@@ -243,26 +243,35 @@ export default function JobBudgetTab({
                     Start Date
                     <span className="text-red-600">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      {...register("scheduleStartDate", { required: true })}
-                      id="scheduleStartDate"
-                      className={`block w-full rounded-md border-0 py-1.5 px-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 ${
-                        errors.scheduleStartDate ? 'ring-red-500' : ''
-                      } [&::-webkit-calendar-picker-indicator]:hidden`}
-                      style={{ WebkitAppearance: 'none' }}
-                    />
-                    <div 
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                      onClick={() => {
-                        const dateInput = document.getElementById('scheduleStartDate') as HTMLInputElement;
-                        dateInput?.showPicker();
-                      }}
-                    >
-                      <DateCalendar />
-                    </div>
-                  </div>
+                  <Controller
+                    control={control}
+                    name="scheduleStartDate"
+                    render={({ field }) => (
+                      <div className="relative">
+                        <CustomDatePicker
+                          id="scheduleStartDate"
+                          placeholder="mm/dd/yyyy"
+                          className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 ${
+                            errors.scheduleStartDate ? 'ring-red-500' : ''
+                          }`}
+                          selected={field.value ? new Date(field.value) : null}
+                          pickerOnChange={(date: Date | null) => {
+                            if (date) {
+                              const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                              field.onChange(formattedDate);
+                            } else {
+                              field.onChange('');
+                            }
+                          }}
+                          inputOnChange={(value: any) => {
+                            if (value && typeof value === 'string') {
+                              field.onChange(value);
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                  />
                   <div className="h-[33px] flex items-start">
                     {errors.scheduleStartDate && (
                       <p className="mt-1 text-sm text-red-600">{errors.scheduleStartDate.message}</p>
@@ -302,27 +311,36 @@ export default function JobBudgetTab({
                     End Date
                     <span className="text-gray-500 text-xs">(optional)</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      {...register("scheduleEndDate")}
-                      id="scheduleEndDate"
-                      min={scheduleStartDate || undefined}
-                      className={`block w-full rounded-md border-0 py-1.5 px-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 ${
-                        errors.scheduleEndDate ? 'ring-red-500' : ''
-                      } [&::-webkit-calendar-picker-indicator]:hidden`}
-                      style={{ WebkitAppearance: 'none' }}
-                    />
-                    <div 
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                      onClick={() => {
-                        const dateInput = document.getElementById('scheduleEndDate') as HTMLInputElement;
-                        dateInput?.showPicker();
-                      }}
-                    >
-                      <DateCalendar />
-                    </div>
-                  </div>
+                  <Controller
+                    control={control}
+                    name="scheduleEndDate"
+                    render={({ field }) => (
+                      <div className="relative">
+                        <CustomDatePicker
+                          id="scheduleEndDate"
+                          placeholder="mm/dd/yyyy"
+                          className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 ${
+                            errors.scheduleEndDate ? 'ring-red-500' : ''
+                          }`}
+                          selected={field.value ? new Date(field.value) : null}
+                          pickerOnChange={(date: Date | null) => {
+                            if (date) {
+                              const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                              field.onChange(formattedDate);
+                            } else {
+                              field.onChange('');
+                            }
+                          }}
+                          inputOnChange={(value: any) => {
+                            if (value && typeof value === 'string') {
+                              field.onChange(value);
+                            }
+                          }}
+                          minDate={scheduleStartDate ? new Date(scheduleStartDate) : undefined}
+                        />
+                      </div>
+                    )}
+                  />
                   <div className="h-[33px] flex items-start">
                     {errors.scheduleEndDate ? (
                       <p className="mt-1 text-sm text-red-600">{errors.scheduleEndDate.message}</p>
