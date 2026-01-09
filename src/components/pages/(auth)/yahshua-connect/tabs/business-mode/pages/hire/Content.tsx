@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
@@ -170,6 +171,10 @@ const transformApplicationToProfile = (application: T_BusinessJobApplication): T
 };
 
 const Content = () => {
+  // Form Methods
+  const createFormMethods = useForm();
+  const editFormMethods = useForm();
+
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [isUpdateJobModalOpen, setIsUpdateJobModalOpen] = useState(false);
   const [isViewApplicantsModalOpen, setIsViewApplicantsModalOpen] = useState(false);
@@ -869,21 +874,26 @@ const Content = () => {
       {/* Create Job Modal */}
       {isCreateJobModalOpen && (
         <CreateBusinessJobModal
+          refetch={refetchJobs}
           isOpen={isCreateJobModalOpen}
-          onClose={() => setIsCreateJobModalOpen(false)}
-          onSubmit={handleCreateJob}
+          setIsOpen={(open: boolean) => setIsCreateJobModalOpen(open)}
+          formMethods={createFormMethods}
         />
       )}
 
       {/* Update Job Modal */}
       {isUpdateJobModalOpen && editingJobId && (
         <UpdateBusinessJobModal
+          refetch={refetchJobs}
           isOpen={isUpdateJobModalOpen}
-          onClose={() => {
-            setIsUpdateJobModalOpen(false);
-            setEditingJobId(null);
+          setIsOpen={(open: boolean) => {
+            setIsUpdateJobModalOpen(open);
+            if (!open) {
+              setEditingJobId(null);
+            }
           }}
-          onSubmit={handleUpdateJob}
+          formMethods={editFormMethods}
+          editingJobId={editingJobId}
           initialData={getEditJobData(editingJobId)!}
         />
       )}

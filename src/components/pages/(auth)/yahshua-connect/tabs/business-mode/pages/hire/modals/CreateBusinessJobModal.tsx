@@ -1,57 +1,32 @@
 import { useState, useRef, useEffect } from 'react';
 
+import toast from 'react-hot-toast';
+
+import { useCreateBusinessJob } from '../hooks/useCreateBusinessJob';
+import CustomToast from '@/components/CustomToast';
 import Modal from '../../../../../components/Modal';
 import JobInfoTab from './tabs/JobInfoTab';
 import JobBudgetTab from './tabs/JobBudgetTab';
 import JobPreviewTab from './tabs/JobPreviewTab';
 
 import classNames from '@/helpers/classNames';
-import { LocationData } from '@/components/LocationPickerMap';
+
+import { T_CreateBusinessJobData } from '@/types/business-mode';
 
 interface CreateBusinessJobModalProps {
+  refetch: any;
   isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: {
-    jobTitle: string;
-    category: string;
-    description: string;
-    location: string;
-    latitude: number | null;
-    longitude: number | null;
-    budgetType: 'fixed' | 'hourly';
-    budgetMin: string;
-    budgetMax: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleTimeFrom: string;
-    scheduleTimeTo: string;
-  }) => void;
+  setIsOpen: (open: boolean) => void;
+  formMethods: any;
 }
 
-const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJobModalProps) => {
+const CreateBusinessJobModal = ({ refetch, isOpen, setIsOpen, formMethods }: CreateBusinessJobModalProps) => {
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
+  const {
+    mutate: createBusinessJob,
+    isLoading: isLoadingCreateBusinessJob,
+  } = useCreateBusinessJob();
   const [selectedTab, setSelectedTab] = useState(1);
-  const [jobTitle, setJobTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [isOtherCategory, setIsOtherCategory] = useState(false);
-  const [customCategory, setCustomCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [locationData, setLocationData] = useState<LocationData | null>(null);
-  const [budgetType, setBudgetType] = useState<'fixed' | 'hourly'>('fixed');
-  const [budgetMin, setBudgetMin] = useState('');
-  const [budgetMax, setBudgetMax] = useState('');
-  const [scheduleStartDate, setScheduleStartDate] = useState<Date | null>(null);
-  const [scheduleEndDate, setScheduleEndDate] = useState<Date | null>(null);
-  const [scheduleTimeFrom, setScheduleTimeFrom] = useState('');
-  const [scheduleTimeTo, setScheduleTimeTo] = useState('');
-  const [validationErrors, setValidationErrors] = useState<{
-    jobTitle?: string;
-    description?: string;
-    location?: string;
-    scheduleStartDate?: string;
-    scheduleEndDate?: string;
-    budgetMin?: string;
-    budgetMax?: string;
-  }>({});
 
   // Reset form when modal opens
   useEffect(() => {
@@ -60,136 +35,68 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
     }
   }, [isOpen]);
 
-  // Category dropdown state
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowCategoryDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleCategorySelect = (selectedCategory: string) => {
-    setCategory(selectedCategory);
-    setShowCategoryDropdown(false);
-  };
-
-  const handleSubmit = () => {
-    // Reset validation errors
-    const errors: typeof validationErrors = {};
-
-    // Validate required fields
-    if (!jobTitle.trim()) {
-      errors.jobTitle = 'Job title is required';
-    }
-    if (!description.trim()) {
-      errors.description = 'Description is required';
-    }
-    if (!locationData?.address) {
-      errors.location = 'Location is required';
-    }
-    if (!scheduleStartDate) {
-      errors.scheduleStartDate = 'Contract start date is required';
-    }
-
-    // Validate end date is not before start date
-    if (scheduleStartDate && scheduleEndDate) {
-      if (scheduleEndDate < scheduleStartDate) {
-        errors.scheduleEndDate = 'End date cannot be before start date';
-      }
-    }
-
-    // Validate budget amounts
-    if (!budgetMin.trim()) {
-      errors.budgetMin = 'Minimum amount is required';
-    } else {
-      const minAmount = parseFloat(budgetMin.trim());
-      if (isNaN(minAmount) || minAmount <= 0) {
-        errors.budgetMin = 'Minimum amount must be a valid positive number';
-      } else if (budgetMax.trim()) {
-        const maxAmount = parseFloat(budgetMax.trim());
-        if (isNaN(maxAmount) || maxAmount <= 0) {
-          errors.budgetMax = 'Maximum amount must be a valid positive number';
-        } else if (maxAmount <= minAmount) {
-          errors.budgetMax = 'Maximum amount must be greater than minimum amount';
-        }
-      }
-    }
-
-    // If there are validation errors, set them and return
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    // Clear validation errors
-    setValidationErrors({});
-
-    const formattedStartDate = scheduleStartDate
-      ? `${scheduleStartDate.getFullYear()}-${String(scheduleStartDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleStartDate.getDate()).padStart(2, '0')}`
-      : '';
-
-    const formattedEndDate = scheduleEndDate
-      ? `${scheduleEndDate.getFullYear()}-${String(scheduleEndDate.getMonth() + 1).padStart(2, '0')}-${String(scheduleEndDate.getDate()).padStart(2, '0')}`
-      : '';
-
-    onSubmit({
-      jobTitle: jobTitle.trim(),
-      category,
-      description: description.trim(),
-      location: locationData?.address.trim() || '',
-      latitude: locationData?.latitude || null,
-      longitude: locationData?.longitude || null,
-      budgetType,
-      budgetMin: budgetMin.trim(),
-      budgetMax: budgetMax.trim(),
-      scheduleStartDate: formattedStartDate,
-      scheduleEndDate: formattedEndDate,
-      scheduleTimeFrom: scheduleTimeFrom.trim(),
-      scheduleTimeTo: scheduleTimeTo.trim(),
-    });
-
-    // Reset form
-    handleReset();
-    onClose();
-  };
-
   const handleReset = () => {
-    setJobTitle('');
-    setCategory('');
-    setIsOtherCategory(false);
-    setCustomCategory('');
-    setDescription('');
-    setLocationData(null);
-    setBudgetType('fixed');
-    setBudgetMin('');
-    setBudgetMax('');
-    setScheduleStartDate(null);
-    setScheduleEndDate(null);
-    setScheduleTimeFrom('');
-    setScheduleTimeTo('');
-    setValidationErrors({});
+    reset();
     setSelectedTab(1);
   };
 
-  const handleClose = () => {
-    handleReset();
-    onClose();
-  };
+  const onSubmit = handleSubmit((data: any) => {
+    // Round coordinates to 6 decimal places to stay within backend's validation limit
+    const roundedLatitude = data.latitude ? Math.round(data.latitude * 1000000) / 1000000 : null;
+    const roundedLongitude = data.longitude ? Math.round(data.longitude * 1000000) / 1000000 : null;
+
+    // Prepare API payload
+    const apiData: T_CreateBusinessJobData = {
+      job_title: data.jobTitle,
+      category: data.category || 'Other',
+      description: data.description,
+      location: data.location,
+      latitude: roundedLatitude,
+      longitude: roundedLongitude,
+      budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
+      contract_start_date: data.scheduleStartDate,
+      contract_end_date: data.scheduleEndDate || null,
+      time_from: data.scheduleTimeFrom || null,
+      time_to: data.scheduleTimeTo || null,
+    };
+
+    // Set budget amounts based on type
+    if (data.budgetType === 'hourly') {
+      apiData.hourly_rate = parseFloat(data.budgetMin) || null;
+    } else {
+      apiData.min_amount = parseFloat(data.budgetMin) || null;
+      apiData.max_amount = data.budgetMax ? parseFloat(data.budgetMax) : parseFloat(data.budgetMin) || null;
+    }
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        toast.custom(
+          () => <CustomToast message={data?.message || "Job posted successfully"} type="success" />,
+          {
+            duration: 5000,
+          }
+        );
+        handleReset();
+        setIsOpen(false);
+        refetch();
+      },
+      onError: (err: any) => {
+        const errorMessage = err?.message || err?.response?.data?.message || "An unexpected error occurred.";
+        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
+          duration: 7000,
+        });
+      },
+    };
+    createBusinessJob(apiData, callbackReq);
+  });
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={() => {
+        handleReset();
+        setIsOpen(false);
+      }}
       title="Post a New Job"
       size="5xl"
     >
@@ -212,8 +119,7 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
           aria-label="post-job-tabs"
         >
           <li 
-            onClick={() => setSelectedTab(1)}
-            className="text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-pointer hover:opacity-80 transition-opacity"
+            className="text-center text-sm font-semibold list-none flex flex-col items-center text-savoy-blue cursor-default"
           >
             <div className="bg-white px-2">
               <div className="h-8 w-8 bg-savoy-blue border-2 mb-2 rounded-lg flex justify-center items-center border-savoy-blue">
@@ -223,9 +129,8 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
             Job Info
           </li>
           <li
-            onClick={() => setSelectedTab(2)}
             className={classNames(
-              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity',
+              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-default',
               selectedTab >= 2 ? 'text-savoy-blue' : 'text-gray-500'
             )}
           >
@@ -242,9 +147,8 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
             Budget & Schedule
           </li>
           <li
-            onClick={() => setSelectedTab(3)}
             className={classNames(
-              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity',
+              'text-center text-sm font-semibold list-none flex flex-col items-center cursor-default',
               selectedTab >= 3 ? 'text-savoy-blue' : 'text-gray-500'
             )}
           >
@@ -266,66 +170,40 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
       {/* Tab Content */}
       {selectedTab === 1 && (
         <JobInfoTab
-          jobTitle={jobTitle}
-          setJobTitle={setJobTitle}
-          category={category}
-          setCategory={setCategory}
-          description={description}
-          setDescription={setDescription}
-          locationData={locationData}
-          setLocationData={setLocationData}
-          showCategoryDropdown={showCategoryDropdown}
-          setShowCategoryDropdown={setShowCategoryDropdown}
-          categoryDropdownRef={categoryDropdownRef}
-          handleCategorySelect={handleCategorySelect}
-          isOtherCategory={isOtherCategory}
-          setIsOtherCategory={setIsOtherCategory}
-          customCategory={customCategory}
-          setCustomCategory={setCustomCategory}
-          validationErrors={validationErrors}
-          setValidationErrors={setValidationErrors}
-          onNext={() => setSelectedTab(2)}
+          control={control}
+          register={register}
+          setSelectedTab={setSelectedTab}
+          errors={errors}
+          setError={setError}
+          clearErrors={clearErrors}
+          watch={watch}
+          setValue={setValue}
         />
       )}
 
       {selectedTab === 2 && (
         <JobBudgetTab
-          budgetType={budgetType}
-          setBudgetType={setBudgetType}
-          budgetMin={budgetMin}
-          setBudgetMin={setBudgetMin}
-          budgetMax={budgetMax}
-          setBudgetMax={setBudgetMax}
-          scheduleStartDate={scheduleStartDate}
-          setScheduleStartDate={setScheduleStartDate}
-          scheduleEndDate={scheduleEndDate}
-          setScheduleEndDate={setScheduleEndDate}
-          scheduleTimeFrom={scheduleTimeFrom}
-          setScheduleTimeFrom={setScheduleTimeFrom}
-          scheduleTimeTo={scheduleTimeTo}
-          setScheduleTimeTo={setScheduleTimeTo}
-          validationErrors={validationErrors}
-          setValidationErrors={setValidationErrors}
-          onNext={() => setSelectedTab(3)}
-          onBack={() => setSelectedTab(1)}
+          control={control}
+          register={register}
+          handleSubmit={handleSubmit}
+          setSelectedTab={setSelectedTab}
+          setValue={setValue}
+          watch={watch}
+          errors={errors}
+          setError={setError}
+          clearErrors={clearErrors}
         />
       )}
 
       {selectedTab === 3 && (
         <JobPreviewTab
-          jobTitle={jobTitle}
-          category={category}
-          description={description}
-          location={locationData?.address || ''}
-          budgetType={budgetType}
-          budgetMin={budgetMin}
-          budgetMax={budgetMax}
-          scheduleStartDate={scheduleStartDate}
-          scheduleEndDate={scheduleEndDate}
-          scheduleTimeFrom={scheduleTimeFrom}
-          scheduleTimeTo={scheduleTimeTo}
-          onBack={() => setSelectedTab(2)}
-          onSubmit={handleSubmit}
+          control={control}
+          register={register}
+          onSubmit={onSubmit}
+          setSelectedTab={setSelectedTab}
+          setValue={setValue}
+          watch={watch}
+          isLoading={isLoadingCreateBusinessJob}
         />
       )}
     </Modal>
@@ -333,4 +211,3 @@ const CreateBusinessJobModal = ({ isOpen, onClose, onSubmit }: CreateBusinessJob
 };
 
 export default CreateBusinessJobModal;
-
