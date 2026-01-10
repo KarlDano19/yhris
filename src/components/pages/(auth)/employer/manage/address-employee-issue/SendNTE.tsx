@@ -21,7 +21,7 @@ const SendNTE = ({
   setIsUploadEmployeeIssueAttachmentModalOpen,
   setNTEAttachmentViewModalOpen,
   setReleased,
-  isLoading,
+  loadingItemId,
   setIsRedirectingToDocumentGenerator,
   isInvestigated,
 }: {
@@ -34,10 +34,12 @@ const SendNTE = ({
   setIsUploadEmployeeIssueAttachmentModalOpen: Dispatch<T_UploadEmployeeIssueAttachmentModal>;
   setNTEAttachmentViewModalOpen: Dispatch<T_NTEAttachmentViewModal>;
   setReleased: any;
-  isLoading: boolean;
+  loadingItemId: string | null;
   setIsRedirectingToDocumentGenerator: Dispatch<boolean>;
   isInvestigated?: boolean;
 }) => {
+  // Check if this specific item is loading
+  const isLoading = loadingItemId === `${id}-nte`;
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
   
