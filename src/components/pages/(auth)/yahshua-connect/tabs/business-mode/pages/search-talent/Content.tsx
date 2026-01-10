@@ -3,14 +3,16 @@
 import { useMemo, useState } from 'react';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
-import useSearchTalentData, { type Talent } from '../../hooks/useSearchTalentData';
+import type { Talent } from '@/types/business-mode';
+import useSearchTalent from './hooks/useSearchTalent';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import TalentDetailsModal from './modals/TalentDetailsModal';
 import JobChatModal from '../find-work/modals/JobChatModal';
 import BookNowModal from './modals/BookNowModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Content = () => {
-  const { talents } = useSearchTalentData();
+  const { data: talentData, isLoading } = useSearchTalent();
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -18,7 +20,42 @@ const Content = () => {
   const [isBookNowModalOpen, setIsBookNowModalOpen] = useState(false);
   const [openedFromDetails, setOpenedFromDetails] = useState(false);
 
-  const talentList = useMemo(() => talents, [talents]);
+  // Transform API data to match frontend Talent type
+  const talentList = useMemo(() => {
+    if (!talentData?.records) return [];
+
+    return talentData.records.map(talent => {
+      // Calculate hourly rate from expected salary (rough estimate)
+      const hourlyRate = talent.expected_salary ? Math.floor(talent.expected_salary / 160) : 500;
+      const hourlyMin = Math.floor(hourlyRate * 0.8);
+      const hourlyMax = Math.floor(hourlyRate * 1.2);
+
+      return {
+        id: talent.id,
+        name: talent.name || `${talent.firstname} ${talent.lastname}`,
+        title: talent.education || talent.description || 'Professional',
+        rating: talent.average_rating || 0,
+        reviews: talent.reviews_count || 0,
+        jobsDone: talent.jobs_done_count || 0,
+        location: talent.address || 'Location not specified',
+        hourlyMin,
+        hourlyMax,
+        skills: talent.skills || [],
+        languages: ['English', 'Filipino'], // Default languages, API doesn't provide this field
+        availability: talent.available_for_bookings ? 'Available Now' : undefined,
+        education: talent.education,
+        about: talent.description,
+        // Pass additional fields for modals
+        email: talent.email,
+        mobile: talent.mobile,
+        photo: talent.photo,
+        portfolio_url: talent.portfolio_url,
+        description: talent.description,
+        setup_preference: talent.setup_preference,
+        expected_salary: talent.expected_salary,
+      } as Talent;
+    });
+  }, [talentData]);
 
   const handleSelectTalent = (talent: Talent) => {
     setSelectedTalent(talent);
@@ -36,7 +73,10 @@ const Content = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      {isLoading ? (
+        <LoadingSpinner size="lg" showText text="Loading talents..." className="py-12" />
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-bold text-gray-900">Search Talent</h2>
@@ -53,8 +93,13 @@ const Content = () => {
             </button>
           </div>
 
-          <div className="space-y-4">
-            {talentList.map((talent: Talent) => (
+          {talentList.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-gray-500">No talents found. Try adjusting your search filters.</div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {talentList.map((talent: Talent) => (
               <div
                 key={talent.id}
                 onClick={() => handleSelectTalent(talent)}
@@ -63,14 +108,22 @@ const Content = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 text-white flex items-center justify-center text-lg font-semibold">
-                        {talent.name
-                          .split(' ')
-                          .map((n: string) => n[0])
-                          .join('')
-                          .substring(0, 2)
-                          .toUpperCase()}
-                      </div>
+                      {talent.photo ? (
+                        <img
+                          src={talent.photo}
+                          alt={talent.name}
+                          className="h-14 w-14 rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 text-white flex items-center justify-center text-lg font-semibold">
+                          {talent.name
+                            .split(' ')
+                            .map((n: string) => n[0])
+                            .join('')
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </div>
+                      )}
                       <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-yellow-400 flex items-center justify-center">
                         <span className="text-xs text-white">★</span>
                       </div>
@@ -150,9 +203,11 @@ const Content = () => {
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
+      )}
 
       {/* Page-specific Modals */}
       <FilterRequestsModal

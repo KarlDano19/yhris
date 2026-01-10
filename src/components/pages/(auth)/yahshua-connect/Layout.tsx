@@ -12,6 +12,7 @@ import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useGetSavedJobs from './hooks/useGetSavedJobs';
 import useGetApplicationByUser from './hooks/useGetApplicationByUser';
 import useGetMyHires from './hooks/useGetMyHires';
+import useGetUpcomingBookings from './hooks/useGetUpcomingBookings';
 import FloatingMenuBar from './components/FloatingMenuBar';
 import ProfileCard from './components/ProfileCard';
 import QuickActionsCard from './components/QuickActionsCard';
@@ -35,36 +36,29 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   // Determine mode from pathname
   const isBusinessMode = pathname?.includes('business-mode') || false;
 
-  // Business mode data (only active/accepted jobs for quick actions)
-  const allActiveJobs = [
-    {
-      id: 1,
-      title: 'Fix Leaking Kitchen Sink',
-      clientName: 'Maria Santos',
-      clientInitials: 'MS',
-      location: 'Carmen, Cagayan de Oro',
-      time: 'Today, 2:00 PM',
-      priceRange: '₱800 - ₱1,200',
-      status: 'accepted',
-      urgent: true,
-    },
-  ];
-
   // My Hires data hook (for business mode)
   const { data: myHiresData, isLoading: isMyHiresLoading } = useGetMyHires();
 
-  const activeJobs = isBusinessMode ? allActiveJobs : [];
+  // Upcoming Bookings data hook (for business mode)
+  const { data: upcomingBookingsData, isLoading: isUpcomingBookingsLoading } = useGetUpcomingBookings();
 
   // Personal mode state
   const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
   const [isSavedJobsModalOpen, setIsSavedJobsModalOpen] = useState(false);
   const [isTrainingsModalOpen, setIsTrainingsModalOpen] = useState(false);
 
+  // Personal mode data hooks
+  const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
+  const { data: savedJobsData } = useGetSavedJobs();
+
+  // Handle response structure (data might be wrapped in 'data' field or at root level)
+  const profileData = applicantDetails?.data || applicantDetails;
+
   // Business mode state
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
   const [isMyHiresModalOpen, setIsMyHiresModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [isAvailableForBookings, setIsAvailableForBookings] = useState(true);
+  const [isAvailableForBookings, setIsAvailableForBookings] = useState<boolean | undefined>(undefined);
   const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<{
     id: number;
     title: string;
@@ -73,10 +67,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     time: string;
     priceRange: string;
   } | null>(null);
-
-  // Personal mode data hooks
-  const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
-  const { data: savedJobsData } = useGetSavedJobs();
 
   // Memoize empty filters object to prevent unnecessary re-renders
   const applicationFilters = useMemo(() => ({}), []);
@@ -107,6 +97,13 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     }
   }, [applicationsData]);
 
+  // Sync availability state with API data when profile loads (business mode only)
+  useEffect(() => {
+    if (isBusinessMode && profileData && profileData.available_for_bookings !== undefined) {
+      setIsAvailableForBookings(profileData.available_for_bookings);
+    }
+  }, [isBusinessMode, profileData]);
+
   // Personal mode quick actions
   const personalQuickActions = [
     {
@@ -133,16 +130,90 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   ];
 
   // Business mode bookings calculation
-  // Use activeJobs from useMyJobsData (which already filters for accepted/scheduled jobs)
-  const allUpcomingBookings = isBusinessMode ? activeJobs.map((job: any) => ({
-    id: job.id,
-    title: job.title,
-    clientName: job.clientName,
-    location: job.location,
-    time: job.time,
-    priceRange: job.priceRange,
-    clientInitials: job.clientInitials,
-  })) : [];
+  // Transform upcoming bookings data from API to modal format
+  const allUpcomingBookings = isBusinessMode && upcomingBookingsData && Array.isArray(upcomingBookingsData)
+    ? upcomingBookingsData.map((booking) => {
+        // Generate client initials
+        const clientInitials = booking.client_name
+          ? booking.client_name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .substring(0, 2)
+              .toUpperCase()
+          : 'UN';
+
+        // Format price range
+        let priceRange = '';
+        if (booking.budget_type === 'fixed_rate') {
+          if (booking.min_amount && booking.max_amount) {
+            priceRange = `₱${booking.min_amount.toLocaleString()} - ₱${booking.max_amount.toLocaleString()}`;
+          } else if (booking.max_amount) {
+            priceRange = `₱${booking.max_amount.toLocaleString()}`;
+          } else if (booking.min_amount) {
+            priceRange = `₱${booking.min_amount.toLocaleString()}`;
+          }
+        } else if (booking.budget_type === 'hourly_rate' && booking.hourly_rate) {
+          priceRange = `₱${booking.hourly_rate.toLocaleString()}/hr`;
+        }
+
+        // Format time
+        let time = '';
+        if (booking.contract_start_date) {
+          const startDate = new Date(booking.contract_start_date);
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+
+          if (startDate.toDateString() === today.toDateString()) {
+            time = 'Today';
+          } else if (startDate.toDateString() === tomorrow.toDateString()) {
+            time = 'Tomorrow';
+          } else {
+            time = startDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: startDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+            });
+          }
+
+          if (booking.time_from) {
+            time += `, ${booking.time_from}`;
+          }
+        } else if (booking.date) {
+          const jobDate = new Date(booking.date);
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+
+          if (jobDate.toDateString() === today.toDateString()) {
+            time = 'Today';
+          } else if (jobDate.toDateString() === tomorrow.toDateString()) {
+            time = 'Tomorrow';
+          } else {
+            time = jobDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: jobDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+            });
+          }
+
+          if (booking.time_from) {
+            time += `, ${booking.time_from}`;
+          }
+        }
+
+        return {
+          id: booking.application_id,
+          title: booking.job_title,
+          clientName: booking.client_name || 'Unknown Client',
+          clientInitials,
+          location: booking.location || 'Location not specified',
+          time: time || 'Not scheduled',
+          priceRange: priceRange || 'Not specified',
+        };
+      })
+    : [];
 
   const upcomingBookings = allUpcomingBookings;
 
@@ -221,9 +292,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     },
   ];
 
-  // Handle response structure (data might be wrapped in 'data' field or at root level)
-  const profileData = applicantDetails?.data || applicantDetails;
-  
   // Get user data from applicant profile
   const userName = profileData 
     ? `${profileData.firstname || ''} ${profileData.lastname || ''}`.trim() 

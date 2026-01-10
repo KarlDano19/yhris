@@ -9,6 +9,7 @@ import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
 
@@ -231,9 +232,7 @@ const Content = ({ averageRating }: ContentProps) => {
         </div>
 
         {isHighMatchJobsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Loading matched jobs...</div>
-          </div>
+          <LoadingSpinner size="lg" showText text="Loading matched jobs..." className="py-12" />
         ) : jobsMatched.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-gray-500">No high match jobs found at the moment.</div>

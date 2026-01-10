@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
 import Modal from '../../../../../components/Modal';
-import { useGetApplicantChat } from '../../../hooks/chat/useGetApplicantChat';
-import { useGetChatMessages } from '../../../hooks/chat/useGetChatMessages';
-import useSendChatMessage from '../../../hooks/chat/useSendChatMessage';
-import useMarkChatMessagesRead from '../../../hooks/chat/useMarkChatMessagesRead';
+import { useGetApplicantChat } from '../../../../../hooks/chat/useGetApplicantChat';
+import { useGetChatMessages } from '../../../../../hooks/chat/useGetChatMessages';
+import useSendChatMessage from '../../../../../hooks/chat/useSendChatMessage';
+import useMarkChatMessagesRead from '../../../../../hooks/chat/useMarkChatMessagesRead';
 
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 interface JobChatModalProps {

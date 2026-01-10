@@ -25,6 +25,7 @@ import { useUpdateApplicationStatus } from './hooks/useUpdateApplicationStatus';
 import { useReviewDailyProgress } from './hooks/useReviewDailyProgress';
 import { useSubmitPayment } from './hooks/useSubmitPayment';
 import { useSubmitApplicantReview } from './hooks/useSubmitApplicantReview';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData } from '@/types/business-mode';
 
@@ -667,12 +668,7 @@ const Content = () => {
           </div>
 
           {/* Loading State */}
-          {isLoadingJobs && (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-savoy-blue mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading your job postings...</p>
-            </div>
-          )}
+          {isLoadingJobs && <LoadingSpinner size="lg" showText text="Loading your job postings..." className="py-8" />}
 
           {/* Empty State */}
           {!isLoadingJobs && jobPostings.length === 0 && (

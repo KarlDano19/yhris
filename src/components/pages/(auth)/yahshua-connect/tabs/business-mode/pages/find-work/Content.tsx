@@ -13,6 +13,7 @@ import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
 import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
 import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import formatPrice from '@/helpers/currencyFormat';
@@ -317,9 +318,7 @@ const Content = () => {
 
         {/* Job Requests List */}
         {isGetJobsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Loading jobs...</div>
-          </div>
+          <LoadingSpinner size="lg" showText text="Loading jobs..." className="py-12" />
         ) : transformedJobs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-gray-500">No jobs available at the moment.</div>

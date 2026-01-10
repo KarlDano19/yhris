@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import Modal from '../components/Modal';
 
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { useGetApplicantChat } from '../tabs/business-mode/hooks/chat/useGetApplicantChat';
-import { useGetChatMessages } from '../tabs/business-mode/hooks/chat/useGetChatMessages';
-import useSendChatMessage from '../tabs/business-mode/hooks/chat/useSendChatMessage';
-import useMarkChatMessagesRead from '../tabs/business-mode/hooks/chat/useMarkChatMessagesRead';
+import { useGetApplicantChat } from '../hooks/chat/useGetApplicantChat';
+import { useGetChatMessages } from '../hooks/chat/useGetChatMessages';
+import useSendChatMessage from '../hooks/chat/useSendChatMessage';
+import useMarkChatMessagesRead from '../hooks/chat/useMarkChatMessagesRead';
 import toast from 'react-hot-toast';
 
 interface ChatModalProps {

@@ -34,20 +34,26 @@ const ProfileCard = ({
   rating = null, 
   reviewCount = 0,
   profilePhoto = null,
-  availableForBookings: initialAvailableForBookings = true,
+  availableForBookings: initialAvailableForBookings,
   earnings,
   spending,
   onAvailabilityChange,
 }: ProfileCardProps) => {
-  const [availableForBookings, setAvailableForBookings] = useState(initialAvailableForBookings);
+  // Initialize state with the prop value, defaulting to false if undefined
+  // This ensures we don't show true before API data loads
+  const [availableForBookings, setAvailableForBookings] = useState(
+    initialAvailableForBookings !== undefined ? initialAvailableForBookings : false
+  );
   const toggleAvailabilityMutation = useToggleAvailability();
   
   // Determine business mode: only if earnings, spending, or onAvailabilityChange are explicitly provided
   const isBusinessMode = earnings !== undefined || spending !== undefined || onAvailabilityChange !== undefined;
 
-  // Update local state when prop changes
+  // Update local state when prop changes (only if prop is actually provided, not undefined)
   useEffect(() => {
-    setAvailableForBookings(initialAvailableForBookings);
+    if (initialAvailableForBookings !== undefined) {
+      setAvailableForBookings(initialAvailableForBookings);
+    }
   }, [initialAvailableForBookings]);
 
   const handleToggle = async () => {

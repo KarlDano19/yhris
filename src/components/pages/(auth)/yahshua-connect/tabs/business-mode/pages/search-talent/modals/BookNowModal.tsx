@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Modal from '../../../../../components/Modal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import { CheckCircleIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import type { Talent } from '../../../hooks/useSearchTalentData';
+import type { Talent } from '@/types/business-mode';
 
 interface BookNowModalProps {
   isOpen: boolean;

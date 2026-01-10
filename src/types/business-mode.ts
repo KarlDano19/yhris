@@ -352,3 +352,36 @@ export type T_SubmitApplicantReviewData = {
   rating: number;
   review_text?: string;
 };
+
+// Talent Type (for Search Talent feature)
+export type Talent = {
+  id: number;
+  name: string;
+  title: string;
+  rating: number;
+  reviews: number;
+  jobsDone: number;
+  portfolioCount?: number;
+  location: string;
+  hourlyMin: number;
+  hourlyMax: number;
+  skills: string[];
+  languages: string[];
+  education?: string;
+  about?: string;
+  availability?: string;
+  // Additional fields from API
+  email?: string;
+  mobile?: string;
+  photo?: string | null;
+  cv?: string | null;
+  portfolio_url?: string | null;
+  description?: string | null;
+  setup_preference?: string | null;
+  expected_salary?: number | null;
+  work_experience?: any[];
+  certifications?: any[];
+  portfolio?: any[];
+  college?: string | null;
+  educational_attainment?: string | null;
+};

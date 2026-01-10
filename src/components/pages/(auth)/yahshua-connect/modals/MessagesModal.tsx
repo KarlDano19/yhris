@@ -1,5 +1,5 @@
 import Modal from '../components/Modal';
-import { useApplicantChatsList, type ApplicantChatListItem } from '../tabs/business-mode/hooks/chat/useApplicantChatsList';
+import { useApplicantChatsList, type ApplicantChatListItem } from '../hooks/chat/useApplicantChatsList';
 
 interface MessagesModalProps {
   isOpen: boolean;

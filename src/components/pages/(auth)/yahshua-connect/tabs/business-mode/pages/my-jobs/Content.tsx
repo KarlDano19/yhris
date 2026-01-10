@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import ChatModal from '../../../../modals/ChatModal';
 import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Import new hooks
 import { useStartJob } from '../hire/hooks/useStartJob';
@@ -285,11 +286,7 @@ const Content = () => {
         </div>
 
         {/* Loading State */}
-        {isLoading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-savoy-blue"></div>
-          </div>
-        )}
+        {isLoading && <LoadingSpinner size="lg" showText text="Loading your jobs..." className="py-12" />}
 
         {/* Error State */}
         {isError && (

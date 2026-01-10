@@ -17,7 +17,7 @@ import MessagesModal from './modals/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
 import ChatModal from './modals/ChatModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
-import { useApplicantChatsList } from './tabs/business-mode/hooks/chat/useApplicantChatsList';
+import { useApplicantChatsList } from './hooks/chat/useApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
 

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import JobChatModal from './pages/find-work/modals/JobChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
+import useGetDashboardOverview from './hooks/useGetDashboardOverview';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -15,8 +17,8 @@ const Content = () => {
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  // Data
-  const thisMonthEarnings = 45230;
+  // Fetch dashboard overview data from API
+  const { data: dashboardData, isLoading } = useGetDashboardOverview();
 
   const weeklyData = [
     { day: 'W1', amount: 12500 },
@@ -93,9 +95,6 @@ const Content = () => {
     },
   ];
 
-  // Calculate urgent requests count
-  const urgentRequestsCount = jobRequests.filter((job) => job.urgent && job.status !== 'accepted').length;
-
   const handleApplyFilters = (filters: {
     location: string;
     skills: string[];
@@ -138,14 +137,23 @@ const Content = () => {
     return `₱${amount.toLocaleString()}`;
   };
 
+  // Extract data from API response
+  const monthlyEarnings = useMemo(() => dashboardData?.monthly_earnings || 0, [dashboardData]);
+  const jobsCompleted = useMemo(() => dashboardData?.jobs_completed || 0, [dashboardData]);
+  const urgentRequestsCount = useMemo(() => dashboardData?.urgent_requests || 0, [dashboardData]);
+  const rating = useMemo(() => dashboardData?.rating || 0, [dashboardData]);
+
+  // TODO: Get user name from session/profile
   const userName = "John Doe";
-  const monthlyEarnings = 45230;
-  const jobsCompleted = 23;
-  const rating = 4.9;
 
   return (
     <div className="space-y-6">
-      {/* Business Overview */}
+      {/* Loading State */}
+      {isLoading ? (
+        <LoadingSpinner size="lg" showText text="Loading dashboard..." className="py-12" />
+      ) : (
+        <>
+          {/* Business Overview */}
       <div className="bg-gradient-to-br from-savoy-blue to-blue-600 rounded-lg shadow-lg p-6 text-white">
         {/* Header */}
         <div className="mb-6">
@@ -210,6 +218,8 @@ const Content = () => {
           ))}
         </div>
       </div>
+        </>
+      )}
 
       {/* Earnings This Month */}
       {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
