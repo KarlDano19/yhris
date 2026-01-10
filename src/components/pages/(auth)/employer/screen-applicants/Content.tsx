@@ -60,6 +60,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
         jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
+        jobPost['newApplicantsLast30Days'] = jobPost['new_applicants_last_30_days'] || 0;
       });
       setJobPostHistoryItems(dataJobPost.records);
       setPagination({
@@ -139,7 +140,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       href={`screen-applicants/${item.id}`}
                       className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                     >
-                      {item.applicantApplied - item.hiredApplicant} New Applicant/s
+                      {item.newApplicantsLast30Days} New Applicant/s
                     </Link>
                   </div>
                 );

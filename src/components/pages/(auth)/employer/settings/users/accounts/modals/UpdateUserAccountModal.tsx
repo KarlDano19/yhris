@@ -27,13 +27,14 @@ export default function UpdateUserAccountModal({
   formMethods: UseFormReturn;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
   const {
     data: accountDetailsData,
     refetch: refetchAccountDetails,
     remove: removeAccount,
   } = useGetAccountDetails(isOpen.id);
   const { mutate: updateAccount, isLoading: isLoadingUpdateAccount } = useUpdateAccount();
+  const watchIsActive = watch('is_active');
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +46,7 @@ export default function UpdateUserAccountModal({
     if (accountDetailsData) {
       setValue('name', accountDetailsData.name);
       setValue('email', accountDetailsData.email);
+      setValue('is_active', accountDetailsData.is_active);
     }
   }, [accountDetailsData]);
 
@@ -146,6 +148,20 @@ export default function UpdateUserAccountModal({
                                   type='text'
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
+                              </div>
+                            </div>
+                            <div className='grid-item flex items-center'>
+                              <div className='flex items-center mt-6'>
+                                <input
+                                  id='is_active'
+                                  type='checkbox'
+                                  checked={watchIsActive === false}
+                                  onChange={(e) => setValue('is_active', !e.target.checked)}
+                                  className='h-4 w-4 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue cursor-pointer'
+                                />
+                                <label htmlFor='is_active' className='ml-2 block text-sm font-medium leading-6 text-gray-900 cursor-pointer'>
+                                  Set to Inactive
+                                </label>
                               </div>
                             </div>
                           </div>

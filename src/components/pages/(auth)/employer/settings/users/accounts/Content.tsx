@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
 
+import classNames from '@/helpers/classNames';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import AddUserAccountModal from '../accounts/modals/AddUserAccountModal';
@@ -20,11 +21,13 @@ import useGetAccountsList from './hooks/useGetAccountsList';
 import useSyncYPUsers from './hooks/useSyncYPUsers';
 import UpdateUserAccountModal from './modals/UpdateUserAccountModal';
 import ResetPasswordModal from './modals/ResetPasswordModal';
+import DeleteModal from '@/components/DeleteModal';
+import useDeleteAccount from './hooks/useDeleteAccount';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, CloudArrowDownIcon } from "@heroicons/react/24/outline";
+import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
-import classNames from '@/helpers/classNames';
 
 type PaginationProps = {
   totalRecords: number;
@@ -41,6 +44,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState<boolean>(false);
   const [isUpdateAccountModalOpen, setIsUpdateAccountModalOpen] = useState<T_ModalData | null>(null);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState<T_ModalData | null>(null);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState<T_ModalData | null>(null);
+  const { mutate: deleteAccount, isLoading: isDeleteAccountLoading } = useDeleteAccount();
   const queryClient = useQueryClient();
   const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
   const [loginType, setLoginType] = useState<string>('');
@@ -186,8 +191,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     if (accountsItems && accountsItems.length > 0) {
       return accountsItems.map((item: any) => (
         <tr key={item.id} className='cursor-pointer'>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
+          <td className={classNames(item.is_active ? 'text-gray-900' : 'text-red-500', 'whitespace-nowrap px-3 py-5 text-sm text-gray-500')}>{item.name}</td>
+          <td className={classNames(item.is_active ? 'text-gray-900' : 'text-red-500', 'whitespace-nowrap px-3 py-5 text-sm text-gray-500')}>{item.email}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
             <div className='flex space-x-2 justify-center'>
               <SmartButton id="edit-sub-account-btn" onClick={() => setIsUpdateAccountModalOpen({ id: item.id, open: true })}>
@@ -195,6 +200,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               </SmartButton>
               <SmartButton id="edit-sub-account-btn" onClick={() => setIsResetPasswordModalOpen({ id: item.id, open: true })}>
                 <ArrowPathIcon className='h-10 w-10 text-gray-800 mx-auto border border-gray-400 p-1.5 rounded-md' />
+              </SmartButton>
+              <SmartButton id="edit-sub-account-btn" onClick={() => setIsDeleteAccountModalOpen({ id: item.id, open: true })}>
+                <DeleteIcon />
               </SmartButton>
             </div>
           </td>
@@ -352,6 +360,27 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={isResetPasswordModalOpen}
           setIsOpen={setIsResetPasswordModalOpen}
           refetch={accountsListRefetch}
+        />
+      )}
+
+      {isDeleteAccountModalOpen && (
+        <DeleteModal
+          isOpen={isDeleteAccountModalOpen}
+          setIsOpen={setIsDeleteAccountModalOpen}
+          onConfirm={() => {
+            const callbackReq = {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteAccountModalOpen(null);
+                accountsListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
+              },
+            };
+            deleteAccount(isDeleteAccountModalOpen.id, callbackReq);
+          }}
+          isLoading={isDeleteAccountLoading}
         />
       )}
 
