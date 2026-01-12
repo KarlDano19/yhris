@@ -123,7 +123,7 @@ const Content = () => {
         logoUrl: job.company_logo || undefined,
         saved: savedJobIds.has(job.id), // Check if job is saved
         match: job.match_percentage || 0,
-        applied: false, // TODO: Check if user has applied
+        applied: job.applied || false, // Applied status from backend
       };
     });
   }, [jobsData, displayCount, savedJobIds]);

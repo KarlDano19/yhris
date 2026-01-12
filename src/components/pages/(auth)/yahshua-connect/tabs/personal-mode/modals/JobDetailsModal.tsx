@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Dialog, Transition } from '@headlessui/react';
 import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
 
-import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon, CheckIcon } from '@heroicons/react/24/outline';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -83,14 +83,21 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
               >
                 <Dialog.Panel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
                   <div className="flex h-screen flex-col overflow-hidden bg-white shadow-2xl">
-                  {/* Header with Apply Now button and Close button */}
+                  {/* Header with Apply Now button or Applied badge and Close button */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-                    <Link 
-                      href={`/job-applicant-form/${jobId}`}
-                      className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Apply Now
-                    </Link>
+                    {jobDetailData?.applied ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg">
+                        <CheckIcon className="h-5 w-5" />
+                        <span className="text-sm font-medium">Applied</span>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/job-applicant-form/${jobId}`}
+                        className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                      >
+                        Apply Now
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={onClose}

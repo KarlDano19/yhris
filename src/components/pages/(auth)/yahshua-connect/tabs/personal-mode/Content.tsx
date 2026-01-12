@@ -66,15 +66,6 @@ const Content = ({ averageRating }: ContentProps) => {
     );
   }, [savedJobsData]);
 
-  // Create a Set of applied job IDs
-  const appliedJobIds = useMemo(() => {
-    if (!applicationsData || !Array.isArray(applicationsData)) return new Set<number>();
-    return new Set(
-      applicationsData
-        .map((app: any) => app.job_posting?.id || app.job_posting_id)
-        .filter((id: any) => id != null && id !== undefined)
-    );
-  }, [applicationsData]);
 
   // Transform high match jobs data to JobCard format
   const jobsMatched = useMemo(() => {
@@ -143,10 +134,10 @@ const Content = ({ averageRating }: ContentProps) => {
         logoUrl: job.company_logo || undefined,
         saved: savedJobIds.has(job.id),
         match: job.match_percentage || 0,
-        applied: appliedJobIds.has(job.id),
+        applied: job.applied || false, // Applied status from backend
       };
     });
-  }, [highMatchJobsData, savedJobIds, appliedJobIds]);
+  }, [highMatchJobsData, savedJobIds]);
 
   const recommendedTraining = {
     title: 'Mastering Design System',
