@@ -61,6 +61,7 @@ export type T_CreateJob = {
   benefits: string[];
   jobDescription: string;
   qualifications: string;
+  skills: string[];
   jobDescriptionFile: File;
   postAs: string;
   postAsUpload: File;
