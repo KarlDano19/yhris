@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import JobDetails from '../JobDetails';
+import JobDetails from './JobDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -13,6 +13,8 @@ interface JobCardProps {
     company: string;
     country: string;
     isNew?: boolean;
+    is_urgent?: boolean;
+    urgent?: boolean;
   };
   isSelected: boolean;
   isJobView: boolean;
@@ -38,7 +40,14 @@ const JobCard = ({
         )}
         onClick={() => onJobClick(job.id)}
       >
-        <span className='text-xs text-red-500'>{job.isNew ? 'NEW' : ''}</span>
+        <div className='flex items-center gap-2 mb-1'>
+          {job.isNew && <span className='text-xs text-red-500 font-medium'>NEW</span>}
+          {(job.is_urgent || job.urgent) && (
+            <span className='text-xs text-orange-600 font-medium bg-orange-100 px-2 py-0.5 rounded'>
+              URGENT
+            </span>
+          )}
+        </div>
         <div className='flex flex-col'>
           <span className='mt-1 ml-1'>
             <FileCaseIcon className='h-6 w-6' />
