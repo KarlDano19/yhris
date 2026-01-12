@@ -23,6 +23,7 @@ interface ApplicantProfileData {
   applicantId: number;
   name: string;
   initials: string;
+  photo?: string | null;
   rating: number;
   reviewsCount: number;
   appliedDate: string;
@@ -343,6 +344,7 @@ const ApplicantProfileModal = ({
         recipientId={applicant.applicantId}
         recipientName={applicant.name}
         recipientInitials={applicant.initials}
+        recipientPhoto={applicant.photo}
         jobId={jobId}
         jobTitle={jobTitle}
       />

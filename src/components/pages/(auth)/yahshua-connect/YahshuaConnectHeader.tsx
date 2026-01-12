@@ -43,7 +43,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<{ id?: number; name: string; initials: string; jobId?: number; jobTitle?: string } | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{ id?: number; name: string; initials: string; photo?: string | null; jobId?: number; jobTitle?: string } | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -264,11 +264,12 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     },
   ];
 
-  const handleSelectMessage = (chat: { id: number; name: string; initials: string; recipientId: number; jobId?: number; jobTitle?: string }) => {
+  const handleSelectMessage = (chat: { id: number; name: string; initials: string; recipientId: number; photo?: string | null; jobId?: number; jobTitle?: string }) => {
     setSelectedChat({
       id: chat.recipientId,
       name: chat.name,
       initials: chat.initials,
+      photo: chat.photo,
       jobId: chat.jobId,
       jobTitle: chat.jobTitle,
     });
@@ -641,6 +642,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
           recipientId={selectedChat.id}
           recipientName={selectedChat.name}
           recipientInitials={selectedChat.initials}
+          recipientPhoto={selectedChat.photo}
           jobId={selectedChat.jobId}
           jobTitle={selectedChat.jobTitle}
         />

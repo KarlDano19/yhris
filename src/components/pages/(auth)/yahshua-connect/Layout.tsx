@@ -23,7 +23,7 @@ import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 // Business mode imports
 import UpcomingBookingsModal from './modals/UpcomingBookingsModal';
 import MyHiresModal from './modals/MyHiresModal';
-import JobChatModal from './tabs/business-mode/pages/find-work/modals/JobChatModal';
+import ChatModal from './modals/ChatModal';
 
 interface YahshuaConnectLayoutProps {
   children: ReactNode;
@@ -60,9 +60,12 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isAvailableForBookings, setIsAvailableForBookings] = useState<boolean | undefined>(undefined);
   const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<{
-    id: number;
+    jobId: number;
     title: string;
+    clientId: number;
     clientName: string;
+    clientInitials: string;
+    clientPhoto: string | null;
     location: string;
     time: string;
     priceRange: string;
@@ -204,10 +207,13 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
         }
 
         return {
-          id: booking.application_id,
+          id: booking.id, // Job posting ID
+          applicationId: booking.application_id,
           title: booking.job_title,
+          clientId: booking.client_id || 0,
           clientName: booking.client_name || 'Unknown Client',
           clientInitials,
+          clientPhoto: booking.client_photo || null,
           location: booking.location || 'Location not specified',
           time: time || 'Not scheduled',
           priceRange: priceRange || 'Not specified',
@@ -314,12 +320,25 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const handleBookingMessage = (booking: {
     id: number;
     title: string;
+    clientId: number;
     clientName: string;
+    clientInitials: string;
+    clientPhoto: string | null;
     location: string;
     time: string;
     priceRange: string;
   }) => {
-    setSelectedBookingForMessage(booking);
+    setSelectedBookingForMessage({
+      jobId: booking.id,
+      title: booking.title,
+      clientId: booking.clientId,
+      clientName: booking.clientName,
+      clientInitials: booking.clientInitials,
+      clientPhoto: booking.clientPhoto,
+      location: booking.location,
+      time: booking.time,
+      priceRange: booking.priceRange,
+    });
     setIsUpcomingBookingsModalOpen(false);
     setIsChatModalOpen(true);
   };
@@ -408,21 +427,17 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
           )}
 
           {isChatModalOpen && selectedBookingForMessage && (
-            <JobChatModal
+            <ChatModal
               isOpen={isChatModalOpen}
               onClose={() => {
                 setIsChatModalOpen(false);
                 setSelectedBookingForMessage(null);
               }}
-              clientName={selectedBookingForMessage.clientName}
-              clientInitials={
-                selectedBookingForMessage.clientName
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .substring(0, 2)
-                  .toUpperCase() || ''
-              }
+              recipientId={selectedBookingForMessage.clientId}
+              recipientName={selectedBookingForMessage.clientName}
+              recipientInitials={selectedBookingForMessage.clientInitials}
+              recipientPhoto={selectedBookingForMessage.clientPhoto}
+              jobId={selectedBookingForMessage.jobId}
               jobTitle={selectedBookingForMessage.title}
             />
           )}

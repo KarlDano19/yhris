@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import BusinessJobCard from './components/BusinessJobCard';
 import JobAcceptedModal from './modals/JobAcceptedModal';
-import JobChatModal from './modals/JobChatModal';
+import ChatModal from '../../../../modals/ChatModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
@@ -397,16 +397,17 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedJobFull && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
             setSelectedJobId(null);
             setSelectedClientId(null);
           }}
-          clientId={selectedClientId || selectedJobFull.clientId}
-          clientName={selectedJobFull.clientName}
-          clientInitials={selectedJobFull.clientInitials || ''}
+          recipientId={selectedClientId || selectedJobFull.clientId}
+          recipientName={selectedJobFull.clientName}
+          recipientInitials={selectedJobFull.clientInitials || ''}
+          recipientPhoto={selectedJobFull.clientPhoto || null}
           jobTitle={selectedJobFull.title}
           jobId={selectedJobId || undefined}
         />

@@ -4,7 +4,7 @@ import { useApplicantChatsList, type ApplicantChatListItem } from '../hooks/chat
 interface MessagesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectMessage: (chat: { id: number; name: string; initials: string; recipientId: number; jobId?: number; jobTitle?: string }) => void;
+  onSelectMessage: (chat: { id: number; name: string; initials: string; recipientId: number; photo?: string | null; jobId?: number; jobTitle?: string }) => void;
 }
 
 const MessagesModal = ({ isOpen, onClose, onSelectMessage }: MessagesModalProps) => {
@@ -70,6 +70,7 @@ const MessagesModal = ({ isOpen, onClose, onSelectMessage }: MessagesModalProps)
                     name: chat.other_participant_name,
                     initials,
                     recipientId: chat.other_participant_id,
+                    photo: chat.other_participant_photo || null,
                     jobId: chat.business_job_posting_id || undefined,
                     jobTitle: chat.business_job_posting_title || undefined,
                   });

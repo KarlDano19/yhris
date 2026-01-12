@@ -385,3 +385,31 @@ export type Talent = {
   college?: string | null;
   educational_attainment?: string | null;
 };
+
+// Active Job Type (for applicant's view of their active jobs)
+export type T_ActiveJob = {
+  id: number;
+  applicationId: number;
+  title: string;
+  clientName: string;
+  clientInitials: string;
+  clientPhoto: string | null;
+  clientId: number;
+  location: string;
+  time: string;
+  priceRange: string;
+  status: string;
+  workStatus: string;
+  paymentStatus: string;
+  urgent: boolean;
+  // Contractual job fields
+  contractStartDate: string;
+  contractEndDate: string | null;
+  isContractual: boolean;
+  totalContractDays: number;
+  submittedProgressCount: number;
+  approvedProgressCount: number;
+  isAllProgressSubmitted: boolean;
+  dailyProgresses: T_DailyProgress[];
+  budgetType: T_BudgetType;
+};

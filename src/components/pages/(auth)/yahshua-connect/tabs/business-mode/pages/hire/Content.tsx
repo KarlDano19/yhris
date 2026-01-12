@@ -14,9 +14,9 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
-import ViewDailyProgressModal from './modals/ViewDailyProgressModal';
+import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
-import JobChatModal from '../find-work/modals/JobChatModal';
+import ChatModal from '../../../../modals/ChatModal';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
 import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
@@ -203,8 +203,10 @@ const Content = () => {
   const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<{
     id: number;
     title: string;
+    clientId: number;
     clientName: string;
-    clientInitials?: string;
+    clientInitials: string;
+    clientPhoto: string | null;
   } | null>(null);
 
   // Delete modal state
@@ -966,22 +968,17 @@ const Content = () => {
 
       {/* Chat Modal */}
       {isChatModalOpen && selectedBookingForMessage && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
             setSelectedBookingForMessage(null);
           }}
-          clientName={selectedBookingForMessage.clientName}
-          clientInitials={
-            selectedBookingForMessage.clientInitials ||
-            selectedBookingForMessage.clientName
-              .split(' ')
-              .map((n: string) => n[0])
-              .join('')
-              .substring(0, 2)
-              .toUpperCase()
-          }
+          recipientId={selectedBookingForMessage.clientId}
+          recipientName={selectedBookingForMessage.clientName}
+          recipientInitials={selectedBookingForMessage.clientInitials}
+          recipientPhoto={selectedBookingForMessage.clientPhoto}
+          jobId={selectedBookingForMessage.id}
           jobTitle={selectedBookingForMessage.title}
         />
       )}

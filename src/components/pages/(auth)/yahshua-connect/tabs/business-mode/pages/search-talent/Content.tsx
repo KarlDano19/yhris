@@ -7,7 +7,7 @@ import type { Talent } from '@/types/business-mode';
 import useSearchTalent from './hooks/useSearchTalent';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import TalentDetailsModal from './modals/TalentDetailsModal';
-import JobChatModal from '../find-work/modals/JobChatModal';
+import ChatModal from '../../../../modals/ChatModal';
 import BookNowModal from './modals/BookNowModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -241,7 +241,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedTalent && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
@@ -252,13 +252,15 @@ const Content = () => {
               setSelectedTalent(null);
             }
           }}
-          clientName={selectedTalent.name}
-          clientInitials={selectedTalent.name
+          recipientId={selectedTalent.id}
+          recipientName={selectedTalent.name}
+          recipientInitials={selectedTalent.name
             .split(' ')
             .map((n: string) => n[0])
             .join('')
             .substring(0, 2)
             .toUpperCase()}
+          recipientPhoto={selectedTalent.photo || null}
           jobTitle={selectedTalent.title}
         />
       )}

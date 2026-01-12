@@ -9,15 +9,15 @@ import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Import new hooks
-import { useStartJob } from '../hire/hooks/useStartJob';
-import { useSubmitDailyProgress } from '../hire/hooks/useSubmitDailyProgress';
-import { useUploadProofOfCompletion } from '../hire/hooks/useUploadProofOfCompletion';
+import { useStartJob } from './hooks/useStartJob';
+import { useSubmitDailyProgress } from './hooks/useSubmitDailyProgress';
+import { useUploadProofOfCompletion } from './hooks/useUploadProofOfCompletion';
 
 // Import new modals
-import StartJobModal from '../hire/modals/StartJobModal';
-import SubmitDailyProgressModal from '../hire/modals/SubmitDailyProgressModal';
-import ViewDailyProgressModal from '../hire/modals/ViewDailyProgressModal';
-import UploadProofModal from '../hire/modals/UploadProofModal';
+import StartJobModal from './modals/StartJobModal';
+import SubmitDailyProgressModal from './modals/SubmitDailyProgressModal';
+import ViewDailyProgressModal from './modals/ViewDailyProgressModal';
+import UploadProofModal from './modals/UploadProofModal';
 
 import { 
   CurrencyDollarIcon, 
@@ -30,32 +30,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
-interface ActiveJob {
-  id: number;
-  applicationId: number;
-  title: string;
-  clientName: string;
-  clientInitials: string;
-  clientPhoto: string | null;
-  clientId: number;
-  location: string;
-  time: string;
-  priceRange: string;
-  status: string;
-  workStatus: string;
-  paymentStatus: string;
-  urgent: boolean;
-  // Contractual job fields
-  contractStartDate: string;
-  contractEndDate: string | null;
-  isContractual: boolean;
-  totalContractDays: number;
-  submittedProgressCount: number;
-  approvedProgressCount: number;
-  isAllProgressSubmitted: boolean;
-  dailyProgresses: any[];
-  budgetType: 'fixed_rate' | 'hourly_rate';
-}
+import { T_ActiveJob } from '@/types/business-mode';
 
 const Content = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -64,6 +39,7 @@ const Content = () => {
     clientId: number;
     clientName: string;
     clientInitials: string;
+    clientPhoto: string | null;
     title: string;
   } | null>(null);
 
@@ -72,7 +48,7 @@ const Content = () => {
   const [isSubmitProgressModalOpen, setIsSubmitProgressModalOpen] = useState(false);
   const [isViewProgressModalOpen, setIsViewProgressModalOpen] = useState(false);
   const [isUploadProofModalOpen, setIsUploadProofModalOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<ActiveJob | null>(null);
+  const [selectedJob, setSelectedJob] = useState<T_ActiveJob | null>(null);
 
   // Hooks for job actions
   const { mutate: startJob, isLoading: isStartingJob } = useStartJob();
@@ -86,7 +62,7 @@ const Content = () => {
   });
 
   // Transform API data to ActiveJob format
-  const activeJobs: ActiveJob[] = useMemo(() => {
+  const activeJobs: T_ActiveJob[] = useMemo(() => {
     if (!data?.records) return [];
 
     return data.records.map((job: any) => {
@@ -159,18 +135,19 @@ const Content = () => {
     });
   }, [data]);
 
-  const handleMessageJob = (job: ActiveJob) => {
+  const handleMessageJob = (job: T_ActiveJob) => {
     setSelectedJobForMessage({
       id: job.id,
       clientId: job.clientId,
       clientName: job.clientName,
       clientInitials: job.clientInitials,
+      clientPhoto: job.clientPhoto,
       title: job.title,
     });
     setIsChatModalOpen(true);
   };
 
-  const handleStartJobClick = (job: ActiveJob) => {
+  const handleStartJobClick = (job: T_ActiveJob) => {
     setSelectedJob(job);
     setIsStartJobModalOpen(true);
   };
@@ -200,7 +177,7 @@ const Content = () => {
     );
   };
 
-  const handleSubmitProgressClick = (job: ActiveJob) => {
+  const handleSubmitProgressClick = (job: T_ActiveJob) => {
     setSelectedJob(job);
     setIsSubmitProgressModalOpen(true);
   };
@@ -237,12 +214,12 @@ const Content = () => {
     );
   };
 
-  const handleViewProgressClick = (job: ActiveJob) => {
+  const handleViewProgressClick = (job: T_ActiveJob) => {
     setSelectedJob(job);
     setIsViewProgressModalOpen(true);
   };
 
-  const handleUploadProofClick = (job: ActiveJob) => {
+  const handleUploadProofClick = (job: T_ActiveJob) => {
     setSelectedJob(job);
     setIsUploadProofModalOpen(true);
   };
@@ -550,6 +527,7 @@ const Content = () => {
           recipientId={selectedJobForMessage.clientId}
           recipientName={selectedJobForMessage.clientName}
           recipientInitials={selectedJobForMessage.clientInitials}
+          recipientPhoto={selectedJobForMessage.clientPhoto}
           jobId={selectedJobForMessage.id}
           jobTitle={selectedJobForMessage.title}
         />
