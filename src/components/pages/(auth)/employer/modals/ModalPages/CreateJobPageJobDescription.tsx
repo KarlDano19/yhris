@@ -45,7 +45,6 @@ export default function CreateJobPageJobDescription({
   // Skills state management
   const [skillsInput, setSkillsInput] = useState('');
   const [tagsSkill, setTagsSkill] = useState<string[]>([]);
-  const isSkillsInitialized = useRef(false);
   
   // Track the last position to detect changes
   const lastPositionRef = useRef<string | null>(null);
@@ -67,26 +66,22 @@ export default function CreateJobPageJobDescription({
       currentContent.includes('Ensuring the accounts of the company are accurate and free of error');
   };
 
-  // Initialize skills tags only once when formData.skills is available
+  // Sync skills from form to UI
   useEffect(() => {
-    if (!isSkillsInitialized.current) {
-      const currentSkills = getValues('skills');
-      let skillsArray = [];
-      if (Array.isArray(currentSkills)) {
-        skillsArray = currentSkills;
-      } else if (typeof currentSkills === 'string') {
-        skillsArray = currentSkills
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter((s: string) => s.length > 0);
-      }
-      if (skillsArray.length > 0) {
-        setTagsSkill(skillsArray);
-        setValue('skills', skillsArray);
-      }
-      isSkillsInitialized.current = true;
+    const currentSkills = getValues('skills');
+    
+    let skillsArray: string[] = [];
+    if (Array.isArray(currentSkills)) {
+      skillsArray = currentSkills;
+    } else if (typeof currentSkills === 'string' && currentSkills.trim()) {
+      skillsArray = currentSkills
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length > 0);
     }
-  }, [getValues, setValue]);
+    
+    setTagsSkill(skillsArray);
+  }, [getValues, combinedFormData]);
 
   // Handle skills input key down
   const handleKeyDownSkill = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -254,6 +249,11 @@ export default function CreateJobPageJobDescription({
             Add relevant skills for this position. Applicants can search by these skills to find your job posting.
           </p>
           <div className='mt-2'>
+            {/* Hidden input to register skills field with react-hook-form */}
+            <input
+              type='hidden'
+              {...register('skills')}
+            />
             <div className='relative flex items-center'>
               <input
                 type='text'

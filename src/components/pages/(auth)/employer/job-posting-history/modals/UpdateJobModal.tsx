@@ -112,12 +112,26 @@ export default function UpdateJobModal({
           otherBenefits: jobPostDataDetails.other_benefits,
         });
       }
+      // Parse skills from comma-separated string to array
+      let skillsArray = [];
+      if (jobPostDataDetails.skills) {
+        if (Array.isArray(jobPostDataDetails.skills)) {
+          skillsArray = jobPostDataDetails.skills;
+        } else if (typeof jobPostDataDetails.skills === 'string') {
+          skillsArray = jobPostDataDetails.skills
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter((s: string) => s.length > 0);
+        }
+      }
+      
       fourthForm.reset({
         is_show_roles: jobPostDataDetails.is_show_roles,
         is_show_remarks: jobPostDataDetails.is_show_remarks,
         jobDescription: jobPostDataDetails.job_description,
         qualifications: jobPostDataDetails.qualifications,
         notesRemarks: jobPostDataDetails.job_remark,
+        skills: skillsArray,
       });
       // Normalize screening questions for the Job Settings page
       if (jobPostDataDetails.screening_questions && jobPostDataDetails.screening_questions !== null) {

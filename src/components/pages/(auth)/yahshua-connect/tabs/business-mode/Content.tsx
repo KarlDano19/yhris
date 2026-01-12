@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
@@ -9,6 +9,8 @@ import ChatModal from '../../modals/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
 import useGetDashboardOverview from './hooks/useGetDashboardOverview';
 import LoadingSpinner from '@/components/LoadingSpinner';
+
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
