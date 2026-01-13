@@ -68,6 +68,7 @@ export type T_BusinessJobApplication = {
   updated_at: string;
   // Contractual job fields
   is_contractual_job: boolean;
+  is_daily_progress_required: boolean;
   total_contract_days: number;
   submitted_progress_count: number;
   approved_progress_count: number;
@@ -113,6 +114,7 @@ export type T_BusinessJob = {
   status: T_JobStatus;
   is_urgent: boolean;
   is_active: boolean;
+  is_daily_progress_required: boolean;
   created_at: string;
   updated_at: string;
   created_by: number;
@@ -142,6 +144,7 @@ export type T_CreateBusinessJobData = {
   time_from?: string | null; // HH:MM format
   time_to?: string | null; // HH:MM format
   is_urgent?: boolean;
+  is_daily_progress_required?: boolean;
 };
 
 // Business Job Response
@@ -406,6 +409,7 @@ export type T_ActiveJob = {
   contractStartDate: string;
   contractEndDate: string | null;
   isContractual: boolean;
+  isDailyProgressRequired: boolean;
   totalContractDays: number;
   submittedProgressCount: number;
   approvedProgressCount: number;

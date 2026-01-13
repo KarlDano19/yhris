@@ -266,6 +266,38 @@ export default function JobInfoTab({
             </div>
           </div>
 
+          {/* Daily Progress Requirement Toggle */}
+          <div className="flex items-center justify-between py-3 border-t border-gray-200 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-900">
+                Require Daily Progress Uploads
+              </label>
+              <p className="text-xs text-gray-500 mt-0.5">
+                When enabled, hired workers must submit daily progress with proof for contractual jobs
+              </p>
+            </div>
+            <Controller
+              control={control}
+              name="isDailyProgressRequired"
+              defaultValue={true}
+              render={({ field }) => (
+                <button
+                  type="button"
+                  onClick={() => field.onChange(!field.value)}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:ring-offset-2 ${
+                    field.value !== false ? 'bg-savoy-blue' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      field.value !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              )}
+            />
+          </div>
+
           {/* Location with Map Picker */}
           <div>
             <label className="block text-sm font-medium leading-6 text-gray-900">

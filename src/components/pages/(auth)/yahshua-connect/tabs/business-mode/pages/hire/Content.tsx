@@ -174,7 +174,6 @@ const transformApplicationToProfile = (application: T_BusinessJobApplication): T
 const Content = () => {
   // Form Methods
   const createFormMethods = useForm();
-  const editFormMethods = useForm();
 
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [isUpdateJobModalOpen, setIsUpdateJobModalOpen] = useState(false);
@@ -354,91 +353,6 @@ const Content = () => {
         toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
       },
     });
-  };
-
-  const handleUpdateJob = (data: {
-    jobTitle: string;
-    category: string;
-    description: string;
-    location: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    budgetType: 'fixed' | 'hourly';
-    budgetMin: string;
-    budgetMax: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleTimeFrom: string;
-    scheduleTimeTo: string;
-  }) => {
-    if (!editingJobId) return;
-
-    // Round coordinates to 6 decimal places to stay within backend's validation limit
-    const roundedLatitude = data.latitude ? Math.round(data.latitude * 1000000) / 1000000 : null;
-    const roundedLongitude = data.longitude ? Math.round(data.longitude * 1000000) / 1000000 : null;
-
-    // Prepare API payload
-    const apiData: T_CreateBusinessJobData = {
-      job_title: data.jobTitle,
-      category: data.category || 'Other',
-      description: data.description,
-      location: data.location,
-      latitude: roundedLatitude,
-      longitude: roundedLongitude,
-      budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
-      contract_start_date: data.scheduleStartDate,
-      contract_end_date: data.scheduleEndDate || null,
-      time_from: data.scheduleTimeFrom || null,
-      time_to: data.scheduleTimeTo || null,
-    };
-
-    // Set budget amounts based on type
-    if (data.budgetType === 'hourly') {
-      apiData.hourly_rate = parseFloat(data.budgetMin) || null;
-    } else {
-      apiData.min_amount = parseFloat(data.budgetMin) || null;
-      apiData.max_amount = data.budgetMax ? parseFloat(data.budgetMax) : parseFloat(data.budgetMin) || null;
-    }
-
-    // Update existing job
-    updateJobMutation.mutate(
-      { jobId: editingJobId, ...apiData },
-      {
-        onSuccess: () => {
-          toast.custom(() => <CustomToast message="Job updated successfully" type="success" />, { duration: 5000 });
-          setEditingJobId(null);
-          setIsUpdateJobModalOpen(false);
-          refetchJobs();
-        },
-        onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to update job';
-          toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
-        },
-      }
-    );
-  };
-
-  // Get initial data for editing
-  const getEditJobData = (jobId: number | null) => {
-    if (!jobId) return undefined;
-    const job = jobPostings.find((j) => j.id === jobId);
-    if (!job) return undefined;
-
-    return {
-      jobTitle: job.job_title,
-      category: job.category,
-      description: job.description,
-      location: job.location,
-      latitude: job.latitude || null,
-      longitude: job.longitude || null,
-      budgetType: job.budget_type === 'hourly_rate' ? ('hourly' as const) : ('fixed' as const),
-      budgetMin: job.budget_type === 'hourly_rate' ? (job.hourly_rate?.toString() || '') : (job.min_amount?.toString() || ''),
-      budgetMax: job.max_amount?.toString() || '',
-      scheduleStartDate: job.contract_start_date || '',
-      scheduleEndDate: job.contract_end_date || '',
-      scheduleTimeFrom: job.time_from || '',
-      scheduleTimeTo: job.time_to || '',
-    };
   };
 
   const handleViewApplicants = (jobId: number) => {
@@ -890,9 +804,7 @@ const Content = () => {
               setEditingJobId(null);
             }
           }}
-          formMethods={editFormMethods}
           editingJobId={editingJobId}
-          initialData={getEditJobData(editingJobId)!}
         />
       )}
 
