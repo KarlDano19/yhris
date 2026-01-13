@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import BusinessJobCard from './components/BusinessJobCard';
 import JobAcceptedModal from './modals/JobAcceptedModal';
-import ChatModal from '../../../../modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';

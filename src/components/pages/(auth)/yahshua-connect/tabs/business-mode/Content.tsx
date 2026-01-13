@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
-import ChatModal from '../../modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
 import useGetDashboardOverview from './hooks/useGetDashboardOverview';
 import LoadingSpinner from '@/components/LoadingSpinner';

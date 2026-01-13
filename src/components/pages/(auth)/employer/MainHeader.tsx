@@ -21,10 +21,14 @@ import SessionExpirationModal from '@/components/SessionExpirationModal';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
+import useGetEmployerApplicantChatsList from '@/components/hooks/chat/useGetEmployerApplicantChatsList';
+import MessagesModal from '@/components/common/chat/MessagesModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
+import ChatIcon from '@/svg/ChatIcon';
 
 interface ErrorDetail {
   detail: string;
@@ -58,6 +62,21 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const { mutate: markAsRead } = useMarkNotificationRead();
   const [notifications, setNotifications] = useState<any[]>([]);
   const { mutate: refreshToken } = useRefreshToken();
+
+  // Chat state
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<{
+    appliedJobId: number;
+    jobTitle: string;
+    applicantName: string;
+    applicantPhoto?: string | null;
+    applicantInitials: string;
+  } | null>(null);
+
+  // Fetch chats to get unread count
+  const { data: chatsData } = useGetEmployerApplicantChatsList(undefined, true);
+  const totalUnreadCount = chatsData?.records?.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -249,12 +268,23 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     );
   };
 
+  const handleSelectMessage = (chat: {
+    appliedJobId: number;
+    jobTitle: string;
+    applicantName: string;
+    applicantPhoto?: string | null;
+    applicantInitials: string;
+  }) => {
+    setSelectedChat(chat);
+    setShowChatModal(true);
+  };
+
   const formatTimeAgo = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -424,6 +454,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </div>
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden gap-2'>
+                  {/* Mobile Messages Button */}
+                  <button
+                    onClick={() => setShowMessagesModal(true)}
+                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                  >
+                    <span className="sr-only">Open messages</span>
+                    <ChatIcon />
+                    {totalUnreadCount > 0 && (
+                      <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Mobile Notifications */}
                   <NotificationDropdown />
                   {/* Mobile menu button */}
@@ -437,6 +480,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </Popover.Button>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
+                  {/* Messages Button */}
+                  <button
+                    onClick={() => setShowMessagesModal(true)}
+                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                  >
+                    <span className="sr-only">Open messages</span>
+                    <ChatIcon />
+                    {totalUnreadCount > 0 && (
+                      <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Notifications */}
                   <NotificationDropdown />
                   {/* Profile dropdown */}
@@ -506,6 +562,36 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       </Popover>
       <FloatingHelpButton companyName={profile.name} />
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
+
+      {/* Chat Modals */}
+      <MessagesModal
+        isOpen={showMessagesModal}
+        onClose={() => setShowMessagesModal(false)}
+        role="employer"
+        onSelectEmployerMessage={handleSelectMessage}
+      />
+
+      {selectedChat && (
+        <ChatModal
+          isOpen={showChatModal}
+          onClose={() => {
+            setShowChatModal(false);
+            setSelectedChat(null);
+          }}
+          onBack={() => {
+            setShowChatModal(false);
+            setSelectedChat(null);
+            setShowMessagesModal(true);
+          }}
+          chatType="employer-applicant"
+          appliedJobId={selectedChat.appliedJobId}
+          subtitle={selectedChat.jobTitle}
+          personName={selectedChat.applicantName}
+          personPhoto={selectedChat.applicantPhoto}
+          personInitials={selectedChat.applicantInitials}
+        />
+      )}
+
       <SessionExpirationModal
         isOpen={isExpiring}
         onRenew={handleRenewSession}

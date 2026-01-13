@@ -13,11 +13,12 @@ import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
 import SessionExpirationModal from '@/components/SessionExpirationModal';
-import MessagesModal from './modals/MessagesModal';
+import MessagesModal from '@/components/common/chat/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
-import ChatModal from './modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from './hooks/chat/useApplicantChatsList';
+import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/useGetEmployerApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
 
@@ -44,6 +45,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedChat, setSelectedChat] = useState<{ id?: number; name: string; initials: string; photo?: string | null; jobId?: number; jobTitle?: string } | null>(null);
+  const [showEmployerChatModal, setShowEmployerChatModal] = useState(false);
+  const [selectedEmployerChat, setSelectedEmployerChat] = useState<{ appliedJobId: number; jobTitle: string; employerName: string; employerLogo?: string | null; employerInitials: string } | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -52,9 +55,16 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const { data: profileData, isLoading: isProfileLoading } = useGetApplicantProfile();
   const { mutate: updateProfile } = useUpdateApplicantProfile();
 
-  // Fetch chats to get unread count
-  const { data: chatsData } = useApplicantChatsList(undefined, true);
-  const totalUnreadCount = chatsData?.records.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
+  // Fetch personal chats (applicant-to-employer) to get unread count
+  const { data: employerChatsData } = useGetEmployerApplicantChatsList(undefined, true);
+  const personalUnreadCount = employerChatsData?.records.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
+
+  // Fetch business chats (applicant-to-applicant marketplace) to get unread count
+  const { data: businessChatsData } = useApplicantChatsList(undefined, true);
+  const businessUnreadCount = businessChatsData?.records.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
+
+  // Total unread count (personal + business)
+  const totalUnreadCount = personalUnreadCount + businessUnreadCount;
   const [isExpiring, setIsExpiring] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
@@ -264,7 +274,14 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     },
   ];
 
-  const handleSelectMessage = (chat: { id: number; name: string; initials: string; recipientId: number; photo?: string | null; jobId?: number; jobTitle?: string }) => {
+  // Personal Mode: Applicant to Employer chats (job applications)
+  const handleSelectPersonalMessage = (chat: { appliedJobId: number; jobTitle: string; employerName: string; employerLogo?: string | null; employerInitials: string }) => {
+    setSelectedEmployerChat(chat);
+    setShowEmployerChatModal(true);
+  };
+
+  // Business Mode: Applicant to Applicant chats (marketplace)
+  const handleSelectBusinessMessage = (chat: { id: number; name: string; initials: string; recipientId: number; photo?: string | null; jobId?: number; jobTitle?: string }) => {
     setSelectedChat({
       id: chat.recipientId,
       name: chat.name,
@@ -623,7 +640,9 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       <MessagesModal
         isOpen={showMessagesModal}
         onClose={() => setShowMessagesModal(false)}
-        onSelectMessage={handleSelectMessage}
+        role="applicant"
+        onSelectPersonalMessage={handleSelectPersonalMessage}
+        onSelectBusinessMessage={handleSelectBusinessMessage}
       />
 
       <NotificationsModal
@@ -639,12 +658,39 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
             setShowChatModal(false);
             setSelectedChat(null);
           }}
+          onBack={() => {
+            setShowChatModal(false);
+            setSelectedChat(null);
+            setShowMessagesModal(true);
+          }}
+          chatType="applicant-applicant"
           recipientId={selectedChat.id}
-          recipientName={selectedChat.name}
-          recipientInitials={selectedChat.initials}
-          recipientPhoto={selectedChat.photo}
-          jobId={selectedChat.jobId}
-          jobTitle={selectedChat.jobTitle}
+          personName={selectedChat.name}
+          personInitials={selectedChat.initials}
+          personPhoto={selectedChat.photo}
+          jobPostingId={selectedChat.jobId}
+          subtitle={selectedChat.jobTitle}
+        />
+      )}
+
+      {selectedEmployerChat && (
+        <ChatModal
+          isOpen={showEmployerChatModal}
+          onClose={() => {
+            setShowEmployerChatModal(false);
+            setSelectedEmployerChat(null);
+          }}
+          onBack={() => {
+            setShowEmployerChatModal(false);
+            setSelectedEmployerChat(null);
+            setShowMessagesModal(true);
+          }}
+          chatType="employer-applicant"
+          appliedJobId={selectedEmployerChat.appliedJobId}
+          subtitle={selectedEmployerChat.jobTitle}
+          personName={selectedEmployerChat.employerName}
+          personPhoto={selectedEmployerChat.employerLogo}
+          personInitials={selectedEmployerChat.employerInitials}
         />
       )}
 

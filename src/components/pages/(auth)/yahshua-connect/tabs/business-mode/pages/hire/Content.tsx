@@ -16,7 +16,7 @@ import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
 import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
-import ChatModal from '../../../../modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
 import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
