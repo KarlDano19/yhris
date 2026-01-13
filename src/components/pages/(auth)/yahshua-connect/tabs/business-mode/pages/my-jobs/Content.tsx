@@ -125,6 +125,7 @@ const Content = () => {
         contractStartDate: job.contract_start_date || '',
         contractEndDate: job.contract_end_date || null,
         isContractual: job.is_contractual_job || false,
+        isProofFileRequired: job.is_proof_file_required ?? true,
         totalContractDays: job.total_contract_days || 1,
         submittedProgressCount: job.submitted_progress_count || 0,
         approvedProgressCount: job.approved_progress_count || 0,
@@ -184,7 +185,7 @@ const Content = () => {
 
   const handleSubmitProgressConfirm = (data: {
     progress_date: string;
-    proof_file: File;
+    proof_file?: File;
     notes: string;
     hours_worked?: number;
   }) => {
@@ -367,9 +368,8 @@ const Content = () => {
               </div>
 
               {/* Progress Indicator for Contractual Jobs */}
-              {job.isContractual && 
-               (job.workStatus === 'started' || 
-                (job.workStatus === 'completed' && !job.isAllProgressSubmitted)) && (
+              {job.isContractual &&
+               (job.workStatus === 'started' || job.workStatus === 'completed') && (
                 <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium text-gray-700">Daily Progress</span>
@@ -385,7 +385,7 @@ const Content = () => {
                       }}
                     />
                   </div>
-                  {job.isAllProgressSubmitted && (
+                  {job.submittedProgressCount >= job.totalContractDays && (
                     <div className="flex items-center gap-1 mt-2 text-green-600">
                       <CheckCircleIcon className="h-4 w-4" />
                       <span className="text-xs font-medium">All progress submitted!</span>
@@ -405,14 +405,15 @@ const Content = () => {
                 </div>
               )}
 
-              {/* Contractual job marked as complete but progress not all submitted - should not happen but handle gracefully */}
-              {job.isContractual && 
-               job.workStatus === 'completed' && 
-               !job.isAllProgressSubmitted && (
+              {/* Contractual job marked as complete but progress not all submitted - only show warning if progress is required */}
+              {job.isContractual &&
+               job.isProofFileRequired &&
+               job.workStatus === 'completed' &&
+               job.submittedProgressCount < job.totalContractDays && (
                 <div className="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center gap-2">
                   <ExclamationTriangleIcon className="h-5 w-5 text-orange-600 flex-shrink-0" />
                   <p className="text-sm text-orange-800">
-                    Contract incomplete: {job.submittedProgressCount}/{job.totalContractDays} days submitted. 
+                    Contract incomplete: {job.submittedProgressCount}/{job.totalContractDays} days submitted.
                     Please submit remaining daily progress.
                   </p>
                 </div>
@@ -476,18 +477,18 @@ const Content = () => {
                       </button>
                     )}
 
-                  {/* Started - Contractual Job (or completed but progress not all submitted) */}
+                  {/* Started - Contractual Job */}
                   {job.status === 'accepted' &&
                     job.isContractual &&
-                    (job.workStatus === 'started' || 
-                     (job.workStatus === 'completed' && !job.isAllProgressSubmitted)) && (
+                    (job.workStatus === 'started' ||
+                     (job.workStatus === 'completed' && job.submittedProgressCount < job.totalContractDays)) && (
                       <button
                         onClick={() => handleSubmitProgressClick(job)}
-                        disabled={isSubmittingProgress || job.isAllProgressSubmitted}
+                        disabled={isSubmittingProgress || job.submittedProgressCount >= job.totalContractDays}
                         className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         <DocumentTextIcon className="h-5 w-5" />
-                        {job.isAllProgressSubmitted
+                        {job.submittedProgressCount >= job.totalContractDays
                           ? 'All Progress Submitted'
                           : 'Submit Daily Progress'}
                       </button>
@@ -497,8 +498,7 @@ const Content = () => {
                 {/* View Progress Button for Contractual Jobs */}
                 {job.status === 'accepted' &&
                   job.isContractual &&
-                  (job.workStatus === 'started' || 
-                   (job.workStatus === 'completed' && !job.isAllProgressSubmitted)) &&
+                  (job.workStatus === 'started' || job.workStatus === 'completed') &&
                   job.submittedProgressCount > 0 && (
                     <button
                       onClick={() => handleViewProgressClick(job)}
@@ -557,11 +557,12 @@ const Content = () => {
           onClose={() => {
             setIsSubmitProgressModalOpen(false);
             setSelectedJob(null);
-          }}
+            }}
           jobTitle={selectedJob.title}
           contractStartDate={selectedJob.contractStartDate}
           contractEndDate={selectedJob.contractEndDate || ''}
           budgetType={selectedJob.budgetType}
+          isProofFileRequired={selectedJob.isProofFileRequired}
           dailyProgresses={selectedJob.dailyProgresses}
           onSubmit={handleSubmitProgressConfirm}
         />

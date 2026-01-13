@@ -13,10 +13,11 @@ interface SubmitDailyProgressModalProps {
   contractStartDate: string;
   contractEndDate: string;
   budgetType: 'fixed_rate' | 'hourly_rate';
+  isProofFileRequired?: boolean;
   dailyProgresses?: any[];
   onSubmit: (data: {
     progress_date: string;
-    proof_file: File;
+    proof_file?: File;
     notes: string;
     hours_worked?: number;
   }) => void;
@@ -29,6 +30,7 @@ const SubmitDailyProgressModal = ({
   contractStartDate,
   contractEndDate,
   budgetType,
+  isProofFileRequired = true,
   dailyProgresses = [],
   onSubmit,
 }: SubmitDailyProgressModalProps) => {
@@ -63,7 +65,10 @@ const SubmitDailyProgressModal = ({
   });
 
   const handleSubmit = () => {
-    if (selectedFile && progressDate) {
+    // File is required only if isProofFileRequired is true
+    const isValid = progressDate && (isProofFileRequired ? selectedFile : true);
+
+    if (isValid) {
       // Format date to YYYY-MM-DD for API
       const year = progressDate.getFullYear();
       const month = String(progressDate.getMonth() + 1).padStart(2, '0');
@@ -72,14 +77,18 @@ const SubmitDailyProgressModal = ({
 
       const data: {
         progress_date: string;
-        proof_file: File;
+        proof_file?: File;
         notes: string;
         hours_worked?: number;
       } = {
         progress_date: formattedDate,
-        proof_file: selectedFile,
         notes: notes,
       };
+
+      // Only include proof_file if a file was selected
+      if (selectedFile) {
+        data.proof_file = selectedFile;
+      }
 
       if (budgetType === 'hourly_rate' && hoursWorked) {
         data.hours_worked = parseFloat(hoursWorked);
@@ -134,7 +143,7 @@ const SubmitDailyProgressModal = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!selectedFile || !progressDate}
+            disabled={!progressDate || (isProofFileRequired && !selectedFile)}
             className="px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Submit Progress
@@ -210,7 +219,12 @@ const SubmitDailyProgressModal = ({
       {/* Upload Section */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Proof of Work <span className="text-red-500">*</span>
+          Proof of Work{' '}
+          {isProofFileRequired ? (
+            <span className="text-red-500">*</span>
+          ) : (
+            <span className="text-gray-500 text-xs">(Optional)</span>
+          )}
         </label>
         <div
           {...getRootProps()}
