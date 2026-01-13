@@ -655,8 +655,8 @@ const Content = () => {
           >
             {jobPost.assignments_count || 0} users
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex justify-center items-center space-x-2'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500' style={{ overflow: 'visible' }}>
+            <div className='flex justify-center items-center space-x-2 relative'>
                 <SmartButton 
                   id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
@@ -697,11 +697,14 @@ const Content = () => {
                   <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
                 </SmartButton>
                 <div className="relative more-menu-container flex items-center">
-                  <button onClick={() => handleMoreMenuClick(jobPost.id)} className="flex items-center">
+                  <button 
+                    onClick={() => handleMoreMenuClick(jobPost.id)} 
+                    className="flex items-center"
+                  >
                     <MoreIconWithBorder />
                   </button>
                   {moreMenuOpen[jobPost.id] && (
-                    <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
+                    <div className='absolute bg-white border rounded shadow-lg mt-2 z-[100] right-0 whitespace-nowrap' style={{ minWidth: '180px', top: '100%' }}>
                       <ul className='py-1 text-left'>
                         <li
                           className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
@@ -983,7 +986,7 @@ const Content = () => {
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8' style={{ paddingBottom: '200px', marginBottom: '-200px' }}>
               <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
                 <table
                   className={classNames(
