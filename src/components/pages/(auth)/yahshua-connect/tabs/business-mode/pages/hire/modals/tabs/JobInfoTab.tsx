@@ -270,15 +270,15 @@ export default function JobInfoTab({
           <div className="flex items-center justify-between py-3 border-t border-gray-200 mt-4">
             <div>
               <label className="block text-sm font-medium text-gray-900">
-                Require Daily Progress Uploads
+                Require Proof File Uploads
               </label>
               <p className="text-xs text-gray-500 mt-0.5">
-                When enabled, hired workers must submit daily progress with proof for contractual jobs
+                When enabled, hired workers must upload proof files when submitting daily progress
               </p>
             </div>
             <Controller
               control={control}
-              name="isDailyProgressRequired"
+              name="isProofFileRequired"
               defaultValue={true}
               render={({ field }) => (
                 <button
