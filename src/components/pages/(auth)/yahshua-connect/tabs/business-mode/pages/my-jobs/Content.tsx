@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import ChatModal from '../../../../modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
 import LoadingSpinner from '@/components/LoadingSpinner';
 

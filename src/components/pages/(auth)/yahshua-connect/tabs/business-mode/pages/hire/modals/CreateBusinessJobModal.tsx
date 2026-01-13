@@ -58,6 +58,7 @@ const CreateBusinessJobModal = ({ refetch, isOpen, setIsOpen, formMethods }: Cre
       contract_end_date: data.scheduleEndDate || null,
       time_from: data.scheduleTimeFrom || null,
       time_to: data.scheduleTimeTo || null,
+      is_daily_progress_required: data.isDailyProgressRequired ?? true,
     };
 
     // Set budget amounts based on type

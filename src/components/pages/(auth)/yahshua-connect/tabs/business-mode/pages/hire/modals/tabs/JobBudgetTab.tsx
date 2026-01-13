@@ -279,29 +279,31 @@ export default function JobBudgetTab({
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="scheduleTimeFrom" className="block text-xs text-gray-600 mb-1">
-                    Time From
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="time"
-                      {...register("scheduleTimeFrom")}
-                      id="scheduleTimeFrom"
-                      className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
-                      style={{ WebkitAppearance: 'none' }}
-                    />
-                    <div 
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                      onClick={() => {
-                        const timeInput = document.getElementById('scheduleTimeFrom') as HTMLInputElement;
-                        timeInput?.showPicker();
-                      }}
-                    >
-                      <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                {budgetType === 'hourly' && (
+                  <div>
+                    <label htmlFor="scheduleTimeFrom" className="block text-xs text-gray-600 mb-1">
+                      Time From
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="time"
+                        {...register("scheduleTimeFrom")}
+                        id="scheduleTimeFrom"
+                        className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
+                        style={{ WebkitAppearance: 'none' }}
+                      />
+                      <div
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                        onClick={() => {
+                          const timeInput = document.getElementById('scheduleTimeFrom') as HTMLInputElement;
+                          timeInput?.showPicker();
+                        }}
+                      >
+                        <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* End Date Column */}
@@ -350,29 +352,31 @@ export default function JobBudgetTab({
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="scheduleTimeTo" className="block text-xs text-gray-600 mb-1">
-                    Time To
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="time"
-                      {...register("scheduleTimeTo")}
-                      id="scheduleTimeTo"
-                      className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
-                      style={{ WebkitAppearance: 'none' }}
-                    />
-                    <div 
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                      onClick={() => {
-                        const timeInput = document.getElementById('scheduleTimeTo') as HTMLInputElement;
-                        timeInput?.showPicker();
-                      }}
-                    >
-                      <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                {budgetType === 'hourly' && (
+                  <div>
+                    <label htmlFor="scheduleTimeTo" className="block text-xs text-gray-600 mb-1">
+                      Time To
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="time"
+                        {...register("scheduleTimeTo")}
+                        id="scheduleTimeTo"
+                        className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6 [&::-webkit-calendar-picker-indicator]:hidden"
+                        style={{ WebkitAppearance: 'none' }}
+                      />
+                      <div
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                        onClick={() => {
+                          const timeInput = document.getElementById('scheduleTimeTo') as HTMLInputElement;
+                          timeInput?.showPicker();
+                        }}
+                      >
+                        <ClockIcon className="h-5 w-5 text-savoy-blue hover:text-indigo-300" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

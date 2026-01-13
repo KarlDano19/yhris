@@ -23,7 +23,7 @@ import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 // Business mode imports
 import UpcomingBookingsModal from './modals/UpcomingBookingsModal';
 import MyHiresModal from './modals/MyHiresModal';
-import ChatModal from './modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 
 interface YahshuaConnectLayoutProps {
   children: ReactNode;

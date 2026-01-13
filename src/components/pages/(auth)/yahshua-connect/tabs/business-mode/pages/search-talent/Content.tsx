@@ -7,7 +7,7 @@ import type { Talent } from '@/types/business-mode';
 import useSearchTalent from './hooks/useSearchTalent';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import TalentDetailsModal from './modals/TalentDetailsModal';
-import ChatModal from '../../../../modals/ChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import BookNowModal from './modals/BookNowModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
