@@ -75,7 +75,7 @@ const UpdateBusinessJobModal = ({ refetch, isOpen, setIsOpen, editingJobId }: Up
       setValue("scheduleEndDate", jobDetails.contract_end_date || '');
       setValue("scheduleTimeFrom", jobDetails.time_from || '');
       setValue("scheduleTimeTo", jobDetails.time_to || '');
-      setValue("isDailyProgressRequired", jobDetails.is_daily_progress_required ?? true);
+      setValue("isProofFileRequired", jobDetails.is_proof_file_required ?? true);
 
       // Reset to first tab and clear errors
       setSelectedTab(1);
@@ -103,7 +103,7 @@ const UpdateBusinessJobModal = ({ refetch, isOpen, setIsOpen, editingJobId }: Up
       contract_end_date: data.scheduleEndDate || null,
       time_from: data.scheduleTimeFrom || null,
       time_to: data.scheduleTimeTo || null,
-      is_daily_progress_required: data.isDailyProgressRequired ?? true,
+      is_proof_file_required: data.isProofFileRequired ?? true,
     };
 
     // Set budget amounts based on type

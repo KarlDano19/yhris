@@ -1,26 +1,20 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
-
+import { useEffect, useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
 
-import JobDetails from './JobDetails';
 import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
 import JobSearchAutocomplete from './components/JobSearchAutocomplete';
 import LocationSearchAutocomplete from './components/LocationSearchAutocomplete';
-import JobCard from './components/JobCard';
-import TabsContent from './tabs/Content';
+import JobFilter from './components/JobFilter';
+import Tabs from './Tabs';
 
-import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import jobIllustration from '@/assets/find-job-illustration.svg';
+import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
+import { dummyTalents, type Talent } from './hooks/HireTalentDummy';
 
-import classNames from '@/helpers/classNames';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const Content = () => {
-  const [hasJob, setJob] = useState(false);
-  const [isJobView, setIsJobView] = useState(false);
-  const [isJobModal, setJobModal] = useState(false);
-  const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   // Pending filter (user input state)
   const [pendingFilter, setPendingFilter] = useState<any>({
     job_title: '',
@@ -52,11 +46,6 @@ const Content = () => {
   const [isJobTitleFocused, setIsJobTitleFocused] = useState(false);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
   
-  const [selectedJobId, setSelectedJobId] = useState<any>();
-  const [jobsItems, setJobsItems] = useState<any>([]);
-  const previousDataJobsRef = useRef<string>('');
-  // Track how many jobs to display (20 per batch, fetches 200 per page)
-  const [displayCount, setDisplayCount] = useState<number>(20);
   // Tab state
   const [activeTab, setActiveTab] = useState<'company-jobs' | 'gig-opportunities' | 'hire-talent'>('company-jobs');
   
@@ -65,15 +54,381 @@ const Content = () => {
     job_title: '',
     location: [],
   });
+
+  // Filter states for each tab
+  const [appliedFilters, setAppliedFilters] = useState({
+    'company-jobs': {
+      jobType: 'All Types',
+      workSetup: 'All Setups',
+      salaryRange: 'Any Salary',
+    },
+    'gig-opportunities': {
+      category: 'All Categories',
+      budget: 'Any Budget',
+      duration: 'Any Duration',
+    },
+    'hire-talent': {
+      specialization: 'All Specializations',
+      availability: 'Any Availability',
+      hourlyRate: 'Any Rate',
+    },
+  });
   
+  // Only fetch jobs for company-jobs tab
   const { 
     data: dataJobs, 
-    isLoading: isGetJobsLoading, 
+    isLoading: isGetJobsLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     totalRecords
-  } = useFindJobs(searchQuery);
+  } = useFindJobs(activeTab === 'company-jobs' ? searchQuery : { job_title: '', location: [] });
+  
+  // Company Jobs State
+  const [hasJob, setJob] = useState(false);
+  const [isJobView, setIsJobView] = useState(false);
+  const [isJobModalOpen, setIsJobModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<any>();
+  const [jobsItems, setJobsItems] = useState<any>([]);
+  const previousDataJobsRef = useRef<string>('');
+  const [displayCount, setDisplayCount] = useState<number>(20);
+
+  // Gig Opportunities State
+  const [hasGig, setHasGig] = useState(false);
+  const [isGigView, setIsGigView] = useState(false);
+  const [isGigModalOpen, setIsGigModalOpen] = useState(false);
+  const [selectedGigId, setSelectedGigId] = useState<number | null>(null);
+  const [displayCountGig, setDisplayCountGig] = useState<number>(20);
+  const [isLoginModalOpenGig, setIsLoginModalOpenGig] = useState(false);
+
+  // Hire Talent State
+  const [hasTalent, setHasTalent] = useState(false);
+  const [isTalentView, setIsTalentView] = useState(false);
+  const [isTalentModalOpen, setIsTalentModalOpen] = useState(false);
+  const [selectedTalentId, setSelectedTalentId] = useState<number | null>(null);
+  const [displayCountTalent, setDisplayCountTalent] = useState<number>(20);
+  const [isLoginModalOpenTalent, setIsLoginModalOpenTalent] = useState(false);
+  const [loginModalAction, setLoginModalAction] = useState<'book' | 'message'>('book');
+
+  // State to track counts
+  const [gigOpportunitiesCount, setGigOpportunitiesCount] = useState(0);
+  const [gigOpportunitiesFilteredCount, setGigOpportunitiesFilteredCount] = useState(0);
+  const [hireTalentCount, setHireTalentCount] = useState(0);
+  const [hireTalentFilteredCount, setHireTalentFilteredCount] = useState(0);
+  
+  // Apply filters to jobs (Company Jobs)
+  const filteredJobs = useMemo(() => {
+    if (!appliedFilters['company-jobs'] || !jobsItems || jobsItems.length === 0) {
+      return jobsItems;
+    }
+
+    const filters = appliedFilters['company-jobs'];
+    return jobsItems.filter((job: any) => {
+      // Filter by job type
+      if (filters.jobType !== 'All Types') {
+        const jobTypeMap: Record<string, string> = {
+          'Full Time': 'full-time',
+          'Part Time': 'part-time',
+          'Internship/OJT': 'internship',
+          'Project-based': 'project-based',
+        };
+        const jobType = job.employment_type?.toLowerCase() || job.job_type?.toLowerCase() || '';
+        const filterType = jobTypeMap[filters.jobType]?.toLowerCase() || '';
+        if (jobType !== filterType && filterType !== '') {
+          return false;
+        }
+      }
+
+      // Filter by work setup
+      if (filters.workSetup !== 'All Setups') {
+        const workSetupMap: Record<string, string> = {
+          'On-site': 'on-site',
+          'Work from Home': 'remote',
+          'Hybrid': 'hybrid',
+        };
+        const workSetup = job.work_setup?.toLowerCase() || job.setup_preference?.toLowerCase() || '';
+        const filterSetup = workSetupMap[filters.workSetup]?.toLowerCase() || '';
+        if (workSetup !== filterSetup && filterSetup !== '') {
+          return false;
+        }
+      }
+
+      // Filter by salary range
+      if (filters.salaryRange !== 'Any Salary') {
+        const salary = job.salary_range || job.expected_salary || job.min_salary || job.max_salary || 0;
+        const salaryNum = typeof salary === 'string' ? parseFloat(salary.replace(/[^0-9.]/g, '')) : salary;
+        
+        if (filters.salaryRange === 'Below ₱15,000' && salaryNum >= 15000) return false;
+        if (filters.salaryRange === '₱15,000 - ₱25,000' && (salaryNum < 15000 || salaryNum > 25000)) return false;
+        if (filters.salaryRange === '₱25,000 - ₱35,000' && (salaryNum < 25000 || salaryNum > 35000)) return false;
+        if (filters.salaryRange === '₱35,000 - ₱50,000' && (salaryNum < 35000 || salaryNum > 50000)) return false;
+        if (filters.salaryRange === '₱50,000 - ₱75,000' && (salaryNum < 50000 || salaryNum > 75000)) return false;
+        if (filters.salaryRange === '₱75,000 - ₱100,000' && (salaryNum < 75000 || salaryNum > 100000)) return false;
+        if (filters.salaryRange === 'Above ₱100,000' && salaryNum <= 100000) return false;
+      }
+
+      return true;
+    });
+  }, [jobsItems, appliedFilters]);
+
+  // Apply filters to gigs (Gig Opportunities)
+  const filteredGigs = useMemo(() => {
+    let filtered = [...dummyGigOpportunities];
+    const filters = appliedFilters['gig-opportunities'];
+
+    // Filter by category
+    if (filters?.category && filters.category !== 'All Categories') {
+      filtered = filtered.filter((gig) =>
+        gig.category.toLowerCase().includes(filters.category.toLowerCase())
+      );
+    }
+
+    // Filter by budget
+    if (filters?.budget && filters.budget !== 'Any Budget') {
+      filtered = filtered.filter((gig) => {
+        const budgetMin = gig.budgetMin;
+        const budgetMax = gig.budgetMax;
+
+        if (filters.budget === 'Below ₱5,000') {
+          return budgetMax < 5000;
+        } else if (filters.budget === '₱5,000 - ₱10,000') {
+          return budgetMin >= 5000 && budgetMax <= 10000;
+        } else if (filters.budget === '₱10,000 - ₱25,000') {
+          return budgetMin >= 10000 && budgetMax <= 25000;
+        } else if (filters.budget === '₱25,000 - ₱50,000') {
+          return budgetMin >= 25000 && budgetMax <= 50000;
+        } else if (filters.budget === 'Above ₱50,000') {
+          return budgetMin > 50000;
+        }
+        return true;
+      });
+    }
+
+    // Filter by duration
+    if (filters?.duration && filters.duration !== 'Any Duration') {
+      filtered = filtered.filter((gig) => {
+        const durationLower = gig.duration.toLowerCase();
+        const filterLower = filters.duration.toLowerCase();
+
+        if (filterLower.includes('less than 1 week')) {
+          return durationLower.includes('day') || durationLower.includes('week');
+        } else if (filterLower.includes('1-2 weeks')) {
+          return durationLower.includes('1') && durationLower.includes('week');
+        } else if (filterLower.includes('2-4 weeks')) {
+          return durationLower.includes('2') || durationLower.includes('3') || durationLower.includes('4');
+        } else if (filterLower.includes('1-3 months')) {
+          return durationLower.includes('month');
+        } else if (filterLower.includes('more than 3 months')) {
+          return durationLower.includes('month');
+        }
+        return true;
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery?.job_title) {
+      const searchLower = searchQuery.job_title.toLowerCase();
+      filtered = filtered.filter((gig) => {
+        const titleMatch = gig.title.toLowerCase().includes(searchLower);
+        const skillsMatch = gig.skills.some((skill) => skill.toLowerCase().includes(searchLower));
+        return titleMatch || skillsMatch;
+      });
+    }
+
+    return filtered;
+  }, [appliedFilters, searchQuery]);
+
+  // Apply filters to talents (Hire Talent)
+  const filteredTalents = useMemo(() => {
+    let filtered = [...dummyTalents];
+    const filters = appliedFilters['hire-talent'];
+
+    // Filter by specialization
+    if (filters?.specialization && filters.specialization !== 'All Specializations') {
+      filtered = filtered.filter((talent) => {
+        const titleMatch = talent.title.toLowerCase().includes(filters.specialization.toLowerCase());
+        const skillsMatch = talent.skills.some((skill) =>
+          skill.toLowerCase().includes(filters.specialization.toLowerCase())
+        );
+        return titleMatch || skillsMatch;
+      });
+    }
+
+    // Filter by availability
+    if (filters?.availability && filters.availability !== 'Any Availability') {
+      filtered = filtered.filter((talent) => {
+        if (filters.availability === 'Available Now') {
+          return talent.availability === 'Available Now';
+        }
+        return talent.availability?.includes(filters.availability) || false;
+      });
+    }
+
+    // Filter by hourly rate
+    if (filters?.hourlyRate && filters.hourlyRate !== 'Any Rate') {
+      filtered = filtered.filter((talent) => {
+        const minRate = talent.hourlyMin;
+        const maxRate = talent.hourlyMax;
+
+        if (filters.hourlyRate === 'Below ₱500/hour') {
+          return maxRate < 500;
+        } else if (filters.hourlyRate === '₱500 - ₱1,000/hour') {
+          return minRate >= 500 && maxRate <= 1000;
+        } else if (filters.hourlyRate === '₱1,000 - ₱2,000/hour') {
+          return minRate >= 1000 && maxRate <= 2000;
+        } else if (filters.hourlyRate === '₱2,000 - ₱5,000/hour') {
+          return minRate >= 2000 && maxRate <= 5000;
+        } else if (filters.hourlyRate === 'Above ₱5,000/hour') {
+          return minRate > 5000;
+        }
+        return true;
+      });
+    }
+
+    // Filter by location
+    if (searchQuery?.location && searchQuery.location.length > 0) {
+      filtered = filtered.filter((talent) => {
+        return searchQuery.location?.some((loc: string) =>
+          talent.location.toLowerCase().includes(loc.toLowerCase())
+        );
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery?.job_title) {
+      const searchLower = searchQuery.job_title.toLowerCase();
+      filtered = filtered.filter((talent) => {
+        const titleMatch = talent.title.toLowerCase().includes(searchLower);
+        const skillsMatch = talent.skills.some((skill) => skill.toLowerCase().includes(searchLower));
+        return titleMatch || skillsMatch;
+      });
+    }
+
+    return filtered;
+  }, [appliedFilters, searchQuery]);
+  
+  // Calculate filtered count for company-jobs tab
+  const filteredCount = useMemo(() => {
+    if (activeTab !== 'company-jobs' || !filteredJobs || filteredJobs.length === 0) {
+      return 0;
+    }
+    return filteredJobs.length;
+  }, [filteredJobs, activeTab]);
+  
+  // Get current tab counts
+  const getTotalCount = () => {
+    if (activeTab === 'company-jobs') {
+      return !isGetJobsLoading ? totalRecords || 0 : 0;
+    } else if (activeTab === 'gig-opportunities') {
+      return gigOpportunitiesCount;
+    } else if (activeTab === 'hire-talent') {
+      return hireTalentCount;
+    }
+    return 0;
+  };
+  
+  const getFilteredCount = () => {
+    if (activeTab === 'company-jobs') {
+      return filteredCount;
+    } else if (activeTab === 'gig-opportunities') {
+      return gigOpportunitiesFilteredCount;
+    } else if (activeTab === 'hire-talent') {
+      return hireTalentFilteredCount;
+    }
+    return 0;
+  };
+
+  // Company Jobs Effects
+  useEffect(() => {
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+
+    if (previousDataJobsRef.current !== dataJobsString) {
+      previousDataJobsRef.current = dataJobsString;
+
+      if (dataJobs && dataJobs.length !== 0) {
+        setJob(true);
+        setJobsItems(dataJobs);
+        setSelectedJobId(null);
+        setIsJobView(false);
+      } else {
+        setJob(false);
+        setJobsItems([]);
+        setIsJobView(false);
+      }
+    }
+  }, [dataJobs]);
+
+  useEffect(() => {
+    if (filteredJobs && filteredJobs.length > 0) {
+      setJob(true);
+      if (!selectedJobId && filteredJobs[0]) {
+        setSelectedJobId(filteredJobs[0].id);
+        setIsJobView(true);
+      }
+    } else if (jobsItems.length === 0) {
+      setJob(false);
+    }
+  }, [filteredJobs, selectedJobId, jobsItems.length]);
+
+  useEffect(() => {
+    setSelectedJobId(null);
+    setIsJobView(false);
+    previousDataJobsRef.current = '';
+    setDisplayCount(20);
+  }, [
+    searchQuery.job_title,
+    Array.isArray(searchQuery.location)
+      ? searchQuery.location.join('|')
+      : searchQuery.location,
+  ]);
+
+  // Gig Opportunities Effects
+  const totalGigsCount = dummyGigOpportunities.length;
+  
+  useEffect(() => {
+    if (filteredGigs && filteredGigs.length > 0) {
+      setHasGig(true);
+      if (!selectedGigId && filteredGigs[0]) {
+        setSelectedGigId(filteredGigs[0].id);
+        setIsGigView(true);
+      }
+    } else {
+      setHasGig(false);
+    }
+    
+    setGigOpportunitiesCount(totalGigsCount);
+    setGigOpportunitiesFilteredCount(filteredGigs.length);
+  }, [filteredGigs, selectedGigId, totalGigsCount]);
+
+  // Hire Talent Effects
+  const totalTalentsCount = dummyTalents.length;
+  
+  useEffect(() => {
+    if (filteredTalents && filteredTalents.length > 0) {
+      setHasTalent(true);
+      if (!selectedTalentId && filteredTalents[0]) {
+        setSelectedTalentId(filteredTalents[0].id);
+        setIsTalentView(true);
+      }
+    } else {
+      setHasTalent(false);
+    }
+    
+    setHireTalentCount(totalTalentsCount);
+    setHireTalentFilteredCount(filteredTalents.length);
+  }, [filteredTalents, selectedTalentId, totalTalentsCount]);
+
+  useEffect(() => {
+    if (activeTab === 'company-jobs' && hasJob) {
+      setJob(true);
+    } else if (activeTab === 'gig-opportunities' && hasGig) {
+      setJob(true);
+    } else if (activeTab === 'hire-talent' && hasTalent) {
+      setJob(true);
+    } else {
+      setJob(false);
+    }
+  }, [activeTab, hasJob, hasGig, hasTalent]);
   
   // Memoize search parameters for job title autocomplete - only when focused
   const jobTitleSearchParams = useMemo(() => {
@@ -140,7 +495,7 @@ const Content = () => {
     const timer = setTimeout(() => {
       setDebouncedJobTitle(pendingFilter.job_title);
       setIsDebouncingJobTitle(false);
-    }, 2000); // 2 seconds delay
+    }, 2000);
 
     return () => {
       clearTimeout(timer);
@@ -158,30 +513,13 @@ const Content = () => {
     const timer = setTimeout(() => {
       setDebouncedLocation(pendingFilter.location);
       setIsDebouncingLocation(false);
-    }, 2000); // 2 seconds delay
+    }, 2000);
 
     return () => {
       clearTimeout(timer);
     };
   }, [pendingFilter.location]);
 
-  // Reset selected job when search query changes (not filter changes)
-  useEffect(() => {
-    setSelectedJobId(null);
-    setIsJobView(false);
-    setJobModal(false);
-    // Reset the ref when search query changes so new data is processed
-    previousDataJobsRef.current = '';
-    // Reset display count to 20 when search changes
-    setDisplayCount(20);
-  }, [
-    searchQuery.job_title,
-    Array.isArray(searchQuery.location)
-      ? searchQuery.location.join('|')
-      : searchQuery.location,
-  ]);
-  
-  
   // Handle search submission
   const handleSearch = () => {
     const normalizedLocations = pendingFilter.locations.length
@@ -213,44 +551,14 @@ const Content = () => {
     }
   }, [isGetJobsLoading, isSearching]);
 
-  useEffect(() => {
-    // Create a stable string representation of dataJobs to compare
-    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
-    
-    // Only update if dataJobs actually changed (by comparing job IDs)
-    if (previousDataJobsRef.current !== dataJobsString) {
-      previousDataJobsRef.current = dataJobsString;
-      
-      if (dataJobs && dataJobs.length !== 0) {
-        setJob(true);
-        setJobsItems(dataJobs);
-        // Only auto-select first job if no job is currently selected
-        if (!selectedJobId && dataJobs[0]) {
-          setSelectedJobId(dataJobs[0].id);
-          setIsJobView(true);
-          setJobModal(true);
-        }
-      } else {
-        setJob(false);
-        setJobsItems([]);
-        setIsJobView(false);
-        setJobModal(false);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataJobs]);
-
-  const handleLoadMore = () => {
-    // Check if there are more jobs in the current fetched batch
-    const jobsInCurrentBatch = jobsItems.length;
+  // Company Jobs Handlers
+  const handleLoadMoreJobs = () => {
+    const jobsInCurrentBatch = filteredJobs.length;
     const nextDisplayCount = displayCount + 20;
-    
-    // If we can show more from current batch (haven't shown all 200 from current page)
+
     if (nextDisplayCount <= jobsInCurrentBatch) {
-      // Show next 20 jobs from current batch (client-side pagination)
       setDisplayCount(nextDisplayCount);
     } else if (hasNextPage && !isFetchingNextPage) {
-      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
       fetchNextPage();
     }
   };
@@ -259,14 +567,62 @@ const Content = () => {
     setSelectedJobId(jobId);
     setIsJobView(true);
     setIsJobModalOpen(true);
-    // setJobModal(true);
   };
 
   const closeJobDetails = () => {
     setIsJobView(false);
-    setJobModal(false);
     setIsJobModalOpen(false);
   };
+
+  // Gig Opportunities Handlers
+  const handleLoadMoreGigs = () => {
+    const nextDisplayCount = displayCountGig + 20;
+    if (nextDisplayCount <= filteredGigs.length) {
+      setDisplayCountGig(nextDisplayCount);
+    }
+  };
+
+  const openGigDetails = (gigId: number) => {
+    setSelectedGigId(gigId);
+    setIsGigView(true);
+    setIsGigModalOpen(true);
+  };
+
+  const closeGigDetails = () => {
+    setIsGigView(false);
+    setIsGigModalOpen(false);
+  };
+
+  const handleSendProposal = () => {
+    setIsLoginModalOpenGig(true);
+  };
+
+  // Hire Talent Handlers
+  const handleLoadMoreTalents = () => {
+    const nextDisplayCount = displayCountTalent + 20;
+    if (nextDisplayCount <= filteredTalents.length) {
+      setDisplayCountTalent(nextDisplayCount);
+    }
+  };
+
+  const openTalentDetails = (talentId: number) => {
+    setSelectedTalentId(talentId);
+    setIsTalentView(true);
+    setIsTalentModalOpen(true);
+  };
+
+  const closeTalentDetails = () => {
+    setIsTalentView(false);
+    setIsTalentModalOpen(false);
+  };
+
+  const handleBookNow = () => {
+    setLoginModalAction('book');
+    setIsLoginModalOpenTalent(true);
+  };
+
+  const selectedGig = filteredGigs.find((g) => g.id === selectedGigId);
+  const selectedTalent = filteredTalents.find((t) => t.id === selectedTalentId);
 
   return (
     <>
@@ -348,100 +704,89 @@ const Content = () => {
           </div>
         </div>
       </div>
-      {/* Tabs Navigation */}
-      <div className="mt-6">
-        <TabsContent activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
-      {hasJob ? (
+      {/* Jobs Available / Opportunities Available - Above Tabs */}
+      {hasJob && (
         <div className='mt-4'>
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
-              Jobs available: {!isGetJobsLoading ? totalRecords || jobsItems.length : '0'}
+              {activeTab === 'company-jobs' && 'Jobs available: '}
+              {activeTab === 'gig-opportunities' && 'Gig opportunities available: '}
+              {activeTab === 'hire-talent' && 'Talents available: '}
+              {getTotalCount()}
             </p>
           </div>
-          <div className='border-t border-gray-300'></div>
-          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
-            <div className='px-4 lg:px-5'>
-              <div className='lg:flex lg:items-start'>
-                <div className='hide-scrollbar lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
-                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
-                    <>
-                      {!isGetJobsLoading
-                        ? jobsItems.slice(0, displayCount).map((job: any) => (
-                            <JobCard
-                              key={job.id}
-                              job={job}
-                              isSelected={selectedJobId === job.id}
-                              isJobView={isJobView}
-                              isJobModalOpen={isJobModalOpen}
-                              onJobClick={openJobDetails}
-                              onCloseDetails={closeJobDetails}
-                            />
-                          ))
-                        : 'Loading jobs...'}
-                    </>
-                    {/* Load More Button */}
-                    {(displayCount < jobsItems.length || hasNextPage) && (
-                      <div className="flex justify-center py-6">
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={isFetchingNextPage}
-                          className="rounded-md bg-savoy-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isFetchingNextPage ? (
-                            <span className="flex items-center">
-                              <svg
-                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                              </svg>
-                              Loading...
-                            </span>
-                          ) : (
-                            'Load More Jobs'
-                          )}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className='hide-scrollbar lg:pl-10 lg:pr-5 py-10 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
-                  <div
-                    className={classNames(
-                      'card border border-savoy-blue rounded-md',
-                      isJobView ? '' : 'hidden'
-                    )}
-                  >
-                    <div className='flex justify-end px-3 mt-2'>
-                      <button onClick={closeJobDetails}>
-                        <XMarkIcon className='h-5 w-5 text-indigo-dye' />
-                      </button>
-                    </div>
-                    <JobDetails jobId={selectedJobId} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      ) : (
-        <div className='w-auto h-[220px] md:w-[600px] md:h-[400px] relative block mx-auto mt-8'>
-          <Image src={jobIllustration} fill alt='Find job illustration' />
+      )}
+      {/* Tabs Navigation and Content */}
+      <div className="mt-6">
+        <Tabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          // Company Jobs Props
+          hasJob={hasJob}
+          isJobView={isJobView}
+          isJobModalOpen={isJobModalOpen}
+          selectedJobId={selectedJobId}
+          filteredJobs={filteredJobs}
+          displayCount={displayCount}
+          isGetJobsLoading={isGetJobsLoading}
+          hasNextPage={hasNextPage ?? false}
+          isFetchingNextPage={isFetchingNextPage}
+          openJobDetails={openJobDetails}
+          closeJobDetails={closeJobDetails}
+          handleLoadMoreJobs={handleLoadMoreJobs}
+          // Gig Opportunities Props
+          hasGig={hasGig}
+          isGigView={isGigView}
+          isGigModalOpen={isGigModalOpen}
+          selectedGigId={selectedGigId}
+          filteredGigs={filteredGigs}
+          displayCountGig={displayCountGig}
+          selectedGig={selectedGig}
+          openGigDetails={openGigDetails}
+          closeGigDetails={closeGigDetails}
+          handleLoadMoreGigs={handleLoadMoreGigs}
+          handleSendProposal={handleSendProposal}
+          isLoginModalOpenGig={isLoginModalOpenGig}
+          setIsLoginModalOpenGig={setIsLoginModalOpenGig}
+          // Hire Talent Props
+          hasTalent={hasTalent}
+          isTalentView={isTalentView}
+          isTalentModalOpen={isTalentModalOpen}
+          selectedTalentId={selectedTalentId}
+          filteredTalents={filteredTalents}
+          displayCountTalent={displayCountTalent}
+          selectedTalent={selectedTalent}
+          openTalentDetails={openTalentDetails}
+          closeTalentDetails={closeTalentDetails}
+          handleLoadMoreTalents={handleLoadMoreTalents}
+          handleBookNow={handleBookNow}
+          isLoginModalOpenTalent={isLoginModalOpenTalent}
+          setIsLoginModalOpenTalent={setIsLoginModalOpenTalent}
+          loginModalAction={loginModalAction}
+        />
+      </div>
+      {/* Job Filter Component - Below Tabs */}
+      {hasJob && (
+        <div className="mt-4">
+          <JobFilter 
+            activeTab={activeTab} 
+            filteredCount={getFilteredCount()}
+            filters={appliedFilters[activeTab]}
+            onFiltersChange={(filters) => {
+              setAppliedFilters(prev => ({
+                ...prev,
+                [activeTab]: filters
+              }));
+            }}
+            onApplyFilters={(filters) => {
+              setAppliedFilters(prev => ({
+                ...prev,
+                [activeTab]: filters
+              }));
+            }}
+          />
+          <div className='border-t border-gray-300 mt-4'></div>
         </div>
       )}
     </>

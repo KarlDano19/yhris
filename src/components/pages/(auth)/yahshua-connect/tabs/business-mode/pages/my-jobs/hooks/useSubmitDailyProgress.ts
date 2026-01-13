@@ -8,7 +8,9 @@ async function submitDailyProgress(data: T_SubmitDailyProgressData): Promise<T_D
 
   const formData = new FormData();
   formData.append('progress_date', data.progress_date);
-  formData.append('proof_file', data.proof_file);
+  if (data.proof_file) {
+    formData.append('proof_file', data.proof_file);
+  }
   if (data.notes) {
     formData.append('notes', data.notes);
   }

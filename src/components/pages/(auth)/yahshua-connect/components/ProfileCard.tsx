@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import useToggleAvailability from '../hooks/useToggleAvailability';
+import MyReviewsModal from '../modals/MyReviewsModal';
 
 import { StarIcon } from '@heroicons/react/24/solid';
 
@@ -18,6 +19,7 @@ interface ProfileCardProps {
   rating?: number | null;
   reviewCount?: number;
   profilePhoto?: string | null;
+  applicantId?: number; // Optional: applicant ID for fetching reviews
   // Business mode props
   availableForBookings?: boolean;
   earnings?: number;
@@ -34,6 +36,7 @@ const ProfileCard = ({
   rating = null, 
   reviewCount = 0,
   profilePhoto = null,
+  applicantId,
   availableForBookings: initialAvailableForBookings,
   earnings,
   spending,
@@ -44,6 +47,7 @@ const ProfileCard = ({
   const [availableForBookings, setAvailableForBookings] = useState(
     initialAvailableForBookings !== undefined ? initialAvailableForBookings : false
   );
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const toggleAvailabilityMutation = useToggleAvailability();
   
   // Determine business mode: only if earnings, spending, or onAvailabilityChange are explicitly provided
@@ -130,11 +134,18 @@ const ProfileCard = ({
           <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
         </div>
 
-        {/* Rating - Centered with Star, Rating, and Review Count - Same style for both modes */}
-        <div className={`flex items-center justify-center gap-1.5 ${isBusinessMode ? 'mb-4' : profileCompletion !== undefined && profileCompletion < 100 ? 'mb-6' : ''}`}>
-          <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-          <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
-          <span className="text-sm text-gray-500">({reviewCount} reviews)</span>
+        {/* Rating - Centered with Star, Rating, and Review Count - Same style for both modes - Clickable */}
+        <div className={`flex justify-center ${isBusinessMode ? 'mb-4' : profileCompletion !== undefined && profileCompletion < 100 ? 'mb-6' : ''}`}>
+          <button
+            type="button"
+            onClick={() => setIsReviewsModalOpen(true)}
+            className={`flex items-center justify-center gap-1.5 transition-opacity ${reviewCount > 0 ? 'cursor-pointer hover:opacity-80' : 'cursor-default opacity-60'}`}
+            disabled={reviewCount === 0}
+          >
+            <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+            <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
+            <span className="text-sm text-blue-600">({reviewCount} reviews)</span>
+          </button>
         </div>
 
         {/* Business Mode: Available Toggle - Only show if onAvailabilityChange is provided */}
@@ -192,6 +203,13 @@ const ProfileCard = ({
           </div>
         )}
       </div>
+
+      {/* Reviews Modal */}
+      <MyReviewsModal
+        isOpen={isReviewsModalOpen}
+        onClose={() => setIsReviewsModalOpen(false)}
+        applicantId={applicantId}
+      />
     </div>
   );
 };
