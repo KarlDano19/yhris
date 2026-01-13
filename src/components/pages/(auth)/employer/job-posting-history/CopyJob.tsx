@@ -28,6 +28,7 @@ function CopyJob({
       rate,
       benefits,
       jobDescription,
+      skills,
       postAs,
       postIn,
     } = item;
@@ -48,6 +49,7 @@ function CopyJob({
       Salary Value: ${salary.salaryValue}
       Rate: ${rate}
       Job Description: ${jobDescription}
+      Skills: ${skills && Array.isArray(skills) ? skills.join(", ") : (skills || "")}
       Salary Benefits: ${benefits.join(", ")}
       postAs: ${postAs}
       postIn: ${postIn.join(", ")}

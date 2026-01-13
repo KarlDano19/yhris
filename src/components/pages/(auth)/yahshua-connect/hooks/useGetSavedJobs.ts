@@ -37,6 +37,7 @@ function useGetSavedJobs() {
     () => getSavedJobs(),
     {
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
       keepPreviousData: true,
     }
   );

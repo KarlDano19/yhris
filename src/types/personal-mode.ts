@@ -43,6 +43,8 @@ export type T_BasicInfo = {
   phone: string;
   landline?: string;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   birthday: Date | null;
   gender: string;
   religion: string;

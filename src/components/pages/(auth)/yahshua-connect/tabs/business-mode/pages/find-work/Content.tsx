@@ -2,15 +2,20 @@
 
 import { useState, useMemo } from 'react';
 
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import BusinessJobCard from './components/BusinessJobCard';
 import JobAcceptedModal from './modals/JobAcceptedModal';
-import JobChatModal from './modals/JobChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
-import FilterRequestsModal from '../../components/modals/FilterRequestsModal';
+import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
+import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
+import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
-
 import formatPrice from '@/helpers/currencyFormat';
 
 interface BusinessJobFilters {
@@ -22,6 +27,8 @@ interface BusinessJobFilters {
   max_budget?: number;
   is_urgent?: boolean;
   status?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const Content = () => {
@@ -30,10 +37,28 @@ const Content = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [filters, setFilters] = useState<BusinessJobFilters>({});
 
-  // Fetch business jobs with filters
+  // Get applicant profile for location coordinates (distance calculation)
+  const { data: profileData } = useGetApplicantProfile();
+  const applicantLatitude = profileData?.data?.latitude;
+  const applicantLongitude = profileData?.data?.longitude;
+
+  // Apply to business job mutation
+  const applyToBusinessJobMutation = useApplyToBusinessJob();
+
+  // Merge applicant location with filters for distance calculation
+  const filtersWithLocation = useMemo(() => ({
+    ...filters,
+    ...(applicantLatitude && applicantLongitude ? {
+      latitude: applicantLatitude,
+      longitude: applicantLongitude,
+    } : {}),
+  }), [filters, applicantLatitude, applicantLongitude]);
+
+  // Fetch business jobs with filters (including location for distance calculation)
   const {
     data: jobsData,
     isLoading: isGetJobsLoading,
@@ -41,7 +66,7 @@ const Content = () => {
     hasNextPage,
     isFetchingNextPage,
     totalRecords
-  } = useFindBusinessJobs(filters);
+  } = useFindBusinessJobs(filtersWithLocation);
 
   // Transform API business jobs data to BusinessJobCard format
   const transformedJobs = useMemo(() => {
@@ -112,7 +137,7 @@ const Content = () => {
       // Determine status - check if user has applied
       const getStatus = () => {
         if (job.has_applied) {
-          return 'pending' as const;
+          return 'accepted' as const; // Show as accepted to display Message button
         }
         return 'pending' as const;
       };
@@ -121,6 +146,7 @@ const Content = () => {
         id: job.id,
         title: job.job_title || 'Untitled Job',
         clientName: job.created_by_name || 'Unknown Client',
+        clientId: job.created_by, // Include client ID
         clientInitials: getClientInitials(job.created_by_name || ''),
         clientPhoto: job.created_by_photo || null,
         clientLocation: job.location || 'Location not specified',
@@ -133,6 +159,7 @@ const Content = () => {
         tags: getTags(),
         urgent: job.is_urgent || false,
         status: getStatus(),
+        hasApplied: job.has_applied || false,
       };
     });
   }, [jobsData, displayCount]);
@@ -194,24 +221,76 @@ const Content = () => {
     setSelectedJobId(null); // Reset selected job when filters change
   };
 
-  const handleAcceptJob = (jobId: number) => {
-    setSelectedJobId(jobId);
-    setIsJobAcceptedModalOpen(true);
+  const handleAcceptJob = async (jobId: number) => {
+    try {
+      setSelectedJobId(jobId);
+      
+      // Check if already applied
+      const job = jobsData?.find((j: any) => j.id === jobId);
+      if (job?.has_applied) {
+        // If already applied, just open the chat modal
+        if (job?.created_by) {
+          setSelectedClientId(job.created_by);
+        }
+        setIsChatModalOpen(true);
+        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+        return;
+      }
+      
+      await applyToBusinessJobMutation.mutateAsync(jobId);
+
+      // Get client ID from job data
+      if (job?.created_by) {
+        setSelectedClientId(job.created_by);
+      }
+
+      setIsJobAcceptedModalOpen(true);
+      setIsJobDetailsModalOpen(false); // Close details modal after accepting job
+      toast.custom(() => (
+        <CustomToast message="Application submitted successfully!" type="success" />
+      ), { duration: 2000 });
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to submit application';
+      
+      // If already applied, open chat instead of showing error
+      if (errorMessage.includes('already applied')) {
+        const job = jobsData?.find((j: any) => j.id === jobId);
+        if (job?.created_by) {
+          setSelectedClientId(job.created_by);
+        }
+        setIsChatModalOpen(true);
+        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+        // Refetch jobs to update has_applied status
+        // This will be handled by the query invalidation in the mutation
+      } else {
+        toast.custom(() => (
+          <CustomToast message={errorMessage} type="error" />
+        ), { duration: 3000 });
+      }
+    }
   };
 
   const handleMessage = (jobId: number) => {
     setSelectedJobId(jobId);
+    // Get client ID from job data
+    const job = jobsData?.find((j: any) => j.id === jobId);
+    if (job?.created_by) {
+      setSelectedClientId(job.created_by);
+    }
     setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
   };
 
   const handleViewDetails = (jobId: number) => {
     setSelectedJobId(jobId);
     setIsJobDetailsModalOpen(true);
+    setIsChatModalOpen(false); // Ensure chat modal is closed
   };
 
   const handleMessageClient = () => {
     setIsJobAcceptedModalOpen(false);
     setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
   };
 
 
@@ -239,9 +318,7 @@ const Content = () => {
 
         {/* Job Requests List */}
         {isGetJobsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Loading jobs...</div>
-          </div>
+          <LoadingSpinner size="lg" showText text="Loading jobs..." className="py-12" />
         ) : transformedJobs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-gray-500">No jobs available at the moment.</div>
@@ -320,15 +397,19 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedJobFull && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
             setSelectedJobId(null);
+            setSelectedClientId(null);
           }}
-          clientName={selectedJobFull.clientName}
-          clientInitials={selectedJobFull.clientInitials || ''}
+          recipientId={selectedClientId || selectedJobFull.clientId}
+          recipientName={selectedJobFull.clientName}
+          recipientInitials={selectedJobFull.clientInitials || ''}
+          recipientPhoto={selectedJobFull.clientPhoto || null}
           jobTitle={selectedJobFull.title}
+          jobId={selectedJobId || undefined}
         />
       )}
     </div>

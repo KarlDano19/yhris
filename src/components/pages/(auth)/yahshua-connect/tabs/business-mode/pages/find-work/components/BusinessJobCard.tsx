@@ -1,6 +1,6 @@
-
 import Image from 'next/image';
-import { MapPinIcon, StarIcon, ClockIcon, CurrencyDollarIcon, ChatBubbleLeftRightIcon, CheckIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+
+import { MapPinIcon, ClockIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
 interface BusinessJobCardProps {
@@ -19,6 +19,7 @@ interface BusinessJobCardProps {
   tags: string[];
   urgent?: boolean;
   status?: 'pending' | 'accepted' | 'scheduled' | 'completed' | 'cancelled';
+  hasApplied?: boolean;
   onAcceptJob?: (jobId: number) => void;
   onMessage?: (jobId: number) => void;
   onViewDetails?: (jobId: number) => void;
@@ -40,11 +41,12 @@ const BusinessJobCard = ({
   tags,
   urgent = false,
   status,
+  hasApplied = false,
   onAcceptJob,
   onMessage,
   onViewDetails,
 }: BusinessJobCardProps) => {
-  const isAccepted = status === 'accepted' || status === 'scheduled';
+  const isAccepted = status === 'accepted' || status === 'scheduled' || hasApplied;
   
   // Generate initials from client name if not provided
   const getInitials = () => {
@@ -115,10 +117,12 @@ const BusinessJobCard = ({
           <ClockIcon className="h-4 w-4" />
           <span>{time}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <PaperAirplaneIcon className="h-4 w-4" />
-          <span>{distance}</span>
-        </div>
+        {distance && (
+          <div className="flex items-center gap-2">
+            <PaperAirplaneIcon className="h-4 w-4" />
+            <span>{distance}</span>
+          </div>
+        )}
       </div>
 
       {/* Price Range */}
@@ -128,34 +132,26 @@ const BusinessJobCard = ({
 
       {/* Actions */}
       <div className="flex gap-3">
+        <button
+          onClick={() => onViewDetails?.(id)}
+          className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
+        >
+          View Details
+        </button>
         {isAccepted ? (
-          <>
-            <button
-              onClick={() => onMessage?.(id)}
-              className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
-            >
-              Message
-            </button>
-            <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-              <CheckIcon className="h-5 w-5" />
-              Accepted
-            </button>
-          </>
+          <button
+            onClick={() => onMessage?.(id)}
+            className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors"
+          >
+            Message
+          </button>
         ) : (
-          <>
-            <button
-              onClick={() => onViewDetails?.(id)}
-              className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
-            >
-              View Details
-            </button>
-            <button
-              onClick={() => onAcceptJob?.(id)}
-              className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors"
-            >
-              Accept Job
-            </button>
-          </>
+          <button
+            onClick={() => onAcceptJob?.(id)}
+            className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors"
+          >
+            Accept Job
+          </button>
         )}
       </div>
     </div>

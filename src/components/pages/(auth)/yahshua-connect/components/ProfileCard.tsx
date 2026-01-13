@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import Image from 'next/image';
+
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import useToggleAvailability from '../hooks/useToggleAvailability';
 
 import { StarIcon } from '@heroicons/react/24/solid';
 
@@ -28,19 +34,51 @@ const ProfileCard = ({
   rating = null, 
   reviewCount = 0,
   profilePhoto = null,
-  availableForBookings: initialAvailableForBookings = true,
+  availableForBookings: initialAvailableForBookings,
   earnings,
   spending,
   onAvailabilityChange,
 }: ProfileCardProps) => {
-  const [availableForBookings, setAvailableForBookings] = useState(initialAvailableForBookings);
+  // Initialize state with the prop value, defaulting to false if undefined
+  // This ensures we don't show true before API data loads
+  const [availableForBookings, setAvailableForBookings] = useState(
+    initialAvailableForBookings !== undefined ? initialAvailableForBookings : false
+  );
+  const toggleAvailabilityMutation = useToggleAvailability();
+  
   // Determine business mode: only if earnings, spending, or onAvailabilityChange are explicitly provided
   const isBusinessMode = earnings !== undefined || spending !== undefined || onAvailabilityChange !== undefined;
 
-  const handleToggle = () => {
-    const newValue = !availableForBookings;
-    setAvailableForBookings(newValue);
-    onAvailabilityChange?.(newValue);
+  // Update local state when prop changes (only if prop is actually provided, not undefined)
+  useEffect(() => {
+    if (initialAvailableForBookings !== undefined) {
+      setAvailableForBookings(initialAvailableForBookings);
+    }
+  }, [initialAvailableForBookings]);
+
+  const handleToggle = async () => {
+    try {
+      const result = await toggleAvailabilityMutation.mutateAsync();
+      
+      // Update local state with the server response
+      setAvailableForBookings(result.available_for_bookings);
+      
+      // Call the callback with the new value
+      onAvailabilityChange?.(result.available_for_bookings);
+      
+      // Show success toast
+      toast.custom(
+        () => <CustomToast message={result.message} type="success" />,
+        { duration: 3000 }
+      );
+    } catch (error: any) {
+      // Show error toast
+      const errorMessage = error || 'Failed to update availability';
+      toast.custom(
+        () => <CustomToast message={errorMessage} type="error" />,
+        { duration: 5000 }
+      );
+    }
   };
 
   // Format amount with K notation
@@ -106,7 +144,8 @@ const ProfileCard = ({
             <button
               type="button"
               onClick={handleToggle}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:ring-offset-2 ${
+              disabled={toggleAvailabilityMutation.isLoading}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-savoy-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 availableForBookings ? 'bg-green-500' : 'bg-gray-300'
               }`}
               role="switch"

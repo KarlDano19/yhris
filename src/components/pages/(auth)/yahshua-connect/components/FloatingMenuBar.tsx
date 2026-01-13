@@ -109,12 +109,16 @@ const FloatingMenuBar = () => {
       href: '/business-mode/earnings',
       icon: CurrencyDollarIcon,
       iconSolid: CurrencyDollarIconSolid,
+      disabled: true,
+      tooltip: 'Coming soon',
     },
     {
       name: 'Spending',
       href: '/business-mode/spending',
       icon: WalletIcon,
       iconSolid: WalletIconSolid,
+      disabled: true,
+      tooltip: 'Coming soon',
     },
   ];
 

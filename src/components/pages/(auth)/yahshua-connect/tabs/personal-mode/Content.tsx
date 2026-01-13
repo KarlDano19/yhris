@@ -5,10 +5,11 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import useGetApplicationByUser from '@/components/pages/(auth)/applicant/application-tracker/hooks/useGetApplicationByUser';
-import useGetHighMatchJobs from '../../hooks/useGetHighMatchJobs';
+import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { BriefcaseIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
 
@@ -22,8 +23,11 @@ const Content = ({ averageRating }: ContentProps) => {
   const router = useRouter();
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
+  // Memoize empty filters object to prevent unnecessary re-renders
+  const applicationFilters = useMemo(() => ({}), []);
+
   // Fetch applications data
-  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser({});
+  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser(applicationFilters);
 
   // Fetch matched jobs (only jobs with matching skills, sorted by match)
   const { data: highMatchJobsData, isLoading: isHighMatchJobsLoading } = useGetHighMatchJobs({
@@ -62,15 +66,6 @@ const Content = ({ averageRating }: ContentProps) => {
     );
   }, [savedJobsData]);
 
-  // Create a Set of applied job IDs
-  const appliedJobIds = useMemo(() => {
-    if (!applicationsData || !Array.isArray(applicationsData)) return new Set<number>();
-    return new Set(
-      applicationsData
-        .map((app: any) => app.job_posting?.id || app.job_posting_id)
-        .filter((id: any) => id != null && id !== undefined)
-    );
-  }, [applicationsData]);
 
   // Transform high match jobs data to JobCard format
   const jobsMatched = useMemo(() => {
@@ -139,10 +134,10 @@ const Content = ({ averageRating }: ContentProps) => {
         logoUrl: job.company_logo || undefined,
         saved: savedJobIds.has(job.id),
         match: job.match_percentage || 0,
-        applied: appliedJobIds.has(job.id),
+        applied: job.applied || false, // Applied status from backend
       };
     });
-  }, [highMatchJobsData, savedJobIds, appliedJobIds]);
+  }, [highMatchJobsData, savedJobIds]);
 
   const recommendedTraining = {
     title: 'Mastering Design System',
@@ -228,9 +223,7 @@ const Content = ({ averageRating }: ContentProps) => {
         </div>
 
         {isHighMatchJobsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Loading matched jobs...</div>
-          </div>
+          <LoadingSpinner size="lg" showText text="Loading matched jobs..." className="py-12" />
         ) : jobsMatched.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-gray-500">No high match jobs found at the moment.</div>
@@ -289,11 +282,13 @@ const Content = ({ averageRating }: ContentProps) => {
       </div> */}
 
       {/* Job Details Modal */}
-      <JobDetailsModal
-        isOpen={selectedJobId !== null}
-        onClose={handleCloseJobDetails}
-        jobId={selectedJobId}
-      />
+      {selectedJobId !== null && (
+        <JobDetailsModal
+          isOpen={selectedJobId !== null}
+          onClose={handleCloseJobDetails}
+          jobId={selectedJobId}
+        />
+      )}
     </div>
   );
 };

@@ -6,11 +6,13 @@ import Modal from '../components/Modal';
 interface Booking {
   id: number;
   title: string;
+  clientId: number;
   clientName: string;
+  clientInitials: string;
+  clientPhoto: string | null;
   location: string;
   time: string;
   priceRange: string;
-  clientInitials?: string;
 }
 
 interface UpcomingBookingsModalProps {

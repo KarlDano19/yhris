@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -10,7 +10,9 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
-import type { Talent } from '../../../hooks/useSearchTalentData';
+import type { Talent } from '@/types/business-mode';
+import { useGetTalentDetail } from '../hooks/useGetTalentDetail';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface TalentDetailsModalProps {
   isOpen: boolean;
@@ -21,7 +23,52 @@ interface TalentDetailsModalProps {
 }
 
 const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: TalentDetailsModalProps) => {
-  if (!talent) return null;
+  // Fetch detailed talent information
+  const { data: talentDetail, isLoading } = useGetTalentDetail(talent?.id || null, isOpen);
+
+  // Merge talent data with detailed API data (API data takes precedence)
+  const displayTalent = useMemo(() => {
+    if (!talent) return null;
+
+    if (talentDetail) {
+      // Calculate hourly rate from expected salary (assuming 160 working hours per month)
+      const hourlyRate = talentDetail.expected_salary ? Math.floor(talentDetail.expected_salary / 160) : 500;
+      const hourlyMin = Math.floor(hourlyRate * 0.8);
+      const hourlyMax = Math.floor(hourlyRate * 1.2);
+
+      return {
+        ...talent,
+        // Use backend data (ApplicantRetrieveProfileSerializer fields)
+        name: talentDetail.name, // Already combined: "firstname lastname"
+        title: talentDetail.education || talentDetail.description || talent.title,
+        rating: talentDetail.average_rating || 0,
+        reviews: talentDetail.reviews_count || 0,
+        jobsDone: talentDetail.jobs_done_count || 0,
+        portfolioCount: talentDetail.portfolio?.length || 0, // Calculate from portfolio array
+        hourlyMin,
+        hourlyMax,
+        skills: talentDetail.skills || [], // Always array from backend
+        languages: talent.languages, // Keep from original (not in backend)
+        education: talentDetail.education,
+        about: talentDetail.description,
+        photo: talentDetail.photo, // Full URL with MEDIA_URL prefix
+        cv: talentDetail.cv, // Full URL with MEDIA_URL prefix
+        work_experience: talentDetail.work_experience || [], // Always array
+        certifications: talentDetail.certifications || [], // Always array
+        portfolio: talentDetail.portfolio || [], // Always array
+        // Additional fields from backend
+        college: talentDetail.college,
+        educational_attainment: talentDetail.educational_attainment,
+        setup_preference: talentDetail.setup_preference,
+        expected_salary: talentDetail.expected_salary,
+        portfolio_url: talentDetail.portfolio_url,
+      };
+    }
+
+    return talent;
+  }, [talent, talentDetail]);
+
+  if (!displayTalent) return null;
 
   return (
     <Transition show={isOpen} as={Fragment} appear={true}>
@@ -90,20 +137,33 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                     {/* Talent Details Content */}
 
                     <div className="flex-1 overflow-y-auto">
-                      <div className="p-4 md:p-6">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center h-full">
+                          <LoadingSpinner size="lg" color="blue" showText text="Loading talent details..." />
+                        </div>
+                      ) : (
+                        <div className="p-4 md:p-6">
                         {/* Talent Header */}
                         <div className="flex flex-col md:flex-row gap-4 mb-4">
                           <div className="flex-1">
                             <div className="flex items-start gap-3">
                               <div className="relative flex-shrink-0">
-                                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 text-white flex items-center justify-center text-xl font-semibold">
-                                  {talent.name
+                                {displayTalent.photo ? (
+                                  <img
+                                    src={displayTalent.photo}
+                                    alt={displayTalent.name}
+                                    className="h-16 w-16 rounded-2xl object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 text-white flex items-center justify-center text-xl font-semibold">
+                                    {displayTalent.name
                                     .split(' ')
                                     .map((n) => n[0])
                                     .join('')
                                     .substring(0, 2)
                                     .toUpperCase()}
-                                </div>
+                                  </div>
+                                )}
                                 {/* Premium badge */}
                                 <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-yellow-400 flex items-center justify-center">
                                   <StarIcon className="h-3 w-3 text-white" />
@@ -112,17 +172,17 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                   <h5 className="text-lg md:text-xl font-semibold text-gray-900 break-words">
-                                    {talent.name}
+                                    {displayTalent.name}
                                   </h5>
                                   <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
                                 </div>
                                 <h6 className="text-gray-600 text-xs md:text-sm mt-1 break-words">
-                                  {talent.title}
+                                  {displayTalent.title}
                                 </h6>
                                 <div className="flex items-center gap-1 mt-1">
                                   <StarIcon className="h-4 w-4 text-yellow-500" />
                                   <span className="text-sm text-gray-700">
-                                    {talent.rating.toFixed(1)} ({talent.reviews} reviews)
+                                    {displayTalent.rating ? displayTalent.rating.toFixed(1) : '0.0'} ({displayTalent.reviews} reviews)
                                   </span>
                                 </div>
                               </div>
@@ -134,15 +194,15 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                         {/* Statistics Cards */}
                         <div className="grid grid-cols-3 gap-4">
                           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <p className="text-2xl font-bold text-gray-900">{talent.jobsDone}</p>
+                            <p className="text-2xl font-bold text-gray-900">{displayTalent.jobsDone}</p>
                             <p className="text-sm text-gray-600 mt-1">Jobs Done</p>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <p className="text-2xl font-bold text-gray-900">{talent.reviews}</p>
+                            <p className="text-2xl font-bold text-gray-900">{displayTalent.reviews}</p>
                             <p className="text-sm text-gray-600 mt-1">Reviews</p>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <p className="text-2xl font-bold text-gray-900">{talent.portfolioCount || 0}</p>
+                            <p className="text-2xl font-bold text-gray-900">{displayTalent.portfolioCount || 0}</p>
                             <p className="text-sm text-gray-600 mt-1">Portfolio</p>
                           </div>
                         </div>
@@ -153,53 +213,92 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                             <div>
                               <p className="text-xs text-gray-600 mb-1">Hourly Rate</p>
                               <p className="text-lg font-bold text-green-700">
-                                ₱{talent.hourlyMin.toLocaleString()} - ₱{talent.hourlyMax.toLocaleString()}/hr
+                                ₱{displayTalent.hourlyMin.toLocaleString()} - ₱{displayTalent.hourlyMax.toLocaleString()}/hr
                               </p>
                             </div>
-                            {talent.availability && (
+                            {displayTalent.availability && (
                               <span className="px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                                {talent.availability}
+                                {displayTalent.availability}
                               </span>
                             )}
                           </div>
                         </div>
 
                         {/* About Section */}
-                        {talent.about && (
+                        {displayTalent.about && (
                           <div>
                             <h4 className="text-base font-bold text-gray-900 mb-2">About</h4>
-                            <p className="text-sm text-gray-700 leading-relaxed">{talent.about}</p>
+                            <p className="text-sm text-gray-700 leading-relaxed">{displayTalent.about}</p>
                           </div>
                         )}
 
                         {/* Skills Section */}
-                        <div>
-                          <h4 className="text-base font-bold text-gray-900 mb-3">Skills</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {talent.skills.map((skill) => (
-                              <span
-                                key={skill}
-                                className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-200"
-                              >
-                                {skill}
-                              </span>
-                            ))}
+                        {displayTalent.skills && displayTalent.skills.length > 0 && (
+                          <div>
+                            <h4 className="text-base font-bold text-gray-900 mb-3">Skills</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {displayTalent.skills.map((skill) => (
+                                <span
+                                  key={skill}
+                                  className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-sm font-medium border border-green-200"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Education & Languages */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          {talent.education && (
+                          {displayTalent.education && (
                             <div>
                               <h4 className="text-base font-bold text-gray-900 mb-2">Education</h4>
-                              <p className="text-sm text-gray-700">{talent.education}</p>
+                              <p className="text-sm text-gray-700">{displayTalent.education}</p>
                             </div>
                           )}
-                          <div>
-                            <h4 className="text-base font-bold text-gray-900 mb-2">Languages</h4>
-                            <p className="text-sm text-gray-700">{talent.languages.join(', ')}</p>
-                          </div>
+                          {displayTalent.languages && displayTalent.languages.length > 0 && (
+                            <div>
+                              <h4 className="text-base font-bold text-gray-900 mb-2">Languages</h4>
+                              <p className="text-sm text-gray-700">{displayTalent.languages.join(', ')}</p>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Work Experience */}
+                        {talentDetail?.work_experience && talentDetail.work_experience.length > 0 && (
+                          <div>
+                            <h4 className="text-base font-bold text-gray-900 mb-3">Work Experience</h4>
+                            <div className="space-y-3">
+                              {talentDetail.work_experience.map((exp: any, index: number) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                  <p className="font-semibold text-gray-900">{exp.position || exp.job_title}</p>
+                                  <p className="text-sm text-gray-600">{exp.company}</p>
+                                  {exp.duration && (
+                                    <p className="text-xs text-gray-500 mt-1">{exp.duration}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Certifications */}
+                        {talentDetail?.certifications && talentDetail.certifications.length > 0 && (
+                          <div>
+                            <h4 className="text-base font-bold text-gray-900 mb-3">Certifications</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {talentDetail.certifications.map((cert: any, index: number) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200"
+                                >
+                                  {typeof cert === 'string' ? cert : cert.name || cert.title}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Response Time */}
                         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -207,7 +306,8 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                           <span>Usually responds within 2 hours</span>
                         </div>
                         </div>
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Dialog.Panel>

@@ -9,6 +9,7 @@ import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
 import JobFiltersModal from '../../modals/JobFIltersModal';
 import JobCard from '../../components/JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
@@ -122,7 +123,7 @@ const Content = () => {
         logoUrl: job.company_logo || undefined,
         saved: savedJobIds.has(job.id), // Check if job is saved
         match: job.match_percentage || 0,
-        applied: false, // TODO: Check if user has applied
+        applied: job.applied || false, // Applied status from backend
       };
     });
   }, [jobsData, displayCount, savedJobIds]);
@@ -174,9 +175,7 @@ const Content = () => {
 
         {/* Jobs List - Single Column */}
         {isGetJobsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Loading jobs...</div>
-          </div>
+          <LoadingSpinner size="lg" showText text="Loading jobs..." className="py-12" />
         ) : transformedJobs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-gray-500">No jobs available at the moment.</div>
@@ -216,23 +215,27 @@ const Content = () => {
         </div>
 
       {/* Job Filters Modal */}
-      <JobFiltersModal
-        isOpen={isFiltersModalOpen}
-        onClose={() => setIsFiltersModalOpen(false)}
-        filters={filters}
-        onApplyFilters={(newFilters) => {
-          setFilters(newFilters);
-          setDisplayCount(20); // Reset display count when filters change
-          setSelectedJobId(null); // Reset selected job when filters change
-        }}
-      />
+      {isFiltersModalOpen && (
+        <JobFiltersModal
+          isOpen={isFiltersModalOpen}
+          onClose={() => setIsFiltersModalOpen(false)}
+          filters={filters}
+          onApplyFilters={(newFilters) => {
+            setFilters(newFilters);
+            setDisplayCount(20); // Reset display count when filters change
+            setSelectedJobId(null); // Reset selected job when filters change
+          }}
+        />
+      )}
 
       {/* Job Details Modal */}
-      <JobDetailsModal
-        isOpen={selectedJobId !== null}
-        onClose={handleCloseJobDetails}
-        jobId={selectedJobId}
-      />
+      {selectedJobId !== null && (
+        <JobDetailsModal
+          isOpen={selectedJobId !== null}
+          onClose={handleCloseJobDetails}
+          jobId={selectedJobId}
+        />
+      )}
     </div>
   );
 };

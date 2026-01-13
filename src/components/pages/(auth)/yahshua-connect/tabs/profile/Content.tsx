@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import useGetApplicantProfile from '../../hooks/useGetApplicantProfile';
-import useUpdateApplicantProfile from '../../hooks/useUpdateApplicantProfile';
+import useUpdateApplicantProfile from './hooks/useUpdateApplicantProfile';
 import BasicInformationModal from './modals/BasicInformationModal';
 import ContactInformationModal from './modals/ContactInformationModal';
 import WorkExperienceModal from './modals/WorkExperienceModal';
@@ -17,6 +17,7 @@ import EmploymentDocumentsModal from './modals/EmploymentDocumentsModal';
 import AddWorkExperienceModal from './modals/AddWorkExperienceModal';
 import AddCertificationModal from './modals/AddCertificationModal';
 import AddProjectModal from './modals/AddProjectModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { ChevronRightIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
@@ -52,6 +53,8 @@ const Content = () => {
     phone: '',
     landline: '',
     location: '',
+    latitude: null,
+    longitude: null,
     birthday: null,
     gender: '',
     religion: '',
@@ -93,6 +96,8 @@ const Content = () => {
         phone: profileData.mobile || '',
         landline: profileData.landline || '',
         location: profileData.address || '',
+        latitude: profileData.latitude || null,
+        longitude: profileData.longitude || null,
         birthday: profileData.birth_date ? new Date(profileData.birth_date) : null,
         gender: profileData.gender || '',
         religion: profileData.religion || '',
@@ -325,8 +330,12 @@ const Content = () => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Sections */}
-      <div className="space-y-4">
+      {/* Loading State */}
+      {isLoading ? (
+        <LoadingSpinner size="lg" showText text="Loading profile..." className="py-12" />
+      ) : (
+        /* Profile Sections */
+        <div className="space-y-4">
         {/* Profile */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <button
@@ -428,7 +437,8 @@ const Content = () => {
             <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-savoy-blue" />
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Profile Section Modals */}
       {isBasicInfoModalOpen && (
@@ -442,6 +452,8 @@ const Content = () => {
               middlename: data.middlename,
               lastname: data.lastname,
               address: data.location,
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
               birth_date: parseDateToISO(data.birthday),
               gender: data.gender,
               religion: data.religion,

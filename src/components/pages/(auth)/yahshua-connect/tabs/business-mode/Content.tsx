@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { FunnelIcon, BoltIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { useState, useMemo } from 'react';
+
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
-import EarningsChartCard from './components/cards/EarningsChartCard';
-import FilterRequestsModal from './components/modals/FilterRequestsModal';
+import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
-import JobChatModal from './pages/find-work/modals/JobChatModal';
+import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
-import ToolsIcon from '@/svg/ToolsIcons';
-import { useHomeData } from './hooks/useHomeData';
+import useGetDashboardOverview from './hooks/useGetDashboardOverview';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -18,13 +19,83 @@ const Content = () => {
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  const { thisMonthEarnings, weeklyData, jobRequests: initialJobRequests, trendingServices } = useHomeData();
+  // Fetch dashboard overview data from API
+  const { data: dashboardData, isLoading } = useGetDashboardOverview();
 
-  // Use job requests as-is from the data
-  const jobRequests = initialJobRequests;
+  const weeklyData = [
+    { day: 'W1', amount: 12500 },
+    { day: 'W2', amount: 9800 },
+    { day: 'W3', amount: 15200 },
+    { day: 'W4', amount: 7700 },
+  ];
 
-  // Calculate urgent requests count
-  const urgentRequestsCount = jobRequests.filter((job) => job.urgent && job.status !== 'accepted').length;
+  // All Jobs
+  const jobRequests = [
+    {
+      id: 1,
+      title: 'Fix Leaking Kitchen Sink',
+      clientName: 'Maria Santos',
+      clientInitials: 'MS',
+      clientLocation: 'Carmen, Cagayan de Oro',
+      distance: '0.8 km',
+      rating: 4.7,
+      hiresCount: 15,
+      description: 'Kitchen sink has been leaking for 2 days.',
+      time: 'Today, 2:00 PM',
+      priceRange: '₱800 - ₱1,200',
+      tags: ['Plumbing', 'Sink Repair'],
+      status: 'accepted' as const,
+      urgent: true,
+    },
+    {
+      id: 2,
+      title: 'Install Ceiling Fan',
+      clientName: 'Juan Cruz',
+      clientInitials: 'JC',
+      clientLocation: 'Gusa, Cagayan de Oro',
+      distance: '1.5 km',
+      rating: 5,
+      hiresCount: 28,
+      description: 'Need electrician to install ceiling fan.',
+      time: 'Tomorrow, 9:00 AM',
+      priceRange: '₱600 - ₱900',
+      tags: ['Electrical', 'Installation'],
+      status: 'pending' as const,
+      urgent: false,
+    },
+    {
+      id: 3,
+      title: 'House Deep Cleaning',
+      clientName: 'Ana Garcia',
+      clientInitials: 'AG',
+      clientLocation: 'Macasandig, Cagayan de Oro',
+      distance: '2.1 km',
+      rating: 4.5,
+      hiresCount: 5,
+      description: 'Need deep cleaning service for 3-bedroom house. All cleaning materials will be provided.',
+      time: 'Tomorrow, 10:00 AM - 2:00 PM',
+      priceRange: '₱1,500 - ₱2,000',
+      tags: ['Cleaning'],
+      status: 'pending' as const,
+      urgent: false,
+    },
+    {
+      id: 4,
+      title: 'Garden Landscaping',
+      clientName: 'Robert Tan',
+      clientInitials: 'RT',
+      clientLocation: 'Lapasan, Cagayan de Oro',
+      distance: '3.5 km',
+      rating: 4.9,
+      hiresCount: 15,
+      description: 'Need landscaping work for front yard garden. Plants and materials will be provided.',
+      time: 'Dec 5, 8:00 AM',
+      priceRange: '₱2,000 - ₱3,000',
+      tags: ['Landscaping'],
+      status: 'pending' as const,
+      urgent: false,
+    },
+  ];
 
   const handleApplyFilters = (filters: {
     location: string;
@@ -68,14 +139,23 @@ const Content = () => {
     return `₱${amount.toLocaleString()}`;
   };
 
+  // Extract data from API response
+  const monthlyEarnings = useMemo(() => dashboardData?.monthly_earnings || 0, [dashboardData]);
+  const jobsCompleted = useMemo(() => dashboardData?.jobs_completed || 0, [dashboardData]);
+  const urgentRequestsCount = useMemo(() => dashboardData?.urgent_requests || 0, [dashboardData]);
+  const rating = useMemo(() => dashboardData?.rating || 0, [dashboardData]);
+
+  // TODO: Get user name from session/profile
   const userName = "John Doe";
-  const monthlyEarnings = 45230;
-  const jobsCompleted = 23;
-  const rating = 4.9;
 
   return (
     <div className="space-y-6">
-      {/* Business Overview */}
+      {/* Loading State */}
+      {isLoading ? (
+        <LoadingSpinner size="lg" showText text="Loading dashboard..." className="py-12" />
+      ) : (
+        <>
+          {/* Business Overview */}
       <div className="bg-gradient-to-br from-savoy-blue to-blue-600 rounded-lg shadow-lg p-6 text-white">
         {/* Header */}
         <div className="mb-6">
@@ -140,11 +220,30 @@ const Content = () => {
           ))}
         </div>
       </div>
+        </>
+      )}
 
       {/* Earnings This Month */}
       {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
         <h2 className="text-lg font-bold text-gray-900 mb-4">Earnings This Month</h2>
-        <EarningsChartCard data={weeklyData} showTitle={false} />
+        <div className="flex items-end justify-between gap-2 h-32">
+          {weeklyData.map((item, index) => {
+            const maxAmount = Math.max(...weeklyData.map((d) => d.amount));
+            const height = (item.amount / maxAmount) * 100;
+            return (
+              <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                <div className="relative flex-1 w-full flex items-end">
+                  <div
+                    className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
+                    style={{ height: `${height}%` }}
+                    title={`₱${item.amount.toLocaleString()}`}
+                  />
+                </div>
+                <span className="text-xs text-gray-600 font-medium">{item.day}</span>
+              </div>
+            );
+          })}
+        </div>
       </div> */}
 
       {/* Trending Services */}
@@ -223,14 +322,17 @@ const Content = () => {
 
       {/* Chat Modal */}
       {isChatModalOpen && selectedJobFull && (
-        <JobChatModal
+        <ChatModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
             setSelectedJobId(null);
           }}
-          clientName={selectedJobFull.clientName}
-          clientInitials={selectedJobFull.clientInitials || ''}
+          recipientId={selectedJobFull.id}
+          recipientName={selectedJobFull.clientName}
+          recipientInitials={selectedJobFull.clientInitials || ''}
+          recipientPhoto={null}
+          jobId={selectedJobFull.id}
           jobTitle={selectedJobFull.title}
         />
       )}

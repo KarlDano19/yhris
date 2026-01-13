@@ -4,8 +4,9 @@ import Link from 'next/link';
 
 import { Dialog, Transition } from '@headlessui/react';
 import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
+import ChatModal from '@/components/common/chat/ChatModal';
 
-import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon, CheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -22,12 +23,23 @@ interface JobDetailsModalProps {
 const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
   const { data, isLoading } = useGetYahshuaConnectJobDetails(jobId);
   const [jobDetailData, setJobDetailData] = useState<any>({});
+  const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
     if (data) {
       setJobDetailData(data);
     }
   }, [data]);
+
+  // Helper function to get employer initials
+  const getEmployerInitials = (name: string) => {
+    if (!name) return '?';
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const renderRoleDescription = (jobDescription: any) => {
     const markup = { __html: jobDescription };
@@ -83,14 +95,34 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
               >
                 <Dialog.Panel className="pointer-events-auto w-screen sm:w-[85vw] md:w-[50vw]">
                   <div className="flex h-screen flex-col overflow-hidden bg-white shadow-2xl">
-                  {/* Header with Apply Now button and Close button */}
+                  {/* Header with Apply Now button or Applied badge and Close button */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-                    <Link 
-                      href={`/job-applicant-form/${jobId}`}
-                      className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Apply Now
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      {jobDetailData?.applied ? (
+                        <>
+                          <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg">
+                            <CheckIcon className="h-5 w-5" />
+                            <span className="text-sm font-medium">Applied</span>
+                          </div>
+                          {jobDetailData?.applied_job_id && (
+                            <button
+                              onClick={() => setShowChatModal(true)}
+                              className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                            >
+                              <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                              <span>Message Employer</span>
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <Link
+                          href={`/job-applicant-form/${jobId}`}
+                          className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          Apply Now
+                        </Link>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={onClose}
@@ -313,6 +345,20 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
             </div>
           </div>
         </div>
+      
+      {/* Employer Chat Modal */}
+      {jobDetailData?.applied_job_id && (
+        <ChatModal
+          isOpen={showChatModal}
+          onClose={() => setShowChatModal(false)}
+          chatType="employer-applicant"
+          appliedJobId={jobDetailData.applied_job_id}
+          subtitle={jobDetailData.job_title || 'Job'}
+          personName={jobDetailData.employer_name || 'Employer'}
+          personPhoto={jobDetailData.company_logo}
+          personInitials={getEmployerInitials(jobDetailData.employer_name || '')}
+        />
+      )}
       </Dialog>
     </Transition>
   );
