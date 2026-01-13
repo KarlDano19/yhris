@@ -1,4 +1,4 @@
-import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import ArchiveButton from '../ArchiveButton';
 import Image from 'next/image';
 import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
@@ -10,6 +10,7 @@ import classNames from '@/helpers/classNames';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import { useParams } from 'next/navigation';
 import { formatDateToLocal } from '@/helpers/date';
+import ChatModal from '@/components/common/chat/ChatModal';
 
 const menuList = [
   {
@@ -28,14 +29,20 @@ const menuList = [
   },
   {
     id: 3,
+    whichModal: 'MESSAGE_APPLICANT',
+    modalTitle: 'Message Applicant',
+    name: 'Message Applicant',
+    icon: <ChatBubbleLeftRightIcon className='w-4 h-4' />,
+  },
+  {
+    id: 4,
     whichModal: 'SEND_EMAIL',
     modalTitle: 'Send an Email to Applicant',
-
     name: 'Send Email',
     icon: <EnvelopeIcon className='w-4 h-4' />,
   },
   {
-    id: 4,
+    id: 5,
     whichModal: 'SCHEDULE_INTERVIEW',
     modalTitle: 'Schedule Interview',
     name: 'Schedule Interview',
@@ -99,6 +106,9 @@ export default function Person({
   const menuRef = useRef<HTMLDivElement>(null);
   const { photo_url, name, id } = applicant;
   const params = useParams();
+
+  // Chat modal state
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
   // Check if applicant is hired - check both 'hired' and 'passed' in final stage
   const isPassedFinalInterview = applicant.status === 'hired';
@@ -282,6 +292,7 @@ export default function Person({
                 if (whichModal === 'CHECKLIST') return permissions.can_update;
                 if (whichModal === 'SEND_EMAIL') return permissions.can_update;
                 if (whichModal === 'SCHEDULE_INTERVIEW') return permissions.can_update;
+                if (whichModal === 'MESSAGE_APPLICANT') return permissions.can_update;
                 return true;
               };
 
@@ -289,53 +300,44 @@ export default function Person({
                 return null; // Don't show action if user doesn't have permission
               }
 
+              // Handle MESSAGE_APPLICANT action separately (opens chat modal)
+              const handleMenuClick = () => {
+                if (whichModal === 'MESSAGE_APPLICANT') {
+                  setIsChatModalOpen(true);
+                  setOpenMenuId(null); // Close the menu
+                  return;
+                }
+
+                let lastElement = state[state.length - 1];
+                let isFinalStage = false;
+                if (lastElement.id == stage.id) {
+                  isFinalStage = true;
+                }
+                setActionState({
+                  ...initialActionState,
+                  email: applicant.email,
+                  applicantId: applicant.id,
+                  stageId: stage.id,
+                  modal: { whichModal, isOpen: true, title: modalTitle },
+                  isFinalStage: isFinalStage,
+                });
+              };
+
+              // Skip Checklist for hired applicants (except MESSAGE_APPLICANT)
+              if (isPassedFinalInterview && name === 'Checklist') {
+                return null;
+              }
+
               return (
-                <React.Fragment key={id}>
-                  {isPassedFinalInterview && name !== 'Checklist' && (
-                    <li>
-                      <button
-                        onClick={() =>
-                          setActionState({
-                            ...initialActionState,
-                            email: applicant.email,
-                            applicantId: applicant.id,
-                            stageId: stage.id,
-                            modal: { whichModal, isOpen: true, title: modalTitle },
-                          })
-                        }
-                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
-                      >
-                        <span>{icon}</span>
-                        <p>{name}</p>
-                      </button>
-                    </li>
-                  )}
-                  {!isPassedFinalInterview && (
-                    <li>
-                      <button
-                        onClick={() => {
-                          let lastElement = state[state.length - 1];
-                          let isFinalStage = false;
-                          if (lastElement.id == stage.id) {
-                            isFinalStage = true;
-                          }
-                          setActionState({
-                            ...initialActionState,
-                            email: applicant.email,
-                            applicantId: applicant.id,
-                            stageId: stage.id,
-                            modal: { whichModal, isOpen: true, title: modalTitle },
-                            isFinalStage: isFinalStage,
-                          });
-                        }}
-                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
-                      >
-                        <span>{icon}</span>
-                        <p>{name}</p>
-                      </button>
-                    </li>
-                  )}
-                </React.Fragment>
+                <li key={id}>
+                  <button
+                    onClick={handleMenuClick}
+                    className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
+                  >
+                    <span>{icon}</span>
+                    <p>{name}</p>
+                  </button>
+                </li>
               );
             })}
           </ul>
@@ -350,6 +352,26 @@ export default function Person({
           </div>
         </div>
       )}
+
+      {/* Chat Modal */}
+      <ChatModal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        chatType="employer-applicant"
+        appliedJobId={applicant.applicationId}
+        personName={applicant.name || 'Applicant'}
+        personInitials={
+          applicant.name
+            ? applicant.name
+                .split(' ')
+                .map((n: string) => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase()
+            : 'NA'
+        }
+        personPhoto={applicant.image || null}
+      />
     </div>
   );
 }
