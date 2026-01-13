@@ -344,7 +344,7 @@ export type T_ApplicantReview = {
   reviewed_applicant_name: string;
   business_job_application: number;
   rating: number;
-  review_text: string | null;
+  comment: string | null;
   created_at: string;
   updated_at: string;
 };

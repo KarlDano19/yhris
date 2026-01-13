@@ -15,7 +15,7 @@ async function submitApplicantReview(data: T_SubmitApplicantReviewData): Promise
     body: JSON.stringify({
       business_job_application: data.applicationId,
       rating: data.rating,
-      review_text: data.review_text || null,
+      comment: data.review_text || null,
     }),
   };
 
