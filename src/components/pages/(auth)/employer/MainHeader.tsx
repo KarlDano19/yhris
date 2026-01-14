@@ -21,7 +21,7 @@ import SessionExpirationModal from '@/components/SessionExpirationModal';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
-import useGetEmployerApplicantChatsList from '@/components/hooks/chat/useGetEmployerApplicantChatsList';
+import useGetEmployerApplicantChatsList from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import MessagesModal from '@/components/common/chat/MessagesModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 

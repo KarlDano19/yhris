@@ -17,8 +17,8 @@ import MessagesModal from '@/components/common/chat/MessagesModal';
 import NotificationsModal from './modals/NotificationsModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
-import { useApplicantChatsList } from './hooks/chat/useApplicantChatsList';
-import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/useGetEmployerApplicantChatsList';
+import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useApplicantChatsList';
+import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
 

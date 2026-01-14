@@ -2,16 +2,16 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Employer-Applicant chat hooks (HRIS)
-import useGetEmployerApplicantChat from './useGetEmployerApplicantChat';
-import useGetEmployerApplicantChatMessages from './useGetEmployerApplicantChatMessages';
-import useSendEmployerApplicantMessage from './useSendEmployerApplicantMessage';
-import useMarkEmployerApplicantMessagesRead from './useMarkEmployerApplicantMessagesRead';
+import useGetEmployerApplicantChat from './employer/useGetEmployerApplicantChat';
+import useGetEmployerApplicantChatMessages from './employer/useGetEmployerApplicantChatMessages';
+import useSendEmployerApplicantMessage from './employer/useSendEmployerApplicantMessage';
+import useMarkEmployerApplicantMessagesRead from './employer/useMarkEmployerApplicantMessagesRead';
 
 // Applicant-Applicant chat hooks (Yahshua Connect)
-import { useGetApplicantChat } from '@/components/pages/(auth)/yahshua-connect/hooks/chat/useGetApplicantChat';
-import { useGetChatMessages } from '@/components/pages/(auth)/yahshua-connect/hooks/chat/useGetChatMessages';
-import useSendChatMessage from '@/components/pages/(auth)/yahshua-connect/hooks/chat/useSendChatMessage';
-import useMarkChatMessagesRead from '@/components/pages/(auth)/yahshua-connect/hooks/chat/useMarkChatMessagesRead';
+import { useGetApplicantChat } from '@/components/hooks/chat/yahshua-connect/useGetApplicantChat';
+import { useGetChatMessages } from '@/components/hooks/chat/yahshua-connect/useGetChatMessages';
+import useSendChatMessage from '@/components/hooks/chat/yahshua-connect/useSendChatMessage';
+import useMarkChatMessagesRead from '@/components/hooks/chat/yahshua-connect/useMarkChatMessagesRead';
 
 export type ChatType = 'employer-applicant' | 'applicant-applicant';
 

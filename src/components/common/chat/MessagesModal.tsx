@@ -5,8 +5,8 @@ import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, BriefcaseIcon, UserIcon } from '@heroicons/react/24/outline';
 
-import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/useGetEmployerApplicantChatsList';
-import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/pages/(auth)/yahshua-connect/hooks/chat/useApplicantChatsList';
+import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
+import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/hooks/chat/yahshua-connect/useApplicantChatsList';
 
 // ============================================================================
 // Types
