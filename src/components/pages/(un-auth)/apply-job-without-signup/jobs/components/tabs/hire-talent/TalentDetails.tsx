@@ -1,4 +1,3 @@
-import { XMarkIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
 
@@ -79,12 +78,7 @@ const TalentDetails = ({
             </div>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <XMarkIcon className="h-6 w-6" />
-        </button>
+
       </div>
 
       {/* Action Buttons */}

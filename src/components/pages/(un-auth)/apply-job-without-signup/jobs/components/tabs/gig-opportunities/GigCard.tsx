@@ -1,6 +1,7 @@
 import GigDetails from './GigDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
+
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { UserGroupIcon } from '@heroicons/react/24/outline';
 import classNames from '@/helpers/classNames';

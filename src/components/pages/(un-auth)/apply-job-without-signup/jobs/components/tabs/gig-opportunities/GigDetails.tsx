@@ -1,4 +1,3 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
 
@@ -52,12 +51,7 @@ const GigDetails = ({
           </div>
           <h2 className="text-xl font-bold text-gray-900">{gig.title}</h2>
         </div>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors ml-4"
-        >
-          <XMarkIcon className="h-6 w-6" />
-        </button>
+
       </div>
 
       {/* Client Information */}
