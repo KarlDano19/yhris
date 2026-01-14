@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { BuildingOfficeIcon, BoltIcon, UserGroupIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import classNames from '@/helpers/classNames';
 import LoginRequiredModal from './modals/LoginRequiredModal';
+import JobFilter from './components/JobFilter';
 
 // Company Jobs Components
 import JobCard from './components/tabs/company-jobs/JobCard';
@@ -71,6 +72,12 @@ interface TabsProps {
   isLoginModalOpenTalent: boolean;
   setIsLoginModalOpenTalent: (open: boolean) => void;
   loginModalAction: 'book' | 'message';
+  
+  // Filter Props
+  filteredCount: number;
+  filters: any;
+  onFiltersChange: (filters: any) => void;
+  onApplyFilters: (filters: any) => void;
 }
 
 const Tabs = ({
@@ -118,6 +125,11 @@ const Tabs = ({
   isLoginModalOpenTalent,
   setIsLoginModalOpenTalent,
   loginModalAction,
+  // Filter Props
+  filteredCount,
+  filters,
+  onFiltersChange,
+  onApplyFilters,
 }: TabsProps) => {
   const tabs = [
     {
@@ -125,8 +137,8 @@ const Tabs = ({
       label: 'Company Jobs',
       icon: BuildingOfficeIcon,
       description: 'Traditional employment opportunities',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-700',
+      bgColor: 'bg-gray-200',
+      textColor: 'text-black-700',
     },
     {
       id: 'gig-opportunities' as TabType,
@@ -199,6 +211,20 @@ const Tabs = ({
           )}
         </div>
       </div>
+
+      {/* Job Filter Component - Below Tab Description */}
+      {hasJob && (
+        <div className="mt-4">
+          <JobFilter 
+            activeTab={activeTab} 
+            filteredCount={filteredCount}
+            filters={filters}
+            onFiltersChange={onFiltersChange}
+            onApplyFilters={onApplyFilters}
+          />
+          <div className='border-t border-gray-300 mt-4'></div>
+        </div>
+      )}
 
       {/* Tab Content */}
       {activeTab === 'company-jobs' && (
@@ -368,6 +394,11 @@ const Tabs = ({
                       }}
                     >
                       <div className='card border border-savoy-blue rounded-md'>
+                        <div className='flex justify-end px-3 mt-2'>
+                          <button onClick={closeGigDetails}>
+                            <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                          </button>
+                        </div>
                         {selectedGig && (
                           <GigDetails
                             gig={selectedGig}
@@ -453,6 +484,11 @@ const Tabs = ({
                       }}
                     >
                       <div className='card border border-green-500 rounded-md'>
+                        <div className='flex justify-end px-3 mt-2'>
+                          <button onClick={closeTalentDetails}>
+                            <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                          </button>
+                        </div>
                         {selectedTalent && (
                           <TalentDetails
                             talent={selectedTalent}

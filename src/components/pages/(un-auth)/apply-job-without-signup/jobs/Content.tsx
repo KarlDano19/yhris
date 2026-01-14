@@ -6,7 +6,6 @@ import Image from 'next/image';
 import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
 import JobSearchAutocomplete from './components/JobSearchAutocomplete';
 import LocationSearchAutocomplete from './components/LocationSearchAutocomplete';
-import JobFilter from './components/JobFilter';
 import Tabs from './Tabs';
 
 import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
@@ -764,31 +763,23 @@ const Content = () => {
           isLoginModalOpenTalent={isLoginModalOpenTalent}
           setIsLoginModalOpenTalent={setIsLoginModalOpenTalent}
           loginModalAction={loginModalAction}
+          // Filter Props
+          filteredCount={getFilteredCount()}
+          filters={appliedFilters[activeTab]}
+          onFiltersChange={(filters) => {
+            setAppliedFilters(prev => ({
+              ...prev,
+              [activeTab]: filters
+            }));
+          }}
+          onApplyFilters={(filters) => {
+            setAppliedFilters(prev => ({
+              ...prev,
+              [activeTab]: filters
+            }));
+          }}
         />
       </div>
-      {/* Job Filter Component - Below Tabs */}
-      {hasJob && (
-        <div className="mt-4">
-          <JobFilter 
-            activeTab={activeTab} 
-            filteredCount={getFilteredCount()}
-            filters={appliedFilters[activeTab]}
-            onFiltersChange={(filters) => {
-              setAppliedFilters(prev => ({
-                ...prev,
-                [activeTab]: filters
-              }));
-            }}
-            onApplyFilters={(filters) => {
-              setAppliedFilters(prev => ({
-                ...prev,
-                [activeTab]: filters
-              }));
-            }}
-          />
-          <div className='border-t border-gray-300 mt-4'></div>
-        </div>
-      )}
     </>
   );
 };

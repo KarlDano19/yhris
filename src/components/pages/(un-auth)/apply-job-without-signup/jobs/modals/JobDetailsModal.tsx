@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 
 
-import JobDetails from '../components/tabs/company-jobs/components/JobDetails';
+import JobDetails from '../components/tabs/company-jobs/JobDetails';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
