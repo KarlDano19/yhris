@@ -6,6 +6,8 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { handlePrintIndividualEvaluations } from '../PrintData';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import useDeleteEvaluationHistory from '../hooks/useDeleteEvaluationHistory';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
@@ -18,6 +20,7 @@ import PrintIndividualEvaluationsSelectionModal from '../modals/PrintIndividualE
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 type T_ModalData = {
   id: number;
@@ -29,6 +32,7 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
   const [allEvaluationRecords, setAllEvaluationRecords] = useState<any>([]);
   const [isEvaluationDetailsModalOpen, setIsEvaluationDetailsModalOpen] = useState<T_ModalData | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isDeleteEvaluationHistoryModalOpen, setIsDeleteEvaluationHistoryModalOpen] = useState<DeleteModalData | null>(null);
   const [itemsFilter, setItemsFilter] = useState<any>({
     from: '',
     to: '',
@@ -50,7 +54,32 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
     totalRecords: 0,
   });
   const [isSearching, setIsSearching] = useState(false);
-
+  const deleteEvaluationHistoryMutation = useDeleteEvaluationHistory();
+  const { mutate: deleteEvaluationHistory, isLoading: isDeleteEvaluationHistoryLoading } = deleteEvaluationHistoryMutation;
+  
+  const handleDeleteEvaluationHistory = async (evaluation_form_id: number) => {
+    try {
+      const callbackReq = {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 3000 });
+          setIsDeleteEvaluationHistoryModalOpen(null);
+          refetchEvaluationHistoryItems();
+        },
+        onError: (err: any) => {
+          toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
+        },
+      };
+      deleteEvaluationHistory(evaluation_form_id, callbackReq);
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : 'Failed to delete evaluation history';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
+      throw error;
+    }
+  };
   const {
     data: dataEvaluationHistoryItems,
     isLoading: isLoadingEvaluationHistoryItems,
@@ -244,22 +273,50 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
       return evaluationHistoryItems.map((item: any) => (
         <tr
           key={item.id}
-          className='cursor-pointer'
-          onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
+          // className='cursor-pointer'
+          // onClick={() => setIsEvaluationDetailsModalOpen({ id: item.id, open: true })}
         >
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.employee_name}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.date_of_evaluation}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_period}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.evaluation_form}</td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <span className={classNames('text-gray-500', item.form_total_score < item.passing_score && 'text-red-500')}>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.employee_name}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.date_of_evaluation}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.evaluation_period}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            {item.evaluation_form}
+          </td>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+            <span
+              className={classNames(
+                "text-gray-500",
+                item.form_total_score < item.passing_score && "text-red-500"
+              )}
+            >
               {item.form_total_score}
             </span>
             /<span>{item.max_total_score}</span>
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <button className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+          <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500 flex items-center justify-center gap-2">
+            <button
+              className="bg-green-500 rounded-md py-2.5 px-8 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50"
+              onClick={() =>
+                setIsEvaluationDetailsModalOpen({ id: item.id, open: true })
+              }
+            >
               View
+            </button>
+            <button
+              onClick={() =>
+                setIsDeleteEvaluationHistoryModalOpen({
+                  id: item.id,
+                  open: true,
+                })
+              }
+            >
+              <DeleteIcon />
             </button>
           </td>
         </tr>
@@ -408,6 +465,14 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
         />
       )}
 
+      {isDeleteEvaluationHistoryModalOpen && (
+        <DeleteModal
+          isOpen={isDeleteEvaluationHistoryModalOpen}
+          setIsOpen={setIsDeleteEvaluationHistoryModalOpen}
+          onConfirm={(data) => handleDeleteEvaluationHistory(data?.id)}
+          isLoading={isDeleteEvaluationHistoryLoading}
+        />
+      )}
       <PrintIndividualEvaluationsSelectionModal
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
