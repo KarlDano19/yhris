@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import Image from 'next/image';
 
 import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
 import JobSearchAutocomplete from './components/JobSearchAutocomplete';
@@ -11,11 +10,7 @@ import Tabs from './Tabs';
 import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
 import { dummyTalents, type Talent } from './hooks/HireTalentDummy';
 
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import classNames from '@/helpers/classNames';
-import JobCard from './components/tabs/company-jobs/JobCard';
-import JobDetails from './components/tabs/company-jobs/JobDetails';
-import jobIllustration from '@/assets/find-job-illustration.svg';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const Content = () => {
   // Pending filter (user input state)
@@ -748,110 +743,6 @@ const Content = () => {
           </div>
         </div>
       </div>
-      {/* Jobs Available / Opportunities Available - Above Tabs */}
-      {hasJob ? (
-        <div className='mt-4'>
-          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
-            <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
-              {activeTab === 'company-jobs' && 'Jobs available: '}
-              {activeTab === 'gig-opportunities' && 'Gig opportunities available: '}
-              {activeTab === 'hire-talent' && 'Talents available: '}
-              {getTotalCount()}
-            </p>
-          </div>
-          <div className='border-t border-gray-300'></div>
-          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
-            <div className='px-4 lg:px-5'>
-              <div className='lg:flex lg:items-start'>
-                <div className='hide-scrollbar lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
-                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
-                    <>
-                      {!isGetJobsLoading
-                        ? jobsItems.map((job: any) => (
-                            <JobCard
-                              key={job.id}
-                              job={job}
-                              isSelected={selectedJobId === job.id}
-                              isJobView={isJobView}
-                              isJobModalOpen={isJobModalOpen}
-                              onJobClick={openJobDetails}
-                              onCloseDetails={closeJobDetails}
-                            />
-                          ))
-                        : 'Loading jobs...'}
-                    </>
-                    
-                    {/* Load More Button */}
-                    {hasNextPage && (
-                      <div className="flex justify-center py-6 col-span-full">
-                        <button
-                          onClick={handleLoadMore}
-                          disabled={isFetchingNextPage}
-                          className="rounded-md bg-savoy-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isFetchingNextPage ? (
-                            <span className="flex items-center">
-                              <svg
-                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                              </svg>
-                              Loading...
-                            </span>
-                          ) : (
-                            'Load More Jobs'
-                          )}
-                        </button>
-                      </div>
-                    )}
-                    
-                    {/* End of results message */}
-                    {!hasNextPage && jobsItems.length > 0 && (
-                      <p className="text-center text-gray-500 text-sm py-4 col-span-full">
-                        No more jobs to load
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className='hide-scrollbar lg:pl-10 lg:pr-5 py-10 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
-                  <div
-                    className={classNames(
-                      'card border border-savoy-blue rounded-md',
-                      isJobView ? '' : 'hidden'
-                    )}
-                  >
-                    <div className='flex justify-end px-3 mt-2'>
-                      <button onClick={closeJobDetails}>
-                        <XMarkIcon className='h-5 w-5 text-indigo-dye' />
-                      </button>
-                    </div>
-                    <JobDetails jobId={selectedJobId} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className='w-auto h-[220px] md:w-[600px] md:h-[400px] relative block mx-auto mt-8'>
-          <Image src={jobIllustration} fill alt='Find job illustration' />
-        </div>
-      )}
       {/* Tabs Navigation and Content */}
       <div className="mt-6">
         <Tabs
@@ -901,6 +792,7 @@ const Content = () => {
           loginModalAction={loginModalAction}
           // Filter Props
           filteredCount={getFilteredCount()}
+          totalRecords={totalRecords}
           filters={appliedFilters[activeTab]}
           onFiltersChange={(filters: any) => {
             setAppliedFilters((prev: any) => ({
