@@ -950,14 +950,28 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
               {...register('profilePicture', {
                 onChange: (e: any) => {
                   const file = e.target.files[0];
-                  if (file && file.size > 5 * 1024 * 1024) {
+                  if (!file) return;
+                  
+                  // Validate file type - only accept PNG, JPEG, JPG
+                  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                  if (!allowedTypes.includes(file.type)) {
+                    toast.custom(() => <CustomToast message='Only PNG, JPEG, and JPG files are allowed' type='error' />, {
+                      duration: 7000,
+                    });
+                    e.target.value = null;
+                    return;
+                  }
+                  
+                  // Validate file size
+                  if (file.size > 5 * 1024 * 1024) {
                     toast.custom(() => <CustomToast message='Photo size should not exceed 5 MB' type='error' />, {
                       duration: 7000,
                     });
                     e.target.value = null;
-                  } else {
-                    renderUploadPhoto(e);
+                    return;
                   }
+                  
+                  renderUploadPhoto(e);
                 },
               })}
               id='profile-picture'
@@ -975,7 +989,27 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
               {...register('resume', {
                 onChange: (e: any) => {
                   const file = e.target.files[0];
-                  if (file && file.size > 5 * 1024 * 1024) {
+                  if (!file) return;
+                  
+                  // Validate file type - only accept PDF, DOC, DOCX
+                  const allowedTypes = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                  ];
+                  if (!allowedTypes.includes(file.type)) {
+                    toast.custom(
+                      () => <CustomToast message='Only PDF, DOC, and DOCX files are allowed' type='error' />,
+                      {
+                        duration: 7000,
+                      }
+                    );
+                    e.target.value = null;
+                    return;
+                  }
+                  
+                  // Validate file size
+                  if (file.size > 5 * 1024 * 1024) {
                     toast.custom(
                       () => <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB' type='error' />,
                       {
@@ -983,12 +1017,13 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                       }
                     );
                     e.target.value = null;
+                    return;
                   }
                 },
               })}
               id='resume'
               className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4'
-              accept='application/pdf'
+              accept='.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             />
             <h6 className='text-xs mt-3'>Maximum file size: 5 MB</h6>
           </div>
