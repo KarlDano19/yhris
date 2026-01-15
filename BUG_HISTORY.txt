@@ -1,0 +1,246 @@
+================================================================================
+                            BUG HISTORY TRACKER
+================================================================================
+
+INSTRUCTIONS FOR CLAUDE CODE:
+When a developer requests to document a bug fix, APPEND a new entry to the end
+of this file following the template format below. Always maintain chronological
+order with newest entries at the bottom. Preserve all existing entries.
+
+Required information to collect:
+- Bug ID (unique identifier)
+- Date Filed (when bug was reported)
+- Date Fixed (when fix was committed)
+- Client/Reporter (who reported it)
+- Issue Description (what was wrong)
+- Desired Outcome (what should happen)
+- Files Changed (list all modified files)
+- Unit Testing Checklist (tests written, coverage, regression tests)
+- Fix Explanation (how it was resolved)
+
+================================================================================
+TECH STACK REFERENCE - YAHSHUA HRIS
+================================================================================
+
+BACKEND (Django REST Framework):
+- Django 4.2 / Django REST Framework 3.14.0
+- PostgreSQL (psycopg2-binary)
+- Redis (django-redis) for caching
+- Celery 5.2.7 / Django Celery Beat for background tasks
+- Django Channels 4.0.0 for WebSockets
+- JWT authentication (djangorestframework-simplejwt)
+- WeasyPrint for PDF generation
+- Anthropic Claude AI for resume parsing
+- AWS S3 (boto3, django-storages) for file storage
+
+FRONTEND (Next.js/React):
+- Next.js 14.1.1 (App Router)
+- React 18.2.0 / TypeScript 5.0.4
+- TanStack React Query 4.29.5 (server state management)
+- React Hook Form 7.43.9 (form state management)
+- React useState/useReducer (local component state)
+- Tailwind CSS 3.3.2
+- Headless UI / Heroicons
+- Axios for API calls
+
+================================================================================
+TEMPLATE FORMAT:
+================================================================================
+
+BUG ID: [Unique identifier, e.g., BUG-001, HRIS-123]
+DATE FILED: [YYYY-MM-DD]
+DATE FIXED: [YYYY-MM-DD]
+CLIENT/REPORTER: [Client name or internal reporter]
+
+ISSUE DESCRIPTION:
+[Clear description of the problem, including steps to reproduce if applicable]
+
+DESIRED OUTCOME:
+[What the expected behavior should be]
+
+FILES CHANGED:
+Backend:
+- app/views/example.py
+- app/serializers/example.py
+- app/models/example.py
+
+Frontend:
+- src/app/example/page.tsx
+- src/components/example/ExampleComponent.tsx
+- src/hooks/useExample.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (Django TestCase or APITestCase)
+☐ All backend tests passing: python manage.py test
+☐ Backend test coverage: [percentage] - Run: coverage run --source='.' manage.py test && coverage report
+☐ Models tested (validation, methods, relationships, signals)
+☐ Serializers tested (field validation, nested data, custom methods)
+☐ Views/API endpoints tested (GET, POST, PUT, PATCH, DELETE responses)
+☐ Permissions tested (authentication, authorization, role-based access)
+☐ Celery tasks tested (task execution, error handling, retries)
+☐ Database migrations tested (forward/backward compatibility)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☐ Frontend test coverage: [percentage] - Check coverage report
+☐ Components tested (rendering, props, state changes)
+☐ Custom hooks tested (useQuery, useMutation wrappers)
+☐ React Query hooks tested (queries, mutations, cache invalidation)
+☐ Form validation tested (React Hook Form rules, error states)
+☐ API service functions tested (Axios calls, error handling)
+☐ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (frontend ↔ backend)
+☐ Cypress/Playwright e2e tests updated (if applicable)
+☐ Manual regression testing completed
+☐ Edge cases and error scenarios tested
+☐ Cross-browser testing completed (if UI changes)
+☐ Mobile responsiveness verified (if UI changes)
+
+FIX EXPLANATION:
+[Detailed explanation of the changes made and why they resolve the issue]
+
+================================================================================
+
+BUG ID: EXAMPLE-001
+DATE FILED: 2024-12-15
+DATE FIXED: 2024-12-20
+CLIENT/REPORTER: QA Team - Maria Santos
+
+ISSUE DESCRIPTION:
+Employee sync from HRIS to Payroll was failing when department name contained
+special characters (e.g., "R&D Department", "Sales & Marketing"). The sync
+process would throw a validation error and skip the employee record silently.
+
+DESIRED OUTCOME:
+Employee sync should handle all valid department names including those with
+special characters. Any sync errors should be logged and reported clearly.
+
+FILES CHANGED:
+Backend:
+- app/views/yahshua_payroll.py
+- app/serializers/employee.py
+- utils/oauth.py
+- tests/views/test_yahshua_payroll.py
+
+Frontend:
+- src/app/(employer)/settings/integration/payroll-sync/page.tsx
+- src/components/settings/PayrollSyncStatus.tsx
+- src/hooks/usePayrollSync.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (APITestCase for sync endpoints)
+☑ All backend tests passing: python manage.py test tests.views.test_yahshua_payroll
+☑ Backend test coverage: 94% - sync views and serializers fully covered
+☑ Models tested (N/A - no model changes)
+☑ Serializers tested (special character handling in department field)
+☑ Views/API endpoints tested (sync endpoint with various department names)
+☑ Permissions tested (employer-only access verified)
+☑ Celery tasks tested (N/A - sync is synchronous)
+☑ Database migrations tested (N/A - no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of PayrollSyncStatus)
+☐ Custom hooks tested (usePayrollSync manual verification)
+☐ React Query hooks tested (manual cache invalidation check)
+☐ Form validation tested (N/A - no form changes)
+☐ API service functions tested (manual API call verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified sync with Payroll staging)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (special chars: &, ', ", <, >, unicode)
+☐ Cross-browser testing completed (N/A - no UI changes)
+☐ Mobile responsiveness verified (N/A - settings page desktop-only)
+
+FIX EXPLANATION:
+The issue was caused by URL encoding not being applied to department names
+before sending to the Payroll API. Updated utils/oauth.py to properly encode
+all string parameters using urllib.parse.quote(). Added explicit error logging
+in the sync view to capture and report validation failures. Frontend sync
+status component now displays detailed error messages when sync fails,
+allowing users to identify and fix problematic records.
+
+================================================================================
+
+BUG ID: EXAMPLE-002
+DATE FILED: 2024-12-18
+DATE FIXED: 2024-12-22
+CLIENT/REPORTER: Systech Internal - Dev Team
+
+ISSUE DESCRIPTION:
+Notification bell showing incorrect unread count after marking notifications
+as read. The count would only update after page refresh, and sometimes show
+negative numbers when rapidly clicking notifications.
+
+DESIRED OUTCOME:
+Notification count should update instantly when notifications are marked as
+read, with optimistic updates and proper error handling. Count should never
+show negative values.
+
+FILES CHANGED:
+Backend:
+- app/views/notification.py
+- app/serializers/notification.py
+- tests/views/test_notification.py
+
+Frontend:
+- src/components/layout/NotificationBell.tsx
+- src/components/notifications/NotificationList.tsx
+- src/hooks/useNotifications.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (APITestCase for notification endpoints)
+☑ All backend tests passing: python manage.py test tests.views.test_notification
+☑ Backend test coverage: 91% - notification views covered
+☑ Models tested (notification count aggregation)
+☑ Serializers tested (unread count serialization)
+☑ Views/API endpoints tested (mark as read, bulk mark, count endpoint)
+☑ Permissions tested (user can only access own notifications)
+☑ Celery tasks tested (N/A)
+☑ Database migrations tested (N/A - no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of NotificationBell, NotificationList)
+☑ Custom hooks tested (useNotifications optimistic updates verified)
+☑ React Query hooks tested (cache invalidation on mark as read)
+☐ Form validation tested (N/A)
+☐ API service functions tested (manual verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (rapid click scenarios)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (rapid clicks, network errors, empty state, concurrent tabs)
+☑ Cross-browser testing completed (tested Chrome, Firefox, Safari)
+☑ Mobile responsiveness verified (notification dropdown on mobile)
+
+FIX EXPLANATION:
+Implemented optimistic updates in useNotifications hook using React Query's
+onMutate callback to immediately decrement count before API response. Added
+Math.max(0, count) guard in the component's local state to prevent negative
+values. Backend now returns updated unread_count in mark-as-read response for
+reconciliation. Added debouncing (300ms) to prevent rapid-fire API calls
+when clicking multiple notifications quickly. React Query's cache is now
+properly invalidated after successful mutation to ensure consistency.
+
+================================================================================
+
+[NEW ENTRIES SHOULD BE APPENDED BELOW THIS LINE]

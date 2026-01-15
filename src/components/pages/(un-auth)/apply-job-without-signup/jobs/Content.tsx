@@ -64,6 +64,7 @@ const Content = () => {
   const [searchQuery, setSearchQuery] = useState<any>({
     job_title: '',
     location: [],
+    page_size: 10, // Page size for pagination
   });
   
   const { 
@@ -172,8 +173,6 @@ const Content = () => {
     setJobModal(false);
     // Reset the ref when search query changes so new data is processed
     previousDataJobsRef.current = '';
-    // Reset display count to 20 when search changes
-    setDisplayCount(20);
   }, [
     searchQuery.job_title,
     Array.isArray(searchQuery.location)
@@ -193,6 +192,7 @@ const Content = () => {
     setSearchQuery({
       job_title: pendingFilter.job_title,
       location: normalizedLocations,
+      page_size: 10,
     });
     setAppliedFilter({
       job_title: pendingFilter.job_title,
@@ -240,17 +240,9 @@ const Content = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataJobs]);
 
+  // Handle load more button click
   const handleLoadMore = () => {
-    // Check if there are more jobs in the current fetched batch
-    const jobsInCurrentBatch = jobsItems.length;
-    const nextDisplayCount = displayCount + 20;
-    
-    // If we can show more from current batch (haven't shown all 200 from current page)
-    if (nextDisplayCount <= jobsInCurrentBatch) {
-      // Show next 20 jobs from current batch (client-side pagination)
-      setDisplayCount(nextDisplayCount);
-    } else if (hasNextPage && !isFetchingNextPage) {
-      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
@@ -367,7 +359,7 @@ const Content = () => {
                   <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                     <>
                       {!isGetJobsLoading
-                        ? jobsItems.slice(0, displayCount).map((job: any) => (
+                        ? jobsItems.map((job: any) => (
                             <JobCard
                               key={job.id}
                               job={job}
@@ -380,9 +372,10 @@ const Content = () => {
                           ))
                         : 'Loading jobs...'}
                     </>
+                    
                     {/* Load More Button */}
-                    {(displayCount < jobsItems.length || hasNextPage) && (
-                      <div className="flex justify-center py-6">
+                    {hasNextPage && (
+                      <div className="flex justify-center py-6 col-span-full">
                         <button
                           onClick={handleLoadMore}
                           disabled={isFetchingNextPage}
@@ -417,6 +410,13 @@ const Content = () => {
                           )}
                         </button>
                       </div>
+                    )}
+                    
+                    {/* End of results message */}
+                    {!hasNextPage && jobsItems.length > 0 && (
+                      <p className="text-center text-gray-500 text-sm py-4 col-span-full">
+                        No more jobs to load
+                      </p>
                     )}
                   </div>
                 </div>

@@ -41,9 +41,6 @@ export default function IncidentReportModal({
   });
   const cancelButtonRef = useRef(null);
   
-  // Character limit state for brief background
-  const maxLength = 430;
-  const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const [customIssueType, setCustomIssueType] = useState('');
@@ -101,19 +98,7 @@ export default function IncidentReportModal({
     // Also prevent excessive spaces (more than 2 consecutive spaces)
     value = value.replace(/ {3,}/g, '  ');
     
-    if (value.length <= maxLength) {
-      // Reset the toast flag when back under the limit
-      if (hasShownToast) setHasShownToast(false);
-      setValue('briefBackground', value);
-    } else if (!hasShownToast) {
-      // Show toast only once per limit exceeding attempt
-      toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
-      setHasShownToast(true);
-      
-      // Prevent further input by truncating the text
-      const truncated = value.substring(0, maxLength);
-      setValue('briefBackground', truncated);
-    }
+    setValue('briefBackground', value);
   };
 
   return (
@@ -394,11 +379,10 @@ export default function IncidentReportModal({
                           id='briefBackground'
                           value={briefBackgroundValue}
                           onChange={handleBriefBackgroundChange}
-                          maxLength={maxLength + 1}
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 resize-none sm:text-sm sm:leading-6'
                         />
                         <div className='text-xs text-gray-500 text-right mt-1'>
-                          {briefBackgroundValue.length}/{maxLength} characters
+                          {briefBackgroundValue.length} characters
                         </div>
                       </div>
                     </div>

@@ -98,6 +98,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState<any>(null);
   const [pdfAttachment, setPdfAttachment] = useState<string | null>(null);
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
@@ -164,12 +165,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
       employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
+    // Track which item is loading
+    setLoadingItemId(`${id}-${emailType}`);
     const callbackReq = {
       onSuccess: (data: any) => {
+        setLoadingItemId(null);
         setEmployeeIssueItems([...employeeIssueItemsCopy]);
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
       },
       onError: (err: any) => {
+        setLoadingItemId(null);
         toast.custom(() => <CustomToast message={err} type='error' />, {
           duration: 7000,
         });
@@ -550,9 +555,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         decision_bcc: '',
         decision_message: ''
       };
-      
+
+      // Track which item is loading
+      setLoadingItemId(`${isSendNTEModalOpen.id}-nte`);
       mutate(payload, {
         onSuccess: (data: any) => {
+          setLoadingItemId(null);
           setIsSendNTEModalOpen(null);
           setPdfAttachment(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
@@ -561,6 +569,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
         },
         onError: (err: any) => {
+          setLoadingItemId(null);
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -605,9 +614,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         nte_bcc: '',
         nte_message: ''
       };
-      
+
+      // Track which item is loading
+      setLoadingItemId(`${isSendDecisionModalOpen.id}-decision`);
       mutate(payload, {
         onSuccess: (data: any) => {
+          setLoadingItemId(null);
           setIsSendDecisionModalOpen(null);
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
           if (refetch) {
@@ -615,6 +627,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
         },
         onError: (err: any) => {
+          setLoadingItemId(null);
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
@@ -666,7 +679,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsUploadEmployeeIssueAttachmentModalOpen={setIsUploadEmployeeIssueAttachmentModalOpen}
                 setNTEAttachmentViewModalOpen={setNTEAttachmentViewModalOpen}
                 setReleased={setReleased}
-                isLoading={isLoading}
+                loadingItemId={loadingItemId}
                 setIsRedirectingToDocumentGenerator={setIsRedirectingToDocumentGenerator}
                 isInvestigated={item.isInvestigated}
               />
@@ -693,7 +706,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setIsUploadDecisionAttachmentModalOpen={setIsUploadDecisionAttachmentModalOpen}
                 setIsDecisionAttachmentViewModalOpen={setIsDecisionAttachmentViewModalOpen}
                 setReleased={setReleased}
-                isLoading={isLoading}
+                loadingItemId={loadingItemId}
                 hasInvestigationReport={hasInvestigationReport}
               />
             </td>
