@@ -11,7 +11,11 @@ import Tabs from './Tabs';
 import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
 import { dummyTalents, type Talent } from './hooks/HireTalentDummy';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import classNames from '@/helpers/classNames';
+import JobCard from './components/tabs/company-jobs/JobCard';
+import JobDetails from './components/tabs/company-jobs/JobDetails';
+import jobIllustration from '@/assets/find-job-illustration.svg';
 
 const Content = () => {
   // Pending filter (user input state)
@@ -95,6 +99,28 @@ const Content = () => {
   const [gigOpportunitiesFilteredCount, setGigOpportunitiesFilteredCount] = useState(0);
   const [hireTalentCount, setHireTalentCount] = useState(0);
   const [hireTalentFilteredCount, setHireTalentFilteredCount] = useState(0);
+  
+  // Filter state for each tab
+  const [appliedFilters, setAppliedFilters] = useState<any>({
+    'company-jobs': {
+      jobType: 'All Types',
+      workSetup: 'All Setups',
+      salaryRange: 'Any Salary',
+    },
+    'gig-opportunities': {
+      category: 'All Categories',
+      budget: 'Any Budget',
+      duration: 'Any Duration',
+    },
+    'hire-talent': {
+      specialization: 'All Specializations',
+      availability: 'Any Availability',
+      hourlyRate: 'Any Rate',
+    },
+  });
+  
+  // Job modal state
+  const [jobModal, setJobModal] = useState(false);
   
   // Apply filters to jobs (Company Jobs)
   const filteredJobs = useMemo(() => {
@@ -723,7 +749,7 @@ const Content = () => {
         </div>
       </div>
       {/* Jobs Available / Opportunities Available - Above Tabs */}
-      {hasJob && (
+      {hasJob ? (
         <div className='mt-4'>
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
@@ -843,7 +869,7 @@ const Content = () => {
           isFetchingNextPage={isFetchingNextPage}
           openJobDetails={openJobDetails}
           closeJobDetails={closeJobDetails}
-          handleLoadMoreJobs={handleLoadMoreJobs}
+          handleLoadMoreJobs={handleLoadMore}
           // Gig Opportunities Props
           hasGig={hasGig}
           isGigView={isGigView}
@@ -876,14 +902,14 @@ const Content = () => {
           // Filter Props
           filteredCount={getFilteredCount()}
           filters={appliedFilters[activeTab]}
-          onFiltersChange={(filters) => {
-            setAppliedFilters(prev => ({
+          onFiltersChange={(filters: any) => {
+            setAppliedFilters((prev: any) => ({
               ...prev,
               [activeTab]: filters
             }));
           }}
-          onApplyFilters={(filters) => {
-            setAppliedFilters(prev => ({
+          onApplyFilters={(filters: any) => {
+            setAppliedFilters((prev: any) => ({
               ...prev,
               [activeTab]: filters
             }));
