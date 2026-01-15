@@ -75,6 +75,7 @@ interface TabsProps {
   
   // Filter Props
   filteredCount: number;
+  totalRecords?: number;
   filters: any;
   onFiltersChange: (filters: any) => void;
   onApplyFilters: (filters: any) => void;
@@ -127,6 +128,7 @@ const Tabs = ({
   loginModalAction,
   // Filter Props
   filteredCount,
+  totalRecords,
   filters,
   onFiltersChange,
   onApplyFilters,
@@ -218,6 +220,7 @@ const Tabs = ({
           <JobFilter 
             activeTab={activeTab} 
             filteredCount={filteredCount}
+            totalRecords={totalRecords}
             filters={filters}
             onFiltersChange={onFiltersChange}
             onApplyFilters={onApplyFilters}
@@ -253,7 +256,7 @@ const Tabs = ({
                     >
                       <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
                         {!isGetJobsLoading
-                          ? filteredJobs.slice(0, displayCount).map((job: any) => (
+                          ? filteredJobs.map((job: any) => (
                               <JobCard
                                 key={job.id}
                                 job={job}
@@ -265,9 +268,10 @@ const Tabs = ({
                               />
                             ))
                           : 'Loading jobs...'}
+                        
                         {/* Load More Button */}
-                        {(displayCount < filteredJobs.length || hasNextPage) && (
-                          <div className="flex justify-center py-6">
+                        {hasNextPage && (
+                          <div className="flex justify-center py-6 col-span-full">
                             <button
                               onClick={handleLoadMoreJobs}
                               disabled={isFetchingNextPage}
@@ -302,6 +306,13 @@ const Tabs = ({
                               )}
                             </button>
                           </div>
+                        )}
+                        
+                        {/* End of results message */}
+                        {!hasNextPage && filteredJobs.length > 0 && (
+                          <p className="text-center text-gray-500 text-sm py-4 col-span-full">
+                            No more jobs to load
+                          </p>
                         )}
                       </div>
                     </div>

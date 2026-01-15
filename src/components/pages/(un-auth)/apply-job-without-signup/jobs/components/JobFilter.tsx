@@ -38,6 +38,7 @@ type Filters = CompanyJobFilters | GigFilters | TalentFilters;
 interface JobFilterProps {
   activeTab: TabType;
   filteredCount?: number;
+  totalRecords?: number;
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   onApplyFilters: (filters: Filters) => void;
@@ -46,6 +47,7 @@ interface JobFilterProps {
 const JobFilter = ({ 
   activeTab, 
   filteredCount = 0,
+  totalRecords,
   filters,
   onFiltersChange,
   onApplyFilters
@@ -71,7 +73,7 @@ const JobFilter = ({
   const getFoundCounterText = () => {
     switch (activeTab) {
       case 'company-jobs':
-        return `${filteredCount} opportunities found`;
+        return `Jobs available: ${totalRecords ?? filteredCount}`;
       case 'gig-opportunities':
         return `${filteredCount} opportunities found`;
       case 'hire-talent':
