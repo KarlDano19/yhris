@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -91,6 +91,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Individual loading states for each received button
   const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
 
+  // Menu key to force close dropdowns on scroll
+  const [menuKey, setMenuKey] = useState(0);
+
   const { mutate, isLoading } = usePatchSeparation();
   const { mutate: deleteSeparation, isLoading: isDeleteSeparationLoading } = useDeleteSeparation();
   const bulkDeleteMutation = useBulkDeleteSeparations();
@@ -130,6 +133,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsFilterLoading(false);
     }
   }, [dataSeparation, isFilterLoading]);
+
+  // Close dropdown menus on scroll by dispatching a click event
+  useEffect(() => {
+    const handleScroll = () => {
+      // Dispatch a click event on body to close any open Headless UI menus
+      document.body.click();
+      // Increment menu key to force re-render and close any open menus
+      setMenuKey(prev => prev + 1);
+    };
+
+    window.addEventListener('scroll', handleScroll, true); // Use capture to catch all scroll events
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, []);
 
   const setReceived = (id: string, emailType: string) => {
     const loadingKey = `${id}-${emailType}`;
@@ -569,6 +587,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               refetch={refetch}
               employerName={item.employer_name}
               effectiveDate={item.effective_date || item.date_of_separation}
+              menuKey={menuKey}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -638,7 +657,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -764,56 +783,57 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           )}
 
           <div className={classNames('mt-8 flow-root', !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 '>
-              <div className='min-w-full py-2 sm:px-6 lg:px-8 '>
-                <table className='min-w-full divide-y divide-gray-300 text-center'>
-                  <thead>
-                    <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        <input
-                          type="checkbox"
-                          checked={selectAll}
-                          onChange={handleSelectAll}
-                          disabled={!separationItems || separationItems.length === 0}
-                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
-                        />
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date of Resignation/Separation
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Name
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Reason of Leaving
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Letter of Documentation
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Sign Documents
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Last Pay
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Quitclaim
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-                </table>
-                <hr />
-              </div>
+            <div className='overflow-x-auto'>
+              <table className={classNames(
+                'min-w-full divide-y divide-gray-300 text-center',
+                separationItems.length === 0 && 'mb-6'
+              )}>
+                <thead>
+                  <tr>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        disabled={!separationItems || separationItems.length === 0}
+                        className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                      />
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Date of Resignation/Separation
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Name
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Reason of Leaving
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Letter of Documentation
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Sign Documents
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Last Pay
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Quitclaim
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+              </table>
             </div>
+            <hr />
           </div>
         </div>
         
         {/* Sticky Pagination */}
-        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-36 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
           <Pagination
             pagination={pagination}
             currentPage={currentPage}
