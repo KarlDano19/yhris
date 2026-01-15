@@ -1,4 +1,5 @@
-import { Dispatch, Fragment, useState } from 'react';
+import { Dispatch, Fragment, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
@@ -30,6 +31,7 @@ export default function SeparationLetter({
   refetch,
   employerName,
   effectiveDate,
+  menuKey,
 }: {
   id: number;
   isLetterSent: boolean;
@@ -42,10 +44,25 @@ export default function SeparationLetter({
   refetch: () => void;
   employerName?: string;
   effectiveDate?: string;
+  menuKey?: number;
 }) {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isCreateLetterModalOpen, setIsCreateLetterModalOpen] = useState(false);
   const [selectedLetterType, setSelectedLetterType] = useState<'Acceptance' | 'Separation'>('Acceptance');
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Calculate dropdown position synchronously based on button position
+  const getDropdownPosition = () => {
+    const button = menuButtonRef.current;
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      return {
+        top: rect.bottom + 4,
+        left: rect.left, // Align to left edge of button
+      };
+    }
+    return { top: -9999, left: -9999 }; // Off-screen if button not found
+  };
 
   const handleSendClick = async () => {
     // Check if there's an attachment (PDF already generated)
@@ -65,57 +82,78 @@ export default function SeparationLetter({
     <>
     <div className='flex flex-col'>
       <div className='inline-flex'>
-        <Menu as='div' className='relative'>
-          <SmartButton
-            id="create-separation-btn"
-            className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80'
-            disabled={isLetterSent}
-          >
-            <Menu.Button className='w-full h-full'>
-              <span className='sr-only'>Open options</span>
-              <div className='flex gap-4'>
-                <span className='flex-1'>Create</span>
-                <ChevronDownIcon
-                  className='flex-none h-5 w-5'
-                  aria-hidden='true'
-                />
-              </div>
-            </Menu.Button>
-          </SmartButton>
-          <Transition
-            as={Fragment}
-            enter='transition ease-out duration-100'
-            enterFrom='transform opacity-0 scale-95'
-            enterTo='transform opacity-100 scale-100'
-            leave='transition ease-in duration-75'
-            leaveFrom='transform opacity-100 scale-100'
-            leaveTo='transform opacity-0 scale-95'
-          >
-            <Menu.Items className='absolute right-0 z-10 -mr-1 mt-2 w-auto origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-              <div className='py-1'>
-                {items.map((item) => (
-                  <Menu.Item key={item.name}>
-                    {({ active }) => (
-                      <span
-                        className={classNames(
-                          active
-                            ? 'bg-gray-100 text-gray-900'
-                            : 'text-gray-700',
-                          'block px-4 py-2 text-sm cursor-pointer'
-                        )}
-                        onClick={() => {
-                          setSelectedLetterType(item.type as 'Acceptance' | 'Separation');
-                          setIsCreateLetterModalOpen(true);
-                        }}
-                      >
-                        {item.name}
-                      </span>
-                    )}
-                  </Menu.Item>
-                ))}
-              </div>
-            </Menu.Items>
-          </Transition>
+        <Menu as='div' key={menuKey} className='relative inline-block text-left'>
+          {({ open }) => {
+            const position = open ? getDropdownPosition() : { top: -9999, left: -9999 };
+            return (
+              <>
+                <SmartButton
+                  id="create-separation-btn"
+                  className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80'
+                  disabled={isLetterSent}
+                >
+                  <Menu.Button
+                    ref={menuButtonRef}
+                    className='w-full h-full'
+                  >
+                    <span className='sr-only'>Open options</span>
+                    <div className='flex gap-4'>
+                      <span className='flex-1'>Create</span>
+                      <ChevronDownIcon
+                        className='flex-none h-5 w-5'
+                        aria-hidden='true'
+                      />
+                    </div>
+                  </Menu.Button>
+                </SmartButton>
+                {typeof document !== 'undefined' && createPortal(
+                  <Transition
+                    as={Fragment}
+                    show={open}
+                    enter='transition ease-out duration-100'
+                    enterFrom='transform opacity-0 scale-95'
+                    enterTo='transform opacity-100 scale-100'
+                    leave='transition ease-in duration-75'
+                    leaveFrom='transform opacity-100 scale-100'
+                    leaveTo='transform opacity-0 scale-95'
+                  >
+                    <Menu.Items
+                      static
+                      className='fixed z-[9999] w-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
+                      style={{
+                        top: position.top,
+                        left: position.left,
+                      }}
+                    >
+                      <div className='py-1'>
+                        {items.map((item) => (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
+                              <span
+                                className={classNames(
+                                  active
+                                    ? 'bg-gray-100 text-gray-900'
+                                    : 'text-gray-700',
+                                  'block px-4 py-2 text-sm cursor-pointer whitespace-nowrap'
+                                )}
+                                onClick={() => {
+                                  setSelectedLetterType(item.type as 'Acceptance' | 'Separation');
+                                  setIsCreateLetterModalOpen(true);
+                                }}
+                              >
+                                {item.name}
+                              </span>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>,
+                  document.body
+                )}
+              </>
+            );
+          }}
         </Menu>
       </div>
       <div className='flex gap-2 mt-2'>

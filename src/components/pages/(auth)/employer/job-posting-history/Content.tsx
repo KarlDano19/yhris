@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
+import { Menu, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -134,11 +136,14 @@ const Content = () => {
   const unseedJobPostingsMutation = useUnseedJobPostings();
   const { mutate: duplicateJobPosting, isLoading: isDuplicateJobPostingLoading } = useDuplicateJobPosting();
   
-  const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
+  const menuButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['userRightsCache']) as { state: { data: any } | undefined };
   const [isSearching, setIsSearching] = useState(false);
+
+  // Menu key to force close dropdowns on scroll
+  const [menuKey, setMenuKey] = useState(0);
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -321,29 +326,40 @@ const Content = () => {
   }, [dataJobPost]);
 
 
-  // Add click outside handler to close menus
+  // Close share options when changing pages
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (Object.keys(moreMenuOpen).some(id => moreMenuOpen[parseInt(id)])) {
-        const target = event.target as HTMLElement;
-        if (!target.closest('.more-menu-container')) {
-          setMoreMenuOpen({});
-          setShowShareOptions({});
-        }
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [moreMenuOpen]);
-
-  // Close all menus when changing pages
-  useEffect(() => {
-    setMoreMenuOpen({});
     setShowShareOptions({});
   }, [currentPage]);
+
+  // Close dropdown menus on scroll by dispatching a click event
+  useEffect(() => {
+    const handleScroll = () => {
+      // Dispatch a click event on body to close any open Headless UI menus
+      document.body.click();
+      setShowShareOptions({});
+      // Increment menu key to force re-render and close any open menus
+      setMenuKey(prev => prev + 1);
+    };
+
+    window.addEventListener('scroll', handleScroll, true); // Use capture to catch all scroll events
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, []);
+
+  // Calculate dropdown position synchronously based on button position
+  const getDropdownPosition = (jobId: number) => {
+    const button = menuButtonRefs.current[jobId];
+    if (button) {
+      const rect = button.getBoundingClientRect();
+
+      return {
+        top: rect.bottom + 4,
+        left: rect.right - 192, // 192px = w-48 (12rem), align to right edge
+      };
+    }
+    return { top: -9999, left: -9999 }; // Off-screen if button not found
+  };
 
   // Update select all state when job postings change
   useEffect(() => {
@@ -482,7 +498,6 @@ const Content = () => {
       toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
       setSelectedJobPostings(new Set());
       setSelectAll(false);
-      setMoreMenuOpen({});
       setShowShareOptions({});
       refetch();
     } catch (error) {
@@ -502,7 +517,6 @@ const Content = () => {
       toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
       setSelectedJobPostings(new Set());
       setSelectAll(false);
-      setMoreMenuOpen({});
       setShowShareOptions({});
       refetch();
     } catch (error) {
@@ -696,80 +710,133 @@ const Content = () => {
                 >
                   <UserGroupIcon className="h-10 w-10 text-blue-600 p-2 bg-white border border-blue-600 rounded-md" />
                 </SmartButton>
-                <div className="relative more-menu-container flex items-center">
-                  <button onClick={() => handleMoreMenuClick(jobPost.id)} className="flex items-center">
-                    <MoreIconWithBorder />
-                  </button>
-                  {moreMenuOpen[jobPost.id] && (
-                    <div className='absolute bg-white border rounded shadow-lg mt-2 z-50 right-0' style={{ minWidth: '180px', top: '100%' }}>
-                      <ul className='py-1 text-left'>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }))}
+                <Menu as="div" key={menuKey} className="relative more-menu-container inline-block text-left">
+                  {({ open }) => {
+                    const position = open ? getDropdownPosition(jobPost.id) : { top: -9999, left: -9999 };
+                    return (
+                    <>
+                      <Menu.Button
+                        ref={(el: HTMLButtonElement | null) => { menuButtonRefs.current[jobPost.id] = el; }}
+                        className="flex items-center"
+                      >
+                        <MoreIconWithBorder />
+                      </Menu.Button>
+                      {typeof document !== 'undefined' && createPortal(
+                        <Transition
+                          as={Fragment}
+                          show={open}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                          beforeLeave={() => setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: false }))}
                         >
-                          Share Post To <ChevronRightIcon className='inline h-4 w-4' />
-                        </li>
-                        {showShareOptions[jobPost.id] && (
-                          <div className='pl-4'>
-                            {jobPost.postIn.map((social: any) => {
-                              const DynamicComponent = componentMap[social];
-                              return (
-                                <span
-                                  key={social}
-                                  className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
-                                  onClick={() => socialMediaShare(social, jobPost.og_url)}
-                                >
-                                  <DynamicComponent />
-                                </span>
-                              );
-                            })}
-                          </div>
-                        )}
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
-                        >
-                          <span className={!jobPost.is_active ? 'text-red-500' : ''}>
-                          {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
-                          </span>
-
-                        </li>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
-                        >
-                          <span className={!jobPost.is_show_roles ? 'text-red-500' : ''}>
-                            {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
-                          </span>
-                        </li>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
-                        >
-                          <span className={!jobPost.is_show_salary ? 'text-red-500' : ''}>
-                            {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
-                          </span>
-                        </li>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer border-b'
-                          onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
-                        >
-                          <span className={!jobPost.is_show_benefits ? 'text-red-500' : ''}>
-                            {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
-                          </span>
-                        </li>
-                        <li
-                          className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
-                          onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
-                        >
-                          <span className={!jobPost.is_show_remarks ? 'text-red-500' : ''}>
-                            {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                          <Menu.Items
+                            static
+                            className="fixed z-[9999] w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-[calc(100vh-16px)] overflow-y-auto"
+                            style={{
+                              top: position.top,
+                              left: position.left,
+                            }}
+                          >
+                            <div className="py-1 text-left">
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setShowShareOptions((prev) => ({ ...prev, [jobPost.id]: !prev[jobPost.id] }));
+                                    }}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b`}
+                                  >
+                                    Share Post To <ChevronRightIcon className='inline h-4 w-4' />
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              {showShareOptions[jobPost.id] && (
+                                <div className='pl-4 flex flex-wrap'>
+                                  {jobPost.postIn.map((social: any) => {
+                                    const DynamicComponent = componentMap[social];
+                                    return (
+                                      <span
+                                        key={social}
+                                        className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
+                                        onClick={() => socialMediaShare(social, jobPost.og_url)}
+                                      >
+                                        <DynamicComponent />
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetAsInactive(jobPost.id, jobPost.is_active)}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_active ? 'text-red-500' : ''}`}
+                                  >
+                                    {jobPost.is_active ? 'Set as Inactive' : 'Set as Active'}
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleShowRoles(jobPost.id, jobPost.is_show_roles)}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_roles ? 'text-red-500' : ''}`}
+                                  >
+                                    {jobPost.is_show_roles ? 'Hide Roles' : 'Show Roles'}
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleShowSalary(jobPost.id, jobPost.is_show_salary)}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_salary ? 'text-red-500' : ''}`}
+                                  >
+                                    {jobPost.is_show_salary ? 'Hide Salary' : 'Show Salary'}
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleShowBenefits(jobPost.id, jobPost.is_show_benefits)}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm border-b ${!jobPost.is_show_benefits ? 'text-red-500' : ''}`}
+                                  >
+                                    {jobPost.is_show_benefits ? 'Hide Benefits' : 'Show Benefits'}
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleShowNotes(jobPost.id, jobPost.is_show_remarks)}
+                                    className={`${active ? 'bg-gray-100' : ''} block w-full px-4 py-2 text-left text-sm ${!jobPost.is_show_remarks ? 'text-red-500' : ''}`}
+                                  >
+                                    {jobPost.is_show_remarks ? 'Hide Notes/Remarks' : 'Show Notes/Remarks'}
+                                  </button>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          </Menu.Items>
+                        </Transition>,
+                        document.body
+                      )}
+                    </>
+                    );
+                  }}
+                </Menu>
             </div>
           </td>
         </tr>
@@ -785,27 +852,9 @@ const Content = () => {
     }
   };
 
-  const handleMoreMenuClick = (jobId: number) => {
-    // Close all other menus first
-    const newMoreMenuOpen: { [key: number]: boolean } = {};
-    
-    // Toggle the clicked menu
-    newMoreMenuOpen[jobId] = !moreMenuOpen[jobId];
-    
-    // Also reset share options when closing menus
-    if (!newMoreMenuOpen[jobId]) {
-      setShowShareOptions((prev) => ({
-        ...prev,
-        [jobId]: false
-      }));
-    }
-    
-    setMoreMenuOpen(newMoreMenuOpen);
-  };
-
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -983,68 +1032,65 @@ const Content = () => {
           </div>
 
           <div className='mt-8 flow-root'>
-            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
-              <div className='inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8'>
-                <table
-                  className={classNames(
-                    'min-w-full divide-y divide-gray-300 text-center',
-                    jobPostHistoryItems.length === 0 && 'mb-6'
-                  )}
-                >
-                  <thead>
-                    <tr>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        <input
-                          type="checkbox"
-                          checked={selectAll}
-                          onChange={handleSelectAll}
-                          disabled={!jobPostHistoryItems || jobPostHistoryItems.length === 0}
-                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
-                        />
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Job No.
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Date Created
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Job Title
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Position
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Job Type
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Job Schedule
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        No. of Hires Needed
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Work Setup
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Assigned Users
-                      </th>
-                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-                </table>
-                <hr />
-                
-              </div>
+            <div className='overflow-x-auto'>
+              <table
+                className={classNames(
+                  'min-w-full divide-y divide-gray-300 text-center',
+                  jobPostHistoryItems.length === 0 && 'mb-6'
+                )}
+              >
+                <thead>
+                  <tr>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        disabled={!jobPostHistoryItems || jobPostHistoryItems.length === 0}
+                        className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                      />
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Job No.
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Date Created
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Job Title
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Position
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Job Type
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Job Schedule
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      No. of Hires Needed
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Work Setup
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Assigned Users
+                    </th>
+                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+              </table>
             </div>
+            <hr />
           </div>
         </div>
         
         {/* Sticky Pagination */}
-        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-0 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
+        <div className="px-2 md:px-8 lg:px-4 mt-8 mb-36 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
           <Pagination
             pagination={pagination}
             currentPage={currentPage}
