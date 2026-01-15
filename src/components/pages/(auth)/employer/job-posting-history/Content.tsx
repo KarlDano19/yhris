@@ -669,8 +669,8 @@ const Content = () => {
           >
             {jobPost.assignments_count || 0} users
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex justify-center items-center space-x-2'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500' style={{ overflow: 'visible' }}>
+            <div className='flex justify-center items-center space-x-2 relative'>
                 <SmartButton 
                   id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}

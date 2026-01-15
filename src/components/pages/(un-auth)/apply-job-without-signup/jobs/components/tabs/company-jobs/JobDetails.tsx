@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import formatPrice from '@/helpers/currencyFormat';
-import useGetJobDetails from './hooks/useGetJobDetails';
+import useGetJobDetails from '../../../hooks/useGetJobDetails';
 
 import {
   CheckCircleIcon,
@@ -245,3 +245,4 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
 };
 
 export default JobDetails;
+
