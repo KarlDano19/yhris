@@ -18,7 +18,7 @@ const SendDecision = ({
   setIsUploadDecisionAttachmentModalOpen,
   setIsDecisionAttachmentViewModalOpen,
   setReleased,
-  isLoading,
+  loadingItemId,
   hasInvestigationReport,
 }: {
   id: number;
@@ -30,9 +30,11 @@ const SendDecision = ({
   setIsUploadDecisionAttachmentModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setIsDecisionAttachmentViewModalOpen: Dispatch<T_DecisionAttachmentViewModal>;
   setReleased: any;
-  isLoading: boolean;
+  loadingItemId: string | null;
   hasInvestigationReport?: boolean;
 }) => {
+  // Check if this specific item is loading
+  const isLoading = loadingItemId === `${id}-decision`;
   // Disable send decision button if there is no investigation report or status is not approved
   const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';
   

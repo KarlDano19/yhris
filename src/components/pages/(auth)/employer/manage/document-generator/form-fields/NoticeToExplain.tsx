@@ -1,10 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 
 import Image from 'next/image';
-
-import { toast } from 'react-hot-toast';
-
-import CustomToast from '@/components/CustomToast';
 import { DatePickerField } from './DatePickerField';
 
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
@@ -138,8 +134,6 @@ export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSu
 
 export const BriefBackgroundField = ({ formData, handleInputChange, disabled, isSubmitted }: FieldProps) => {
   const [showValidation, setShowValidation] = useState(false);
-  const maxLength = 430;
-  const [hasShownToast, setHasShownToast] = useState(false);
 
   useEffect(() => {
     setShowValidation(isSubmitted === true && !formData.briefBackground);
@@ -147,37 +141,20 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
 
   const handleBriefBackgroundChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     let value = e.target.value;
-    
+
     // Prevent excessive consecutive line breaks (more than 2)
     // Replace 3 or more consecutive line breaks with just 2
     value = value.replace(/\n{3,}/g, '\n\n');
-    
+
     // Also prevent excessive spaces (more than 2 consecutive spaces)
     value = value.replace(/ {3,}/g, '  ');
-    
-    if (value.length <= maxLength) {
-      // Reset the toast flag when back under the limit
-      if (hasShownToast) setHasShownToast(false);
-      
-      // Update the input value if we modified it
-      if (value !== e.target.value) {
-        e.target.value = value;
-      }
-      
-      handleInputChange(e);
-    } else if (!hasShownToast) {
-      // Show toast only once per limit exceeding attempt
-      toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
-      setHasShownToast(true);
-      
-      // Prevent further input by truncating the text
-      const truncated = value.substring(0, maxLength);
-      e.target.value = truncated;
-      
-      // Create a new event to pass the truncated value
-      const newEvent = { ...e, target: { ...e.target, value: truncated, name: e.target.name } };
-      handleInputChange(newEvent as any);
+
+    // Update the input value if we modified it
+    if (value !== e.target.value) {
+      e.target.value = value;
     }
+
+    handleInputChange(e);
   };
 
   return (
@@ -192,8 +169,7 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         value={formData.briefBackground ?? ''}
         onChange={handleBriefBackgroundChange}
         rows={Math.max(4, Math.min(10, (formData.briefBackground || '').split('\n').length + 1))}
-        maxLength={maxLength + 1}
-        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors resize-none ${
+        className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors resize-y ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
         } ${
           showValidation
@@ -203,7 +179,7 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         disabled={disabled}
       />
       <div className="text-xs text-gray-500 text-right mt-1">
-        {(formData.briefBackground || '').length}/{maxLength} characters
+        {(formData.briefBackground || '').length} characters
       </div>
     </div>
   );

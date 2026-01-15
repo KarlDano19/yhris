@@ -11,7 +11,11 @@ import Tabs from './Tabs';
 import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
 import { dummyTalents, type Talent } from './hooks/HireTalentDummy';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import classNames from '@/helpers/classNames';
+import JobCard from './components/tabs/company-jobs/JobCard';
+import JobDetails from './components/tabs/company-jobs/JobDetails';
+import jobIllustration from '@/assets/find-job-illustration.svg';
 
 const Content = () => {
   // Pending filter (user input state)
@@ -52,28 +56,9 @@ const Content = () => {
   const [searchQuery, setSearchQuery] = useState<any>({
     job_title: '',
     location: [],
-  });
-
-  // Filter states for each tab
-  const [appliedFilters, setAppliedFilters] = useState({
-    'company-jobs': {
-      jobType: 'All Types',
-      workSetup: 'All Setups',
-      salaryRange: 'Any Salary',
-    },
-    'gig-opportunities': {
-      category: 'All Categories',
-      budget: 'Any Budget',
-      duration: 'Any Duration',
-    },
-    'hire-talent': {
-      specialization: 'All Specializations',
-      availability: 'Any Availability',
-      hourlyRate: 'Any Rate',
-    },
+    page_size: 10, // Page size for pagination
   });
   
-  // Only fetch jobs for company-jobs tab
   const { 
     data: dataJobs, 
     isLoading: isGetJobsLoading,
@@ -114,6 +99,28 @@ const Content = () => {
   const [gigOpportunitiesFilteredCount, setGigOpportunitiesFilteredCount] = useState(0);
   const [hireTalentCount, setHireTalentCount] = useState(0);
   const [hireTalentFilteredCount, setHireTalentFilteredCount] = useState(0);
+  
+  // Filter state for each tab
+  const [appliedFilters, setAppliedFilters] = useState<any>({
+    'company-jobs': {
+      jobType: 'All Types',
+      workSetup: 'All Setups',
+      salaryRange: 'Any Salary',
+    },
+    'gig-opportunities': {
+      category: 'All Categories',
+      budget: 'Any Budget',
+      duration: 'Any Duration',
+    },
+    'hire-talent': {
+      specialization: 'All Specializations',
+      availability: 'Any Availability',
+      hourlyRate: 'Any Rate',
+    },
+  });
+  
+  // Job modal state
+  const [jobModal, setJobModal] = useState(false);
   
   // Apply filters to jobs (Company Jobs)
   const filteredJobs = useMemo(() => {
@@ -519,6 +526,21 @@ const Content = () => {
     };
   }, [pendingFilter.location]);
 
+  // Reset selected job when search query changes (not filter changes)
+  useEffect(() => {
+    setSelectedJobId(null);
+    setIsJobView(false);
+    setJobModal(false);
+    // Reset the ref when search query changes so new data is processed
+    previousDataJobsRef.current = '';
+  }, [
+    searchQuery.job_title,
+    Array.isArray(searchQuery.location)
+      ? searchQuery.location.join('|')
+      : searchQuery.location,
+  ]);
+  
+  
   // Handle search submission
   const handleSearch = () => {
     const normalizedLocations = pendingFilter.locations.length
@@ -530,6 +552,7 @@ const Content = () => {
     setSearchQuery({
       job_title: pendingFilter.job_title,
       location: normalizedLocations,
+      page_size: 10,
     });
     setAppliedFilter({
       job_title: pendingFilter.job_title,
@@ -550,14 +573,36 @@ const Content = () => {
     }
   }, [isGetJobsLoading, isSearching]);
 
-  // Company Jobs Handlers
-  const handleLoadMoreJobs = () => {
-    const jobsInCurrentBatch = filteredJobs.length;
-    const nextDisplayCount = displayCount + 20;
+  useEffect(() => {
+    // Create a stable string representation of dataJobs to compare
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+    
+    // Only update if dataJobs actually changed (by comparing job IDs)
+    if (previousDataJobsRef.current !== dataJobsString) {
+      previousDataJobsRef.current = dataJobsString;
+      
+      if (dataJobs && dataJobs.length !== 0) {
+        setJob(true);
+        setJobsItems(dataJobs);
+        // Only auto-select first job if no job is currently selected
+        if (!selectedJobId && dataJobs[0]) {
+          setSelectedJobId(dataJobs[0].id);
+          setIsJobView(true);
+          setJobModal(true);
+        }
+      } else {
+        setJob(false);
+        setJobsItems([]);
+        setIsJobView(false);
+        setJobModal(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataJobs]);
 
-    if (nextDisplayCount <= jobsInCurrentBatch) {
-      setDisplayCount(nextDisplayCount);
-    } else if (hasNextPage && !isFetchingNextPage) {
+  // Handle load more button click
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
@@ -704,7 +749,7 @@ const Content = () => {
         </div>
       </div>
       {/* Jobs Available / Opportunities Available - Above Tabs */}
-      {hasJob && (
+      {hasJob ? (
         <div className='mt-4'>
           <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
             <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
@@ -714,6 +759,97 @@ const Content = () => {
               {getTotalCount()}
             </p>
           </div>
+          <div className='border-t border-gray-300'></div>
+          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+            <div className='px-4 lg:px-5'>
+              <div className='lg:flex lg:items-start'>
+                <div className='hide-scrollbar lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
+                  <div className='lg:pl-5 lg:pr-10 py-8 lg:py-10 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                    <>
+                      {!isGetJobsLoading
+                        ? jobsItems.map((job: any) => (
+                            <JobCard
+                              key={job.id}
+                              job={job}
+                              isSelected={selectedJobId === job.id}
+                              isJobView={isJobView}
+                              isJobModalOpen={isJobModalOpen}
+                              onJobClick={openJobDetails}
+                              onCloseDetails={closeJobDetails}
+                            />
+                          ))
+                        : 'Loading jobs...'}
+                    </>
+                    
+                    {/* Load More Button */}
+                    {hasNextPage && (
+                      <div className="flex justify-center py-6 col-span-full">
+                        <button
+                          onClick={handleLoadMore}
+                          disabled={isFetchingNextPage}
+                          className="rounded-md bg-savoy-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isFetchingNextPage ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Loading...
+                            </span>
+                          ) : (
+                            'Load More Jobs'
+                          )}
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* End of results message */}
+                    {!hasNextPage && jobsItems.length > 0 && (
+                      <p className="text-center text-gray-500 text-sm py-4 col-span-full">
+                        No more jobs to load
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className='hide-scrollbar lg:pl-10 lg:pr-5 py-10 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
+                  <div
+                    className={classNames(
+                      'card border border-savoy-blue rounded-md',
+                      isJobView ? '' : 'hidden'
+                    )}
+                  >
+                    <div className='flex justify-end px-3 mt-2'>
+                      <button onClick={closeJobDetails}>
+                        <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                      </button>
+                    </div>
+                    <JobDetails jobId={selectedJobId} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className='w-auto h-[220px] md:w-[600px] md:h-[400px] relative block mx-auto mt-8'>
+          <Image src={jobIllustration} fill alt='Find job illustration' />
         </div>
       )}
       {/* Tabs Navigation and Content */}
@@ -733,7 +869,7 @@ const Content = () => {
           isFetchingNextPage={isFetchingNextPage}
           openJobDetails={openJobDetails}
           closeJobDetails={closeJobDetails}
-          handleLoadMoreJobs={handleLoadMoreJobs}
+          handleLoadMoreJobs={handleLoadMore}
           // Gig Opportunities Props
           hasGig={hasGig}
           isGigView={isGigView}
@@ -766,14 +902,14 @@ const Content = () => {
           // Filter Props
           filteredCount={getFilteredCount()}
           filters={appliedFilters[activeTab]}
-          onFiltersChange={(filters) => {
-            setAppliedFilters(prev => ({
+          onFiltersChange={(filters: any) => {
+            setAppliedFilters((prev: any) => ({
               ...prev,
               [activeTab]: filters
             }));
           }}
-          onApplyFilters={(filters) => {
-            setAppliedFilters(prev => ({
+          onApplyFilters={(filters: any) => {
+            setAppliedFilters((prev: any) => ({
               ...prev,
               [activeTab]: filters
             }));
@@ -785,3 +921,4 @@ const Content = () => {
 };
 
 export default Content;
+
