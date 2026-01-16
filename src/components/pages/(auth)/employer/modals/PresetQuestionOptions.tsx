@@ -82,8 +82,9 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
 
   ];
 
-  // Check if any custom questions are selected
-  const hasCustomQuestions = selectedOptions.some(option => option.startsWith('custom-question'));
+  // Check if any custom questions are selected and count them
+  const customQuestionsCount = selectedOptions.filter(option => option.startsWith('custom-question')).length;
+  const hasCustomQuestions = customQuestionsCount > 0;
 
   return (
     <div className="mt-4">
@@ -106,10 +107,13 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
                     : 'bg-blue-100 text-blue-600 border border-transparent font-semibold'
               }`}
             >
-              {isSelected && (
+              {option.id === 'custom-question' && customQuestionsCount > 0 ? (
+                <span className="mr-1 bg-white text-savoy-blue px-1.5 py-0.5 rounded-full text-xs font-bold">
+                  {customQuestionsCount}
+                </span>
+              ) : isSelected ? (
                 <span className="mr-1 text-white">✓</span>
-              )}
-              {!isSelected && (
+              ) : (
                 <span className="mr-1">+</span>
               )}
               {option.label}
