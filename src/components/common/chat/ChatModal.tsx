@@ -212,7 +212,7 @@ const ChatModal = ({
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+      <Dialog as="div" className="relative z-[70]" onClose={handleClose}>
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
