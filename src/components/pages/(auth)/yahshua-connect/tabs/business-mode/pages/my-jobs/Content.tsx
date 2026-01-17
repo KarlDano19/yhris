@@ -150,9 +150,61 @@ const Content = () => {
         hourlyRate: job.hourly_rate || null,
         timeFrom: job.time_from || null,
         timeTo: job.time_to || null,
+        // minutes allowed before/after scheduled times
+        clockInMinutesBefore: job.clock_in_minutes_before ?? 60,
+        clockOutMinutesAfter: job.clock_out_minutes_after ?? 60,
       };
     });
   }, [data]);
+
+  // Helper: parse "HH:MM" into a Date on the given baseDate
+  const parseTimeToDate = (timeStr: string | null, baseDate: Date): Date | null => {
+    if (!timeStr) return null;
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return null;
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    const d = new Date(baseDate);
+    d.setHours(hours, minutes, 0, 0);
+    return d;
+  };
+
+  // Frontend validation for clock in: returns { allowed: boolean, message?: string }
+  const validateClockIn = (job: T_ActiveJob) => {
+    if (!job.timeFrom) return { allowed: true };
+    const now = new Date();
+    const scheduledStart = parseTimeToDate(job.timeFrom, now);
+    if (!scheduledStart) return { allowed: true };
+    // If scheduled start is earlier than now but timeTo indicates overnight, handle next-day comparison
+    const minutesBefore = job.clockInMinutesBefore ?? 60;
+    const earliest = scheduledStart.getTime() - minutesBefore * 60000;
+    if (now.getTime() < earliest) {
+      const allowedAt = new Date(earliest);
+      return {
+        allowed: false,
+        message: `Too early to clock in. You can clock in starting at ${allowedAt.toLocaleTimeString()}.`
+      };
+    }
+    return { allowed: true };
+  };
+
+  // Frontend validation for clock out
+  const validateClockOut = (job: T_ActiveJob) => {
+    if (!job.timeTo) return { allowed: true };
+    const now = new Date();
+    const scheduledEnd = parseTimeToDate(job.timeTo, now);
+    if (!scheduledEnd) return { allowed: true };
+    const minutesAfter = job.clockOutMinutesAfter ?? 60;
+    const latest = scheduledEnd.getTime() + minutesAfter * 60000;
+    if (now.getTime() > latest) {
+      const endedAt = new Date(latest);
+      return {
+        allowed: false,
+        message: `Too late to clock out. The clock out window ended at ${endedAt.toLocaleTimeString()}.`
+      };
+    }
+    return { allowed: true };
+  };
 
   const handleMessageJob = (job: T_ActiveJob) => {
     setSelectedJobForMessage({
@@ -279,6 +331,12 @@ const Content = () => {
 
   const handleClockInConfirm = () => {
     if (!selectedJob) return;
+    // Client-side validation before sending request
+    const check = validateClockIn(selectedJob);
+    if (!check.allowed) {
+      toast.custom(() => <CustomToast message={check.message || 'Too early to clock in'} type="error" />, { duration: 5000 });
+      return;
+    }
 
     clockIn(
       { applicationId: selectedJob.applicationId },
@@ -309,6 +367,12 @@ const Content = () => {
 
   const handleClockOutConfirm = () => {
     if (!selectedJob) return;
+    // Client-side validation before sending request
+    const check = validateClockOut(selectedJob);
+    if (!check.allowed) {
+      toast.custom(() => <CustomToast message={check.message || 'Too late to clock out'} type="error" />, { duration: 5000 });
+      return;
+    }
 
     clockOut(
       { applicationId: selectedJob.applicationId },
