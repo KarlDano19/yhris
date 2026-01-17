@@ -18,6 +18,25 @@ export type T_PaymentStatus = 'pending' | 'paid' | 'cancelled';
 // Daily Progress Status Type
 export type T_DailyProgressStatus = 'submitted' | 'approved' | 'rejected';
 
+// Time Record Status Type
+export type T_TimeRecordStatus = 'clocked_in' | 'clocked_out';
+
+// Time Record Type (for clock in/out)
+export type T_TimeRecord = {
+  id: number;
+  business_job_application_id: number;
+  record_date: string;
+  clock_in_time: string | null;
+  clock_out_time: string | null;
+  expected_hours: number;
+  actual_hours: number | null;
+  late_minutes: number;
+  early_departure_minutes: number;
+  status: T_TimeRecordStatus;
+  created_at: string;
+  updated_at: string;
+};
+
 // Daily Progress Types
 export type T_DailyProgress = {
   id: number;
@@ -25,7 +44,6 @@ export type T_DailyProgress = {
   progress_date: string;
   proof_file: string | null;
   notes: string | null;
-  hours_worked: number | null;
   status: T_DailyProgressStatus;
   client_feedback: string | null;
   submitted_at: string;
@@ -69,11 +87,21 @@ export type T_BusinessJobApplication = {
   // Contractual job fields
   is_contractual_job: boolean;
   is_proof_file_required: boolean;
+  is_daily_progress_required: boolean;
+  is_daily_progress_approval_required: boolean;
+  is_strict_schedule: boolean;
+  clock_in_minutes_before: number;
+  clock_out_minutes_after: number;
   total_contract_days: number;
   submitted_progress_count: number;
   approved_progress_count: number;
   is_all_progress_submitted: boolean;
   daily_progresses: T_DailyProgress[];
+  // Time record fields (for hourly rate jobs)
+  today_time_record: T_TimeRecord | null;
+  total_time_records_count: number;
+  total_hours_worked: number;
+  time_records: T_TimeRecord[];
   // Review tracking
   has_client_reviewed: boolean;
 };
@@ -115,6 +143,11 @@ export type T_BusinessJob = {
   is_urgent: boolean;
   is_active: boolean;
   is_proof_file_required: boolean;
+  is_daily_progress_required: boolean;
+  is_daily_progress_approval_required: boolean;
+  is_strict_schedule: boolean;
+  clock_in_minutes_before: number;
+  clock_out_minutes_after: number;
   created_at: string;
   updated_at: string;
   created_by: number;
@@ -145,6 +178,11 @@ export type T_CreateBusinessJobData = {
   time_to?: string | null; // HH:MM format
   is_urgent?: boolean;
   is_proof_file_required?: boolean;
+  is_daily_progress_required?: boolean; // For hourly rate jobs
+  is_daily_progress_approval_required?: boolean; // Whether client must approve daily progress
+  is_strict_schedule?: boolean; // For hourly rate jobs - enforce time window
+  clock_in_minutes_before?: number; // Minutes before time_from that applicant can clock in
+  clock_out_minutes_after?: number; // Minutes after time_to that applicant can clock out
 };
 
 // Business Job Response
@@ -307,7 +345,6 @@ export type T_SubmitDailyProgressData = {
   progress_date: string;
   proof_file?: File;
   notes?: string;
-  hours_worked?: number;
 };
 
 // Review Daily Progress Data
@@ -410,10 +447,59 @@ export type T_ActiveJob = {
   contractEndDate: string | null;
   isContractual: boolean;
   isProofFileRequired: boolean;
+  isDailyProgressRequired: boolean;
+  isDailyProgressApprovalRequired: boolean;
+  isStrictSchedule: boolean;
+  clockInMinutesBefore: number;
+  clockOutMinutesAfter: number;
   totalContractDays: number;
   submittedProgressCount: number;
   approvedProgressCount: number;
   isAllProgressSubmitted: boolean;
   dailyProgresses: T_DailyProgress[];
   budgetType: T_BudgetType;
+  // Time record fields (for hourly rate jobs)
+  todayTimeRecord: T_TimeRecord | null;
+  totalTimeRecordsCount: number;
+  totalHoursWorked: number;
+  timeRecords: T_TimeRecord[];
+  // Hourly rate specific
+  hourlyRate: number | null;
+  timeFrom: string | null;
+  timeTo: string | null;
+};
+
+// Clock In/Out Data Types
+export type T_ClockInData = {
+  applicationId: number;
+};
+
+export type T_ClockOutData = {
+  applicationId: number;
+};
+
+export type T_ClockInResponse = {
+  message: string;
+  data: T_TimeRecord;
+};
+
+export type T_ClockOutResponse = {
+  message: string;
+  data: T_TimeRecord;
+  requires_daily_progress: boolean;
+  is_daily_progress_required: boolean;
+};
+
+export type T_TimeRecordsResponse = {
+  records: T_TimeRecord[];
+  total_count: number;
+  page_count: number;
+  current_page: number;
+  page_size: number;
+  starting: number;
+  ending: number;
+  summary: {
+    total_hours: number;
+    total_records: number;
+  };
 };

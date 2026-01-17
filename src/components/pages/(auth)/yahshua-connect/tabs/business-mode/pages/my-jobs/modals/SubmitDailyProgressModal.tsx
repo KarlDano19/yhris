@@ -19,7 +19,6 @@ interface SubmitDailyProgressModalProps {
     progress_date: string;
     proof_file?: File;
     notes: string;
-    hours_worked?: number;
   }) => void;
 }
 
@@ -29,7 +28,6 @@ const SubmitDailyProgressModal = ({
   jobTitle,
   contractStartDate,
   contractEndDate,
-  budgetType,
   isProofFileRequired = true,
   dailyProgresses = [],
   onSubmit,
@@ -37,7 +35,6 @@ const SubmitDailyProgressModal = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [progressDate, setProgressDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState<string>('');
-  const [hoursWorked, setHoursWorked] = useState<string>('');
 
   const maxFileSize = 10 * 1024 * 1024; // 10MB
   const acceptedTypes = {
@@ -79,7 +76,6 @@ const SubmitDailyProgressModal = ({
         progress_date: string;
         proof_file?: File;
         notes: string;
-        hours_worked?: number;
       } = {
         progress_date: formattedDate,
         notes: notes,
@@ -88,10 +84,6 @@ const SubmitDailyProgressModal = ({
       // Only include proof_file if a file was selected
       if (selectedFile) {
         data.proof_file = selectedFile;
-      }
-
-      if (budgetType === 'hourly_rate' && hoursWorked) {
-        data.hours_worked = parseFloat(hoursWorked);
       }
 
       onSubmit(data);
@@ -103,7 +95,6 @@ const SubmitDailyProgressModal = ({
     setSelectedFile(null);
     setProgressDate(null);
     setNotes('');
-    setHoursWorked('');
     onClose();
   };
 
@@ -112,13 +103,18 @@ const SubmitDailyProgressModal = ({
       setSelectedFile(null);
       setProgressDate(null);
       setNotes('');
-      setHoursWorked('');
     }
   }, [isOpen]);
 
   // Parse contract dates for date picker constraints
   const minDate = contractStartDate ? new Date(contractStartDate) : undefined;
-  const maxDate = contractEndDate ? new Date(contractEndDate) : undefined;
+
+  // Max date should be the minimum of today and contract end date
+  // This prevents selecting future dates
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // End of today
+  const contractEnd = contractEndDate ? new Date(contractEndDate) : undefined;
+  const maxDate = contractEnd ? (contractEnd < today ? contractEnd : today) : today;
 
   // Calculate dates that already have submitted progress (to exclude from picker)
   const excludedDates = dailyProgresses.map((progress) => {
@@ -177,30 +173,10 @@ const SubmitDailyProgressModal = ({
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-savoy-blue shadow-sm"
         />
         <p className="mt-1 text-xs text-gray-500">
-          Select a date between {new Date(contractStartDate).toLocaleDateString()} and{' '}
-          {new Date(contractEndDate).toLocaleDateString()}
-          {excludedDates.length > 0 && ' (dates with submitted progress are disabled)'}
+          Select today or a past date within the contract period (up to {maxDate.toLocaleDateString()})
+          {excludedDates.length > 0 && '. Dates with submitted progress are disabled.'}
         </p>
       </div>
-
-      {/* Hours Worked (for hourly rate jobs) */}
-      {budgetType === 'hourly_rate' && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hours Worked
-          </label>
-          <input
-            type="number"
-            step="0.5"
-            min="0"
-            max="24"
-            value={hoursWorked}
-            onChange={(e) => setHoursWorked(e.target.value)}
-            placeholder="e.g., 8.0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-savoy-blue"
-          />
-        </div>
-      )}
 
       {/* Notes */}
       <div className="mb-4">
