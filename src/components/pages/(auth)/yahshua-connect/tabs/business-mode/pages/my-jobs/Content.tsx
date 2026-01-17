@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -135,6 +136,51 @@ const Content = () => {
       };
     });
   }, [data]);
+
+  // Handle navigation from notifications (query params)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const applicationIdParam = searchParams?.get?.('application_id');
+      const jobIdParam = searchParams?.get?.('job_id');
+
+      let targetJob = null;
+      if (applicationIdParam) {
+        const parsedAppId = Number(applicationIdParam);
+        if (!Number.isNaN(parsedAppId)) {
+          targetJob = activeJobs.find((j) => Number(j.applicationId) === parsedAppId);
+        }
+      }
+      if (!targetJob && jobIdParam) {
+        const parsedJobId = Number(jobIdParam);
+        if (!Number.isNaN(parsedJobId)) {
+          targetJob = activeJobs.find((j) => Number(j.id) === parsedJobId);
+        }
+      }
+
+      if (targetJob) {
+        setTimeout(() => {
+          try {
+            const el = document.getElementById(`job-${targetJob.id}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+              setTimeout(() => {
+                el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+              }, 3000);
+            }
+          } catch (e) {}
+        }, 200);
+        // clear params
+        router.replace('/business-mode/my-jobs');
+      }
+    } catch (e) {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams?.toString(), activeJobs]);
 
   const handleMessageJob = (job: T_ActiveJob) => {
     setSelectedJobForMessage({
@@ -286,6 +332,7 @@ const Content = () => {
           {!isLoading && !isError && activeJobs.map((job) => (
             <div
               key={job.id}
+              id={`job-${job.id}`}
               className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
                 job.urgent ? 'border-red-500' : 'border-gray-200'
               }`}
@@ -601,3 +648,5 @@ const Content = () => {
 };
 
 export default Content;
+
+

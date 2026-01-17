@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 import toast from 'react-hot-toast';
@@ -246,6 +247,72 @@ const Content = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle navigation from notifications (query params)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const jobIdParam = searchParams?.get?.('job_id');
+      const applicationIdParam = searchParams?.get?.('application_id');
+
+      if (jobIdParam) {
+        const parsedJobId = Number(jobIdParam);
+        if (!Number.isNaN(parsedJobId)) {
+          setSelectedJobId(parsedJobId);
+          // highlight and scroll to job card when available
+          setTimeout(() => {
+            try {
+              const el = document.getElementById(`job-${parsedJobId}`);
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                setTimeout(() => {
+                  el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                }, 3000);
+              }
+            } catch (err) {
+              // ignore
+            }
+          }, 200);
+          // Clear query params
+          router.replace('/business-mode/hire');
+        }
+        return;
+      }
+
+      if (applicationIdParam) {
+        const parsedApplicationId = Number(applicationIdParam);
+        if (!Number.isNaN(parsedApplicationId)) {
+          // If we can find the parent job, select it so modals have context
+          const parentJob = jobPostings.find((j) =>
+            Array.isArray(j.applications) && j.applications.some((a: any) => Number(a.id) === parsedApplicationId)
+          );
+          if (parentJob) {
+            setSelectedJobId(parentJob.id);
+            // highlight parent job card
+            setTimeout(() => {
+              try {
+                const el = document.getElementById(`job-${parentJob.id}`);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                  setTimeout(() => {
+                    el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                  }, 3000);
+                }
+              } catch (err) {}
+            }, 200);
+          }
+          setSelectedApplicationId(parsedApplicationId);
+          router.replace('/business-mode/hire');
+        }
+      }
+    } catch (e) {
+      // ignore parsing errors
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams?.toString(), jobPostings]);
   // Handle more menu toggle
   const handleMoreMenuClick = (jobId: number) => {
     setMoreMenuOpen((prev) => ({
@@ -604,6 +671,7 @@ const Content = () => {
               return (
                 <div
                   key={job.id}
+                  id={`job-${job.id}`}
                   className={`bg-white rounded-xl p-5 hover:shadow-md transition-shadow ${
                     job.is_active ? 'border border-gray-200' : 'border-2 border-red-300'
                   }`}
@@ -966,3 +1034,4 @@ const Content = () => {
 };
 
 export default Content;
+
