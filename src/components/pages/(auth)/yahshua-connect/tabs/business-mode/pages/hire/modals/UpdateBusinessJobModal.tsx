@@ -78,6 +78,15 @@ const UpdateBusinessJobModal = ({ refetch, isOpen, setIsOpen, editingJobId }: Up
       setValue("scheduleTimeFrom", jobDetails.time_from || '');
       setValue("scheduleTimeTo", jobDetails.time_to || '');
       setValue("isProofFileRequired", jobDetails.is_proof_file_required ?? true);
+      setValue("isDailyProgressApprovalRequired", jobDetails.is_daily_progress_approval_required ?? true);
+
+      // Set hourly rate specific settings
+      if (jobDetails.budget_type === 'hourly_rate') {
+        setValue("isStrictSchedule", jobDetails.is_strict_schedule ?? false);
+        setValue("isDailyProgressRequired", jobDetails.is_daily_progress_required ?? false);
+        setValue("clockInMinutesBefore", jobDetails.clock_in_minutes_before ?? 60);
+        setValue("clockOutMinutesAfter", jobDetails.clock_out_minutes_after ?? 60);
+      }
 
       // Reset to first tab and clear errors
       setSelectedTab(1);
@@ -106,11 +115,17 @@ const UpdateBusinessJobModal = ({ refetch, isOpen, setIsOpen, editingJobId }: Up
       time_from: data.scheduleTimeFrom || null,
       time_to: data.scheduleTimeTo || null,
       is_proof_file_required: data.isProofFileRequired ?? true,
+      is_daily_progress_approval_required: data.isDailyProgressApprovalRequired ?? true,
     };
 
     // Set budget amounts based on type
     if (data.budgetType === 'hourly') {
       apiData.hourly_rate = parseFloat(data.budgetMin) || null;
+      // Include hourly rate specific settings
+      apiData.is_strict_schedule = data.isStrictSchedule ?? false;
+      apiData.is_daily_progress_required = data.isDailyProgressRequired ?? false;
+      apiData.clock_in_minutes_before = parseInt(data.clockInMinutesBefore) || 60;
+      apiData.clock_out_minutes_after = parseInt(data.clockOutMinutesAfter) || 60;
     } else {
       apiData.min_amount = parseFloat(data.budgetMin) || null;
       apiData.max_amount = data.budgetMax ? parseFloat(data.budgetMax) : parseFloat(data.budgetMin) || null;

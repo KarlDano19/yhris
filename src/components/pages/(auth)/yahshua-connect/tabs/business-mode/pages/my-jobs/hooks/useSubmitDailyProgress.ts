@@ -14,9 +14,6 @@ async function submitDailyProgress(data: T_SubmitDailyProgressData): Promise<T_D
   if (data.notes) {
     formData.append('notes', data.notes);
   }
-  if (data.hours_worked !== undefined) {
-    formData.append('hours_worked', data.hours_worked.toString());
-  }
 
   const config: RequestInit = {
     method: 'POST',

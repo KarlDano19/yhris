@@ -16,6 +16,7 @@ import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
 import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
+import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
@@ -184,6 +185,7 @@ const Content = () => {
   const [isConfirmRejectModalOpen, setIsConfirmRejectModalOpen] = useState(false);
   const [isSubmitPaymentProofModalOpen, setIsSubmitPaymentProofModalOpen] = useState(false);
   const [isViewDailyProgressModalOpen, setIsViewDailyProgressModalOpen] = useState(false);
+  const [isViewTimeLogsModalOpen, setIsViewTimeLogsModalOpen] = useState(false);
   const [isReviewApplicantModalOpen, setIsReviewApplicantModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
@@ -593,6 +595,11 @@ const Content = () => {
     setIsViewDailyProgressModalOpen(true);
   };
 
+  const handleViewTimeLogs = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsViewTimeLogsModalOpen(true);
+  };
+
   const handleReviewDailyProgress = (progressId: number, status: 'approved' | 'rejected', feedback: string) => {
     reviewDailyProgress(
       { progressId, status, client_feedback: feedback },
@@ -631,6 +638,23 @@ const Content = () => {
       workStatus: acceptedApp.work_status,
       hasClientReviewed: acceptedApp.has_client_reviewed || false,
     };
+  };
+
+  // Check if edit/delete should be disabled for a job
+  // Disabled when there's a hired applicant whose work is not yet completed and reviewed
+  const shouldDisableEditDelete = (job: T_BusinessJob) => {
+    const hireInfo = getAcceptedHire(job);
+
+    // No hired applicant - allow edit/delete
+    if (!hireInfo) return false;
+
+    // Work completed AND client has reviewed - allow edit/delete
+    if (hireInfo.workStatus === 'completed' && hireInfo.hasClientReviewed) {
+      return false;
+    }
+
+    // Work in progress or not reviewed yet - disable edit/delete
+    return true;
   };
 
   return (
@@ -740,15 +764,30 @@ const Content = () => {
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <p className="text-sm text-savoy-blue mb-2">Hired: {hireInfo.applicantName}</p>
                       
-                      {/* Contractual Job - View Daily Progress */}
+                      {/* Contractual Job - View Time Logs and/or Daily Progress */}
                       {job.contract_end_date && hireInfo.workStatus !== 'not_started' && (
-                        <button
-                          onClick={() => handleViewDailyProgress(job.id)}
-                          className="mb-2 text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
-                        >
-                          <DocumentTextIcon className="h-4 w-4" />
-                          View Daily Progress
-                        </button>
+                        <div className="flex flex-wrap gap-3 mb-2">
+                          {/* Hourly rate jobs - always show View Time Logs */}
+                          {job.budget_type === 'hourly_rate' && (
+                            <button
+                              onClick={() => handleViewTimeLogs(job.id)}
+                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
+                            >
+                              <ClockIcon className="h-4 w-4" />
+                              View Time Logs
+                            </button>
+                          )}
+                          {/* Fixed rate jobs OR hourly rate jobs with daily progress required - show View Daily Progress */}
+                          {(job.budget_type === 'fixed_rate' || (job.budget_type === 'hourly_rate' && job.is_daily_progress_required)) && (
+                            <button
+                              onClick={() => handleViewDailyProgress(job.id)}
+                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
+                            >
+                              <DocumentTextIcon className="h-4 w-4" />
+                              View Daily Progress
+                            </button>
+                          )}
+                        </div>
                       )}
 
                       {hireInfo.paymentStatus === 'paid' ? (
@@ -814,8 +853,9 @@ const Content = () => {
                                   handleEditPost(job.id);
                                   setMoreMenuOpen({});
                                 }}
-                                disabled={updateJobMutation.isLoading}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50"
+                                disabled={updateJobMutation.isLoading || shouldDisableEditDelete(job)}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={shouldDisableEditDelete(job) ? 'Cannot edit while applicant is working. Complete the job and review first.' : ''}
                               >
                                 Edit Job
                               </button>
@@ -823,8 +863,9 @@ const Content = () => {
                             <li>
                               <button
                                 onClick={() => handleDeleteClick(job.id)}
-                                disabled={deleteJobMutation.isLoading}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50"
+                                disabled={deleteJobMutation.isLoading || shouldDisableEditDelete(job)}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={shouldDisableEditDelete(job) ? 'Cannot delete while applicant is working. Complete the job and review first.' : ''}
                               >
                                 Delete Job
                               </button>
@@ -1009,6 +1050,24 @@ const Content = () => {
           onReview={handleReviewDailyProgress}
         />
       )}
+
+      {/* View Time Logs Modal */}
+      {isViewTimeLogsModalOpen && selectedJob && (() => {
+        const acceptedApp = selectedJob.applications?.find((app) => app.status === 'accepted');
+        return (
+          <ViewTimeLogsModal
+            isOpen={isViewTimeLogsModalOpen}
+            onClose={() => {
+              setIsViewTimeLogsModalOpen(false);
+              setSelectedJobId(null);
+            }}
+            jobTitle={selectedJob.job_title}
+            applicantName={acceptedApp?.applicant_name || 'Unknown'}
+            timeRecords={acceptedApp?.time_records || []}
+            hourlyRate={selectedJob.hourly_rate}
+          />
+        );
+      })()}
 
       {/* Review Applicant Modal */}
       {isReviewApplicantModalOpen && selectedHireForReview && (

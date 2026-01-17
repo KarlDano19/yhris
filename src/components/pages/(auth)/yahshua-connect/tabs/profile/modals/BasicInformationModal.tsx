@@ -11,7 +11,7 @@ import CustomToast from '@/components/CustomToast';
 import LocationPermissionModal from '../../../modals/LocationPermissionModal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
-import { MapPinIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 import nationalities from '@/utils/nationalities';
 
@@ -110,6 +110,14 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
       
       toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
     }
+  };
+
+  // Handle delete location
+  const handleDeleteLocation = () => {
+    setValue('location', '');
+    setValue('latitude', null as any);
+    setValue('longitude', null as any);
+    toast.custom(() => <CustomToast message="Location removed. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
   };
 
   const onSubmit = (data: T_BasicInfo) => {
@@ -486,14 +494,26 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
               <label className="block text-sm font-medium text-gray-700">
                 Current Location
               </label>
-              <button
-                type="button"
-                onClick={() => setIsLocationModalOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-savoy-blue text-white rounded-lg hover:bg-savoy-blue/90 transition-colors"
-              >
-                <MapPinIcon className="w-4 h-4" />
-                Update Location
-              </button>
+              <div className="flex items-center gap-2">
+                {latitudeValue && longitudeValue && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteLocation}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    Delete Location
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-savoy-blue text-white rounded-lg hover:bg-savoy-blue/90 transition-colors"
+                >
+                  <MapPinIcon className="w-4 h-4" />
+                  Update Location
+                </button>
+              </div>
             </div>
             
             {/* Display current location address */}
