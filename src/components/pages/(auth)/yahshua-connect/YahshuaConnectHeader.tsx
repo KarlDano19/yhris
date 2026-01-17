@@ -19,7 +19,7 @@ import ChatModal from '@/components/common/chat/ChatModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useApplicantChatsList';
 import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
-import useGetApplicantProfile from './hooks/useGetApplicantProfile';
+import { useQueryClient } from '@tanstack/react-query';
 import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
 
 import classNames from '@/helpers/classNames';
@@ -51,8 +51,15 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
-  // Fetch applicant profile to check for location data
-  const { data: profileData, isLoading: isProfileLoading } = useGetApplicantProfile();
+  // Get applicant profile from cache to check for location data
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['applicantProfileCache']) as {
+    state: { data: { data?: any; [key: string]: any } } | undefined;
+  };
+  const profileData = cachedProfile?.state?.data?.data || cachedProfile?.state?.data;
+  const isProfileLoading = !profileData;
   const { mutate: updateProfile } = useUpdateApplicantProfile();
 
   // Fetch personal chats (applicant-to-employer) to get unread count
@@ -438,7 +445,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                     {/* Profile Info */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900">
-                        {profileData?.first_name} {profileData?.last_name}
+                        {profileData?.firstname} {profileData?.lastname}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         {profileData?.email}
@@ -555,7 +562,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                       {/* Profile Info */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">
-                          {profileData?.first_name} {profileData?.last_name}
+                          {profileData?.firstname} {profileData?.lastname}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           {profileData?.email}

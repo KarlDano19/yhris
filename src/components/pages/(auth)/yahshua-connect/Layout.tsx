@@ -379,8 +379,16 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
 
           {/* Main Content */}
           <div className="lg:col-span-9">
-            {isValidElement(children) 
-              ? cloneElement(children, { averageRating } as any)
+            {isValidElement(children)
+              ? cloneElement(children, {
+                  averageRating,
+                  profileData: profileData ? {
+                    firstname: profileData.firstname,
+                    lastname: profileData.lastname,
+                    latitude: profileData.latitude,
+                    longitude: profileData.longitude,
+                  } : undefined,
+                } as any)
               : children
             }
           </div>

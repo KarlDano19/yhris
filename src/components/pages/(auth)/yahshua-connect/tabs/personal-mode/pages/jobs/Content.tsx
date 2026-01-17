@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 import useFindJobs from './hooks/useFindJobs';
-import useGetSavedJobs from '../../../../hooks/useGetSavedJobs';
 import JobFiltersModal from '../../modals/JobFIltersModal';
 import JobCard from '../../components/JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
@@ -41,8 +41,14 @@ const Content = () => {
     useApplicantPersonal: true, // Use applicant_personal view type for match percentage
   });
 
-  // Fetch saved jobs to check which jobs are saved
-  const { data: savedJobsData } = useGetSavedJobs();
+  // Get saved jobs data from cache
+  const queryClient = useQueryClient();
+  const cachedSavedJobs = queryClient
+    .getQueryCache()
+    .find(['savedJobsCache']) as {
+    state: { data: any[] } | undefined;
+  };
+  const savedJobsData = cachedSavedJobs?.state?.data;
   
   // Create a Set of saved job IDs for quick lookup
   const savedJobIds = useMemo(() => {

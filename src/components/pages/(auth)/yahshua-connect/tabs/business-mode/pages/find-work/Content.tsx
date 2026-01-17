@@ -12,7 +12,7 @@ import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
 import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
-import useGetApplicantProfile from '../../../../hooks/useGetApplicantProfile';
+import { useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
@@ -41,10 +41,16 @@ const Content = () => {
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [filters, setFilters] = useState<BusinessJobFilters>({});
 
-  // Get applicant profile for location coordinates (distance calculation)
-  const { data: profileData } = useGetApplicantProfile();
-  const applicantLatitude = profileData?.data?.latitude;
-  const applicantLongitude = profileData?.data?.longitude;
+  // Get applicant profile from cache for location coordinates (distance calculation)
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['applicantProfileCache']) as {
+    state: { data: { data?: { latitude?: number; longitude?: number }; latitude?: number; longitude?: number } } | undefined;
+  };
+  const profileData = cachedProfile?.state?.data?.data || cachedProfile?.state?.data;
+  const applicantLatitude = profileData?.latitude;
+  const applicantLongitude = profileData?.longitude;
 
   // Apply to business job mutation
   const applyToBusinessJobMutation = useApplyToBusinessJob();
