@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 import useFindJobs from './hooks/useFindJobs';
 import JobFiltersModal from '../../modals/JobFIltersModal';
@@ -14,7 +14,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
 import formatPrice from '@/helpers/currencyFormat';
- 
 
 
 interface JobFilters {
@@ -25,7 +24,6 @@ interface JobFilters {
 const Content = () => {
   const router = useRouter();
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
-  const [highlightedJobId, setHighlightedJobId] = useState<number | null>(null);
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [filters, setFilters] = useState<JobFilters>({});
@@ -42,8 +40,6 @@ const Content = () => {
     ...filters,
     useApplicantPersonal: true, // Use applicant_personal view type for match percentage
   });
-
-  const searchParams = useSearchParams();
 
   // Get saved jobs data from cache
   const queryClient = useQueryClient();
@@ -165,47 +161,6 @@ const Content = () => {
     setSelectedJobId(null);
   };
 
-  // Handle navigation from notifications (open job details via query param)
-  useEffect(() => {
-    try {
-      const jobIdParam = searchParams?.get?.('job_id');
-      if (!jobIdParam) return;
-      const parsedJobId = Number(jobIdParam);
-      if (Number.isNaN(parsedJobId)) return;
-
-      setSelectedJobId(parsedJobId);
-      setHighlightedJobId(parsedJobId);
-      // highlight and scroll to job card when available
-      setTimeout(() => {
-        try {
-          const el = document.getElementById(`job-${parsedJobId}`);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-            setTimeout(() => {
-              el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-            }, 3000);
-          }
-        } catch (err) {
-          // ignore
-        }
-      }, 200);
-
-      // Clear query param without reloading
-      try {
-        router.replace('/personal-mode/jobs');
-      } catch (err) {}
-    } catch (e) {
-        // ignore
-      }
-    }, [searchParams?.toString(), router]);
-
-  // Clear highlight after short duration
-  useEffect(() => {
-    if (highlightedJobId == null) return;
-    const t = setTimeout(() => setHighlightedJobId(null), 5000);
-    return () => clearTimeout(t);
-  }, [highlightedJobId]);
 
   return (
     <div className="space-y-6">
@@ -239,9 +194,8 @@ const Content = () => {
                   key={job.id}
                   {...job}
                   isSelected={selectedJobId === job.id}
-                  isHighlighted={highlightedJobId === job.id}
                   onCardClick={() => handleJobCardClick(job.id)}
-                  onApply={() => router.push(`/job-applicant-form/${job.id}`)}
+                  onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
                 />
               ))}
             </div>

@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, cloneElement, isValidElement, useEffect, useMemo } from 'react';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { Tooltip } from 'react-tooltip';
@@ -47,27 +47,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
   const [isSavedJobsModalOpen, setIsSavedJobsModalOpen] = useState(false);
   const [isTrainingsModalOpen, setIsTrainingsModalOpen] = useState(false);
-  const [savedJobsHighlightId, setSavedJobsHighlightId] = useState<number | null>(null);
-  const searchParams = useSearchParams();
-
-  // Open SavedJobsModal when URL contains openSavedJobs param (used by notifications)
-  useEffect(() => {
-    if (isBusinessMode) return;
-    try {
-      const open = searchParams?.get?.('openSavedJobs');
-      const highlight = searchParams?.get?.('highlight');
-      if (open) {
-        setSavedJobsHighlightId(highlight ? parseInt(highlight, 10) : null);
-        setIsSavedJobsModalOpen(true);
-        // clear the query params from URL
-        try {
-          router.replace(pathname || '/personal-mode');
-        } catch (err) {}
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, [searchParams?.toString(), isBusinessMode, router, pathname]);
 
   // Get applicant profile from cache (fetched by YahshuaConnectHeader)
   const cachedProfile = queryClient.getQueryData(['applicantProfileCache']) as { data?: any } | undefined;
@@ -430,14 +409,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
           {isSavedJobsModalOpen && (
             <SavedJobsModal
               isOpen={isSavedJobsModalOpen}
-              onClose={() => {
-                setIsSavedJobsModalOpen(false);
-                setSavedJobsHighlightId(null);
-                try {
-                  router.replace(pathname || '/personal-mode');
-                } catch (err) {}
-              }}
-              highlightJobId={savedJobsHighlightId}
+              onClose={() => setIsSavedJobsModalOpen(false)}
             />
           )}
 
