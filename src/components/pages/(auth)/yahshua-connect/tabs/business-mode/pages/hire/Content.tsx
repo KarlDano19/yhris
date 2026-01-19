@@ -289,62 +289,6 @@ const Content = () => {
     );
   };
 
-  const handleCreateJob = (data: {
-    jobTitle: string;
-    category: string;
-    description: string;
-    location: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    budgetType: 'fixed' | 'hourly';
-    budgetMin: string;
-    budgetMax: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleTimeFrom: string;
-    scheduleTimeTo: string;
-  }) => {
-    // Round coordinates to 6 decimal places to stay within backend's validation limit
-    const roundedLatitude = data.latitude ? Math.round(data.latitude * 1000000) / 1000000 : null;
-    const roundedLongitude = data.longitude ? Math.round(data.longitude * 1000000) / 1000000 : null;
-
-    // Prepare API payload
-    const apiData: T_CreateBusinessJobData = {
-      job_title: data.jobTitle,
-      category: data.category || 'Other',
-      description: data.description,
-      location: data.location,
-      latitude: roundedLatitude,
-      longitude: roundedLongitude,
-      budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
-      contract_start_date: data.scheduleStartDate,
-      contract_end_date: data.scheduleEndDate || null,
-      time_from: data.scheduleTimeFrom || null,
-      time_to: data.scheduleTimeTo || null,
-    };
-
-    // Set budget amounts based on type
-    if (data.budgetType === 'hourly') {
-      apiData.hourly_rate = parseFloat(data.budgetMin) || null;
-    } else {
-      apiData.min_amount = parseFloat(data.budgetMin) || null;
-      apiData.max_amount = data.budgetMax ? parseFloat(data.budgetMax) : parseFloat(data.budgetMin) || null;
-    }
-
-    // Create new job
-    createJobMutation.mutate(apiData, {
-      onSuccess: () => {
-        toast.custom(() => <CustomToast message="Job posted successfully" type="success" />, { duration: 5000 });
-        setIsCreateJobModalOpen(false);
-        refetchJobs();
-      },
-      onError: (err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Failed to create job';
-        toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
-      },
-    });
-  };
-
   const handleViewApplicants = (jobId: number) => {
     setSelectedJobId(jobId);
     setIsViewApplicantsModalOpen(true);

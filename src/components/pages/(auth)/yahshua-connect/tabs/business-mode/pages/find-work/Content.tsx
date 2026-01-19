@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import BusinessJobCard from './components/BusinessJobCard';
 import JobAcceptedModal from './modals/JobAcceptedModal';
+import ConfirmAcceptJobModal from './modals/ConfirmAcceptJobModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
@@ -34,10 +35,12 @@ interface BusinessJobFilters {
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] = useState(false);
   const [isJobAcceptedModalOpen, setIsJobAcceptedModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [pendingAcceptJobId, setPendingAcceptJobId] = useState<number | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [filters, setFilters] = useState<BusinessJobFilters>({});
@@ -224,29 +227,42 @@ const Content = () => {
     setSelectedJobId(null); // Reset selected job when filters change
   };
 
-  const handleAcceptJob = async (jobId: number) => {
-    try {
+  const handleAcceptJob = (jobId: number) => {
+    // Check if already applied
+    const job = jobsData?.find((j: any) => j.id === jobId);
+    if (job?.has_applied) {
+      // If already applied, just open the chat modal
       setSelectedJobId(jobId);
-      
-      // Check if already applied
-      const job = jobsData?.find((j: any) => j.id === jobId);
-      if (job?.has_applied) {
-        // If already applied, just open the chat modal
-        if (job?.created_by) {
-          setSelectedClientId(job.created_by);
-        }
-        setIsChatModalOpen(true);
-        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
-        return;
+      if (job?.created_by) {
+        setSelectedClientId(job.created_by);
       }
-      
-      await applyToBusinessJobMutation.mutateAsync(jobId);
+      setIsChatModalOpen(true);
+      setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+      return;
+    }
+
+    // Show confirmation modal before accepting
+    setPendingAcceptJobId(jobId);
+    setIsConfirmAcceptModalOpen(true);
+  };
+
+  const handleConfirmAcceptJob = async () => {
+    if (!pendingAcceptJobId) return;
+
+    try {
+      setSelectedJobId(pendingAcceptJobId);
+
+      const job = jobsData?.find((j: any) => j.id === pendingAcceptJobId);
+
+      await applyToBusinessJobMutation.mutateAsync(pendingAcceptJobId);
 
       // Get client ID from job data
       if (job?.created_by) {
         setSelectedClientId(job.created_by);
       }
 
+      setIsConfirmAcceptModalOpen(false);
+      setPendingAcceptJobId(null);
       setIsJobAcceptedModalOpen(true);
       setIsJobDetailsModalOpen(false); // Close details modal after accepting job
       toast.custom(() => (
@@ -254,18 +270,22 @@ const Content = () => {
       ), { duration: 2000 });
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to submit application';
-      
+
       // If already applied, open chat instead of showing error
       if (errorMessage.includes('already applied')) {
-        const job = jobsData?.find((j: any) => j.id === jobId);
+        const job = jobsData?.find((j: any) => j.id === pendingAcceptJobId);
         if (job?.created_by) {
           setSelectedClientId(job.created_by);
         }
+        setIsConfirmAcceptModalOpen(false);
+        setPendingAcceptJobId(null);
         setIsChatModalOpen(true);
         setIsJobDetailsModalOpen(false); // Ensure details modal is closed
         // Refetch jobs to update has_applied status
         // This will be handled by the query invalidation in the mutation
       } else {
+        setIsConfirmAcceptModalOpen(false);
+        setPendingAcceptJobId(null);
         toast.custom(() => (
           <CustomToast message={errorMessage} type="error" />
         ), { duration: 3000 });
@@ -366,6 +386,24 @@ const Content = () => {
         onClose={() => setIsFilterModalOpen(false)}
         onApplyFilters={handleApplyFilters}
       />
+
+      {/* Confirm Accept Job Modal */}
+      {pendingAcceptJobId && (() => {
+        const pendingJob = transformedJobs.find((job) => job.id === pendingAcceptJobId);
+        return pendingJob ? (
+          <ConfirmAcceptJobModal
+            isOpen={isConfirmAcceptModalOpen}
+            onClose={() => {
+              setIsConfirmAcceptModalOpen(false);
+              setPendingAcceptJobId(null);
+            }}
+            onConfirm={handleConfirmAcceptJob}
+            jobTitle={pendingJob.title}
+            clientName={pendingJob.clientName}
+            isLoading={applyToBusinessJobMutation.isLoading}
+          />
+        ) : null;
+      })()}
 
       {/* Job Accepted Modal */}
       {selectedJobFull && selectedJobId && (
