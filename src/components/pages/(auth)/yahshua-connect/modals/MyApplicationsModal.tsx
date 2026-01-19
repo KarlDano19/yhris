@@ -87,18 +87,18 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
           <p className="text-sm text-gray-400 text-center mt-1">Start applying to jobs to see them here</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           {transformedApplications.map((application) => (
             <div
               key={application.id}
-              className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
             >
               <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                 {application.logo}
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 mb-1">{application.title}</h4>
-                <p className="text-sm text-gray-600 mb-2">{application.company}</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 mb-1 break-words">{application.title}</h4>
+                <p className="text-sm text-gray-600 mb-2 break-words">{application.company}</p>
                 <div className="flex items-center gap-3">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(

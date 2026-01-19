@@ -48,27 +48,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       } catch (e) {
         // fallback: use original
       }
-
-      // If the notification points to a personal-mode job, navigate to personal-mode
-      // and open the job details by passing job_id as query param.
-      try {
-        if (typeof target === 'string' && target.includes('/personal-mode')) {
-          // Extract numeric id if present in the path (last number)
-          let extractedId: number | null = null;
-          const m = String(target).match(/(\d+)(?!.*\d)/);
-          if (m) extractedId = parseInt(m[1], 10);
-
-          if (extractedId) {
-            // Navigate to the Jobs page and pass job_id so the Jobs page can open/highlight the job
-            router.push(`/personal-mode/jobs`);
-            onClose();
-            return;
-          }
-        }
-      } catch (e) {
-        // ignore and fallback to default navigation
-      }
-
       router.push(target);
       onClose();
     }
@@ -120,17 +99,19 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       title="Notifications"
       size="md"
     >
-      <div className="space-y-0">
+      {/* Unread count header */}
+      <div className="px-4 mb-2">
+              <div className="text-sm text-gray-600">{notifications.filter((n: any) => !n.is_read).length} unread</div>
+            </div>
+      {/* Scrollable content area to avoid modal/page overflow */}
+      <div className="space-y-0 max-h-[60vh] overflow-y-auto pr-2">
     {isLoading ? (
           <div className="py-6 text-center text-gray-500">Loading notifications...</div>
         ) : notifications.length === 0 ? (
           <div className="py-6 text-center text-gray-500">No notifications</div>
         ) : (
           <>
-            {/* Unread count header */}
-            <div className="px-4 py-2 border-b border-gray-100">
-              <div className="text-sm text-gray-600">{notifications.filter((n: any) => !n.is_read).length} unread</div>
-            </div>
+            
 
             {notifications.map((notification: any) => (
               <div
@@ -144,30 +125,23 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
-                    <h4 className="font-semibold text-gray-900 mb-1">{notification.title}</h4>
+                    <h4 className="font-semibold text-gray-900 mb-1 break-words">{notification.title}</h4>
                     {!notification.is_read && (
                       <span className="ml-2 mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">{notification.message}</p>
+                  <p className="text-sm text-gray-600 mb-1 break-words">{notification.message}</p>
                   <p className="text-xs text-gray-500">{formatTime(notification.created_at)}</p>
                 </div>
               </div>
             ))}
 
-            {/* {hasNextPage && (
-              <div className="p-4 text-center">
-                <button
-                  onClick={() => fetchNextPage()}
-                  className="px-3 py-1 bg-gray-200 rounded"
-                >
-                  Load more
-                </button>
-              </div>
-            )} */}
-
             {/* Footer: Mark all as read */}
-            <div className="p-4 text-center border-t border-gray-100">
+            
+          </>
+        )}
+      </div>
+      <div className="p-4 text-center border-t border-gray-100">
               <button
                 onClick={handleMarkAllAsRead}
                 className="text-sm text-blue-600 hover:text-blue-800"
@@ -175,9 +149,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
                 Mark all as read
               </button>
             </div>
-          </>
-        )}
-      </div>
+      
     </Modal>
   );
 };
