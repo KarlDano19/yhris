@@ -1,5 +1,7 @@
 import Modal from '../../../../../components/Modal';
 
+import { formatDateToLocal } from '@/helpers/date';
+
 import { BriefcaseIcon } from '@heroicons/react/24/outline';
 
 interface StartJobModalProps {
@@ -67,14 +69,14 @@ const StartJobModal = ({
           <div className="flex justify-between">
             <span className="text-sm font-medium text-gray-700">Start Date:</span>
             <span className="text-sm text-gray-900">
-              {new Date(contractStartDate).toLocaleDateString()}
+              {formatDateToLocal(contractStartDate, true)}
             </span>
           </div>
           {contractEndDate && (
             <div className="flex justify-between">
               <span className="text-sm font-medium text-gray-700">End Date:</span>
               <span className="text-sm text-gray-900">
-                {new Date(contractEndDate).toLocaleDateString()}
+                {formatDateToLocal(contractEndDate, true)}
               </span>
             </div>
           )}

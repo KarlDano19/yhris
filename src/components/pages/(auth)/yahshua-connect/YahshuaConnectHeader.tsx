@@ -51,8 +51,9 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
-  // Fetch applicant profile to check for location data
-  const { data: profileData, isLoading: isProfileLoading } = useGetApplicantProfile();
+  // Get applicant profile to check for location data
+  const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
+  const profileData = applicantDetails?.data || applicantDetails;
   const { mutate: updateProfile } = useUpdateApplicantProfile();
 
   // Fetch personal chats (applicant-to-employer) to get unread count
@@ -92,6 +93,9 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     // Wait for profile data to be available
     if (!profileData) return;
 
+    // Wait for hasProfile to be determined (don't proceed if false)
+    if (!hasProfile) return;
+
     // Check if profile has valid latitude and longitude (non-zero values)
     const hasValidLocation =
       profileData?.latitude !== null &&
@@ -101,7 +105,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       profileData?.longitude !== undefined &&
       profileData?.longitude !== 0;
 
-    if (!hasValidLocation && hasProfile) {
+    if (!hasValidLocation) {
       // Show location permission modal after a short delay to not overwhelm user
       const timer = setTimeout(() => {
         setShowLocationModal(true);
@@ -110,7 +114,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
 
       return () => clearTimeout(timer);
     } else {
-      // User already has location or doesn't have a profile yet
+      // User already has valid location
       setHasCheckedLocation(true);
     }
   }, [profileData, isProfileLoading, hasCheckedLocation, hasProfile, disabled]);
@@ -438,7 +442,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                     {/* Profile Info */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900">
-                        {profileData?.first_name} {profileData?.last_name}
+                        {profileData?.firstname} {profileData?.lastname}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         {profileData?.email}
@@ -555,7 +559,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                       {/* Profile Info */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">
-                          {profileData?.first_name} {profileData?.last_name}
+                          {profileData?.firstname} {profileData?.lastname}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           {profileData?.email}

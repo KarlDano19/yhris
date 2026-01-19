@@ -1,14 +1,14 @@
 'use client';
 
-import { ReactNode, useState, cloneElement, isValidElement, useEffect, useCallback, useRef, useMemo } from 'react';
+import { ReactNode, useState, cloneElement, isValidElement, useEffect, useMemo } from 'react';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Tooltip } from 'react-tooltip';
 import { CalendarIcon, UserGroupIcon, DocumentTextIcon, BookmarkIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 
 // Personal mode imports
-import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useGetSavedJobs from './hooks/useGetSavedJobs';
 import useGetApplicationByUser from './hooks/useGetApplicationByUser';
 import useGetMyHires from './hooks/useGetMyHires';
@@ -32,7 +32,8 @@ interface YahshuaConnectLayoutProps {
 const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  
+  const queryClient = useQueryClient();
+
   // Determine mode from pathname
   const isBusinessMode = pathname?.includes('business-mode') || false;
 
@@ -47,12 +48,12 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const [isSavedJobsModalOpen, setIsSavedJobsModalOpen] = useState(false);
   const [isTrainingsModalOpen, setIsTrainingsModalOpen] = useState(false);
 
-  // Personal mode data hooks
-  const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
+  // Get applicant profile from cache (fetched by YahshuaConnectHeader)
+  const cachedProfile = queryClient.getQueryData(['applicantProfileCache']) as { data?: any } | undefined;
   const { data: savedJobsData } = useGetSavedJobs();
 
   // Handle response structure (data might be wrapped in 'data' field or at root level)
-  const profileData = applicantDetails?.data || applicantDetails;
+  const profileData = cachedProfile?.data || cachedProfile;
 
   // Business mode state
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
@@ -379,8 +380,16 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
 
           {/* Main Content */}
           <div className="lg:col-span-9">
-            {isValidElement(children) 
-              ? cloneElement(children, { averageRating } as any)
+            {isValidElement(children)
+              ? cloneElement(children, {
+                  averageRating,
+                  profileData: profileData ? {
+                    firstname: profileData.firstname,
+                    lastname: profileData.lastname,
+                    latitude: profileData.latitude,
+                    longitude: profileData.longitude,
+                  } : undefined,
+                } as any)
               : children
             }
           </div>
