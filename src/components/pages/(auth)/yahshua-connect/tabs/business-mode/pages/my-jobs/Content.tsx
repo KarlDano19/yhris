@@ -161,6 +161,101 @@ const Content = () => {
     });
   }, [data]);
 
+  // Handle navigation from notifications (query params) - open appropriate modals
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const jobIdParam = searchParams?.get?.('job_id');
+      const applicationIdParam = searchParams?.get?.('application_id');
+      const openParam = searchParams?.get?.('open'); // e.g., 'application', 'submit_progress', 'upload_proof', 'start_job', 'clock_in', 'clock_out', 'chat'
+
+      if (jobIdParam) {
+        const parsedJobId = Number(jobIdParam);
+        if (!Number.isNaN(parsedJobId)) {
+          const parentJob = activeJobs.find((j) => j.id === parsedJobId);
+          if (parentJob) {
+            setSelectedJob(parentJob);
+            // scroll & highlight
+            setTimeout(() => {
+              try {
+                const el = document.getElementById(`job-${parentJob.id}`);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              } catch (err) {}
+            }, 200);
+            // open modal per openParam
+            switch (openParam) {
+              case 'submit_progress':
+                setIsSubmitProgressModalOpen(true);
+                break;
+              case 'view_progress':
+              case 'application':
+                setIsViewProgressModalOpen(true);
+                break;
+              case 'upload_proof':
+                setIsUploadProofModalOpen(true);
+                break;
+              case 'start_job':
+                setIsStartJobModalOpen(true);
+                break;
+              case 'clock_in':
+                setIsClockInModalOpen(true);
+                break;
+              case 'clock_out':
+                setIsClockOutModalOpen(true);
+                break;
+              case 'chat':
+                setSelectedJobForMessage({
+                  id: parentJob.id,
+                  clientId: parentJob.clientId,
+                  clientName: parentJob.clientName,
+                  clientInitials: parentJob.clientInitials,
+                  clientPhoto: parentJob.clientPhoto,
+                  title: parentJob.title,
+                });
+                setIsChatModalOpen(true);
+                break;
+              default:
+                // if applicationId present but no explicit openParam, open view progress
+                if (applicationIdParam) {
+                  setIsViewProgressModalOpen(false);
+                }
+            }
+            router.replace('/business-mode/my-jobs');
+          }
+        }
+      } else if (applicationIdParam) {
+        const parsedApplicationId = Number(applicationIdParam);
+        if (!Number.isNaN(parsedApplicationId)) {
+          // Try to locate parent job by applicationId
+          const parentJob = activeJobs.find((j) => j.applicationId === parsedApplicationId || j.dailyProgresses?.some((p:any) => Number(p.id) === parsedApplicationId));
+          if (parentJob) {
+            setSelectedJob(parentJob);
+            setTimeout(() => {
+              try {
+                const el = document.getElementById(`job-${parentJob.id}`);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                  setTimeout(() => {
+                    el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+                  }, 3000);
+                }
+              } catch (err) {}
+            }, 200);
+          }
+          router.replace('/business-mode/my-jobs');
+        }
+      }
+    } catch (e) {
+      // ignore parsing errors
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams?.toString(), activeJobs]);
+
   // Helper: parse "HH:MM" into a Date on the given baseDate
   const parseTimeToDate = (timeStr: string | null, baseDate: Date): Date | null => {
     if (!timeStr) return null;
@@ -439,10 +534,10 @@ const Content = () => {
           {!isLoading && !isError && activeJobs.map((job) => (
             <div
               key={job.id}
-              id={`job-${job.id}`}
-              className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
+            id={`job-${job.id}`}
+            className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
                 job.urgent ? 'border-red-500' : 'border-gray-200'
-              }`}
+              } ${selectedJob?.id === job.id ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
             >
               {/* Header with Status Badges */}
               <div className="flex items-start justify-between mb-4">

@@ -11,7 +11,7 @@ import {
 
 import { T_DailyProgress } from '@/types/business-mode';
 
-interface ViewDailyProgressModalProps {
+interface ViewApplicantDailyProgressProps {
   isOpen: boolean;
   onClose: () => void;
   jobTitle: string;
@@ -20,14 +20,14 @@ interface ViewDailyProgressModalProps {
   onReview?: (progressId: number, status: 'approved' | 'rejected', feedback: string) => void;
 }
 
-const ViewDailyProgressModal = ({
+const ViewApplicantDailyProgress = ({
   isOpen,
   onClose,
   jobTitle,
   dailyProgresses,
   isClient,
   onReview,
-}: ViewDailyProgressModalProps) => {
+}: ViewApplicantDailyProgressProps) => {
   const [selectedProgress, setSelectedProgress] = useState<T_DailyProgress | null>(null);
   const [reviewStatus, setReviewStatus] = useState<'approved' | 'rejected'>('approved');
   const [feedback, setFeedback] = useState<string>('');
@@ -73,7 +73,7 @@ const ViewDailyProgressModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Daily Progress - ${jobTitle}`}
+      title={`Daily Progress1 - ${jobTitle}`}
       size="lg"
       footerContent={
         selectedProgress && isClient && selectedProgress.status === 'submitted' ? (
@@ -289,5 +289,6 @@ const ViewDailyProgressModal = ({
   );
 };
 
-export default ViewDailyProgressModal;
+export default ViewApplicantDailyProgress;
+
 

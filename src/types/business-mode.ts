@@ -60,6 +60,8 @@ export type T_DailyProgress = {
   client_feedback: string | null;
   submitted_at: string;
   reviewed_at: string | null;
+  // optional hours worked reported by applicant
+  hours_worked?: number | null;
 };
 
 // Business Job Application Types

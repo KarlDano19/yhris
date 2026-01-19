@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import Modal from '../components/Modal';
@@ -22,6 +23,7 @@ interface SavedJobsModalProps {
 const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsModalProps) => {
   // Get saved jobs data from cache
   const queryClient = useQueryClient();
+  const router = useRouter();
   const cachedSavedJobs = queryClient
     .getQueryCache()
     .find(['savedJobsCache']) as {
@@ -142,7 +144,15 @@ const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsMod
             <div
               id={`saved-job-${job.id}`}
               key={job.id}
-              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                try {
+                  router.push(`/personal-mode/jobs?job_id=${job.id}`);
+                  onClose();
+                } catch (err) {
+                  // ignore
+                }
+              }}
+              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
                 {job.logoUrl ? (
@@ -172,7 +182,10 @@ const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsMod
               </div>
               <div className="flex-shrink-0 mt-2 sm:mt-0 sm:ml-2">
                 <button
-                  onClick={() => handleUnsave(job.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUnsave(job.id);
+                  }}
                   className="text-savoy-blue hover:text-blue-700 transition-colors"
                   title="Remove from saved jobs"
                 >

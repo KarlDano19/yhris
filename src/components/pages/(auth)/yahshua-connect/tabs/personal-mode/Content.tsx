@@ -143,12 +143,6 @@ const Content = ({ averageRating }: ContentProps) => {
     });
   }, [highMatchJobsData, savedJobIds]);
 
-  const recommendedTraining = {
-    title: 'Mastering Design System',
-    duration: '3 hrs',
-    level: 'Intermediate',
-    price: 'FREE',
-  };
 
   const handleJobCardClick = (jobId: number) => {
     // Toggle: if same job is clicked, close it; otherwise, open the new one

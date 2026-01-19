@@ -13,6 +13,7 @@ interface ViewApplicantsModalProps {
   onViewProfile?: (applicantId: number) => void;
   onHire?: (applicantId: number) => void;
   onReject?: (applicantId: number) => void;
+  onViewDailyProgress?: (applicantId: number) => void;
 }
 
 const ViewApplicantsModal = ({
@@ -23,6 +24,7 @@ const ViewApplicantsModal = ({
   onViewProfile,
   onHire,
   onReject,
+  onViewDailyProgress,
 }: ViewApplicantsModalProps) => {
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => {
@@ -129,8 +131,19 @@ const ViewApplicantsModal = ({
                   View Full Profile
                 </button>
                 {applicant.status === 'accepted' ? (
-                  <div className="flex-1 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-center">
-                    Hired
+                  <div className="flex-1 flex items-center gap-2">
+                    {onViewDailyProgress && (
+                      <button
+                        onClick={() => onViewDailyProgress(applicant.id)}
+                        className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors text-sm"
+                      >
+                        View Daily Progress
+                      </button>
+                    )}
+                    <div className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium text-center">
+                      Hired
+                    </div>
+                    
                   </div>
                 ) : applicant.status === 'rejected' ? (
                   <div className="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium text-center">

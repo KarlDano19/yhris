@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import useFindJobs from './hooks/useFindJobs';
@@ -26,7 +26,9 @@ const Content = () => {
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   const [displayCount, setDisplayCount] = useState<number>(20);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [highlightedJobId, setHighlightedJobId] = useState<number | null>(null);
   const [filters, setFilters] = useState<JobFilters>({});
+  const searchParams = useSearchParams();
 
   // Fetch jobs with filters and match percentage using applicant_personal view type
   const {
@@ -157,6 +159,40 @@ const Content = () => {
     setSelectedJobId(selectedJobId === jobId ? null : jobId);
   };
 
+  // Open job details when URL contains job_id (used by notifications)
+  useEffect(() => {
+    try {
+      const jobIdParam = searchParams?.get?.('job_id');
+      if (!jobIdParam) return;
+      const parsedJobId = Number(jobIdParam);
+      if (Number.isNaN(parsedJobId)) return;
+
+      setSelectedJobId(parsedJobId);
+      setHighlightedJobId(parsedJobId);
+      // scroll & highlight
+      setTimeout(() => {
+        try {
+          const el = document.getElementById(`job-${parsedJobId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+            setTimeout(() => {
+              el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+            }, 3000);
+          }
+        } catch (err) {
+          // ignore
+        }
+      }, 200);
+
+      try {
+        router.replace('/personal-mode/jobs');
+      } catch (err) {}
+    } catch (e) {
+      // ignore
+    }
+  }, [searchParams?.toString(), router]);
+
   const handleCloseJobDetails = () => {
     setSelectedJobId(null);
   };
@@ -190,10 +226,11 @@ const Content = () => {
           <>
             <div className="space-y-4">
               {transformedJobs.map((job) => (
-                <JobCard 
+                <JobCard
                   key={job.id}
                   {...job}
                   isSelected={selectedJobId === job.id}
+                  isHighlighted={highlightedJobId === job.id}
                   onCardClick={() => handleJobCardClick(job.id)}
                   onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
                 />

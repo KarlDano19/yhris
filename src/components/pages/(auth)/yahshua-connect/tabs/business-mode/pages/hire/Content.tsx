@@ -15,7 +15,7 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
-import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
+import ViewApplicantDailyProgress from './modals/ViewApplicantDailyProgressModal';
 import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import ChatModal from '@/components/common/chat/ChatModal';
@@ -250,16 +250,12 @@ const Content = () => {
         const parsedJobId = Number(jobIdParam);
         if (!Number.isNaN(parsedJobId)) {
           setSelectedJobId(parsedJobId);
-          // highlight and scroll to job card when available
+          // scroll to job card (highlighting is handled via selectedJobId in the render)
           setTimeout(() => {
             try {
               const el = document.getElementById(`job-${parsedJobId}`);
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-                setTimeout(() => {
-                  el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-                }, 3000);
               }
             } catch (err) {
               // ignore
@@ -274,26 +270,25 @@ const Content = () => {
       if (applicationIdParam) {
         const parsedApplicationId = Number(applicationIdParam);
         if (!Number.isNaN(parsedApplicationId)) {
-          // If we can find the parent job, select it so modals have context
+          // If we can find the parent job, select it so the UI can highlight the job card.
+          // Do NOT auto-open the ViewDailyProgressModal when arriving from a notification
+          // about an application (e.g., "someone applied to your job").
           const parentJob = jobPostings.find((j) =>
             Array.isArray(j.applications) && j.applications.some((a: any) => Number(a.id) === parsedApplicationId)
           );
-          if (parentJob) {
-            setSelectedJobId(parentJob.id);
-            // highlight parent job card
-            setTimeout(() => {
-              try {
-                const el = document.getElementById(`job-${parentJob.id}`);
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-                  setTimeout(() => {
-                    el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-                  }, 3000);
-                }
-              } catch (err) {}
-            }, 200);
-          }
+            if (parentJob) {
+              setSelectedJobId(parentJob.id);
+              // scroll to job card (highlighting is handled via selectedJobId in the render)
+              setTimeout(() => {
+                try {
+                  const el = document.getElementById(`job-${parentJob.id}`);
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                } catch (err) {}
+              }, 200);
+            }
+          // keep the selected application id in state for context (but don't auto-open the modal)
           setSelectedApplicationId(parsedApplicationId);
           router.replace('/business-mode/hire');
         }
@@ -687,9 +682,9 @@ const Content = () => {
                 <div
                   key={job.id}
                   id={`job-${job.id}`}
-                  className={`bg-white rounded-xl p-5 hover:shadow-md transition-shadow ${
+              className={`bg-white rounded-xl p-5 hover:shadow-md transition-shadow ${
                     job.is_active ? 'border border-gray-200' : 'border-2 border-red-300'
-                  }`}
+                  } ${selectedJobId === job.id ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -941,6 +936,12 @@ const Content = () => {
           onViewProfile={handleViewProfile}
           onHire={handleHireClick}
           onReject={handleRejectClick}
+          onViewDailyProgress={(applicationId: number) => {
+            // open daily progress modal for this application
+            handleViewDailyProgress(selectedJob.id, applicationId);
+            // close applicants modal
+            setIsViewApplicantsModalOpen(false);
+          }}
         />
       )}
 
@@ -1047,7 +1048,7 @@ const Content = () => {
       {isViewDailyProgressModalOpen && selectedJob && selectedApplicationId && (() => {
         const application = selectedJob.applications?.find((app) => app.id === selectedApplicationId);
         return application ? (
-          <ViewDailyProgressModal
+          <ViewApplicantDailyProgress
             isOpen={isViewDailyProgressModalOpen}
             onClose={() => {
               setIsViewDailyProgressModalOpen(false);

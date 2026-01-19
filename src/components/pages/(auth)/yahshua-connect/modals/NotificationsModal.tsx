@@ -37,10 +37,26 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     if (!notification.is_read) {
       markAsRead(notification.id);
     }
-    if (notification.url_path) {
+    // Prefer explicit references (ids) when available, fallback to url_path
+    const refs = notification.references || {};
+    let target: string | undefined;
+
+    if (refs.job_posting_id) {
+      // regular job posting (yahshua connect)
+      target = `/personal-mode/jobs?job_id=${refs.job_posting_id}`;
+    } else if (refs.business_job_id) {
+    // business-mode (gig) notifications:
+    // - If there's an application_id, forward it as application_id (used to locate a specific application)
+    // - Otherwise, pass the job id as job_id so the hire page can highlight the job card
+    if (refs.application_id) {
+      target = `/business-mode/my-jobs?application_id=${refs.application_id}`;
+    } else {
+      target = `/business-mode/hire?job_id=${refs.business_job_id}`;
+    }
+    } else if (typeof notification.url_path === 'string') {
       // Notifications shown here are for the applicant (worker). Some older notifications
       // may point to the employer's "hire" page; map those to the applicant "my-jobs" page.
-      let target = notification.url_path;
+      target = notification.url_path;
       try {
         if (typeof target === 'string' && target.startsWith('/business-mode/hire')) {
           target = target.replace('/business-mode/hire', '/business-mode/my-jobs');
@@ -48,6 +64,9 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       } catch (e) {
         // fallback: use original
       }
+    }
+
+    if (target) {
       router.push(target);
       onClose();
     }
