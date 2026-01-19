@@ -110,16 +110,16 @@ const BusinessJobCard = ({
       {/* Location, Time, and Distance */}
       <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600">
         <div className="flex items-center gap-2">
-          <MapPinIcon className="h-4 w-4" />
+          <MapPinIcon className="h-4 w-4 text-savoy-blue" />
           <span>{clientLocation}</span>
         </div>
         <div className="flex items-center gap-2">
-          <ClockIcon className="h-4 w-4" />
+          <ClockIcon className="h-4 w-4 text-savoy-blue" />
           <span>{time}</span>
         </div>
         {distance && (
           <div className="flex items-center gap-2">
-            <PaperAirplaneIcon className="h-4 w-4" />
+            <PaperAirplaneIcon className="h-4 w-4 text-savoy-blue" />
             <span>{distance}</span>
           </div>
         )}

@@ -1,7 +1,11 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 
 import Modal from '../components/Modal';
-import useGetApplicationByUser from '../hooks/useGetApplicationByUser';
 
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -14,9 +18,15 @@ interface MyApplicationsModalProps {
 }
 
 const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
-  // Memoize empty filters object to prevent unnecessary re-renders
-  const applicationFilters = useMemo(() => ({}), []);
-  const { data: applicationsData, isLoading } = useGetApplicationByUser(applicationFilters);
+  // Get applications data from cache
+  const queryClient = useQueryClient();
+  const cachedApplications = queryClient
+    .getQueryCache()
+    .find(['jobAppliedCache', {}]) as {
+    state: { data: { data?: any[]; } | any[] } | undefined;
+  };
+  const applicationsData = cachedApplications?.state?.data;
+  const isLoading = !applicationsData;
   const [transformedApplications, setTransformedApplications] = useState<T_Application[]>([]);
 
   // Transform API data to match the display format

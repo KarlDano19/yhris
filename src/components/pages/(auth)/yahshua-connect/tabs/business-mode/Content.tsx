@@ -2,15 +2,25 @@
 
 import { useState, useMemo } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
+import CustomToast from '@/components/CustomToast';
 import useGetDashboardOverview from './hooks/useGetDashboardOverview';
+import useFindBusinessJobs from './pages/find-work/hooks/useFindBusinessJobs';
+import useApplyToBusinessJob from './pages/find-work/hooks/useApplyToBusinessJob';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
+
+import formatPrice from '@/helpers/currencyFormat';
+import { calculateDistanceKm } from '@/helpers/distance';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -22,93 +32,160 @@ const Content = () => {
   // Fetch dashboard overview data from API
   const { data: dashboardData, isLoading } = useGetDashboardOverview();
 
-  const weeklyData = [
-    { day: 'W1', amount: 12500 },
-    { day: 'W2', amount: 9800 },
-    { day: 'W3', amount: 15200 },
-    { day: 'W4', amount: 7700 },
-  ];
+  // Subscribe to applicant profile cache to get user name and location
+  const { data: profileResponse } = useQuery<any>(['applicantProfileCache'], {
+    enabled: false, // Don't fetch, just subscribe to existing cache
+  });
+  const profileData = profileResponse?.data || profileResponse;
+  const userName = `${profileData?.firstname || ''} ${profileData?.lastname || ''}`.trim() || 'User';
+  const applicantLatitude = profileData?.latitude;
+  const applicantLongitude = profileData?.longitude;
 
-  // All Jobs
-  const jobRequests = [
-    {
-      id: 1,
-      title: 'Fix Leaking Kitchen Sink',
-      clientName: 'Maria Santos',
-      clientInitials: 'MS',
-      clientLocation: 'Carmen, Cagayan de Oro',
-      distance: '0.8 km',
-      rating: 4.7,
-      hiresCount: 15,
-      description: 'Kitchen sink has been leaking for 2 days.',
-      time: 'Today, 2:00 PM',
-      priceRange: '₱800 - ₱1,200',
-      tags: ['Plumbing', 'Sink Repair'],
-      status: 'accepted' as const,
-      urgent: true,
-    },
-    {
-      id: 2,
-      title: 'Install Ceiling Fan',
-      clientName: 'Juan Cruz',
-      clientInitials: 'JC',
-      clientLocation: 'Gusa, Cagayan de Oro',
-      distance: '1.5 km',
-      rating: 5,
-      hiresCount: 28,
-      description: 'Need electrician to install ceiling fan.',
-      time: 'Tomorrow, 9:00 AM',
-      priceRange: '₱600 - ₱900',
-      tags: ['Electrical', 'Installation'],
-      status: 'pending' as const,
-      urgent: false,
-    },
-    {
-      id: 3,
-      title: 'House Deep Cleaning',
-      clientName: 'Ana Garcia',
-      clientInitials: 'AG',
-      clientLocation: 'Macasandig, Cagayan de Oro',
-      distance: '2.1 km',
-      rating: 4.5,
-      hiresCount: 5,
-      description: 'Need deep cleaning service for 3-bedroom house. All cleaning materials will be provided.',
-      time: 'Tomorrow, 10:00 AM - 2:00 PM',
-      priceRange: '₱1,500 - ₱2,000',
-      tags: ['Cleaning'],
-      status: 'pending' as const,
-      urgent: false,
-    },
-    {
-      id: 4,
-      title: 'Garden Landscaping',
-      clientName: 'Robert Tan',
-      clientInitials: 'RT',
-      clientLocation: 'Lapasan, Cagayan de Oro',
-      distance: '3.5 km',
-      rating: 4.9,
-      hiresCount: 15,
-      description: 'Need landscaping work for front yard garden. Plants and materials will be provided.',
-      time: 'Dec 5, 8:00 AM',
-      priceRange: '₱2,000 - ₱3,000',
-      tags: ['Landscaping'],
-      status: 'pending' as const,
-      urgent: false,
-    },
-  ];
+  // Fetch business jobs from API (without location filter - we'll calculate distance on frontend)
+  const { data: jobsData, isLoading: isJobsLoading } = useFindBusinessJobs({});
+
+  // Mutation hook for applying to business jobs
+  const applyToBusinessJobMutation = useApplyToBusinessJob();
+
+  // Transform API business jobs data to BusinessJobCard format
+  const transformedJobs = useMemo(() => {
+    if (!jobsData || jobsData.length === 0) return [];
+
+    return jobsData.map((job: any) => {
+      // Get client initials from created_by_name
+      const getClientInitials = (clientName: string) => {
+        if (!clientName) return '?';
+        const words = clientName.trim().split(/\s+/);
+        if (words.length >= 2) {
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return clientName.substring(0, 2).toUpperCase();
+      };
+
+      // Format price range
+      const formatPriceRange = () => {
+        if (job.budget_type === 'Range' && job.min_amount && job.max_amount) {
+          return `₱ ${formatPrice(job.min_amount)} - ₱ ${formatPrice(job.max_amount)}`;
+        } else if (job.hourly_rate) {
+          return `₱ ${formatPrice(job.hourly_rate)}/hour`;
+        } else if (job.min_amount) {
+          return `₱ ${formatPrice(job.min_amount)}`;
+        } else if (job.max_amount) {
+          return `₱ ${formatPrice(job.max_amount)}`;
+        }
+        return 'Price not specified';
+      };
+
+      // Format date and time
+      const formatTime = () => {
+        // Use contract_start_date (backend field name) instead of date
+        const dateField = job.contract_start_date || job.date;
+        if (!dateField) return 'Date not specified';
+
+        const dateFormatted = formatDateToLocal(dateField, true);
+
+        if (job.time_from && job.time_to) {
+          return `${dateFormatted}, ${job.time_from} - ${job.time_to}`;
+        } else if (job.time_from) {
+          return `${dateFormatted}, ${job.time_from}`;
+        }
+        return dateFormatted;
+      };
+
+      // Format distance (use computed distanceKm)
+      const formatDistance = (dk: number | null) => {
+        if (dk !== null && dk !== undefined) {
+          return `${dk} km away`;
+        }
+        return '';
+      };
+
+      // Get category as tags
+      const getTags = () => {
+        const tags = [];
+        if (job.category) {
+          tags.push(job.category);
+        }
+        return tags;
+      };
+
+      // Determine status - check if user has applied
+      const getStatus = () => {
+        if (job.has_applied) {
+          return 'accepted' as const;
+        }
+        return 'pending' as const;
+      };
+
+      // compute distance using applicant profile coords when available
+      const distanceKm = (applicantLatitude && applicantLongitude && job.latitude && job.longitude)
+        ? Math.round(calculateDistanceKm(Number(applicantLatitude), Number(applicantLongitude), Number(job.latitude), Number(job.longitude)) * 10) / 10
+        : null;
+
+      return {
+        id: job.id,
+        title: job.job_title || 'Untitled Job',
+        clientName: job.created_by_name || 'Unknown Client',
+        clientId: job.created_by,
+        clientInitials: getClientInitials(job.created_by_name || ''),
+        clientPhoto: job.created_by_photo || null,
+        clientLocation: job.location || 'Location not specified',
+        distance: formatDistance(distanceKm),
+        rating: job.created_by_rating || 0,
+        hiresCount: job.created_by_reviews_count || 0,
+        description: job.description || 'No description provided',
+        time: formatTime(),
+        priceRange: formatPriceRange(),
+        tags: getTags(),
+        urgent: job.is_urgent || false,
+        status: getStatus(),
+        hasApplied: job.has_applied || false,
+      };
+    });
+  }, [jobsData]);
+
+  // Limit to 4 jobs for home page preview
+  const displayedJobs = transformedJobs.slice(0, 4);
 
   const handleApplyFilters = (filters: {
     location: string;
     skills: string[];
     urgentOnly: boolean;
   }) => {
-    // TODO: Implement filter logic
+    // TODO: Implement filter logic for home page
     console.log('Applied filters:', filters);
   };
 
-  const handleAcceptJob = (jobId: number) => {
-    setSelectedJobId(jobId);
-    setIsJobAcceptedModalOpen(true);
+  const handleAcceptJob = async (jobId: number) => {
+    try {
+      setSelectedJobId(jobId);
+
+      // Check if already applied
+      const job = jobsData?.find((j: any) => j.id === jobId);
+      if (job?.has_applied) {
+        // If already applied, open chat modal instead
+        setIsChatModalOpen(true);
+        toast.custom(() => <CustomToast message="You have already applied to this job. Opening chat..." type="info" />, {
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Apply to the business job
+      await applyToBusinessJobMutation.mutateAsync(jobId);
+
+      // Show success modal and toast
+      setIsJobAcceptedModalOpen(true);
+      toast.custom(() => <CustomToast message="Application submitted successfully!" type="success" />, {
+        duration: 5000,
+      });
+    } catch (error: any) {
+      // Handle error
+      const message = error?.message || 'Failed to apply to job. Please try again.';
+      toast.custom(() => <CustomToast message={message} type="error" />, {
+        duration: 7000,
+      });
+    }
   };
 
   const handleMessage = (jobId: number) => {
@@ -127,7 +204,7 @@ const Content = () => {
   };
 
   const selectedJobFull = selectedJobId
-    ? jobRequests.find((job) => job.id === selectedJobId)
+    ? transformedJobs.find((job) => job.id === selectedJobId)
     : null;
 
   // Format amount with K notation
@@ -144,9 +221,6 @@ const Content = () => {
   const jobsCompleted = useMemo(() => dashboardData?.jobs_completed || 0, [dashboardData]);
   const urgentRequestsCount = useMemo(() => dashboardData?.urgent_requests || 0, [dashboardData]);
   const rating = useMemo(() => dashboardData?.rating || 0, [dashboardData]);
-
-  // TODO: Get user name from session/profile
-  const userName = "John Doe";
 
   return (
     <div className="space-y-6">
@@ -208,17 +282,25 @@ const Content = () => {
           </button>
         </div>
 
-        <div className="space-y-4">
-          {jobRequests.map((job) => (
-            <BusinessJobCard
-              key={job.id}
-              {...job}
-              onAcceptJob={handleAcceptJob}
-              onMessage={handleMessage}
-              onViewDetails={handleViewDetails}
-            />
-          ))}
-        </div>
+        {isJobsLoading ? (
+          <LoadingSpinner size="lg" showText text="Loading nearby jobs..." className="py-12" />
+        ) : displayedJobs.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No nearby business jobs available at the moment.</div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {displayedJobs.map((job) => (
+              <BusinessJobCard
+                key={job.id}
+                {...job}
+                onAcceptJob={handleAcceptJob}
+                onMessage={handleMessage}
+                onViewDetails={handleViewDetails}
+              />
+            ))}
+          </div>
+        )}
       </div>
         </>
       )}
@@ -328,10 +410,10 @@ const Content = () => {
             setIsChatModalOpen(false);
             setSelectedJobId(null);
           }}
-          recipientId={selectedJobFull.id}
+          recipientId={selectedJobFull.clientId}
           recipientName={selectedJobFull.clientName}
           recipientInitials={selectedJobFull.clientInitials || ''}
-          recipientPhoto={null}
+          recipientPhoto={selectedJobFull.clientPhoto}
           jobId={selectedJobFull.id}
           jobTitle={selectedJobFull.title}
         />

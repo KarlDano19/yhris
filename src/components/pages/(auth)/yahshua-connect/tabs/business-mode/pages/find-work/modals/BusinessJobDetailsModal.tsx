@@ -11,6 +11,7 @@ import {
   XMarkIcon,
   MapPinIcon,
   ClockIcon,
+  CalendarIcon,
   PaperAirplaneIcon,
   CurrencyDollarIcon,
   ClipboardDocumentIcon,
@@ -18,6 +19,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
+import { formatDateToLocal } from '@/helpers/date';
 import formatPrice from '@/helpers/currencyFormat';
 
 interface BusinessJobDetailsModalProps {
@@ -62,16 +64,12 @@ const BusinessJobDetailsModal = ({
 
   // Format date and time
   const formatDateTime = () => {
-    if (!jobDetailData.date) return 'Date not specified';
-    
-    const dateStr = jobDetailData.date;
-    const date = new Date(dateStr);
-    const dateFormatted = date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-    
+    // Use contract_start_date (backend field name) instead of date
+    const dateField = jobDetailData.contract_start_date || jobDetailData.date;
+    if (!dateField) return 'Date not specified';
+
+    const dateFormatted = formatDateToLocal(dateField, true);
+
     if (jobDetailData.time_from && jobDetailData.time_to) {
       return `${dateFormatted}, ${jobDetailData.time_from} - ${jobDetailData.time_to}`;
     } else if (jobDetailData.time_from) {
@@ -100,6 +98,15 @@ const BusinessJobDetailsModal = ({
       return `${jobDetailData.distance_km} km away`;
     }
     return 'Distance not available';
+  };
+
+  // Format status text (replace underscores with spaces and capitalize)
+  const formatStatus = (status: string) => {
+    if (!status) return '';
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   };
 
   if (!jobId) return null;
@@ -173,7 +180,7 @@ const BusinessJobDetailsModal = ({
                                 </h5>
                                 {jobDetailData?.category && (
                                   <h6 className="text-indigo-dye text-xs md:text-sm mt-1 break-words">
-                                    Category: {jobDetailData.category}
+                                    <span className="font-medium text-savoy-blue">Category:</span> {jobDetailData.category}
                                   </h6>
                                 )}
                                 <h6 className="text-indigo-dye text-xs md:text-sm mt-1 break-words">
@@ -233,14 +240,16 @@ const BusinessJobDetailsModal = ({
                         {/* Job Details - Only show if there's data to display */}
                         {(!isLoading && (
                           jobDetailData?.description ||
-                          jobDetailData?.location ||
                           (jobDetailData?.distance_km !== null && jobDetailData?.distance_km !== undefined) ||
                           jobDetailData?.date ||
+                          jobDetailData?.contract_start_date ||
+                          jobDetailData?.contract_end_date ||
+                          jobDetailData?.time_from ||
+                          jobDetailData?.time_to ||
                           jobDetailData?.budget_type ||
                           jobDetailData?.min_amount ||
                           jobDetailData?.max_amount ||
                           jobDetailData?.hourly_rate ||
-                          jobDetailData?.category ||
                           jobDetailData?.status
                         )) && (
                           <div className="border-t border-gray-300 my-4 pt-4">
@@ -259,19 +268,6 @@ const BusinessJobDetailsModal = ({
                                 </div>
                               )}
 
-                              {/* Location */}
-                              {jobDetailData?.location && (
-                                <div>
-                                  <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                                    <MapPinIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                                    Location
-                                  </h6>
-                                  <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words">
-                                    {jobDetailData.location}
-                                  </p>
-                                </div>
-                              )}
-
                               {/* Distance */}
                               {jobDetailData?.distance_km !== null && jobDetailData?.distance_km !== undefined && (
                                 <div>
@@ -285,15 +281,36 @@ const BusinessJobDetailsModal = ({
                                 </div>
                               )}
 
-                              {/* Schedule */}
-                              {jobDetailData?.date && (
+                              {/* Contract Dates */}
+                              {(jobDetailData?.contract_start_date || jobDetailData?.date) && (
+                                <div>
+                                  <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
+                                    <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+                                    Contract Period
+                                  </h6>
+                                  <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
+                                    {formatDateToLocal(jobDetailData.contract_start_date || jobDetailData.date, true)}
+                                    {jobDetailData.contract_end_date && (
+                                      <> - {formatDateToLocal(jobDetailData.contract_end_date, true)}</>
+                                    )}
+                                    {!jobDetailData.contract_end_date && (
+                                      <span className="text-gray-500"> (Single day)</span>
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Work Hours */}
+                              {(jobDetailData?.time_from || jobDetailData?.time_to) && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <ClockIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                                    Schedule
+                                    Work Hours
                                   </h6>
                                   <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                                    {formatDateTime()}
+                                    {jobDetailData.time_from && jobDetailData.time_to
+                                      ? `${jobDetailData.time_from} - ${jobDetailData.time_to}`
+                                      : jobDetailData.time_from || jobDetailData.time_to}
                                   </p>
                                 </div>
                               )}
@@ -311,19 +328,6 @@ const BusinessJobDetailsModal = ({
                                 </div>
                               )}
 
-                              {/* Category */}
-                              {jobDetailData?.category && (
-                                <div>
-                                  <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                                    <StarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                                    Category
-                                  </h6>
-                                  <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                                    {jobDetailData.category}
-                                  </p>
-                                </div>
-                              )}
-
                               {/* Status */}
                               {jobDetailData?.status && (
                                 <div>
@@ -331,8 +335,8 @@ const BusinessJobDetailsModal = ({
                                     <CheckCircleIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
                                     Status
                                   </h6>
-                                  <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] capitalize">
-                                    {jobDetailData.status}
+                                  <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
+                                    {formatStatus(jobDetailData.status)}
                                   </p>
                                 </div>
                               )}

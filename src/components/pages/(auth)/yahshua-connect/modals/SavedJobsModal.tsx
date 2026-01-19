@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import Modal from '../components/Modal';
 import CustomToast from '@/components/CustomToast';
-import useGetSavedJobs from '../hooks/useGetSavedJobs';
 import useUpdateSavedJobs from '../hooks/useUpdateSavedJobs';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
@@ -19,7 +19,15 @@ interface SavedJobsModalProps {
 }
 
 const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
-  const { data: savedJobsData, isLoading, refetch } = useGetSavedJobs();
+  // Get saved jobs data from cache
+  const queryClient = useQueryClient();
+  const cachedSavedJobs = queryClient
+    .getQueryCache()
+    .find(['savedJobsCache']) as {
+    state: { data: any[] } | undefined;
+  };
+  const savedJobsData = cachedSavedJobs?.state?.data;
+  const isLoading = !savedJobsData;
   const deleteSavedJobMutation = useUpdateSavedJobs();
   const [transformedSavedJobs, setTransformedSavedJobs] = useState<T_SavedJob[]>([]);
 
@@ -78,7 +86,7 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
           () => <CustomToast message="Job removed from saved jobs" type="success" />,
           { duration: 3000 }
         );
-        refetch(); // Refetch to update the list
+        queryClient.invalidateQueries(['savedJobsCache']); // Invalidate cache to update the list
       },
       onError: (error: any) => {
         const errorMessage = error?.message || error || 'Failed to remove job from saved jobs';

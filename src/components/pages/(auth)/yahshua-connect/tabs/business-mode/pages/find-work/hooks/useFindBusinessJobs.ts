@@ -163,7 +163,9 @@ function useFindBusinessJobs(itemsFilter: BusinessJobFilters | null) {
         : itemsFilter?.location,
       itemsFilter?.is_urgent,
       itemsFilter?.status,
-    ], 
+      itemsFilter?.latitude,
+      itemsFilter?.longitude,
+    ],
     ({ pageParam = 1 }) => fetchBusinessJobs(itemsFilter, pageParam, 'listing'),
     {
       getNextPageParam: (lastPage) => lastPage.nextPage,

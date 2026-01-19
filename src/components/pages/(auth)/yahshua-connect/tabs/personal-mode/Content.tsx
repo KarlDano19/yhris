@@ -3,10 +3,9 @@
 import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
-import useGetApplicationByUser from '@/components/pages/(auth)/applicant/application-tracker/hooks/useGetApplicationByUser';
 import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
-import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -23,19 +22,24 @@ const Content = ({ averageRating }: ContentProps) => {
   const router = useRouter();
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  // Memoize empty filters object to prevent unnecessary re-renders
-  const applicationFilters = useMemo(() => ({}), []);
+  // Get applications data from cache
+  const queryClient = useQueryClient();
+  const cachedApplications = queryClient.getQueryCache().find(['jobAppliedCache', {}]) as any;
+  const applicationsData = cachedApplications?.state?.data;
+  const isApplicationsLoading = !applicationsData;
 
-  // Fetch applications data
-  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser(applicationFilters);
+  // Get saved jobs data from cache
+  const cachedSavedJobs = queryClient
+    .getQueryCache()
+    .find(['savedJobsCache']) as {
+    state: { data: any[] } | undefined;
+  };
+  const savedJobsData = cachedSavedJobs?.state?.data;
 
   // Fetch matched jobs (only jobs with matching skills, sorted by match)
   const { data: highMatchJobsData, isLoading: isHighMatchJobsLoading } = useGetHighMatchJobs({
     limit: 10, // Show top 10 jobs with matching skills
   });
-
-  // Fetch saved jobs to check which jobs are saved
-  const { data: savedJobsData } = useGetSavedJobs();
 
   // Calculate counts - handle response structure (might be wrapped in 'data' field or array directly)
   const applicationsCount = useMemo(() => {
