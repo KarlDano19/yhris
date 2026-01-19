@@ -7,6 +7,7 @@ import CustomToast from '@/components/CustomToast';
 import ChatModal from '@/components/common/chat/ChatModal';
 import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 
 // Import new hooks
 import { useStartJob } from './hooks/useStartJob';
@@ -153,6 +154,8 @@ const Content = () => {
         // minutes allowed before/after scheduled times
         clockInMinutesBefore: job.clock_in_minutes_before ?? 60,
         clockOutMinutesAfter: job.clock_out_minutes_after ?? 60,
+        // can start job flag (from backend)
+        canStartJob: job.can_start_job ?? false,
       };
     });
   }, [data]);
@@ -495,15 +498,18 @@ const Content = () => {
               {/* Job Details */}
               <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-700">
                 <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-gray-500" />
-                  <span>{job.time}</span>
+                  <CalendarIcon className="h-4 w-4 text-savoy-blue" />
+                  <span>
+                    {formatDateToLocal(job.contractStartDate, true)}
+                    {job.contractEndDate && ` - ${formatDateToLocal(job.contractEndDate, true)}`}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CurrencyDollarIcon className="h-4 w-4 text-gray-500" />
+                  <CurrencyDollarIcon className="h-4 w-4 text-savoy-blue" />
                   <span className="font-semibold text-green-600">{job.priceRange}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPinIcon className="h-4 w-4 text-gray-500" />
+                  <MapPinIcon className="h-4 w-4 text-savoy-blue" />
                   <span>{job.location}</span>
                 </div>
                 {job.isContractual && (
@@ -647,8 +653,8 @@ const Content = () => {
                     </button>
                   )}
 
-                  {/* Not Started - Show Start Button */}
-                  {job.status === 'accepted' && job.workStatus === 'not_started' && (
+                  {/* Not Started - Show Start Button (only if canStartJob is true) */}
+                  {job.status === 'accepted' && job.workStatus === 'not_started' && job.canStartJob && (
                     <button
                       onClick={() => handleStartJobClick(job)}
                       disabled={isStartingJob}
@@ -657,6 +663,20 @@ const Content = () => {
                       {isStartingJob ? 'Starting...' : 'Start Job'}
                     </button>
                   )}
+
+                  {/* Not Started - Show Disabled Button with Contract Start Date (when contract start date doesn't match today) */}
+                  {job.status === 'accepted' && job.workStatus === 'not_started' && !job.canStartJob && (() => {
+                    const formattedDate = formatDateToLocal(job.contractStartDate, true);
+                    return (
+                      <button
+                        disabled
+                        className="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed"
+                        title={`You can start this job on ${formattedDate}`}
+                      >
+                        Start on {formattedDate}
+                      </button>
+                    );
+                  })()}
 
                   {/* Started - Single Day Fixed Rate Job */}
                   {job.status === 'accepted' &&

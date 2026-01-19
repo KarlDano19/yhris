@@ -14,6 +14,7 @@ import useFindBusinessJobs from './hooks/useFindBusinessJobs';
 import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
 import { useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import formatPrice from '@/helpers/currencyFormat';
@@ -105,16 +106,12 @@ const Content = () => {
 
       // Format date and time
       const formatTime = () => {
-        if (!job.date) return 'Date not specified';
-        
-        const dateStr = job.date;
-        const date = new Date(dateStr);
-        const dateFormatted = date.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric',
-          year: 'numeric'
-        });
-        
+        // Use contract_start_date (backend field name) instead of date
+        const dateField = job.contract_start_date || job.date;
+        if (!dateField) return 'Date not specified';
+
+        const dateFormatted = formatDateToLocal(dateField, true);
+
         if (job.time_from && job.time_to) {
           return `${dateFormatted}, ${job.time_from} - ${job.time_to}`;
         } else if (job.time_from) {

@@ -21,6 +21,18 @@ export type T_DailyProgressStatus = 'submitted' | 'approved' | 'rejected';
 // Time Record Status Type
 export type T_TimeRecordStatus = 'clocked_in' | 'clocked_out';
 
+// Hire Info Type (for displaying hired applicants)
+export type T_HireInfo = {
+  applicationId: number;
+  applicantId: number;
+  applicantName: string;
+  paymentStatus: T_PaymentStatus;
+  workStatus: T_WorkStatus;
+  hasClientReviewed: boolean;
+  dailyProgresses: T_DailyProgress[];
+  timeRecords: T_TimeRecord[];
+};
+
 // Time Record Type (for clock in/out)
 export type T_TimeRecord = {
   id: number;
@@ -467,6 +479,8 @@ export type T_ActiveJob = {
   hourlyRate: number | null;
   timeFrom: string | null;
   timeTo: string | null;
+  // Can start job flag (based on contract start date)
+  canStartJob: boolean;
 };
 
 // Clock In/Out Data Types

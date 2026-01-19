@@ -3,15 +3,19 @@
 import { useState, useMemo } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
+import CustomToast from '@/components/CustomToast';
 import useGetDashboardOverview from './hooks/useGetDashboardOverview';
 import useFindBusinessJobs from './pages/find-work/hooks/useFindBusinessJobs';
+import useApplyToBusinessJob from './pages/find-work/hooks/useApplyToBusinessJob';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
 
@@ -39,6 +43,9 @@ const Content = () => {
 
   // Fetch business jobs from API (without location filter - we'll calculate distance on frontend)
   const { data: jobsData, isLoading: isJobsLoading } = useFindBusinessJobs({});
+
+  // Mutation hook for applying to business jobs
+  const applyToBusinessJobMutation = useApplyToBusinessJob();
 
   // Transform API business jobs data to BusinessJobCard format
   const transformedJobs = useMemo(() => {
@@ -71,15 +78,11 @@ const Content = () => {
 
       // Format date and time
       const formatTime = () => {
-        if (!job.date) return 'Date not specified';
+        // Use contract_start_date (backend field name) instead of date
+        const dateField = job.contract_start_date || job.date;
+        if (!dateField) return 'Date not specified';
 
-        const dateStr = job.date;
-        const date = new Date(dateStr);
-        const dateFormatted = date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
+        const dateFormatted = formatDateToLocal(dateField, true);
 
         if (job.time_from && job.time_to) {
           return `${dateFormatted}, ${job.time_from} - ${job.time_to}`;
@@ -153,9 +156,36 @@ const Content = () => {
     console.log('Applied filters:', filters);
   };
 
-  const handleAcceptJob = (jobId: number) => {
-    setSelectedJobId(jobId);
-    setIsJobAcceptedModalOpen(true);
+  const handleAcceptJob = async (jobId: number) => {
+    try {
+      setSelectedJobId(jobId);
+
+      // Check if already applied
+      const job = jobsData?.find((j: any) => j.id === jobId);
+      if (job?.has_applied) {
+        // If already applied, open chat modal instead
+        setIsChatModalOpen(true);
+        toast.custom(() => <CustomToast message="You have already applied to this job. Opening chat..." type="info" />, {
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Apply to the business job
+      await applyToBusinessJobMutation.mutateAsync(jobId);
+
+      // Show success modal and toast
+      setIsJobAcceptedModalOpen(true);
+      toast.custom(() => <CustomToast message="Application submitted successfully!" type="success" />, {
+        duration: 5000,
+      });
+    } catch (error: any) {
+      // Handle error
+      const message = error?.message || 'Failed to apply to job. Please try again.';
+      toast.custom(() => <CustomToast message={message} type="error" />, {
+        duration: 7000,
+      });
+    }
   };
 
   const handleMessage = (jobId: number) => {

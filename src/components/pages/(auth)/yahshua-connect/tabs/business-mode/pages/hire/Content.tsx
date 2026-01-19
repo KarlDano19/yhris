@@ -27,20 +27,12 @@ import { useReviewDailyProgress } from './hooks/useReviewDailyProgress';
 import { useSubmitPayment } from './hooks/useSubmitPayment';
 import { useSubmitApplicantReview } from './hooks/useSubmitApplicantReview';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
 
-import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData } from '@/types/business-mode';
+import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData, T_HireInfo } from '@/types/business-mode';
 
 import { PlusIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
-
-// Helper to format date from API (YYYY-MM-DD) to display format (Dec 20)
-const formatDateForDisplay = (dateStr: string | null): string => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${monthNames[date.getMonth()]} ${date.getDate()}`;
-};
 
 // Helper to format time from API (HH:MM) to display format (8:00 AM)
 const formatTimeForDisplay = (timeFrom: string | null, timeTo: string | null): string => {
@@ -99,7 +91,7 @@ const transformApplicationToApplicant = (application: T_BusinessJobApplication) 
   reviewsCount: application.applicant_reviews_count || 0,
   description: '', // Will be filled from skills or work experience
   services: application.applicant_skills || [],
-  appliedDate: application.created_at ? new Date(application.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+  appliedDate: application.created_at ? formatDateToLocal(application.created_at, true) : '',
   status: application.status,
   email: application.applicant_email,
   phone: application.applicant_mobile,
@@ -149,16 +141,12 @@ const transformApplicationToProfile = (application: T_BusinessJobApplication): T
     initials: getInitials(application.applicant_name || ''),
     rating: application.applicant_average_rating || 0,
     reviewsCount: application.applicant_reviews_count || 0,
-    appliedDate: application.created_at 
-      ? new Date(application.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-      : '',
+    appliedDate: application.created_at ? formatDateToLocal(application.created_at, true) : '',
     applicationMessage: '', // Application message not available in API response
     email: application.applicant_email || '',
     phone: application.applicant_mobile || '',
     location: application.applicant_address || '',
-    dateOfBirth: application.applicant_birth_date 
-      ? new Date(application.applicant_birth_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-      : '',
+    dateOfBirth: application.applicant_birth_date ? formatDateToLocal(application.applicant_birth_date, true) : '',
     status: application.status,
     skills: application.applicant_skills || [],
     workExperience: workExperience,
@@ -441,18 +429,18 @@ const Content = () => {
     setIsUpdateJobModalOpen(true);
   };
 
-  const handleSubmitPaymentProofFromJob = (jobId: number) => {
+  const handleSubmitPaymentProofFromJob = (jobId: number, applicationId: number) => {
     const job = jobPostings.find((j) => j.id === jobId);
     if (!job) return;
 
-    // Find accepted application
-    const acceptedApp = job.applications?.find((app) => app.status === 'accepted');
-    if (!acceptedApp) return;
+    // Find specific application by ID
+    const application = job.applications?.find((app) => app.id === applicationId);
+    if (!application) return;
 
     setSelectedHireForPayment({
-      id: acceptedApp.id,
+      id: application.id,
       serviceName: job.job_title,
-      providerName: acceptedApp.applicant_name || 'Unknown',
+      providerName: application.applicant_name || 'Unknown',
       priceRange: formatPriceRange(job),
     });
     setIsSubmitPaymentProofModalOpen(true);
@@ -483,17 +471,17 @@ const Content = () => {
     );
   };
 
-  const handleReviewApplicantFromJob = (jobId: number) => {
+  const handleReviewApplicantFromJob = (jobId: number, applicationId: number) => {
     const job = jobPostings.find((j) => j.id === jobId);
     if (!job) return;
 
-    // Find accepted application
-    const acceptedApp = job.applications?.find((app) => app.status === 'accepted');
-    if (!acceptedApp) return;
+    // Find specific application by ID
+    const application = job.applications?.find((app) => app.id === applicationId);
+    if (!application) return;
 
     setSelectedHireForReview({
-      id: acceptedApp.id,
-      applicantName: acceptedApp.applicant_name || 'Unknown',
+      id: application.id,
+      applicantName: application.applicant_name || 'Unknown',
       jobTitle: job.job_title,
     });
     setIsReviewApplicantModalOpen(true);
@@ -523,13 +511,15 @@ const Content = () => {
     );
   };
 
-  const handleViewDailyProgress = (jobId: number) => {
+  const handleViewDailyProgress = (jobId: number, applicationId: number) => {
     setSelectedJobId(jobId);
+    setSelectedApplicationId(applicationId);
     setIsViewDailyProgressModalOpen(true);
   };
 
-  const handleViewTimeLogs = (jobId: number) => {
+  const handleViewTimeLogs = (jobId: number, applicationId: number) => {
     setSelectedJobId(jobId);
+    setSelectedApplicationId(applicationId);
     setIsViewTimeLogsModalOpen(true);
   };
 
@@ -560,34 +550,35 @@ const Content = () => {
   const selectedApplicantForHire = selectedApplication ? transformApplicationToApplicant(selectedApplication) : null;
   const applicantProfileData = selectedApplication ? transformApplicationToProfile(selectedApplication) : null;
 
-  // Check if job has accepted hire
-  const getAcceptedHire = (job: T_BusinessJob) => {
-    const acceptedApp = job.applications?.find((app) => app.status === 'accepted');
-    if (!acceptedApp) return null;
-    return {
-      applicantId: acceptedApp.applicant,
-      applicantName: acceptedApp.applicant_name || 'Unknown',
-      paymentStatus: acceptedApp.payment_status,
-      workStatus: acceptedApp.work_status,
-      hasClientReviewed: acceptedApp.has_client_reviewed || false,
-    };
+  // Get all accepted hires for a job
+  const getAcceptedHires = (job: T_BusinessJob): T_HireInfo[] => {
+    const acceptedApps = job.applications?.filter((app) => app.status === 'accepted') || [];
+    return acceptedApps.map((app) => ({
+      applicationId: app.id,
+      applicantId: app.applicant,
+      applicantName: app.applicant_name || 'Unknown',
+      paymentStatus: app.payment_status,
+      workStatus: app.work_status,
+      hasClientReviewed: app.has_client_reviewed || false,
+      dailyProgresses: app.daily_progresses || [],
+      timeRecords: app.time_records || [],
+    }));
   };
 
   // Check if edit/delete should be disabled for a job
-  // Disabled when there's a hired applicant whose work is not yet completed and reviewed
+  // Disabled when there's ANY hired applicant whose work is not yet completed and reviewed
   const shouldDisableEditDelete = (job: T_BusinessJob) => {
-    const hireInfo = getAcceptedHire(job);
+    const hireInfos = getAcceptedHires(job);
 
-    // No hired applicant - allow edit/delete
-    if (!hireInfo) return false;
+    // No hired applicants - allow edit/delete
+    if (hireInfos.length === 0) return false;
 
-    // Work completed AND client has reviewed - allow edit/delete
-    if (hireInfo.workStatus === 'completed' && hireInfo.hasClientReviewed) {
-      return false;
-    }
+    // Disable if ANY hire is not completed & reviewed
+    const hasActiveHires = hireInfos.some((hire) =>
+      hire.workStatus !== 'completed' || !hire.hasClientReviewed
+    );
 
-    // Work in progress or not reviewed yet - disable edit/delete
-    return true;
+    return hasActiveHires;
   };
 
   return (
@@ -621,8 +612,8 @@ const Content = () => {
           {/* Job Postings List */}
           <div className="space-y-4">
             {jobPostings.map((job) => {
-              const hireInfo = getAcceptedHire(job);
-              const isHired = !!hireInfo;
+              const hiredApplicants = getAcceptedHires(job);
+              const isHired = hiredApplicants.length > 0;
               const applicantsCount = job.applications?.length || 0;
 
               return (
@@ -672,8 +663,8 @@ const Content = () => {
                     <div className="flex items-center gap-2">
                       <ClockIcon className="h-4 w-4" />
                       <span>
-                        {formatDateForDisplay(job.contract_start_date)}
-                        {job.contract_end_date && ` - ${formatDateForDisplay(job.contract_end_date)}`}
+                        {formatDateToLocal(job.contract_start_date, true)}
+                        {job.contract_end_date && ` - ${formatDateToLocal(job.contract_end_date, true)}`}
                         {job.time_from && `, ${formatTimeForDisplay(job.time_from, job.time_to)}`}
                       </span>
                     </div>
@@ -691,63 +682,83 @@ const Content = () => {
                     </div>
                   </div>
 
-                  {/* Hired Info */}
-                  {isHired && hireInfo && (
+                  {/* Hired Applicants Section */}
+                  {isHired && hiredApplicants.length > 0 && (
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-savoy-blue mb-2">Hired: {hireInfo.applicantName}</p>
-                      
-                      {/* Contractual Job - View Time Logs and/or Daily Progress */}
-                      {job.contract_end_date && hireInfo.workStatus !== 'not_started' && (
-                        <div className="flex flex-wrap gap-3 mb-2">
-                          {/* Hourly rate jobs - always show View Time Logs */}
-                          {job.budget_type === 'hourly_rate' && (
-                            <button
-                              onClick={() => handleViewTimeLogs(job.id)}
-                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
-                            >
-                              <ClockIcon className="h-4 w-4" />
-                              View Time Logs
-                            </button>
-                          )}
-                          {/* Fixed rate jobs OR hourly rate jobs with daily progress required - show View Daily Progress */}
-                          {(job.budget_type === 'fixed_rate' || (job.budget_type === 'hourly_rate' && job.is_daily_progress_required)) && (
-                            <button
-                              onClick={() => handleViewDailyProgress(job.id)}
-                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
-                            >
-                              <DocumentTextIcon className="h-4 w-4" />
-                              View Daily Progress
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      <p className="text-sm font-semibold text-gray-700 mb-3">
+                        Hired Applicants ({hiredApplicants.length})
+                      </p>
 
-                      {hireInfo.paymentStatus === 'paid' ? (
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-700 flex items-center gap-1">
-                            Payment completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                          </p>
-                          {!hireInfo.hasClientReviewed && (
-                            <button
-                              onClick={() => handleReviewApplicantFromJob(job.id)}
-                              className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
-                            >
-                              Review Applicant
-                            </button>
-                          )}
-                        </div>
-                      ) : hireInfo.workStatus === 'completed' ? (
-                        <button
-                          onClick={() => handleSubmitPaymentProofFromJob(job.id)}
-                          className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
-                        >
-                          Submit Payment Proof
-                        </button>
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          Work status: {hireInfo.workStatus === 'started' ? 'In Progress' : 'Not Started'}
-                        </p>
-                      )}
+                      <div className={`space-y-3 ${hiredApplicants.length > 3 ? 'max-h-[400px] overflow-y-auto pr-2' : ''}`}>
+                        {hiredApplicants.map((hire) => (
+                          <div
+                            key={hire.applicationId}
+                            className="bg-white border border-gray-200 rounded-lg p-4"
+                          >
+                            <p className="text-sm font-semibold text-savoy-blue mb-2">
+                              {hire.applicantName}
+                            </p>
+
+                            {/* View Time Logs & Daily Progress */}
+                            {job.contract_end_date && hire.workStatus !== 'not_started' && (
+                              <div className="flex flex-wrap gap-3 mb-2">
+                                {job.budget_type === 'hourly_rate' && (
+                                  <button
+                                    onClick={() => handleViewTimeLogs(job.id, hire.applicationId)}
+                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
+                                  >
+                                    <ClockIcon className="h-4 w-4" />
+                                    View Time Logs
+                                  </button>
+                                )}
+
+                                {(job.budget_type === 'fixed_rate' || (job.budget_type === 'hourly_rate' && job.is_daily_progress_required)) && (
+                                  <button
+                                    onClick={() => handleViewDailyProgress(job.id, hire.applicationId)}
+                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
+                                  >
+                                    <DocumentTextIcon className="h-4 w-4" />
+                                    View Daily Progress
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Payment & Review Status/Actions */}
+                            {hire.paymentStatus === 'paid' ? (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 flex items-center gap-1">
+                                  Payment completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                </p>
+                                {!hire.hasClientReviewed && (
+                                  <button
+                                    onClick={() => handleReviewApplicantFromJob(job.id, hire.applicationId)}
+                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
+                                  >
+                                    Review Applicant
+                                  </button>
+                                )}
+                                {hire.hasClientReviewed && (
+                                  <p className="text-sm text-green-700 flex items-center gap-1">
+                                    Review completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                  </p>
+                                )}
+                              </div>
+                            ) : hire.workStatus === 'completed' ? (
+                              <button
+                                onClick={() => handleSubmitPaymentProofFromJob(job.id, hire.applicationId)}
+                                className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
+                              >
+                                Submit Payment Proof
+                              </button>
+                            ) : (
+                              <p className="text-sm text-gray-600">
+                                Work status: {hire.workStatus === 'started' ? 'In Progress' : 'Not Started'}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -876,7 +887,7 @@ const Content = () => {
           applicant={selectedApplicantForHire}
           jobDetails={{
             title: selectedJob.job_title,
-            scheduledDate: formatDateForDisplay(selectedJob.contract_start_date) + (selectedJob.contract_end_date ? ` - ${formatDateForDisplay(selectedJob.contract_end_date)}` : ''),
+            scheduledDate: formatDateToLocal(selectedJob.contract_start_date, true) + (selectedJob.contract_end_date ? ` - ${formatDateToLocal(selectedJob.contract_end_date, true)}` : ''),
             scheduledTime: formatTimeForDisplay(selectedJob.time_from, selectedJob.time_to),
             priceRange: formatPriceRange(selectedJob),
           }}
@@ -965,40 +976,41 @@ const Content = () => {
       )}
 
       {/* View Daily Progress Modal */}
-      {isViewDailyProgressModalOpen && selectedJob && (
-        <ViewDailyProgressModal
-          isOpen={isViewDailyProgressModalOpen}
-          onClose={() => {
-            setIsViewDailyProgressModalOpen(false);
-            setSelectedJobId(null);
-          }}
-          jobTitle={selectedJob.job_title}
-          dailyProgresses={
-            selectedJob.applications
-              ?.find((app) => app.status === 'accepted')
-              ?.daily_progresses || []
-          }
-          isClient={true}
-          onReview={handleReviewDailyProgress}
-        />
-      )}
+      {isViewDailyProgressModalOpen && selectedJob && selectedApplicationId && (() => {
+        const application = selectedJob.applications?.find((app) => app.id === selectedApplicationId);
+        return application ? (
+          <ViewDailyProgressModal
+            isOpen={isViewDailyProgressModalOpen}
+            onClose={() => {
+              setIsViewDailyProgressModalOpen(false);
+              setSelectedJobId(null);
+              setSelectedApplicationId(null);
+            }}
+            jobTitle={`${selectedJob.job_title} - ${application.applicant_name || 'Unknown'}`}
+            dailyProgresses={application.daily_progresses || []}
+            isClient={true}
+            onReview={handleReviewDailyProgress}
+          />
+        ) : null;
+      })()}
 
       {/* View Time Logs Modal */}
-      {isViewTimeLogsModalOpen && selectedJob && (() => {
-        const acceptedApp = selectedJob.applications?.find((app) => app.status === 'accepted');
-        return (
+      {isViewTimeLogsModalOpen && selectedJob && selectedApplicationId && (() => {
+        const application = selectedJob.applications?.find((app) => app.id === selectedApplicationId);
+        return application ? (
           <ViewTimeLogsModal
             isOpen={isViewTimeLogsModalOpen}
             onClose={() => {
               setIsViewTimeLogsModalOpen(false);
               setSelectedJobId(null);
+              setSelectedApplicationId(null);
             }}
             jobTitle={selectedJob.job_title}
-            applicantName={acceptedApp?.applicant_name || 'Unknown'}
-            timeRecords={acceptedApp?.time_records || []}
+            applicantName={application.applicant_name || 'Unknown'}
+            timeRecords={application.time_records || []}
             hourlyRate={selectedJob.hourly_rate}
           />
-        );
+        ) : null;
       })()}
 
       {/* Review Applicant Modal */}
