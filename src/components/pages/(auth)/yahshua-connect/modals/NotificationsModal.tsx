@@ -48,6 +48,27 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       } catch (e) {
         // fallback: use original
       }
+
+      // If the notification points to a personal-mode job, navigate to personal-mode
+      // and open the job details by passing job_id as query param.
+      try {
+        if (typeof target === 'string' && target.includes('/personal-mode')) {
+          // Extract numeric id if present in the path (last number)
+          let extractedId: number | null = null;
+          const m = String(target).match(/(\d+)(?!.*\d)/);
+          if (m) extractedId = parseInt(m[1], 10);
+
+          if (extractedId) {
+            // Navigate to the Jobs page and pass job_id so the Jobs page can open/highlight the job
+            router.push(`/personal-mode/jobs`);
+            onClose();
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore and fallback to default navigation
+      }
+
       router.push(target);
       onClose();
     }

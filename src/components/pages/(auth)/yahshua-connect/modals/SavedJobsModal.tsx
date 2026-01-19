@@ -1,6 +1,5 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
 
@@ -20,10 +19,46 @@ interface SavedJobsModalProps {
   onClose: () => void;
 }
 
-const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
+interface SavedJobsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  highlightJobId?: number | null;
+}
+
+const SavedJobsModal = ({ isOpen, onClose, highlightJobId }: SavedJobsModalProps) => {
   const { data: savedJobsData, isLoading, refetch } = useGetSavedJobs();
   const deleteSavedJobMutation = useUpdateSavedJobs();
   const [transformedSavedJobs, setTransformedSavedJobs] = useState<T_SavedJob[]>([]);
+  const [selectedSavedJobId, setSelectedSavedJobId] = useState<number | null>(null);
+  const router = useRouter();
+
+  // If parent passes a highlightJobId (from notification), reflect it in selected state
+  useEffect(() => {
+    if (highlightJobId != null) {
+      setSelectedSavedJobId(highlightJobId);
+    }
+  }, [highlightJobId]);
+
+  // Scroll to and highlight the selected saved job when selection changes
+  useEffect(() => {
+    if (selectedSavedJobId == null) return;
+    // Delay to ensure modal and list have rendered
+    const t = setTimeout(() => {
+      try {
+        const el = document.getElementById(`saved-job-${selectedSavedJobId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          }, 3000);
+        }
+      } catch (err) {
+        // ignore failures
+      }
+    }, 120);
+    return () => clearTimeout(t);
+  }, [selectedSavedJobId]);
 
   // Transform API data to match the display format
   useEffect(() => {
@@ -73,6 +108,20 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
     setTransformedSavedJobs(transformed);
   }, [savedJobsData]);
 
+  // If highlightJobId refers to a savedJobId or job id, resolve it to the transformed job.id
+  useEffect(() => {
+    if (highlightJobId == null) return;
+    if (!transformedSavedJobs || transformedSavedJobs.length === 0) return;
+    const found = transformedSavedJobs.find((j: any) =>
+      j.id === highlightJobId ||
+      j.savedJobId === highlightJobId ||
+      j.savedJobId === Number(highlightJobId)
+    );
+    if (found) {
+      setSelectedSavedJobId(found.id);
+    }
+  }, [highlightJobId, transformedSavedJobs]);
+
   const handleUnsave = (jobPostingId: number) => {
     deleteSavedJobMutation.mutate(jobPostingId, {
       onSuccess: () => {
@@ -110,10 +159,19 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {transformedSavedJobs.map((job) => (
+          <div className="max-h-[70vh] sm:max-h-[60vh] overflow-y-auto pr-2 space-y-4">
+            {transformedSavedJobs.map((job) => (
             <div
+              id={`saved-job-${job.id}`}
               key={job.id}
-              className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                setSelectedSavedJobId(job.id);
+                router.push(`job-applicant-form/${job.id}`);
+              }}
+              role="button"
+              className={`flex items-start gap-4 p-4 border rounded-xl transition-colors ${
+                selectedSavedJobId === job.id ? 'border-savoy-blue border-2' : 'border-gray-200 hover:bg-gray-50'
+              } cursor-pointer`}
             >
               <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
                 {job.logoUrl ? (
@@ -142,7 +200,10 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
                 <p className="text-sm font-semibold text-savoy-blue mb-2">{job.salary}</p>
               </div>
               <button
-                onClick={() => handleUnsave(job.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUnsave(job.id);
+                }}
                 className="text-savoy-blue hover:text-blue-700 transition-colors flex-shrink-0"
                 title="Remove from saved jobs"
               >
@@ -150,6 +211,7 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
               </button>
             </div>
           ))}
+            </div>
         </div>
       )}
     </Modal>

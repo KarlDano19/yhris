@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, cloneElement, isValidElement, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Tooltip } from 'react-tooltip';
 import { CalendarIcon, UserGroupIcon, DocumentTextIcon, BookmarkIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
@@ -46,6 +46,27 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
   const [isSavedJobsModalOpen, setIsSavedJobsModalOpen] = useState(false);
   const [isTrainingsModalOpen, setIsTrainingsModalOpen] = useState(false);
+  const [savedJobsHighlightId, setSavedJobsHighlightId] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+
+  // Open SavedJobsModal when URL contains openSavedJobs param (used by notifications)
+  useEffect(() => {
+    if (isBusinessMode) return;
+    try {
+      const open = searchParams?.get?.('openSavedJobs');
+      const highlight = searchParams?.get?.('highlight');
+      if (open) {
+        setSavedJobsHighlightId(highlight ? parseInt(highlight, 10) : null);
+        setIsSavedJobsModalOpen(true);
+        // clear the query params from URL
+        try {
+          router.replace(pathname || '/personal-mode');
+        } catch (err) {}
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [searchParams?.toString(), isBusinessMode, router, pathname]);
 
   // Personal mode data hooks
   const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
@@ -400,7 +421,14 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
           {isSavedJobsModalOpen && (
             <SavedJobsModal
               isOpen={isSavedJobsModalOpen}
-              onClose={() => setIsSavedJobsModalOpen(false)}
+              onClose={() => {
+                setIsSavedJobsModalOpen(false);
+                setSavedJobsHighlightId(null);
+                try {
+                  router.replace(pathname || '/personal-mode');
+                } catch (err) {}
+              }}
+              highlightJobId={savedJobsHighlightId}
             />
           )}
 
