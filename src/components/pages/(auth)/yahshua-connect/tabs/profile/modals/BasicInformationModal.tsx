@@ -30,12 +30,6 @@ const LocationDisplayMap = dynamic<{ latitude: number; longitude: number; addres
   }
 );
 
-interface LocationData {
-  address: string;
-  latitude: number;
-  longitude: number;
-}
-
 interface BasicInformationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -50,7 +44,7 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
 
   // Watch form values for autocomplete inputs
   const nationalityValue = watch('nationality');
-  const locationValue = watch('location');
+  const addressValue = watch('address');
   const latitudeValue = watch('latitude');
   const longitudeValue = watch('longitude');
 
@@ -96,25 +90,25 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
       );
       const data = await response.json();
       const address = data.display_name || `${roundedLatitude}, ${roundedLongitude}`;
-      
-      setValue('location', address);
+
+      setValue('address', address);
       setValue('latitude', roundedLatitude);
       setValue('longitude', roundedLongitude);
-      
+
       toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
     } catch (error) {
       // If reverse geocoding fails, just use coordinates
-      setValue('location', `${roundedLatitude}, ${roundedLongitude}`);
+      setValue('address', `${roundedLatitude}, ${roundedLongitude}`);
       setValue('latitude', roundedLatitude);
       setValue('longitude', roundedLongitude);
-      
+
       toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
     }
   };
 
   // Handle delete location
   const handleDeleteLocation = () => {
-    setValue('location', '');
+    setValue('address', '');
     setValue('latitude', null as any);
     setValue('longitude', null as any);
     toast.custom(() => <CustomToast message="Location removed. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
@@ -515,25 +509,20 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
                 </button>
               </div>
             </div>
-            
+
             {/* Display current location address */}
-            {locationValue && (
+            {addressValue && latitudeValue && longitudeValue && (
               <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-700">{locationValue}</p>
-                {latitudeValue && longitudeValue && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Coordinates: {latitudeValue}, {longitudeValue}
-                  </p>
-                )}
+                <p className="text-sm text-gray-700">{addressValue}</p>
               </div>
             )}
-            
+
             {/* Read-only map display */}
             {latitudeValue && longitudeValue ? (
               <LocationDisplayMap
                 latitude={latitudeValue}
                 longitude={longitudeValue}
-                address={locationValue || ''}
+                address={addressValue || ''}
               />
             ) : (
               <div className="h-[300px] bg-gray-100 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-gray-300">

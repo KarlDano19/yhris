@@ -42,7 +42,7 @@ export type T_BasicInfo = {
   email: string;
   phone: string;
   landline?: string;
-  location: string;
+  address: string;
   latitude?: number | null;
   longitude?: number | null;
   birthday: Date | null;
