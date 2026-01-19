@@ -16,9 +16,10 @@ import { T_SavedJob } from '@/types/personal-mode';
 interface SavedJobsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  highlightJobId?: number | null;
 }
 
-const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
+const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsModalProps) => {
   // Get saved jobs data from cache
   const queryClient = useQueryClient();
   const cachedSavedJobs = queryClient
@@ -79,6 +80,26 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
     setTransformedSavedJobs(transformed);
   }, [savedJobsData]);
 
+  // Scroll to and highlight a job when highlightJobId is provided
+  useEffect(() => {
+    if (!highlightJobId || transformedSavedJobs.length === 0) return;
+    const idToFind = `saved-job-${highlightJobId}`;
+    setTimeout(() => {
+      try {
+        const el = document.getElementById(idToFind);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          }, 3000);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }, 200);
+  }, [highlightJobId, transformedSavedJobs]);
+
   const handleUnsave = (jobPostingId: number) => {
     deleteSavedJobMutation.mutate(jobPostingId, {
       onSuccess: () => {
@@ -119,6 +140,7 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           {transformedSavedJobs.map((job) => (
             <div
+              id={`saved-job-${job.id}`}
               key={job.id}
               className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
             >

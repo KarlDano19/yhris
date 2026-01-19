@@ -27,6 +27,7 @@ interface JobCardProps {
   onApply?: () => void;
   onCardClick?: () => void;
   isSelected?: boolean;
+  isHighlighted?: boolean;
 }
 
 const JobCard = ({
@@ -45,6 +46,7 @@ const JobCard = ({
   onApply,
   onCardClick,
   isSelected = false,
+  isHighlighted = false,
 }: JobCardProps) => {
   const [isSaved, setIsSaved] = useState(saved);
   const [isSaving, setIsSaving] = useState(false);
@@ -118,10 +120,11 @@ const JobCard = ({
   };
 
   return (
-    <div 
+    <div
+      id={`job-${id}`}
       className={`bg-white rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow cursor-pointer ${
         isSelected ? 'border-savoy-blue border-2' : 'border-gray-200'
-      }`}
+      } ${isHighlighted ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
       onClick={onCardClick}
     >
       <div className="flex items-start justify-between mb-3">
