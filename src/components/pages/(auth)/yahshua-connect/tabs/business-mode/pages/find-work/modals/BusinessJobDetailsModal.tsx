@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment } from 'react';
 
 import Image from 'next/image';
 
@@ -9,13 +9,11 @@ import useGetBusinessJobDetails from '../hooks/useGetBusinessJobDetails';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import {
   XMarkIcon,
-  MapPinIcon,
   ClockIcon,
   CalendarIcon,
   PaperAirplaneIcon,
   CurrencyDollarIcon,
   ClipboardDocumentIcon,
-  StarIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
@@ -36,13 +34,6 @@ const BusinessJobDetailsModal = ({
   onAcceptJob,
 }: BusinessJobDetailsModalProps) => {
   const { data, isLoading } = useGetBusinessJobDetails(jobId);
-  const [jobDetailData, setJobDetailData] = useState<any>({});
-
-  useEffect(() => {
-    if (data) {
-      setJobDetailData(data);
-    }
-  }, [data]);
 
   const handleAcceptJob = () => {
     if (jobId) {
@@ -62,40 +53,24 @@ const BusinessJobDetailsModal = ({
     return clientName.substring(0, 2).toUpperCase();
   };
 
-  // Format date and time
-  const formatDateTime = () => {
-    // Use contract_start_date (backend field name) instead of date
-    const dateField = jobDetailData.contract_start_date || jobDetailData.date;
-    if (!dateField) return 'Date not specified';
-
-    const dateFormatted = formatDateToLocal(dateField, true);
-
-    if (jobDetailData.time_from && jobDetailData.time_to) {
-      return `${dateFormatted}, ${jobDetailData.time_from} - ${jobDetailData.time_to}`;
-    } else if (jobDetailData.time_from) {
-      return `${dateFormatted}, ${jobDetailData.time_from}`;
-    }
-    return dateFormatted;
-  };
-
   // Format price range
   const formatPriceRange = () => {
-    if (jobDetailData.budget_type === 'Range' && jobDetailData.min_amount && jobDetailData.max_amount) {
-      return `₱ ${formatPrice(jobDetailData.min_amount)} - ₱ ${formatPrice(jobDetailData.max_amount)}`;
-    } else if (jobDetailData.hourly_rate) {
-      return `₱ ${formatPrice(jobDetailData.hourly_rate)}/hour`;
-    } else if (jobDetailData.min_amount) {
-      return `₱ ${formatPrice(jobDetailData.min_amount)}`;
-    } else if (jobDetailData.max_amount) {
-      return `₱ ${formatPrice(jobDetailData.max_amount)}`;
+    if (data?.budget_type === 'hourly_rate' && data?.hourly_rate) {
+      return `₱ ${formatPrice(data.hourly_rate)}/hour`;
+    } else if (data?.budget_type === 'fixed_rate' && data?.min_amount && data?.max_amount) {
+      return `₱ ${formatPrice(data.min_amount)} - ₱ ${formatPrice(data.max_amount)}`;
+    } else if (data?.min_amount) {
+      return `₱ ${formatPrice(data.min_amount)}`;
+    } else if (data?.max_amount) {
+      return `₱ ${formatPrice(data.max_amount)}`;
     }
     return 'Price not specified';
   };
 
   // Format distance
   const formatDistance = () => {
-    if (jobDetailData.distance_km !== null && jobDetailData.distance_km !== undefined) {
-      return `${jobDetailData.distance_km} km away`;
+    if (data?.distance_km !== null && data?.distance_km !== undefined) {
+      return `${data.distance_km} km away`;
     }
     return 'Distance not available';
   };
@@ -148,12 +123,12 @@ const BusinessJobDetailsModal = ({
                         type="button"
                         onClick={handleAcceptJob}
                         className={`px-6 py-2 text-white rounded-lg font-medium transition-colors text-sm ${
-                          jobDetailData?.has_applied
+                          data?.has_applied
                             ? 'bg-green-600 hover:bg-green-700'
                             : 'bg-savoy-blue hover:bg-blue-700'
                         }`}
                       >
-                        {jobDetailData?.has_applied ? 'Message Client' : 'Accept This Job'}
+                        {data?.has_applied ? 'Message Client' : 'Accept This Job'}
                       </button>
                       <button
                         type="button"
@@ -176,20 +151,20 @@ const BusinessJobDetailsModal = ({
                               </span>
                               <div className="flex-1 min-w-0">
                                 <h5 className="text-lg md:text-xl font-semibold text-indigo-dye break-words">
-                                  {!isLoading ? jobDetailData?.job_title || 'Loading job title...' : 'Loading job title...'}
+                                  {!isLoading ? data?.job_title || 'Loading job title...' : 'Loading job title...'}
                                 </h5>
-                                {jobDetailData?.category && (
+                                {data?.category && (
                                   <h6 className="text-indigo-dye text-xs md:text-sm mt-1 break-words">
-                                    <span className="font-medium text-savoy-blue">Category:</span> {jobDetailData.category}
+                                    <span className="font-medium text-savoy-blue">Category:</span> {data.category}
                                   </h6>
                                 )}
                                 <h6 className="text-indigo-dye text-xs md:text-sm mt-1 break-words">
-                                  {!isLoading ? jobDetailData?.location || 'Loading location...' : 'Loading location...'}
+                                  {!isLoading ? data?.location || 'Loading location...' : 'Loading location...'}
                                 </h6>
                               </div>
                             </div>
                           </div>
-                          {jobDetailData?.is_urgent && (
+                          {data?.is_urgent && (
                             <div className="flex-shrink-0">
                               <span className="inline-block px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
                                 Urgent
@@ -199,15 +174,15 @@ const BusinessJobDetailsModal = ({
                         </div>
 
                         {/* Client Information */}
-                        {jobDetailData?.created_by_name && (
+                        {data?.created_by_name && (
                           <div className="border-t border-gray-300 my-4 pt-4">
                             <h5 className="text-lg md:text-xl font-semibold text-indigo-dye mb-3">Client Information</h5>
                             <div className="flex items-start gap-4">
-                              {jobDetailData.created_by_photo && jobDetailData.created_by_photo !== '/assets/no-user.png' ? (
+                              {data.created_by_photo && data.created_by_photo !== '/assets/no-user.png' ? (
                                 <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
                                   <Image
-                                    src={jobDetailData.created_by_photo}
-                                    alt={jobDetailData.created_by_name}
+                                    src={data.created_by_photo}
+                                    alt={data.created_by_name}
                                     width={56}
                                     height={56}
                                     className="w-full h-full object-cover"
@@ -216,20 +191,20 @@ const BusinessJobDetailsModal = ({
                                 </div>
                               ) : (
                                 <div className="w-14 h-14 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-semibold text-base flex-shrink-0">
-                                  {getInitials(jobDetailData.created_by_name)}
+                                  {getInitials(data.created_by_name)}
                                 </div>
                               )}
                               <div className="flex-1">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                  {jobDetailData.created_by_name}
+                                  {data.created_by_name}
                                 </h3>
                                 <div className="flex items-center gap-1">
                                   <StarIconSolid className="h-4 w-4 text-yellow-400" />
                                   <span className="text-sm font-semibold text-gray-700">
-                                    {jobDetailData.created_by_rating || 0}
+                                    {data.created_by_rating || 0}
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
-                                    ({jobDetailData.created_by_reviews_count || 0} reviews)
+                                    ({data.created_by_reviews_count || 0} reviews)
                                   </span>
                                 </div>
                               </div>
@@ -239,37 +214,36 @@ const BusinessJobDetailsModal = ({
 
                         {/* Job Details - Only show if there's data to display */}
                         {(!isLoading && (
-                          jobDetailData?.description ||
-                          (jobDetailData?.distance_km !== null && jobDetailData?.distance_km !== undefined) ||
-                          jobDetailData?.date ||
-                          jobDetailData?.contract_start_date ||
-                          jobDetailData?.contract_end_date ||
-                          jobDetailData?.time_from ||
-                          jobDetailData?.time_to ||
-                          jobDetailData?.budget_type ||
-                          jobDetailData?.min_amount ||
-                          jobDetailData?.max_amount ||
-                          jobDetailData?.hourly_rate ||
-                          jobDetailData?.status
+                          data?.description ||
+                          (data?.distance_km !== null && data?.distance_km !== undefined) ||
+                          data?.contract_start_date ||
+                          data?.contract_end_date ||
+                          data?.time_from ||
+                          data?.time_to ||
+                          data?.budget_type ||
+                          data?.min_amount ||
+                          data?.max_amount ||
+                          data?.hourly_rate ||
+                          data?.status
                         )) && (
                           <div className="border-t border-gray-300 my-4 pt-4">
                             <h5 className="text-lg md:text-xl font-semibold text-indigo-dye mb-3">Job Details</h5>
                             <div className="details mt-2 space-y-3">
                               {/* Description */}
-                              {jobDetailData?.description && (
+                              {data?.description && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <ClipboardDocumentIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
                                     Description
                                   </h6>
                                   <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words">
-                                    {jobDetailData.description}
+                                    {data.description}
                                   </p>
                                 </div>
                               )}
 
                               {/* Distance */}
-                              {jobDetailData?.distance_km !== null && jobDetailData?.distance_km !== undefined && (
+                              {data?.distance_km !== null && data?.distance_km !== undefined && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <PaperAirplaneIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
@@ -282,18 +256,18 @@ const BusinessJobDetailsModal = ({
                               )}
 
                               {/* Contract Dates */}
-                              {(jobDetailData?.contract_start_date || jobDetailData?.date) && (
+                              {data?.contract_start_date && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
                                     Contract Period
                                   </h6>
                                   <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                                    {formatDateToLocal(jobDetailData.contract_start_date || jobDetailData.date, true)}
-                                    {jobDetailData.contract_end_date && (
-                                      <> - {formatDateToLocal(jobDetailData.contract_end_date, true)}</>
+                                    {formatDateToLocal(data.contract_start_date, true)}
+                                    {data.contract_end_date && (
+                                      <> - {formatDateToLocal(data.contract_end_date, true)}</>
                                     )}
-                                    {!jobDetailData.contract_end_date && (
+                                    {!data.contract_end_date && (
                                       <span className="text-gray-500"> (Single day)</span>
                                     )}
                                   </p>
@@ -301,22 +275,22 @@ const BusinessJobDetailsModal = ({
                               )}
 
                               {/* Work Hours */}
-                              {(jobDetailData?.time_from || jobDetailData?.time_to) && (
+                              {(data?.time_from || data?.time_to) && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <ClockIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
                                     Work Hours
                                   </h6>
                                   <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                                    {jobDetailData.time_from && jobDetailData.time_to
-                                      ? `${jobDetailData.time_from} - ${jobDetailData.time_to}`
-                                      : jobDetailData.time_from || jobDetailData.time_to}
+                                    {data.time_from && data.time_to
+                                      ? `${data.time_from} - ${data.time_to}`
+                                      : data.time_from || data.time_to}
                                   </p>
                                 </div>
                               )}
 
                               {/* Budget/Price */}
-                              {(jobDetailData?.budget_type || jobDetailData?.min_amount || jobDetailData?.max_amount || jobDetailData?.hourly_rate) && (
+                              {(data?.budget_type || data?.min_amount || data?.max_amount || data?.hourly_rate) && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <CurrencyDollarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
@@ -329,14 +303,14 @@ const BusinessJobDetailsModal = ({
                               )}
 
                               {/* Status */}
-                              {jobDetailData?.status && (
+                              {data?.status && (
                                 <div>
                                   <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                                     <CheckCircleIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
                                     Status
                                   </h6>
                                   <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                                    {formatStatus(jobDetailData.status)}
+                                    {formatStatus(data.status)}
                                   </p>
                                 </div>
                               )}
