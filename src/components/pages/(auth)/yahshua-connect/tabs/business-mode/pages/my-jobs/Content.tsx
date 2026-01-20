@@ -534,8 +534,8 @@ const Content = () => {
           {!isLoading && !isError && activeJobs.map((job) => (
             <div
               key={job.id}
-            id={`job-${job.id}`}
-            className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
+              id={`job-${job.id}`}
+              className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all ${
                 job.urgent ? 'border-red-500' : 'border-gray-200'
               } ${selectedJob?.id === job.id ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
             >

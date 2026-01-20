@@ -135,7 +135,7 @@ const ViewApplicantsModal = ({
                     {onViewDailyProgress && (
                       <button
                         onClick={() => onViewDailyProgress(applicant.id)}
-                        className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors text-sm"
+                        className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors text-center"
                       >
                         View Daily Progress
                       </button>

@@ -15,6 +15,7 @@ async function reviewDailyProgress(data: T_ReviewDailyProgressData): Promise<T_D
     body: JSON.stringify({
       status: data.status,
       client_feedback: data.client_feedback,
+      client_review_status: data.status, // ensure backend creates notification
     }),
   };
 
