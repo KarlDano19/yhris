@@ -9,6 +9,7 @@ interface ApplicantData {
   initials: string;
   rating: number;
   reviewsCount: number;
+  photo?: string | null;
 }
 
 interface JobDetails {
@@ -81,9 +82,17 @@ const ConfirmHireModal = ({
       <div className="space-y-6">
         {/* Candidate Information */}
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-            {applicant.initials}
-          </div>
+          {applicant.photo ? (
+            <img
+              src={applicant.photo}
+              alt={applicant.name}
+              className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+              {applicant.initials}
+            </div>
+          )}
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-1">
               {applicant.name}

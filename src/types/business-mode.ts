@@ -26,6 +26,8 @@ export type T_HireInfo = {
   applicationId: number;
   applicantId: number;
   applicantName: string;
+  applicantPhoto: string | null;
+  applicantInitials: string;
   paymentStatus: T_PaymentStatus;
   workStatus: T_WorkStatus;
   hasClientReviewed: boolean;
@@ -240,6 +242,7 @@ export type T_ApplicantProfileData = {
   applicantId: number;
   name: string;
   initials: string;
+  photo?: string | null;
   rating: number;
   reviewsCount: number;
   appliedDate: string;

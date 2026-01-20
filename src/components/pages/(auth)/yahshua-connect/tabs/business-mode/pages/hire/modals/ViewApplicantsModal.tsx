@@ -74,9 +74,17 @@ const ViewApplicantsModal = ({
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-4 flex-1">
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold flex-shrink-0">
-                    {applicant.initials}
-                  </div>
+                  {applicant.photo ? (
+                    <img
+                      src={applicant.photo}
+                      alt={applicant.name}
+                      className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      {applicant.initials}
+                    </div>
+                  )}
 
                   {/* Applicant Info */}
                   <div className="flex-1">
