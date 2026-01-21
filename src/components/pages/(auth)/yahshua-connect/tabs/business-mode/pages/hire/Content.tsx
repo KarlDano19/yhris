@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
+import SeederButton from '@/components/SeederButton';
 import CreateBusinessJobModal from './modals/CreateBusinessJobModal';
 import UpdateBusinessJobModal from './modals/UpdateBusinessJobModal';
 import ViewApplicantsModal from './modals/ViewApplicantsModal';
@@ -17,8 +18,11 @@ import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
 import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
 import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
+import ViewPreviousHiresModal from './modals/ViewPreviousHiresModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobPostingCard from './components/BusinessJobPostingCard';
+import useSeedBusinessJobs from './hooks/useSeedBusinessJobs';
+import useUnseedBusinessJobs from './hooks/useUnseedBusinessJobs';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
 import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
@@ -31,9 +35,9 @@ import { useSubmitApplicantReview } from './hooks/useSubmitApplicantReview';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatDateToLocal } from '@/helpers/date';
 
-import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData, T_HireInfo } from '@/types/business-mode';
+import { PlusIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { T_BusinessJob, T_BusinessJobApplication, T_ApplicantProfileData, T_HireInfo } from '@/types/business-mode';
 
 // Helper to format time from API (HH:MM) to display format (8:00 AM)
 const formatTimeForDisplay = (timeFrom: string | null, timeTo: string | null): string => {
@@ -169,6 +173,7 @@ const Content = () => {
   const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
   const [isUpdateJobModalOpen, setIsUpdateJobModalOpen] = useState(false);
   const [isViewApplicantsModalOpen, setIsViewApplicantsModalOpen] = useState(false);
+  const [isViewPreviousHiresModalOpen, setIsViewPreviousHiresModalOpen] = useState(false);
   const [isApplicantProfileModalOpen, setIsApplicantProfileModalOpen] = useState(false);
   const [isConfirmHireModalOpen, setIsConfirmHireModalOpen] = useState(false);
   const [isConfirmRejectModalOpen, setIsConfirmRejectModalOpen] = useState(false);
@@ -216,9 +221,18 @@ const Content = () => {
   // More menu state for dropdown
   const [moreMenuOpen, setMoreMenuOpen] = useState<{ [key: number]: boolean }>({});
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // API Hooks
-  const { data: myJobsData, isLoading: isLoadingJobs, refetch: refetchJobs } = useGetMyBusinessJobs({ page_size: 100 });
+  const {
+    data: myJobsData,
+    isLoading: isLoadingJobs,
+    refetch: refetchJobs,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useGetMyBusinessJobs();
   const createJobMutation = useCreateBusinessJob();
   const updateJobMutation = useUpdateBusinessJobDetails();
   const deleteJobMutation = useDeleteBusinessJob();
@@ -227,9 +241,36 @@ const Content = () => {
   const { mutate: reviewDailyProgress, isLoading: isReviewingProgress } = useReviewDailyProgress();
   const { mutate: submitPayment, isLoading: isSubmittingPayment } = useSubmitPayment();
   const { mutate: submitApplicantReview, isLoading: isSubmittingReview } = useSubmitApplicantReview();
+  const seedBusinessJobsMutation = useSeedBusinessJobs();
+  const unseedBusinessJobsMutation = useUnseedBusinessJobs();
 
   // Get job postings from API
   const jobPostings = myJobsData?.records || [];
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   // Close more menu when clicking outside
   useEffect(() => {
@@ -328,6 +369,30 @@ const Content = () => {
     });
   };
 
+  // Handle seed business jobs
+  const handleSeedBusinessJobs = async (count: number, budgetType?: 'fixed_rate' | 'hourly_rate' | 'mix') => {
+    try {
+      const result = await seedBusinessJobsMutation.mutateAsync({ count, budget_type: budgetType || 'mix' });
+      const message = result?.data?.message || result?.message || `Successfully created ${count} job posting(s)`;
+      toast.custom(() => <CustomToast message={message} type="success" />, { duration: 5000 });
+      refetchJobs();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to seed jobs'} type="error" />, { duration: 7000 });
+    }
+  };
+
+  // Handle unseed business jobs
+  const handleUnseedBusinessJobs = async () => {
+    try {
+      const result = await unseedBusinessJobsMutation.mutateAsync();
+      const message = result?.data?.message || result?.message || 'Successfully deleted seeded job postings';
+      toast.custom(() => <CustomToast message={message} type="success" />, { duration: 5000 });
+      refetchJobs();
+    } catch (error: any) {
+      toast.custom(() => <CustomToast message={error || 'Failed to unseed jobs'} type="error" />, { duration: 7000 });
+    }
+  };
+
   // Handle toggle active/inactive
   const handleToggleStatus = (jobId: number, isActive: boolean) => {
     const newIsActive = !isActive;
@@ -367,6 +432,11 @@ const Content = () => {
   const handleViewApplicants = (jobId: number) => {
     setSelectedJobId(jobId);
     setIsViewApplicantsModalOpen(true);
+  };
+
+  const handleViewHistory = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsViewPreviousHiresModalOpen(true);
   };
 
   const handleViewProfile = (applicationId: number) => {
@@ -454,7 +524,7 @@ const Content = () => {
     if (!job) return;
 
     // Find specific application by ID
-    const application = job.applications?.find((app) => app.id === applicationId);
+    const application = job.applications?.find((app: T_BusinessJobApplication) => app.id === applicationId);
     if (!application) return;
 
     setSelectedHireForPayment({
@@ -496,7 +566,7 @@ const Content = () => {
     if (!job) return;
 
     // Find specific application by ID
-    const application = job.applications?.find((app) => app.id === applicationId);
+    const application = job.applications?.find((app: T_BusinessJobApplication) => app.id === applicationId);
     if (!application) return;
 
     setSelectedHireForReview({
@@ -574,21 +644,60 @@ const Content = () => {
     );
   };
 
+  // Batch filtering helper functions
+  // Get applications for current batch only
+  const getCurrentBatchApplications = (job: T_BusinessJob) => {
+    return job.applications?.filter(app =>
+      app.batch_number === job.current_batch_number
+    ) || [];
+  };
+
+  // Get applications from previous batches
+  const getPreviousBatchApplications = (job: T_BusinessJob) => {
+    const previousApps = job.applications?.filter(app =>
+      app.batch_number < job.current_batch_number
+    ) || [];
+
+    // Sort by batch number descending (most recent first)
+    return previousApps.sort((a, b) => b.batch_number - a.batch_number);
+  };
+
+  // Get accepted hires for current batch only
+  const getCurrentBatchHires = (job: T_BusinessJob): T_HireInfo[] => {
+    const currentApps = getCurrentBatchApplications(job);
+    const acceptedApps = currentApps.filter((app: T_BusinessJobApplication) => app.status === 'accepted');
+
+    return acceptedApps.map((app: T_BusinessJobApplication) => ({
+      applicationId: app.id,
+      applicantId: app.applicant,
+      applicantName: app.applicant_name || 'Unknown',
+      applicantPhoto: app.applicant_photo || null,
+      applicantInitials: getInitials(app.applicant_name || ''),
+      paymentStatus: app.payment_status,
+      workStatus: app.work_status,
+      hasClientReviewed: app.has_client_reviewed || false,
+      dailyProgresses: app.daily_progresses || [],
+      timeRecords: app.time_records || [],
+    }));
+  };
+
   // Get selected job data
   const selectedJob = jobPostings.find((job) => job.id === selectedJobId);
 
-  // Get applicants for selected job
-  const selectedJobApplicants = selectedJob?.applications?.map(transformApplicationToApplicant) || [];
+  // Get applicants for selected job (current batch only)
+  const selectedJobApplicants = selectedJob
+    ? getCurrentBatchApplications(selectedJob).map(transformApplicationToApplicant)
+    : [];
 
   // Get selected applicant data
-  const selectedApplication = selectedJob?.applications?.find((app) => app.id === selectedApplicationId);
+  const selectedApplication = selectedJob?.applications?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
   const selectedApplicantForHire = selectedApplication ? transformApplicationToApplicant(selectedApplication) : null;
   const applicantProfileData = selectedApplication ? transformApplicationToProfile(selectedApplication) : null;
 
-  // Get all accepted hires for a job
+  // Get all accepted hires for a job (DEPRECATED - use getCurrentBatchHires)
   const getAcceptedHires = (job: T_BusinessJob): T_HireInfo[] => {
-    const acceptedApps = job.applications?.filter((app) => app.status === 'accepted') || [];
-    return acceptedApps.map((app) => ({
+    const acceptedApps = job.applications?.filter((app: T_BusinessJobApplication) => app.status === 'accepted') || [];
+    return acceptedApps.map((app: T_BusinessJobApplication) => ({
       applicationId: app.id,
       applicantId: app.applicant,
       applicantName: app.applicant_name || 'Unknown',
@@ -611,7 +720,7 @@ const Content = () => {
     if (hireInfos.length === 0) return false;
 
     // Disable if ANY hire is not completed & reviewed
-    const hasActiveHires = hireInfos.some((hire) =>
+    const hasActiveHires = hireInfos.some((hire: T_HireInfo) =>
       hire.workStatus !== 'completed' || !hire.hasClientReviewed
     );
 
@@ -620,19 +729,45 @@ const Content = () => {
 
   return (
     <>
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
       <div className="space-y-6">
         {/* Hire Header */}
         <div className="bg-white rounded-lg shadow-sm p-5">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-gray-900">Hire Someone</h2>
-            <button
-              onClick={() => setIsCreateJobModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              disabled={createJobMutation.isLoading}
-            >
-              <PlusIcon className="h-5 w-5" />
-              <span>Post a Job</span>
-            </button>
+
+            <div className="flex items-center gap-2">
+              <SeederButton
+                onSeed={handleSeedBusinessJobs}
+                onUnseed={handleUnseedBusinessJobs}
+                isLoading={seedBusinessJobsMutation.isLoading}
+                isUnseeding={unseedBusinessJobsMutation.isLoading}
+                maxCount={100}
+                defaultCount={5}
+                showSeeder={true}
+                showBudgetType={true}
+              />
+
+              <button
+                onClick={() => setIsCreateJobModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                disabled={createJobMutation.isLoading}
+              >
+                <PlusIcon className="h-5 w-5" />
+                <span>Post a Job</span>
+              </button>
+            </div>
           </div>
 
           {/* Loading State */}
@@ -649,15 +784,18 @@ const Content = () => {
           {/* Job Postings List */}
           <div className="space-y-4">
             {jobPostings.map((job) => {
-              const hiredApplicants = getAcceptedHires(job);
+              const hiredApplicants = getCurrentBatchHires(job);
               const isHired = hiredApplicants.length > 0;
-              const applicantsCount = job.applications?.length || 0;
+              const applicantsCount = getCurrentBatchApplications(job).length;
+              const previousBatchApplicants = getPreviousBatchApplications(job);
+              const previousHiresCount = previousBatchApplicants.filter((app: T_BusinessJobApplication) => app.status === 'accepted').length;
 
               return (
                 <BusinessJobPostingCard
                   key={job.id}
                   job={job}
                   hiredApplicants={hiredApplicants}
+                  previousHiresCount={previousHiresCount}
                   isHired={isHired}
                   applicantsCount={applicantsCount}
                   isMoreMenuOpen={moreMenuOpen[job.id] || false}
@@ -666,6 +804,7 @@ const Content = () => {
                   }}
                   onMoreMenuClick={() => handleMoreMenuClick(job.id)}
                   onViewApplicants={() => handleViewApplicants(job.id)}
+                  onViewHistory={() => handleViewHistory(job.id)}
                   onViewTimeLogs={(applicationId) => handleViewTimeLogs(job.id, applicationId)}
                   onViewDailyProgress={(applicationId) => handleViewDailyProgress(job.id, applicationId)}
                   onSubmitPaymentProof={(applicationId) => handleSubmitPaymentProofFromJob(job.id, applicationId)}
@@ -686,6 +825,24 @@ const Content = () => {
               );
             })}
           </div>
+
+          {/* Load More Button */}
+          {!isLoadingJobs && hasNextPage && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={handleLoadMore}
+                disabled={isFetchingNextPage}
+                className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+              </button>
+            </div>
+          )}
+          {!isLoadingJobs && totalRecords > 0 && (
+            <div className="text-sm text-gray-600 text-center mt-4">
+              Showing {jobPostings.length} of {totalRecords} jobs
+            </div>
+          )}
         </div>
       </div>
 
@@ -727,6 +884,20 @@ const Content = () => {
           onViewProfile={handleViewProfile}
           onHire={handleHireClick}
           onReject={handleRejectClick}
+        />
+      )}
+
+      {/* View Previous Hires Modal */}
+      {isViewPreviousHiresModalOpen && selectedJob && (
+        <ViewPreviousHiresModal
+          isOpen={isViewPreviousHiresModalOpen}
+          onClose={() => {
+            setIsViewPreviousHiresModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobTitle={selectedJob.job_title}
+          previousBatchApplicants={getPreviousBatchApplications(selectedJob)}
+          currentBatchNumber={selectedJob.current_batch_number}
         />
       )}
 
@@ -844,7 +1015,7 @@ const Content = () => {
 
       {/* View Daily Progress Modal */}
       {isViewDailyProgressModalOpen && selectedJob && selectedApplicationId && (() => {
-        const application = selectedJob.applications?.find((app) => app.id === selectedApplicationId);
+        const application = selectedJob.applications?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
         return application ? (
           <ViewDailyProgressModal
             isOpen={isViewDailyProgressModalOpen}
@@ -863,7 +1034,7 @@ const Content = () => {
 
       {/* View Time Logs Modal */}
       {isViewTimeLogsModalOpen && selectedJob && selectedApplicationId && (() => {
-        const application = selectedJob.applications?.find((app) => app.id === selectedApplicationId);
+        const application = selectedJob.applications?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
         return application ? (
           <ViewTimeLogsModal
             isOpen={isViewTimeLogsModalOpen}

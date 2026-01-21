@@ -33,7 +33,7 @@ async function fetchBusinessJobs(filters: BusinessJobFilters | null, pageParam: 
     if (mode === 'listing') {
       // For job listings
       searchParams.append('current_page', pageParam.toString());
-      searchParams.append('page_size', '200'); // 200 jobs per page for listings
+      searchParams.append('page_size', String(filters?.page_size || 10)); // 10 jobs per page for listings
       
       // Add filters
       if (filters?.category) {
@@ -123,15 +123,11 @@ async function fetchBusinessJobs(filters: BusinessJobFilters | null, pageParam: 
     
     if (mode === 'listing') {
       // Return data in format expected by useInfiniteQuery
-      const totalPages = data.total_pages || 1;
-      const nextPage = pageParam < totalPages ? pageParam + 1 : undefined;
-      
       return {
         records: data.records || [],
         total_records: data.total_records || 0,
-        total_pages: totalPages,
+        total_pages: data.total_pages || 1,
         current_page: pageParam,
-        nextPage: nextPage,
       };
     } else {
       // Return autocomplete format
@@ -165,10 +161,19 @@ function useFindBusinessJobs(itemsFilter: BusinessJobFilters | null) {
       itemsFilter?.status,
       itemsFilter?.latitude,
       itemsFilter?.longitude,
+      itemsFilter?.page_size,
     ],
     ({ pageParam = 1 }) => fetchBusinessJobs(itemsFilter, pageParam, 'listing'),
     {
-      getNextPageParam: (lastPage) => lastPage.nextPage,
+      getNextPageParam: (lastPage) => {
+        // Check if there are more pages (like notifications/public jobs)
+        if (lastPage && lastPage.current_page !== undefined && lastPage.total_pages !== undefined) {
+          if (lastPage.current_page < lastPage.total_pages) {
+            return lastPage.current_page + 1;
+          }
+        }
+        return undefined;
+      },
       refetchOnWindowFocus: false,
       keepPreviousData: true,
       enabled: true, // Enable initial fetch to show jobs on page load

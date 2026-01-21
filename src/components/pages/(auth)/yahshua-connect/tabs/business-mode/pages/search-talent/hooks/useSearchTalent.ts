@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 export interface TalentSearchResult {
@@ -22,16 +22,6 @@ export interface TalentSearchResult {
   setup_preference: string | null;
 }
 
-interface TalentSearchResponse {
-  records: TalentSearchResult[];
-  total: number;
-  page: number;
-  pageSize: number;
-  currentPage: number;
-  starting: number;
-  ending: number;
-}
-
 interface SearchTalentParams {
   search?: string;
   location?: string[];
@@ -40,10 +30,9 @@ interface SearchTalentParams {
   from?: string;
   to?: string;
   pageSize?: number;
-  currentPage?: number;
 }
 
-async function searchTalent(params: SearchTalentParams = {}): Promise<TalentSearchResponse> {
+async function searchTalent(params: SearchTalentParams, pageParam: number = 1) {
   try {
     const token = getCookie('token');
 
@@ -58,8 +47,8 @@ async function searchTalent(params: SearchTalentParams = {}): Promise<TalentSear
     if (params.salary) queryParams.append('salary', params.salary);
     if (params.from) queryParams.append('from', params.from);
     if (params.to) queryParams.append('to', params.to);
-    queryParams.append('pageSize', String(params.pageSize || 20));
-    queryParams.append('currentPage', String(params.currentPage || 1));
+    queryParams.append('pageSize', String(params.pageSize || 10));
+    queryParams.append('currentPage', String(pageParam));
 
     const config: RequestInit = {
       method: 'GET',
@@ -78,16 +67,20 @@ async function searchTalent(params: SearchTalentParams = {}): Promise<TalentSear
         throw res.json();
       }
       const response = await res.json();
-      return response.data || response;
+      const data = response.data || response;
+
+      return {
+        records: data.records || [],
+        total_records: data.total_records || 0,
+        total_pages: data.total_pages || 1,
+        current_page: pageParam,
+      };
     }
     return {
       records: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-      currentPage: 1,
-      starting: 0,
-      ending: 0,
+      total_records: 0,
+      total_pages: 1,
+      current_page: pageParam,
     };
   } catch (error: any) {
     let errStringify = await error;
@@ -102,16 +95,33 @@ async function searchTalent(params: SearchTalentParams = {}): Promise<TalentSear
 }
 
 export function useSearchTalent(params: SearchTalentParams = {}) {
-  const query = useQuery(
-    ['talentSearchCache', params],
-    () => searchTalent(params),
+  const query = useInfiniteQuery(
+    ['talentSearchCache', params.search, params.location, params.gender, params.salary, params.from, params.to, params.pageSize],
+    ({ pageParam = 1 }) => searchTalent(params, pageParam),
     {
+      getNextPageParam: (lastPage) => {
+        if (lastPage && lastPage.current_page !== undefined && lastPage.total_pages !== undefined) {
+          if (lastPage.current_page < lastPage.total_pages) {
+            return lastPage.current_page + 1;
+          }
+        }
+        return undefined;
+      },
       refetchOnWindowFocus: false,
       keepPreviousData: true,
       staleTime: 3 * 60 * 1000, // Cache for 3 minutes
     }
   );
-  return query;
+
+  // Flatten all pages into a single array
+  const allTalents = query.data?.pages.flatMap(page => page.records) || [];
+  const totalRecords = query.data?.pages[0]?.total_records || 0;
+
+  return {
+    ...query,
+    data: { records: allTalents, total_records: totalRecords },
+    totalRecords,
+  };
 }
 
 export default useSearchTalent;
