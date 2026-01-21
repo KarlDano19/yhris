@@ -259,6 +259,7 @@ export default function JobBudgetTab({
                             errors.scheduleStartDate ? 'ring-red-500' : ''
                           }`}
                           selected={field.value ? new Date(field.value) : null}
+                          minDate={new Date()}
                           pickerOnChange={(date: Date | null) => {
                             if (date) {
                               const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;

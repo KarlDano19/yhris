@@ -1,6 +1,6 @@
-import { CalendarIcon, ClockIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import JobDetailsLocation from '@/svg/JobDetailLocation';
+import { CalendarIcon, ClockIcon, ClipboardDocumentIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import FileCaseIcon from '@/svg/FileCaseIcon';
+import { formatDateToLocal } from '@/helpers/date';
 
 export default function JobPreviewTab({
   control,
@@ -32,19 +32,11 @@ export default function JobPreviewTab({
   const scheduleTimeFrom = watch("scheduleTimeFrom");
   const scheduleTimeTo = watch("scheduleTimeTo");
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Not set';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Not set';
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[date.getMonth()]} ${date.getDate()}`;
-  };
-
   const formatDateRange = () => {
     if (!scheduleStartDate) return 'Not set';
-    const startDateStr = formatDate(scheduleStartDate);
+    const startDateStr = formatDateToLocal(scheduleStartDate, true);
     if (scheduleEndDate) {
-      const endDateStr = formatDate(scheduleEndDate);
+      const endDateStr = formatDateToLocal(scheduleEndDate, true);
       return `${startDateStr} - ${endDateStr}`;
     }
     return `${startDateStr} (Flexible/Ongoing)`;
@@ -91,9 +83,15 @@ export default function JobPreviewTab({
               {jobTitle || 'Untitled Job'}
             </h5>
             {category && (
-              <h6 className="text-indigo-dye text-xs md:text-sm mt-1 break-words">
-                Category: {category}
+              <h6 className="text-xs md:text-sm mt-1 break-words">
+                <span className="text-savoy-blue font-medium">Category:</span>{' '}
+                <span className="text-indigo-dye">{category}</span>
               </h6>
+            )}
+            {location && (
+              <p className="text-xs md:text-sm text-indigo-dye mt-1 break-words">
+                {location}
+              </p>
             )}
           </div>
         </div>
@@ -103,58 +101,53 @@ export default function JobPreviewTab({
           <h5 className="text-lg md:text-xl font-semibold text-indigo-dye mb-3">Job Details</h5>
           <div className="details mt-2 space-y-3">
             {/* Description */}
-            <div>
-              <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                <ClipboardDocumentIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                Description
-              </h6>
-              <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] whitespace-pre-wrap break-words">
-                {description || 'No description provided'}
-              </p>
-            </div>
-
-            {/* Location */}
-            <div>
-              <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                <JobDetailsLocation className="h-3.5 w-3.5 md:h-4 md:w-4 mr-2 flex-shrink-0" />
-                Location
-              </h6>
-              <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] break-words">
-                {location || 'Not set'}
-              </p>
-            </div>
-
-            {/* Budget */}
-            <div>
-              <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                {budgetType === 'fixed' ? 'Budget' : 'Rate per Hour'}
-              </h6>
-              <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                {formatPriceRange()}
-              </p>
-            </div>
+            {description && (
+              <div>
+                <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
+                  <ClipboardDocumentIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+                  Description
+                </h6>
+                <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px] whitespace-pre-wrap break-words">
+                  {description}
+                </p>
+              </div>
+            )}
 
             {/* Contract Period */}
-            <div>
-              <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
-                <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                Contract Period
-              </h6>
-              <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
-                {formatDateRange()}
-              </p>
-            </div>
+            {scheduleStartDate && (
+              <div>
+                <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
+                  <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+                  Contract Period
+                </h6>
+                <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
+                  {formatDateRange()}
+                </p>
+              </div>
+            )}
 
             {/* Time */}
             {scheduleTimeFrom && (
               <div>
                 <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
                   <ClockIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
-                  Time
+                  Work Hours
                 </h6>
                 <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
                   {formatTimeRange()}
+                </p>
+              </div>
+            )}
+
+            {/* Budget */}
+            {budgetMin && (
+              <div>
+                <h6 className="text-sm md:text-[15px] flex items-center text-savoy-blue font-medium mb-1">
+                  <CurrencyDollarIcon className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+                  {budgetType === 'fixed' ? 'Budget' : 'Rate per Hour'}
+                </h6>
+                <p className="text-xs md:text-[13px] text-indigo-dye mt-1 ml-[28px]">
+                  {formatPriceRange()}
                 </p>
               </div>
             )}

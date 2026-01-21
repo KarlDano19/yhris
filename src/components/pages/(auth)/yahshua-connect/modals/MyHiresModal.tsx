@@ -1,10 +1,9 @@
 
-
-import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 import Modal from '../components/Modal';
 
 interface HiredApplicant {
   id: number;
+  jobPostingId: number;
   serviceName: string;
   providerName: string;
   providerInitials?: string;
@@ -16,14 +15,14 @@ interface MyHiresModalProps {
   isOpen: boolean;
   onClose: () => void;
   hires: HiredApplicant[];
-  onSendPaymentProof?: (hireId: number) => void;
+  onViewHire: (jobPostingId: number) => void;
 }
 
 const MyHiresModal = ({
   isOpen,
   onClose,
   hires,
-  onSendPaymentProof,
+  onViewHire,
 }: MyHiresModalProps) => {
   // Generate initials from provider name if not provided
   const getInitials = (name: string, initials?: string) => {
@@ -64,7 +63,8 @@ const MyHiresModal = ({
           {hires.map((hire) => (
             <div
               key={hire.id}
-              className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+              onClick={() => onViewHire(hire.jobPostingId)}
+              className="bg-gray-50 rounded-lg p-4 border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-savoy-blue transition-all"
             >
               {/* Service Name and Status */}
               <div className="flex items-start justify-between mb-3">
@@ -86,20 +86,14 @@ const MyHiresModal = ({
               </p>
 
               {/* Price */}
-              <p className="text-base font-semibold text-orange-600 mb-4">
+              <p className="text-base font-semibold text-orange-600 mb-3">
                 {formatPrice(hire.price)}
               </p>
 
-              {/* Action Button */}
-              {hire.status === 'in-progress' && (
-                <button
-                  onClick={() => onSendPaymentProof?.(hire.id)}
-                  className="w-full px-4 py-2.5 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors flex items-center justify-center gap-2"
-                >
-                  <DocumentArrowUpIcon className="h-5 w-5" />
-                  Send Payment Proof
-                </button>
-              )}
+              {/* View Details Indicator */}
+              <div className="text-sm text-savoy-blue font-medium">
+                View Details →
+              </div>
             </div>
           ))}
         </div>

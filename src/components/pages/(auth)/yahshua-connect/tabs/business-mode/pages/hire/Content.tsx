@@ -19,9 +19,11 @@ import ViewApplicantDailyProgress from './modals/ViewApplicantDailyProgressModal
 import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import ChatModal from '@/components/common/chat/ChatModal';
+import BusinessJobPostingCard from './components/BusinessJobPostingCard';
 import { useCreateBusinessJob } from './hooks/useCreateBusinessJob';
 import { useUpdateBusinessJobDetails } from './hooks/useUpdateBusinessJobDetails';
 import { useDeleteBusinessJob } from './hooks/useDeleteBusinessJob';
+import { useDuplicateBusinessJobPosting } from './hooks/useDuplicateBusinessJobPosting';
 import { useGetMyBusinessJobs } from './hooks/useGetMyBusinessJobs';
 import { useUpdateApplicationStatus } from './hooks/useUpdateApplicationStatus';
 import { useReviewDailyProgress } from './hooks/useReviewDailyProgress';
@@ -32,8 +34,7 @@ import { formatDateToLocal } from '@/helpers/date';
 
 import { T_BusinessJob, T_BusinessJobApplication, T_CreateBusinessJobData, T_ApplicantProfileData, T_HireInfo } from '@/types/business-mode';
 
-import { PlusIcon, ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
-import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 // Helper to format time from API (HH:MM) to display format (8:00 AM)
 const formatTimeForDisplay = (timeFrom: string | null, timeTo: string | null): string => {
@@ -158,6 +159,7 @@ const transformApplicationToProfile = (application: T_BusinessJobApplication): T
       type: 'PDF Document',
     },
     reviews: [], // Reviews would need to come from a separate endpoint
+    photo: application.applicant_photo,
   };
 };
 
@@ -198,6 +200,15 @@ const Content = () => {
     clientInitials: string;
     clientPhoto: string | null;
   } | null>(null);
+  const [isHiredApplicantChatOpen, setIsHiredApplicantChatOpen] = useState(false);
+  const [selectedHiredApplicantForChat, setSelectedHiredApplicantForChat] = useState<{
+    jobId: number;
+    jobTitle: string;
+    applicantId: number;
+    applicantName: string;
+    applicantInitials: string;
+    applicantPhoto: string | null;
+  } | null>(null);
 
   // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -212,6 +223,7 @@ const Content = () => {
   const createJobMutation = useCreateBusinessJob();
   const updateJobMutation = useUpdateBusinessJobDetails();
   const deleteJobMutation = useDeleteBusinessJob();
+  const duplicateJobMutation = useDuplicateBusinessJobPosting();
   const updateStatusMutation = useUpdateApplicationStatus();
   const { mutate: reviewDailyProgress, isLoading: isReviewingProgress } = useReviewDailyProgress();
   const { mutate: submitPayment, isLoading: isSubmittingPayment } = useSubmitPayment();
@@ -228,7 +240,7 @@ const Content = () => {
       const isClickOutsideAllMenus = Object.values(menuRefs.current).every(
         (ref) => !ref || !ref.contains(target)
       );
-      
+
       if (isClickOutsideAllMenus) {
         setMoreMenuOpen({});
       }
@@ -237,67 +249,54 @@ const Content = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle navigation from notifications (query params)
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  // Helper function to scroll and highlight a job
+  const scrollAndHighlightJob = (jobId: string) => {
+    const element = document.getElementById(`job-${jobId}`);
+    if (element) {
+      // Scroll to the job posting
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  useEffect(() => {
-    try {
-      const jobIdParam = searchParams?.get?.('job_id');
-      const applicationIdParam = searchParams?.get?.('application_id');
+      // Add highlight effect
+      element.classList.add('ring-4', 'ring-savoy-blue', 'ring-offset-2');
 
-      if (jobIdParam) {
-        const parsedJobId = Number(jobIdParam);
-        if (!Number.isNaN(parsedJobId)) {
-          setSelectedJobId(parsedJobId);
-          // scroll to job card (highlighting is handled via selectedJobId in the render)
-          setTimeout(() => {
-            try {
-              const el = document.getElementById(`job-${parsedJobId}`);
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            } catch (err) {
-              // ignore
-            }
-          }, 200);
-          // Clear query params
-          router.replace('/business-mode/hire');
-        }
-        return;
-      }
-
-      if (applicationIdParam) {
-        const parsedApplicationId = Number(applicationIdParam);
-        if (!Number.isNaN(parsedApplicationId)) {
-          // If we can find the parent job, select it so the UI can highlight the job card.
-          // Do NOT auto-open the ViewDailyProgressModal when arriving from a notification
-          // about an application (e.g., "someone applied to your job").
-          const parentJob = jobPostings.find((j) =>
-            Array.isArray(j.applications) && j.applications.some((a: any) => Number(a.id) === parsedApplicationId)
-          );
-            if (parentJob) {
-              setSelectedJobId(parentJob.id);
-              // scroll to job card (highlighting is handled via selectedJobId in the render)
-              setTimeout(() => {
-                try {
-                  const el = document.getElementById(`job-${parentJob.id}`);
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                } catch (err) {}
-              }, 200);
-            }
-          // keep the selected application id in state for context (but don't auto-open the modal)
-          setSelectedApplicationId(parsedApplicationId);
-          router.replace('/business-mode/hire');
-        }
-      }
-    } catch (e) {
-      // ignore parsing errors
+      // Remove highlight after 3 seconds
+      setTimeout(() => {
+        element.classList.remove('ring-4', 'ring-savoy-blue', 'ring-offset-2');
+      }, 3000);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams?.toString(), jobPostings]);
+  };
+
+  // Auto-scroll and highlight job when navigating from MyHiresModal
+  useEffect(() => {
+    const scrollToJobId = sessionStorage.getItem('scrollToJobId');
+    if (scrollToJobId && jobPostings.length > 0) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        scrollAndHighlightJob(scrollToJobId);
+        // Clear sessionStorage
+        sessionStorage.removeItem('scrollToJobId');
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [jobPostings]);
+
+  // Listen for custom event to scroll when already on hire page
+  useEffect(() => {
+    const handleScrollToJob = (event: Event) => {
+      const customEvent = event as CustomEvent<{ jobPostingId: number }>;
+      const jobId = customEvent.detail.jobPostingId;
+
+      // Small delay to ensure modal is closed and DOM is ready
+      setTimeout(() => {
+        scrollAndHighlightJob(jobId.toString());
+      }, 150);
+    };
+
+    window.addEventListener('scrollToJob', handleScrollToJob);
+    return () => window.removeEventListener('scrollToJob', handleScrollToJob);
+  }, []);
+
   // Handle more menu toggle
   const handleMoreMenuClick = (jobId: number) => {
     setMoreMenuOpen((prev) => ({
@@ -351,57 +350,16 @@ const Content = () => {
     );
   };
 
-  const handleCreateJob = (data: {
-    jobTitle: string;
-    category: string;
-    description: string;
-    location: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    budgetType: 'fixed' | 'hourly';
-    budgetMin: string;
-    budgetMax: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleTimeFrom: string;
-    scheduleTimeTo: string;
-  }) => {
-    // Round coordinates to 6 decimal places to stay within backend's validation limit
-    const roundedLatitude = data.latitude ? Math.round(data.latitude * 1000000) / 1000000 : null;
-    const roundedLongitude = data.longitude ? Math.round(data.longitude * 1000000) / 1000000 : null;
-
-    // Prepare API payload
-    const apiData: T_CreateBusinessJobData = {
-      job_title: data.jobTitle,
-      category: data.category || 'Other',
-      description: data.description,
-      location: data.location,
-      latitude: roundedLatitude,
-      longitude: roundedLongitude,
-      budget_type: data.budgetType === 'hourly' ? 'hourly_rate' : 'fixed_rate',
-      contract_start_date: data.scheduleStartDate,
-      contract_end_date: data.scheduleEndDate || null,
-      time_from: data.scheduleTimeFrom || null,
-      time_to: data.scheduleTimeTo || null,
-    };
-
-    // Set budget amounts based on type
-    if (data.budgetType === 'hourly') {
-      apiData.hourly_rate = parseFloat(data.budgetMin) || null;
-    } else {
-      apiData.min_amount = parseFloat(data.budgetMin) || null;
-      apiData.max_amount = data.budgetMax ? parseFloat(data.budgetMax) : parseFloat(data.budgetMin) || null;
-    }
-
-    // Create new job
-    createJobMutation.mutate(apiData, {
+  // Handle duplicate job posting
+  const handleDuplicateJob = (jobId: number) => {
+    duplicateJobMutation.mutate(jobId, {
       onSuccess: () => {
-        toast.custom(() => <CustomToast message="Job posted successfully" type="success" />, { duration: 5000 });
-        setIsCreateJobModalOpen(false);
+        toast.custom(() => <CustomToast message="Job duplicated successfully" type="success" />, { duration: 5000 });
+        setMoreMenuOpen({});
         refetchJobs();
       },
       onError: (err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Failed to create job';
+        const message = err instanceof Error ? err.message : 'Failed to duplicate job';
         toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
       },
     });
@@ -420,6 +378,7 @@ const Content = () => {
 
   const handleBackToApplicants = () => {
     setIsApplicantProfileModalOpen(false);
+    setSelectedApplicationId(null);
     setIsViewApplicantsModalOpen(true);
   };
 
@@ -549,6 +508,21 @@ const Content = () => {
     setIsReviewApplicantModalOpen(true);
   };
 
+  const handleChatWithHiredApplicant = (jobId: number, applicantId: number, applicantName: string, applicantPhoto: string | null, applicantInitials: string) => {
+    const job = jobPostings.find((j) => j.id === jobId);
+    if (!job) return;
+
+    setSelectedHiredApplicantForChat({
+      jobId: job.id,
+      jobTitle: job.job_title,
+      applicantId,
+      applicantName,
+      applicantInitials,
+      applicantPhoto,
+    });
+    setIsHiredApplicantChatOpen(true);
+  };
+
   const handleSubmitApplicantReview = (data: { rating: number; review_text?: string }) => {
     if (!selectedHireForReview) return;
 
@@ -619,6 +593,8 @@ const Content = () => {
       applicationId: app.id,
       applicantId: app.applicant,
       applicantName: app.applicant_name || 'Unknown',
+      applicantPhoto: app.applicant_photo || null,
+      applicantInitials: getInitials(app.applicant_name || ''),
       paymentStatus: app.payment_status,
       workStatus: app.work_status,
       hasClientReviewed: app.has_client_reviewed || false,
@@ -679,219 +655,35 @@ const Content = () => {
               const applicantsCount = job.applications?.length || 0;
 
               return (
-                <div
+                <BusinessJobPostingCard
                   key={job.id}
-                  id={`job-${job.id}`}
-              className={`bg-white rounded-xl p-5 hover:shadow-md transition-shadow ${
-                    job.is_active ? 'border border-gray-200' : 'border-2 border-red-300'
-                  } ${selectedJobId === job.id ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className={`text-lg font-bold mb-1 ${job.is_active ? 'text-gray-900' : 'text-red-500'}`}>
-                        {job.job_title}
-                      </h3>
-                      <p className={`text-sm mb-3 ${job.is_active ? 'text-gray-600' : 'text-red-400'}`}>
-                        {job.category} • {job.location}
-                      </p>
-                      <p className={`text-sm mb-4 ${job.is_active ? 'text-gray-700' : 'text-red-400'}`}>
-                        {job.description}
-                      </p>
-                    </div>
-                    {!job.is_active ? (
-                      <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                        Inactive
-                      </span>
-                    ) : isHired ? (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                        Hired
-                      </span>
-                    ) : job.status === 'active' ? (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                        Active
-                      </span>
-                    ) : job.status === 'in_progress' ? (
-                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                        In Progress
-                      </span>
-                    ) : job.status === 'completed' ? (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
-                        Completed
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Job Details */}
-                  <div className={`flex flex-wrap items-center gap-4 mb-4 text-sm ${job.is_active ? 'text-gray-600' : 'text-red-400'}`}>
-                    <div className="flex items-center gap-2">
-                      <ClockIcon className="h-4 w-4" />
-                      <span>
-                        {formatDateToLocal(job.contract_start_date, true)}
-                        {job.contract_end_date && ` - ${formatDateToLocal(job.contract_end_date, true)}`}
-                        {job.time_from && `, ${formatTimeForDisplay(job.time_from, job.time_to)}`}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CurrencyDollarIcon className="h-4 w-4" />
-                      <span className={`font-semibold ${job.is_active ? 'text-green-600' : 'text-red-500'}`}>
-                        {formatPriceRange(job)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <UserGroupIcon className="h-4 w-4" />
-                      <span>
-                        {applicantsCount} applicant{applicantsCount !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Hired Applicants Section */}
-                  {isHired && hiredApplicants.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-3">
-                        Hired Applicants ({hiredApplicants.length})
-                      </p>
-
-                      <div className={`space-y-3 ${hiredApplicants.length > 3 ? 'max-h-[400px] overflow-y-auto pr-2' : ''}`}>
-                        {hiredApplicants.map((hire) => (
-                          <div
-                            key={hire.applicationId}
-                            className="bg-white border border-gray-200 rounded-lg p-4"
-                          >
-                            <p className="text-sm font-semibold text-savoy-blue mb-2">
-                              {hire.applicantName}
-                            </p>
-
-                            {/* View Time Logs & Daily Progress */}
-                            {job.contract_end_date && hire.workStatus !== 'not_started' && (
-                              <div className="flex flex-wrap gap-3 mb-2">
-                                {job.budget_type === 'hourly_rate' && (
-                                  <button
-                                    onClick={() => handleViewTimeLogs(job.id, hire.applicationId)}
-                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
-                                  >
-                                    <ClockIcon className="h-4 w-4" />
-                                    View Time Logs
-                                  </button>
-                                )}
-
-                                {(job.budget_type === 'fixed_rate' || (job.budget_type === 'hourly_rate' && job.is_daily_progress_required)) && (
-                                  <button
-                                    onClick={() => handleViewDailyProgress(job.id, hire.applicationId)}
-                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline flex items-center gap-1"
-                                  >
-                                    <DocumentTextIcon className="h-4 w-4" />
-                                    View Daily Progress
-                                  </button>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Payment & Review Status/Actions */}
-                            {hire.paymentStatus === 'paid' ? (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 flex items-center gap-1">
-                                  Payment completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                                </p>
-                                {!hire.hasClientReviewed && (
-                                  <button
-                                    onClick={() => handleReviewApplicantFromJob(job.id, hire.applicationId)}
-                                    className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
-                                  >
-                                    Review Applicant
-                                  </button>
-                                )}
-                                {hire.hasClientReviewed && (
-                                  <p className="text-sm text-green-700 flex items-center gap-1">
-                                    Review completed <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                                  </p>
-                                )}
-                              </div>
-                            ) : hire.workStatus === 'completed' ? (
-                              <button
-                                onClick={() => handleSubmitPaymentProofFromJob(job.id, hire.applicationId)}
-                                className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium underline"
-                              >
-                                Submit Payment Proof
-                              </button>
-                            ) : (
-                              <p className="text-sm text-gray-600">
-                                Work status: {hire.workStatus === 'started' ? 'In Progress' : 'Not Started'}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={() => handleViewApplicants(job.id)}
-                      className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
-                    >
-                      View Applicants ({applicantsCount})
-                    </button>
-
-                    {/* More Menu Dropdown */}
-                    <div 
-                      className="relative more-menu-container" 
-                      ref={(el) => {
-                        menuRefs.current[job.id] = el;
-                      }}
-                    >
-                      <button
-                        onClick={() => handleMoreMenuClick(job.id)}
-                        className="flex items-center"
-                        data-tooltip-id="more-options-tooltip"
-                        data-tooltip-content="More Options"
-                      >
-                        <MoreIconWithBorder />
-                      </button>
-
-                      {moreMenuOpen[job.id] && (
-                        <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50" style={{ minWidth: '160px' }}>
-                          <ul className="py-1 text-left">
-                            <li>
-                              <button
-                                onClick={() => {
-                                  handleEditPost(job.id);
-                                  setMoreMenuOpen({});
-                                }}
-                                disabled={updateJobMutation.isLoading || shouldDisableEditDelete(job)}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title={shouldDisableEditDelete(job) ? 'Cannot edit while applicant is working. Complete the job and review first.' : ''}
-                              >
-                                Edit Job
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                onClick={() => handleDeleteClick(job.id)}
-                                disabled={deleteJobMutation.isLoading || shouldDisableEditDelete(job)}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b border-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title={shouldDisableEditDelete(job) ? 'Cannot delete while applicant is working. Complete the job and review first.' : ''}
-                              >
-                                Delete Job
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                onClick={() => handleToggleStatus(job.id, job.is_active)}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                              >
-                                <span className={!job.is_active ? 'text-green-600' : 'text-red-500'}>
-                                  {job.is_active ? 'Set as Inactive' : 'Set as Active'}
-                                </span>
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  job={job}
+                  hiredApplicants={hiredApplicants}
+                  isHired={isHired}
+                  applicantsCount={applicantsCount}
+                  isMoreMenuOpen={moreMenuOpen[job.id] || false}
+                  menuRef={(el) => {
+                    menuRefs.current[job.id] = el;
+                  }}
+                  onMoreMenuClick={() => handleMoreMenuClick(job.id)}
+                  onViewApplicants={() => handleViewApplicants(job.id)}
+                  onViewTimeLogs={(applicationId) => handleViewTimeLogs(job.id, applicationId)}
+                  onViewDailyProgress={(applicationId) => handleViewDailyProgress(job.id, applicationId)}
+                  onSubmitPaymentProof={(applicationId) => handleSubmitPaymentProofFromJob(job.id, applicationId)}
+                  onReviewApplicant={(applicationId) => handleReviewApplicantFromJob(job.id, applicationId)}
+                  onChatWithApplicant={(applicantId, applicantName, applicantPhoto, applicantInitials) => handleChatWithHiredApplicant(job.id, applicantId, applicantName, applicantPhoto, applicantInitials)}
+                  onEditJob={() => {
+                    handleEditPost(job.id);
+                    setMoreMenuOpen({});
+                  }}
+                  onDeleteJob={() => handleDeleteClick(job.id)}
+                  onDuplicateJob={() => handleDuplicateJob(job.id)}
+                  onToggleStatus={() => handleToggleStatus(job.id, job.is_active)}
+                  shouldDisableEditDelete={shouldDisableEditDelete(job)}
+                  isUpdateLoading={updateJobMutation.isLoading}
+                  isDeleteLoading={deleteJobMutation.isLoading}
+                  isDuplicateLoading={duplicateJobMutation.isLoading}
+                />
               );
             })}
           </div>
@@ -969,14 +761,10 @@ const Content = () => {
       {isApplicantProfileModalOpen && selectedJob && applicantProfileData && (
         <ApplicantProfileModal
           isOpen={isApplicantProfileModalOpen}
-          onClose={() => {
-            setIsApplicantProfileModalOpen(false);
-            setSelectedApplicationId(null);
-          }}
+          onClose={handleBackToApplicants}
           jobTitle={selectedJob.job_title}
           jobId={selectedJob.id}
           applicant={applicantProfileData}
-          onBack={handleBackToApplicants}
           onMessage={handleMessageApplicant}
           onHire={handleHireClick}
           onReject={handleRejectClick}
@@ -1013,6 +801,23 @@ const Content = () => {
           recipientPhoto={selectedBookingForMessage.clientPhoto}
           jobId={selectedBookingForMessage.id}
           jobTitle={selectedBookingForMessage.title}
+        />
+      )}
+
+      {/* Hired Applicant Chat Modal */}
+      {isHiredApplicantChatOpen && selectedHiredApplicantForChat && (
+        <ChatModal
+          isOpen={isHiredApplicantChatOpen}
+          onClose={() => {
+            setIsHiredApplicantChatOpen(false);
+            setSelectedHiredApplicantForChat(null);
+          }}
+          recipientId={selectedHiredApplicantForChat.applicantId}
+          recipientName={selectedHiredApplicantForChat.applicantName}
+          recipientInitials={selectedHiredApplicantForChat.applicantInitials}
+          recipientPhoto={selectedHiredApplicantForChat.applicantPhoto}
+          jobId={selectedHiredApplicantForChat.jobId}
+          jobTitle={selectedHiredApplicantForChat.jobTitle}
         />
       )}
 

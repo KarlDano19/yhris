@@ -147,7 +147,10 @@ const BookNowModal = ({ isOpen, onClose, talent, onConfirm }: BookNowModalProps)
           </div>
           <div className="text-right">
             <p className="text-sm font-semibold text-green-700">
-              ₱{talent.hourlyMin.toLocaleString()} - ₱{talent.hourlyMax.toLocaleString()}/hr
+              {talent.expected_salary
+                ? `₱${talent.expected_salary.toLocaleString()}/month`
+                : 'Not specified'
+              }
             </p>
           </div>
         </div>

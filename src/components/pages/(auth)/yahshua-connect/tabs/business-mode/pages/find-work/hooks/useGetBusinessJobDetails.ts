@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
+import { T_BusinessJob } from '@/types/business-mode';
 
-async function getBusinessJobDetails(jobId: any, latitude?: number, longitude?: number) {
+async function getBusinessJobDetails(jobId: number | null, latitude?: number, longitude?: number): Promise<T_BusinessJob> {
   try {
     const token = getCookie('token');
     
@@ -13,16 +14,18 @@ async function getBusinessJobDetails(jobId: any, latitude?: number, longitude?: 
       searchParams.append('longitude', longitude.toString());
     }
 
-    const config: any = {
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-      },
+    const headers: Record<string, string> = {
+      'content-type': 'application/json',
     };
-    
+
     if (token) {
-      config.headers['Authorization'] = `Token ${token}`;
+      headers['Authorization'] = `Token ${token}`;
     }
+
+    const config: RequestInit = {
+      method: 'GET',
+      headers,
+    };
     
     const queryString = searchParams.toString();
     const url = `${process.env.NEXT_PUBLIC_API_URL}/api/business-jobs/${jobId}/${queryString ? `?${queryString}` : ''}`;
@@ -44,10 +47,10 @@ async function getBusinessJobDetails(jobId: any, latitude?: number, longitude?: 
   }
 }
 
-function useGetBusinessJobDetails(jobId: any, latitude?: number, longitude?: number) {
-  const query = useQuery(
-    ['businessJobDetailCache', jobId, latitude, longitude], 
-    () => getBusinessJobDetails(jobId, latitude, longitude), 
+function useGetBusinessJobDetails(jobId: number | null, latitude?: number, longitude?: number) {
+  const query = useQuery<T_BusinessJob>(
+    ['businessJobDetailCache', jobId, latitude, longitude],
+    () => getBusinessJobDetails(jobId, latitude, longitude),
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
