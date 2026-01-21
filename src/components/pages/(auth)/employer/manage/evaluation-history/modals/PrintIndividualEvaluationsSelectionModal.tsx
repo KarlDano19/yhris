@@ -2,7 +2,7 @@ import React, { useState, Fragment, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import { PrinterIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { PrinterIcon, XCircleIcon, DocumentArrowDownIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface EvaluationRecord {
@@ -16,10 +16,12 @@ interface EvaluationRecord {
   passing_score: number;
 }
 
+export type ExportFormat = 'pdf' | 'csv';
+
 interface PrintIndividualEvaluationsSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedOption: string, selectedForms?: string[]) => void;
+  onConfirm: (selectedOption: string, selectedForms?: string[], format?: ExportFormat) => void;
   isLoading?: boolean;
   evaluationRecords?: EvaluationRecord[];
 }
@@ -33,6 +35,7 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>('all');
   const [selectedForms, setSelectedForms] = useState<Set<string>>(new Set());
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('pdf');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,7 +71,7 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
         break;
     }
     
-    onConfirm(selectedOption, formsToInclude);
+    onConfirm(selectedOption, formsToInclude, selectedFormat);
 
     // Close the modal after printing
     handleClose();
@@ -77,6 +80,7 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
   const handleClose = () => {
     setSelectedOption('all');
     setSelectedForms(new Set());
+    setSelectedFormat('pdf');
     setIsDropdownOpen(false);
     setSelectedIndex(-1);
     onClose();
@@ -101,17 +105,32 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
     {
       id: 'all',
       title: 'All Evaluation Forms',
-      description: `Print all ${evaluationRecords.length} evaluation records`,
+      description: `Export all ${evaluationRecords.length} evaluation records`,
       value: evaluationRecords.length
     },
     {
       id: 'selected',
       title: 'Selected Evaluation Forms',
-      description: `Print ${
+      description: `Export ${
         Array.from(selectedForms).reduce((total, formName) => 
           total + getFormRecordCount(formName), 0)
       } records from selected forms`,
       value: selectedForms.size
+    }
+  ];
+
+  const formatOptions = [
+    {
+      id: 'pdf' as ExportFormat,
+      title: 'PDF',
+      description: 'Print-ready document format',
+      icon: DocumentTextIcon
+    },
+    {
+      id: 'csv' as ExportFormat,
+      title: 'CSV',
+      description: 'Spreadsheet-compatible format',
+      icon: DocumentArrowDownIcon
     }
   ];
 
@@ -145,7 +164,7 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
                 <div className="flex bg-savoy-blue p-4 items-center gap-4 rounded-t-lg">
                   <PrinterIcon className="w-6 h-6 text-white" />
                   <h3 className="flex-1 text-white font-semibold">
-                    Print Individual Evaluations Selection
+                    Export Individual Evaluations
                   </h3>
                   <XCircleIcon
                     className="w-6 h-6 text-white cursor-pointer"
@@ -154,10 +173,64 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
                 </div>
 
                 <div className="p-6">
+                  {/* Export Format Selection */}
+                  <div className="mb-6">
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      Select export format:
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      {formatOptions.map((format) => {
+                        const IconComponent = format.icon;
+                        return (
+                          <div
+                            key={format.id}
+                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                              selectedFormat === format.id
+                                ? 'border-savoy-blue bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => setSelectedFormat(format.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <IconComponent className={`w-5 h-5 ${
+                                  selectedFormat === format.id ? 'text-savoy-blue' : 'text-gray-400'
+                                }`} />
+                                <div>
+                                  <h4 className="text-sm font-medium text-gray-900">
+                                    {format.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-500">
+                                    {format.description}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="ml-2">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  selectedFormat === format.id
+                                    ? 'border-savoy-blue bg-savoy-blue'
+                                    : 'border-gray-300'
+                                }`}>
+                                  {selectedFormat === format.id && (
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 my-4"></div>
+
                   {/* Print Options */}
                   <div className="mb-6">
                     <p className="text-sm text-gray-600 mb-4">
-                      Choose how you want to select evaluation records for printing:
+                      Choose how you want to select evaluation records for export:
                     </p>
                     
                     <div className="grid grid-cols-2 gap-3">
@@ -319,12 +392,21 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
                       {isLoading ? (
                         <>
                           <div className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                          Generating...
+                          {selectedFormat === 'pdf' ? 'Generating...' : 'Exporting...'}
                         </>
                       ) : (
                         <>
-                          <PrinterIcon className="w-4 h-4" />
-                          Print Report
+                          {selectedFormat === 'pdf' ? (
+                            <>
+                              <PrinterIcon className="w-4 h-4" />
+                              Print Report
+                            </>
+                          ) : (
+                            <>
+                              <DocumentArrowDownIcon className="w-4 h-4" />
+                              Export CSV
+                            </>
+                          )}
                         </>
                       )}
                     </button>
@@ -340,4 +422,3 @@ const PrintIndividualEvaluationsSelectionModal: React.FC<PrintIndividualEvaluati
 };
 
 export default PrintIndividualEvaluationsSelectionModal;
-
