@@ -29,7 +29,7 @@ import useUpdateApplicantOrient from './hooks/useUpdateApplicantOrient';
 import useEnrollEmployeeToYP from '@/components/hooks/useEnrollEmployeeToYP';
 import { handleEmailSending, updateOrientItems } from './functions/emailHandlers';
 import useSyncEmployees from '@/components/hooks/useSyncEmployees';
-import LocationDepart1nt from './LocationDepartment';
+import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
 import EnrollRedirectModal from './modals/EnrollRedirectModal';
 

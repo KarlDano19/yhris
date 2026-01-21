@@ -14,9 +14,10 @@ interface NotificationsModalProps {
 }
 
 const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
-  const { data, isLoading, fetchNextPage, hasNextPage, refetch } = useGetApplicantNotifications();
+  const { data, isLoading, fetchNextPage, hasNextPage, refetch, isFetchingNextPage } = useGetApplicantNotifications();
 
-  const [tab, setTab] = useState<'all' | 'unread' | 'read'>('all');
+  const [tab, setTab] = useState<'all' | 'unread'>('all');
+  const listRef = React.useRef<HTMLDivElement | null>(null);
 
   const notifications = useMemo(() => {
     if (!data || !data.pages) return [];
@@ -33,6 +34,12 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
   const { mutate: markAsRead } = useMarkApplicantNotificationRead();
   const router = useRouter();
 
+  // Filtered notifications based on tab
+  const filteredNotifications = useMemo(() => {
+    if (tab === 'unread') return notifications.filter((n: any) => !n.is_read);
+    return notifications;
+  }, [notifications, tab]);
+
   const handleNotificationClick = (notification: any) => {
     if (!notification.is_read) {
       markAsRead(notification.id);
@@ -45,21 +52,34 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       // regular job posting (yahshua connect)
       target = `/personal-mode/jobs?job_id=${refs.job_posting_id}`;
     } else if (refs.business_job_id) {
-    // business-mode (gig) notifications:
-    // - If there's an application_id, forward it as application_id (used to locate a specific application)
-    // - Otherwise, pass the job id as job_id so the hire page can highlight the job card
-    if (refs.application_id) {
-      target = `/business-mode/my-jobs?application_id=${refs.application_id}`;
-    } else {
-      target = `/business-mode/hire?job_id=${refs.business_job_id}`;
-    }
+      // business-mode (gig) notifications:
+
+      if (refs.application_id) {
+        target = `/business-mode/my-jobs?application_id=${refs.application_id}`;
+      } else {
+        // Check if this is a daily progress review notification (title contains "Daily Progress Reviewed")
+        if (notification.title === 'Daily Progress Reviewed') {
+          target = `/business-mode/my-jobs?job_id=${refs.business_job_id}&open=view_progress`;
+        } else {
+          target = `/business-mode/hire?job_id=${refs.business_job_id}`;
+        }
+      }
     } else if (typeof notification.url_path === 'string') {
       // Notifications shown here are for the applicant (worker). Some older notifications
-      // may point to the employer's "hire" page; map those to the applicant "my-jobs" page.
       target = notification.url_path;
       try {
-        if (typeof target === 'string' && target.startsWith('/business-mode/hire')) {
-          target = target.replace('/business-mode/hire', '/business-mode/my-jobs');
+        if (typeof target === 'string') {
+          // Handle daily progress review notifications - convert business_job_id to job_id and add open param
+          if (notification.title === 'Daily Progress Reviewed') {
+            // Parse URL to extract business_job_id parameter
+            const url = new URL(target, window.location.origin);
+            const businessJobId = url.searchParams.get('business_job_id');
+            if (businessJobId) {
+              target = `/business-mode/my-jobs?job_id=${businessJobId}&open=view_progress`;
+            }
+          } else if (target.startsWith('/business-mode/hire')) {
+            target = target.replace('/business-mode/hire', '/business-mode/my-jobs');
+          }
         }
       } catch (e) {
         // fallback: use original
@@ -77,6 +97,17 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     unread.forEach((n: any) => {
       markAsRead(n.id);
     });
+  };
+
+  // Infinite scroll handler
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const threshold = 200; // px from bottom
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < threshold) {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
   };
 
   const getIcon = (type: string | undefined) => {
@@ -116,23 +147,40 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       isOpen={isOpen}
       onClose={onClose}
       title="Notifications"
-      size="md"
+      size="lg"
     >
-      {/* Unread count header */}
-      <div className="px-4 mb-2">
-              <div className="text-sm text-gray-600">{notifications.filter((n: any) => !n.is_read).length} unread</div>
-            </div>
-      {/* Scrollable content area to avoid modal/page overflow */}
-      <div className="space-y-0 max-h-[60vh] overflow-y-auto pr-2">
-    {isLoading ? (
+      {/* Tabs + Unread count header */}
+      <div className="px-4 mb-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setTab('all')}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${tab === 'all' ? 'bg-gray-100 text-gray-900' : 'text-gray-600'}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setTab('unread')}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${tab === 'unread' ? 'bg-gray-100 text-gray-900' : 'text-gray-600'}`}
+          >
+            Unread
+          </button>
+        </div>
+        <div className="text-sm text-gray-600">{notifications.filter((n: any) => !n.is_read).length} unread</div>
+      </div>
+
+      {/* Scrollable content area with infinite scroll */}
+      <div
+        ref={listRef}
+        onScroll={handleScroll}
+        className="space-y-0 max-h-[70vh] overflow-y-auto pr-2"
+      >
+        {isLoading ? (
           <div className="py-6 text-center text-gray-500">Loading notifications...</div>
-        ) : notifications.length === 0 ? (
+        ) : filteredNotifications.length === 0 ? (
           <div className="py-6 text-center text-gray-500">No notifications</div>
         ) : (
           <>
-            
-
-            {notifications.map((notification: any) => (
+            {filteredNotifications.map((notification: any) => (
               <div
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
@@ -155,20 +203,33 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
               </div>
             ))}
 
-            {/* Footer: Mark all as read */}
-            
+            {/* Loader for infinite scroll */}
+            {isFetchingNextPage && (
+              <div className="py-4 text-center text-gray-500">Loading more...</div>
+            )}
           </>
         )}
       </div>
+
       <div className="p-4 text-center border-t border-gray-100">
-              <button
-                onClick={handleMarkAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Mark all as read
-              </button>
-            </div>
-      
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={handleMarkAllAsRead}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Mark all as read
+          </button>
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="text-sm text-gray-600 hover:text-gray-800"
+            >
+              {isFetchingNextPage ? 'Loading...' : 'Load more'}
+            </button>
+          )}
+        </div>
+      </div>
     </Modal>
   );
 };

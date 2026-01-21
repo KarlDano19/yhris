@@ -24,6 +24,8 @@ interface JobCardProps {
   saved?: boolean;
   match?: number;
   applied?: boolean;
+  applied_job_status?: string;
+  applied_job_updated_at?: string;
   onApply?: () => void;
   onCardClick?: () => void;
   isSelected?: boolean;
@@ -42,7 +44,9 @@ const JobCard = ({
   logoUrl,
   saved = false,
   match,
-  applied = false,
+  applied,
+  applied_job_status,
+  applied_job_updated_at,
   onApply,
   onCardClick,
   isSelected = false,
@@ -63,6 +67,24 @@ const JobCard = ({
     if (!matchValue) return 'bg-gray-200';
     if (matchValue === 100) return 'bg-green-500';
     return 'bg-yellow-400';
+  };
+
+  const computeReapplyDate = () => {
+    const status = (applied_job_status || '').toLowerCase();
+    const updatedAt = applied_job_updated_at;
+    if (status === 'rejected' && updatedAt) {
+      try {
+        const updatedDate = new Date(updatedAt);
+        const expiresAt = new Date(updatedDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        if (now.getTime() <= expiresAt.getTime()) {
+          return expiresAt.toLocaleDateString();
+        }
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   };
 
   const handleSaveToggle = () => {
@@ -201,15 +223,43 @@ const JobCard = ({
         </div>
       )}
 
-      {/* Action Button */}
+      {/* Action Button / Status Badge */}
       <div className="flex items-center justify-end gap-2">
         {applied ? (
-          <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg">
-            <CheckIcon className="h-5 w-5" />
-            <span className="text-sm font-medium">Applied</span>
-          </div>
+          (() => {
+            const status = (applied_job_status || '').toLowerCase();
+            const reapplyDate = computeReapplyDate();
+
+            if (status === 'rejected') {
+              return (
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg">
+                    <span className="text-sm font-medium">Rejected</span>
+                  </div>
+                  {reapplyDate && <span className="text-xs text-gray-500 mt-1">Can re-apply on {reapplyDate}</span>}
+                </div>
+              );
+            }
+
+            if (status === 'hired' || status === 'passed') {
+              return (
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-200 text-green-700 rounded-lg">
+                  <CheckIcon className="h-5 w-5" />
+                  <span className="text-sm font-medium">Hired</span>
+                </div>
+              );
+            }
+
+            // ongoing or fallback -> show Applied
+            return (
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
+                <CheckIcon className="h-5 w-5" />
+                <span className="text-sm font-medium">Applied</span>
+              </div>
+            );
+          })()
         ) : (
-          <Link 
+          <Link
             href={`/job-applicant-form/${id}`}
             onClick={(e) => {
               e.stopPropagation();

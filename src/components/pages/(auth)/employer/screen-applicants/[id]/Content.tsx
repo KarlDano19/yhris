@@ -234,14 +234,20 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
               isMatch = Boolean(
                 idealAnswers.some((ideal: any) =>
-                  applicantAnswers.some((app: any) => app.toLowerCase() === ideal.toLowerCase())
+                  applicantAnswers.some((app: any) =>
+                    app != null && ideal != null && String(app).toLowerCase() === String(ideal).toLowerCase()
+                  )
                 )
               );
             } else if (responseType === 'Yes / No') {
               // Yes/No questions - check if answer matches ideal answer
               const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
               const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
-              isMatch = applicantAnswer.toLowerCase() === idealAnswer.toLowerCase();
+              if (applicantAnswer == null || idealAnswer == null) {
+                isMatch = false;
+              } else {
+                isMatch = String(applicantAnswer).toLowerCase() === String(idealAnswer).toLowerCase();
+              }
             } else {
               // For Text questions, don't affect "Not Fit" status - skip evaluation
               return;

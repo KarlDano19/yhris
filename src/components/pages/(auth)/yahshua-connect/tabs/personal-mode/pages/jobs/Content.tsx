@@ -132,6 +132,8 @@ const Content = () => {
         saved: savedJobIds.has(job.id), // Check if job is saved
         match: job.match_percentage || 0,
         applied: job.applied || false, // Applied status from backend
+        applied_job_status: job.applied_job_status,
+        applied_job_updated_at: job.applied_job_updated_at,
       };
     });
   }, [jobsData, displayCount, savedJobIds]);
