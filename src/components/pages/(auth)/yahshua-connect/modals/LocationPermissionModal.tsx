@@ -32,15 +32,32 @@ const LocationPermissionModal = ({
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
-        setIsLoading(false);
-        // Set selected location instead of immediately calling callback
-        setSelectedLocation({
-          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-          latitude,
-          longitude,
-        });
+
+        // Use reverse geocoding to get address from coordinates
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+          setSelectedLocation({
+            address,
+            latitude,
+            longitude,
+          });
+          setIsLoading(false);
+        } catch (error) {
+          // If reverse geocoding fails, just use coordinates
+          setSelectedLocation({
+            address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            latitude,
+            longitude,
+          });
+          setIsLoading(false);
+        }
       },
       (err) => {
         setIsLoading(false);

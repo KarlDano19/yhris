@@ -31,11 +31,6 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
     if (!talent) return null;
 
     if (talentDetail) {
-      // Calculate hourly rate from expected salary (assuming 160 working hours per month)
-      const hourlyRate = talentDetail.expected_salary ? Math.floor(talentDetail.expected_salary / 160) : 500;
-      const hourlyMin = Math.floor(hourlyRate * 0.8);
-      const hourlyMax = Math.floor(hourlyRate * 1.2);
-
       return {
         ...talent,
         // Use backend data (ApplicantRetrieveProfileSerializer fields)
@@ -45,8 +40,6 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
         reviews: talentDetail.reviews_count || 0,
         jobsDone: talentDetail.jobs_done_count || 0,
         portfolioCount: talentDetail.portfolio?.length || 0, // Calculate from portfolio array
-        hourlyMin,
-        hourlyMax,
         skills: talentDetail.skills || [], // Always array from backend
         languages: talent.languages, // Keep from original (not in backend)
         education: talentDetail.education,
@@ -207,13 +200,16 @@ const TalentDetailsModal = ({ isOpen, onClose, talent, onMessage, onBookNow }: T
                           </div>
                         </div>
 
-                        {/* Hourly Rate & Availability */}
+                        {/* Expected Salary & Availability */}
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-xs text-gray-600 mb-1">Hourly Rate</p>
+                              <p className="text-xs text-gray-600 mb-1">Expected Salary</p>
                               <p className="text-lg font-bold text-green-700">
-                                ₱{displayTalent.hourlyMin.toLocaleString()} - ₱{displayTalent.hourlyMax.toLocaleString()}/hr
+                                {displayTalent.expected_salary
+                                  ? `₱${displayTalent.expected_salary.toLocaleString()}/month`
+                                  : 'Not specified'
+                                }
                               </p>
                             </div>
                             {displayTalent.availability && (

@@ -197,11 +197,11 @@ const LocationPickerMap = ({ value, onChange, placeholder = 'Search for a locati
       </div>
 
       {/* Selected Location Display */}
-      {value && (
+      {/* {value && (
         <div className="text-xs text-gray-500">
           <span className="font-medium">Coordinates:</span> {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -236,7 +236,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
         } else if (hire.application_work_status === 'not_started') {
           status = 'pending';
         }
-        
+
         // Calculate price from job posting budget
         let price = 0;
         if (hire.application_payment_amount) {
@@ -246,7 +246,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
         } else if (hire.budget_type === 'hourly_rate') {
           price = hire.hourly_rate || 0;
         }
-        
+
         // Generate initials from hired applicant name
         const providerInitials = hire.hired_applicant_name
           ? hire.hired_applicant_name
@@ -256,9 +256,10 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
               .substring(0, 2)
               .toUpperCase()
           : 'UN';
-        
+
         return {
           id: hire.application_id,
+          jobPostingId: hire.id,
           serviceName: hire.job_title,
           providerName: hire.hired_applicant_name || 'Unknown',
           providerInitials,
@@ -344,9 +345,17 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
     setIsChatModalOpen(true);
   };
 
-  const handleSendPaymentProof = (hireId: number) => {
-    // TODO: Implement payment proof upload
-    console.log('Send payment proof for hire:', hireId);
+  const handleViewHire = (jobPostingId: number) => {
+    setIsMyHiresModalOpen(false);
+    // Store jobPostingId to highlight and scroll to it on hire page
+    sessionStorage.setItem('scrollToJobId', jobPostingId.toString());
+
+    // Dispatch custom event to trigger scroll even if already on hire page
+    window.dispatchEvent(new CustomEvent('scrollToJob', {
+      detail: { jobPostingId }
+    }));
+
+    router.push('/business-mode/hire');
   };
 
   const layoutContent = (
@@ -456,7 +465,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
               isOpen={isMyHiresModalOpen}
               onClose={() => setIsMyHiresModalOpen(false)}
               hires={hiredApplicants}
-              onSendPaymentProof={handleSendPaymentProof}
+              onViewHire={handleViewHire}
             />
           )}
         </>

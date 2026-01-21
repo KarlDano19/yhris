@@ -67,7 +67,6 @@ interface ApplicantProfileModalProps {
   jobTitle: string;
   jobId: number;
   applicant: ApplicantProfileData;
-  onBack: () => void;
   onMessage: (applicantId: number) => void;
   onHire: (applicantId: number) => void;
   onReject: (applicantId: number) => void;
@@ -79,7 +78,6 @@ const ApplicantProfileModal = ({
   jobTitle,
   jobId,
   applicant,
-  onBack,
   onMessage,
   onHire,
   onReject,
@@ -111,23 +109,23 @@ const ApplicantProfileModal = ({
       onClose={onClose}
       title={`Applicants for '${jobTitle}'`}
       size="4xl"
-      headerContent={
-        <button
-          onClick={onBack}
-          className="text-sm text-savoy-blue hover:text-savoy-blue/80 font-medium mr-3"
-        >
-          &lt; Back to all applicants
-        </button>
-      }
     >
       <div className="max-h-[80vh] overflow-y-auto -mx-5 px-5">
         {/* Applicant Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            <div className="w-16 h-16 rounded-full bg-savoy-blue flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-              {applicant.initials}
-            </div>
+            {applicant.photo ? (
+              <img
+                src={applicant.photo}
+                alt={applicant.name}
+                className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-savoy-blue flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                {applicant.initials}
+              </div>
+            )}
 
             {/* Name and Rating */}
             <div>
@@ -146,9 +144,8 @@ const ApplicantProfileModal = ({
           <div className="flex gap-3">
             <button
               onClick={() => setIsChatModalOpen(true)}
-              className="px-4 py-2 border border-savoy-blue text-savoy-blue bg-white rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors"
             >
-              <ChatBubbleLeftRightIcon className="h-5 w-5" />
               Message
             </button>
             {applicant.status === 'accepted' ? (

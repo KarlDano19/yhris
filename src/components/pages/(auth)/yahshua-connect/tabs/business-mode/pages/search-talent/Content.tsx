@@ -25,11 +25,6 @@ const Content = () => {
     if (!talentData?.records) return [];
 
     return talentData.records.map(talent => {
-      // Calculate hourly rate from expected salary (rough estimate)
-      const hourlyRate = talent.expected_salary ? Math.floor(talent.expected_salary / 160) : 500;
-      const hourlyMin = Math.floor(hourlyRate * 0.8);
-      const hourlyMax = Math.floor(hourlyRate * 1.2);
-
       return {
         id: talent.id,
         name: talent.name || `${talent.firstname} ${talent.lastname}`,
@@ -38,8 +33,6 @@ const Content = () => {
         reviews: talent.reviews_count || 0,
         jobsDone: talent.jobs_done_count || 0,
         location: talent.address || 'Location not specified',
-        hourlyMin,
-        hourlyMax,
         skills: talent.skills || [],
         languages: ['English', 'Filipino'], // Default languages, API doesn't provide this field
         availability: talent.available_for_bookings ? 'Available Now' : undefined,
@@ -102,8 +95,7 @@ const Content = () => {
               {talentList.map((talent: Talent) => (
               <div
                 key={talent.id}
-                onClick={() => handleSelectTalent(talent)}
-                className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -153,9 +145,12 @@ const Content = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Hourly Rate</p>
+                    <p className="text-sm text-gray-600">Expected Salary</p>
                     <p className="text-base font-semibold text-green-700">
-                      ₱{talent.hourlyMin.toLocaleString()} - ₱{talent.hourlyMax.toLocaleString()}/hr
+                      {talent.expected_salary
+                        ? `₱${talent.expected_salary.toLocaleString()}/month`
+                        : 'Not specified'
+                      }
                     </p>
                     {talent.availability && (
                       <div className="mt-2">
@@ -180,18 +175,27 @@ const Content = () => {
                   )}
                 </div>
 
-                <div className="mt-4 flex flex-col sm:flex-row gap-3" onClick={(e) => e.stopPropagation()}>
+                <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => handleSelectTalent(talent)}
+                    className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
+                  >
+                    View Details
+                  </button>
+
                   <button
                     onClick={() => {
                       setSelectedTalent(talent);
                       setOpenedFromDetails(false);
                       setIsChatModalOpen(true);
                     }}
-                    className="flex-1 px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-savoy-blue/5 transition-colors"
+                    className="flex-1 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-savoy-blue/90 transition-colors"
                   >
                     Message
                   </button>
-                  <button
+                  
+                  {/* Hide for now */}
+                  {/* <button
                     onClick={() => {
                       setSelectedTalent(talent);
                       setOpenedFromDetails(false);
@@ -200,7 +204,7 @@ const Content = () => {
                     className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
                   >
                     Book Now
-                  </button>
+                  </button> */}
                 </div>
               </div>
               ))}

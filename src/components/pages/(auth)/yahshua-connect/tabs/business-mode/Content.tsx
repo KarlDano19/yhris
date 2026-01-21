@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
+import ConfirmAcceptJobModal from './pages/find-work/modals/ConfirmAcceptJobModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
 import CustomToast from '@/components/CustomToast';
@@ -24,10 +25,12 @@ import { calculateDistanceKm } from '@/helpers/distance';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] = useState(false);
   const [isJobAcceptedModalOpen, setIsJobAcceptedModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [pendingAcceptJobId, setPendingAcceptJobId] = useState<number | null>(null);
 
   // Fetch dashboard overview data from API
   const { data: dashboardData, isLoading } = useGetDashboardOverview();
@@ -156,32 +159,48 @@ const Content = () => {
     console.log('Applied filters:', filters);
   };
 
-  const handleAcceptJob = async (jobId: number) => {
-    try {
+  const handleAcceptJob = (jobId: number) => {
+    // Check if already applied
+    const job = jobsData?.find((j: any) => j.id === jobId);
+    if (job?.has_applied) {
+      // If already applied, open chat modal instead
       setSelectedJobId(jobId);
+      setIsChatModalOpen(true);
+      toast.custom(() => <CustomToast message="You have already applied to this job. Opening chat..." type="info" />, {
+        duration: 3000,
+      });
+      return;
+    }
 
-      // Check if already applied
-      const job = jobsData?.find((j: any) => j.id === jobId);
-      if (job?.has_applied) {
-        // If already applied, open chat modal instead
-        setIsChatModalOpen(true);
-        toast.custom(() => <CustomToast message="You have already applied to this job. Opening chat..." type="info" />, {
-          duration: 3000,
-        });
-        return;
-      }
+    // Show confirmation modal before accepting
+    setPendingAcceptJobId(jobId);
+    setIsConfirmAcceptModalOpen(true);
+  };
+
+  const handleConfirmAcceptJob = async () => {
+    if (!pendingAcceptJobId) return;
+
+    try {
+      setSelectedJobId(pendingAcceptJobId);
 
       // Apply to the business job
-      await applyToBusinessJobMutation.mutateAsync(jobId);
+      await applyToBusinessJobMutation.mutateAsync(pendingAcceptJobId);
+
+      // Close confirmation modal and reset pending job
+      setIsConfirmAcceptModalOpen(false);
+      setPendingAcceptJobId(null);
 
       // Show success modal and toast
       setIsJobAcceptedModalOpen(true);
+      setIsJobDetailsModalOpen(false);
       toast.custom(() => <CustomToast message="Application submitted successfully!" type="success" />, {
         duration: 5000,
       });
     } catch (error: any) {
       // Handle error
       const message = error?.message || 'Failed to apply to job. Please try again.';
+      setIsConfirmAcceptModalOpen(false);
+      setPendingAcceptJobId(null);
       toast.custom(() => <CustomToast message={message} type="error" />, {
         duration: 7000,
       });
@@ -370,6 +389,24 @@ const Content = () => {
           onApplyFilters={handleApplyFilters}
         />
       )}
+
+      {/* Confirm Accept Job Modal */}
+      {pendingAcceptJobId && (() => {
+        const pendingJob = transformedJobs.find((job) => job.id === pendingAcceptJobId);
+        return pendingJob ? (
+          <ConfirmAcceptJobModal
+            isOpen={isConfirmAcceptModalOpen}
+            onClose={() => {
+              setIsConfirmAcceptModalOpen(false);
+              setPendingAcceptJobId(null);
+            }}
+            onConfirm={handleConfirmAcceptJob}
+            jobTitle={pendingJob.title}
+            clientName={pendingJob.clientName}
+            isLoading={applyToBusinessJobMutation.isLoading}
+          />
+        ) : null;
+      })()}
 
       {/* Job Accepted Modal */}
       {isJobAcceptedModalOpen && selectedJobFull && (
