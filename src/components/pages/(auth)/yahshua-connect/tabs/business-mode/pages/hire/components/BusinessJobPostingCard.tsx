@@ -1,5 +1,11 @@
+import { useState } from 'react';
+
+import { Tooltip } from 'react-tooltip';
+
 import { ClockIcon, CurrencyDollarIcon, UserGroupIcon, CheckCircleIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { StarIcon } from '@heroicons/react/24/solid';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
+import BusinessJobReviewsModal from '../../find-work/modals/BusinessJobReviewsModal';
 
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -8,12 +14,14 @@ import { T_BusinessJob, T_HireInfo } from '@/types/business-mode';
 interface BusinessJobPostingCardProps {
   job: T_BusinessJob;
   hiredApplicants: T_HireInfo[];
+  previousHiresCount: number;
   isHired: boolean;
   applicantsCount: number;
   isMoreMenuOpen: boolean;
   menuRef: (el: HTMLDivElement | null) => void;
   onMoreMenuClick: () => void;
   onViewApplicants: () => void;
+  onViewHistory: () => void;
   onViewTimeLogs: (applicationId: number) => void;
   onViewDailyProgress: (applicationId: number) => void;
   onSubmitPaymentProof: (applicationId: number) => void;
@@ -68,12 +76,14 @@ const formatPriceRange = (job: T_BusinessJob): string => {
 const BusinessJobPostingCard = ({
   job,
   hiredApplicants,
+  previousHiresCount,
   isHired,
   applicantsCount,
   isMoreMenuOpen,
   menuRef,
   onMoreMenuClick,
   onViewApplicants,
+  onViewHistory,
   onViewTimeLogs,
   onViewDailyProgress,
   onSubmitPaymentProof,
@@ -90,6 +100,7 @@ const BusinessJobPostingCard = ({
 }: BusinessJobPostingCardProps) => {
   // Check if any hired applicant has actually started work
   const hasStartedWork = hiredApplicants.some(hire => hire.workStatus === 'started');
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
 
   return (
     <div
@@ -100,9 +111,31 @@ const BusinessJobPostingCard = ({
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className={`text-lg font-bold mb-1 ${job.is_active ? 'text-gray-900' : 'text-red-500'}`}>
-            {job.job_title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className={`text-lg font-bold ${job.is_active ? 'text-gray-900' : 'text-red-500'}`}>
+              {job.job_title}
+            </h3>
+            {job.average_rating && job.reviews_count > 0 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsReviewsModalOpen(true);
+                }}
+                className="flex items-center gap-0.5 transition-opacity hover:opacity-80 cursor-pointer"
+                data-tooltip-id="job-rating-tooltip"
+                data-tooltip-content="Click to view reviews from past applicants"
+              >
+                <StarIcon className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm font-semibold text-gray-700">
+                  {job.average_rating}
+                </span>
+                <span className="text-xs text-blue-600">
+                  ({job.reviews_count} {job.reviews_count === 1 ? 'review' : 'reviews'})
+                </span>
+              </button>
+            )}
+          </div>
           <p className={`text-sm ${job.is_active ? 'text-gray-600' : 'text-red-400'}`}>
             <span className="font-semibold text-savoy-blue">Category:</span> {job.category}
           </p>
@@ -248,12 +281,24 @@ const BusinessJobPostingCard = ({
 
       {/* Action Buttons */}
       <div className="flex items-center justify-between">
-        <button
-          onClick={onViewApplicants}
-          className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
-        >
-          View Applicants ({applicantsCount})
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onViewApplicants}
+            className="px-4 py-2 border border-savoy-blue text-savoy-blue rounded-lg font-medium hover:bg-blue-50 transition-colors"
+          >
+            View Applicants ({applicantsCount})
+          </button>
+
+          {previousHiresCount > 0 && (
+            <button
+              onClick={onViewHistory}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <ClockIcon className="h-4 w-4" />
+              History ({previousHiresCount})
+            </button>
+          )}
+        </div>
 
         {/* More Menu Dropdown */}
         <div className="relative more-menu-container" ref={menuRef}>
@@ -313,6 +358,16 @@ const BusinessJobPostingCard = ({
           )}
         </div>
       </div>
+
+      {/* Business Job Reviews Modal */}
+      <BusinessJobReviewsModal
+        isOpen={isReviewsModalOpen}
+        onClose={() => setIsReviewsModalOpen(false)}
+        jobId={job.id}
+      />
+
+      {/* Tooltip */}
+      <Tooltip id="job-rating-tooltip" />
     </div>
   );
 };

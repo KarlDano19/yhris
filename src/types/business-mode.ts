@@ -88,6 +88,7 @@ export type T_BusinessJobApplication = {
   applicant_average_rating: number | null;
   applicant_reviews_count: number | null;
   status: T_ApplicationStatus;
+  batch_number: number;
   work_status: T_WorkStatus;
   started_at: string | null;
   completed_at: string | null;
@@ -118,6 +119,7 @@ export type T_BusinessJobApplication = {
   time_records: T_TimeRecord[];
   // Review tracking
   has_client_reviewed: boolean;
+  has_applicant_reviewed: boolean;
 };
 
 // Applicant Work Experience (from API)
@@ -154,6 +156,7 @@ export type T_BusinessJob = {
   time_from: string | null;
   time_to: string | null;
   status: T_JobStatus;
+  current_batch_number: number;
   is_urgent: boolean;
   is_active: boolean;
   is_proof_file_required: boolean;
@@ -170,6 +173,8 @@ export type T_BusinessJob = {
   created_by_reviews_count: number;
   created_by_photo: string | null;
   applications_count: number;
+  average_rating: number | null;
+  reviews_count: number;
   has_applied: boolean;
   applications: T_BusinessJobApplication[];
 };
@@ -484,6 +489,8 @@ export type T_ActiveJob = {
   timeTo: string | null;
   // Can start job flag (based on contract start date)
   canStartJob: boolean;
+  // Review tracking
+  hasApplicantReviewed: boolean;
 };
 
 // Clock In/Out Data Types

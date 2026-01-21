@@ -107,14 +107,17 @@ const SubmitDailyProgressModal = ({
   }, [isOpen]);
 
   // Parse contract dates for date picker constraints
-  const minDate = contractStartDate ? new Date(contractStartDate) : undefined;
+  // ORIGINAL CODE (COMMENTED OUT FOR TESTING)
+  // Restricts to contract dates AND prevents future dates beyond today
+  // const minDate = contractStartDate ? new Date(contractStartDate) : undefined;
+  // const today = new Date();
+  // today.setHours(23, 59, 59, 999);
+  // const contractEnd = contractEndDate ? new Date(contractEndDate) : undefined;
+  // const maxDate = contractEnd ? (contractEnd < today ? contractEnd : today) : today;
 
-  // Max date should be the minimum of today and contract end date
-  // This prevents selecting future dates
-  const today = new Date();
-  today.setHours(23, 59, 59, 999); // End of today
-  const contractEnd = contractEndDate ? new Date(contractEndDate) : undefined;
-  const maxDate = contractEnd ? (contractEnd < today ? contractEnd : today) : today;
+  // TESTING CODE (ALLOW ANY DATE WITHIN CONTRACT PERIOD - INCLUDING FUTURE DATES)
+  const minDate = contractStartDate ? new Date(contractStartDate) : undefined;
+  const maxDate = contractEndDate ? new Date(contractEndDate) : undefined;
 
   // Calculate dates that already have submitted progress (to exclude from picker)
   const excludedDates = dailyProgresses.map((progress) => {
@@ -173,7 +176,8 @@ const SubmitDailyProgressModal = ({
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-savoy-blue shadow-sm"
         />
         <p className="mt-1 text-xs text-gray-500">
-          Select today or a past date within the contract period (up to {maxDate.toLocaleDateString()})
+          {/* ORIGINAL: Select today or a past date within the contract period (up to today) */}
+          {/* TESTING: */}Select any date within the contract period ({minDate?.toLocaleDateString()} - {maxDate?.toLocaleDateString()})
           {excludedDates.length > 0 && '. Dates with submitted progress are disabled.'}
         </p>
       </div>

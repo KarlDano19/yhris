@@ -24,11 +24,11 @@ async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode
     }
 
     const searchParams = new URLSearchParams();
-    
+
     if (mode === 'listing') {
       // For job listings
       searchParams.append('current_page', pageParam.toString());
-      searchParams.append('page_size', '200'); // 200 jobs per page for listings
+      searchParams.append('page_size', String(filters?.page_size || 10)); // 10 jobs per page for listings
       
       // Use applicant_personal view type if flag is set (for personal mode with match percentage)
       if (filters?.useApplicantPersonal || filters?.view_type === 'applicant_personal') {
@@ -105,15 +105,11 @@ async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode
     
     if (mode === 'listing') {
       // Return data in format expected by useInfiniteQuery
-      const totalPages = data.total_pages || 1;
-      const nextPage = pageParam < totalPages ? pageParam + 1 : undefined;
-      
       return {
         records: data.records || [],
         total_records: data.total_records || 0,
-        total_pages: totalPages,
+        total_pages: data.total_pages || 1,
         current_page: pageParam,
-        nextPage: nextPage,
       };
     } else {
       // Return autocomplete format
@@ -143,11 +139,18 @@ function useFindJobs(itemsFilter: JobFilters | null) {
       Array.isArray(itemsFilter?.location)
         ? itemsFilter?.location.join('|')
         : itemsFilter?.location,
+      itemsFilter?.page_size,
       itemsFilter?.useApplicantPersonal || itemsFilter?.view_type === 'applicant_personal', // Include in cache key
-    ], 
+    ],
     ({ pageParam = 1 }) => fetchJobs(itemsFilter, pageParam, 'listing'),
     {
-      getNextPageParam: (lastPage) => lastPage.nextPage,
+      getNextPageParam: (lastPage) => {
+        // Check if there are more pages (like notifications/public jobs)
+        if (lastPage && lastPage.current_page < lastPage.total_pages) {
+          return lastPage.current_page + 1;
+        }
+        return undefined;
+      },
       refetchOnWindowFocus: false,
       keepPreviousData: true,
       enabled: true, // Enable initial fetch to show jobs on page load

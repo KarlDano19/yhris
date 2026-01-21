@@ -1,7 +1,11 @@
+import { useState } from 'react';
+
 import Image from 'next/image';
+import { Tooltip } from 'react-tooltip';
 
 import { MapPinIcon, ClockIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import BusinessJobReviewsModal from '../modals/BusinessJobReviewsModal';
 
 interface BusinessJobCardProps {
   id: number;
@@ -13,6 +17,8 @@ interface BusinessJobCardProps {
   distance: string;
   rating: number;
   hiresCount: number;
+  jobRating?: number | null;
+  jobReviewsCount?: number;
   description: string;
   time: string;
   priceRange: string;
@@ -35,6 +41,8 @@ const BusinessJobCard = ({
   distance,
   rating,
   hiresCount,
+  jobRating,
+  jobReviewsCount = 0,
   description,
   time,
   priceRange,
@@ -47,6 +55,7 @@ const BusinessJobCard = ({
   onViewDetails,
 }: BusinessJobCardProps) => {
   const isAccepted = status === 'accepted' || status === 'scheduled' || hasApplied;
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   
   // Generate initials from client name if not provided
   const getInitials = () => {
@@ -90,8 +99,25 @@ const BusinessJobCard = ({
                 Urgent
               </span>
             )}
+            {/* Job Rating */}
+            {jobRating && jobReviewsCount > 0 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsReviewsModalOpen(true);
+                }}
+                className="flex items-center gap-0.5 transition-opacity hover:opacity-80 cursor-pointer"
+                data-tooltip-id="job-rating-tooltip"
+                data-tooltip-content="Click to view reviews from past applicants"
+              >
+                <StarIconSolid className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm font-semibold text-gray-700">{jobRating}</span>
+                <span className="text-xs text-blue-600 ml-1">({jobReviewsCount} {jobReviewsCount === 1 ? 'review' : 'reviews'})</span>
+              </button>
+            )}
           </div>
-          
+
           {/* Client Name and Rating */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-sm font-medium text-gray-900">{clientName}</span>
@@ -154,6 +180,16 @@ const BusinessJobCard = ({
           </button>
         )}
       </div>
+
+      {/* Business Job Reviews Modal */}
+      <BusinessJobReviewsModal
+        isOpen={isReviewsModalOpen}
+        onClose={() => setIsReviewsModalOpen(false)}
+        jobId={id}
+      />
+
+      {/* Tooltip */}
+      <Tooltip id="job-rating-tooltip" />
     </div>
   );
 };

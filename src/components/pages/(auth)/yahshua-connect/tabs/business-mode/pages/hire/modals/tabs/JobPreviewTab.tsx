@@ -31,6 +31,7 @@ export default function JobPreviewTab({
   const scheduleEndDate = watch("scheduleEndDate");
   const scheduleTimeFrom = watch("scheduleTimeFrom");
   const scheduleTimeTo = watch("scheduleTimeTo");
+  const isUrgent = watch("isUrgent");
 
   const formatDateRange = () => {
     if (!scheduleStartDate) return 'Not set';
@@ -79,9 +80,16 @@ export default function JobPreviewTab({
             <FileCaseIcon className="h-5 w-5 md:h-6 md:w-6" />
           </span>
           <div className="flex-1 min-w-0">
-            <h5 className="text-lg md:text-xl font-semibold text-indigo-dye break-words">
-              {jobTitle || 'Untitled Job'}
-            </h5>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h5 className="text-lg md:text-xl font-semibold text-indigo-dye break-words">
+                {jobTitle || 'Untitled Job'}
+              </h5>
+              {isUrgent && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                  Urgent
+                </span>
+              )}
+            </div>
             {category && (
               <h6 className="text-xs md:text-sm mt-1 break-words">
                 <span className="text-savoy-blue font-medium">Category:</span>{' '}
