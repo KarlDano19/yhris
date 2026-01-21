@@ -16,7 +16,7 @@ import Pagination from '@/components/Pagination';
 import useFileforge from '@/components/hooks/useFileforge';
 import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
 import EvaluationDetailsModal from '../modals/EvaluationDetailsModal';
-import PrintIndividualEvaluationsSelectionModal from '../modals/PrintIndividualEvaluationsSelectionModal';
+import PrintIndividualEvaluationsSelectionModal, { ExportFormat } from '../modals/PrintIndividualEvaluationsSelectionModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';
@@ -54,6 +54,7 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
     totalRecords: 0,
   });
   const [isSearching, setIsSearching] = useState(false);
+  const [isExportingCSV, setIsExportingCSV] = useState(false);
   const deleteEvaluationHistoryMutation = useDeleteEvaluationHistory();
   const { mutate: deleteEvaluationHistory, isLoading: isDeleteEvaluationHistoryLoading } = deleteEvaluationHistoryMutation;
   
@@ -107,7 +108,7 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
   // Handle print button click - fetches all records and opens modal
   const handlePrintClick = async () => {
     if (!evaluationHistoryItems || evaluationHistoryItems.length === 0) {
-      toast.custom(() => <CustomToast message='No evaluation data available to print.' type='error' />, { duration: 3000 });
+      toast.custom(() => <CustomToast message='No evaluation data available to export.' type='error' />, { duration: 3000 });
       return;
     }
 
@@ -146,8 +147,70 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
     }
   };
 
-  // Handle print modal confirmation - filters and prints data based on selected forms
-  const handlePrintConfirm = async (selectedOption: string, selectedForms?: string[]) => {
+  // Generate CSV filename
+  const generateCSVFilename = (dateFilter?: { from: string; to: string }) => {
+    const dateFrom = dateFilter?.from ? new Date(dateFilter.from).toISOString().split('T')[0] : 'all-time';
+    const dateTo = dateFilter?.to ? new Date(dateFilter.to).toISOString().split('T')[0] : 'all-time';
+    return `individual-evaluations-${dateFrom}-to-${dateTo}.csv`;
+  };
+
+  // Handle CSV export
+  const handleCSVExport = async (formattedData: any[], dateFilter?: { from: string; to: string }) => {
+    try {
+      setIsExportingCSV(true);
+
+      // Define CSV headers
+      const headers = [
+        'Employee Name',
+        'Date of Evaluation',
+        'Evaluation Period',
+        'Evaluation Form',
+        'Total Score',
+        'Max Score',
+        'Passing Score',
+        'Status'
+      ];
+
+      // Convert data to CSV rows
+      const csvRows = formattedData.map((item: any) => {
+        const status = item.form_total_score >= item.passing_score ? 'Passed' : 'Failed';
+        return [
+          `"${(item.employee_name || '').replace(/"/g, '""')}"`,
+          `"${item.date_of_evaluation || ''}"`,
+          `"${(item.evaluation_period || '').replace(/"/g, '""')}"`,
+          `"${(item.evaluation_form || '').replace(/"/g, '""')}"`,
+          item.form_total_score || 0,
+          item.max_total_score || 0,
+          item.passing_score || 0,
+          status
+        ].join(',');
+      });
+
+      // Combine headers and rows
+      const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', generateCSVFilename(dateFilter));
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.custom(() => <CustomToast message='CSV exported successfully.' type='success' />, { duration: 3000 });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.custom(() => <CustomToast message='Failed to export CSV.' type='error' />, { duration: 3000 });
+    } finally {
+      setIsExportingCSV(false);
+    }
+  };
+
+  // Handle print modal confirmation - filters and prints/exports data based on selected forms and format
+  const handlePrintConfirm = async (selectedOption: string, selectedForms?: string[], format: ExportFormat = 'pdf') => {
     try {
       // Format and filter the data based on selected forms
       let formattedData = allEvaluationRecords.map((item: any) => ({
@@ -162,23 +225,29 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
         );
       }
 
-      // Prepare date filter for printing
-      const printDateFilter = appliedFilter.from || appliedFilter.to
+      // Prepare date filter
+      const dateFilter = appliedFilter.from || appliedFilter.to
         ? {
             from: appliedFilter.from ? appliedFilter.from.toLocaleDateString('en-CA') : '',
             to: appliedFilter.to ? appliedFilter.to.toLocaleDateString('en-CA') : '',
           }
         : undefined;
 
-      await handlePrintIndividualEvaluations(
-        generatePDFLocally,
-        formattedData,
-        printDateFilter,
-        appliedFilter.search
-      );
+      // Export based on selected format
+      if (format === 'csv') {
+        await handleCSVExport(formattedData, dateFilter);
+      } else {
+        await handlePrintIndividualEvaluations(
+          generatePDFLocally,
+          formattedData,
+          dateFilter,
+          appliedFilter.search
+        );
+      }
     } catch (error) {
-      console.error('Error printing individual evaluations:', error);
-      toast.custom(() => <CustomToast message='Failed to generate PDF.' type='error' />, { duration: 3000 });
+      console.error('Error exporting evaluations:', error);
+      const errorMessage = format === 'csv' ? 'Failed to export CSV.' : 'Failed to generate PDF.';
+      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 3000 });
     }
   };
 
@@ -402,11 +471,13 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
               </button>
               <button
                 onClick={handlePrintClick}
-                disabled={isPrintGenerating || isLoadingEvaluationHistoryItems || evaluationHistoryItems.length === 0}
+                disabled={isPrintGenerating || isExportingCSV || isLoadingEvaluationHistoryItems || evaluationHistoryItems.length === 0}
                 className='flex items-center justify-center bg-white text-black rounded-md p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                title='Print individual evaluations'
+                title='Export individual evaluations'
+                data-tooltip-id='export-tooltip'
+                data-tooltip-content='Export to PDF or CSV'
               >
-                {isPrintGenerating ? (
+                {isPrintGenerating || isExportingCSV ? (
                   <div className="animate-spin w-6 h-6"></div>
                 ) : (
                   <div>
@@ -477,14 +548,14 @@ const IndividualEvaluations = ({ hasActiveSubscription, isActive }: { hasActiveS
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         onConfirm={handlePrintConfirm}
-        isLoading={isPrintGenerating}
+        isLoading={isPrintGenerating || isExportingCSV}
         evaluationRecords={allEvaluationRecords}
       />
 
       <Tooltip id='search-tooltip'/>
+      <Tooltip id='export-tooltip'/>
     </>
   );
 };
 
 export default IndividualEvaluations;
-
