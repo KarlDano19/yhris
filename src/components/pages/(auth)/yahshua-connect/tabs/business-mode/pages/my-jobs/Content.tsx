@@ -156,6 +156,7 @@ const Content = () => {
         budgetType: job.budget_type || 'fixed_rate',
         // Hourly rate specific fields
         isDailyProgressRequired: job.is_daily_progress_required || false,
+        isDailyProgressApprovalRequired: job.is_daily_progress_approval_required || false,
         isStrictSchedule: job.is_strict_schedule || false,
         todayTimeRecord: job.today_time_record || null,
         totalTimeRecordsCount: job.total_time_records_count || 0,
