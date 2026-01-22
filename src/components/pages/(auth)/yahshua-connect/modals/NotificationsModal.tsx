@@ -2,11 +2,14 @@ import React, { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-
 import Modal from '../components/Modal';
-import { BriefcaseIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { BriefcaseIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
+ 
 import useGetApplicantNotifications from '../hooks/useGetApplicantNotifications';
 import useMarkApplicantNotificationRead from '../hooks/useMarkApplicantNotificationRead';
+import useDeleteApplicantNotification from '../hooks/useDeleteApplicantNotification';
+
+import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 
 interface NotificationsModalProps {
   isOpen: boolean;
@@ -18,6 +21,8 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
   const [tab, setTab] = useState<'all' | 'unread'>('all');
   const listRef = React.useRef<HTMLDivElement | null>(null);
+  const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
+  const { mutate: deleteNotification } = useDeleteApplicantNotification();
 
   const notifications = useMemo(() => {
     if (!data || !data.pages) return [];
@@ -36,9 +41,10 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
   // Filtered notifications based on tab
   const filteredNotifications = useMemo(() => {
-    if (tab === 'unread') return notifications.filter((n: any) => !n.is_read);
-    return notifications;
-  }, [notifications, tab]);
+    const base = tab === 'unread' ? notifications.filter((n: any) => !n.is_read) : notifications;
+    // filter out locally removed notifications for optimistic UI
+    return base.filter((n: any) => !removedIds.has(n.id));
+  }, [notifications, tab, removedIds]);
 
   const handleNotificationClick = (notification: any) => {
     if (!notification.is_read) {
@@ -99,6 +105,143 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     });
   };
 
+  // helper to perform delete (optimistic UI)
+  const handleDeleteNotification = (id: number) => {
+    // optimistically remove from UI
+    setRemovedIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    // call backend
+    deleteNotification(id);
+  };
+
+  // Notification item with swipe-to-reveal-delete behavior
+  const NotificationItem = ({ notification }: { notification: any }) => {
+    const [translateX, setTranslateX] = React.useState<number>(0);
+    const startXRef = React.useRef<number | null>(null);
+    const swipingRef = React.useRef<boolean>(false);
+    const openRef = React.useRef<boolean>(false);
+
+    const THRESHOLD = 80;
+    const MAX_REVEAL = 120;
+    const FULL_SWIPE = 180;
+    const lastDxRef = React.useRef<number>(0);
+
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+      startXRef.current = e.clientX;
+      swipingRef.current = true;
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!swipingRef.current || startXRef.current === null) return;
+      const dxRaw = e.clientX - startXRef.current;
+      lastDxRef.current = dxRaw;
+      // visually clamp transform so we don't slide completely off-screen
+      if (dxRaw < 0) {
+        const clamped = Math.max(dxRaw, -MAX_REVEAL);
+        setTranslateX(clamped);
+      } else if (openRef.current) {
+        // allow closing by dragging right
+        const clamped = Math.min(dxRaw - MAX_REVEAL, 0);
+        setTranslateX(clamped);
+      }
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!swipingRef.current) return;
+      swipingRef.current = false;
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+
+      // if user performed a full swipe past the full threshold, delete immediately
+      if (lastDxRef.current <= -FULL_SWIPE) {
+        handleDeleteNotification(notification.id);
+        // reset values
+        setTranslateX(0);
+        openRef.current = false;
+        startXRef.current = null;
+        lastDxRef.current = 0;
+        return;
+      }
+
+      if (translateX <= -THRESHOLD) {
+        // open to reveal actions
+        setTranslateX(-MAX_REVEAL);
+        openRef.current = true;
+      } else {
+        // reset
+        setTranslateX(0);
+        openRef.current = false;
+      }
+      startXRef.current = null;
+      lastDxRef.current = 0;
+    };
+
+    const onClickItem = () => {
+      // if not swiped open, treat as click
+      if (!openRef.current) handleNotificationClick(notification);
+    };
+
+    return (
+      <div className="relative overflow-hidden">
+        {/* Actions revealed on swipe: Mark as read (eye) + Delete */}
+        <div className="absolute right-2 top-2 bottom-2 w-44 flex items-center justify-end gap-2 pr-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!notification.is_read) {
+                markAsRead(notification.id);
+              }
+            }}
+            className="h-10 px-3 flex items-center justify-center bg-gray-50 text-gray-700 rounded-md shadow-sm"
+          >
+            <EyeIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteNotification(notification.id);
+            }}
+            className="h-10 px-3 flex items-center justify-center bg-red-50 text-red-600 rounded-md shadow-sm"
+          >
+            <span className="h-5 w-5 inline-flex text-red-600"><DeleteIconNoBorder/></span>
+          </button>
+        </div>
+
+        <div
+          role="button"
+          tabIndex={0}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onClick={onClickItem}
+          style={{
+            transform: `translateX(${translateX}px)`,
+            transition: swipingRef.current ? 'none' : 'transform 180ms ease',
+          }}
+          className="flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer bg-white"
+        >
+          <div className={`w-10 h-10 rounded-lg ${getIconBgColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
+            {getIcon(notification.type)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <h4 className="font-semibold text-gray-900 mb-1 break-words">{notification.title}</h4>
+              {!notification.is_read && (
+                <span className="ml-2 mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+              )}
+            </div>
+            <p className="text-sm text-gray-600 mb-1 break-words">{notification.message}</p>
+            <p className="text-xs text-gray-500">{formatTime(notification.created_at)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Infinite scroll handler
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -147,8 +290,9 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       isOpen={isOpen}
       onClose={onClose}
       title="Notifications"
-      size="lg"
+      size="xl"
     >
+      <div className="w-full max-w-[920px]">
       {/* Tabs + Unread count header */}
       <div className="px-4 mb-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -168,7 +312,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         <div className="text-sm text-gray-600">{notifications.filter((n: any) => !n.is_read).length} unread</div>
       </div>
 
-      {/* Scrollable content area with infinite scroll */}
+        {/* Scrollable content area with infinite scroll */}
       <div
         ref={listRef}
         onScroll={handleScroll}
@@ -181,26 +325,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         ) : (
           <>
             {filteredNotifications.map((notification: any) => (
-              <div
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                className="flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer"
-              >
-                <div className={`w-10 h-10 rounded-lg ${getIconBgColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
-                  {/* use icon based on notification source */}
-                  {getIcon(notification.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <h4 className="font-semibold text-gray-900 mb-1 break-words">{notification.title}</h4>
-                    {!notification.is_read && (
-                      <span className="ml-2 mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-1 break-words">{notification.message}</p>
-                  <p className="text-xs text-gray-500">{formatTime(notification.created_at)}</p>
-                </div>
-              </div>
+              <NotificationItem key={notification.id} notification={notification} />
             ))}
 
             {/* Loader for infinite scroll */}
@@ -211,7 +336,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         )}
       </div>
 
-      <div className="p-4 text-center border-t border-gray-100">
+      <div className="p-4 text-center">
         <div className="flex items-center justify-center gap-4">
           <button
             onClick={handleMarkAllAsRead}
@@ -229,6 +354,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
             </button>
           )}
         </div>
+      </div>
       </div>
     </Modal>
   );

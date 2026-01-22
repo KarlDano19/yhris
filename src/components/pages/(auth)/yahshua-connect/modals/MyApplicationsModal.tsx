@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-
 import Modal from '../components/Modal';
 
 import { formatDateToLocal } from '@/helpers/date';
@@ -57,7 +56,7 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
       };
 
       return {
-        id: application.id,
+        id: application.id || application.job_posting_id, 
         title: application.job_title || 'Untitled Job',
         company: application.employer_name || 'Unknown Company',
         logo: getCompanyInitials(application.employer_name || '?'),
@@ -84,7 +83,7 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
         if (diffDays <= 15) {
           return {
             text: 'Rejected',
-            className: 'bg-red-100 text-red-700',
+            className: 'bg-red-100 text-red-700 ',
           };
         }
         // If rejection expired, fallthrough to show Applied
@@ -161,13 +160,13 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
                   <div className="flex items-center gap-3 flex-wrap">
                     {/* Stage status badge (existing) */}
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      className={`px-4 py-2 rounded-full text-sm font-sm ${getStatusColor(
                         application.status
                       )}`}
                     >
                       {application.status}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-sm text-gray-500">
                       Applied: {application.appliedDate}
                     </span>
                   </div>
@@ -178,7 +177,7 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
                     const badge = getApplicationStatusBadge(application);
                     return (
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${badge.className}`}
+                        className={`px-4 py-2 rounded-full text-sm font-sm ${badge.className}`}
                       >
                         {badge.text}
                       </span>

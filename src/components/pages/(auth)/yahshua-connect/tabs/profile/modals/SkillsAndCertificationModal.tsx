@@ -152,7 +152,20 @@ const SkillsAndCertificationModal = ({
               type="text"
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
+              onKeyDown={(e: any) => {
+                // Add on Enter
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddSkill();
+                }
+                // Treat Tab as add when there's input (isMulti behavior)
+                if (e.key === 'Tab') {
+                  if (newSkill.trim()) {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }
+              }}
               placeholder="Add a skill..."
               className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
             />
