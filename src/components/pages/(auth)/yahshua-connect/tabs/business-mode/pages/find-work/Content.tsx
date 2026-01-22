@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -17,7 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatDateToLocal } from '@/helpers/date';
 
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import formatPrice from '@/helpers/currencyFormat';
 
 interface BusinessJobFilters {
@@ -42,8 +42,8 @@ const Content = () => {
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [pendingAcceptJobId, setPendingAcceptJobId] = useState<number | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [displayCount, setDisplayCount] = useState<number>(20);
   const [filters, setFilters] = useState<BusinessJobFilters>({});
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Get applicant profile from cache for location coordinates (distance calculation)
   const queryClient = useQueryClient();
@@ -82,7 +82,7 @@ const Content = () => {
   const transformedJobs = useMemo(() => {
     if (!jobsData || jobsData.length === 0) return [];
 
-    return jobsData.slice(0, displayCount).map((job: any) => {
+    return jobsData.map((job: any) => {
       // Get client initials from created_by_name
       const getClientInitials = (clientName: string) => {
         if (!clientName) return '?';
@@ -159,6 +159,8 @@ const Content = () => {
         distance: formatDistance(),
         rating: job.created_by_rating || 0,
         hiresCount: job.created_by_reviews_count || 0,
+        jobRating: job.average_rating || null,
+        jobReviewsCount: job.reviews_count || 0,
         description: job.description || 'No description provided',
         time: formatTime(),
         priceRange: formatPriceRange(),
@@ -168,24 +170,31 @@ const Content = () => {
         hasApplied: job.has_applied || false,
       };
     });
-  }, [jobsData, displayCount]);
+  }, [jobsData]);
 
   const handleLoadMore = () => {
-    // Check if there are more jobs in the current fetched batch
-    const jobsInCurrentBatch = jobsData?.length || 0;
-    const nextDisplayCount = displayCount + 20;
-    
-    // If there are more jobs to show from current batch
-    if (displayCount < jobsInCurrentBatch) {
-      // Show next 20 jobs (or remaining jobs if less than 20)
-      setDisplayCount(Math.min(nextDisplayCount, jobsInCurrentBatch));
-    } else if (hasNextPage && !isFetchingNextPage) {
-      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
-      fetchNextPage().then(() => {
-        // Update displayCount after new data is fetched
-        setDisplayCount(nextDisplayCount);
-      });
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   const handleApplyFilters = (newFilters: {
@@ -221,9 +230,8 @@ const Content = () => {
     if (newFilters.date_to) {
       businessFilters.date_to = newFilters.date_to;
     }
-    
+
     setFilters(businessFilters);
-    setDisplayCount(20); // Reset display count when filters change
     setSelectedJobId(null); // Reset selected job when filters change
   };
 
@@ -323,6 +331,18 @@ const Content = () => {
 
   return (
     <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
       {/* Find Work Header */}
       <div className="bg-white rounded-lg shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
@@ -360,7 +380,7 @@ const Content = () => {
               ))}
             </div>
             {/* Load More Button */}
-            {(displayCount < (totalRecords || 0) || displayCount < (jobsData?.length || 0) || hasNextPage) && (
+            {hasNextPage && (
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleLoadMore}
@@ -373,7 +393,7 @@ const Content = () => {
             )}
             {totalRecords > 0 && (
               <div className="text-sm text-gray-600 text-center mt-4">
-                Showing {Math.min(displayCount, totalRecords)} of {totalRecords} jobs
+                Showing {jobsData?.length || 0} of {totalRecords} jobs
               </div>
             )}
           </>

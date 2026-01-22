@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { useMemo, useState, useEffect } from 'react';
+import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
 import type { Talent } from '@/types/business-mode';
 import useSearchTalent from './hooks/useSearchTalent';
@@ -12,13 +12,21 @@ import BookNowModal from './modals/BookNowModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Content = () => {
-  const { data: talentData, isLoading } = useSearchTalent();
+  const {
+    data: talentData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useSearchTalent();
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isBookNowModalOpen, setIsBookNowModalOpen] = useState(false);
   const [openedFromDetails, setOpenedFromDetails] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Transform API data to match frontend Talent type
   const talentList = useMemo(() => {
@@ -64,8 +72,45 @@ const Content = () => {
     console.log('Applied filters:', filters);
   };
 
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
       {isLoading ? (
         <LoadingSpinner size="lg" showText text="Loading talents..." className="py-12" />
       ) : (
@@ -74,7 +119,7 @@ const Content = () => {
             <div>
               <h2 className="text-lg font-bold text-gray-900">Search Talent</h2>
               <p className="text-sm text-gray-600">
-                {talentList.length} {talentList.length === 1 ? 'professional' : 'professionals'} found
+                Showing {talentList.length} of {totalRecords || 0} {totalRecords === 1 ? 'professional' : 'professionals'}
               </p>
             </div>
             <button
@@ -91,6 +136,7 @@ const Content = () => {
               <div className="text-gray-500">No talents found. Try adjusting your search filters.</div>
             </div>
           ) : (
+            <>
             <div className="space-y-4">
               {talentList.map((talent: Talent) => (
               <div
@@ -209,6 +255,20 @@ const Content = () => {
               </div>
               ))}
             </div>
+
+            {/* Load More Button */}
+            {hasNextPage && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetchingNextPage ? 'Loading...' : 'Load More Talent'}
+                </button>
+              </div>
+            )}
+            </>
           )}
         </div>
       )}

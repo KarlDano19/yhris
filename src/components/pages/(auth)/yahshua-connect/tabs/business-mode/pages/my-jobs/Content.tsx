@@ -16,6 +16,7 @@ import { useSubmitDailyProgress } from './hooks/useSubmitDailyProgress';
 import { useUploadProofOfCompletion } from './hooks/useUploadProofOfCompletion';
 import { useClockIn } from './hooks/useClockIn';
 import { useClockOut } from './hooks/useClockOut';
+import { useSubmitJobReview } from './hooks/useSubmitJobReview';
 
 // Import new modals
 import StartJobModal from './modals/StartJobModal';
@@ -24,16 +25,19 @@ import ViewDailyProgressModal from './modals/ViewDailyProgressModal';
 import UploadProofModal from './modals/UploadProofModal';
 import ClockInModal from './modals/ClockInModal';
 import ClockOutModal from './modals/ClockOutModal';
+import ReviewJobModal from './modals/ReviewJobModal';
 
-import { 
-  CurrencyDollarIcon, 
-  ChatBubbleLeftRightIcon, 
-  CalendarIcon, 
-  MapPinIcon, 
+import {
+  CurrencyDollarIcon,
+  ChatBubbleLeftRightIcon,
+  CalendarIcon,
+  MapPinIcon,
   ExclamationTriangleIcon,
   ClockIcon,
   DocumentTextIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  StarIcon,
+  ArrowUpIcon
 } from '@heroicons/react/24/outline';
 
 import { T_ActiveJob } from '@/types/business-mode';
@@ -56,7 +60,9 @@ const Content = () => {
   const [isUploadProofModalOpen, setIsUploadProofModalOpen] = useState(false);
   const [isClockInModalOpen, setIsClockInModalOpen] = useState(false);
   const [isClockOutModalOpen, setIsClockOutModalOpen] = useState(false);
+  const [isReviewJobModalOpen, setIsReviewJobModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<T_ActiveJob | null>(null);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Hooks for job actions
   const { mutate: startJob, isLoading: isStartingJob } = useStartJob();
@@ -64,12 +70,19 @@ const Content = () => {
   const { mutate: uploadProof, isLoading: isUploadingProof } = useUploadProofOfCompletion();
   const { mutate: clockIn, isLoading: isClockingIn } = useClockIn();
   const { mutate: clockOut, isLoading: isClockingOut } = useClockOut();
+  const { mutate: submitReview, isLoading: isSubmittingReview } = useSubmitJobReview();
 
   // Fetch my applied jobs where I've been accepted (hired)
   // Note: Remove application_status filter to show all applied jobs for now
-  const { data, isLoading, isError } = useGetMyAppliedJobs({
-    page_size: 50,
-  });
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useGetMyAppliedJobs({});
 
   // Transform API data to ActiveJob format
   const activeJobs: T_ActiveJob[] = useMemo(() => {
@@ -157,6 +170,8 @@ const Content = () => {
         clockOutMinutesAfter: job.clock_out_minutes_after ?? 60,
         // can start job flag (from backend)
         canStartJob: job.can_start_job ?? false,
+        // Review tracking
+        hasApplicantReviewed: job.has_applicant_reviewed ?? false,
       };
     });
   }, [data]);
@@ -422,6 +437,44 @@ const Content = () => {
     );
   };
 
+  // Review job handler
+  const handleReviewJobClick = (job: T_ActiveJob) => {
+    setSelectedJob(job);
+    setIsReviewJobModalOpen(true);
+  };
+
+  const handleReviewJobConfirm = (data: { rating: number; comment?: string }) => {
+    if (!selectedJob) return;
+
+    submitReview(
+      {
+        business_job_application: selectedJob.applicationId,
+        rating: data.rating,
+        comment: data.comment,
+      },
+      {
+        onSuccess: () => {
+          toast.custom(
+            <CustomToast
+              message="Review submitted successfully! Thank you for your feedback."
+              type="success"
+            />
+          );
+          setIsReviewJobModalOpen(false);
+          setSelectedJob(null);
+        },
+        onError: (error: any) => {
+          toast.custom(
+            <CustomToast
+              message={error.message || 'Failed to submit review'}
+              type="error"
+            />
+          );
+        },
+      }
+    );
+  };
+
   // Clock In/Out handlers for hourly rate jobs
   const handleClockInClick = (job: T_ActiveJob) => {
     setSelectedJob(job);
@@ -501,9 +554,45 @@ const Content = () => {
     );
   };
 
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   return (
     <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
       {/* My Jobs Header */}
       <div className="bg-white rounded-lg shadow-sm p-5">
         <div className="mb-4">
@@ -717,9 +806,28 @@ const Content = () => {
               )}
 
               {job.workStatus === 'completed' && job.paymentStatus === 'paid' && (
-                <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <p className="text-sm text-green-800">Payment received - Job completed!</p>
+                <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ExclamationTriangleIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <p className="text-sm text-green-800">Payment received - Job completed!</p>
+                  </div>
+
+                  {!job.hasApplicantReviewed && (
+                    <button
+                      onClick={() => handleReviewJobClick(job)}
+                      className="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <StarIcon className="h-5 w-5" />
+                      Review Job
+                    </button>
+                  )}
+
+                  {job.hasApplicantReviewed && (
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircleIcon className="h-5 w-5" />
+                      <p className="text-sm font-medium">Review completed ✓</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -848,11 +956,16 @@ const Content = () => {
                       const contractStart = new Date(job.contractStartDate);
                       const contractEnd = job.contractEndDate ? new Date(job.contractEndDate) : null;
                       const todayWithinContract = todayDate >= contractStart && (!contractEnd || todayDate <= contractEnd);
-                      // Disable button if all progress submitted, today's progress submitted, or today is outside contract
+
+                      // ORIGINAL CODE WITH RESTRICTIONS (COMMENTED OUT FOR TESTING)
+                      // const isButtonDisabled = isSubmittingProgress ||
+                      //   job.submittedProgressCount >= job.totalContractDays ||
+                      //   todayProgressSubmitted ||
+                      //   !todayWithinContract;
+
+                      // TESTING CODE (NO DATE/DUPLICATE RESTRICTIONS)
                       const isButtonDisabled = isSubmittingProgress ||
-                        job.submittedProgressCount >= job.totalContractDays ||
-                        todayProgressSubmitted ||
-                        !todayWithinContract;
+                        job.submittedProgressCount >= job.totalContractDays;
 
                       // Determine button text
                       // Only hourly rate jobs can have optional daily progress
@@ -861,11 +974,13 @@ const Content = () => {
                       let buttonText = isOptional ? 'Submit Daily Progress (Optional)' : 'Submit Daily Progress';
                       if (job.submittedProgressCount >= job.totalContractDays) {
                         buttonText = 'All Progress Submitted';
-                      } else if (todayProgressSubmitted) {
-                        buttonText = 'Today\'s Progress Submitted';
-                      } else if (!todayWithinContract) {
-                        buttonText = 'Outside Contract Period';
                       }
+                      // ORIGINAL BUTTON TEXT CONDITIONS (COMMENTED OUT FOR TESTING)
+                      // else if (todayProgressSubmitted) {
+                      //   buttonText = 'Today\'s Progress Submitted';
+                      // } else if (!todayWithinContract) {
+                      //   buttonText = 'Outside Contract Period';
+                      // }
 
                       return (
                         <button
@@ -898,6 +1013,25 @@ const Content = () => {
             </div>
           ))}
         </div>
+
+        {/* Load More Button */}
+        {!isLoading && hasNextPage && (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleLoadMore}
+              disabled={isFetchingNextPage}
+              className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+            </button>
+          </div>
+        )}
+
+        {totalRecords > 0 && (
+          <div className="text-sm text-gray-600 text-center mt-4">
+            Showing {activeJobs.length} of {totalRecords} jobs
+          </div>
+        )}
       </div>
 
       {/* Page-specific Modals */}
@@ -1013,6 +1147,21 @@ const Content = () => {
           timeRecord={selectedJob.todayTimeRecord}
           isStrictSchedule={selectedJob.isStrictSchedule}
           timeTo={selectedJob.timeTo}
+        />
+      )}
+
+      {/* Review Job Modal */}
+      {selectedJob && (
+        <ReviewJobModal
+          isOpen={isReviewJobModalOpen}
+          onClose={() => {
+            setIsReviewJobModalOpen(false);
+            setSelectedJob(null);
+          }}
+          onSubmit={handleReviewJobConfirm}
+          isSubmitting={isSubmittingReview}
+          jobTitle={selectedJob.title}
+          employerName={selectedJob.clientName}
         />
       )}
     </div>

@@ -1,21 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
-
-import { T_MyBusinessJobsResponse } from '@/types/business-mode';
 
 interface UseGetMyBusinessJobsParams {
   status?: string;
   page_size?: number;
-  current_page?: number;
 }
 
-async function fetchMyBusinessJobs(params: UseGetMyBusinessJobsParams = {}): Promise<T_MyBusinessJobsResponse> {
+async function fetchMyBusinessJobs(params: UseGetMyBusinessJobsParams, pageParam: number = 1) {
   const token = getCookie('token');
 
   const searchParams = new URLSearchParams();
-  if (params.status) searchParams.append('status', params.status);
-  if (params.page_size) searchParams.append('page_size', params.page_size.toString());
-  if (params.current_page) searchParams.append('current_page', params.current_page.toString());
+  searchParams.append('current_page', pageParam.toString());
+  searchParams.append('page_size', String(params?.page_size || 10));
+  if (params?.status) searchParams.append('status', params.status);
 
   const config: RequestInit = {
     method: 'GET',
@@ -34,18 +31,43 @@ async function fetchMyBusinessJobs(params: UseGetMyBusinessJobsParams = {}): Pro
     throw new Error(errorData.message || 'Failed to fetch business jobs.');
   }
 
-  const data = await res.json();
-  return data.data || data;
+  const responseData = await res.json();
+  const data = responseData.data || responseData;
+
+  return {
+    records: data.records || [],
+    total_records: data.total_records || 0,
+    total_pages: data.total_pages || 1,
+    current_page: pageParam,
+  };
 }
 
 export function useGetMyBusinessJobs(params: UseGetMyBusinessJobsParams = {}, enabled: boolean = true) {
-  return useQuery<T_MyBusinessJobsResponse, Error>(
-    ['myBusinessJobsCache', params],
-    () => fetchMyBusinessJobs(params),
+  const query = useInfiniteQuery(
+    ['myBusinessJobsCache', params.status, params.page_size],
+    ({ pageParam = 1 }) => fetchMyBusinessJobs(params, pageParam),
     {
+      getNextPageParam: (lastPage) => {
+        if (lastPage && lastPage.current_page !== undefined && lastPage.total_pages !== undefined) {
+          if (lastPage.current_page < lastPage.total_pages) {
+            return lastPage.current_page + 1;
+          }
+        }
+        return undefined;
+      },
       enabled,
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );
+
+  // Flatten all pages into a single array
+  const allJobs = query.data?.pages.flatMap(page => page.records) || [];
+  const totalRecords = query.data?.pages[0]?.total_records || 0;
+
+  return {
+    ...query,
+    data: { records: allJobs, total_records: totalRecords },
+    totalRecords,
+  };
 }

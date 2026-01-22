@@ -22,7 +22,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { ChevronRightIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
-import { formatDateToLocal } from '@/helpers/date';
 import { T_BasicInfo, T_WorkExperience, T_Education, T_Certification, T_Portfolio, T_EmploymentDocument } from '@/types/personal-mode';
 
 const Content = () => {

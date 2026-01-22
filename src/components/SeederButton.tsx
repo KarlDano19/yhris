@@ -7,7 +7,7 @@ import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import CustomToast from '@/components/CustomToast';
 
 interface SeederButtonProps {
-  onSeed: (count: number) => Promise<void>;
+  onSeed: (count: number, budgetType?: 'fixed_rate' | 'hourly_rate' | 'mix') => Promise<void>;
   onUnseed?: () => Promise<void>;
   isLoading?: boolean;
   isUnseeding?: boolean;
@@ -15,6 +15,7 @@ interface SeederButtonProps {
   maxCount?: number;
   defaultCount?: number;
   showSeeder?: boolean;
+  showBudgetType?: boolean;
 }
 
 export default function SeederButton({
@@ -28,11 +29,15 @@ export default function SeederButton({
 
   // showSeeder is used to hide the seeder button if it is not needed
   showSeeder = true,
-  
+
+  // showBudgetType is used to show budget type dropdown for business jobs
+  showBudgetType = false,
+
 }: SeederButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUnseedModalOpen, setIsUnseedModalOpen] = useState(false);
   const [count, setCount] = useState(defaultCount);
+  const [budgetType, setBudgetType] = useState<'fixed_rate' | 'hourly_rate' | 'mix'>('mix');
   const [isSeeding, setIsSeeding] = useState(false);
 
   const handleSeed = async () => {
@@ -46,9 +51,10 @@ export default function SeederButton({
 
     setIsSeeding(true);
     try {
-      await onSeed(count);
+      await onSeed(count, showBudgetType ? budgetType : undefined);
       setIsModalOpen(false);
       setCount(defaultCount);
+      setBudgetType('mix');
     } catch (error) {
       // Error handling is done by the parent component
       console.error('Seeding error:', error);
@@ -106,7 +112,7 @@ export default function SeederButton({
                     } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <BeakerIcon className="mr-3 h-5 w-5 text-purple-500" aria-hidden="true" />
-                    {isLoading ? 'Seeding...' : 'Seed Data'}
+                    {isLoading ? 'Seeding...' : (showBudgetType ? 'Seed Jobs' : 'Seed Data')}
                   </button>
                 )}
               </Menu.Item>
@@ -166,20 +172,22 @@ export default function SeederButton({
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
-                        Seed Data
+                        {showBudgetType ? 'Seed Business Jobs' : 'Seed Data'}
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          Generate fake data for testing and development purposes.
+                          {showBudgetType
+                            ? 'Generate fake business job postings for testing and development purposes.'
+                            : 'Generate fake data for testing and development purposes.'}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-6 space-y-4">
                       {/* Count Input */}
                       <div>
                         <label htmlFor="count" className="block text-sm font-medium text-gray-700 text-left">
-                          Number of Records
+                          {showBudgetType ? 'Number of Jobs' : 'Number of Records'}
                         </label>
                         <input
                           type="number"
@@ -191,8 +199,33 @@ export default function SeederButton({
                           onChange={(e) => setCount(parseInt(e.target.value) || defaultCount)}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
                         />
-                        <p className="mt-1 text-xs text-gray-500">Maximum: {maxCount} records</p>
+                        <p className="mt-1 text-xs text-gray-500">Maximum: {maxCount} {showBudgetType ? 'jobs' : 'records'}</p>
                       </div>
+
+                      {/* Budget Type Dropdown (only for business jobs) */}
+                      {showBudgetType && (
+                        <div>
+                          <label htmlFor="budgetType" className="block text-sm font-medium text-gray-700 text-left">
+                            Budget Type
+                          </label>
+                          <select
+                            id="budgetType"
+                            name="budgetType"
+                            value={budgetType}
+                            onChange={(e) => setBudgetType(e.target.value as 'fixed_rate' | 'hourly_rate' | 'mix')}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+                          >
+                            <option value="mix">Mix of Both</option>
+                            <option value="fixed_rate">Fixed Rate Only</option>
+                            <option value="hourly_rate">Hourly Rate Only</option>
+                          </select>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {budgetType === 'mix' && 'Randomly generate both fixed rate and hourly rate jobs'}
+                            {budgetType === 'fixed_rate' && 'All jobs will have fixed budget (min/max amount)'}
+                            {budgetType === 'hourly_rate' && 'All jobs will have hourly rates with progress tracking'}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -263,11 +296,13 @@ export default function SeederButton({
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
-                        Delete All Data
+                        {showBudgetType ? 'Delete All Seeded Jobs' : 'Delete All Data'}
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          This will permanently delete ALL data. This action cannot be undone.
+                          {showBudgetType
+                            ? 'This will permanently delete all seeded business job postings. This action cannot be undone.'
+                            : 'This will permanently delete ALL data. This action cannot be undone.'}
                         </p>
                       </div>
                     </div>

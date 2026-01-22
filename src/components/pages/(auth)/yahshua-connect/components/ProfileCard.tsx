@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import Image from 'next/image';
+import { Tooltip } from 'react-tooltip';
 
 import toast from 'react-hot-toast';
 
@@ -141,6 +142,8 @@ const ProfileCard = ({
             onClick={() => setIsReviewsModalOpen(true)}
             className={`flex items-center justify-center gap-1.5 transition-opacity ${reviewCount > 0 ? 'cursor-pointer hover:opacity-80' : 'cursor-default opacity-60'}`}
             disabled={reviewCount === 0}
+            data-tooltip-id="profile-rating-tooltip"
+            data-tooltip-content={reviewCount > 0 ? "Click to view your reviews" : "No reviews yet"}
           >
             <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
             <span className="text-base font-bold text-gray-900">{rating !== null && rating !== undefined ? rating : 'N/A'}</span>
@@ -210,6 +213,9 @@ const ProfileCard = ({
         onClose={() => setIsReviewsModalOpen(false)}
         applicantId={applicantId}
       />
+
+      {/* Tooltip */}
+      <Tooltip id="profile-rating-tooltip" />
     </div>
   );
 };

@@ -11,7 +11,7 @@ import JobCard from '../../components/JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
 import formatPrice from '@/helpers/currencyFormat';
 
@@ -24,10 +24,10 @@ interface JobFilters {
 const Content = () => {
   const router = useRouter();
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
-  const [displayCount, setDisplayCount] = useState<number>(20);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [highlightedJobId, setHighlightedJobId] = useState<number | null>(null);
   const [filters, setFilters] = useState<JobFilters>({});
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const searchParams = useSearchParams();
 
   // Fetch jobs with filters and match percentage using applicant_personal view type
@@ -70,7 +70,7 @@ const Content = () => {
   const transformedJobs = useMemo(() => {
     if (!jobsData || jobsData.length === 0) return [];
 
-    return jobsData.slice(0, displayCount).map((job: any) => {
+    return jobsData.map((job: any) => {
       // Get company initials for logo
       const getCompanyInitials = (companyName: string) => {
         if (!companyName) return '?';
@@ -136,23 +136,11 @@ const Content = () => {
         applied_job_updated_at: job.applied_job_updated_at,
       };
     });
-  }, [jobsData, displayCount, savedJobIds]);
+  }, [jobsData, savedJobIds]);
 
   const handleLoadMore = () => {
-    // Check if there are more jobs in the current fetched batch
-    const jobsInCurrentBatch = jobsData?.length || 0;
-    const nextDisplayCount = displayCount + 20;
-    
-    // If there are more jobs to show from current batch
-    if (displayCount < jobsInCurrentBatch) {
-      // Show next 20 jobs (or remaining jobs if less than 20)
-      setDisplayCount(Math.min(nextDisplayCount, jobsInCurrentBatch));
-    } else if (hasNextPage && !isFetchingNextPage) {
-      // We've shown all jobs from current batch, fetch next page (next 200 jobs)
-      fetchNextPage().then(() => {
-        // Update displayCount after new data is fetched
-        setDisplayCount(nextDisplayCount);
-      });
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
   };
 
@@ -199,9 +187,39 @@ const Content = () => {
     setSelectedJobId(null);
   };
 
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   return (
     <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
       {/* Browse Jobs Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
         <div className="flex items-center justify-between mb-4">
@@ -239,7 +257,7 @@ const Content = () => {
               ))}
             </div>
             {/* Load More Button */}
-            {(displayCount < (totalRecords || 0) || displayCount < (jobsData?.length || 0) || hasNextPage) && (
+            {hasNextPage && (
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleLoadMore}
@@ -252,7 +270,7 @@ const Content = () => {
             )}
             {totalRecords > 0 && (
               <div className="text-sm text-gray-600 text-center mt-4">
-                Showing {Math.min(displayCount, totalRecords)} of {totalRecords} jobs
+                Showing {jobsData?.length || 0} of {totalRecords} jobs
               </div>
             )}
           </>
@@ -267,7 +285,6 @@ const Content = () => {
           filters={filters}
           onApplyFilters={(newFilters) => {
             setFilters(newFilters);
-            setDisplayCount(20); // Reset display count when filters change
             setSelectedJobId(null); // Reset selected job when filters change
           }}
         />
