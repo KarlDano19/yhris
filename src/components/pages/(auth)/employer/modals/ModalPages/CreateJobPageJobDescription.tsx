@@ -1,4 +1,4 @@
-import { Dispatch, useState, useEffect, useRef } from 'react';
+import { Dispatch, useState, useEffect, useRef, useMemo } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -29,7 +29,7 @@ export default function CreateJobPageJobDescription({
   positionData?: any[];
   firstForm?: any;
 }) {
-  const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
     jobDescriptionFile: false,
     jobDescription: false,

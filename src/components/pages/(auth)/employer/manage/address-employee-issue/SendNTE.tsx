@@ -112,8 +112,8 @@ const SendNTE = ({
           disabled={true}
           data-tooltip-id='nte-received-tooltip'
           data-tooltip-html={isNTEReceived ?
-            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully' :
-            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully'}
+            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the NTE' :
+            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the NTE'}
           data-tooltip-place='bottom'
           onClick={() => setReleased(id, 'nte')}
         >

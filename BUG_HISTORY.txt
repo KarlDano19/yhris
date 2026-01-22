@@ -244,3 +244,181 @@ properly invalidated after successful mutation to ensure consistency.
 ================================================================================
 
 [NEW ENTRIES SHOULD BE APPENDED BELOW THIS LINE]
+
+BUG ID: HRIS-001
+DATE FILED: 2026-01-15
+DATE FIXED: 2026-01-15
+CLIENT/REPORTER: Production Client - Job Posting #276
+
+ISSUE DESCRIPTION:
+When applicants applied to a specific job posting (ID 276), the screen-applicants page
+would crash with a client-side exception: "TypeError: Cannot read properties of null
+(reading 'toLowerCase')". The error occurred during screening answer evaluation when
+comparing applicant responses against ideal answers. The page displayed "Application
+error: a client-side exception has occurred" and was completely unusable for that
+job posting.
+
+DESIRED OUTCOME:
+The screen-applicants page should load and display all applicants regardless of
+whether their screening answers contain null values. Applicants with null/missing
+screening answers should be treated as "not fit" for those questions rather than
+crashing the entire page.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing with job posting #276)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified page loads with null screening data)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (null idealAnswer, null applicant answer, array with null values)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no UI changes)
+
+FIX EXPLANATION:
+The bug was in the `processApplicants` function (Content.tsx:230-254) which evaluates
+applicant screening answers against the job posting's ideal answers. The code called
+`.toLowerCase()` directly on values that could be null:
+
+1. Multiple Choice comparison (line 237): `app.toLowerCase() === ideal.toLowerCase()`
+   - Both `app` (applicant's answer) and `ideal` (ideal answer) could be null
+
+2. Yes/No comparison (line 244): `applicantAnswer.toLowerCase() === idealAnswer.toLowerCase()`
+   - Both values could be null if screening data was incomplete
+
+The fix added null checks before calling `.toLowerCase()`:
+- For Multiple Choice: Added guard `if (app == null || ideal == null) return false;`
+  and wrapped values with `String()` for type safety
+- For Yes/No: Added conditional check that sets `isMatch = false` when either value
+  is null, otherwise performs the comparison with `String()` wrapper
+
+This ensures applicants with null/missing screening answers are treated as "not fit"
+for those specific questions (conservative approach) rather than crashing the page.
+The root cause was likely incomplete screening question data in the database for
+job posting #276.
+
+================================================================================
+
+FEATURE ID: HRIS-002
+DATE REQUESTED: 2026-01-21
+DATE IMPLEMENTED: 2026-01-21
+CLIENT/REPORTER: Systech Internal - Feature Request
+
+FEATURE DESCRIPTION:
+Add CSV export functionality to the Individual Evaluations page. Currently, users
+can only print evaluation data to PDF. The request was to allow users to choose
+between PDF and CSV export formats when exporting individual evaluation records.
+
+DESIRED OUTCOME:
+Users should be able to:
+1. Click the export button on the Individual Evaluations page
+2. Select export format: PDF (existing) or CSV (new)
+3. Select evaluation forms to include: All or Selected specific forms
+4. Download the file in the chosen format
+
+FILES CHANGED:
+Backend:
+- (No backend changes required - CSV generation handled on frontend)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/evaluation-history/tabs/IndividualEvaluations.tsx
+- src/components/pages/(auth)/employer/manage/evaluation-history/modals/PrintIndividualEvaluationsSelectionModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of export modal and CSV download)
+☐ Custom hooks tested (N/A - no new hooks)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors, new ExportFormat type added)
+
+Integration & E2E:
+☑ API integration tests completed (verified data fetch for CSV export)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (empty data, special characters in names, large datasets)
+☑ Cross-browser testing completed (CSV download works in Chrome, Firefox)
+☐ Mobile responsiveness verified (modal responsive design maintained)
+
+IMPLEMENTATION DETAILS:
+
+1. PrintIndividualEvaluationsSelectionModal.tsx:
+   - Added new `ExportFormat` type ('pdf' | 'csv') exported for reuse
+   - Added format selection UI with radio buttons (PDF/CSV options)
+   - Added DocumentArrowDownIcon and DocumentTextIcon for visual distinction
+   - Updated `onConfirm` callback to include selected format parameter
+   - Dynamic button text: "Print Report" for PDF, "Export CSV" for CSV
+   - Added state management for `selectedFormat` with 'pdf' as default
+   - Reset format selection on modal close
+
+2. IndividualEvaluations.tsx:
+   - Added `isExportingCSV` state for loading state management
+   - Added `handleCSVExport` function for CSV generation:
+     * Defines CSV headers: Employee Name, Date of Evaluation, Evaluation Period,
+       Evaluation Form, Total Score, Max Score, Passing Score, Status
+     * Converts data to CSV rows with proper escaping (quotes, special chars)
+     * Creates Blob with CSV content and triggers browser download
+     * Filename pattern: individual-evaluations-{from}-to-{to}.csv
+   - Updated `handlePrintConfirm` to handle both PDF and CSV formats
+   - Added tooltip for export button
+   - Import ExportFormat type from modal component
+
+CSV Export Format:
+- Headers: Employee Name, Date of Evaluation, Evaluation Period, Evaluation Form,
+          Total Score, Max Score, Passing Score, Status
+- Status column: "Passed" if form_total_score >= passing_score, else "Failed"
+- Special character handling: Values wrapped in quotes, internal quotes escaped
+- File encoding: UTF-8 with proper MIME type (text/csv;charset=utf-8)
+
+Design Decisions:
+- Frontend-only CSV generation: Since data is already fetched when modal opens,
+  generating CSV on frontend is efficient and avoids additional API calls
+- Consistent filtering: Same form selection logic applies to both PDF and CSV
+- User experience: Format selection appears first, then record selection
+- Backward compatible: PDF remains the default format selection
+
+================================================================================

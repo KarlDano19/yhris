@@ -114,7 +114,7 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
                 <p className="text-xs sm:text-sm">
                   This is to certify that <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.employeeName || '[Employee Name]'}
-                  </span> has been employed by <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+                  </span> {formData.endDate ? 'was employed by' : 'is currently employed by'} <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.companyName || '[Company Name]'}
                   </span> as <span className="font-semibold" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     {formData.position || '[Position]'}
