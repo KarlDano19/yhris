@@ -66,9 +66,6 @@ export default function PersonalInfoForm({
       isEmpty(v) ? "Email is required." : validEmail(v) ? null : "Invalid email address.",
     mobile: (v: string) => {
       if (isEmpty(v)) return "Contact Number is required.";
-      if (!/^\d+$/.test(v)) return "Contact Number must be digits only.";
-      if (v.length !== 11) return "Contact Number must be exactly 11 digits.";
-      if (!v.startsWith("09")) return "Contact Number must start with '09'.";
       return null;
     },
   };
@@ -225,11 +222,11 @@ export default function PersonalInfoForm({
           <Field
             dataTestid="contact-no-field"
             label="Contact Number"
-            defaultValue={mobile}
+            value={mobile}
             onChange={handlePhone(setMobile, "mobile", validateTop.mobile)}
             error={showErr("mobile")}
             disabled={!editing}
-            hint="Digits only (11 digits, starts with '09')"
+            hint="Digits only"
             required
           />
           

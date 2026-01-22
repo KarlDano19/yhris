@@ -12,10 +12,18 @@ async function addDirective(directive: DirectiveData) {
     data.append('to', JSON.stringify(directive.to));
     data.append('company_name', directive.company_name || '');
     
-    // Handle attachments as FileField
+    // Handle attachments as multiple FileField
     if (directive.attachments) {
-      // For File objects, append directly
-      if (typeof directive.attachments === 'object' && directive.attachments !== null) {
+      // Check if attachments is an array or a single file
+      if (Array.isArray(directive.attachments)) {
+        // Multiple attachments - append each file
+        directive.attachments.forEach((file: File) => {
+          if (file && file instanceof File) {
+            data.append('attachments', file);
+          }
+        });
+      } else if (typeof directive.attachments === 'object' && directive.attachments !== null) {
+        // Single attachment - append directly
         data.append('attachments', directive.attachments as any);
       }
     }

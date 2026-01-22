@@ -10,6 +10,7 @@ export interface EmailData {
   bcc?: string[];
   template?: string;
   attachment?: File | string;
+  attachments?: (File | string)[];  // For multiple attachments (sign documents)
 }
 
 export interface LetterData {
@@ -43,7 +44,8 @@ export interface SeparationItem {
     message: string;
     cc?: string[];
     bcc?: string[];
-    attachment?: File | string;
+    attachment?: File | string;  // Keep for backward compatibility
+    attachments?: (File | string)[];  // For multiple attachments
   };
   lastPay: {
     template: string;
@@ -103,7 +105,11 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.signDocuments.bcc = data.bcc;
     }
-    if (data.attachment) {
+    // Handle multiple attachments for sign documents
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      separationItemCopy.signDocuments.attachments = data.attachments;
+    } else if (data.attachment) {
+      // Backward compatibility: single attachment
       separationItemCopy.signDocuments.attachment = data.attachment;
     }
     separationItemCopy.isDocumentsSent = true;

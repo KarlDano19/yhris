@@ -517,6 +517,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           onSubmit={(data) => handleFormSubmit(data, () => setActionState(initialActionState))}
           defaultRecipients={actionState.email ? [actionState.email] : []}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send"
         />
       ),
