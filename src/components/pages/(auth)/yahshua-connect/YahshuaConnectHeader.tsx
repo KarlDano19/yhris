@@ -20,7 +20,7 @@ import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useApplicantChatsList';
 import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
-import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
+import useUpdateApplicantProfile from './profile/hooks/useUpdateApplicantProfile';
 
 import classNames from '@/helpers/classNames';
 
@@ -408,14 +408,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
             {/* Profile Dropdown */}
             <div className="relative">
               <button
-                onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
-                disabled={disabled}
-                className={classNames(
-                  "relative p-2 rounded-xl transition-colors",
-                  disabled 
-                    ? "opacity-50 cursor-not-allowed" 
-                    : "hover:bg-gray-100"
-                )}
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="relative p-2 rounded-xl transition-colors hover:bg-gray-100"
               >
                 <div className="h-9 w-9 rounded-full bg-gray-200 overflow-hidden">
                   <img 
@@ -525,14 +519,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               {/* Profile Dropdown */}
               <div className="relative">
                 <button
-                  onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
-                  disabled={disabled}
-                  className={classNames(
-                    "relative p-2 rounded-xl transition-colors",
-                    disabled 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : "hover:bg-gray-100"
-                  )}
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="relative p-2 rounded-xl transition-colors hover:bg-gray-100"
                 >
                   <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
                     <img 

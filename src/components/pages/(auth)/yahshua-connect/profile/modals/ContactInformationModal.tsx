@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { useForm } from 'react-hook-form';
 
-import Modal from '../../../components/Modal';
+import Modal from '../../components/Modal';
 
 import { T_BasicInfo } from '@/types/personal-mode';
 
