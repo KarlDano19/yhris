@@ -20,7 +20,7 @@ import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useApplicantChatsList';
 import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
-import useUpdateApplicantProfile from './tabs/profile/hooks/useUpdateApplicantProfile';
+import useUpdateApplicantProfile from './profile/hooks/useUpdateApplicantProfile';
 import useGetApplicantNotifications from './hooks/useGetApplicantNotifications';
 
 import classNames from '@/helpers/classNames';
@@ -31,6 +31,7 @@ import NotificationsIcon from '@/svg/NotificationsIcon';
 import ProfileDropdownIcon from '@/svg/ProfileDropdownIcon';
 import ChatIcon from '@/svg/ChatIcon';
 import ExitIcon from '@/svg/ExitIcon';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 interface YahshuaConnectHeaderProps {
   disabled?: boolean;
@@ -407,21 +408,25 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
             {/* Profile Dropdown */}
             <div className="relative">
               <button
-                onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
-                disabled={disabled}
-                className={classNames(
-                  "relative p-2 rounded-xl transition-colors",
-                  disabled 
-                    ? "opacity-50 cursor-not-allowed" 
-                    : "hover:bg-gray-100"
-                )}
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="relative p-2 rounded-xl transition-colors hover:bg-gray-100"
               >
                 <div className="h-9 w-9 rounded-full bg-gray-200 overflow-hidden">
-                  <img 
-                    src={profileData?.photo || "https://via.placeholder.com/36"} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
+                  {profileData?.photo ? (
+                    <img 
+                      src={profileData.photo} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <PlaceholderAvatar
+                      width={36}
+                      height={36}
+                      className="rounded-full"
+                      firstName={profileData?.firstname || ''}
+                      lastName={profileData?.lastname || ''}
+                    />
+                  )}
                 </div>
                 <div className="absolute bottom-0 right-0">
                   <ProfileDropdownIcon fill="#2C3F58" />
@@ -526,21 +531,25 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               {/* Profile Dropdown */}
               <div className="relative">
                 <button
-                  onClick={() => !disabled && setShowProfileDropdown(!showProfileDropdown)}
-                  disabled={disabled}
-                  className={classNames(
-                    "relative p-2 rounded-xl transition-colors",
-                    disabled 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : "hover:bg-gray-100"
-                  )}
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="relative p-2 rounded-xl transition-colors hover:bg-gray-100"
                 >
                   <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
-                    <img 
-                      src={profileData?.photo || "https://via.placeholder.com/32"} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
+                    {profileData?.photo ? (
+                      <img 
+                        src={profileData.photo} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <PlaceholderAvatar
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                        firstName={profileData?.firstname || ''}
+                        lastName={profileData?.lastname || ''}
+                      />
+                    )}
                   </div>
                   <div className="absolute bottom-0 right-0">
                     <ProfileDropdownIcon fill="#2C3F58" />

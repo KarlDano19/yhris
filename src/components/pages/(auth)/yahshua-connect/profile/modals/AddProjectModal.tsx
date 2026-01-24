@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
-import Modal from '../../../components/Modal';
+import Modal from '../../components/Modal';
 
 import CustomToast from '@/components/CustomToast';
 import EyePassword from '@/svg/EyePassword';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import Modal from '../../../components/Modal';
+import Modal from '../../components/Modal';
 
 import { PlusIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
