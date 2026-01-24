@@ -1,8 +1,7 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/business-mode/pages/earnings/Content";
 
 export const metadata = {
-  title: "Earnings - YAHSHUA CONNECT",
-  description: "View your earnings and trending services - YAHSHUA Student Information System",
+  title: "Earnings - Yahshua Connect",
 };
 
 const EarningsPage = async () => {

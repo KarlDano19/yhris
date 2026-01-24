@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
-import Modal from '../../../components/Modal';
+import Modal from '../../components/Modal';
 
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import EyePassword from '@/svg/EyePassword';
 import DeleteIcon from '@/svg/DeleteIcon';
 import ViewDocumentModal from './ViewDocumentModal';
-import { ArrowUpTrayIcon, XMarkIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 import { T_Certification } from '@/types/personal-mode';
 

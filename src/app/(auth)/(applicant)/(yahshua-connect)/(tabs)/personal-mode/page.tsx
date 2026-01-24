@@ -1,8 +1,7 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/personal-mode/Content";
 
 export const metadata = {
-  title: "Personal Mode - YAHSHUA CONNECT",
-  description: "YAHSHUA CONNECT - Personal Mode Dashboard",
+  title: "Personal Mode - Yahshua Connect",
 };
 
 const YahshuaConnectPersonalMode = async () => {

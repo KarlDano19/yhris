@@ -301,10 +301,6 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
   ];
 
   // Get user data from applicant profile
-  const userName = profileData 
-    ? `${profileData.firstname || ''} ${profileData.lastname || ''}`.trim() 
-    : 'Loading...';
-  const userInitial = profileData?.firstname?.[0]?.toUpperCase() || 'U';
   const userAbout = profileData?.description || null;
   const averageRating = profileData?.average_rating ?? null;
   const profileCompletion = profileData?.profile_completion_percentage ?? 0;
@@ -367,9 +363,9 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
           <div className="lg:col-span-3">
             <div className="space-y-6">
               <ProfileCard
-                name={userName}
                 about={userAbout}
-                initial={userInitial}
+                firstName={profileData?.firstname || ''}
+                lastName={profileData?.lastname || ''}
                 profileCompletion={isBusinessMode ? undefined : profileCompletion}
                 rating={averageRating}
                 reviewCount={reviewCount}

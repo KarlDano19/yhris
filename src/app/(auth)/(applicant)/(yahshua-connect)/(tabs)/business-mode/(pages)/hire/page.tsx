@@ -1,8 +1,7 @@
 import Content from "@/components/pages/(auth)/yahshua-connect/tabs/business-mode/pages/hire/Content";
 
 export const metadata = {
-  title: "Hire - YAHSHUA CONNECT",
-  description: "Post and manage job listings - YAHSHUA Student Information System",
+  title: "Hire - Yahshua Connect",
 };
 
 const HirePage = async () => {
