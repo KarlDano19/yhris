@@ -19,7 +19,7 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
   const getInitials = () => {
     const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
     const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return firstInitial + lastInitial || 'U'; // Default to 'U' for User if no names
+    return firstInitial + lastInitial || '';
   };
 
   // Generate a consistent color based on the name

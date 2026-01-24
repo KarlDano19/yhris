@@ -13,10 +13,10 @@ import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 interface ProfileCardProps {
-  name: string;
   about?: string | null;
   title?: string;
-  initial: string;
+  firstName?: string;
+  lastName?: string;
   profileCompletion?: number;
   rating?: number | null;
   reviewCount?: number;
@@ -29,13 +29,13 @@ interface ProfileCardProps {
   onAvailabilityChange?: (isAvailable: boolean) => void;
 }
 
-const ProfileCard = ({ 
-  name, 
+const ProfileCard = ({
   about = null,
   title,
-  initial, 
+  firstName = '',
+  lastName = '',
   profileCompletion,
-  rating = null, 
+  rating = null,
   reviewCount = 0,
   profilePhoto = null,
   applicantId,
@@ -109,7 +109,7 @@ const ProfileCard = ({
             {profilePhoto && profilePhoto !== '/assets/no-user.png' ? (
               <Image
                 src={profilePhoto}
-                alt={name}
+                alt={`${firstName} ${lastName}`.trim() || 'Profile'}
                 width={96}
                 height={96}
                 className="w-full h-full object-cover"
@@ -120,8 +120,8 @@ const ProfileCard = ({
                 width={96}
                 height={96}
                 className="rounded-lg"
-                firstName={name.split(' ')[0] || ''}
-                lastName={name.split(' ').slice(1).join(' ') || ''}
+                firstName={firstName}
+                lastName={lastName}
               />
             )}
           </div>
@@ -132,7 +132,7 @@ const ProfileCard = ({
       <div className="pt-14 px-6 pb-6 text-center">
         {/* Name - Centered, Bold, Dark */}
         <div className="text-center mb-2">
-          <h3 className="text-xl font-bold text-gray-900">{name}</h3>
+          <h3 className="text-xl font-bold text-gray-900">{`${firstName} ${lastName}`.trim() || 'Loading...'}</h3>
         </div>
 
         {/* Description - Same for both modes */}

@@ -124,6 +124,10 @@ function ProfileTab({
     if (!file) return;
     if (file.size <= 5000000) {
       if (file) {
+        // Set the actual file for upload
+        setValue('basicInfo.photo', file);
+
+        // Set preview URL
         let reader = new FileReader();
         reader.readAsDataURL(target.files[0]);
         reader.onload = () => {
