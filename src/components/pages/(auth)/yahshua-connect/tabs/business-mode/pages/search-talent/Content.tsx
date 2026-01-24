@@ -5,7 +5,8 @@ import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
 import type { Talent } from '@/types/business-mode';
 import useSearchTalent from './hooks/useSearchTalent';
-import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
+import FilterRequestsModal from '../../components/FilterRequestsModal';
+import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
 import TalentDetailsModal from './modals/TalentDetailsModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BookNowModal from './modals/BookNowModal';
@@ -58,18 +59,28 @@ const Content = () => {
     });
   }, [talentData]);
 
+  // Derive available skills from the talent list (unique, sorted)
+  const availableSkills = useMemo(() => {
+    const all = talentList.flatMap((t) => t.skills || []);
+    const unique = Array.from(new Set(all.filter(Boolean)));
+    return unique.sort((a, b) => a.localeCompare(b));
+  }, [talentList]);
+
   const handleSelectTalent = (talent: Talent) => {
     setSelectedTalent(talent);
     setIsDetailsOpen(true);
   };
 
-  const handleApplyFilters = (filters: {
-    location: string;
-    skills: string[];
-    urgentOnly: boolean;
+  const { filters, applyFromModal } = useBusinessModeFilters();
+
+  const handleApplyFilters = (payload: {
+    location?: string;
+    category?: string;
+    skills?: string[];
+    urgentOnly?: boolean;
   }) => {
-    // TODO: Implement filter logic
-    console.log('Applied filters:', filters);
+    applyFromModal(payload);
+    setIsFilterModalOpen(false);
   };
 
   const handleLoadMore = () => {
@@ -278,6 +289,9 @@ const Content = () => {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onApplyFilters={handleApplyFilters}
+        initialUrgentOnly={!!filters?.is_urgent}
+        showSkills={true}
+        availableSkills={availableSkills}
       />
 
       {/* Talent Details Modal */}

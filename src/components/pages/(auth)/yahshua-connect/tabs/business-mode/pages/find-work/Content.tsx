@@ -10,7 +10,8 @@ import JobAcceptedModal from './modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './modals/ConfirmAcceptJobModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
-import FilterRequestsModal from '../hire/modals/FilterRequestsModal';
+import FilterRequestsModal from '../../components/FilterRequestsModal';
+import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
 import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
 import { useQueryClient } from '@tanstack/react-query';
@@ -42,7 +43,7 @@ const Content = () => {
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [pendingAcceptJobId, setPendingAcceptJobId] = useState<number | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [filters, setFilters] = useState<BusinessJobFilters>({});
+  const { filters, applyFromModal } = useBusinessModeFilters();
   const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Get applicant profile from cache for location coordinates (distance calculation)
@@ -207,31 +208,7 @@ const Content = () => {
     date_from?: string;
     date_to?: string;
   }) => {
-    const businessFilters: BusinessJobFilters = {};
-    
-    if (newFilters.location) {
-      businessFilters.location = newFilters.location;
-    }
-    if (newFilters.category) {
-      businessFilters.category = newFilters.category;
-    }
-    if (newFilters.urgentOnly) {
-      businessFilters.is_urgent = true;
-    }
-    if (newFilters.min_budget !== undefined) {
-      businessFilters.min_budget = newFilters.min_budget;
-    }
-    if (newFilters.max_budget !== undefined) {
-      businessFilters.max_budget = newFilters.max_budget;
-    }
-    if (newFilters.date_from) {
-      businessFilters.date_from = newFilters.date_from;
-    }
-    if (newFilters.date_to) {
-      businessFilters.date_to = newFilters.date_to;
-    }
-
-    setFilters(businessFilters);
+    applyFromModal(newFilters);
     setSelectedJobId(null); // Reset selected job when filters change
   };
 
@@ -405,6 +382,8 @@ const Content = () => {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onApplyFilters={handleApplyFilters}
+        initialUrgentOnly={!!filters?.is_urgent}
+        showSkills={false}
       />
 
       {/* Confirm Accept Job Modal */}

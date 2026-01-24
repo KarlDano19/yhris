@@ -127,6 +127,12 @@ const BusinessJobCard = ({
               <span className="text-xs text-gray-500 ml-1">({hiresCount || 0} reviews)</span>
             </div>
           </div>
+          {/* Category */}
+          {tags && tags.length > 0 && (
+            <p className="text-sm text-gray-600">
+              <span className="font-semibold text-savoy-blue">Category:</span> {tags[0]}
+            </p>
+          )}
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
-import FilterRequestsModal from './pages/hire/modals/FilterRequestsModal';
+import FilterRequestsModal from './components/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './pages/find-work/modals/ConfirmAcceptJobModal';
 import ChatModal from '@/components/common/chat/ChatModal';
@@ -19,12 +19,14 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatDateToLocal } from '@/helpers/date';
 
 import { FunnelIcon } from '@heroicons/react/24/outline';
+import useBusinessModeFilters from '../../hooks/useBusinessModeFilters';
 
 import formatPrice from '@/helpers/currencyFormat';
 import { calculateDistanceKm } from '@/helpers/distance';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const { filters, applyFromModal } = useBusinessModeFilters();
   const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] = useState(false);
   const [isJobAcceptedModalOpen, setIsJobAcceptedModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -44,8 +46,8 @@ const Content = () => {
   const applicantLatitude = profileData?.latitude;
   const applicantLongitude = profileData?.longitude;
 
-  // Fetch business jobs from API (without location filter - we'll calculate distance on frontend)
-  const { data: jobsData, isLoading: isJobsLoading } = useFindBusinessJobs({});
+  // Fetch business jobs from API (apply filters when provided)
+  const { data: jobsData, isLoading: isJobsLoading } = useFindBusinessJobs(filters || {});
 
   // Mutation hook for applying to business jobs
   const applyToBusinessJobMutation = useApplyToBusinessJob();
@@ -150,13 +152,14 @@ const Content = () => {
   // Limit to 4 jobs for home page preview
   const displayedJobs = transformedJobs.slice(0, 4);
 
-  const handleApplyFilters = (filters: {
-    location: string;
-    skills: string[];
-    urgentOnly: boolean;
+  const handleApplyFilters = (payload: {
+    location?: string;
+    category?: string;
+    skills?: string[];
+    urgentOnly?: boolean;
   }) => {
-    // TODO: Implement filter logic for home page
-    console.log('Applied filters:', filters);
+    applyFromModal(payload);
+    setIsFilterModalOpen(false);
   };
 
   const handleAcceptJob = (jobId: number) => {
@@ -387,6 +390,8 @@ const Content = () => {
           isOpen={isFilterModalOpen}
           onClose={() => setIsFilterModalOpen(false)}
           onApplyFilters={handleApplyFilters}
+          initialUrgentOnly={!!filters?.is_urgent}
+          showSkills={false}
         />
       )}
 
