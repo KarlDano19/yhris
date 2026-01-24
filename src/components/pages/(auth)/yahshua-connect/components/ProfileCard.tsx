@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useToggleAvailability from '../hooks/useToggleAvailability';
 import MyReviewsModal from '../modals/MyReviewsModal';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 import { StarIcon } from '@heroicons/react/24/solid';
 
@@ -115,9 +116,13 @@ const ProfileCard = ({
                 unoptimized
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-3xl font-bold">
-                {initial}
-              </div>
+              <PlaceholderAvatar
+                width={96}
+                height={96}
+                className="rounded-lg"
+                firstName={name.split(' ')[0] || ''}
+                lastName={name.split(' ').slice(1).join(' ') || ''}
+              />
             )}
           </div>
         </div>
