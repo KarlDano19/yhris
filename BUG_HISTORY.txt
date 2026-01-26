@@ -512,3 +512,156 @@ Design Decisions:
 - Backward compatible: PDF remains the default format selection
 
 ================================================================================
+
+BUG ID: HRIS-004
+DATE FILED: 2026-01-26
+DATE FIXED: 2026-01-26
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+The "Sync All to YP" button in the HRIS general settings (employees section) and the
+FloatingSyncButton (master sync) were only pushing data from HRIS TO Yahshua Payroll
+(YP) in one direction. Users were unable to get updated data FROM YP back into HRIS.
+When departments, locations, positions, or employment types were added/updated in YP,
+clicking the sync button would NOT pull those changes into HRIS.
+
+The backend endpoints for pulling data FROM YP already existed but were not connected
+to the frontend UI:
+- /api/departments/sync-third-party-integration/
+- /api/locations/sync-third-party-integration/
+- /api/positions/sync-third-party-integration/
+- /api/employee-status/sync-third-party-integration/
+
+The sync button was misleadingly named "Sync All to YP" which implied one-directional
+syncing, causing user confusion.
+
+DESIRED OUTCOME:
+Implement bidirectional sync so that clicking the sync button performs:
+1. FIRST: Pull data FROM YP to HRIS (fetch and update departments, locations,
+   positions, employment types)
+2. THEN: Push data FROM HRIS TO YP (ensure YP has latest HRIS records)
+
+Both systems should stay fully synchronized after each sync operation.
+
+FILES CHANGED:
+Backend:
+- (No backend changes - endpoints already existed and were working)
+
+Frontend:
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartmentFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/location/useSyncLocationFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/position/useSyncPositionFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/employee-status/useSyncEmployeeStatusFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/Content.tsx (UPDATED)
+- src/components/FloatingSyncButton.tsx (UPDATED)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (N/A - no backend changes, endpoints tested previously)
+☑ All backend tests passing (existing tests still pass)
+☑ Backend test coverage: N/A - no new code
+☑ Models tested (N/A)
+☑ Serializers tested (N/A)
+☑ Views/API endpoints tested (existing sync-third-party-integration endpoints verified working)
+☑ Permissions tested (N/A - no permission changes)
+☑ Celery tasks tested (N/A)
+☑ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of both Content.tsx and FloatingSyncButton.tsx)
+☑ Custom hooks tested (all 4 new FROM YP hooks manually verified)
+☑ React Query hooks tested (useMutation wrappers working correctly)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors, proper typing for all hooks)
+
+Integration & E2E:
+☑ API integration tests completed (verified bidirectional sync with YP staging)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed (tested both sync buttons)
+☑ Edge cases tested (empty data FROM YP, partial failures, network errors)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - settings page desktop-only)
+
+FIX EXPLANATION:
+
+Created 4 new frontend hooks to pull data FROM YP:
+
+1. useSyncDepartmentFromYP.ts - Calls /api/departments/sync-third-party-integration/
+   - Backend fetches from YP's /sso/departments-info/
+   - Creates/updates departments in HRIS database
+
+2. useSyncLocationFromYP.ts - Calls /api/locations/sync-third-party-integration/
+   - Backend fetches from YP's /sso/locations-info/
+   - Creates/updates locations in HRIS database
+
+3. useSyncPositionFromYP.ts - Calls /api/positions/sync-third-party-integration/
+   - Backend fetches from YP's /sso/positions-info/
+   - Creates/updates positions in HRIS database
+
+4. useSyncEmployeeStatusFromYP.ts - Calls /api/employee-status/sync-third-party-integration/
+   - Backend fetches from YP's /sso/employment-types-info/
+   - Creates/updates employment types in HRIS database
+
+Updated Content.tsx (/settings/general-settings/employees):
+- Imported 4 new FROM YP hooks
+- Added hook instances for pulling FROM YP
+- Updated isSyncingAll state to include new loading states
+- Rewrote handleSyncAll function from 4 operations to 8 operations:
+  * Phase 1: Execute 4 operations to pull FROM YP (departments, locations, positions, employment status)
+  * Phase 2: After Phase 1 completes (500ms delay), execute 4 operations to push TO YP
+  * Shows individual toast notifications for each operation
+  * Shows final summary when all 8 operations complete
+- Changed button text from "Sync All to YP" to "Sync All with YP" for clarity
+
+Updated FloatingSyncButton.tsx (master sync):
+- Imported 4 new FROM YP hooks
+- Added hook instances for pulling FROM YP
+- Updated sync steps from 7 to 11 steps:
+  * Step 1: Users
+  * Step 2: Employee ID Settings
+  * Steps 3-10: Bidirectional sync for Locations, Positions, Departments, Employment Status
+    - Each entity now has "FROM YP" step followed by "TO YP" step
+  * Step 11: Employees
+- Updated handleMasterSync to execute bidirectional sync sequentially:
+  * Pull Locations FROM YP → Push Locations TO YP
+  * Pull Positions FROM YP → Push Positions TO YP
+  * Pull Departments FROM YP → Push Departments TO YP
+  * Pull Employment Status FROM YP → Push Employment Status TO YP
+- Updated UI text to clarify bidirectional sync in modal description
+- Each step shows clear "(FROM YP)" or "(TO YP)" label in progress UI
+
+Data Flow:
+1. FROM YP Phase:
+   - HRIS makes GET request to YP endpoints (/sso/departments-info/, etc.)
+   - YP returns latest data
+   - HRIS creates/updates records using payroll_id as primary matching key
+   - Falls back to name matching for legacy records without payroll_id
+
+2. TO YP Phase:
+   - HRIS fetches records from local database
+   - Formats data for YP's expected structure
+   - POST to YP bulk-sync endpoints (/sso/departments-bulk-sync/, etc.)
+   - YP creates/updates records and returns updated IDs
+   - HRIS updates local records with YP's payroll_id for future syncs
+
+Benefits:
+- Both systems stay synchronized in both directions
+- User sees clear progress for each operation with direction labels
+- Individual errors don't block entire sync - partial success supported
+- Button text now accurately describes bidirectional behavior
+- No backend changes required - leveraged existing endpoints
+
+User Testing Results:
+- Tested adding department in YP → synced successfully to HRIS
+- Tested adding department in HRIS → synced successfully to YP
+- Verified all 4 entity types (departments, locations, positions, employment types)
+- Verified both sync buttons (Content.tsx and FloatingSyncButton.tsx)
+- Confirmed toast notifications show clear messages for each step
+- Verified proper error handling when YP is unreachable
+
+================================================================================
