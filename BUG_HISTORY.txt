@@ -243,7 +243,97 @@ properly invalidated after successful mutation to ensure consistency.
 
 ================================================================================
 
-[NEW ENTRIES SHOULD BE APPENDED BELOW THIS LINE]
+BUG ID: HRIS-003
+DATE FILED: 2026-01-26
+DATE FIXED: 2026-01-26
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Users were unable to upload image files (JPEG, PNG) through the SendEmailModal component.
+When attempting to select image files using the file input dialog or drag-and-drop,
+image files would not appear in the file selection list. Only document file types
+(Word, PDF, CSV, Excel) were selectable. This limitation prevented users from attaching
+screenshots, photos, or other image files to their emails.
+
+DESIRED OUTCOME:
+The SendEmailModal should accept both document files AND image files (JPEG, PNG) as
+valid attachment types. Users should be able to:
+1. Select image files from the file picker dialog
+2. Drag and drop image files into the attachment upload area
+3. Upload multiple images if multiple attachment mode is enabled
+4. See previews and manage uploaded image files just like document files
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/SendEmailModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of image upload in all attachment modes)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (10MB file size limit applies to images)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified image uploads to backend)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (JPEG, PNG, large images, mixed file types, single/multiple mode)
+☑ Cross-browser testing completed (file picker shows images in Chrome, Firefox)
+☐ Mobile responsiveness verified (N/A - modal responsive design unchanged)
+
+FIX EXPLANATION:
+The issue was caused by the HTML file input `accept` attribute being too restrictive.
+All six file input elements in the component only accepted specific document MIME types:
+- application/msword (DOC)
+- application/pdf (PDF)
+- text/csv (CSV)
+- application/vnd.openxmlformats-officedocument.wordprocessingml.document (DOCX)
+- application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (XLSX)
+- application/vnd.ms-excel (XLS)
+
+The fix added image MIME types to ALL file input accept attributes:
+- image/jpeg (JPEG/JPG files)
+- image/png (PNG files)
+
+File inputs updated (6 total):
+1. Line 1053: Initial drag-drop file input (showDragDropAttachment mode)
+2. Line 1068: Replace file input for single attachment mode (showDragDropAttachment)
+3. Line 1158: "Add more files" input for multiple attachment mode (showDragDropAttachment)
+4. Line 1195: Initial file input (regular attachment mode)
+5. Line 1210: Replace file input for single attachment mode (regular mode)
+6. Line 1300: "Add more files" input for multiple attachment mode (regular mode)
+
+This change allows users to upload image files while maintaining all existing
+functionality:
+- 10MB file size limit still enforced for all file types
+- Single vs multiple attachment mode logic unchanged
+- Template attachments still work correctly
+- File preview and removal features work for images
+
+The fix is backward compatible and does not affect existing document upload functionality.
+
+================================================================================
 
 BUG ID: HRIS-001
 DATE FILED: 2026-01-15
