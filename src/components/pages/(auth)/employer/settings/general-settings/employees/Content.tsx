@@ -17,6 +17,10 @@ import useSyncLocation from './hooks/location/useSyncLocation';
 import useSyncDepartment from './hooks/department/useSyncDepartment';
 import useSyncPosition from './hooks/position/useSyncPosition';
 import useSyncEmployeeStatus from './hooks/employee-status/useSyncEmployeeStatus';
+import useSyncDepartmentFromYP from './hooks/department/useSyncDepartmentFromYP';
+import useSyncLocationFromYP from './hooks/location/useSyncLocationFromYP';
+import useSyncPositionFromYP from './hooks/position/useSyncPositionFromYP';
+import useSyncEmployeeStatusFromYP from './hooks/employee-status/useSyncEmployeeStatusFromYP';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeId from './tabs/Employee-id';
@@ -24,110 +28,188 @@ import EmployeeId from './tabs/Employee-id';
 const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState('location');
 
-  // Bulk sync hooks
+  // Bulk sync hooks - TO YP
   const { mutate: syncLocation, isLoading: isSyncLocationLoading } = useSyncLocation();
   const { mutate: syncDepartment, isLoading: isSyncDepartmentLoading } = useSyncDepartment();
   const { mutate: syncPosition, isLoading: isSyncPositionLoading } = useSyncPosition();
   const { mutate: syncEmployeeStatus, isLoading: isSyncEmployeeStatusLoading } = useSyncEmployeeStatus();
-  
+
+  // Sync hooks - FROM YP
+  const { mutate: syncDepartmentFromYP, isLoading: isSyncDepartmentFromYPLoading } = useSyncDepartmentFromYP();
+  const { mutate: syncLocationFromYP, isLoading: isSyncLocationFromYPLoading } = useSyncLocationFromYP();
+  const { mutate: syncPositionFromYP, isLoading: isSyncPositionFromYPLoading } = useSyncPositionFromYP();
+  const { mutate: syncEmployeeStatusFromYP, isLoading: isSyncEmployeeStatusFromYPLoading } = useSyncEmployeeStatusFromYP();
+
   // Track overall sync state
-  const isSyncingAll = isSyncLocationLoading || isSyncDepartmentLoading || isSyncPositionLoading || isSyncEmployeeStatusLoading;
+  const isSyncingAll =
+    isSyncLocationLoading || isSyncDepartmentLoading ||
+    isSyncPositionLoading || isSyncEmployeeStatusLoading ||
+    isSyncLocationFromYPLoading || isSyncDepartmentFromYPLoading ||
+    isSyncPositionFromYPLoading || isSyncEmployeeStatusFromYPLoading;
 
   const handleSyncAll = async () => {
-    // 4 bulk sync operations (location, department, position, employee status)
-    const totalOperations = 4;
+    // 8 operations total: 4 FROM YP + 4 TO YP
+    const totalOperations = 8;
     let completedCount = 0;
     const errors: string[] = [];
     const successes: string[] = [];
 
     const onOperationComplete = (type: string, operation: string, success: boolean, message?: string) => {
       completedCount++;
-      
+
       if (success) {
         successes.push(`${type} ${operation}`);
       } else if (message) {
         errors.push(`${type} ${operation}: ${message}`);
       }
 
-      // Show final result when all operations are complete
+      // When first 4 operations complete (FROM YP), start TO YP operations
+      if (completedCount === 4) {
+        setTimeout(() => executePushToYP(), 500);
+      }
+
+      // Show final result when all operations complete
       if (completedCount === totalOperations) {
-        if (errors.length === 0) {
-          toast.custom(() => <CustomToast message={`All data synced successfully! (${successes.length} operations completed)`} type='success' />, { duration: 6000 });
-        } else if (successes.length > 0) {
-          toast.custom(() => <CustomToast message={`Sync completed with ${successes.length} successes and ${errors.length} errors. Check individual items for details.`} type='warning' />, { duration: 8000 });
-        } else {
-          toast.custom(() => <CustomToast message={`Sync failed: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? ` and ${errors.length - 3} more errors` : ''}`} type='error' />, { duration: 8000 });
-        }
+        showFinalResults();
       }
     };
 
-    // Bulk sync locations to payroll (creates/updates all locations in one call)
-    syncLocation({}, {
-      onSuccess: (data) => {
-        const summary = data.summary;
-        const message = summary 
-          ? `Location bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
-          : data.message || 'Location bulk sync completed';
-        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Location', 'bulk sync', true, message);
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Location bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Location', 'bulk sync', false, errorMessage);
-      },
-    });
+    const executePullFromYP = () => {
+      // 1. Pull departments FROM YP
+      syncDepartmentFromYP({ syncType: 'all' }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={`Departments FROM YP: ${data.message}`} type='success' />, { duration: 3000 });
+          onOperationComplete('Department', 'FROM YP', true, data.message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Department pull failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Department', 'FROM YP', false, errorMessage);
+        },
+      });
 
-    // Bulk sync departments to payroll (creates/updates all departments in one call)
-    syncDepartment({}, {
-      onSuccess: (data) => {
-        const summary = data.summary;
-        const message = summary 
-          ? `Department bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
-          : data.message || 'Department bulk sync completed';
-        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Department', 'bulk sync', true, message);
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Department bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Department', 'bulk sync', false, errorMessage);
-      },
-    });
+      // 2. Pull locations FROM YP
+      syncLocationFromYP({ syncType: 'all' }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={`Locations FROM YP: ${data.message}`} type='success' />, { duration: 3000 });
+          onOperationComplete('Location', 'FROM YP', true, data.message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Location pull failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Location', 'FROM YP', false, errorMessage);
+        },
+      });
 
-    // Bulk sync positions to payroll (creates/updates all positions in one call)
-    syncPosition({}, {
-      onSuccess: (data) => {
-        const summary = data.summary;
-        const message = summary 
-          ? `Position bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
-          : data.message || 'Position bulk sync completed';
-        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Position', 'bulk sync', true, message);
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Position bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Position', 'bulk sync', false, errorMessage);
-      },
-    });
+      // 3. Pull positions FROM YP
+      syncPositionFromYP({ syncType: 'all' }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={`Positions FROM YP: ${data.message}`} type='success' />, { duration: 3000 });
+          onOperationComplete('Position', 'FROM YP', true, data.message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Position pull failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Position', 'FROM YP', false, errorMessage);
+        },
+      });
 
-    // Bulk sync employee statuses to payroll (creates/updates all employee statuses in one call)
-    syncEmployeeStatus({}, {
-      onSuccess: (data) => {
-        const summary = data.summary;
-        const message = summary 
-          ? `Employee Status bulk sync completed: ${summary.created} created, ${summary.updated} updated, ${summary.errors} errors`
-          : data.message || 'Employee Status bulk sync completed';
-        toast.custom(() => <CustomToast message={message} type='success' />, { duration: 4000 });
-        onOperationComplete('Employee Status', 'bulk sync', true, message);
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || err;
-        toast.custom(() => <CustomToast message={`Employee Status bulk sync failed: ${errorMessage}`} type='error' />, { duration: 5000 });
-        onOperationComplete('Employee Status', 'bulk sync', false, errorMessage);
-      },
-    });
+      // 4. Pull employee status FROM YP
+      syncEmployeeStatusFromYP({ syncType: 'all' }, {
+        onSuccess: (data: any) => {
+          toast.custom(() => <CustomToast message={`Employee Statuses FROM YP: ${data.message}`} type='success' />, { duration: 3000 });
+          onOperationComplete('Employee Status', 'FROM YP', true, data.message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Employee Status pull failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Employee Status', 'FROM YP', false, errorMessage);
+        },
+      });
+    };
+
+    const executePushToYP = () => {
+      // 5. Push locations TO YP
+      syncLocation({}, {
+        onSuccess: (data: any) => {
+          const summary = data.summary;
+          const message = summary
+            ? `Location TO YP: ${summary.created} created, ${summary.updated} updated`
+            : data.message || 'Location push completed';
+          toast.custom(() => <CustomToast message={message} type='success' />, { duration: 3000 });
+          onOperationComplete('Location', 'TO YP', true, message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Location push failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Location', 'TO YP', false, errorMessage);
+        },
+      });
+
+      // 6. Push departments TO YP
+      syncDepartment({}, {
+        onSuccess: (data: any) => {
+          const summary = data.summary;
+          const message = summary
+            ? `Department TO YP: ${summary.created} created, ${summary.updated} updated`
+            : data.message || 'Department push completed';
+          toast.custom(() => <CustomToast message={message} type='success' />, { duration: 3000 });
+          onOperationComplete('Department', 'TO YP', true, message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Department push failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Department', 'TO YP', false, errorMessage);
+        },
+      });
+
+      // 7. Push positions TO YP
+      syncPosition({}, {
+        onSuccess: (data: any) => {
+          const summary = data.summary;
+          const message = summary
+            ? `Position TO YP: ${summary.created} created, ${summary.updated} updated`
+            : data.message || 'Position push completed';
+          toast.custom(() => <CustomToast message={message} type='success' />, { duration: 3000 });
+          onOperationComplete('Position', 'TO YP', true, message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Position push failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Position', 'TO YP', false, errorMessage);
+        },
+      });
+
+      // 8. Push employee status TO YP
+      syncEmployeeStatus({}, {
+        onSuccess: (data: any) => {
+          const summary = data.summary;
+          const message = summary
+            ? `Employee Status TO YP: ${summary.created} created, ${summary.updated} updated`
+            : data.message || 'Employee Status push completed';
+          toast.custom(() => <CustomToast message={message} type='success' />, { duration: 3000 });
+          onOperationComplete('Employee Status', 'TO YP', true, message);
+        },
+        onError: (err: any) => {
+          const errorMessage = err.message || err;
+          toast.custom(() => <CustomToast message={`Employee Status push failed: ${errorMessage}`} type='error' />, { duration: 3000 });
+          onOperationComplete('Employee Status', 'TO YP', false, errorMessage);
+        },
+      });
+    };
+
+    const showFinalResults = () => {
+      if (errors.length === 0) {
+        toast.custom(() => <CustomToast message={`Bidirectional sync completed successfully! (${successes.length} operations)`} type='success' />, { duration: 6000 });
+      } else if (successes.length > 0) {
+        toast.custom(() => <CustomToast message={`Sync completed with ${successes.length} successes and ${errors.length} errors. Check details above.`} type='warning' />, { duration: 8000 });
+      } else {
+        toast.custom(() => <CustomToast message={`Sync failed: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? ` and ${errors.length - 3} more` : ''}`} type='error' />, { duration: 8000 });
+      }
+    };
+
+    // Start with pulling FROM YP
+    executePullFromYP();
   };
   
 
@@ -222,7 +304,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                     Syncing...
                   </div>
                 ) : (
-                  'Sync All to YP'
+                  'Sync All with YP'
                 )}
               </SmartButton>
             </div>
