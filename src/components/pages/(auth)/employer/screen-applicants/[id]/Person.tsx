@@ -135,6 +135,7 @@ export default function Person({
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
+  const isPooling = applicant.status === 'pooling';
   const isArchived = applicant.is_archived === true;
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
@@ -169,6 +170,11 @@ export default function Person({
     backgroundColorClass = 'bg-red-100';
   }
 
+  // If applicant is pooled, always show green background regardless of screening fit
+  if (isPooling) {
+    backgroundColorClass = 'bg-green-100';
+  }
+ 
   return (
     <div
       className={classNames(
@@ -241,8 +247,8 @@ export default function Person({
         )}
       </div>
       
-      {/* Archive Button - only show for rejected or withdrawn applicants and if user has permissions */}
-      {(isRejected || isWithdrawn) && canInteract && (
+      {/* Archive Button - show for rejected, withdrawn, or pooling applicants and if user has permissions */}
+      {(isRejected || isWithdrawn || isPooling) && canInteract && (
         <div className='mr-2'>
           <ArchiveButton
             appliedJobId={applicant.applicationId}

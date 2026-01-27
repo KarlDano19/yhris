@@ -124,9 +124,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
     return dataArchivedApplicants.filter((applicant: any) => {
-      // Only count if actually archived with rejected/withdrawn status
-      const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-      if (!isArchivedStatus) return false;
+    // Only count if actually archived with rejected/withdrawn/pooling status
+    const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn' || applicant.status === 'pooling';
+    if (!isArchivedStatus) return false;
       
       // Check if archived within the last 30 days
       const archivedDate = new Date(applicant.updated_at || applicant.created_at);
@@ -174,8 +174,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
    * Check if status update should trigger archived modal refresh
    */
   const shouldTriggerArchivedRefresh = useCallback((status: string) => {
-    // Only trigger if status is rejected or withdrawn (archived statuses)
-    return status === 'rejected' || status === 'withdrawn';
+    // Trigger when status is one of the archived statuses (rejected, withdrawn, pooling)
+    return status === 'rejected' || status === 'withdrawn' || status === 'pooling';
   }, []);
 
   /**
@@ -354,6 +354,25 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       });
     }
   }, [dataJobPostDetails, dataAppliedApplicants, screeningQuestions]);
+
+  // Listen for local archive events to refresh lists immediately
+  useEffect(() => {
+    const handler = (e: any) => {
+      // Refresh both active and archived lists when an applicant is archived
+      appliedApplicantRefetch();
+      archivedApplicantRefetch();
+    };
+
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('applicant:archived', handler as EventListener);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined' && window.removeEventListener) {
+        window.removeEventListener('applicant:archived', handler as EventListener);
+      }
+    };
+  }, [appliedApplicantRefetch, archivedApplicantRefetch]);
 
   const handleFormSubmit = (data: any, isOpen?: any) => {
     if (whichModal) {
