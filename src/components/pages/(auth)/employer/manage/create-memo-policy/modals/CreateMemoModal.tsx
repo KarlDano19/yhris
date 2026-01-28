@@ -91,7 +91,7 @@ export default function CreateMemoModal({
           { duration: 5000 }
         );
         setIsOpen(false);
-        
+
         refetch();
 
         reset();
@@ -99,6 +99,9 @@ export default function CreateMemoModal({
         setEmployeeSelected(false);
         setTagsTo([]);
         setFiles([]);
+        setQrCodeExist(false);
+        setToSaveData(null);
+        setSignatureUrl('');
       },
       onError: (err: any) => {
         toast.custom(() => <CustomToast message={err} type='error' />, {
