@@ -425,11 +425,7 @@ const Content = () => {
                         className="h-14 object-contain -mb-6 -ml-10 max-w-[120%]"
                       />
                     ) : (
-                      <div className="h-10 flex items-center -ml-5">
-                        <svg viewBox="0 0 200 50" className="w-32 -mb-1">
-                          <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
-                        </svg>
-                      </div>
+                      null
                     )}
                   </div>
                   <p className="font-semibold text-sm mb-2">{directive.name}</p>

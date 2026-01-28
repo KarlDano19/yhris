@@ -665,3 +665,86 @@ User Testing Results:
 - Verified proper error handling when YP is unreachable
 
 ================================================================================
+
+BUG ID: HRIS-005
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+On the public directives page, when a directive entry did not have a signature image uploaded,
+the system was displaying a placeholder SVG squiggly line as a fallback. This squiggly line
+looked unprofessional and could be mistaken for an actual signature, causing confusion for
+users viewing company directives and memos.
+
+DESIRED OUTCOME:
+When a directive does not have a signature image, the signature area should simply be empty
+(show nothing) rather than displaying a placeholder graphic. This provides a cleaner appearance
+and avoids any confusion about whether a directive has been signed.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(un-auth)/directives/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of directives page with and without signatures)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified page renders correctly)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (directives with signature, directives without signature)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+The issue was in the conditional rendering logic for directive signatures in Content.tsx.
+When a directive had a signature image (`directive.signature`), it would display the image.
+However, when no signature was present, the fallback was rendering an SVG element that
+drew a squiggly line path intended to look like a placeholder signature:
+
+Before (lines 427-432):
+```jsx
+<div className="h-10 flex items-center -ml-5">
+  <svg viewBox="0 0 200 50" className="w-32 -mb-1">
+    <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
+  </svg>
+</div>
+```
+
+After:
+```jsx
+null
+```
+
+The fix simply returns `null` when there is no signature image, which causes React to render
+nothing in that space. This is cleaner because:
+1. No misleading placeholder that could be confused with an actual signature
+2. Cleaner visual appearance for unsigned directives
+3. Simpler code with no unnecessary SVG rendering
+
+================================================================================
