@@ -665,7 +665,7 @@ export default function Employee201Content({
         );
 
       case "disciplinary":
-        return <DisciplinaryRecordsForm emp={employeeDetails} />;
+        return <DisciplinaryRecordsForm employeeId={params?.id} />;
 
       case "performance":
         return <PerformanceEvaluationForm emp={employeeDetails} />;
