@@ -22,10 +22,11 @@ async function submitApplication(data: any) {
       skills: data.skills,
       education: data.education,
       screening_answers: data.screeningAnswers || [],
+      video_intro_url: data.videoIntroductionUrl,
     };
     
-    const formData = new FormData();
-    if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
+      const formData = new FormData();
+      if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
       formData.append('skills', data.skills.join(','));
     }
     if (data.education && Array.isArray(data.education) && data.education.length > 0) {
