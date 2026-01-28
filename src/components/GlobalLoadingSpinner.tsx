@@ -1,11 +1,11 @@
-'use client';
+ 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useIsFetching } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
 
-const GlobalLoadingSpinner: React.FC = () => {
+const GlobalLoadingSpinner = () => {
   const pathname = usePathname();
   const isFetching = useIsFetching();
   const [visible, setVisible] = useState(false);
