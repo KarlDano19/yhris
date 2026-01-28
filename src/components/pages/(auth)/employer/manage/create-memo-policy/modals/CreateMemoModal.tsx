@@ -462,7 +462,7 @@ export default function CreateMemoModal({
                           type='file'
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
                         />
-                        {watch('signature') && (
+                        {watch('signature') && watch('signature') instanceof FileList && watch('signature')!.length > 0 && (
                           <button
                             type='button'
                             className='underline text-savoy-blue text-sm'
