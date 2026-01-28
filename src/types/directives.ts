@@ -2,11 +2,18 @@
  * Types and interfaces for directives functionality
  */
 
+export interface DirectiveAttachment {
+  id: number;
+  attachment: string;
+  attachment_name: string;
+  created_at?: string;
+}
+
 export interface DirectiveData {
   id: number;
   directive_type?: 'memo' | 'policy';
   title: string;
-  to?: string | string[]; 
+  to?: string | string[];
   is_active?: boolean;
   company_name?: string;
 
@@ -19,14 +26,9 @@ export interface DirectiveData {
   body?: string;
   name?: string;
   position?: string;
-  signature?: string | File;
+  signature?: string | File | FileList;
   qr_code?: string | File;
-  attachments?: string | File | Array<{
-    id: number;
-    attachment: string;
-    attachment_name: string;
-    created_at?: string;
-  }>;
+  attachments?: string | File | File[] | DirectiveAttachment[];
   attachment?: string; // Backward compatibility field - URL of first attachment
 }
 

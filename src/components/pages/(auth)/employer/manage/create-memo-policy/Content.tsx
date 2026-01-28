@@ -390,14 +390,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
                 <div>
-                  <SmartButton
+                  <Menu.Button
+                    as={SmartButton}
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                   >
-                    <Menu.Button className="w-full h-full">
-                      CREATE
-                    </Menu.Button>
-                  </SmartButton>
+                    CREATE
+                  </Menu.Button>
                 </div>
 
                 <Transition
