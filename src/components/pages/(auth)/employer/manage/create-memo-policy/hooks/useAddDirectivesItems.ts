@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { DirectiveData } from '@/types/directives';
+import { DirectiveData, DirectiveAttachment } from '@/types/directives';
 
 async function addDirective(directive: DirectiveData) {
   try {
@@ -11,30 +11,51 @@ async function addDirective(directive: DirectiveData) {
     data.append('title', directive.title);
     data.append('to', JSON.stringify(directive.to));
     data.append('company_name', directive.company_name || '');
-    
+
     // Handle attachments as multiple FileField
     if (directive.attachments) {
-      // Check if attachments is an array or a single file
       if (Array.isArray(directive.attachments)) {
-        // Multiple attachments - append each file
-        directive.attachments.forEach((file: File) => {
-          if (file && file instanceof File) {
-            data.append('attachments', file);
+        // Array could be File[] or DirectiveAttachment[]
+        directive.attachments.forEach((item) => {
+          // Only append if it's a File (new uploads)
+          // Skip DirectiveAttachment objects (already uploaded files from backend)
+          if (item instanceof File) {
+            data.append('attachments', item);
           }
         });
-      } else if (typeof directive.attachments === 'object' && directive.attachments !== null) {
-        // Single attachment - append directly
-        data.append('attachments', directive.attachments as any);
+      } else if (directive.attachments instanceof File) {
+        // Single File attachment
+        data.append('attachments', directive.attachments);
       }
+      // Skip string attachments (they are URLs from backend)
     }
     
     if (directive.directive_type === 'memo') {
       data.append('body', directive.body || '');
       data.append('name', directive.name || '');
       data.append('position', directive.position || '');
-      if (directive.signature && typeof directive.signature === 'string' && directive.signature.length) {
-        const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
-        data.append('signature', signatureBlob, 'signature.jpg');
+      if (directive.signature) {
+        console.log('Signature type:', typeof directive.signature);
+        console.log('Signature value:', directive.signature);
+        console.log('Is FileList?', directive.signature instanceof FileList);
+        console.log('Is File?', directive.signature instanceof File);
+
+        if (typeof directive.signature === 'string' && directive.signature.length) {
+          // Handle drawn signature (base64 data URL)
+          console.log('Processing drawn signature');
+          const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
+          data.append('signature', signatureBlob, 'signature.jpg');
+        } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
+          // Handle uploaded file from file input (FileList)
+          console.log('Processing FileList signature, file:', directive.signature[0]);
+          data.append('signature', directive.signature[0]);
+        } else if (directive.signature instanceof File) {
+          // Handle uploaded file (File object)
+          console.log('Processing File signature');
+          data.append('signature', directive.signature);
+        } else {
+          console.log('Signature format not recognized');
+        }
       }
       if (directive.qr_code) {
         data.append('qr_code', directive.qr_code as File);

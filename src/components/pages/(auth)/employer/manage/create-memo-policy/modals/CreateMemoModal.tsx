@@ -4,7 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
@@ -44,15 +44,17 @@ export default function CreateMemoModal({
   const [signatureModalOpen, setSignatureModalOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [qrCodeExist, setQrCodeExist] = useState(false);
+  const [signatureFileExist, setSignatureFileExist] = useState(false);
   const [toSaveData, setToSaveData] = useState<any>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const qrCodeInputRef = useRef<HTMLInputElement>(null);
   const [inputTo, setInputTo] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
   const [isToFocused, setIsToFocused] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, formState: { errors } } = useForm<DirectiveData>();
+  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<DirectiveData>();
   const { mutate, isLoading } = useAddDirectivesItems();
   const queryClient = useQueryClient();
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
@@ -100,6 +102,7 @@ export default function CreateMemoModal({
         setTagsTo([]);
         setFiles([]);
         setQrCodeExist(false);
+        setSignatureFileExist(false);
         setToSaveData(null);
         setSignatureUrl('');
       },
@@ -235,21 +238,36 @@ export default function CreateMemoModal({
   useEffect(() => {
     if (signatureUrl) {
       setValue('signature', signatureUrl as never);
+      // Clear uploaded file if drawn signature is created
+      setSignatureFileExist(false);
+      const signatureInput = document.getElementById('signature') as HTMLInputElement;
+      if (signatureInput) {
+        signatureInput.value = '';
+      }
     } else {
       setSignatureUrl('');
     }
     if (!isOpen && signatureUrl) {
       setSignatureUrl('');
     }
-    
+
     // Reset form when modal closes
     if (!isOpen) {
       setFiles([]);
       setEmployeeSearch('');
       setEmployeeSelected(false);
       setIsToFocused(false);
+      setQrCodeExist(false);
+      setSignatureFileExist(false);
       if (attachmentInputRef.current) {
         attachmentInputRef.current.value = '';
+      }
+      const signatureInput = document.getElementById('signature') as HTMLInputElement;
+      if (signatureInput) {
+        signatureInput.value = '';
+      }
+      if (qrCodeInputRef.current) {
+        qrCodeInputRef.current.value = '';
       }
     }
   }, [signatureUrl, setValue, isOpen]);
@@ -456,21 +474,31 @@ export default function CreateMemoModal({
                       <div className='flex-1'>
                         <input
                           id='signature'
-                          {...register('signature')}
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              setSignatureUrl('');
-                            }
-                          }}
                           type='file'
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
+                          {...register('signature', {
+                            onChange: (e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                setSignatureUrl('');
+                                setSignatureFileExist(true);
+                              } else {
+                                setSignatureFileExist(false);
+                              }
+                            }
+                          })}
                         />
-                        {watch('signature') && watch('signature') instanceof FileList && watch('signature')!.length > 0 && (
+                        {signatureFileExist && (
                           <button
                             type='button'
-                            className='underline text-savoy-blue text-sm'
+                            className='underline text-savoy-blue text-sm mt-1'
                             onClick={() => {
-                              setValue('signature', '' as never);
+                              setValue('signature', null as never);
+                              setSignatureFileExist(false);
+                              // Reset the input by accessing it via DOM
+                              const signatureInput = document.getElementById('signature') as HTMLInputElement;
+                              if (signatureInput) {
+                                signatureInput.value = '';
+                              }
                             }}
                           >
                             Remove Signature
@@ -497,6 +525,7 @@ export default function CreateMemoModal({
                         <div className='mt-2'>
                           <input
                             id='qr_code'
+                            ref={qrCodeInputRef}
                             type='file'
                             onChange={uploadOnChange}
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
@@ -509,6 +538,9 @@ export default function CreateMemoModal({
                                 delete toSaveData.qr_code;
                                 setToSaveData({ ...toSaveData });
                                 setQrCodeExist(false);
+                                if (qrCodeInputRef.current) {
+                                  qrCodeInputRef.current.value = '';
+                                }
                               }}
                             >
                               Remove QR Code

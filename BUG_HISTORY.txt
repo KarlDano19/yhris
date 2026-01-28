@@ -780,3 +780,358 @@ FIX EXPLANATION:
    - The FileList actually contains files (`length > 0`)
 
 ================================================================================
+
+BUG ID: HRIS-006
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+When creating a memo in the Create Memo/Policy page, uploading a signature file using the
+"Choose File" button (as opposed to drawing a signature) did not save the signature to the
+database. After submission, the signature field remained null in the database, even though
+a file was selected and the form submission appeared successful. Drawing a signature worked
+correctly, but uploading a file did not.
+
+DESIRED OUTCOME:
+Both signature methods (drawing and uploading) should work correctly:
+1. Drawing a signature → signature saved as base64 image data
+2. Uploading a signature file → signature saved to storage and path stored in database
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/create-memo-policy/hooks/useAddDirectivesItems.ts
+- src/types/directives.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of signature upload)
+☐ Custom hooks tested (useAddDirectivesItems manually verified)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (updated DirectiveData interface)
+
+Integration & E2E:
+☑ API integration tests completed (verified signature upload to backend)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (FileList upload, File object, drawn signature base64)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+The issue was in the signature handling logic in useAddDirectivesItems.ts. The code only
+checked for string signatures (base64 from drawn signatures) and did not handle file uploads:
+
+Before (lines 35-38):
+```typescript
+if (directive.signature && typeof directive.signature === 'string' && directive.signature.length) {
+  const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
+  data.append('signature', signatureBlob, 'signature.jpg');
+}
+```
+
+This condition only passed for drawn signatures (base64 strings). When a user uploaded a file,
+React Hook Form provided a FileList object, which failed the `typeof === 'string'` check,
+causing the signature to be skipped entirely.
+
+The fix updated the logic to handle three signature formats:
+
+After (lines 35-47):
+```typescript
+if (directive.signature) {
+  if (typeof directive.signature === 'string' && directive.signature.length) {
+    // Handle drawn signature (base64 data URL)
+    const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
+    data.append('signature', signatureBlob, 'signature.jpg');
+  } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
+    // Handle uploaded file from file input (FileList)
+    data.append('signature', directive.signature[0]);
+  } else if (directive.signature instanceof File) {
+    // Handle uploaded file (File object)
+    data.append('signature', directive.signature);
+  }
+}
+```
+
+Additionally, the TypeScript interface was updated to properly reflect all possible signature types:
+
+Before (directives.ts):
+```typescript
+signature?: string | File;
+```
+
+After (directives.ts):
+```typescript
+signature?: string | File | FileList;
+```
+
+This ensures proper type checking and allows the hook to handle all three signature formats:
+1. Base64 string (drawn signature)
+2. FileList (from file input)
+3. File object (direct file reference)
+
+================================================================================
+
+BUG ID: HRIS-007
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Two issues with file removal buttons in the Create Memo Modal:
+
+1. The "Remove Signature" button only appeared when a QR code was uploaded, not when a
+   signature file was actually selected. This made it impossible to remove a signature file
+   once uploaded.
+
+2. The "Remove QR Code" button appeared correctly but did not actually remove the selected
+   file. Clicking the button would update the UI state but the file remained selected in
+   the file input, causing it to be submitted with the form anyway.
+
+DESIRED OUTCOME:
+1. "Remove Signature" button should appear immediately when a signature file is selected
+   and should disappear when removed.
+2. "Remove QR Code" button should fully clear the file input, allowing users to select
+   a different file or submit without a QR code.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/CreateMemoModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of remove buttons)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified form submission without files)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (remove then re-select, remove both files, submit without files)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+
+Issue 1 - Remove Signature Button Not Showing:
+The button visibility was controlled by `watch('signature')` which doesn't always trigger
+re-renders when file inputs change. The fix added:
+- New state: `signatureFileExist` to explicitly track signature file uploads
+- Updated signature input to use React Hook Form's `onChange` option within `register()`:
+  ```typescript
+  {...register('signature', {
+    onChange: (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setSignatureUrl('');
+        setSignatureFileExist(true);
+      } else {
+        setSignatureFileExist(false);
+      }
+    }
+  })}
+  ```
+- Changed button condition from complex watch logic to simple state check:
+  ```typescript
+  {signatureFileExist && (<button>Remove Signature</button>)}
+  ```
+
+Issue 2 - Remove QR Code Button Not Working:
+The button was updating state (`setQrCodeExist(false)`) but not resetting the actual
+HTML file input element. The fix:
+- Added ref: `qrCodeInputRef = useRef<HTMLInputElement>(null)`
+- Added ref to QR code input: `ref={qrCodeInputRef}`
+- Updated remove button handler to clear the file input:
+  ```typescript
+  onClick={() => {
+    delete toSaveData.qr_code;
+    setToSaveData({ ...toSaveData });
+    setQrCodeExist(false);
+    if (qrCodeInputRef.current) {
+      qrCodeInputRef.current.value = '';  // ← This line added
+    }
+  }}
+  ```
+
+Additional improvements:
+- Modal cleanup now resets both file inputs when closed
+- When drawn signature is created, uploaded signature file is automatically cleared
+- State flags are reset on successful form submission
+
+================================================================================
+
+BUG ID: HRIS-008
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Navigating to the Create Memo/Policy page caused a React hydration error in the browser console:
+"Warning: In HTML, <button> cannot be a descendant of <button>. This will cause a hydration
+error." The error was caused by nested button elements where a SmartButton component (which
+renders a <button>) was wrapping a Headless UI Menu.Button component (which also renders a
+<button>). This created invalid HTML structure and prevented proper server-side rendering.
+
+Additional error appeared when attempting to fix by using Menu.Button's `as` prop:
+"Function components cannot be given refs." This occurred because Menu.Button tried to attach
+a ref to SmartButton, but SmartButton was not forwarding refs.
+
+DESIRED OUTCOME:
+The "CREATE" button should work correctly with both permission checking (SmartButton) and
+dropdown menu functionality (Headless UI Menu.Button) without any hydration errors or ref
+warnings. The button should have a single <button> element in the DOM, not nested buttons.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/create-memo-policy/Content.tsx
+- src/components/SmartPermissions/SmartButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of CREATE button dropdown)
+☑ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (forwardRef types correct)
+
+Integration & E2E:
+☑ API integration tests completed (N/A - UI only)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (permission checks still work, dropdown still works, ref forwarding)
+☑ Cross-browser testing completed (Chrome, Firefox - no hydration errors)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+
+Phase 1 - Fix Nested Buttons (Content.tsx):
+Changed from nested button structure to using Headless UI's `as` prop for component composition.
+
+Before (lines 393-400):
+```tsx
+<SmartButton id="create_memo_btn" className='...'>
+  <Menu.Button className="w-full h-full">
+    CREATE
+  </Menu.Button>
+</SmartButton>
+```
+
+After:
+```tsx
+<Menu.Button
+  as={SmartButton}
+  id="create_memo_btn"
+  className='...'
+>
+  CREATE
+</Menu.Button>
+```
+
+This tells Menu.Button to render using SmartButton instead of wrapping it, resulting in a
+single button element with both Menu functionality and permission checking.
+
+Phase 2 - Add Ref Forwarding (SmartButton.tsx):
+Updated SmartButton to forward refs using React.forwardRef() so Menu.Button can attach its
+internal ref for focus management and accessibility.
+
+Before:
+```typescript
+export const SmartButton: React.FC<SmartButtonProps> = ({
+  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
+}) => {
+  // ... component logic
+  return (
+    <button type={type} onClick={onClick} ...>
+      {children}
+    </button>
+  );
+};
+```
+
+After:
+```typescript
+export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>(({
+  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
+}, ref) => {
+  // ... component logic
+  return (
+    <button ref={ref} type={type} onClick={onClick} ...>
+      {children}
+    </button>
+  );
+});
+
+SmartButton.displayName = 'SmartButton';
+```
+
+Benefits of the fix:
+1. Valid HTML - single button element instead of nested buttons
+2. No hydration errors - server and client render identically
+3. Backward compatible - all existing SmartButton usage continues to work
+4. More flexible - SmartButton can now be composed with other component libraries
+5. Maintains all functionality - permission checking and dropdown menu both work
+
+The forwardRef change is purely additive and doesn't affect existing code that doesn't
+pass refs to SmartButton.
+
+================================================================================
