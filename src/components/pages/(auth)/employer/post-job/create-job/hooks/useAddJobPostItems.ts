@@ -73,6 +73,14 @@ async function addJobPost(jobPost: any) {
       formData.append('rejection_feedback', jobPost.rejectionFeedback);
     }
 
+    // Add video intro enabled setting
+    if (jobPost.isVideoIntroEnabled !== undefined) {
+      formData.append('is_video_intro_enabled', jobPost.isVideoIntroEnabled.toString());
+    } else {
+      // Default to false if not specified
+      formData.append('is_video_intro_enabled', 'false');
+    }
+
     if (jobPost.jobDescriptionFile && jobPost.jobDescriptionFile instanceof File) {
       formData.append('uploaded_job_description', jobPost.jobDescriptionFile);
     }

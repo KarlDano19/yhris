@@ -554,7 +554,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} jobPostingDetails={dataJobPostDetails} />,
     },
   };
 
