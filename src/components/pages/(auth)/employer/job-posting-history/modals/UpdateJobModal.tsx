@@ -27,6 +27,7 @@ declare global {
     screeningQuestions: any[];
     autoRejectEnabled: boolean;
     rejectionFeedback?: string;
+    isVideoIntroEnabled?: boolean;
   }
 }
 
@@ -52,6 +53,7 @@ export default function UpdateJobModal({
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [autoRejectEnabled, setAutoRejectEnabled] = useState(true);
+  const [isVideoIntroEnabled, setIsVideoIntroEnabled] = useState(false);
   const {
     data: jobPostDataDetails,
     refetch: refetchJobPostDetails,
@@ -145,6 +147,12 @@ export default function UpdateJobModal({
           window.rejectionFeedback = jobPostDataDetails.rejection_feedback;
         }
       }
+      // Load video intro enabled setting
+      setIsVideoIntroEnabled(
+        jobPostDataDetails.is_video_intro_enabled !== undefined
+          ? jobPostDataDetails.is_video_intro_enabled
+          : false
+      );
       fifthForm.reset({
         postAs: jobPostDataDetails.poster_type,
         uploaded_image: jobPostDataDetails.uploaded_image,
@@ -195,12 +203,13 @@ export default function UpdateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    // Include screening questions and auto-reject settings in the form data
+    // Include screening questions, auto-reject settings, and video intro in the form data
     setCombinedFormData((prev: any) => ({
       ...prev,
       ...data,
       screeningQuestions: screeningQuestions,
-      autoRejectEnabled: autoRejectEnabled
+      autoRejectEnabled: autoRejectEnabled,
+      isVideoIntroEnabled: isVideoIntroEnabled
     }));
     setPageNumber(6);
   };
@@ -235,7 +244,12 @@ export default function UpdateJobModal({
     if (!finalData.rejectionFeedback && window.rejectionFeedback) {
       finalData.rejectionFeedback = window.rejectionFeedback;
     }
-    
+
+    // Ensure video intro enabled is included in the final data
+    if (finalData.isVideoIntroEnabled === undefined) {
+      finalData.isVideoIntroEnabled = isVideoIntroEnabled;
+    }
+
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
@@ -265,7 +279,8 @@ export default function UpdateJobModal({
     // Reset global variables used for screening questions
     setScreeningQuestions([]);
     setAutoRejectEnabled(true);
-    
+    setIsVideoIntroEnabled(false);
+
     setPageNumber(1);
     setIsOpen({ id: null, open: false });
   };
@@ -365,6 +380,8 @@ export default function UpdateJobModal({
                       autoRejectEnabled={autoRejectEnabled}
                       setAutoRejectEnabled={setAutoRejectEnabled}
                       initialRejectionFeedback={jobPostDataDetails?.rejection_feedback || ''}
+                      isVideoIntroEnabled={isVideoIntroEnabled}
+                      setIsVideoIntroEnabled={setIsVideoIntroEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

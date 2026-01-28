@@ -117,7 +117,15 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     if (jobPost.rejectionFeedback) {
       formData.append('rejection_feedback', jobPost.rejectionFeedback);
     }
-    
+
+    // Add video intro enabled setting
+    if (jobPost.isVideoIntroEnabled !== undefined) {
+      formData.append('is_video_intro_enabled', jobPost.isVideoIntroEnabled.toString());
+    } else {
+      // Default to false if not specified
+      formData.append('is_video_intro_enabled', 'false');
+    }
+
     const config = {
       method: 'PATCH',
       headers: {
