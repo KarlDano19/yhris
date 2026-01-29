@@ -1050,7 +1050,7 @@ export default function SendEmailModal({
                             multiple={effectiveAllowMultiple}
                             className='sr-only'
                             onChange={handleAttachmentUpload}
-                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                           />
                         </label>
                         
@@ -1065,7 +1065,7 @@ export default function SendEmailModal({
                               multiple={false}
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1155,7 +1155,7 @@ export default function SendEmailModal({
                               multiple
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1192,7 +1192,7 @@ export default function SendEmailModal({
                             multiple={effectiveAllowMultiple}
                             className='sr-only'
                             onChange={handleAttachmentUpload}
-                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                           />
                         </label>
                         
@@ -1207,7 +1207,7 @@ export default function SendEmailModal({
                               multiple={false}
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1297,7 +1297,7 @@ export default function SendEmailModal({
                               multiple
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
