@@ -49,7 +49,10 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         data.cc = separationEmail.lastPay.cc;
         data.bcc = separationEmail.lastPay.bcc;
         data.context = separationEmail.lastPay.message;
-        if (separationEmail.lastPay.attachment) {
+        // Handle multiple attachments
+        if (separationEmail.lastPay.attachments && Array.isArray(separationEmail.lastPay.attachments) && separationEmail.lastPay.attachments.length > 0) {
+          data.attachments = separationEmail.lastPay.attachments;
+        } else if (separationEmail.lastPay.attachment) {
           data.attachment = separationEmail.lastPay.attachment;
         }
       }
@@ -59,7 +62,10 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
         data.cc = separationEmail.quitClaim.cc;
         data.bcc = separationEmail.quitClaim.bcc;
         data.context = separationEmail.quitClaim.message;
-        if (separationEmail.quitClaim.attachment) {
+        // Handle multiple attachments
+        if (separationEmail.quitClaim.attachments && Array.isArray(separationEmail.quitClaim.attachments) && separationEmail.quitClaim.attachments.length > 0) {
+          data.attachments = separationEmail.quitClaim.attachments;
+        } else if (separationEmail.quitClaim.attachment) {
           data.attachment = separationEmail.quitClaim.attachment;
         }
       }
