@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, Fragment } from 'react';
+import { flushSync } from 'react-dom';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -61,6 +62,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isExportProgressModalOpen, setIsExportProgressModalOpen] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const [filteredItemsForPrint, setFilteredItemsForPrint] = useState<any>(null);
+  const [shouldPrint, setShouldPrint] = useState<boolean>(false);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -162,14 +165,43 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     workAccidentIlnessReportsRefetch();
   }, [currentPage, pageSize]);
 
-  const handlePrintWithBranch = () => {
-    if (selectedBranch) {
-      const filteredItems = workAccidentIlnessReportsItems.filter((item: any) => item.branch === selectedBranch);
-      handlePrint();
+  // Clear filtered items when modal is closed
+  useEffect(() => {
+    if (!isSelectBranchModalOpen) {
+      setFilteredItemsForPrint(null);
+      setShouldPrint(false);
+    }
+  }, [isSelectBranchModalOpen]);
+
+  // Trigger print after filtered items have been set and DOM has updated
+  useEffect(() => {
+    if (shouldPrint && filteredItemsForPrint !== null) {
+      // Use setTimeout to ensure React has finished rendering the updated DOM
+      setTimeout(() => {
+        handlePrint(filteredItemsForPrint);
+        setShouldPrint(false);
+      }, 1000);
+    }
+  }, [shouldPrint, filteredItemsForPrint]);
+
+  const handlePrintWithBranch = (branch: string) => {
+    if (branch) {
+      // Filter work accident illness reports by the selected branch/location
+      const filtered = workAccidentIlnessReportsItems.filter(
+        (item: any) => item.employee_location === branch
+      );
+
+      // Use flushSync to force synchronous state update
+      flushSync(() => {
+        setFilteredItemsForPrint(filtered);
+      });
+
+      // Set flag to trigger print after DOM updates
+      setShouldPrint(true);
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = (items: any) => {
     // Create a new div element
     const printDiv = document.createElement('div');
 
@@ -177,6 +209,46 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const originalPrintSection = document.getElementById('printSection');
     if (originalPrintSection) {
       printDiv.innerHTML = originalPrintSection.innerHTML;
+
+      // Now replace the tbody content with filtered items
+      const tbody = printDiv.querySelector('tbody');
+      if (tbody) {
+        // Clear existing rows
+        tbody.innerHTML = '';
+
+        // Add filtered rows
+        items.forEach((item: any) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.employee || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.age || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.civil_status || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.address || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.no_of_dependents || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.sex || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.occupation || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.employment_status || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.average_weekly_earnings || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.length_of_service || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.years_of_experience || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.hours_worked_per_day || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.hours_worked_per_week || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.reportable_illness || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.date_of_illness || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.date_returned_to_work_illness || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.days_of_absence_illness || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.days_chargeable_illness || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.extent_of_disability || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.nature_of_injury || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.part_of_body_affected || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.date_of_disability || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.date_returned_to_work || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.days_of_absence || ''}</td>
+            <td class='border-2 border-gray-800 p-1 text-sm whitespace-normal break-words max-w-xs'>${item.days_chargeable || ''}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
     }
 
     // Style the new div to be off-screen
@@ -629,7 +701,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSelectBranchModalOpen}
           onBranchSelect={(branch) => {
             setSelectedBranch(branch);
-            handlePrintWithBranch();
+            handlePrintWithBranch(branch);
           }}
         />
       )}
@@ -687,12 +759,11 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       {/* Print Section */}
       <div className='container mx-auto p-4 hidden'>
         <div id='printSection'>
-          <Image
+          <img
             className='mx-auto my-6'
             src='/assets/work-accident-illness-report.png'
             alt='Work Accident/Illness Report'
-            width={1500}
-            height={1000}
+            style={{ width: '100%', height: 'auto', maxWidth: '1980px' }}
           />
           <div className='flex flex-col gap-1 text-left pb-2'>
             <h1 className='text-sm font-bold'>
