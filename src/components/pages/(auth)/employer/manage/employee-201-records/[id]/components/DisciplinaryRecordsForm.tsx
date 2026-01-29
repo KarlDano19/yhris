@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { useGetDisciplinaryRecords } from "../hooks/useGetDisciplinaryRecords";
@@ -9,6 +9,7 @@ import Pagination from "@/components/Pagination";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomToast from "@/components/CustomToast";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import Filter, { FilterGroup, FilterValues } from "@/components/common/Filter";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
@@ -25,6 +26,9 @@ export default function DisciplinaryRecordsForm({
     setPage,
     setPageSize,
     setOpts,
+    filterOptions,
+    isFilterLoading,
+    fetchFilters,
   } = useGetDisciplinaryRecords(employeeId, {
     current_page: 1,
     page_size: 10,
@@ -37,13 +41,64 @@ export default function DisciplinaryRecordsForm({
     from: null,
     to: null,
   });
+  const [filters, setFilters] = useState<FilterValues>({});
   const [isSearching, setIsSearching] = useState(false);
+  const [hasClickedFilter, setHasClickedFilter] = useState(false);
+
+  // Fetch filters when user clicks to open the filter dropdown
+  const handleFilterClick = () => {
+    if (!hasClickedFilter && !filterOptions) {
+      fetchFilters();
+      setHasClickedFilter(true);
+    }
+  };
 
   const currentPage = listData?.current_page ?? 1;
   const pageSize = listData?.page_size ?? 10;
   const totalRecords = listData?.total_records ?? 0;
   const totalPages = listData?.total_pages ?? 1;
   const records = listData?.records ?? [];
+
+  // Build filter groups from fetched issue types
+  const filterGroups: FilterGroup[] = useMemo(() => {
+    const issueTypeOptions = filterOptions?.issue_types ?? [];
+
+    // Always show filter, but with loading state if not fetched yet
+    const optionsWithAll = filterOptions
+      ? [
+          { value: "all", label: "All Issue Types" },
+          ...issueTypeOptions,
+        ]
+      : [{ value: "all", label: isFilterLoading ? "Loading..." : "All Issue Types" }];
+
+    return [
+      {
+        id: "issue_type",
+        title: "Issue Type",
+        options: optionsWithAll,
+        multiSelect: false,
+        allowEmpty: false,
+        displayMode: "dropdown" as const,
+      },
+    ];
+  }, [filterOptions, isFilterLoading]);
+
+  // Handle filter changes - apply when Apply button is clicked
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+    const issueTypeValue = newFilters.issue_type?.[0];
+
+    // Don't apply if "all" is selected
+    const finalIssueType = issueTypeValue === "all" ? undefined : issueTypeValue;
+
+    setOpts({
+      current_page: 1,
+      page_size: pageSize,
+      start: dateFilter.from || undefined,
+      end: dateFilter.to || undefined,
+      issue_type: finalIssueType,
+    });
+  };
 
   const handleSearch = () => {
     const dateFrom = dateFilter.from ? Date.parse(dateFilter.from) : null;
@@ -74,11 +129,15 @@ export default function DisciplinaryRecordsForm({
     }
 
     setIsSearching(true);
+    const issueTypeValue = filters.issue_type?.[0];
+    const finalIssueType = issueTypeValue === "all" ? undefined : issueTypeValue;
+
     setOpts({
       current_page: 1,
       page_size: pageSize,
       start: dateFilter.from || undefined,
       end: dateFilter.to || undefined,
+      issue_type: finalIssueType,
     });
   };
 
@@ -98,56 +157,73 @@ export default function DisciplinaryRecordsForm({
 
       {/* Date Range Filter Section */}
       <div className="mb-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-          {/* Date Range Pickers */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 flex-wrap md:flex-nowrap">
-            <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
-              <CustomDatePicker
-                id="from-datepicker"
-                placeholder="mm/dd/yyyy"
-                className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
-                selected={dateFilter.from}
-                pickerOnChange={(date: any) => {
-                  setDateFilter({ ...dateFilter, from: date });
-                }}
-                inputOnChange={(value: any) => {
-                  setDateFilter({
-                    ...dateFilter,
-                    from: value?.target?.value === '' ? null : value,
-                  });
-                }}
-              />
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:justify-between">
+          {/* Left Side: Date Range Pickers and Search Button */}
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            {/* Date Range Pickers */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 flex-wrap md:flex-nowrap">
+              <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
+                <CustomDatePicker
+                  id="from-datepicker"
+                  placeholder="mm/dd/yyyy"
+                  className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
+                  selected={dateFilter.from}
+                  pickerOnChange={(date: any) => {
+                    setDateFilter({ ...dateFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setDateFilter({
+                      ...dateFilter,
+                      from: value?.target?.value === '' ? null : value,
+                    });
+                  }}
+                />
+              </div>
+              <p className="text-gray-600 text-sm md:text-base self-center">to</p>
+              <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
+                <CustomDatePicker
+                  id="to-datepicker"
+                  placeholder="mm/dd/yyyy"
+                  className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
+                  selected={dateFilter.to}
+                  pickerOnChange={(date: any) => {
+                    setDateFilter({ ...dateFilter, to: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setDateFilter({
+                      ...dateFilter,
+                      to: value?.target?.value === '' ? null : value,
+                    });
+                  }}
+                  minDate={dateFilter.from}
+                />
+              </div>
             </div>
-            <p className="text-gray-600 text-sm md:text-base self-center">to</p>
-            <div className="relative flex-1 md:flex-none min-w-[140px] md:min-w-0">
-              <CustomDatePicker
-                id="to-datepicker"
-                placeholder="mm/dd/yyyy"
-                className="appearance-none block w-full rounded-md py-1.5 px-3 md:pl-3 md:pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 md:placeholder:text-black text-sm leading-6"
-                selected={dateFilter.to}
-                pickerOnChange={(date: any) => {
-                  setDateFilter({ ...dateFilter, to: date });
-                }}
-                inputOnChange={(value: any) => {
-                  setDateFilter({
-                    ...dateFilter,
-                    to: value?.target?.value === '' ? null : value,
-                  });
-                }}
-                minDate={dateFilter.from}
-              />
+
+            {/* Search Button */}
+            <div className="flex gap-2">
+              <button
+                className="bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100"
+                onClick={handleSearch}
+                disabled={isSearching}
+              >
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <button
-              className="bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100"
-              onClick={handleSearch}
-              disabled={isSearching}
-            >
-              <MagnifyingGlassIcon className="h-5 w-5" />
-            </button>
+          {/* Right Side: Filter Component */}
+          <div className="flex justify-start lg:justify-end" onClick={handleFilterClick}>
+            <Filter
+              filterGroups={filterGroups}
+              defaultValues={{ issue_type: ["all"] }}
+              resetValues={{ issue_type: ["all"] }}
+              onFilterChange={handleFilterChange}
+              buttonId="disciplinary-records-filter-btn"
+              size="small"
+              showApplyButton={true}
+              showResetButton={true}
+            />
           </div>
         </div>
       </div>

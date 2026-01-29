@@ -40,6 +40,10 @@ export type ListOptions = {
   issue_type?: string;
 };
 
+export type FilterOptions = {
+  issue_types: Array<{ value: string; label: string }>;
+};
+
 function buildUrl(employeeId: number | string, opts: ListOptions): string {
   const base = `${process.env.NEXT_PUBLIC_API_URL}/api/employee-201/employees/${employeeId}/disciplinary-records/`;
   const params = new URLSearchParams();
@@ -54,22 +58,67 @@ function buildUrl(employeeId: number | string, opts: ListOptions): string {
   return params.toString() ? `${base}?${params}` : base;
 }
 
+function buildFilterUrl(employeeId: number | string): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/api/employee-201/employees/${employeeId}/disciplinary-records/?view_type=filters`;
+}
+
 export function useGetDisciplinaryRecords(
   employeeId?: number | string,
   initialOpts: ListOptions = {}
 ) {
   const [data, setData] = useState<DisciplinaryListMeta | undefined>(undefined);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(!!employeeId);
+  const [isFilterLoading, setIsFilterLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [opts, setOpts] = useState<ListOptions>(initialOpts);
 
   const acRef = useRef<AbortController | null>(null);
+  const filterAcRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => () => {
     mountedRef.current = false;
     acRef.current?.abort();
+    filterAcRef.current?.abort();
   }, []);
+
+  const fetchFilters = useCallback(async () => {
+    if (!employeeId) return;
+
+    filterAcRef.current?.abort();
+    const ac = new AbortController();
+    filterAcRef.current = ac;
+
+    setIsFilterLoading(true);
+
+    try {
+      const token = getCookie("token") as string | undefined;
+      const res = await fetch(buildFilterUrl(employeeId), {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
+        signal: ac.signal,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch filters (${res.status})`);
+      }
+
+      const payload = await res.json();
+      const filters = payload?.data || payload;
+
+      setFilterOptions(filters);
+    } catch (e: any) {
+      if (e?.name === "AbortError") return;
+      // Silently fail on filter fetch errors, just set empty filters
+      setFilterOptions({ issue_types: [] });
+    } finally {
+      if (mountedRef.current) setIsFilterLoading(false);
+    }
+  }, [employeeId]);
 
   const refetch = useCallback(async () => {
     if (!employeeId) return;
@@ -142,5 +191,16 @@ export function useGetDisciplinaryRecords(
     setOpts((o) => ({ ...o, page_size, current_page: 1 }));
   }, []);
 
-  return { data, isLoading, error, refetch, setPage, setPageSize, setOpts } as const;
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+    setPage,
+    setPageSize,
+    setOpts,
+    filterOptions,
+    isFilterLoading,
+    fetchFilters,
+  } as const;
 }
