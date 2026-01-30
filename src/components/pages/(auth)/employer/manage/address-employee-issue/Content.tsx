@@ -705,7 +705,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isInvestigated={item.isInvestigated}
                 setIsInvestigateModalOpen={setIsInvestigateModalOpen}
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
-                isResponded={item.is_responded === true}
                 isNTEReceived={item.isNTEReceived === true}
                 employeeIssueDetails={item}
               />
@@ -724,7 +723,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 loadingItemId={loadingItemId}
                 hasInvestigationReport={hasInvestigationReport}
                 isNTEReceived={item.isNTEReceived === true}
-                isNTEManuallyReceived={item.isNTEManuallyReceived === true}
+                isResponded={item.is_responded === true}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>

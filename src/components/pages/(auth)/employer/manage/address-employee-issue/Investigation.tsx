@@ -14,7 +14,6 @@ const Investigation = ({
   investigatedDate,
   setIsInvestigateModalOpen,
   setInvestigationReportDetailsModalOpen,
-  isResponded,
   isNTEReceived,
   employeeIssueDetails,
   userRights,
@@ -24,13 +23,12 @@ const Investigation = ({
   investigatedDate: string;
   setIsInvestigateModalOpen: Dispatch<T_InvestigationModal>;
   setInvestigationReportDetailsModalOpen: Dispatch<T_InvestigationReportDetailsModal>;
-  isResponded?: boolean;
   isNTEReceived?: boolean;
   employeeIssueDetails?: any;
   userRights?: any;
 }) => {
-  // Disable investigate button if NTE has not been received or status is not approved
-  const shouldDisableInvestigate = isNTEReceived === false || employeeIssueDetails?.status !== 'approved';
+  // Disable investigate button if NTE has not been received (either by employee response OR manual bypass) or status is not approved
+  const shouldDisableInvestigate = !isNTEReceived || employeeIssueDetails?.status !== 'approved';
   
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
