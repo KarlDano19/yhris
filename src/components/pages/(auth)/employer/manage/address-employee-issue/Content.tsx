@@ -160,10 +160,10 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
       employeeIssueItemsCopy[itemIndex].incidentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
-    if (emailType === 'decision') {
-      employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
-    }
+    // if (emailType === 'decision') {
+    //   employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
+    //   employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
+    // }
 
     // Track which item is loading
     setLoadingItemId(`${id}-${emailType}`);
@@ -207,7 +207,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['isNTEManuallyReceived'] = employeeIssue.is_nte_manually_received;
           employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
@@ -255,7 +254,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           employeeIssue.incidentDate = formatDateToLocal(employeeIssue.incident_date);
           employeeIssue['isNTESent'] = employeeIssue.is_nte_sent;
           employeeIssue['isNTEReceived'] = employeeIssue.is_nte_received;
-          employeeIssue['isNTEManuallyReceived'] = employeeIssue.is_nte_manually_received;
           employeeIssue['incidentReceivedDate'] = formatDateToLocal(employeeIssue.incident_received_date);
           employeeIssue['isInvestigated'] = employeeIssue.investigate ? true : false;
           employeeIssue['investigatedDate'] = employeeIssue.investigate
