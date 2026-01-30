@@ -23,15 +23,18 @@ const InvestigationDecisionSection = ({
       <label className='block text-sm font-medium leading-6 text-gray-900'>
         Investigation Decision
       </label>
-      <div className="mt-2 pl-2">
-        <span className="text-sm text-gray-600">
-          {displayText}
-        </span>
-        {!isOther && customDecision && customDecision !== decision && (
-          <span className="block mt-1 text-sm text-gray-500 italic">
-            {customDecision}
+      <div className="mt-2 pl-2 flex items-start gap-2">
+        <span className="text-sm text-gray-600 mt-0.5">•</span>
+        <div className="flex-1">
+          <span className="text-sm text-gray-600">
+            {displayText}
           </span>
-        )}
+          {!isOther && customDecision && customDecision !== decision && (
+            <span className="block mt-1 text-sm text-gray-500 italic">
+              {customDecision}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
