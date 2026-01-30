@@ -20,6 +20,8 @@ const SendDecision = ({
   setReleased,
   loadingItemId,
   hasInvestigationReport,
+  isNTEReceived,
+  isNTEManuallyReceived,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -32,11 +34,28 @@ const SendDecision = ({
   setReleased: any;
   loadingItemId: string | null;
   hasInvestigationReport?: boolean;
+  isNTEReceived?: boolean;
+  isNTEManuallyReceived?: boolean;
 }) => {
   // Check if this specific item is loading
   const isLoading = loadingItemId === `${id}-decision`;
-  // Disable send decision button if there is no investigation report or status is not approved
-  const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';
+
+  // Logic for Send Decision button:
+  // 1. If NTE was manually received (employer clicked "Received"): Investigation is optional - enable immediately
+  // 2. If employee responded (not manual): Investigation is required - only enable after investigation
+  let shouldDisableSendDecision = false;
+
+  if (employeeIssueDetails?.status !== 'approved') {
+    shouldDisableSendDecision = true;
+  } else if (isNTEReceived === false) {
+    shouldDisableSendDecision = true;
+  } else if (isNTEManuallyReceived === true) {
+    // Manual bypass: Investigation is optional, enable immediately
+    shouldDisableSendDecision = false;
+  } else if (hasInvestigationReport === false) {
+    // Employee responded: Investigation is required
+    shouldDisableSendDecision = true;
+  }
   
   // Format decision_received_date as MM/DD/YYYY
   const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.decision_received_date);
@@ -64,7 +83,11 @@ const SendDecision = ({
           title={
             employeeIssueDetails?.status !== 'approved'
               ? 'Decision can only be sent when status is approved'
-              : (shouldDisableSendDecision ? 'Investigation report is required before sending decision' : '')
+              : isNTEReceived === false
+              ? 'NTE must be received before sending decision'
+              : isNTEManuallyReceived === false && hasInvestigationReport === false
+              ? 'Investigation report is required before sending decision (employee has responded)'
+              : ''
           }
         >
           {isDecisionSent ? 'Sent' : 'Send'}

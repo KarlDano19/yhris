@@ -15,6 +15,7 @@ const Investigation = ({
   setIsInvestigateModalOpen,
   setInvestigationReportDetailsModalOpen,
   isResponded,
+  isNTEReceived,
   employeeIssueDetails,
   userRights,
 }: {
@@ -24,11 +25,12 @@ const Investigation = ({
   setIsInvestigateModalOpen: Dispatch<T_InvestigationModal>;
   setInvestigationReportDetailsModalOpen: Dispatch<T_InvestigationReportDetailsModal>;
   isResponded?: boolean;
+  isNTEReceived?: boolean;
   employeeIssueDetails?: any;
   userRights?: any;
 }) => {
-  // Disable investigate button if employee has not responded (is_responded: false) or status is not approved
-  const shouldDisableInvestigate = isResponded === false || employeeIssueDetails?.status !== 'approved';
+  // Disable investigate button if NTE has not been received or status is not approved
+  const shouldDisableInvestigate = isNTEReceived === false || employeeIssueDetails?.status !== 'approved';
   
   return (
     <div className='flex flex-col gap-2 items-center justify-center min-h-[80px]'>
@@ -53,7 +55,7 @@ const Investigation = ({
           title={
             employeeIssueDetails?.status !== 'approved'
               ? 'Investigation can only be done when status is approved'
-              : (shouldDisableInvestigate ? 'Employee has not responded yet' : '')
+              : (shouldDisableInvestigate ? 'NTE must be received before investigation' : '')
           }
         >
           {isInvestigated ? 'Investigated' : 'Investigate'}

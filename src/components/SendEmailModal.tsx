@@ -50,6 +50,7 @@ export interface SendEmailModalProps {
   defaultRecipients?: string[];
   showAttachment?: boolean;
   customAttachmentSection?: React.ReactNode;
+  customContentAboveAttachment?: React.ReactNode;
   onSuccess?: () => void;
   onError?: (error: any) => void;
   isLoading?: boolean;
@@ -77,6 +78,7 @@ export default function SendEmailModal({
   defaultRecipients = [],
   showAttachment = true,
   customAttachmentSection,
+  customContentAboveAttachment,
   onSuccess,
   onError,
   isLoading = false,
@@ -1015,7 +1017,14 @@ export default function SendEmailModal({
                 />
               </div>
             </div>
-            
+
+            {/* Custom content above attachment section */}
+            {customContentAboveAttachment && (
+              <div className="mt-4">
+                {customContentAboveAttachment}
+              </div>
+            )}
+
             {/* Conditional Attachment section */}
             {(showAttachment || showDragDropAttachment) && (
               <div className='sm:col-span-4 mt-4'>
