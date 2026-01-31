@@ -1,4 +1,5 @@
 import React, { Dispatch, useState, useEffect, useRef, useMemo } from 'react';
+import { Dispatch, useState, useEffect, useRef, useMemo } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -30,6 +31,7 @@ export default function CreateJobPageJobDescription({
   firstForm?: any;
 }) {
   // SSR-safe ReactQuill - memoized to prevent re-creation on every render
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
     jobDescriptionFile: false,

@@ -187,7 +187,7 @@ export default function ResetPasswordModal({
                                   />
                                   <button
                                     type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                                    className='absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center px-2 text-blue-400'
                                     onClick={() => {
                                       setShowPassword(!showPassword);
                                     }}
@@ -244,7 +244,7 @@ export default function ResetPasswordModal({
                                   />
                                   <button
                                     type='button'
-                                    className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+                                    className='absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center px-2 text-blue-400'
                                     onClick={() => {
                                       setShowConfirmPassword(!showConfirmPassword);
                                     }}

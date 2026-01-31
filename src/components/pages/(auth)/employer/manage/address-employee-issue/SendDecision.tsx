@@ -20,6 +20,8 @@ const SendDecision = ({
   setReleased,
   loadingItemId,
   hasInvestigationReport,
+  isNTEReceived,
+  isResponded,
 }: {
   id: number;
   isDecisionSent: boolean;
@@ -32,11 +34,29 @@ const SendDecision = ({
   setReleased: any;
   loadingItemId: string | null;
   hasInvestigationReport?: boolean;
+  isNTEReceived?: boolean;
+  isResponded?: boolean;
 }) => {
   // Check if this specific item is loading
   const isLoading = loadingItemId === `${id}-decision`;
-  // Disable send decision button if there is no investigation report or status is not approved
-  const shouldDisableSendDecision = hasInvestigationReport === false || employeeIssueDetails?.status !== 'approved';
+
+  // Logic for Send Decision button:
+  // 1. If NTE was manually received (is_nte_received=true but is_responded=false): Investigation is optional - enable immediately
+  // 2. If employee responded (is_nte_received=true and is_responded=true): Investigation is required - only enable after investigation
+  let shouldDisableSendDecision = false;
+
+  if (employeeIssueDetails?.status !== 'approved') {
+    shouldDisableSendDecision = true;
+  } else if (!isNTEReceived) {
+    // NTE must be received (either by employee response OR manual bypass)
+    shouldDisableSendDecision = true;
+  } else if (isNTEReceived && !isResponded) {
+    // Manual bypass (is_nte_received=true but is_responded=false): Investigation is optional, enable immediately
+    shouldDisableSendDecision = false;
+  } else if (isNTEReceived && isResponded && hasInvestigationReport === false) {
+    // Employee responded: Investigation is required
+    shouldDisableSendDecision = true;
+  }
   
   // Format decision_received_date as MM/DD/YYYY
   const formattedReceivedDate = formatDateToLocal(employeeIssueDetails?.decision_received_date);
@@ -64,7 +84,11 @@ const SendDecision = ({
           title={
             employeeIssueDetails?.status !== 'approved'
               ? 'Decision can only be sent when status is approved'
-              : (shouldDisableSendDecision ? 'Investigation report is required before sending decision' : '')
+              : !isNTEReceived
+              ? 'NTE must be received before sending decision'
+              : isResponded && hasInvestigationReport === false
+              ? 'Investigation report is required before sending decision (employee has responded)'
+              : ''
           }
         >
           {isDecisionSent ? 'Sent' : 'Send'}
@@ -79,8 +103,8 @@ const SendDecision = ({
           disabled={true}
           data-tooltip-id='decision-received-tooltip'
           data-tooltip-html={isDecisionReceived ?
-            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully' :
-            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully'}
+            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the decision' :
+            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when employee responds to the decision'}
           data-tooltip-place='bottom'
           onClick={() => setReleased(id, 'decision')}
         >
