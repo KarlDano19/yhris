@@ -50,6 +50,7 @@ export interface SendEmailModalProps {
   defaultRecipients?: string[];
   showAttachment?: boolean;
   customAttachmentSection?: React.ReactNode;
+  customContentAboveAttachment?: React.ReactNode;
   onSuccess?: () => void;
   onError?: (error: any) => void;
   isLoading?: boolean;
@@ -77,6 +78,7 @@ export default function SendEmailModal({
   defaultRecipients = [],
   showAttachment = true,
   customAttachmentSection,
+  customContentAboveAttachment,
   onSuccess,
   onError,
   isLoading = false,
@@ -1015,7 +1017,14 @@ export default function SendEmailModal({
                 />
               </div>
             </div>
-            
+
+            {/* Custom content above attachment section */}
+            {customContentAboveAttachment && (
+              <div className="mt-4">
+                {customContentAboveAttachment}
+              </div>
+            )}
+
             {/* Conditional Attachment section */}
             {(showAttachment || showDragDropAttachment) && (
               <div className='sm:col-span-4 mt-4'>
@@ -1050,7 +1059,7 @@ export default function SendEmailModal({
                             multiple={effectiveAllowMultiple}
                             className='sr-only'
                             onChange={handleAttachmentUpload}
-                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                           />
                         </label>
                         
@@ -1065,7 +1074,7 @@ export default function SendEmailModal({
                               multiple={false}
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1155,7 +1164,7 @@ export default function SendEmailModal({
                               multiple
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1192,7 +1201,7 @@ export default function SendEmailModal({
                             multiple={effectiveAllowMultiple}
                             className='sr-only'
                             onChange={handleAttachmentUpload}
-                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                            accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                           />
                         </label>
                         
@@ -1207,7 +1216,7 @@ export default function SendEmailModal({
                               multiple={false}
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}
@@ -1297,7 +1306,7 @@ export default function SendEmailModal({
                               multiple
                               className='sr-only'
                               onChange={handleAttachmentUpload}
-                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                              accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, image/jpeg, image/png'
                             />
                           </label>
                         )}

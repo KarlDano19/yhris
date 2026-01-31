@@ -94,9 +94,6 @@ const ScreeningQuestion: React.FC<ScreeningQuestionProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          {editable && (
-            <button onClick={onEdit} className="text-savoy-blue hover:underline text-sm font-medium">Edit</button>
-          )}
           <button onClick={onRemove} className="text-gray-400 hover:text-red-500 text-xl">×</button>
         </div>
       </div>
