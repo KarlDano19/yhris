@@ -124,7 +124,10 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.lastPay.bcc = data.bcc;
     }
-    if (data.attachment) {
+    // Handle multiple attachments
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      separationItemCopy.lastPay.attachments = data.attachments;
+    } else if (data.attachment) {
       separationItemCopy.lastPay.attachment = data.attachment;
     }
     separationItemCopy.isLastPayReleased = true;
@@ -139,7 +142,10 @@ export const handleEmailSending = (
     if (data.bcc) {
       separationItemCopy.quitClaim.bcc = data.bcc;
     }
-    if (data.attachment) {
+    // Handle multiple attachments
+    if (data.attachments && Array.isArray(data.attachments) && data.attachments.length > 0) {
+      separationItemCopy.quitClaim.attachments = data.attachments;
+    } else if (data.attachment) {
       separationItemCopy.quitClaim.attachment = data.attachment;
     }
     separationItemCopy.isQuitclaimSigned = true;
