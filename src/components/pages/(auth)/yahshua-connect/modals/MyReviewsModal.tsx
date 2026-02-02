@@ -3,25 +3,15 @@
 import { useState, useEffect } from 'react';
 
 import Modal from '../components/Modal';
+import Pagination from '@/components/Pagination';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetMyReviews from '../hooks/useGetMyReviews';
 
 import { formatDateToLocal } from '@/helpers/date';
+import { T_Review } from '@/types/personal-mode';
 
 import { StarIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
-
-interface Review {
-  id: number;
-  rating: number;
-  comment?: string | null;
-  review_text?: string | null; // Some APIs might return review_text instead
-  created_at: string;
-  reviewer_name: string;
-  reviewer_email: string | null;
-  reviewer_photo: string | null;
-  job_title: string | null;
-  job_category: string | null;
-}
 
 interface MyReviewsModalProps {
   isOpen: boolean;
@@ -30,12 +20,24 @@ interface MyReviewsModalProps {
 }
 
 const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) => {
-  const { data: reviewsData, isLoading } = useGetMyReviews(applicantId, isOpen);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
+
+  const { data: reviewsData, isLoading } = useGetMyReviews(
+    applicantId,
+    { currentPage, pageSize },
+    isOpen
+  );
+
+  const [reviews, setReviews] = useState<T_Review[]>([]);
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [reviewsCount, setReviewsCount] = useState<number>(0);
   const [applicantName, setApplicantName] = useState<string>('');
-  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!reviewsData) {
@@ -43,22 +45,19 @@ const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) =
       setAverageRating(null);
       setReviewsCount(0);
       setApplicantName('');
-      setExpandedReviews(new Set());
+      setPagination({ totalPages: 1, totalRecords: 0 });
       return;
     }
 
-    // Handle response structure
-    const data = reviewsData.data || reviewsData;
-    
-    if (data.reviews && Array.isArray(data.reviews)) {
-      setReviews(data.reviews);
-    } else {
-      setReviews([]);
-    }
-
-    setAverageRating(data.average_rating || null);
-    setReviewsCount(data.reviews_count || 0);
-    setApplicantName(data.applicant_name || '');
+    // Update with new paginated response structure
+    setReviews(reviewsData.records || []);
+    setAverageRating(reviewsData.average_rating || null);
+    setReviewsCount(reviewsData.reviews_count || 0);
+    setApplicantName(reviewsData.applicant_name || '');
+    setPagination({
+      totalPages: reviewsData.total_pages || 1,
+      totalRecords: reviewsData.total_records || 0,
+    });
   }, [reviewsData]);
 
   const toggleReview = (reviewId: number) => {
@@ -87,6 +86,17 @@ const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) =
     );
   };
 
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+    setExpandedReviews(new Set()); // Reset expanded reviews when page changes
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+    setExpandedReviews(new Set());
+  };
 
   return (
     <Modal
@@ -96,8 +106,8 @@ const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) =
       size="2xl"
     >
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading reviews...</div>
+        <div className="py-8">
+          <LoadingSpinner size="md" showText text="Loading reviews..." />
         </div>
       ) : reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
@@ -131,13 +141,13 @@ const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) =
           )}
 
           {/* Reviews List */}
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {reviews.map((review) => {
               const isExpanded = expandedReviews.has(review.id);
               // Check if comment exists and is not empty - handle various cases
               const commentValue = review.comment || (review as any).review_text || null;
-              const hasComment = commentValue !== null && 
-                                 commentValue !== undefined && 
+              const hasComment = commentValue !== null &&
+                                 commentValue !== undefined &&
                                  String(commentValue).trim().length > 0;
               const displayComment = hasComment ? String(commentValue).trim() : null;
 
@@ -186,6 +196,17 @@ const MyReviewsModal = ({ isOpen, onClose, applicantId }: MyReviewsModalProps) =
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {!isLoading && reviews.length > 0 && (
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
+          )}
         </div>
       )}
     </Modal>

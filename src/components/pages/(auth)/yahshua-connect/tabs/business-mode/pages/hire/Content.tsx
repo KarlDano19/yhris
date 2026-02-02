@@ -523,8 +523,8 @@ const Content = () => {
     const job = jobPostings.find((j) => j.id === jobId);
     if (!job) return;
 
-    // Find specific application by ID
-    const application = job.applications?.find((app: T_BusinessJobApplication) => app.id === applicationId);
+    // Find specific application by ID (from hired_applicants)
+    const application = job.hired_applicants?.find((app: T_BusinessJobApplication) => app.id === applicationId);
     if (!application) return;
 
     setSelectedHireForPayment({
@@ -565,8 +565,8 @@ const Content = () => {
     const job = jobPostings.find((j) => j.id === jobId);
     if (!job) return;
 
-    // Find specific application by ID
-    const application = job.applications?.find((app: T_BusinessJobApplication) => app.id === applicationId);
+    // Find specific application by ID (from hired_applicants)
+    const application = job.hired_applicants?.find((app: T_BusinessJobApplication) => app.id === applicationId);
     if (!application) return;
 
     setSelectedHireForReview({
@@ -644,30 +644,11 @@ const Content = () => {
     );
   };
 
-  // Batch filtering helper functions
-  // Get applications for current batch only
-  const getCurrentBatchApplications = (job: T_BusinessJob) => {
-    return job.applications?.filter(app =>
-      app.batch_number === job.current_batch_number
-    ) || [];
-  };
-
-  // Get applications from previous batches
-  const getPreviousBatchApplications = (job: T_BusinessJob) => {
-    const previousApps = job.applications?.filter(app =>
-      app.batch_number < job.current_batch_number
-    ) || [];
-
-    // Sort by batch number descending (most recent first)
-    return previousApps.sort((a, b) => b.batch_number - a.batch_number);
-  };
-
-  // Get accepted hires for current batch only
+  // Get accepted hires for current batch only (from API hired_applicants field)
   const getCurrentBatchHires = (job: T_BusinessJob): T_HireInfo[] => {
-    const currentApps = getCurrentBatchApplications(job);
-    const acceptedApps = currentApps.filter((app: T_BusinessJobApplication) => app.status === 'accepted');
+    const hiredApplicants = job.hired_applicants || [];
 
-    return acceptedApps.map((app: T_BusinessJobApplication) => ({
+    return hiredApplicants.map((app: T_BusinessJobApplication) => ({
       applicationId: app.id,
       applicantId: app.applicant,
       applicantName: app.applicant_name || 'Unknown',
@@ -684,19 +665,14 @@ const Content = () => {
   // Get selected job data
   const selectedJob = jobPostings.find((job) => job.id === selectedJobId);
 
-  // Get applicants for selected job (current batch only)
-  const selectedJobApplicants = selectedJob
-    ? getCurrentBatchApplications(selectedJob).map(transformApplicationToApplicant)
-    : [];
-
-  // Get selected applicant data
-  const selectedApplication = selectedJob?.applications?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
+  // Get selected applicant data (from hired_applicants only)
+  const selectedApplication = selectedJob?.hired_applicants?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
   const selectedApplicantForHire = selectedApplication ? transformApplicationToApplicant(selectedApplication) : null;
   const applicantProfileData = selectedApplication ? transformApplicationToProfile(selectedApplication) : null;
 
   // Get all accepted hires for a job (DEPRECATED - use getCurrentBatchHires)
   const getAcceptedHires = (job: T_BusinessJob): T_HireInfo[] => {
-    const acceptedApps = job.applications?.filter((app: T_BusinessJobApplication) => app.status === 'accepted') || [];
+    const acceptedApps = job.hired_applicants || [];
     return acceptedApps.map((app: T_BusinessJobApplication) => ({
       applicationId: app.id,
       applicantId: app.applicant,
@@ -786,9 +762,8 @@ const Content = () => {
             {jobPostings.map((job) => {
               const hiredApplicants = getCurrentBatchHires(job);
               const isHired = hiredApplicants.length > 0;
-              const applicantsCount = getCurrentBatchApplications(job).length;
-              const previousBatchApplicants = getPreviousBatchApplications(job);
-              const previousHiresCount = previousBatchApplicants.filter((app: T_BusinessJobApplication) => app.status === 'accepted').length;
+              const applicantsCount = job.current_batch_applications_count || 0;
+              const previousHiresCount = job.previous_batches_applications_count || 0;
 
               return (
                 <BusinessJobPostingCard
@@ -880,7 +855,8 @@ const Content = () => {
             setSelectedJobId(null);
           }}
           jobTitle={selectedJob.job_title}
-          applicants={selectedJobApplicants}
+          jobId={selectedJob.id}
+          currentBatchNumber={selectedJob.current_batch_number}
           onViewProfile={handleViewProfile}
           onHire={handleHireClick}
           onReject={handleRejectClick}
@@ -896,7 +872,7 @@ const Content = () => {
             setSelectedJobId(null);
           }}
           jobTitle={selectedJob.job_title}
-          previousBatchApplicants={getPreviousBatchApplications(selectedJob)}
+          jobId={selectedJob.id}
           currentBatchNumber={selectedJob.current_batch_number}
         />
       )}

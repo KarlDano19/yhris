@@ -3,9 +3,11 @@
 import { AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
+import { T_Training } from '@/types/personal-mode';
+
 const Content = () => {
 
-  const allTrainings = [
+  const allTrainings: T_Training[] = [
     {
       id: 1,
       title: 'Mastering Design System',

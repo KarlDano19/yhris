@@ -1,14 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../../../../../components/Modal';
+import Pagination from '@/components/Pagination';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+import { useGetBusinessJobApplications } from '../hooks/useGetBusinessJobApplications';
 import { T_BusinessJobApplication } from '@/types/business-mode';
 
 interface ViewPreviousHiresModalProps {
   isOpen: boolean;
   onClose: () => void;
   jobTitle: string;
-  previousBatchApplicants: T_BusinessJobApplication[];
+  jobId: number;
   currentBatchNumber: number;
 }
 
@@ -26,23 +30,63 @@ const ViewPreviousHiresModal = ({
   isOpen,
   onClose,
   jobTitle,
-  previousBatchApplicants,
+  jobId,
   currentBatchNumber,
 }: ViewPreviousHiresModalProps) => {
-  const [selectedBatch, setSelectedBatch] = useState<number | 'all'>('all');
+  const [selectedBatch, setSelectedBatch] = useState<number | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalRecords: 0,
+  });
 
-  // Get unique batch numbers
+  // Fetch previous batch applications
+  const { data: applicationsData, isLoading } = useGetBusinessJobApplications(
+    jobId,
+    {
+      currentPage,
+      pageSize,
+      viewType: 'previous_batches',
+      batchNumber: selectedBatch,
+      status: 'accepted', // Only show accepted/hired applicants
+    },
+    isOpen // Only fetch when modal is open
+  );
+
+  // Update pagination when data changes
+  useEffect(() => {
+    if (applicationsData) {
+      setPagination({
+        totalPages: applicationsData.total_pages,
+        totalRecords: applicationsData.total_records,
+      });
+    }
+  }, [applicationsData]);
+
+  // Get accepted applicants
+  const acceptedApplicants = applicationsData?.records || [];
+
+  // Get unique batch numbers for filter (from current data)
   const batchNumbers = Array.from(
-    new Set(previousBatchApplicants.map(app => app.batch_number))
+    new Set(acceptedApplicants.map(app => app.batch_number))
   ).sort((a, b) => b - a); // Sort descending (most recent first)
 
-  // Filter applicants by selected batch
-  const filteredApplicants = selectedBatch === 'all'
-    ? previousBatchApplicants
-    : previousBatchApplicants.filter(app => app.batch_number === selectedBatch);
+  const handleBatchChange = (value: string) => {
+    const batchValue = value === 'all' ? undefined : Number(value);
+    setSelectedBatch(batchValue);
+    setCurrentPage(1); // Reset to first page when changing batch
+  };
 
-  // Only show accepted applicants
-  const acceptedApplicants = filteredApplicants.filter(app => app.status === 'accepted');
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1); // Reset to first page when changing page size
+    setPageSize(value);
+  };
 
   return (
     <Modal
@@ -57,25 +101,25 @@ const ViewPreviousHiresModal = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-900">
-                Total Completed Batches: {currentBatchNumber - 1}
+                Total Completed Batches: {currentBatchNumber > 1 ? currentBatchNumber - 1 : 0}
               </p>
               <p className="text-sm text-gray-600">
-                Total Previous Hires: {previousBatchApplicants.filter(app => app.status === 'accepted').length}
+                Total Previous Hires: {pagination.totalRecords}
               </p>
             </div>
           </div>
         </div>
 
         {/* Batch Filter */}
-        {batchNumbers.length > 1 && (
+        {!isLoading && batchNumbers.length > 1 && (
           <div className="flex items-center gap-3">
             <label htmlFor="batch-filter" className="text-sm font-medium text-gray-700">
               Filter by Batch:
             </label>
             <select
               id="batch-filter"
-              value={selectedBatch}
-              onChange={(e) => setSelectedBatch(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+              value={selectedBatch ?? 'all'}
+              onChange={(e) => handleBatchChange(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-savoy-blue focus:ring-savoy-blue"
             >
               <option value="all">All Batches</option>
@@ -88,14 +132,24 @@ const ViewPreviousHiresModal = ({
           </div>
         )}
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="py-8">
+            <LoadingSpinner size="md" showText text="Loading previous hires..." />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && acceptedApplicants.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No previous hires found
+          </div>
+        )}
+
         {/* Previous Hires List */}
-        <div className="space-y-3 max-h-[500px] overflow-y-auto">
-          {acceptedApplicants.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No previous hires found
-            </div>
-          ) : (
-            acceptedApplicants.map((app) => {
+        {!isLoading && acceptedApplicants.length > 0 && (
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {acceptedApplicants.map((app) => {
               const initials = getInitials(app.applicant_name || 'U');
 
               return (
@@ -148,20 +202,22 @@ const ViewPreviousHiresModal = ({
                       )}
                     </div>
                   </div>
-
-                  {/* Additional Info if available */}
-                  {(app.cover_letter || app.proposal) && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <p className="text-xs text-gray-600 line-clamp-2">
-                        {app.cover_letter || app.proposal}
-                      </p>
-                    </div>
-                  )}
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && acceptedApplicants.length > 0 && (
+          <Pagination
+            pagination={pagination}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageSizeChange={pageSizeChange}
+            onPageChange={paginationChange}
+          />
+        )}
 
         {/* Footer */}
         <div className="flex justify-end pt-4 border-t border-gray-200">

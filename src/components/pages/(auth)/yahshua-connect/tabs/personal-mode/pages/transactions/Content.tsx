@@ -2,9 +2,11 @@
 
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
+import { T_PersonalTransaction } from '@/types/personal-mode';
+
 const Content = () => {
 
-  const transactions = [
+  const transactions: T_PersonalTransaction[] = [
     {
       id: 1,
       description: 'Fix Leaking Sink - Maria Santos',

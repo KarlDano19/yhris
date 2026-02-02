@@ -8,26 +8,10 @@ import CustomToast from '@/components/CustomToast';
 import useAddSavedJobs from '../pages/jobs/hooks/useAddSavedJobs';
 import useUpdateSavedJobs from '../../../hooks/useUpdateSavedJobs';
 
+import { T_JobCard } from '@/types/personal-mode';
+
 import { BookmarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
-
-interface JobCardProps {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salary: string;
-  tags: string[];
-  logo: string;
-  logoUrl?: string; // Optional company logo URL
-  saved?: boolean;
-  match?: number;
-  applied?: boolean;
-  onApply?: () => void;
-  onCardClick?: () => void;
-  isSelected?: boolean;
-}
 
 const JobCard = ({
   id,
@@ -45,7 +29,7 @@ const JobCard = ({
   onApply,
   onCardClick,
   isSelected = false,
-}: JobCardProps) => {
+}: T_JobCard) => {
   const [isSaved, setIsSaved] = useState(saved);
   const [isSaving, setIsSaving] = useState(false);
   
