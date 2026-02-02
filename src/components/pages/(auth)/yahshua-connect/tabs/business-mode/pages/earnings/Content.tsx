@@ -1,19 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+
 import TransactionDetailsModal from './TransactionDetailsModal';
 
-interface Transaction {
-  id: number;
-  description: string;
-  clientName: string;
-  amount: number;
-  date: string;
-  category: string;
-}
+import { T_Transaction } from '@/types/business-mode';
 
 const Content = () => {
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<T_Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Data
@@ -27,7 +21,7 @@ const Content = () => {
     { day: 'W4', amount: 7700 },
   ];
 
-  const recentPayments: Transaction[] = [
+  const recentPayments: T_Transaction[] = [
     {
       id: 1,
       description: 'Fix Leaking Sink',
@@ -46,7 +40,7 @@ const Content = () => {
     },
   ];
 
-  const handleTransactionClick = (transaction: Transaction) => {
+  const handleTransactionClick = (transaction: T_Transaction) => {
     setSelectedTransaction(transaction);
     setIsModalOpen(true);
   };

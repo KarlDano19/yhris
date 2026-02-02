@@ -1,12 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface HighMatchJobsFilters {
-  min_match_percentage?: number; // Minimum match percentage threshold (default: 1, set to 0 to include all jobs)
-  limit?: number; // Maximum number of jobs to return (default: 10)
-}
+import { T_HighMatchJobsFilters } from '@/types/personal-mode';
 
-async function getHighMatchJobs(filters?: HighMatchJobsFilters) {
+async function getHighMatchJobs(filters?: T_HighMatchJobsFilters) {
   try {
     const token = getCookie('token');
     if (!token) {
@@ -53,7 +50,7 @@ async function getHighMatchJobs(filters?: HighMatchJobsFilters) {
   }
 }
 
-function useGetHighMatchJobs(filters?: HighMatchJobsFilters) {
+function useGetHighMatchJobs(filters?: T_HighMatchJobsFilters) {
   const query = useQuery(
     ['highMatchJobsCache', filters?.min_match_percentage, filters?.limit],
     () => getHighMatchJobs(filters),

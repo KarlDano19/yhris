@@ -36,7 +36,10 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
     }
 
     // Handle response structure (data might be wrapped in 'data' field or at root level)
-    const applications = applicationsData.data || applicationsData;
+    const applications = Array.isArray(applicationsData)
+      ? applicationsData
+      : (applicationsData as any).data || [];
+
     if (!Array.isArray(applications)) {
       setTransformedApplications([]);
       return;

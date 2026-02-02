@@ -173,10 +173,12 @@ export type T_BusinessJob = {
   created_by_reviews_count: number;
   created_by_photo: string | null;
   applications_count: number;
+  current_batch_applications_count: number;
+  previous_batches_applications_count: number;
   average_rating: number | null;
   reviews_count: number;
   has_applied: boolean;
-  applications: T_BusinessJobApplication[];
+  hired_applicants: T_BusinessJobApplication[];
 };
 
 // Create Business Job Data
@@ -526,4 +528,104 @@ export type T_TimeRecordsResponse = {
     total_hours: number;
     total_records: number;
   };
+};
+
+// Business Job Review Types
+export type T_BusinessJobReview = {
+  id: number;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  applicant_name: string;
+  applicant_photo: string | null;
+};
+
+// Business Job Reviews Response (paginated)
+export type T_BusinessJobReviewsResponse = {
+  records: T_BusinessJobReview[];
+  total_records: number;
+  total_pages: number;
+  starting: number;
+  ending: number;
+  average_rating: number | null;
+  reviews_count: number;
+  job_title: string;
+};
+
+// Transaction Types (for Earnings)
+export type T_Transaction = {
+  id: number;
+  description: string;
+  clientName: string;
+  amount: number;
+  date: string;
+  category: string;
+};
+
+// Spending Transaction Type
+export type T_SpendingTransaction = {
+  id: number;
+  description: string;
+  providerName: string;
+  amount: number;
+  date: string;
+  category: string;
+};
+
+// Hired Applicant Type (for My Hires and Spending)
+export type T_HiredApplicant = {
+  id: number;
+  jobPostingId: number;
+  serviceName: string;
+  providerName: string;
+  providerInitials?: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  price: number;
+};
+
+// Business Job Filters (for Find Work)
+export type T_BusinessJobFilters = {
+  category?: string;
+  location?: string | string[];
+  date_from?: string;
+  date_to?: string;
+  min_budget?: number;
+  max_budget?: number;
+  is_urgent?: boolean;
+  status?: string;
+  latitude?: number;
+  longitude?: number;
+};
+
+// Search Talent Parameters
+export type T_SearchTalentParams = {
+  search?: string;
+  location?: string[];
+  gender?: string;
+  salary?: string;
+  from?: string;
+  to?: string;
+  pageSize?: number;
+};
+
+// Talent Search Result (from API)
+export type T_TalentSearchResult = {
+  id: number;
+  name: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  mobile: string;
+  address: string;
+  photo: string | null;
+  skills: string[];
+  education: string;
+  average_rating: number;
+  reviews_count: number;
+  jobs_done_count: number;
+  available_for_bookings: boolean;
+  expected_salary: number | null;
+  portfolio_url: string | null;
+  description: string | null;
+  setup_preference: string | null;
 };

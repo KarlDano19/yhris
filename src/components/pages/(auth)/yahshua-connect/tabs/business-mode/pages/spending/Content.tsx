@@ -1,27 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+
 import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
 import MyHiresModal from '../../../../modals/MyHiresModal';
 import ChatModal from '@/components/common/chat/ChatModal';
 
-interface SpendingTransaction {
-  id: number;
-  description: string;
-  providerName: string;
-  amount: number;
-  date: string;
-  category: string;
-}
-
-interface HiredApplicant {
-  id: number;
-  serviceName: string;
-  providerName: string;
-  providerInitials: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  price: number;
-}
+import { T_SpendingTransaction, T_HiredApplicant } from '@/types/business-mode';
 
 const Content = () => {
   const [isUpcomingBookingsModalOpen, setIsUpcomingBookingsModalOpen] = useState(false);
@@ -50,7 +35,7 @@ const Content = () => {
     { day: 'W4', amount: 1500 },
   ];
 
-  const recentPayments: SpendingTransaction[] = [
+  const recentPayments: T_SpendingTransaction[] = [
     {
       id: 1,
       description: 'Hired: Home Cleaning Service',
@@ -85,9 +70,10 @@ const Content = () => {
   ];
 
   // Hired Applicants
-  const hiredApplicants: HiredApplicant[] = [
+  const hiredApplicants: T_HiredApplicant[] = [
     {
       id: 1,
+      jobPostingId: 101,
       serviceName: 'Garden Landscaping',
       providerName: 'Carlos Mendez',
       providerInitials: 'CM',
@@ -96,6 +82,7 @@ const Content = () => {
     },
     {
       id: 2,
+      jobPostingId: 102,
       serviceName: 'House Cleaning',
       providerName: 'Ana Garcia',
       providerInitials: 'AG',
@@ -104,6 +91,7 @@ const Content = () => {
     },
     {
       id: 3,
+      jobPostingId: 103,
       serviceName: 'Install Ceiling Fan',
       providerName: 'Pedro Santos',
       providerInitials: 'PS',
@@ -115,6 +103,11 @@ const Content = () => {
   const handleSendPaymentProof = (hireId: number) => {
     // TODO: Implement payment proof upload
     console.log('Send payment proof for hire:', hireId);
+  };
+
+  const handleViewHire = (jobPostingId: number) => {
+    // TODO: Navigate to job posting details or open job details modal
+    console.log('View job posting:', jobPostingId);
   };
 
   // Transform activeJobs for the modal
@@ -245,6 +238,7 @@ const Content = () => {
         isOpen={isMyHiresModalOpen}
         onClose={() => setIsMyHiresModalOpen(false)}
         hires={hiredApplicants}
+        onViewHire={handleViewHire}
         onSendPaymentProof={handleSendPaymentProof}
       />
 

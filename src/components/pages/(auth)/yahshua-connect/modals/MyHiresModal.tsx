@@ -1,21 +1,13 @@
 
 import Modal from '../components/Modal';
-
-interface HiredApplicant {
-  id: number;
-  jobPostingId: number;
-  serviceName: string;
-  providerName: string;
-  providerInitials?: string;
-  status: 'in-progress' | 'completed' | 'pending';
-  price: number;
-}
+import { T_HiredApplicant } from '@/types/business-mode';
 
 interface MyHiresModalProps {
   isOpen: boolean;
   onClose: () => void;
-  hires: HiredApplicant[];
+  hires: T_HiredApplicant[];
   onViewHire: (jobPostingId: number) => void;
+  onSendPaymentProof?: (hireId: number) => void;
 }
 
 const MyHiresModal = ({
@@ -24,15 +16,6 @@ const MyHiresModal = ({
   hires,
   onViewHire,
 }: MyHiresModalProps) => {
-  // Generate initials from provider name if not provided
-  const getInitials = (name: string, initials?: string) => {
-    if (initials) return initials;
-    const names = name.split(' ');
-    if (names.length >= 2) {
-      return (names[0][0] + names[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
