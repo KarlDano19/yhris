@@ -113,7 +113,7 @@ const SignDocuments = ({
               <span className='sr-only'>Loading...</span>
               </div>
           )}
-          {!isLoading && 'Received'}
+          {!isLoading && (isDocumentsReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isDocumentsReceived ? (

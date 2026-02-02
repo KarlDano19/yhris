@@ -94,7 +94,7 @@ const Quitclaim = ({
               <span className='sr-only'>Loading...</span>
             </div>
           )}
-          {!isLoading && 'Received'}
+          {!isLoading && (isQuitclaimReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isQuitclaimReceived ? (

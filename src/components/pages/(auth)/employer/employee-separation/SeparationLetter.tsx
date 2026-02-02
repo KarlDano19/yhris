@@ -210,7 +210,7 @@ export default function SeparationLetter({
                   <span className='sr-only'>Loading...</span>
                 </div>
               )}
-              {!isLoading && 'Received'}
+              {!isLoading && (isLetterReceived ? 'Received' : 'Receive')}
             </button>
           </div>
           {isLetterReceived ? (
