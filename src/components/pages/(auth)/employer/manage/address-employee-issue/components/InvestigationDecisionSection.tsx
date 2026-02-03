@@ -14,9 +14,15 @@ const InvestigationDecisionSection = ({
   decision,
   customDecision,
 }: InvestigationDecisionSectionProps) => {
+  // Helper function to check if value is valid (not null, undefined, empty, or the string "undefined")
+  const isValidValue = (value: string | null | undefined): boolean => {
+    return !!value && value.trim() !== '' && value !== 'undefined';
+  };
+
   // If decision is "Other", display custom decision instead
   const isOther = decision?.toLowerCase().includes('other');
-  const displayText = isOther && customDecision ? customDecision : decision;
+  const validCustomDecision = isValidValue(customDecision) ? customDecision : null;
+  const displayText = isOther && validCustomDecision ? validCustomDecision : decision;
 
   return (
     <div className="border-t pt-4">
@@ -29,9 +35,9 @@ const InvestigationDecisionSection = ({
           <span className="text-sm text-gray-600">
             {displayText}
           </span>
-          {!isOther && customDecision && customDecision !== decision && (
+          {!isOther && validCustomDecision && validCustomDecision !== decision && (
             <span className="block mt-1 text-sm text-gray-500 italic">
-              {customDecision}
+              {validCustomDecision}
             </span>
           )}
         </div>
