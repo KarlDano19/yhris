@@ -574,7 +574,7 @@ export default function Employee201Content({
           philhealth: employeeDetails?.philhealth,
           emergency_contact: employeeDetails?.emergency_contact,
           emergency_contact_name: employeeDetails?.emergency_contact?.name,
-          emergency_contact_number: employeeDetails?.emergency_contact?.contact_number,
+          emergency_contact_number: employeeDetails?.emergency_contact?.phone ?? employeeDetails?.emergency_contact?.contact_number,
           gender: employeeDetails?.gender,
           birthdate: employeeDetails?.birthdate,
           system_id: employeeDetails?.system_id,
