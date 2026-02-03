@@ -106,7 +106,25 @@ export default function EditEmployeeCompensationLogModal({
   // Render value (keep existing logic from original renderAuditData)
   const renderValue = (val: any): React.ReactNode => {
     try {
-      if (val === null || val === undefined) return "N/A";
+      // Check for null, undefined, or empty values
+      if (val === null || val === undefined) {
+        return <span className="text-red-600 font-medium">N/A</span>;
+      }
+
+      // Check for empty string or whitespace-only string
+      if (typeof val === "string" && val.trim() === "") {
+        return <span className="text-red-600 font-medium">N/A</span>;
+      }
+
+      // Check for empty array
+      if (Array.isArray(val) && val.length === 0) {
+        return <span className="text-red-600 font-medium">N/A</span>;
+      }
+
+      // Check for empty object
+      if (typeof val === "object" && !Array.isArray(val) && Object.keys(val).length === 0) {
+        return <span className="text-red-600 font-medium">N/A</span>;
+      }
 
       if (typeof val === "string") {
         // Check if the string contains HTML tags
@@ -185,10 +203,34 @@ export default function EditEmployeeCompensationLogModal({
       }
 
       if (Array.isArray(val)) {
+        // Check if it's an array of objects (complex data like screening questions)
+        const isComplexArray = val.length > 0 && typeof val[0] === 'object' && val[0] !== null && !Array.isArray(val[0]);
+
+        if (isComplexArray) {
+          return (
+            <div className="space-y-3">
+              {val.map((item, idx) => (
+                <div key={idx} className="border border-gray-300 rounded-lg p-3 bg-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                      {idx + 1}
+                    </span>
+                    <span className="text-xs font-medium text-gray-500">Item {idx + 1}</span>
+                  </div>
+                  <div className="ml-8 space-y-1.5">
+                    {renderValue(item)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        // Simple array (strings, numbers, etc.)
         return (
-          <ul className="list-disc ml-4">
+          <ul className="list-disc ml-4 space-y-1">
             {val.map((item, idx) => (
-              <li key={idx}>{renderValue(item)}</li>
+              <li key={idx} className="text-sm">{renderValue(item)}</li>
             ))}
           </ul>
         );
@@ -196,13 +238,15 @@ export default function EditEmployeeCompensationLogModal({
 
       if (typeof val === "object") {
         return (
-          <div className="ml-4">
+          <div className="space-y-1.5">
             {Object.entries(val).map(([k, v]) => (
-              <div key={k}>
-                <span className="font-semibold">
-                  {k.charAt(0).toUpperCase() + k.slice(1)}:
-                </span>{" "}
-                {renderValue(v)}
+              <div key={k} className="flex">
+                <span className="font-semibold text-gray-700 min-w-[140px] flex-shrink-0">
+                  {formatFieldName(k)}:
+                </span>
+                <span className="flex-1 ml-2">
+                  {renderValue(v)}
+                </span>
               </div>
             ))}
           </div>
