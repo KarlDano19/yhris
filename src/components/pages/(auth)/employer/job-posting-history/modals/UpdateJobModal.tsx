@@ -158,19 +158,14 @@ export default function UpdateJobModal({
   }, [jobPostDataDetails]);
 
   const firstFormSubmit = (data: any) => {
-    // Ensure we're using position_id for the API call
     const formData = { ...data };
-    if (jobPostDataDetails?.position_id && !formData.position_id) {
-      formData.position_id = jobPostDataDetails.position_id;
-      formData.position = jobPostDataDetails.position_id; // For API compatibility
-    }
-    
+
     // Find the selected position and add its description to the data
     const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
     if (selectedPosition?.description) {
       formData.positionDescription = selectedPosition.description;
     }
-    
+
     setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
     setPageNumber(2);
   };
