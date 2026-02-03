@@ -1,11 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+import { InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import useGetEmailMonitoringLogDetails from '../hooks/useGetEmailMonitoringLogDetails';
 import { formatDateTimeSeparate } from '@/helpers/date';
-
-import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -146,6 +145,25 @@ export default function ViewEmailMonitoringLogDetails({
     if (typeof val === 'string') return val.split(',').map((s) => s.trim()).filter(Boolean);
     return fallback;
   };
+  const isEmailString = (s: any) => {
+    if (!s || typeof s !== 'string') return false;
+    return /\S+@\S+\.\S+/.test(s);
+  };
+
+  const displayUserName = (() => {
+    const userVal = logDetails?.user;
+    const emailVal = logDetails?.email;
+    if (userVal && !isEmailString(userVal)) return userVal;
+    if (emailVal) return emailVal;
+    return userVal ?? 'N/A';
+  })();
+
+  const displayUserEmail = (() => {
+    const emailVal = logDetails?.email;
+    // Show email only if it's different from displayed name
+    if (emailVal && emailVal !== displayUserName) return emailVal;
+    return '';
+  })();
 
   return (
     <Transition.Root show={isOpen.open} as={Fragment}>
@@ -173,102 +191,144 @@ export default function ViewEmailMonitoringLogDetails({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
-                <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Email Log</h3>
-                  <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-5xl'>
+                {/* Header */}
+                <div className='flex bg-savoy-blue p-4 items-center'>
+                  <h3 className='flex-1 text-white text-lg font-semibold'>
+                    Email Log: #{logDetails.id ?? ''}
+                  </h3>
+                  <XMarkIcon
+                    className='w-6 h-6 text-white cursor-pointer hover:text-gray-200'
+                    onClick={() => customCloseModal()}
+                  />
                 </div>
 
-                <div className='px-6 pt-5 pb-6'>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <div className='space-y-3'>
-                      <div>
-                        <h4 className='text-sm text-gray-500'>User</h4>
-                        <div className='text-sm font-medium'>{logDetails.user ?? 'N/A'}</div>
+                {/* Log Information Section */}
+                <div className='px-6 py-4 bg-gray-50'>
+                  <div className='flex items-center gap-2 mb-4'>
+                    <InformationCircleIcon className='w-5 h-5 text-blue-500' />
+                    <h3 className='text-sm font-semibold text-gray-700 uppercase tracking-wide'>
+                      Log Information
+                    </h3>
+                  </div>
+
+                  <div className='grid grid-cols-4 gap-4'>
+                    <div>
+                      <label className='text-xs text-gray-500 uppercase'>User</label>
+                    <div className='mt-1'>
+                      <div className='text-sm font-medium text-gray-900'>
+                        {displayUserName}
                       </div>
-                      <div>
-                        <h4 className='text-sm text-gray-500'>Date</h4>
-                        <div className='text-sm font-medium'>{logDetails.created_at ? formatDateTime(logDetails.created_at).formattedDate + ' ' + formatDateTime(logDetails.created_at).formattedTime : 'N/A'}</div>
-                      </div>                      
-                      <div>
-                        <h4 className='text-sm text-gray-500'>Module</h4>
-                        <div className='text-sm font-medium'>{logDetails.model_name ?? 'N/A'}</div>
-                      </div>
-                      <div>
-                        <h4 className='text-sm text-gray-500'>Activity ID</h4>
-                        <div className='text-sm font-medium'>{logDetails.id ?? 'N/A'}</div>
-                      </div>
+                      {displayUserEmail ? (
+                        <div className='text-xs text-gray-500'>
+                          {displayUserEmail}
+                        </div>
+                      ) : null}
+                    </div>
                     </div>
 
-                    <div className='space-y-3'>
-                      <h4 className='text-sm text-gray-500'>Email Details</h4>
-                      <div className='border border-gray-200 rounded-md p-3 bg-gray-50'>
-                        <div className='text-sm'>
-                          {/*
-                          Subject / Template removed for privacy.
-                          <div className='mb-2'>
-                            <span className='font-semibold'>Subject / Template: </span>
-                            <span>{emailRecord?.template ?? 'N/A'}</span>
-                          </div>
-                          */}
-                          <div className='mb-2'>
-                            <span className='font-semibold'>To: </span>
-                            <div className='mt-2 flex flex-wrap gap-2'>
-                              {toArray(emailRecord?.to, logDetails.email ? [logDetails.email] : []).map((addr: any) => (
-                                <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
-                                  {addr}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className='mb-2'>
-                            <span className='font-semibold'>Cc: </span>
-                            <div className='mt-2 flex flex-wrap gap-2'>
-                              {toArray(emailRecord?.cc, []).map((addr: any) => (
-                                <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
-                                  {addr}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className='mb-2'>
-                            <span className='font-semibold'>Bcc: </span>
-                            <div className='mt-2 flex flex-wrap gap-2'>
-                              {toArray(emailRecord?.bcc, []).map((addr: any) => (
-                                <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
-                                  {addr}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className='mb-2'>
-                            <span className='font-semibold'>Status: </span>
-                            <span className={isSuccessStatus ? 'text-green-500' : 'text-red-500'}>
-                              {displayStatus}
-                            </span>
-                          </div>
-                          {emailRecord?.scheduled_date && (
-                            <div className='mb-2'>
-                              <span className='font-semibold'>Scheduled: </span>
-                              <span>{new Date(emailRecord.scheduled_date).toLocaleString()}</span>
-                            </div>
-                          )}
+                    <div>
+                      <label className='text-xs text-gray-500 uppercase'>Date & Time</label>
+                      <div className='mt-1'>
+                        <div className='text-sm font-medium text-gray-900'>
+                          {logDetails.created_at ? formatDateTime(logDetails.created_at).formattedDate : 'N/A'}
+                        </div>
+                        <div className='text-xs text-gray-500'>
+                          {logDetails.created_at ? formatDateTime(logDetails.created_at).formattedTime : ''}
                         </div>
                       </div>
                     </div>
-                    {/* Body content removed for privacy */}
+
+                    <div>
+                      <label className='text-xs text-gray-500 uppercase'>Module</label>
+                      <div className='text-sm font-medium text-gray-900 mt-1'>
+                        {logDetails.model_name ?? 'N/A'}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className='text-xs text-gray-500 uppercase'>Activity ID</label>
+                      <div className='text-sm font-medium text-gray-900 mt-1'>
+                        {logDetails.id ?? 'N/A'}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <hr />
-                <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse px-4'>
-                  <button
-                    type='button'
-                    className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                    onClick={() => customCloseModal()}
-                    ref={cancelButtonRef}
-                  >
-                    Close
-                  </button>
+
+                {/* Email Details Section (single column, no previous/new comparison) */}
+                <div className='px-6 py-4'>
+                  <div className='flex items-center gap-2 mb-4'>
+                    <InformationCircleIcon className='w-5 h-5 text-blue-500' />
+                    <h3 className='text-sm font-semibold text-gray-700 uppercase tracking-wide'>
+                      Email Details
+                    </h3>
+                  </div>
+
+                  <div className='border border-gray-200 rounded-lg p-4 bg-gray-50'>
+                    <div className='space-y-3'>
+                      <div>
+                        <label className='text-xs text-gray-500 uppercase'>To</label>
+                        <div className='mt-2 flex flex-wrap gap-2'>
+                          {toArray(emailRecord?.to, logDetails.email ? [logDetails.email] : []).map((addr: any) => (
+                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                              {addr}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className='text-xs text-gray-500 uppercase'>Cc</label>
+                        <div className='mt-2 flex flex-wrap gap-2'>
+                          {toArray(emailRecord?.cc, []).map((addr: any) => (
+                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                              {addr}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className='text-xs text-gray-500 uppercase'>Bcc</label>
+                        <div className='mt-2 flex flex-wrap gap-2'>
+                          {toArray(emailRecord?.bcc, []).map((addr: any) => (
+                            <div key={addr} className='bg-[#ACB9CB] rounded-md py-0 px-4 text-sm'>
+                              {addr}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className='text-xs text-gray-500 uppercase'>Status</label>
+                        <div className={isSuccessStatus ? 'text-green-500' : 'text-red-500'}>
+                          {displayStatus}
+                        </div>
+                      </div>
+
+                      {emailRecord?.scheduled_date && (
+                        <div>
+                          <label className='text-xs text-gray-500 uppercase'>Scheduled</label>
+                          <div className='mt-1 text-sm'>{new Date(emailRecord.scheduled_date).toLocaleString()}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className='border-t border-gray-200 px-6 py-4 mt-2'>
+                  <div className='flex justify-end'>
+                    <div className='flex gap-3'>
+                      <button
+                        onClick={customCloseModal}
+                        className='inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-blue-700'
+                        ref={cancelButtonRef}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
