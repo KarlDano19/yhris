@@ -110,7 +110,8 @@ export default function InvestigationModal({
       employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing = data.isAttendHearing;
       employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation = data.resultOfInvestigation;
       employeeIssueItemsCopy[itemIndex].investigateForm.decision = data.decision;
-      employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
+      // Only set 'other' if it has a value (when decision is "Other...")
+      employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other || null;
       const attachments = toSaveData?.attachments;
       employeeIssueItemsCopy[itemIndex].investigateForm.attachments = attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
