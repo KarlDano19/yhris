@@ -4,6 +4,15 @@ import { getCookie } from 'cookies-next';
 async function getAuditLogDetails(audit_log_id: number | null) {
     try {
         const token = getCookie('token');
+
+        if (!audit_log_id) {
+            return {};
+        }
+
+        if (!token) {
+            return {};
+        }
+
         const config = {
             method: 'GET',
             headers: {
@@ -11,14 +20,18 @@ async function getAuditLogDetails(audit_log_id: number | null) {
                 Authorization: `Token ${token}`,
             },
         };
-        if (token) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/audit-logs/${audit_log_id}/`, config);
-            if (!res.ok) {
-                throw res.json();
-            }
-            return res.json();
+
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/audit-logs/${audit_log_id}/`;
+
+        const res = await fetch(url, config);
+
+        if (!res.ok) {
+            throw await res.json();
         }
-        return {};
+
+        const responseData = await res.json();
+
+        return responseData.data || responseData;
     } catch (err: any) {
         let errStringify = await err;
         if (Object.hasOwn(errStringify, 'response')) {
@@ -30,9 +43,13 @@ async function getAuditLogDetails(audit_log_id: number | null) {
 
 function useGetAuditLogDetails(audit_log_id: number | null) {
     const query = useQuery(
-        ['auditLogDetailsCache'],
+        ['auditLogDetailsCache', audit_log_id],
         () => getAuditLogDetails(audit_log_id),
-        { enabled: false, refetchOnWindowFocus: false }
+        {
+            enabled: false,
+            refetchOnWindowFocus: false,
+            retry: false
+        }
     );
     return query;
 }

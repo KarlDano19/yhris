@@ -99,6 +99,14 @@ export default function SeparationLetter({
       setIsCreateLetterModalOpen(true);
     }
   };
+ 
+  // Determine send button disabled state and title
+  const sendDisabled = isLoading || isLetterReceived;
+  const sendTitle = isLetterReceived
+    ? 'Letter already received'
+    : (letterAttachment
+        ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
+        : 'Click to Generate & Send Letter');
 
   return (
     <>
@@ -187,13 +195,11 @@ export default function SeparationLetter({
                 : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
               'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
             )}
-            disabled={isLoading}
+            disabled={sendDisabled}
             onClick={handleSendClick}
-            title={hasAttachment
-              ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
-              : 'Click to Generate & Send Letter'}
+            title={sendTitle}
           >
-            {isLetterSent ? 'Resent' : 'Send'}
+            {isLetterSent ? 'Resend' : 'Send'}
           </button>
         </div>
         <div className='flex flex-col'>
@@ -232,7 +238,7 @@ export default function SeparationLetter({
                   <span className='sr-only'>Loading...</span>
                 </div>
               )}
-              {!isLoading && 'Received'}
+              {!isLoading && (isLetterReceived ? 'Received' : 'Receive')}
             </button>
           </div>
           {isLetterReceived ? (
@@ -268,7 +274,6 @@ export default function SeparationLetter({
               <p className='ml-2 text-xs'>{letterReceivedDate}</p>
             </div>
           ) : null}
-      <Tooltip id='letter-attachment-tooltip' />
         </div>
       </div>
       <Tooltip id='letter-received-tooltip' />
