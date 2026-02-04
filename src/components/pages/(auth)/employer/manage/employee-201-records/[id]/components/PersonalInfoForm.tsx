@@ -47,7 +47,7 @@ export default function PersonalInfoForm({
   // emergency contact
   const [ecName,     setEcName]     = useState(s(emp?.emergency_contact?.name));
   const [ecRelation, setEcRelation] = useState(s(emp?.emergency_contact?.relation));
-  const [ecContact,  setEcContact]  = useState(s(emp?.emergency_contact?.contact_number));
+  const [ecContact,  setEcContact]  = useState(s(emp?.emergency_contact?.phone ?? emp?.emergency_contact?.contact_number));
   const [ecAddress,  setEcAddress]  = useState(s(emp?.emergency_contact?.address));
 
   // error bag
@@ -102,27 +102,27 @@ export default function PersonalInfoForm({
   };
 
   const validateEmergency = {
-    name:           (v: string) => (isEmpty(v) ? "Emergency Contact Name is missing." : null),
-    relation:       (_: string) => null,
-    contact_number: (v: string) => {
+    name:     (v: string) => (isEmpty(v) ? "Emergency Contact Name is missing." : null),
+    relation: (_: string) => null,
+    phone:    (v: string) => {
       if (isEmpty(v)) return "Emergency Contact Number is missing.";
       if (!/^\d+$/.test(v)) return "Emergency Contact Number must be digits only.";
       if (v.length !== 11) return "Emergency Contact Number must be exactly 11 digits.";
       if (!v.startsWith("09")) return "Emergency Contact Number must start with '09'.";
       return null;
     },
-    address:        (_: string) => null,
+    address:  (_: string) => null,
   };
 
   /* ---------- emit whole emergency_contact on any change ---------- */
   const emitEmergency = (overrides?: Partial<{
-    name: string; relation: string; contact_number: string; address: string;
+    name: string; relation: string; phone: string; address: string;
   }>) => {
     const ec = {
-      name:           overrides?.name ?? ecName,
-      relation:       overrides?.relation ?? ecRelation,
-      contact_number: overrides?.contact_number ?? ecContact,
-      address:        overrides?.address ?? ecAddress,
+      name:     overrides?.name ?? ecName,
+      relation: overrides?.relation ?? ecRelation,
+      phone:    overrides?.phone ?? ecContact,
+      address:  overrides?.address ?? ecAddress,
     };
     emit("emergency_contact", ec);
   };
@@ -140,7 +140,7 @@ export default function PersonalInfoForm({
 
     "emergency_contact.name": validateEmergency.name(ecName),
     "emergency_contact.relation": validateEmergency.relation(ecRelation),
-    "emergency_contact.contact_number": validateEmergency.contact_number(ecContact),
+    "emergency_contact.phone": validateEmergency.phone(ecContact),
     "emergency_contact.address": validateEmergency.address(ecAddress),
   });
 
@@ -392,10 +392,10 @@ export default function PersonalInfoForm({
             onChange={(e) => {
               const digits = e.target.value.replace(/\D/g, "");
               setEcContact(digits);
-              emitEmergency({ contact_number: digits });
-              setErr("emergency_contact.contact_number", validateEmergency.contact_number(digits));
+              emitEmergency({ phone: digits });
+              setErr("emergency_contact.phone", validateEmergency.phone(digits));
             }}
-            error={showErr("emergency_contact.contact_number")}
+            error={showErr("emergency_contact.phone")}
             disabled={!editing}
             hint="Digits only (11 digits, starts with '09')"
             required
