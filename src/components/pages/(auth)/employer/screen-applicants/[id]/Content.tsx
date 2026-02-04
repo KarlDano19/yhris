@@ -392,8 +392,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             
             // Create dynamic success message based on the action performed
             let successMessage = 'Successfully updated the checklist.';
-            
-            if (data.status === 'hired') {
+
+            // Check if this is only a job posting deactivation without status change
+            if (data.deactivate_job_posting && data.status === 'ongoing') {
+              successMessage = 'Job posting deactivated.';
+            } else if (data.status === 'passed' && data.new_required_slot) {
+              // Hiring in final stage with slot increase
+              successMessage = 'Successfully hired the applicant! Required slot increased.';
+            } else if (data.status === 'hired') {
               successMessage = 'Successfully hired the applicant!';
             } else if (data.status === 'rejected') {
               successMessage = 'Successfully rejected the applicant.';
@@ -404,12 +410,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             } else if (data.status === 'passed') {
               successMessage = 'Successfully moved applicant to next stage.';
             }
-            
-            // Add additional context for special actions
-            if (data.new_required_slot) {
-              successMessage += ' Required slot increased.';
-            }
-            if (data.deactivate_job_posting) {
+
+            // Add additional context for special actions (only if not already handled above)
+            if (data.deactivate_job_posting && data.status !== 'ongoing') {
               successMessage += ' Job posting deactivated.';
             }
             

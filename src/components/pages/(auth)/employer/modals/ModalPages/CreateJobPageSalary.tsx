@@ -33,6 +33,8 @@ export default function CreateJobPageSalary({
     benefits: false,
     range: false,
     amount: false,
+    salaryType: false,
+    rate: false,
   });
   const [isOtherBenefitOpen, setIsOtherBenefitOpen] = useState(false);
   const SalarTypeValue = watch('salary.salaryType');
@@ -55,6 +57,24 @@ export default function CreateJobPageSalary({
     'Meal Allowance',
   ];
 
+  // Initialize benefits from form on mount and when returning to this page
+  useEffect(() => {
+    const existingBenefits = getValues('benefits');
+    if (existingBenefits && existingBenefits.length > 0) {
+      setSelectedBenefitOptions(existingBenefits);
+    }
+  }, []);
+
+  // Update benefits when pageNumber changes to 3
+  useEffect(() => {
+    if (pageNumber === 3) {
+      const existingBenefits = getValues('benefits');
+      if (existingBenefits && existingBenefits.length > 0) {
+        setSelectedBenefitOptions(existingBenefits);
+      }
+    }
+  }, [pageNumber, getValues]);
+
   //combining the selectedBenefits and otherBenefits
   useEffect(() => {
     // check if the isOtherBenfitOpen is true
@@ -67,12 +87,6 @@ export default function CreateJobPageSalary({
     setValue('benefits', concatenatedValue);
   }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue]);
 
-  useEffect(() => {
-    if (pageNumber === 3) {
-      setSelectedBenefitOptions(getValues('benefits') || []);
-    }
-  }, [pageNumber]);
-
   // Convert string to array of string in other benefits
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const stringData = event.target.value;
@@ -81,7 +95,7 @@ export default function CreateJobPageSalary({
   };
 
   return (
-    <div onClick={() => setManualInputFocus({ benefits: false, range: false, amount: false })}>
+    <div onClick={() => setManualInputFocus({ benefits: false, range: false, amount: false, salaryType: false, rate: false })}>
       <div className='px-4 pb-6'>
         {/* start */}
         <div className='sm:col-span-4 mt-4'>
@@ -93,15 +107,20 @@ export default function CreateJobPageSalary({
             <select
               id='salary'
               {...register('salary.salaryType', { required: true })}
-              className='appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+              className={`appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 outline-none ${
+                manualInputFocus.salaryType ? 'ring-2 ring-blue-700 focus:ring-blue-700' : 'ring-gray-300 focus:ring-2 focus:ring-blue-500'
+              }`}
               onClick={() =>
                 setManualInputFocus({
                   benefits: false,
                   range: false,
                   amount: false,
+                  salaryType: false,
+                  rate: false,
                 })
               }
             >
+              <option value=''>Select salary type...</option>
               <option>Range</option>
               <option>Start Amount</option>
               <option>Exact Amount</option>
@@ -115,7 +134,7 @@ export default function CreateJobPageSalary({
         {/* start */}
 
         <div className={`flex items-center gap-3 mt-4`}>
-          {SalarTypeValue == 'Range' ? (
+          {SalarTypeValue && SalarTypeValue == 'Range' ? (
             <>
               <div className='relative w-3/4'>
                 <label htmlFor='minimum' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -137,6 +156,8 @@ export default function CreateJobPageSalary({
                         benefits: false,
                         range: false,
                         amount: false,
+                        salaryType: false,
+                        rate: false,
                       })
                     }
                   />
@@ -166,6 +187,8 @@ export default function CreateJobPageSalary({
                         benefits: false,
                         range: false,
                         amount: false,
+                        salaryType: false,
+                        rate: false,
                       })
                     }
                   />
@@ -175,7 +198,7 @@ export default function CreateJobPageSalary({
                 </div>
               </div>
             </>
-          ) : (
+          ) : SalarTypeValue && SalarTypeValue !== '' ? (
             <div className='w-full'>
               <label htmlFor='salaryValue' className='block text-sm font-medium leading-6 text-gray-900'>
                 {SalarTypeValue}
@@ -204,7 +227,7 @@ export default function CreateJobPageSalary({
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Rate */}
           <div className='w-full'>
@@ -216,15 +239,20 @@ export default function CreateJobPageSalary({
               <select
                 id='salary'
                 {...register('rate', { required: true })}
-                className='appearance-none block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                className={`appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 sm:text-sm sm:leading-6 outline-none h-[38px] ${
+                  manualInputFocus.rate ? 'ring-2 ring-blue-700 focus:ring-blue-700' : 'ring-gray-300 focus:ring-2 focus:ring-blue-500'
+                }`}
                 onClick={() =>
                   setManualInputFocus({
                     benefits: false,
                     range: false,
                     amount: false,
+                    salaryType: false,
+                    rate: false,
                   })
                 }
               >
+                <option value=''>Select rate...</option>
                 <option>Monthly</option>
                 <option>Bi-monthly</option>
                 <option>Weekly</option>
@@ -270,6 +298,8 @@ export default function CreateJobPageSalary({
                       benefits: false,
                       range: false,
                       amount: false,
+                      salaryType: false,
+                      rate: false,
                     });
                     setSelectedBenefitOptions((prevOptions) => {
                       if (prevOptions.includes(benefit)) {
@@ -299,6 +329,8 @@ export default function CreateJobPageSalary({
                   benefits: false,
                   range: false,
                   amount: false,
+                  salaryType: false,
+                  rate: false,
                 });
               }}
             >
@@ -365,6 +397,8 @@ export default function CreateJobPageSalary({
               range: salaryTypeValue === 'Range' && !salaryRangeMinValue && !salaryRangeMaxValue ? true : false,
               amount:
                 salaryTypeValue !== 'Range' && ((typeof salaryValueValue !== 'number' && salaryValueValue.trim() === '-') || !salaryValueValue) ? true : false,
+              salaryType: !salaryType,
+              rate: !rate,
             });
             if (salaryTypeValue === 'Range') {
               if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {

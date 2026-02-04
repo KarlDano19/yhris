@@ -17,6 +17,7 @@ export default function CreateJobPageJobType({
   hasSalaryRange,
   secondFormSubmit,
   hiredCount = 0, // Add hired count for validation
+  thirdFormGetValues,
 }: {
   control: any;
   register: any;
@@ -28,6 +29,7 @@ export default function CreateJobPageJobType({
   hasSalaryRange?: boolean;
   secondFormSubmit?: () => void;
   hiredCount?: number; // Add hired count prop
+  thirdFormGetValues?: any;
 }) {
   const [otherJobType, setOtherJobType] = useState(false);
   const [otherSchedule, setOtherSchedule] = useState(false);
@@ -100,7 +102,16 @@ export default function CreateJobPageJobType({
     const results = [!!hireDate, !!jobType, !!workSetup, !!schedule];
     const incomplete = results.some((item: boolean) => !item);
     if (!incomplete) {
-      if (!hasSalaryRange) {
+      // Check if salary data already exists in the third form
+      let hasSalaryData = false;
+      if (thirdFormGetValues) {
+        const salaryData = thirdFormGetValues('salary');
+        const rateData = thirdFormGetValues('rate');
+        const benefitsData = thirdFormGetValues('benefits');
+        hasSalaryData = salaryData?.salaryType && rateData && benefitsData && benefitsData.length > 0;
+      }
+
+      if (!hasSalaryRange && !hasSalaryData) {
         setIsSalaryRangeModalOpen(true);
       } else {
         setPageNumber(3);

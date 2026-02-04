@@ -219,6 +219,9 @@ export default function CreateJobModal({
                       setValue={secondForm.setValue}
                       setPageNumber={setPageNumber}
                       getValues={secondForm.getValues}
+                      hasSalaryRange={isRangeBenefitsAdded}
+                      secondFormSubmit={secondFormSubmit}
+                      thirdFormGetValues={thirdForm.getValues}
                     />
                   </div>
                   <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
