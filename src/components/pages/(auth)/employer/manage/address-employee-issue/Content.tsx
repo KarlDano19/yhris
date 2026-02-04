@@ -27,6 +27,7 @@ import UpdateStatusModal from './modals/UpdateStatusModal';
 import InvestigationReportDetailsModal from './modals/InvestigationReportDetailsModal';
 import SendEmailModal from '@/components/SendEmailModal';
 import NTEAttachmentSection from './components/NTEAttachmentSection';
+import InvestigationDecisionSection from './components/InvestigationDecisionSection';
 import { useDeleteNTEAttachment } from './hooks/useDeleteNTEAttachment';
 import useGetEmployeeIssueDetails from './hooks/useGetEmployeeIssueDetails';
 import SendNTE from './SendNTE';
@@ -153,25 +154,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const itemIndex = employeeIssueItems.findIndex((item: any) => item.id === id);
     const employeeIssueItemsCopy = JSON.parse(JSON.stringify(employeeIssueItems));
     const currentDate = new Date();
-    employeeIssueItemsCopy[itemIndex].id = id;
-    employeeIssueItemsCopy[itemIndex].actionType = 'received';
-    employeeIssueItemsCopy[itemIndex].emailType = emailType;
-    employeeIssueItemsCopy[itemIndex].dateReceived = currentDate;
+
+    // Update local state for immediate UI feedback
     if (emailType === 'nte') {
       employeeIssueItemsCopy[itemIndex].isNTEReceived = true;
       employeeIssueItemsCopy[itemIndex].incidentReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
-    if (emailType === 'decision') {
-      employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
-      employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
-    }
+    // if (emailType === 'decision') {
+    //   employeeIssueItemsCopy[itemIndex].isDecisionReceived = true;
+    //   employeeIssueItemsCopy[itemIndex].decisionReceivedDate = formatDateToLocal(currentDate.toISOString());
+    // }
+
     // Track which item is loading
     setLoadingItemId(`${id}-${emailType}`);
+
+    // Create a clean payload with ONLY the fields we need to send
+    const payload = {
+      id: id,
+      actionType: 'received',
+      emailType: emailType,
+      dateReceived: currentDate,
+    };
+
     const callbackReq = {
       onSuccess: (data: any) => {
         setLoadingItemId(null);
         setEmployeeIssueItems([...employeeIssueItemsCopy]);
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        if (refetch) {
+          refetch();
+        }
       },
       onError: (err: any) => {
         setLoadingItemId(null);
@@ -180,7 +192,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         });
       },
     };
-    mutate(employeeIssueItemsCopy[itemIndex], callbackReq);
+    mutate(payload, callbackReq);
   };
 
   useEffect(() => {
@@ -691,7 +703,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 isInvestigated={item.isInvestigated}
                 setIsInvestigateModalOpen={setIsInvestigateModalOpen}
                 setInvestigationReportDetailsModalOpen={setInvestigationReportDetailsModalOpen}
-                isResponded={item.is_responded === true}
+                isNTEReceived={item.isNTEReceived === true}
                 employeeIssueDetails={item}
               />
             </td>
@@ -708,6 +720,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 setReleased={setReleased}
                 loadingItemId={loadingItemId}
                 hasInvestigationReport={hasInvestigationReport}
+                isNTEReceived={item.isNTEReceived === true}
+                isResponded={item.is_responded === true}
               />
             </td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -1065,6 +1079,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onSubmit={handleDecisionSubmit}
           defaultRecipients={decisionEmployeeIssueDetails?.email ? [decisionEmployeeIssueDetails.email] : []}
           showAttachment={true}
+          customContentAboveAttachment={
+            decisionEmployeeIssueDetails?.investigation_decision ? (
+              <InvestigationDecisionSection
+                decision={decisionEmployeeIssueDetails?.investigation_decision || null}
+                customDecision={decisionEmployeeIssueDetails?.investigation_custom_decision || null}
+              />
+            ) : undefined
+          }
           customAttachmentSection={
             <NTEAttachmentSection
               pdfAttachment={decisionEmployeeIssueDetails?.nte_attachment || null}

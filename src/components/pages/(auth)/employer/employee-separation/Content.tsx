@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 
 import Link from 'next/link';
 
@@ -469,6 +469,65 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   }, [dataSeparation, pageSize]);
 
+  // Memoize selected letter item and prePopulatedData to avoid passing
+  // a new object reference on each parent re-render (prevents modal from
+  // resetting when parent re-renders, e.g., on scroll).
+  const selectedLetter = useMemo(() => {
+    return isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id) : null;
+  }, [separationItems, isLetterModalOpen?.id]);
+
+  const memoPrePopulatedData = useMemo(() => {
+    if (!isLetterModalOpen) return undefined;
+    const name = selectedLetter?.name || 'Employee';
+    // Prefer saved separation_subject/message/to if present
+    const subject = selectedLetter?.separation_subject && selectedLetter.separation_subject.trim() !== ''
+      ? selectedLetter.separation_subject
+      : `Letter of ${isLetterModalOpen.type} - ${name}`;
+    const message = selectedLetter?.separation_message && selectedLetter.separation_message.trim() !== ''
+      ? selectedLetter.separation_message
+      : `<p>Dear ${name},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`;
+    // separation_to may be stored as JSON string or plain email
+    let toEmails: string[] = [];
+    if (selectedLetter?.separation_to) {
+      try {
+        const parsed = JSON.parse(selectedLetter.separation_to);
+        toEmails = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        toEmails = selectedLetter.separation_to ? [selectedLetter.separation_to] : [];
+      }
+    } else {
+      toEmails = selectedLetter?.email ? [selectedLetter.email] : [];
+    }
+
+    return {
+      subject,
+      message,
+      to: toEmails,
+      cc: selectedLetter?.separation_cc ? (() => {
+        try { const p = JSON.parse(selectedLetter.separation_cc); return Array.isArray(p) ? p : [p]; } catch { return [selectedLetter.separation_cc]; }
+      })() : [],
+      bcc: selectedLetter?.separation_bcc ? (() => {
+        try { const p = JSON.parse(selectedLetter.separation_bcc); return Array.isArray(p) ? p : [p]; } catch { return [selectedLetter.separation_bcc]; }
+      })() : []
+    };
+  }, [isLetterModalOpen, selectedLetter]);
+
+  const memoDefaultRecipients = useMemo(() => {
+    if (!isLetterModalOpen?.id) return [];
+    const item = separationItems.find((item: any) => item.id === isLetterModalOpen.id);
+    if (!item) return [];
+    // Prefer saved separation_to if present
+    if (item.separation_to) {
+      try {
+        const parsed = JSON.parse(item.separation_to);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        return item.separation_to ? [item.separation_to] : (item.email ? [item.email] : []);
+      }
+    }
+    return item.email ? [item.email] : [];
+  }, [separationItems, isLetterModalOpen?.id]);
+
   // Update select all state when separations change
   useEffect(() => {
     if (separationItems) {
@@ -873,13 +932,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           allowMultipleAttachments={true}
           submitButtonText="Send Letter"
           isLoading={isLoading}
-          prePopulatedData={{
-            subject: `Letter of ${isLetterModalOpen.type} - ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'}`,
-            message: `<p>Dear ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`,
-            to: isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : [],
-            cc: [],
-            bcc: []
-          }}
+          prePopulatedData={memoPrePopulatedData}
         />
       )}
       {isDocumentModalOpen && (

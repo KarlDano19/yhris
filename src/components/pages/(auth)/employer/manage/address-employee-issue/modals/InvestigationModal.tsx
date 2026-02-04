@@ -42,6 +42,9 @@ export default function InvestigationModal({
 
   const cancelButtonRef = useRef(null);
 
+  // Watch the decision field to conditionally show the custom decision input
+  const selectedDecision = watch('decision');
+
   // Function to check if there are unsaved changes
   const hasUnsavedChanges = () => {
     const formData = watch();
@@ -107,7 +110,8 @@ export default function InvestigationModal({
       employeeIssueItemsCopy[itemIndex].investigateForm.isAttendHearing = data.isAttendHearing;
       employeeIssueItemsCopy[itemIndex].investigateForm.resultOfInvestigation = data.resultOfInvestigation;
       employeeIssueItemsCopy[itemIndex].investigateForm.decision = data.decision;
-      employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other;
+      // Only set 'other' if it has a value (when decision is "Other...")
+      employeeIssueItemsCopy[itemIndex].investigateForm.other = data.other || null;
       const attachments = toSaveData?.attachments;
       employeeIssueItemsCopy[itemIndex].investigateForm.attachments = attachments;
       employeeIssueItemsCopy[itemIndex].isInvestigated = true;
@@ -359,19 +363,22 @@ export default function InvestigationModal({
                           </div>
                         </div>
                       </div>
-                      <div className='sm:col-span-4 mt-4'>
-                        <label htmlFor='other' className='block text-sm font-medium leading-6 text-gray-900'>
-                          If you selected other, please specify the decision.
-                        </label>
-                        <div className='mt-2'>
-                          <input
-                            id='other'
-                            {...register('other', { required: false })}
-                            type='name'
-                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                          />
+                      {selectedDecision === 'Other...' && (
+                        <div className='sm:col-span-4 mt-4'>
+                          <label htmlFor='other' className='block text-sm font-medium leading-6 text-gray-900'>
+                            If you selected other, please specify the decision.
+                            <span className='text-red-600'>*</span>
+                          </label>
+                          <div className='mt-2'>
+                            <input
+                              id='other'
+                              {...register('other', { required: selectedDecision === 'Other...' })}
+                              type='name'
+                              className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                            />
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='attachment' className='block text-sm font-medium leading-6 text-gray-900'>
                         Attachment
