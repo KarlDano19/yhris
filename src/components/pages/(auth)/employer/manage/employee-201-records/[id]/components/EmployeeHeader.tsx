@@ -209,8 +209,6 @@ export default function EmployeeHeader({
             active={activeTab === "disciplinary"}
             onClick={() => setActiveTab("disciplinary")}
             icon={<ExclamationTriangleIcon className="h-7 w-7 md:h-9 md:w-9" />}
-            disabled
-            tooltip="Coming soon"
           >
             Disciplinary Records
           </Tab>

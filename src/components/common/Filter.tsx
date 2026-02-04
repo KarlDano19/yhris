@@ -186,7 +186,8 @@ export default function Filter({
                     <select
                       value={draftFilters[group.id]?.[0] || group.options[0]?.value}
                       onChange={(e) => handleOptionChange(group.id, e.target.value)}
-                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none"
+                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none truncate"
+                      title={group.options.find(opt => opt.value === draftFilters[group.id]?.[0])?.label || group.options[0]?.label}
                     >
                       {group.options.map((option) => (
                         <option key={option.value} value={option.value}>

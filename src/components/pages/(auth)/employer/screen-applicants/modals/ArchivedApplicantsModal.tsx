@@ -58,7 +58,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   onRefresh
 }) => {
   
-  const [activeTab, setActiveTab] = useState<'rejected' | 'withdrawn'>('rejected');
+  const [activeTab, setActiveTab] = useState<'rejected' | 'withdrawn' | 'pooling'>('rejected');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
@@ -83,6 +83,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   // Separate applications by status
   const rejectedApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'rejected') || [];
   const withdrawnApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'withdrawn') || [];
+  const poolingApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'pooling') || [];
 
   // Filter applications based on search term
   const filteredRejectedApplicants = rejectedApplicants.filter((applicant: any) =>
@@ -93,6 +94,13 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   );
 
   const filteredWithdrawnApplicants = withdrawnApplicants.filter((applicant: any) =>
+    `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredPoolingApplicants = poolingApplicants.filter((applicant: any) =>
     `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase()) ||
@@ -161,7 +169,14 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   // COMPUTED VALUES
   // ============================================================================
 
-  const currentApplicants = activeTab === 'rejected' ? filteredRejectedApplicants : filteredWithdrawnApplicants;
+  const currentApplicants =
+    activeTab === 'rejected'
+      ? filteredRejectedApplicants
+      : activeTab === 'withdrawn'
+      ? filteredWithdrawnApplicants
+      : activeTab === 'pooling'
+      ? filteredPoolingApplicants
+      : [];
   const allSelected = currentApplicants.length > 0 && selectedApplicants.length === currentApplicants.length;
 
 
@@ -171,6 +186,8 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
         return 'bg-red-100 text-red-800';
       case 'withdrawn':
         return 'bg-yellow-100 text-yellow-800';
+      case 'pooling':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -272,7 +289,26 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                   Withdrawn ({withdrawnApplicants.length})
                 </div>
               </button>
+              {/* Pooling Tab */}
+              <button
+                onClick={() => {
+                  setActiveTab('pooling');
+                  setSearchTerm('');
+                  setSelectedApplicants([]);
+                }}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'pooling'
+                    ? 'bg-white text-green-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Pooling ({poolingApplicants.length})
+                </div>
+              </button>
             </div>
+            
 
             {/* Search Bar and Actions */}
             <div className="flex items-center gap-3">
@@ -404,6 +440,42 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                     ) : (
                       <div className="space-y-3">
                         {filteredWithdrawnApplicants.map(renderApplicantCard)}
+                      </div>
+                    )}
+                  </>
+                )}
+                {activeTab === 'pooling' && (
+                  <>
+                    {filteredPoolingApplicants.length > 0 && (
+                      <div className="mb-3 flex items-center">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={() => handleSelectAll(filteredPoolingApplicants)}
+                            className="h-4 w-4 mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-700">
+                            {allSelected ? 'Deselect All' : 'Select All'}
+                          </span>
+                        </label>
+                      </div>
+                    )}
+                    
+                    {filteredPoolingApplicants.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        {searchTerm ? (
+                          <p>No pooling applications found matching &quot;{searchTerm}&quot;</p>
+                        ) : poolingApplicants.length === 0 ? (
+                          <p>No pooling applications found</p>
+                        ) : (
+                          <p>No applications match your search</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {filteredPoolingApplicants.map(renderApplicantCard)}
                       </div>
                     )}
                   </>

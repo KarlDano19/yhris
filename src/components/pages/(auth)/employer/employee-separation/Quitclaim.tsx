@@ -2,11 +2,19 @@ import React, { Dispatch, useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import classNames from '@/helpers/classNames';
 import { T_QuitclaimModal } from '@/types/globals';
+import classNames from '@/helpers/classNames';
+import AttachmentViewModal from './modals/AttachmentViewModal';
+import AttachmentListModal from './modals/AttachmentListModal';
 
 import ClipIcon from '@/svg/ClipIcon';
-import AttachmentViewModal from './modals/AttachmentViewModal';
+
+interface QuitclaimAttachment {
+  id?: number;
+  attachment: string;
+  attachment_name: string;
+  created_at?: string;
+}
 
 const Quitclaim = ({
   id,
@@ -14,6 +22,7 @@ const Quitclaim = ({
   isQuitclaimReceived,
   quitclaimReceivedDate,
   quitclaimAttachment,
+  quitclaimAttachments = [],
   setIsQuitclaimModalOpen,
   setReceived,
   isLoading,
@@ -24,13 +33,25 @@ const Quitclaim = ({
   isQuitclaimReceived: boolean;
   quitclaimReceivedDate?: string;
   quitclaimAttachment?: string | null;
+  quitclaimAttachments?: QuitclaimAttachment[];
   setIsQuitclaimModalOpen: Dispatch<T_QuitclaimModal>;
   setReceived: any;
   isLoading: boolean;
   isLastPayReleased: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  
+  const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
+
+  // Determine which attachments to display (prefer new format, fallback to old)
+  const attachmentsToDisplay: QuitclaimAttachment[] =
+    quitclaimAttachments && quitclaimAttachments.length > 0
+      ? quitclaimAttachments
+      : quitclaimAttachment
+        ? [{ attachment: quitclaimAttachment, attachment_name: 'Quitclaim Document' }]
+        : [];
+
+  const hasAttachment = attachmentsToDisplay.length > 0;
+
   // Disabled if last pay hasn't been released yet
   const isDisabled = !isLastPayReleased || isQuitclaimSigned;
   
@@ -100,23 +121,40 @@ const Quitclaim = ({
       {isQuitclaimReceived ? (
         <div>
           <div className='flex gap-1 items-center justify-center'>
-            <div
-              className={quitclaimAttachment ? 'cursor-pointer' : ''}
-              data-tooltip-id='quitclaim-attachment-tooltip'
-              data-tooltip-content={quitclaimAttachment ? 'Click to view attachment' : 'No attachment'}
-              data-tooltip-place='bottom'
-              onClick={() => {
-                if (quitclaimAttachment) {
-                  setIsViewModalOpen(true);
+            <div className='flex items-center gap-1'>
+              <div
+                className='cursor-pointer'
+                data-tooltip-id='quitclaim-attachment-tooltip'
+                data-tooltip-content={
+                  attachmentsToDisplay.length === 1
+                    ? attachmentsToDisplay[0].attachment_name
+                    : `${attachmentsToDisplay.length} attachments - Click to view list`
                 }
-              }}
-            >
-              <ClipIcon hasFile={!!quitclaimAttachment} />
+                data-tooltip-place='bottom'
+                onClick={() => {
+                  if (attachmentsToDisplay.length === 1) {
+                    // Single attachment - open directly
+                    window.open(attachmentsToDisplay[0].attachment, '_blank');
+                  } else {
+                    // Multiple attachments - open modal
+                    setIsAttachmentListModalOpen(true);
+                  }
+                }}
+              >
+                <ClipIcon hasFile={true} />
+              </div>
+              {attachmentsToDisplay.length > 1 && (
+                <span className='text-xs text-gray-500 ml-1'>
+                  ({attachmentsToDisplay.length})
+                </span>
+              )}
             </div>
             <p className='ml-2 text-xs'>{quitclaimReceivedDate}</p>
           </div>
         </div>
       ) : null}
+
+      <Tooltip id='quitclaim-attachment-tooltip' style={{ zIndex: 9999 }} />
       
       <Tooltip id='quitclaim-tooltip' style={{ zIndex: 9999 }} />
       <Tooltip id='quitclaim-received-tooltip' style={{ zIndex: 9999 }} />
@@ -129,6 +167,15 @@ const Quitclaim = ({
         setIsOpen={setIsViewModalOpen}
         attachmentUrl={quitclaimAttachment}
         title="Quitclaim Attachment"
+      />
+    )}
+
+    {isAttachmentListModalOpen && (
+      <AttachmentListModal
+        isOpen={isAttachmentListModalOpen}
+        setIsOpen={setIsAttachmentListModalOpen}
+        attachments={attachmentsToDisplay}
+        title="Quitclaim Attachments"
       />
     )}
     </>
