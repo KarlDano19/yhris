@@ -4,11 +4,7 @@ import { getCookie } from 'cookies-next';
 async function getAuditLogDetails(audit_log_id: number | null) {
     try {
         const token = getCookie('token');
-
-        if (!audit_log_id) {
-            return {};
-        }
-
+        
         if (!token) {
             return {};
         }
