@@ -128,7 +128,7 @@ export default function ViewEmailMonitoringLogDetails({
         to: toArr,
         cc: ccArr,
         bcc: bccArr,
-        status: typeof status === 'boolean' ? (status ? 'Sent' : 'Not Sent') : status ?? 'Logged',
+        is_send: status,
         scheduled_date: scheduled_date ?? null,
       };
     }
@@ -136,9 +136,6 @@ export default function ViewEmailMonitoringLogDetails({
   };
 
   const emailRecord = extractEmailRecord(logDetails);
-  const rawStatus = emailRecord?.status ?? logDetails?.status ?? 'Logged';
-  const isSuccessStatus = ['sent', 'success'].includes(String(rawStatus).toLowerCase());
-  const displayStatus = isSuccessStatus ? 'Success' : 'Unsuccessful';
   const toArray = (val: any, fallback: any[] = []) => {
     if (!val && val !== 0) return fallback;
     if (Array.isArray(val)) return val;
@@ -212,7 +209,7 @@ export default function ViewEmailMonitoringLogDetails({
                     </h3>
                   </div>
 
-                  <div className='grid grid-cols-4 gap-4'>
+                  <div className='grid grid-cols-5 gap-4'>
                     <div>
                       <label className='text-xs text-gray-500 uppercase'>User</label>
                     <div className='mt-1'>
@@ -250,6 +247,13 @@ export default function ViewEmailMonitoringLogDetails({
                       <label className='text-xs text-gray-500 uppercase'>Activity ID</label>
                       <div className='text-sm font-medium text-gray-900 mt-1'>
                         {logDetails.id ?? 'N/A'}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className='text-xs text-gray-500 uppercase'>Status</label>
+                      <div className='text-sm font-medium text-gray-900 mt-1'>
+                        {emailRecord?.is_send ? 'Success' : 'Unsuccessful'}
                       </div>
                     </div>
                   </div>
@@ -296,13 +300,6 @@ export default function ViewEmailMonitoringLogDetails({
                               {addr}
                             </div>
                           ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className='text-xs text-gray-500 uppercase'>Status</label>
-                        <div className={isSuccessStatus ? 'text-green-500' : 'text-red-500'}>
-                          {displayStatus}
                         </div>
                       </div>
 

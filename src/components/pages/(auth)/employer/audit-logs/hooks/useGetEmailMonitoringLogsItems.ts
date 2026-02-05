@@ -38,7 +38,7 @@ async function getEmailMonitoringLogsItems(filters: any) {
             },
         };
         if (token) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-monitoring/history/?${searchParams}`, config);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-monitoring/?${searchParams}`, config);
             if (!res.ok) {
                 throw res.json();
             }

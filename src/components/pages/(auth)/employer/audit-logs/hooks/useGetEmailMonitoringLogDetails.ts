@@ -12,7 +12,7 @@ async function getEmailMonitoringLogDetails(audit_log_id: number | null) {
             },
         };
         if (token) {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-monitoring/history/?id=${audit_log_id}`, config);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/email-monitoring/${audit_log_id}/`, config);
             if (!res.ok) {
                 throw res.json();
             }
