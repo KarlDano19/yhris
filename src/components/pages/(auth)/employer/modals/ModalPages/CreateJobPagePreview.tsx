@@ -186,7 +186,7 @@ export default function CreateJobPagePreview({
                   ) : (
                     <>PHP {formatPrice(thirdFormGetValues('salary')?.salaryValue || 0)}</>
                   )}
-                  &nbsp;/ {thirdFormGetValues('salary')?.rate || 'No rate specified'}
+                  &nbsp;/ {thirdFormGetValues('rate') || 'No rate specified'}
                 </p>
               </>
             )}
