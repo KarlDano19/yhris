@@ -14,7 +14,7 @@ import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
 import useGetStageNotes from '../hooks/useGetStageNotes';
 import useUpdateStageNotes from '../hooks/useUpdateStageNotes';
 import CustomToast from '@/components/CustomToast';
-import ConfirmModal from '@/components/ConfirmModal';
+import JobCapacityModal from './JobCapacityModal';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StageType } from '../types';
@@ -73,8 +73,7 @@ export default function Checklist({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
-  const [isDeactivationConfirmationModalOpen, setIsDeactivationConfirmationModalOpen] = useState(false);
-  const [isSlotIncreaseModalOpen, setIsSlotIncreaseModalOpen] = useState(false);
+  const [isJobCapacityModalOpen, setIsJobCapacityModalOpen] = useState(false);
   const [pendingHireData, setPendingHireData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   let applicant: ApplicantType | undefined;
@@ -292,10 +291,10 @@ export default function Checklist({
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
 
-    // Check if job posting is fully staffed (show deactivation modal first)
+    // Check if job posting is fully staffed (show job capacity modal)
     if (isBeingHired && jobPostingDetails?.hired_count >= jobPostingDetails?.required_slot) {
       setPendingHireData(data);
-      setIsDeactivationConfirmationModalOpen(true);
+      setIsJobCapacityModalOpen(true);
       return;
     }
 
@@ -338,21 +337,21 @@ export default function Checklist({
     }, 400);
   };
 
-  const handleDeactivationConfirmation = () => {
+  const handleSetInactive = () => {
     if (pendingHireData) {
       setIsLoading(true);
-      
+
       // Just deactivate the job posting, don't hire the applicant
       const dataWithDeactivation = {
         ...pendingHireData,
         status: 'ongoing', // Keep applicant in ongoing status, don't hire
         deactivate_job_posting: true
       };
-      
-      setIsDeactivationConfirmationModalOpen(false);
+
+      setIsJobCapacityModalOpen(false);
       resetFormData();
       setIsOpen(false);
-      
+
       setTimeout(() => {
         handleFormSubmit(dataWithDeactivation);
         setTimeout(() => {
@@ -364,28 +363,21 @@ export default function Checklist({
     }
   };
 
-
-  const handleDeactivationCancel = () => {
-    // Close deactivation modal and show slot increase modal
-    setIsDeactivationConfirmationModalOpen(false);
-    setIsSlotIncreaseModalOpen(true);
-  };
-
-  const handleSlotIncreaseConfirmation = () => {
+  const handleIncreaseLimit = () => {
     if (pendingHireData) {
       setIsLoading(true);
-      
+
       // Hire the applicant and increase the required slot
       const dataWithSlotIncrease = {
         ...pendingHireData,
         new_required_slot: (jobPostingDetails?.required_slot || 0) + 1,
         deactivate_job_posting: false
       };
-      
-      setIsSlotIncreaseModalOpen(false);
+
+      setIsJobCapacityModalOpen(false);
       resetFormData();
       setIsOpen(false);
-      
+
       setTimeout(() => {
         handleFormSubmit(dataWithSlotIncrease);
         setTimeout(() => {
@@ -397,8 +389,9 @@ export default function Checklist({
     }
   };
 
-  const handleSlotIncreaseCancel = () => {
-    setIsSlotIncreaseModalOpen(false);
+  const handleKeepActive = () => {
+    // Close the modal without any changes
+    setIsJobCapacityModalOpen(false);
     setPendingHireData(null);
   };
 
@@ -692,40 +685,32 @@ export default function Checklist({
         </form>
 
         {/* Unsaved Changes Confirmation Modal */}
-          {isUnsavedChangesModalOpen && (
-            <UnsavedChangesModal
-              isOpen={isUnsavedChangesModalOpen}
-              onClose={handleUnsavedChangesCancel}
-              onConfirm={handleUnsavedChangesConfirm}
-              isLoading={false}
-              isSwitchingEmployee={false}
-              contentType="checklist"
-            />
+        {isUnsavedChangesModalOpen && (
+          <UnsavedChangesModal
+            isOpen={isUnsavedChangesModalOpen}
+            onClose={handleUnsavedChangesCancel}
+            onConfirm={handleUnsavedChangesConfirm}
+            isLoading={false}
+            isSwitchingEmployee={false}
+            contentType="checklist"
+          />
         )}
-          
-      {/* Deactivation Confirmation Modal - for fully staffed jobs */}
-      {isDeactivationConfirmationModalOpen && (
-        <ConfirmModal
-          message={`Job posting "${jobPostingDetails?.job_title || 'this position'}" is full (${jobPostingDetails?.hired_count || 0}/${jobPostingDetails?.required_slot || 0}).\nDo you want to set this job posting to inactive?`}
-          isOpen={isDeactivationConfirmationModalOpen}
-          setIsOpen={setIsDeactivationConfirmationModalOpen}
-          confirmAction={handleDeactivationConfirmation}
-          cancelAction={handleDeactivationCancel}
-          isLoading={isLoading}
-        />
-      )}
 
-      {/* Slot Increase Confirmation Modal */}
-      {isSlotIncreaseModalOpen && (
-        <ConfirmModal
-          message={`Do you want to increase the required slot from ${jobPostingDetails?.required_slot || 0} to ${(jobPostingDetails?.required_slot || 0) + 1} and hire ${applicant?.name || 'this applicant'}?`}
-          isOpen={isSlotIncreaseModalOpen}
-          setIsOpen={setIsSlotIncreaseModalOpen}
-          confirmAction={handleSlotIncreaseConfirmation}
-          cancelAction={handleSlotIncreaseCancel}
-          isLoading={isLoading}
-        />
-      )}
+        {/* Job Capacity Modal - for fully staffed jobs */}
+        {isJobCapacityModalOpen && (
+          <JobCapacityModal
+            isOpen={isJobCapacityModalOpen}
+            setIsOpen={setIsJobCapacityModalOpen}
+            jobTitle={jobPostingDetails?.job_title || 'this position'}
+            hiredCount={jobPostingDetails?.hired_count || 0}
+            requiredSlot={jobPostingDetails?.required_slot || 0}
+            applicantName={applicant?.name || 'this applicant'}
+            onSetInactive={handleSetInactive}
+            onIncreaseLimit={handleIncreaseLimit}
+            onKeepActive={handleKeepActive}
+            isLoading={isLoading}
+          />
+        )}
         
       </ModalLayout>
       {!hasActiveSubscription && (
