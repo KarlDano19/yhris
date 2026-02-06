@@ -27,6 +27,7 @@ import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
@@ -927,9 +928,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isLetterModalOpen}
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
-          defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipients}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
+          showAttachment={true}
+          customAttachmentSection={
+            <SeparationLetterAttachmentSection
+              pdfAttachment={isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.letter_attachment : null}
+              letterType={isLetterModalOpen.type as 'Acceptance' | 'Separation'}
+              onViewAttachment={(url: string) => window.open(url, '_blank')}
+              canShowPreview={true}
+            />
+          }
           submitButtonText="Send Letter"
           isLoading={isLoading}
           prePopulatedData={memoPrePopulatedData}

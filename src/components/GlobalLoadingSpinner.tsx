@@ -73,54 +73,8 @@
           {/* Yahshua logo loading animation */}
           <div className="flex flex-col items-center justify-center">
             <YahshuaLoadingLogo size={96} durationMs={1000} />
-            <div className="mt-3 text-xl text-yellow-100 font-semibold loading-text" aria-label="Loading">
-              <span className="wave" style={{ animationDelay: '0ms' }}>L</span>
-              <span className="wave" style={{ animationDelay: '80ms' }}>o</span>
-              <span className="wave" style={{ animationDelay: '160ms' }}>a</span>
-              <span className="wave" style={{ animationDelay: '240ms' }}>d</span>
-              <span className="wave" style={{ animationDelay: '320ms' }}>i</span>
-              <span className="wave" style={{ animationDelay: '400ms' }}>n</span>
-              <span className="wave" style={{ animationDelay: '480ms' }}>g</span>
-              <span className="dot" style={{ animationDelay: '560ms' }}>.</span>
-              <span className="dot" style={{ animationDelay: '640ms' }}>.</span>
-              <span className="dot" style={{ animationDelay: '720ms' }}>.</span>
-            </div>
+            <div className="mt-3 text-xl text-yellow-100 font-semibold">Loading...</div>
           </div>
-          <style jsx>{`
-            /* Waving letters animation for "Loading..." */
-            .loading-text {
-              display: inline-flex;
-              gap: 2px;
-              letter-spacing: 0.5px;
-            }
-
-            .loading-text .wave {
-              display: inline-block;
-              transform-origin: center bottom;
-              animation: wave 1200ms cubic-bezier(.2,.9,.2,1) infinite;
-              will-change: transform, opacity;
-            }
-
-            .loading-text .dot {
-              display: inline-block;
-              margin-left: 2px;
-              opacity: 0.6;
-              animation: dotPulse 1200ms ease-in-out infinite;
-            }
-
-            @keyframes wave {
-              0% { transform: translateY(0) rotate(0deg); opacity: 0.85; }
-              30% { transform: translateY(-8px) rotate(-2deg); opacity: 1; }
-              60% { transform: translateY(0) rotate(2deg); opacity: 0.95; }
-              100% { transform: translateY(0) rotate(0deg); opacity: 0.85; }
-            }
-
-            @keyframes dotPulse {
-              0% { transform: translateY(0); opacity: 0.45; }
-              50% { transform: translateY(-6px); opacity: 1; }
-              100% { transform: translateY(0); opacity: 0.45; }
-            }
-          `}</style>
         </div>
       </div>
     );

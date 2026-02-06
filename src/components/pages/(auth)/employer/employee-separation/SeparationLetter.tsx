@@ -197,9 +197,7 @@ export default function SeparationLetter({
             )}
             disabled={sendDisabled}
             onClick={handleSendClick}
-            title={hasAttachment
-              ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
-              : 'Click to Generate & Send Letter'}
+            title={sendTitle}
           >
             {isLetterSent ? 'Resend' : 'Send'}
           </button>
@@ -276,7 +274,6 @@ export default function SeparationLetter({
               <p className='ml-2 text-xs'>{letterReceivedDate}</p>
             </div>
           ) : null}
-      <Tooltip id='letter-attachment-tooltip' />
         </div>
       </div>
       <Tooltip id='letter-received-tooltip' />
