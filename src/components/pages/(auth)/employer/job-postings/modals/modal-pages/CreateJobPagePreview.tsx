@@ -1,6 +1,6 @@
 import { Dispatch } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, LinkIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -21,6 +21,7 @@ export default function CreateJobPagePreview({
   secondFormGetValues,
   thirdFormGetValues,
   fourthFormGetValues,
+  seventhFormGetValues,
   setPageNumber,
   onSubmit,
   fileProps,
@@ -32,6 +33,7 @@ export default function CreateJobPagePreview({
   secondFormGetValues: any;
   thirdFormGetValues: any;
   fourthFormGetValues: any;
+  seventhFormGetValues?: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   fileProps: any;
@@ -177,8 +179,13 @@ export default function CreateJobPagePreview({
               {secondFormGetValues('schedule') ? secondFormGetValues('schedule').join(', ') : 'No schedule specified'}
             </p>
             
-            {/* Salary Range - only show if is_show_salary is true */}
-            {window.is_show_salary !== false && (
+            {/* Salary Range - only show if is_show_salary is true AND salary data exists */}
+            {window.is_show_salary !== false && thirdFormGetValues('salary')?.salaryType && (
+              (thirdFormGetValues('salary')?.salaryType === 'Range'
+                ? (thirdFormGetValues('salary')?.salaryRangeMin > 0 || thirdFormGetValues('salary')?.salaryRangeMax > 0)
+                : thirdFormGetValues('salary')?.salaryValue > 0
+              ) && thirdFormGetValues('rate')
+            ) && (
               <>
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                   <BanknotesIcon className='h-5 w-5 mr-1' />
@@ -192,7 +199,7 @@ export default function CreateJobPagePreview({
                   ) : (
                     <>PHP {formatPrice(thirdFormGetValues('salary')?.salaryValue || 0)}</>
                   )}
-                  &nbsp;/ {thirdFormGetValues('rate') || 'No rate specified'}
+                  &nbsp;/ {thirdFormGetValues('rate')}
                 </p>
               </>
             )}
@@ -219,6 +226,21 @@ export default function CreateJobPagePreview({
                 </h6>
                 <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
                   {renderNotesRemarks(firstFormGetValues('notesRemarks'))}
+                </p>
+              </>
+            )}
+
+            {/* Job URL */}
+            {seventhFormGetValues && seventhFormGetValues('jobUrl') && (
+              <>
+                <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                  <LinkIcon className='h-5 w-5 mr-1' />
+                  Job URL
+                </h6>
+                <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                  <span className='text-savoy-blue'>
+                    {seventhFormGetValues('jobUrl')}
+                  </span>
                 </p>
               </>
             )}

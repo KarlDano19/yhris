@@ -128,24 +128,22 @@ export default function CreateJobPagePlatform({
           </div>
           <div className='mt-3'>
             <label htmlFor='jobUrl' className='block text-sm font-medium leading-6 text-gray-900'>
-              Add a link to your job post
+              Job URL
             </label>
-            {isEdit && (
-              <p className='text-sm text-gray-500 mt-1'>
-                Job URL is automatically generated and cannot be changed.
-              </p>
-            )}
+            <p className='text-sm text-gray-500 mt-1'>
+              {isEdit
+                ? 'Job URL is automatically generated and cannot be changed.'
+                : 'Job URL will be automatically generated after creating the job post.'}
+            </p>
             <div className='mt-1'>
               <input
                 id='jobUrl'
-                placeholder='Enter URL...'
-                {...register('jobUrl', { required: true })}
+                placeholder={isEdit ? '' : 'Auto-generated after job creation'}
+                {...register('jobUrl', { required: false })}
                 type='text'
-                disabled={isEdit}
-                readOnly={isEdit}
-                className={`block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
-                  isEdit ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-900'
-                }`}
+                disabled={true}
+                readOnly={true}
+                className='block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 bg-gray-100 text-gray-500 cursor-not-allowed'
               />
             </div>
           </div>

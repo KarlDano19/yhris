@@ -1,6 +1,6 @@
 import { useEffect, Dispatch, useState } from 'react';
-import ToggleSection from '../ToggleSection';
-import ScreeningQuestion from '../ScreeningQuestion';
+import ToggleSection from '../../../../../../common/ToggleSection';
+import ScreeningQuestion from '../../components/ScreeningQuestion';
 import CustomScreeningForm from '../CustomScreeningForm';
 import CustomQuestionsModal from '../CustomQuestionsModal';
 import PresetQuestionOptions, { PRESET_QUESTIONS } from '../PresetQuestionOptions';

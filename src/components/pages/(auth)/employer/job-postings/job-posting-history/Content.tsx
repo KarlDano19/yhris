@@ -23,7 +23,6 @@ import ProgressModal from '@/components/ProgressModal';
 import SeederButton from '@/components/SeederButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import SetJob from './SetJob';
-import JobPreview from './JobPreview';
 import JobPreviewModal from './modals/JobPreviewModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/useGetJobPostItems';
@@ -374,6 +373,7 @@ const Content = () => {
         jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
         jobPost['is_show_roles'] = jobPost['is_show_roles'];
         jobPost['company_logo'] = jobPost['company_logo'];
+        jobPost['job_url'] = jobPost['job_url'];
         jobPost['created_at'] = formatDateToLocal(jobPost['created_at']);
       });
       setJobPostHistoryItems(dataJobPost.records);
@@ -648,7 +648,7 @@ const Content = () => {
               jobPost.isActive ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            <JobPreview id={jobPost.id} jobNumber={jobPost.id} setIsJobPreviewOpen={setIsJobPreviewOpen} />
+            {jobPost.id}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${

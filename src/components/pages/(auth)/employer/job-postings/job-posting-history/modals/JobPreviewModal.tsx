@@ -2,7 +2,7 @@ import { Dispatch, Fragment, useRef } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 
-import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 import { T_JobPreviewModal } from "@/types/globals";
 import formatPrice from '@/helpers/currencyFormat';
@@ -72,7 +72,7 @@ export default function JobPreviewModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
-                <div className="flex bg-savoy-blue p-2 items-center">
+                <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Job {id} - Preview
                   </h3>
@@ -183,8 +183,13 @@ export default function JobPreviewModal({
                                 {item.schedule}
                               </p>
                               
-                              {/* Salary Range - only show if is_show_salary is true */}
-                              {item.is_show_salary && (
+                              {/* Salary Range - only show if is_show_salary is true AND salary data exists */}
+                              {item.is_show_salary && item.salary_range_type && (
+                                (item.salary_range_type === 'Range'
+                                  ? (item.minimum_amount > 0 || item.maximum_amount > 0)
+                                  : item.exact_amount > 0
+                                ) && item.rate
+                              ) && (
                                 <>
                                   <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                                     <BanknotesIcon className='h-5 w-5 mr-1' />
@@ -198,7 +203,7 @@ export default function JobPreviewModal({
                                     ) : (
                                       <>PHP {formatPrice(item.exact_amount || 0)}</>
                                     )}
-                                    &nbsp;/ {item.rate || 'No rate specified'}
+                                    &nbsp;/ {item.rate}
                                   </p>
                                 </>
                               )}
@@ -225,6 +230,21 @@ export default function JobPreviewModal({
                                   </h6>
                                   <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
                                     {renderNotesRemarks(item.job_remark)}
+                                  </p>
+                                </>
+                              )}
+
+                              {/* Job URL */}
+                              {item.job_url && (
+                                <>
+                                  <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
+                                    <LinkIcon className='h-5 w-5 mr-1' />
+                                    Job URL
+                                  </h6>
+                                  <p className='text-[13px] text-indigo-dye mt-1 ml-3 sm:ml-6'>
+                                    <a href={item.job_url} target='_blank' rel='noopener noreferrer' className='text-savoy-blue underline'>
+                                      {item.job_url}
+                                    </a>
                                   </p>
                                 </>
                               )}

@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
-import CreateJobModal from './create-job/modals/CreateJobModal';
+import CreateJobModal from './modals/CreateJobModal';
 import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';

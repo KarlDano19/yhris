@@ -6,14 +6,14 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
-import CreateJobPageJobTitleInfo from '../../modals/ModalPages/CreateJobPageJobTitleInfo';
-import CreateJobPageJobType from '../../modals/ModalPages/CreateJobPageJobType';
-import CreateJobPageSalary from '../../modals/ModalPages/CreateJobPageSalary';
-import CreateJobPageJobDescription from '../../modals/ModalPages/CreateJobPageJobDescription';
-import CreateJobPageJobSettings from '../../modals/ModalPages/CreateJobPageJobSettings';
-import CreateJobPagePostAs from '../../modals/ModalPages/CreateJobPagePostAs';
-import CreateJobPagePreview from '../../modals/ModalPages/CreateJobPagePreview';
-import CreateJobPagePlatform from '../../modals/ModalPages/CreateJobPagePlatform';
+import CreateJobPageJobTitleInfo from '../../modals/modal-pages/CreateJobPageJobTitleInfo';
+import CreateJobPageJobType from '../../modals/modal-pages/CreateJobPageJobType';
+import CreateJobPageSalary from '../../modals/modal-pages/CreateJobPageSalary';
+import CreateJobPageJobDescription from '../../modals/modal-pages/CreateJobPageJobDescription';
+import CreateJobPageJobSettings from '../../modals/modal-pages/CreateJobPageJobSettings';
+import CreateJobPagePostAs from '../../modals/modal-pages/CreateJobPagePostAs';
+import CreateJobPagePreview from '../../modals/modal-pages/CreateJobPagePreview';
+import CreateJobPagePlatform from '../../modals/modal-pages/CreateJobPagePlatform';
 import classNames from '@/helpers/classNames';
 
 import useGetJobDetails from '../hooks/useGetJobPostDetails';
@@ -690,6 +690,7 @@ export default function UpdateJobModal({
                       secondFormGetValues={secondForm.getValues}
                       thirdFormGetValues={thirdForm.getValues}
                       fourthFormGetValues={fourthForm.getValues}
+                      seventhFormGetValues={seventhForm.getValues}
                       setPageNumber={setPageNumber}
                       onSubmit={seventhFormSubmit}
                       fileProps={fileProps}

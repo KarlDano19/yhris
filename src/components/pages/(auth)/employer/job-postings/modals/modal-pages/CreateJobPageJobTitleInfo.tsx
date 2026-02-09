@@ -4,7 +4,7 @@ import Select from 'react-select';
 
 import SelectChevronDown from '@/svg/SelectChevronDownDummy';
 import { advertiseOptions } from '@/utils/advertiseOptions';
-import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
+import CreateModal from '../../../settings/general-settings/employees/modals/CreateModal';
 import { CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
 interface Field {

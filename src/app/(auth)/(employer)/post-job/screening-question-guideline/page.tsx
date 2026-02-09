@@ -1,5 +1,5 @@
 import React from 'react';
-import ScreeningQuestionGuidelines from '@/components/pages/(auth)/employer/post-job/ScreeningQuestionGuidelines';
+import ScreeningQuestionGuidelines from '@/components/pages/(auth)/employer/job-postings/post-job/ScreeningQuestionGuidelines';
 
 export const metadata = {
   title: 'Screening Question Guidelines - Yahshua HRIS',
