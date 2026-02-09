@@ -647,6 +647,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               employerName={item.employer_name}
               effectiveDate={item.effective_date || item.date_of_separation}
               menuKey={menuKey}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -661,6 +663,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-sign documents`] || false}
               isLetterReceived={item.isLetterReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -671,6 +675,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               lastPayAttachment={item.last_pay_attachment}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
               isDocumentsReceived={item.isDocumentsReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
