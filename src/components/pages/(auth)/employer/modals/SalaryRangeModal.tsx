@@ -9,12 +9,14 @@ export default function SalaryRangeModal({
   isOpen,
   setIsOpen,
   setIsRangeBenefitsAdded,
+  setUserDeclinedSalary,
   onSubmit,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   setPageNumber: Dispatch<number>;
   setIsRangeBenefitsAdded: Dispatch<boolean>;
+  setUserDeclinedSalary?: Dispatch<boolean>;
   onSubmit: () => void;
 }) {
   const cancelButtonRef = useRef(null);
@@ -73,6 +75,7 @@ export default function SalaryRangeModal({
                     className='text-lg block sm:flex m-auto font-bold leading-6 text-white bg-savoy-blue shadow-sm py-3 px-6 rounded-md transition-all'
                     onClick={() => {
                       setIsRangeBenefitsAdded(true);
+                      setUserDeclinedSalary?.(false); // Reset declined flag when user chooses to add
                       setIsOpen(false);
                       onSubmit();
                       setPageNumber(3);
@@ -85,6 +88,8 @@ export default function SalaryRangeModal({
                     type='button'
                     className='text-lg block sm:flex m-auto font-bold leading-6 text-savoy-blue  shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all mt-3 sm:mt-0'
                     onClick={() => {
+                      setIsRangeBenefitsAdded(false);
+                      setUserDeclinedSalary?.(true); // Mark that user explicitly declined
                       setIsOpen(false);
                       onSubmit();
                       setPageNumber(4);

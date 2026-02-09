@@ -19,7 +19,9 @@ async function addJobPost(jobPost: any) {
     formData.append('qualifications', jobPost.qualifications);
     // Ensure notesRemarks is never undefined - use empty string if not provided
     formData.append('job_remark', jobPost.notesRemarks || '');
-    formData.append('job_url', jobPost.jobUrl);
+    // Always include job_url - use provided value or generate default
+    const jobUrl = jobPost.jobUrl || `${window.location.protocol}//${window.location.host}/jobs/`;
+    formData.append('job_url', jobUrl);
     formData.append('poster_type', jobPost.postAs);
     formData.append('shared_to', jobPost.postIn.join());
     formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);

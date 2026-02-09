@@ -14,6 +14,7 @@ import CreateJobPageJobSettings from '../../modals/ModalPages/CreateJobPageJobSe
 import CreateJobPagePostAs from '../../modals/ModalPages/CreateJobPagePostAs';
 import CreateJobPagePreview from '../../modals/ModalPages/CreateJobPagePreview';
 import CreateJobPagePlatform from '../../modals/ModalPages/CreateJobPagePlatform';
+import classNames from '@/helpers/classNames';
 
 import useGetJobDetails from '../hooks/useGetJobPostDetails';
 import useUpdateJobPostItems from '../hooks/useUpdateJobPostItems';
@@ -40,20 +41,25 @@ export default function UpdateJobModal({
   refetch,
   isOpen,
   setIsOpen,
+  openConfirmSocialShareModal,
 }: {
   refetch: any;
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
+  openConfirmSocialShareModal: (social: string, og_url: string) => void;
 }) {
   const cancelButtonRef = useRef(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
+  const [userDeclinedSalary, setUserDeclinedSalary] = useState(false);
   const [combinedFormData, setCombinedFormData] = useState<any>({});
   const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [autoRejectEnabled, setAutoRejectEnabled] = useState(true);
   const [isVideoIntroEnabled, setIsVideoIntroEnabled] = useState(false);
+  const [originalSharedTo, setOriginalSharedTo] = useState<string>('');
+
   const {
     data: jobPostDataDetails,
     refetch: refetchJobPostDetails,
@@ -75,7 +81,7 @@ export default function UpdateJobModal({
   const seventhForm = useForm();
   const eighthForm = useForm();
   const { mutate, isLoading } = useUpdateJobPostItems();
-  
+
   // Fetch positions data in the parent component
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
 
@@ -100,6 +106,7 @@ export default function UpdateJobModal({
       });
       if (jobPostDataDetails?.salary_range_type) {
         setIsRangeBenefitsAdded(true);
+        setUserDeclinedSalary(false); // Reset declined flag since salary data exists
         thirdForm.reset({
           is_show_salary: jobPostDataDetails.is_show_salary,
           is_show_benefits: jobPostDataDetails.is_show_benefits,
@@ -108,8 +115,8 @@ export default function UpdateJobModal({
             salaryRangeMin: jobPostDataDetails.minimum_amount,
             salaryRangeMax: jobPostDataDetails.maximum_amount,
             salaryValue: jobPostDataDetails.exact_amount,
-            rate: jobPostDataDetails.rate,
           },
+          rate: jobPostDataDetails.rate, // Move rate outside of salary object
           benefits: jobPostDataDetails.offered_benefits.split(','),
           otherBenefits: jobPostDataDetails.other_benefits,
         });
@@ -153,15 +160,18 @@ export default function UpdateJobModal({
           ? jobPostDataDetails.is_video_intro_enabled
           : false
       );
-      fifthForm.reset({
+      fifthForm.reset();
+      sixthForm.reset({
         postAs: jobPostDataDetails.poster_type,
         uploaded_image: jobPostDataDetails.uploaded_image,
       });
-      sixthForm.reset();
       seventhForm.reset({
         shared_to: jobPostDataDetails.shared_to.split(','),
         jobUrl: jobPostDataDetails.job_url,
       });
+
+      // Capture original shared_to for comparison later
+      setOriginalSharedTo(jobPostDataDetails.shared_to || '');
     }
   }, [jobPostDataDetails]);
 
@@ -224,17 +234,35 @@ export default function UpdateJobModal({
 
   const onSubmit = () => {
     const data = eighthForm.getValues();
-    const finalData = { ...combinedFormData, ...data };
-    
+    // Get ALL current form values to ensure nothing is lost when user jumps between pages
+    const page1Data = firstForm.getValues();
+    const page2Data = secondForm.getValues();
+    const page3Data = thirdForm.getValues();
+    const page4Data = fourthForm.getValues();
+    const page5Data = fifthForm.getValues();
+    const posterData = sixthForm.getValues(); // Page 6: postAs, uploaded file
+    const platformData = seventhForm.getValues(); // Page 7: shared_to, jobUrl
+    const finalData = {
+      ...combinedFormData,
+      ...page1Data,
+      ...page2Data,
+      ...page3Data,
+      ...page4Data,
+      ...page5Data,
+      ...posterData, // Poster type and uploaded file
+      ...platformData, // Platform selection
+      ...data // Page 8 data (confirmation)
+    };
+
     // Ensure screening questions are included in the final data
     if (!finalData.screeningQuestions && screeningQuestions.length > 0) {
       finalData.screeningQuestions = screeningQuestions;
     }
-    
+
     if (finalData.autoRejectEnabled === undefined) {
       finalData.autoRejectEnabled = autoRejectEnabled;
     }
-    
+
     // Ensure rejection feedback is included in the final data
     if (!finalData.rejectionFeedback && window.rejectionFeedback) {
       finalData.rejectionFeedback = window.rejectionFeedback;
@@ -245,11 +273,44 @@ export default function UpdateJobModal({
       finalData.isVideoIntroEnabled = isVideoIntroEnabled;
     }
 
+    // If user declined to add salary, remove salary-related fields
+    if (userDeclinedSalary) {
+      delete finalData.salary;
+      delete finalData.rate;
+      delete finalData.benefits;
+      delete finalData.is_show_salary;
+      delete finalData.is_show_benefits;
+    }
+
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+
+        // Close the update modal first
         customCloseModal();
         setIsSalaryRangeModalOpen(false);
+
+        // Trigger social share modal ONLY for NEWLY ADDED platforms
+        if (data?.job_post?.shared_to && data?.job_post?.og_url) {
+          // Parse original and new platforms
+          const originalPlatforms = originalSharedTo
+            ? originalSharedTo.split(',').map((p: string) => p.trim()).filter((p: string) => p !== '')
+            : [];
+          const newPlatforms = data.job_post.shared_to
+            .split(',')
+            .map((p: string) => p.trim())
+            .filter((p: string) => p !== '');
+
+          // Filter to get only newly added platforms
+          const addedPlatforms = newPlatforms.filter((p: string) => !originalPlatforms.includes(p));
+
+          // Only show modal if there are newly added platforms
+          if (addedPlatforms.length > 0) {
+            const addedPlatformsString = addedPlatforms.join(',');
+            openConfirmSocialShareModal(addedPlatformsString, data.job_post.og_url);
+          }
+        }
+
         refetch();
       },
       onError: (err: any) => {
@@ -259,6 +320,130 @@ export default function UpdateJobModal({
       },
     };
     mutate({jobPost: finalData, job_post_id: isOpen.id}, callbackReq);
+  };
+
+  // Handler for saving from any page (Pages 1-7)
+  const handleSaveFromPage = (currentPageNumber: number, currentPageForm: any) => {
+    // Validate current page only
+    currentPageForm.handleSubmit(
+      (validData: any) => {
+        // Page-specific data processing
+        let processedData = { ...validData };
+
+        // Page 1: Add position description
+        if (currentPageNumber === 1) {
+          const selectedPosition = positionData?.find((pos: any) => pos.id === validData.position);
+          if (selectedPosition?.description) {
+            processedData.positionDescription = selectedPosition.description;
+          }
+        }
+
+        // Page 5: Include screening questions, auto-reject settings, and video intro
+        if (currentPageNumber === 5) {
+          processedData.screeningQuestions = screeningQuestions;
+          processedData.autoRejectEnabled = autoRejectEnabled;
+          processedData.isVideoIntroEnabled = isVideoIntroEnabled;
+        }
+
+        // Build existing data from jobPostDataDetails to preserve required fields
+        const existingData: any = {};
+        if (jobPostDataDetails) {
+          // Add shared_to (required field) from existing data if not in current changes
+          if (jobPostDataDetails.shared_to) {
+            existingData.shared_to = jobPostDataDetails.shared_to.split(',');
+          }
+        }
+
+        // Get ALL current form values to ensure nothing is lost when user jumps between pages
+        const page1Data = firstForm.getValues();
+        const page2Data = secondForm.getValues();
+        const page3Data = thirdForm.getValues();
+        const page4Data = fourthForm.getValues();
+        const page5Data = fifthForm.getValues();
+        const page6Data = sixthForm.getValues(); // Important: postAs and uploaded file
+        const page7Data = seventhForm.getValues();
+
+        // Merge: existing data -> accumulated data -> all form values -> current page data
+        // This ensures required fields are preserved when saving from any page
+        const finalData = {
+          ...existingData,
+          ...combinedFormData,
+          ...page1Data,
+          ...page2Data,
+          ...page3Data,
+          ...page4Data,
+          ...page5Data,
+          ...page6Data, // Poster type and uploaded file
+          ...page7Data,
+          ...processedData // Current page overrides all
+        };
+
+        // Ensure screening questions are included in the final data
+        if (!finalData.screeningQuestions && screeningQuestions.length > 0) {
+          finalData.screeningQuestions = screeningQuestions;
+        }
+
+        if (finalData.autoRejectEnabled === undefined) {
+          finalData.autoRejectEnabled = autoRejectEnabled;
+        }
+
+        // Ensure rejection feedback is included in the final data
+        if (!finalData.rejectionFeedback && window.rejectionFeedback) {
+          finalData.rejectionFeedback = window.rejectionFeedback;
+        }
+
+        // Ensure video intro enabled is included in the final data
+        if (finalData.isVideoIntroEnabled === undefined) {
+          finalData.isVideoIntroEnabled = isVideoIntroEnabled;
+        }
+
+        // If user declined to add salary, remove salary-related fields
+        if (userDeclinedSalary) {
+          delete finalData.salary;
+          delete finalData.rate;
+          delete finalData.benefits;
+          delete finalData.is_show_salary;
+          delete finalData.is_show_benefits;
+        }
+
+        // Call the mutation
+        const callbackReq = {
+          onSuccess: (data: any) => {
+            toast.custom(() => <CustomToast message="Job posting updated successfully!" type='success' />, { duration: 5000 });
+            customCloseModal();
+            setIsSalaryRangeModalOpen(false);
+            refetch();
+          },
+          onError: (err: any) => {
+            toast.custom(() => <CustomToast message={err} type='error' />, {
+              duration: 7000,
+            });
+          },
+        };
+
+        mutate({jobPost: finalData, job_post_id: isOpen.id}, callbackReq);
+      },
+      (errors: any) => {
+        // Show validation error toast
+        toast.custom(() => <CustomToast message="Please fix the errors on this page" type='error' />, {
+          duration: 5000,
+        });
+      }
+    )();
+  };
+
+  // Check if tab 3 should be enabled
+  const isTab3Enabled = () => {
+    // If user explicitly declined, tab 3 is disabled
+    if (userDeclinedSalary) {
+      return false;
+    }
+
+    const salaryData = thirdForm.getValues('salary');
+    const rateData = thirdForm.getValues('rate');
+    const benefitsData = thirdForm.getValues('benefits');
+    const hasSalaryData = salaryData?.salaryType && rateData && benefitsData && benefitsData.length > 0;
+    return isRangeBenefitsAdded || hasSalaryData;
   };
 
   const customCloseModal = () => {
@@ -275,15 +460,16 @@ export default function UpdateJobModal({
     setScreeningQuestions([]);
     setAutoRejectEnabled(true);
     setIsVideoIntroEnabled(false);
+    setUserDeclinedSalary(false);
+    setOriginalSharedTo('');
 
     setPageNumber(1);
     setIsOpen({ id: null, open: false });
   };
 
   return (
-    <>
-      <Transition.Root show={isOpen.open} as={Fragment}>
-        <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
+    <Transition.Root show={isOpen.open} as={Fragment}>
+      <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
           <Transition.Child
             as={Fragment}
             enter='ease-out duration-300'
@@ -312,6 +498,94 @@ export default function UpdateJobModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Update Job Form</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
+
+                  {/* Tab Navigation */}
+                  <div className='pt-4 pb-2 px-4'>
+                    <div className='flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide'>
+                      {/* Tab 1: Job Info */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(1)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 1 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>1</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 1 ? 'text-savoy-blue' : 'hidden')}>Job Info</h1>
+                      </div>
+
+                      {/* Tab 2: Job Type */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(2)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 2 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>2</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 2 ? 'text-savoy-blue' : 'hidden')}>Job Type</h1>
+                      </div>
+
+                      {/* Tab 3: Salary & Benefits */}
+                      <div
+                        className={classNames(
+                          'flex space-x-2 transition-opacity',
+                          isTab3Enabled() ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                        )}
+                        onClick={() => {
+                          if (isTab3Enabled()) {
+                            setPageNumber(3);
+                          }
+                        }}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 3 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>3</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 3 ? 'text-savoy-blue' : 'hidden')}>Salary & Benefits</h1>
+                      </div>
+
+                      {/* Tab 4: Job Description */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(4)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 4 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>4</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 4 ? 'text-savoy-blue' : 'hidden')}>Job Description</h1>
+                      </div>
+
+                      {/* Tab 5: Job Settings */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(5)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 5 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>5</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 5 ? 'text-savoy-blue' : 'hidden')}>Job Settings</h1>
+                      </div>
+
+                      {/* Tab 6: Post As */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(6)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 6 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>6</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 6 ? 'text-savoy-blue' : 'hidden')}>Post As</h1>
+                      </div>
+
+                      {/* Tab 7: Preview */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(7)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 7 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>7</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 7 ? 'text-savoy-blue' : 'hidden')}>Preview</h1>
+                      </div>
+
+                      {/* Tab 8: Platform */}
+                      <div
+                        className='flex space-x-2 transition-opacity cursor-pointer'
+                        onClick={() => setPageNumber(8)}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 8 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>8</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 8 ? 'text-savoy-blue' : 'hidden')}>Platform</h1>
+                      </div>
+                    </div>
+                    <div className='pl-0 pt-2'>
+                      <h1 className='text-sm font-semibold text-gray-500'>Step {pageNumber} out of 8</h1>
+                    </div>
+                  </div>
+
                   <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
                     <CreateJobPageJobTitleInfo
                       control={firstForm.control}
@@ -324,6 +598,9 @@ export default function UpdateJobModal({
                       positionData={positionData}
                       refetchPositions={refetchPositions}
                       fourthForm={fourthForm}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(1, firstForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
@@ -337,6 +614,11 @@ export default function UpdateJobModal({
                       getValues={secondForm.getValues}
                       secondFormSubmit={secondFormSubmit}
                       hiredCount={jobPostDataDetails?.hired_count || 0}
+                      hasSalaryRange={isRangeBenefitsAdded}
+                      thirdFormGetValues={thirdForm.getValues}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(2, secondForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
@@ -350,6 +632,9 @@ export default function UpdateJobModal({
                       getValues={thirdForm.getValues}
                       onSubmit={thirdFormSubmit}
                       pageNumber={pageNumber}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(3, thirdForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
@@ -364,6 +649,9 @@ export default function UpdateJobModal({
                       combinedFormData={combinedFormData}
                       positionData={positionData}
                       firstForm={firstForm}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(4, fourthForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
@@ -377,17 +665,23 @@ export default function UpdateJobModal({
                       initialRejectionFeedback={jobPostDataDetails?.rejection_feedback || ''}
                       isVideoIntroEnabled={isVideoIntroEnabled}
                       setIsVideoIntroEnabled={setIsVideoIntroEnabled}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(5, fifthForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
                     <CreateJobPagePostAs
-                      setValue={fifthForm.setValue}
-                      getValues={fifthForm.getValues}
-                      register={fifthForm.register}
+                      setValue={sixthForm.setValue}
+                      getValues={sixthForm.getValues}
+                      register={sixthForm.register}
                       setPageNumber={setPageNumber}
                       isRangeBenefitsAdded={isRangeBenefitsAdded}
                       onSubmit={sixthFormSubmit}
                       pageNumber={pageNumber}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(6, sixthForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
@@ -399,6 +693,9 @@ export default function UpdateJobModal({
                       setPageNumber={setPageNumber}
                       onSubmit={seventhFormSubmit}
                       fileProps={fileProps}
+                      isEdit={true}
+                      onSave={() => handleSaveFromPage(7, seventhForm)}
+                      isLoading={isLoading}
                     />
                   </div>
                   <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>
@@ -419,9 +716,9 @@ export default function UpdateJobModal({
                     isOpen={isSalaryRangeModalOpen}
                     setIsOpen={setIsSalaryRangeModalOpen}
                     setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+                    setUserDeclinedSalary={setUserDeclinedSalary}
                     onSubmit={() => {
                       secondFormSubmit();
-                      setIsRangeBenefitsAdded(true);
                     }}
                   />
                 </Dialog.Panel>
@@ -430,6 +727,5 @@ export default function UpdateJobModal({
           </div>
         </Dialog>
       </Transition.Root>
-    </>
   );
 }

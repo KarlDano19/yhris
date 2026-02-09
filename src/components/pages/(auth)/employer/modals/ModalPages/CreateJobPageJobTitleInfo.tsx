@@ -23,6 +23,9 @@ export default function CreateJobPageTitleInfo({
   positionData,
   refetchPositions,
   fourthForm,
+  isEdit,
+  onSave,
+  isLoading,
 }: {
   control: any;
   Controller: any;
@@ -34,6 +37,9 @@ export default function CreateJobPageTitleInfo({
   positionData?: any;
   refetchPositions?: () => void;
   fourthForm?: any;
+  isEdit?: boolean;
+  onSave?: () => void;
+  isLoading?: boolean;
 }) {
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
   
@@ -218,7 +224,7 @@ export default function CreateJobPageTitleInfo({
                       value={positionOptions.flatMap(group => group.options).find((item: any) => 
                         item.value === value || item.label === value
                       )}
-                      onChange={(val) => {
+                      onChange={(val: any) => {
                         onChange(val?.value || ''); // This will send the position ID
                         // Immediately update the position description in the job description form
                         if (fourthForm) {
@@ -243,7 +249,7 @@ export default function CreateJobPageTitleInfo({
                       isClearable={false}
                       noOptionsMessage={() => 'No positions available'}
                       placeholder='Select a position...'
-                      formatGroupLabel={(group) => (
+                      formatGroupLabel={(group: any) => (
                         <div className="text-xs font-semibold text-gray-500 py-1">
                           {group.label}
                         </div>
@@ -283,7 +289,7 @@ export default function CreateJobPageTitleInfo({
                           ? value.includes(item.value) 
                           : item.value === value
                       )}
-                      onChange={(val) => {
+                      onChange={(val: any) => {
                         const selectedValues = val ? val.map((item: any) => item.value) : [];
                         if (selectedValues.length <= 10) {
                           onChange(selectedValues);
@@ -301,28 +307,28 @@ export default function CreateJobPageTitleInfo({
                       isMulti
                       noOptionsMessage={() => null}
                       placeholder='Select locations... (max 10)'
-                      isOptionDisabled={(option) => {
+                      isOptionDisabled={(option: any) => {
                         // First check if it's a region header (these should always be disabled)
                         if (option.isDisabled) return true;
-                        
+
                         // Then check if we've reached the selection limit
                         const currentSelections = Array.isArray(value) ? value.length : 0;
                         return currentSelections >= 10;
                       }}
                       styles={{
-                        multiValue: (provided) => ({
+                        multiValue: (provided: any) => ({
                           ...provided,
                           backgroundColor: '#eff6ff',
                           borderRadius: '6px',
                           border: '1.5px solid rgba(29, 78, 216, 0.1)',
                         }),
-                        multiValueLabel: (provided) => ({
+                        multiValueLabel: (provided: any) => ({
                           ...provided,
                           color: '#305ddb',
                           fontSize: '12px',
                           fontWeight: '500',
                         }),
-                        multiValueRemove: (provided) => ({
+                        multiValueRemove: (provided: any) => ({
                           ...provided,
                           color: '#2353d9',
                           padding: '2px',
@@ -349,6 +355,16 @@ export default function CreateJobPageTitleInfo({
           >
             Next
           </button>
+          {isEdit && onSave && (
+            <button
+              type='button'
+              className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed'
+              onClick={onSave}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          )}
         </div>
       </form>
 

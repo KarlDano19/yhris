@@ -17,6 +17,9 @@ export default function CreateJobPageJobDescription({
   combinedFormData,
   positionData,
   firstForm,
+  isEdit,
+  onSave,
+  isLoading,
 }: {
   register: any;
   setValue: any;
@@ -28,6 +31,9 @@ export default function CreateJobPageJobDescription({
   combinedFormData?: any;
   positionData?: any[];
   firstForm?: any;
+  isEdit?: boolean;
+  onSave?: () => void;
+  isLoading?: boolean;
 }) {
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -139,9 +145,7 @@ export default function CreateJobPageJobDescription({
             <div className='mt-2'>
               <input
                 id='jobDescriptionFile'
-                {...register('jobDescriptionFile', {
-                  required: true,
-                })}
+                {...register('jobDescriptionFile')}
                 type='file'
                 className='hidden'
                 onChange={(e) => {
@@ -244,41 +248,11 @@ export default function CreateJobPageJobDescription({
         </div>
       </div>
       <hr />
-      <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
-        <button
-          id='pageJobDescriptionNextBtn'
-          type='button'
-          className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-          onClick={async () => {
-            const jobDescriptionFile = getValues('jobDescriptionFile');
-            const jobDescription = getValues('jobDescription');
-            const qualifications = getValues('qualifications');
-            const notesRemarks = getValues('notesRemarks');
-            const results = [
-              filePropsLocal.fileName,
-              jobDescription !== '<ul><li><br></li></ul>' && jobDescription !== '<p><br></p>' && jobDescription,
-              qualifications !== '<ul><li><br></li></ul>' && qualifications !== '<p><br></p>' && qualifications,
-              notesRemarks !== '<ul><li><br></li></ul>' && notesRemarks !== '<p><br></p>' && notesRemarks,
-            ];
-            const incomplete = results.every((item: boolean) => !item);
-            if (!incomplete) {
-              onSubmit();
-            } else {
-              setManualInputFocus({
-                jobDescriptionFile: !!!jobDescriptionFile,
-                jobDescription: !!!jobDescription,
-                qualifications: !!!qualifications,
-                notesRemarks: !!!notesRemarks,
-              });
-            }
-          }}
-        >
-          Next
-        </button>
+      <div className='mt-5 flex flex-col gap-3 px-4 sm:mt-4 sm:flex-row sm:justify-between'>
         <button
           id='pageJobDescriptionBackBtn'
           type='button'
-          className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
+          className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
           onClick={() => {
             // Check if salary fields are actually filled
             const hasSalaryData = combinedFormData?.salary?.salaryType &&
@@ -295,6 +269,48 @@ export default function CreateJobPageJobDescription({
         >
           Back
         </button>
+        <div className='flex gap-3 flex-row-reverse'>
+          <button
+            id='pageJobDescriptionNextBtn'
+            type='button'
+            className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+            onClick={async () => {
+              const jobDescriptionFile = getValues('jobDescriptionFile');
+              const jobDescription = getValues('jobDescription');
+              const qualifications = getValues('qualifications');
+              const notesRemarks = getValues('notesRemarks');
+              const results = [
+                filePropsLocal.fileName,
+                jobDescription !== '<ul><li><br></li></ul>' && jobDescription !== '<p><br></p>' && jobDescription,
+                qualifications !== '<ul><li><br></li></ul>' && qualifications !== '<p><br></p>' && qualifications,
+                notesRemarks !== '<ul><li><br></li></ul>' && notesRemarks !== '<p><br></p>' && notesRemarks,
+              ];
+              const incomplete = results.every((item: boolean) => !item);
+              if (!incomplete) {
+                onSubmit();
+              } else {
+                setManualInputFocus({
+                  jobDescriptionFile: !!!jobDescriptionFile,
+                  jobDescription: !!!jobDescription,
+                  qualifications: !!!qualifications,
+                  notesRemarks: !!!notesRemarks,
+                });
+              }
+            }}
+          >
+            Next
+          </button>
+          {isEdit && onSave && (
+            <button
+              type='button'
+              className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed'
+              onClick={onSave}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

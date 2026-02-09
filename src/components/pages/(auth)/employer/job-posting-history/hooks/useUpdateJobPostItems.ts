@@ -7,23 +7,49 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     const formData = new FormData();
     
     // Basic job details
-    formData.append('country', jobPost.country);
-    formData.append('language', jobPost.language);
-    formData.append('job_title', jobPost.jobTitle);
-    formData.append('position', jobPost.position);
-    formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise || '');
-    formData.append('job_type', jobPost.jobType.join());
-    formData.append('work_setup', jobPost.workSetup.join());
-    formData.append('job_schedule', jobPost.schedule.join());
-    formData.append('required_slot', jobPost.hireCount.toString());
-    formData.append('date_required', new Date(jobPost.hireDate).toISOString());
-    formData.append('job_description', jobPost.jobDescription);
-    formData.append('qualifications', jobPost.qualifications);
-    // Ensure notesRemarks is never undefined - use empty string if not provided
-    formData.append('job_remark', jobPost.notesRemarks || '');
-    formData.append('job_url', jobPost.jobUrl);
-    formData.append('poster_type', jobPost.postAs);
-    
+    if (jobPost.country) formData.append('country', jobPost.country);
+    if (jobPost.language) formData.append('language', jobPost.language);
+    if (jobPost.jobTitle) formData.append('job_title', jobPost.jobTitle);
+    if (jobPost.position) formData.append('position', jobPost.position);
+    if (jobPost.placeAdvertise) {
+      formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise);
+    }
+    if (jobPost.jobType && Array.isArray(jobPost.jobType)) {
+      formData.append('job_type', jobPost.jobType.join());
+    }
+    if (jobPost.workSetup && Array.isArray(jobPost.workSetup)) {
+      formData.append('work_setup', jobPost.workSetup.join());
+    }
+    if (jobPost.schedule && Array.isArray(jobPost.schedule)) {
+      formData.append('job_schedule', jobPost.schedule.join());
+    }
+    if (jobPost.hireCount) {
+      formData.append('required_slot', jobPost.hireCount.toString());
+    }
+    if (jobPost.hireDate) {
+      formData.append('date_required', new Date(jobPost.hireDate).toISOString());
+    }
+    if (jobPost.jobDescription) formData.append('job_description', jobPost.jobDescription);
+    if (jobPost.qualifications) formData.append('qualifications', jobPost.qualifications);
+    if (jobPost.notesRemarks) formData.append('job_remark', jobPost.notesRemarks);
+
+    // Always include job_url - use provided value or generate default
+    const jobUrl = jobPost.jobUrl || `${window.location.protocol}//${window.location.host}/jobs/`;
+    formData.append('job_url', jobUrl);
+
+    // Always send poster_type (similar to CREATE flow)
+    if (jobPost.postAs) formData.append('poster_type', jobPost.postAs);
+
+    // Open Graph metadata (similar to CREATE flow)
+    formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);
+    formData.append('og_type', 'article');
+    if (jobPost.jobTitle) {
+      formData.append('og_title', jobPost.jobTitle);
+      formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
+    }
+    formData.append('og_image_width', '300');
+    formData.append('og_image_height', '300');
+
     // Show/hide flags
     formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
     formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
@@ -31,20 +57,21 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('is_show_benefits', jobPost.is_show_benefits === true ? 'true' : 'false');
     
     // Handle both postIn and shared_to properties for platform sharing
-    if (jobPost.postIn && Array.isArray(jobPost.postIn)) {
+    // Only send shared_to if it has a value (for PATCH requests, omit empty fields)
+    if (jobPost.postIn && Array.isArray(jobPost.postIn) && jobPost.postIn.length > 0) {
       formData.append('shared_to', jobPost.postIn.join());
-    } else if (jobPost.shared_to && Array.isArray(jobPost.shared_to)) {
+    } else if (jobPost.shared_to && Array.isArray(jobPost.shared_to) && jobPost.shared_to.length > 0) {
       formData.append('shared_to', jobPost.shared_to.join());
-    } else if (typeof jobPost.shared_to === 'string') {
+    } else if (typeof jobPost.shared_to === 'string' && jobPost.shared_to.trim() !== '') {
       formData.append('shared_to', jobPost.shared_to);
-    } else {
-      formData.append('shared_to', '');
     }
     
     formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);
     formData.append('og_type', 'article');
-    formData.append('og_title', jobPost.jobTitle);
-    formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
+    if (jobPost.jobTitle) {
+      formData.append('og_title', jobPost.jobTitle);
+      formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
+    }
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
 
@@ -56,7 +83,7 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       formData.append('uploaded_custom_poster', jobPost.postAsUpload);
     }
 
-    // Salary information
+    // Salary information (only send if exists - for PATCH requests)
     if (jobPost.salary && jobPost.rate) {
       formData.append('salary_range_type', jobPost.salary.salaryType);
       formData.append('rate', jobPost.rate);
@@ -66,18 +93,11 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       } else {
         formData.append('exact_amount', jobPost.salary.salaryValue);
       }
-    } else {
-      formData.append('salary_range_type', '');
-      formData.append('rate', '');
-      formData.append('minimum_amount', '');
-      formData.append('exact_amount', '');
     }
-    
-    // Benefits
-    if (jobPost.benefits) {
+
+    // Benefits (only send if exists - for PATCH requests)
+    if (jobPost.benefits && Array.isArray(jobPost.benefits) && jobPost.benefits.length > 0) {
       formData.append('offered_benefits', jobPost.benefits.join());
-    } else {
-      formData.append('offered_benefits', '');
     }
 
     // Add screening questions and auto-reject settings
@@ -133,7 +153,7 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
       },
       body: formData,
     };
-    
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${job_post_id}/`, config);
     if (!res.ok) {
       throw res.json();

@@ -16,6 +16,9 @@ export default function CreateJobPageSalary({
   getValues,
   onSubmit,
   pageNumber,
+  isEdit,
+  onSave,
+  isLoading,
 }: {
   watch: any;
   register: any;
@@ -26,6 +29,9 @@ export default function CreateJobPageSalary({
   getValues: any;
   onSubmit: () => void;
   pageNumber?: number;
+  isEdit?: boolean;
+  onSave?: () => void;
+  isLoading?: boolean;
 }) {
   const [selectedBenefitOptions, setSelectedBenefitOptions] = useState<string[]>([]);
   const [selectedOtherBenefit, setSelectedOtherBenefit] = useState<string[]>([]);
@@ -219,6 +225,8 @@ export default function CreateJobPageSalary({
                       benefits: false,
                       range: false,
                       amount: false,
+                      salaryType: false,
+                      rate: false,
                     })
                   }
                 />
@@ -369,66 +377,7 @@ export default function CreateJobPageSalary({
         </div>
       </div>
       <hr />
-      <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
-        <button
-          id='pageSalaryNextBtn'
-          type='button'
-          className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-          onClick={async () => {
-            const salaryType = await trigger('salary.salaryType');
-            if (!salaryType) {
-              setFocus('salaryType');
-            }
-            const salaryValue = await trigger('salary.salaryValue');
-            if (!salaryValue) {
-              setFocus('salaryValue');
-            }
-            const rate = await trigger('rate');
-            if (!rate) {
-              setFocus('rate');
-            }
-            const benefits = selectedBenefitOptions.length > 0;
-            const salaryTypeValue = getValues('salary.salaryType');
-            const salaryRangeMinValue = getValues('salary.salaryRangeMin');
-            const salaryRangeMaxValue = getValues('salary.salaryRangeMax');
-            const salaryValueValue = getValues('salary.salaryValue');
-            setManualInputFocus({
-              benefits: !!!benefits && !isOtherBenefitOpen,
-              range: salaryTypeValue === 'Range' && !salaryRangeMinValue && !salaryRangeMaxValue ? true : false,
-              amount:
-                salaryTypeValue !== 'Range' && ((typeof salaryValueValue !== 'number' && salaryValueValue.trim() === '-') || !salaryValueValue) ? true : false,
-              salaryType: !salaryType,
-              rate: !rate,
-            });
-            if (salaryTypeValue === 'Range') {
-              if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {
-                toast.custom(
-                  () => (
-                    <CustomToast
-                      message={'Minimum salary cannot be greater than or equal to maximum salary.'}
-                      type='error'
-                    />
-                  ),
-                  {
-                    duration: 7000,
-                  }
-                );
-                return;
-              }
-            }
-            const results = [salaryType, rate, benefits || isOtherBenefitOpen];
-            const incomplete = results.some((item: boolean) => !item);
-            if (
-              !incomplete &&
-              ((salaryTypeValue === 'Range' && salaryRangeMinValue && salaryRangeMaxValue) ||
-                (salaryTypeValue !== 'Range' && (typeof salaryValueValue !== 'number' && salaryValueValue.trim()) !== '-' && salaryValueValue))
-            ) {
-              onSubmit();
-            }
-          }}
-        >
-          Next
-        </button>
+      <div className='mt-5 flex flex-col gap-3 px-4 sm:mt-4 sm:flex-row sm:justify-between'>
         <button
           id='pageSalaryBackBtn'
           type='button'
@@ -437,6 +386,77 @@ export default function CreateJobPageSalary({
         >
           Back
         </button>
+        <div className='flex gap-3 flex-row-reverse'>
+          <button
+            id='pageSalaryNextBtn'
+            type='button'
+            className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+            onClick={async () => {
+              const salaryType = await trigger('salary.salaryType');
+              if (!salaryType) {
+                setFocus('salaryType');
+              }
+              const salaryValue = await trigger('salary.salaryValue');
+              if (!salaryValue) {
+                setFocus('salaryValue');
+              }
+              const rate = await trigger('rate');
+              if (!rate) {
+                setFocus('rate');
+              }
+              const benefits = selectedBenefitOptions.length > 0;
+              const salaryTypeValue = getValues('salary.salaryType');
+              const salaryRangeMinValue = getValues('salary.salaryRangeMin');
+              const salaryRangeMaxValue = getValues('salary.salaryRangeMax');
+              const salaryValueValue = getValues('salary.salaryValue');
+              setManualInputFocus({
+                benefits: !!!benefits && !isOtherBenefitOpen,
+                range: salaryTypeValue === 'Range' && !salaryRangeMinValue && !salaryRangeMaxValue ? true : false,
+                amount:
+                  salaryTypeValue !== 'Range' && ((typeof salaryValueValue !== 'number' && salaryValueValue.trim() === '-') || !salaryValueValue) ? true : false,
+                salaryType: !salaryType,
+                rate: !rate,
+              });
+              if (salaryTypeValue === 'Range') {
+                if (parseInt(salaryRangeMinValue) >= parseInt(salaryRangeMaxValue)) {
+                  toast.custom(
+                    () => (
+                      <CustomToast
+                        message={'Minimum salary cannot be greater than or equal to maximum salary.'}
+                        type='error'
+                      />
+                    ),
+                    {
+                      duration: 7000,
+                    }
+                  );
+                  return;
+                }
+              }
+              const results = [salaryType, rate, benefits || isOtherBenefitOpen];
+              const incomplete = results.some((item: boolean) => !item);
+              if (
+                !incomplete &&
+                ((salaryTypeValue === 'Range' && salaryRangeMinValue && salaryRangeMaxValue) ||
+                  (salaryTypeValue !== 'Range' && (typeof salaryValueValue !== 'number' && salaryValueValue.trim()) !== '-' && salaryValueValue))
+              ) {
+                onSubmit();
+              }
+            }}
+          >
+            Next
+          </button>
+          {isEdit && onSave && (
+            <button
+              type='button'
+              className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed'
+              onClick={onSave}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

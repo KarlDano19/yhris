@@ -22,6 +22,7 @@ export default function CreateJobPagePlatform({
 }) {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [manualInputFocus, setManualInputFocus] = useState(false);
+  const [originalPlatforms, setOriginalPlatforms] = useState<string[]>([]);
 
   const handleRadioChange = (value: string) => {
     setSelectedOptions((prevOptions) => {
@@ -43,25 +44,37 @@ export default function CreateJobPagePlatform({
     if (getValues) {
       // Check for shared_to first (from API data)
       const sharedTo = getValues('shared_to');
-      if (sharedTo) {
+      if (sharedTo && isEdit) {
+        let platforms: string[] = [];
         if (typeof sharedTo === 'string') {
-          setSelectedOptions(sharedTo.split(',').map(item => item.trim()));
+          // Filter out empty strings after splitting and trimming
+          platforms = sharedTo.split(',').map(item => item.trim()).filter(item => item !== '');
         } else if (Array.isArray(sharedTo)) {
-          setSelectedOptions(sharedTo);
+          // Filter out empty strings from array
+          platforms = sharedTo.filter(item => item && item.trim() !== '');
         }
+
+        // Set original platforms ONCE when component loads in edit mode
+        if (originalPlatforms.length === 0 && platforms.length > 0) {
+          setOriginalPlatforms(platforms);
+        }
+
+        // Set current selected options
+        setSelectedOptions(platforms);
       } else if (getValues('postIn')) {
         const postIn = getValues('postIn');
         if (Array.isArray(postIn)) {
-          setSelectedOptions(postIn);
+          const filteredPostIn = postIn.filter(item => item && item.trim() !== '');
+          setSelectedOptions(filteredPostIn);
         } else if (typeof postIn === 'string') {
-          setSelectedOptions(postIn.split(',').map(item => item.trim()));
+          const filteredPostIn = postIn.split(',').map(item => item.trim()).filter(item => item !== '');
+          setSelectedOptions(filteredPostIn);
         } else {
           setSelectedOptions([]);
         }
       }
     }
-    // Add sharedTo as a dependency so it updates when the value changes
-  }, [pageNumber, getValues, getValues && getValues('shared_to')]);
+  }, [pageNumber, getValues, getValues && getValues('shared_to'), isEdit, originalPlatforms.length]);
 
   return (
     <>
@@ -71,8 +84,13 @@ export default function CreateJobPagePlatform({
           <label className='block text-sm font-medium leading-6 text-gray-900'>
             Post in (you may select multiple platforms):
           </label>
+          {isEdit && originalPlatforms.length > 0 && (
+            <p className='text-sm text-gray-500 mt-1'>
+              You can add new platforms, but cannot remove previously selected platforms.
+            </p>
+          )}
           <div className={`flex flex-col space-y-2 ml-2 mt-2 ${manualInputFocus ? 'border-2 border-blue-700' : ''}`}>
-            <label className='inline-flex items-center mr-4'>
+            <label className={`inline-flex items-center mr-4 ${isEdit && originalPlatforms.includes('LinkedIn') ? 'opacity-60' : ''}`}>
               <input
                 id='linkedinCheckbox'
                 type='checkbox'
@@ -83,12 +101,13 @@ export default function CreateJobPagePlatform({
                   setManualInputFocus(false);
                 }}
                 checked={selectedOptions.includes('LinkedIn')}
+                disabled={isEdit && originalPlatforms.includes('LinkedIn')}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <LinkedIn /> <span className='ml-2'>LinkedIn</span>
               </span>
             </label>
-            <label className='inline-flex items-start mr-4'>
+            <label className={`inline-flex items-start mr-4 ${isEdit && originalPlatforms.includes('Facebook') ? 'opacity-60' : ''}`}>
               <input
                 id='facebookRadioBtn'
                 type='checkbox'
@@ -99,6 +118,7 @@ export default function CreateJobPagePlatform({
                   setManualInputFocus(false);
                 }}
                 checked={selectedOptions.includes('Facebook')}
+                disabled={isEdit && originalPlatforms.includes('Facebook')}
               />
               <span className='flex items-center ml-2 text-sm font-medium leading-6 text-gray-900'>
                 <Facebook />
@@ -110,13 +130,22 @@ export default function CreateJobPagePlatform({
             <label htmlFor='jobUrl' className='block text-sm font-medium leading-6 text-gray-900'>
               Add a link to your job post
             </label>
+            {isEdit && (
+              <p className='text-sm text-gray-500 mt-1'>
+                Job URL is automatically generated and cannot be changed.
+              </p>
+            )}
             <div className='mt-1'>
               <input
                 id='jobUrl'
                 placeholder='Enter URL...'
                 {...register('jobUrl', { required: true })}
                 type='text'
-                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                disabled={isEdit}
+                readOnly={isEdit}
+                className={`block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
+                  isEdit ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'text-gray-900'
+                }`}
               />
             </div>
           </div>

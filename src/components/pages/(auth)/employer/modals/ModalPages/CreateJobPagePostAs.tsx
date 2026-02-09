@@ -12,6 +12,9 @@ export default function CreateJobPagePostAs({
   isRangeBenefitsAdded,
   onSubmit,
   pageNumber,
+  isEdit,
+  onSave,
+  isLoading,
 }: {
   setValue: any;
   register: any;
@@ -20,6 +23,9 @@ export default function CreateJobPagePostAs({
   isRangeBenefitsAdded: boolean;
   onSubmit: () => void;
   pageNumber?: number;
+  isEdit?: boolean;
+  onSave?: () => void;
+  isLoading?: boolean;
 }) {
   const [showInput, setShowInput] = useState(false);
   const [manualInputFocus, setManualInputFocus] = useState(false);
@@ -46,7 +52,7 @@ export default function CreateJobPagePostAs({
     } else {
       setShowInput(false);
     }
-  }, [pageNumber]);
+  }, [pageNumber, getValues]);
 
   return (
     <>
@@ -163,34 +169,52 @@ export default function CreateJobPagePostAs({
         </div>
       </div>
       <hr />
-      <div className='mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between px-4'>
-        <button
-          id='pagePostAsNextBtn'
-          type='button'
-          className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-          onClick={() => {
-            const postAs = getValues('postAs');
-            if ((postAs && postAs !== 'upload') || (postAs === 'upload' && fileProps.fileName)) {
-              onSubmit();
-            } else {
-              if (getValues('uploaded_image')) {
-                onSubmit();
-              } else {
-                setManualInputFocus(true);
-              }
-            }
-          }}
-        >
-          Next
-        </button>
+      <div className='mt-5 flex flex-col gap-3 px-4 sm:mt-4 sm:flex-row sm:justify-between'>
         <button
           id='pagePostAsBackBtn'
           type='button'
           className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0 sm:w-auto'
-          onClick={() => setPageNumber(5)}
+          onClick={() => {
+            if (isRangeBenefitsAdded) {
+              setPageNumber(4);
+            } else {
+              setPageNumber(5);
+            }
+          }}
         >
           Back
         </button>
+        <div className='flex gap-3 flex-row-reverse'>
+          <button
+            id='pagePostAsNextBtn'
+            type='button'
+            className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
+            onClick={() => {
+              const postAs = getValues('postAs');
+              if ((postAs && postAs !== 'upload') || (postAs === 'upload' && fileProps.fileName)) {
+                onSubmit();
+              } else {
+                if (getValues('uploaded_image')) {
+                  onSubmit();
+                } else {
+                  setManualInputFocus(true);
+                }
+              }
+            }}
+          >
+            Next
+          </button>
+          {isEdit && onSave && (
+            <button
+              type='button'
+              className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed'
+              onClick={onSave}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

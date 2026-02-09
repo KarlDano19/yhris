@@ -48,6 +48,7 @@ import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
 import AssignUsersModal from './modals/AssignUsersModal';
+import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
 import { useQueryClient } from '@tanstack/react-query';
@@ -144,6 +145,64 @@ const Content = () => {
 
   // Menu key to force close dropdowns on scroll
   const [menuKey, setMenuKey] = useState(0);
+
+  // Social share modal state
+  const [socialType, setSocialType] = useState<string | null>(null);
+  const [socialOgUrl, setOgUrl] = useState<string>('');
+  const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
+  const [isSocialShareModalClosed, setIsSocialShareModalClosed] = useState(false);
+  const isSocialShareModalClosedRef = useRef(isSocialShareModalClosed);
+
+  useEffect(() => {
+    isSocialShareModalClosedRef.current = isSocialShareModalClosed;
+  }, [isSocialShareModalClosed]);
+
+  const openConfirmSocialShareModal = (social: string, og_url: string) => {
+    setOgUrl(og_url);
+
+    const openModalAndWait = async (social: string) => {
+      return new Promise<void>((resolve) => {
+        setSocialType(social);
+        setIsSocialShareModalOpen(true);
+        const interval = setInterval(() => {
+          if (isSocialShareModalClosedRef.current) {
+            clearInterval(interval);
+            setIsSocialShareModalClosed(false);
+            setIsSocialShareModalOpen(false);
+            resolve();
+          }
+        }, 100);
+      });
+    };
+
+    const splitSocial = social.split(',');
+    const processSocialShares = async () => {
+      // Add a small delay to ensure UpdateJobModal has fully closed
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      for (const social of splitSocial) {
+        await openModalAndWait(social);
+      }
+    };
+
+    processSocialShares();
+  };
+
+  const socialMediaShareModal = () => {
+    // Add timestamp to force LinkedIn/Facebook to re-scrape updated job metadata (bypass cache)
+    const urlWithTimestamp = `${socialOgUrl}${socialOgUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    const encoded_url = encodeURIComponent(urlWithTimestamp);
+    if (socialType === 'Facebook') {
+      const og_url = `${encoded_url}%26source%3Dfacebook`;
+      shareFb(og_url);
+      return;
+    }
+    if (socialType === 'LinkedIn') {
+      const og_url = `${encoded_url}%26source%3Dlinkedin`;
+      shareLinkedIn(og_url);
+      return;
+    }
+  };
 
   const handleRightClick = (event: any, jobPost: any) => {
     event.preventDefault();
@@ -382,14 +441,16 @@ const Content = () => {
   };
 
   const socialMediaShare = (social: string, og_url: string) => {
-    const encoded_url = encodeURIComponent(og_url);
+    // Add timestamp to force LinkedIn/Facebook to re-scrape metadata (bypass cache)
+    const urlWithTimestamp = `${og_url}${og_url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    const encoded_url = encodeURIComponent(urlWithTimestamp);
     if (social === 'Facebook') {
-      og_url = `${encoded_url}%3Fsource%3Dfacebook`;
+      og_url = `${encoded_url}%26source%3Dfacebook`;
       shareFb(og_url);
       return;
     }
     if (social === 'LinkedIn') {
-      og_url = `${encoded_url}`;
+      og_url = `${encoded_url}%26source%3Dlinkedin`;
       shareLinkedIn(og_url);
       return;
     }
@@ -1117,7 +1178,25 @@ const Content = () => {
           selectedJobId={selectedJobId}
         />
       )}
-      {isEditModalOpen?.open && <UpdateJobModal refetch={refetch} isOpen={isEditModalOpen} setIsOpen={setIsEditModalOpen} />}
+      {isEditModalOpen?.open && (
+        <UpdateJobModal
+          refetch={refetch}
+          isOpen={isEditModalOpen}
+          setIsOpen={setIsEditModalOpen}
+          openConfirmSocialShareModal={openConfirmSocialShareModal}
+        />
+      )}
+
+      {isSocialShareModalOpen && (
+        <ConfirmSocialShareModal
+          onSubmit={socialMediaShareModal}
+          socialType={socialType}
+          isOpen={isSocialShareModalOpen}
+          setIsOpen={setIsSocialShareModalOpen}
+          setIsSocialShareModalClosed={setIsSocialShareModalClosed}
+        />
+      )}
+
       {isDeleteModalOpen && (
         <DeleteModal<T_ModalData>
           isOpen={isDeleteModalOpen}

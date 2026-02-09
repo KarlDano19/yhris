@@ -26,6 +26,9 @@ export default function CreateJobPageJobSettings({
   initialRejectionFeedback,
   isVideoIntroEnabled: initialIsVideoIntroEnabled,
   setIsVideoIntroEnabled,
+  isEdit,
+  onSave,
+  isLoading,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
@@ -36,6 +39,9 @@ export default function CreateJobPageJobSettings({
   initialRejectionFeedback?: string;
   isVideoIntroEnabled?: boolean;
   setIsVideoIntroEnabled?: (enabled: boolean) => void;
+  isEdit?: boolean;
+  onSave?: () => void;
+  isLoading?: boolean;
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
@@ -833,23 +839,35 @@ export default function CreateJobPageJobSettings({
         </div>
       </div>
       <hr />
-      <div className="mt-5 sm:mt-4 flex flex-col sm:flex-row-reverse sm:justify-between gap-3 px-2 sm:px-4">
-        <button
-          id="pageJobSettingsNextBtn"
-          type="button"
-          className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto"
-          onClick={handleSubmit}
-        >
-          Next
-        </button>
+      <div className="mt-5 flex flex-col gap-3 px-4 sm:mt-4 sm:flex-row sm:justify-between">
         <button
           id="pageJobSettingsBackBtn"
           type="button"
-          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto"
+          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:mt-0 sm:w-auto"
           onClick={() => setPageNumber(4)}
         >
           Back
         </button>
+        <div className='flex gap-3 flex-row-reverse'>
+          <button
+            id="pageJobSettingsNextBtn"
+            type="button"
+            className="inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto"
+            onClick={handleSubmit}
+          >
+            Next
+          </button>
+          {isEdit && onSave && (
+            <button
+              type='button'
+              className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed'
+              onClick={onSave}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          )}
+        </div>
       </div>
       
       {/* Custom Questions Modal */}

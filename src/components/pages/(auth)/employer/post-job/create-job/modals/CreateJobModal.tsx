@@ -14,6 +14,7 @@ import CreateJobPageJobSettings from '../../../modals/ModalPages/CreateJobPageJo
 import CreateJobPagePostAs from '../../../modals/ModalPages/CreateJobPagePostAs';
 import CreateJobPagePreview from '../../../modals/ModalPages/CreateJobPagePreview';
 import CreateJobPagePlatform from '../../../modals/ModalPages/CreateJobPagePlatform';
+import classNames from '@/helpers/classNames';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 
@@ -169,6 +170,11 @@ export default function CreateJobModal({
     mutate(finalData, callbackReq);
   };
 
+  // Check if tab 3 should be enabled (in create mode, only enabled after adding salary/benefits)
+  const isTab3Enabled = () => {
+    return isRangeBenefitsAdded;
+  };
+
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
@@ -201,6 +207,73 @@ export default function CreateJobModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
+
+                  {/* Tab Navigation */}
+                  <div className='pt-4 pb-2 px-4'>
+                    <div className='flex flex-row overflow-x-auto whitespace-nowrap space-x-4 scrollbar-hide'>
+                      {/* Tab 1: Job Info */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 1 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>1</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 1 ? 'text-savoy-blue' : 'hidden')}>Job Info</h1>
+                      </div>
+
+                      {/* Tab 2: Job Type */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 2 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>2</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 2 ? 'text-savoy-blue' : 'hidden')}>Job Type</h1>
+                      </div>
+
+                      {/* Tab 3: Salary & Benefits */}
+                      <div
+                        className={classNames(
+                          'flex space-x-2 transition-opacity',
+                          isTab3Enabled() ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                        )}
+                        onClick={() => {
+                          if (isTab3Enabled()) {
+                            setPageNumber(3);
+                          }
+                        }}
+                      >
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 3 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>3</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 3 ? 'text-savoy-blue' : 'hidden')}>Salary & Benefits</h1>
+                      </div>
+
+                      {/* Tab 4: Job Description */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 4 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>4</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 4 ? 'text-savoy-blue' : 'hidden')}>Job Description</h1>
+                      </div>
+
+                      {/* Tab 5: Job Settings */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 5 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>5</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 5 ? 'text-savoy-blue' : 'hidden')}>Job Settings</h1>
+                      </div>
+
+                      {/* Tab 6: Post As */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 6 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>6</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 6 ? 'text-savoy-blue' : 'hidden')}>Post As</h1>
+                      </div>
+
+                      {/* Tab 7: Preview */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 7 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>7</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 7 ? 'text-savoy-blue' : 'hidden')}>Preview</h1>
+                      </div>
+
+                      {/* Tab 8: Platform */}
+                      <div className='flex space-x-2 transition-opacity'>
+                        <h1 className={classNames('text-sm md:text-base font-semibold border-2 py-1 px-2 md:px-3 rounded-full', pageNumber === 8 ? 'text-savoy-blue border-savoy-blue' : 'text-gray-500 border-gray-500')}>8</h1>
+                        <h1 className={classNames('self-center text-sm md:text-base font-semibold', pageNumber === 8 ? 'text-savoy-blue' : 'hidden')}>Platform</h1>
+                      </div>
+                    </div>
+                    <div className='pl-0 pt-2'>
+                      <h1 className='text-sm font-semibold text-gray-500'>Step {pageNumber} out of 8</h1>
+                    </div>
+                  </div>
+
                   <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
                     <CreateJobPageJobTitleInfo
                       control={firstForm.control}
