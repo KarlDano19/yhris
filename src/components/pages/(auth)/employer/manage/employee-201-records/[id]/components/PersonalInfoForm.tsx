@@ -1,16 +1,22 @@
 "use client";
 
+// 1. React imports
 import { useEffect, useMemo, useState } from "react";
 
+// 2. Internal component imports
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
 import CustomDatePicker from "@/components/CustomDatePicker";
-import SelectChevronDown from "@/svg/SelectChevronDown";
 
+// 3. Internal utility imports
 import { s } from "../utils/_shared";
 
+// 4. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
+
+// 5. SVG imports
+import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {
   emp?: Partial<Employee>;

@@ -1,64 +1,76 @@
 "use client";
 
-import { useCallback, useState } from "react";
+// 1. React imports (none needed)
+
+// 2. Third-party library imports
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
+// 3. Internal imports
 import { detailUrl, toFormData } from "../utils/trainingRecordUtils";
-import type { TrainingRecord, UpdateTrainingInput } from "../types/trainingRecords";
 
-export function usePatchTrainingRecord() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+// 4. Type imports
+import type {
+  TrainingRecord,
+  UpdateTrainingInput,
+} from "../types/trainingRecords";
 
-  const update = useCallback(
-    async (
-      employeeId: number | string,
-      recordId: number | string,
-      input: UpdateTrainingInput
-    ): Promise<TrainingRecord> => {
-      setIsLoading(true);
-      setError(undefined);
-      try {
-        const url = detailUrl(employeeId, recordId, Boolean(input.clear_file));
-        const fd = toFormData({
-          training_title: input.training_title,
-          date_completed: input.date_completed,
-          training_provider: input.training_provider,
-          ...(input.proof_of_completion ? { proof_of_completion: input.proof_of_completion } : {}),
-        });
+type PatchTrainingRecordParams = {
+  employeeId: number | string;
+  recordId: number | string;
+  input: UpdateTrainingInput;
+};
 
-        const token = getCookie("token") as string | undefined;
-
-        const res = await fetch(url, {
-          method: "PATCH",
-          headers: {
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-          body: fd,
-        });
-
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.message || problem?.detail || JSON.stringify(problem);
-          } catch {}
-          throw new Error(msg);
-        }
-
-        return (await res.json()) as TrainingRecord;
-      } catch (e: any) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-        throw e;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
+async function patchTrainingRecord(
+  params: PatchTrainingRecordParams
+): Promise<TrainingRecord> {
+  const token = getCookie("token");
+  const url = detailUrl(
+    params.employeeId,
+    params.recordId,
+    Boolean(params.input.clear_file)
   );
 
-  return { update, isLoading, error } as const;
+  const fd = toFormData({
+    training_title: params.input.training_title,
+    date_completed: params.input.date_completed,
+    training_provider: params.input.training_provider,
+    ...(params.input.proof_of_completion
+      ? { proof_of_completion: params.input.proof_of_completion }
+      : {}),
+  });
+
+  const config: RequestInit = {
+    method: "PATCH",
+    headers: {
+      Authorization: `Token ${token}`,
+      // NO Content-Type for FormData
+    },
+    body: fd,
+  };
+
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.message || errorData?.detail || "Failed to update training record."
+    );
+  }
+
+  return res.json();
+}
+
+export function usePatchTrainingRecord() {
+  const queryClient = useQueryClient();
+
+  return useMutation<TrainingRecord, Error, PatchTrainingRecordParams>(
+    (params: PatchTrainingRecordParams) => patchTrainingRecord(params),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries(["trainingRecordsCache", variables.employeeId]);
+        queryClient.invalidateQueries(["employee", variables.employeeId]);
+      },
+    }
+  );
 }

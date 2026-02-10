@@ -1,20 +1,24 @@
 "use client";
 
+// 1. React imports
 import { useEffect, useMemo, useState } from "react";
+
+// 2. Next.js imports
 import { useRouter, useSearchParams } from "next/navigation";
 
+// 3. Internal component imports
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
 import AddableSelect from "../common/AddableSelect";
-
-import { s } from "../utils/_shared";
-
 import SalaryHistoryModal from "../modals/EmploymentDetails/SalaryHistoryModal";
 import EmploymentHistoryModal from "../modals/EmploymentDetails/EmploymentHistoryModal";
-
 import CustomDatePicker from "@/components/CustomDatePicker";
 
+// 4. Internal utility imports
+import { s } from "../utils/_shared";
+
+// 5. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
 
 type Props = {

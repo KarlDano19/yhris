@@ -1,72 +1,55 @@
 "use client";
 
-import { useCallback, useState } from "react";
+// 1. React imports (none needed)
+
+// 2. Third-party library imports
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
+type DeleteHRNoteParams = {
+  employeeId: number | string;
+  noteId: number | string;
+};
 
-type DeleteResult =
-  | { ok: true; status: number }
-  | { ok: false; error: Error; status?: number };
+async function deleteHRNote(params: DeleteHRNoteParams): Promise<void> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    String(params.employeeId)
+  )}/hr-notes/${encodeURIComponent(String(params.noteId))}/`;
+
+  const config = {
+    method: "DELETE",
+    headers: {
+      Authorization: `Token ${token}`,
+    },
+  };
+
+  const res = await fetch(url, config);
+
+  if (!res.ok && res.status !== 204) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.message || errorData?.detail || "Failed to delete HR note."
+    );
+  }
+}
 
 export function useDeleteHRNote(employeeId?: number | string) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const deleteNote = useCallback(
-    async (noteId: number | string): Promise<DeleteResult> => {
+  return useMutation<void, Error, number | string>(
+    (noteId: number | string) => {
       if (!employeeId) {
-        const err = new Error("Missing employeeId");
-        setError(err);
-        return { ok: false, error: err };
+        throw new Error("Missing employeeId");
       }
-      if (!noteId && noteId !== 0) {
-        const err = new Error("Missing note id");
-        setError(err);
-        return { ok: false, error: err };
-      }
-
-      setIsDeleting(true);
-      setError(null);
-
-      const token = getCookie("token") as string | undefined;
-      const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
-        String(employeeId)
-      )}/hr-notes/${encodeURIComponent(String(noteId))}/`;
-
-      try {
-        const res = await fetch(url, {
-          method: "DELETE",
-          headers: {
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-        });
-
-        if (!res.ok && res.status !== 204) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.message ||
-                  problem?.detail ||
-                  JSON.stringify(problem);
-          } catch {}
-          throw new Error(msg);
-        }
-
-        setIsDeleting(false);
-        return { ok: true, status: res.status };
-      } catch (e: any) {
-        const err = e instanceof Error ? e : new Error(String(e));
-        setError(err);
-        setIsDeleting(false);
-        return { ok: false, error: err };
-      }
+      return deleteHRNote({ employeeId, noteId });
     },
-    [employeeId]
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["hrNotesCache", employeeId]);
+        queryClient.invalidateQueries(["employee", employeeId]);
+      },
+    }
   );
-
-  return { isDeleting, error, deleteNote } as const;
 }

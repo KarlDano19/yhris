@@ -1,127 +1,131 @@
 "use client";
 
-import { useCallback, useState } from "react";
+// 1. React imports (none needed)
+
+// 2. Third-party library imports
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
+// 3. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
 
-export type PatchResult<T = unknown> =
-  | { ok: true; data: T; status: number }
-  | { ok: false; error: Error; status?: number };
+type UploadPhotoParams = {
+  employeeId: string;
+  file: File;
+};
 
-export function useEmployeePhotoPatch(employeeId?: string) {
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+type RemovePhotoParams = {
+  employeeId: string;
+};
 
-  const buildUrl = () => {
-    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-    if (!baseUrl) throw new Error("Missing NEXT_PUBLIC_API_URL");
-    if (!employeeId) throw new Error("Missing employeeId");
-    // Same endpoint style as your personal-info API
-    return `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
-      employeeId
-    )}/personal-info/`;
+async function uploadPhoto(params: UploadPhotoParams): Promise<Partial<Employee>> {
+  if (!params.file) {
+    throw new Error("No file selected.");
+  }
+  if (!/^image\//.test(params.file.type)) {
+    throw new Error("Please select an image file.");
+  }
+  if (params.file.size > 10 * 1024 * 1024) {
+    throw new Error("Max file size is 10MB.");
+  }
+
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    params.employeeId
+  )}/personal-info/`;
+
+  const form = new FormData();
+  form.append("photo", params.file);
+
+  const config: RequestInit = {
+    method: "PATCH",
+    headers: {
+      Authorization: `Token ${token}`,
+      // NO Content-Type for FormData
+    },
+    body: form,
   };
 
-  const upload = useCallback(
-    async (file: File): Promise<PatchResult<Partial<Employee>>> => {
-      try {
-        const url = buildUrl();
-        setIsSaving(true);
-        setError(null);
+  const res = await fetch(url, config);
 
-        if (!file) throw new Error("No file selected.");
-        // (Optional) lightweight guard here; UI already validates:
-        if (!/^image\//.test(file.type))
-          throw new Error("Please select an image file.");
-        if (file.size > 10 * 1024 * 1024)
-          throw new Error("Max file size is 10MB.");
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.detail || errorData?.message || "Failed to upload photo."
+    );
+  }
 
-        const form = new FormData();
-        form.append("photo", file);
+  return res.json().catch(() => ({}));
+}
 
-        const token = getCookie("token") as string | undefined;
-        const res = await fetch(url, {
-          method: "PATCH",
-          headers: {
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-            // do NOT set Content-Type for FormData
-          },
-          body: form,
-        });
+async function removePhoto(params: RemovePhotoParams): Promise<Partial<Employee>> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    params.employeeId
+  )}/personal-info/`;
 
-        if (!res.ok) {
-          let msg: string;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.detail ||
-                  problem?.message ||
-                  JSON.stringify(problem);
-          } catch {
-            msg = res.statusText || `HTTP ${res.status}`;
-          }
-          throw new Error(msg);
-        }
+  const form = new FormData();
+  form.append("remove", "1");
 
-        const data = (await res.json().catch(() => ({}))) as Partial<Employee>;
-        setIsSaving(false);
-        return { ok: true, data, status: res.status };
-      } catch (e: any) {
-        const err = e instanceof Error ? e : new Error(String(e));
-        setError(err);
-        setIsSaving(false);
-        return { ok: false, error: err };
-      }
+  const config: RequestInit = {
+    method: "PATCH",
+    headers: {
+      Authorization: `Token ${token}`,
     },
-    [employeeId]
+    body: form,
+  };
+
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.detail || errorData?.message || "Failed to remove photo."
+    );
+  }
+
+  return res.json().catch(() => ({}));
+}
+
+export function useEmployeePhotoPatch(employeeId?: string) {
+  const queryClient = useQueryClient();
+
+  const uploadMutation = useMutation<Partial<Employee>, Error, File>(
+    (file: File) => {
+      if (!employeeId) {
+        throw new Error("Missing employeeId");
+      }
+      return uploadPhoto({ employeeId, file });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employee", employeeId]);
+        queryClient.invalidateQueries(["employeesCache"]);
+      },
+    }
   );
 
-  const remove = useCallback(async (): Promise<
-    PatchResult<Partial<Employee>>
-  > => {
-    try {
-      const url = buildUrl();
-      setIsSaving(true);
-      setError(null);
-
-      const form = new FormData();
-      form.append("remove", "1");
-
-      const token = getCookie("token") as string | undefined;
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-        body: form,
-      });
-
-      if (!res.ok) {
-        let msg: string;
-        try {
-          const problem = await res.json();
-          msg =
-            typeof problem === "string"
-              ? problem
-              : problem?.detail || problem?.message || JSON.stringify(problem);
-        } catch {
-          msg = res.statusText || `HTTP ${res.status}`;
-        }
-        throw new Error(msg);
+  const removeMutation = useMutation<Partial<Employee>, Error, void>(
+    () => {
+      if (!employeeId) {
+        throw new Error("Missing employeeId");
       }
-
-      const data = (await res.json().catch(() => ({}))) as Partial<Employee>;
-      setIsSaving(false);
-      return { ok: true, data, status: res.status };
-    } catch (e: any) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-      setIsSaving(false);
-      return { ok: false, error: err };
+      return removePhoto({ employeeId });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employee", employeeId]);
+        queryClient.invalidateQueries(["employeesCache"]);
+      },
     }
-  }, [employeeId]);
+  );
 
-  return { isSaving, error, upload, remove } as const;
+  return {
+    isSaving: uploadMutation.isLoading || removeMutation.isLoading,
+    error: uploadMutation.error || removeMutation.error,
+    upload: uploadMutation.mutateAsync,
+    remove: removeMutation.mutateAsync,
+  } as const;
 }

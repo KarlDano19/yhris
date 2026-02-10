@@ -1,18 +1,23 @@
 "use client";
 
+// 1. React imports
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { TrashIcon } from "@heroicons/react/24/solid";
-
-import CustomDatePicker from "@/components/CustomDatePicker";
-import Pagination from "@/components/Pagination";
-
+// 2. Internal component imports
 import ConfirmModal from "../modals/ConfirmModal";
 import Section from "../common/Section";
 import Field from "../common/Field";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import Pagination from "@/components/Pagination";
 
+// 3. Internal hook imports
 import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
+
+// 4. Type imports
 import { TrainingRecord } from "../types/trainingRecords";
+
+// 5. Icon imports
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 /* ------------------------------- Types ------------------------------- */
 type FileAction = "keep" | "replace" | "clear";

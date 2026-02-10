@@ -1,49 +1,50 @@
 "use client";
 
-import { useCallback, useState } from "react";
+// 1. React imports
+import { useCallback } from "react";
 
+// 2. Third-party library imports
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
+// 3. Internal imports
 import { detailUrl } from "../utils/trainingRecordUtils";
 
-export function useDeleteTrainingRecord() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+type DeleteTrainingParams = {
+  employeeId: number | string;
+  recordId: number | string;
+};
 
-  const remove = useCallback(
-    async (employeeId: number | string, recordId: number | string): Promise<void> => {
-      setIsLoading(true);
-      setError(undefined);
-      try {
-        const token = getCookie("token") as string | undefined;
-
-        const res = await fetch(detailUrl(employeeId, recordId), {
-          method: "DELETE",
-          headers: {
-            "content-type": "application/json",
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-        });
-
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.message || problem?.detail || JSON.stringify(problem);
-          } catch {}
-          throw new Error(msg);
-        }
-      } catch (e: any) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-        throw e;
-      } finally {
-        setIsLoading(false);
-      }
+async function deleteTrainingRecord(params: DeleteTrainingParams): Promise<void> {
+  const token = getCookie("token");
+  const config = {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
     },
-    []
-  );
+  };
 
-  return { remove, isLoading, error } as const;
+  const res = await fetch(detailUrl(params.employeeId, params.recordId), config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.message || errorData?.detail || "Failed to delete training record."
+    );
+  }
+}
+
+export function useDeleteTrainingRecord() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, DeleteTrainingParams>(
+    (params: DeleteTrainingParams) => deleteTrainingRecord(params),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries(["trainingRecordsCache", variables.employeeId]);
+        queryClient.invalidateQueries(["employee", variables.employeeId]);
+      },
+    }
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
@@ -56,107 +56,73 @@ export type AnalysisParams = {
   include_details?: boolean; // default false
 };
 
-type State<T> = {
-  data: T | null;
-  error: string | null;
-  loading: boolean;
-};
+async function getEmploymentHistoryAnalysis(
+  employeeId: number | string,
+  params?: AnalysisParams
+): Promise<EmploymentHistoryAnalysis> {
+  try {
+    const token = getCookie("token") as string | undefined;
 
-/** ---------- Hook (backwards compatible) ---------- */
-export function useEmploymentHistoryAnalysis() {
-  const [state, setState] = useState<State<EmploymentHistoryAnalysis>>({
-    data: null,
-    error: null,
-    loading: false,
-  });
-
-  // optional: keep a ref to cancel ongoing request if caller passes no signal
-  const acRef = useRef<AbortController | null>(null);
-
-  const buildUrl = useCallback((employeeId: number | string, params?: AnalysisParams) => {
     const qs = new URLSearchParams();
     if (params?.as_of) qs.set("as_of", params.as_of);
     if (params?.include_details) qs.set("include_details", "1");
     const q = qs.toString();
-    return `${API_URL}/api/employee-201/employees/${encodeURIComponent(
+
+    const url = `${API_URL}/api/employee-201/employees/${encodeURIComponent(
       String(employeeId)
     )}/employment-history/analysis/${q ? `?${q}` : ""}`;
-  }, []);
 
-  const getToken = useCallback(() => {
-    return (getCookie("token") as string | undefined) || "";
-  }, []);
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Token ${token}` } : {}),
+      },
+    };
 
-  const fetchAnalysis = useCallback(
-    async (employeeId: number | string, params?: AnalysisParams, signal?: AbortSignal) => {
-      // If no external signal provided, manage our own AbortController
-      if (!signal) {
-        acRef.current?.abort();
-        acRef.current = new AbortController();
-        signal = acRef.current.signal;
+    if (token) {
+      const res = await fetch(url, config);
+      if (!res.ok) {
+        throw res.json();
       }
+      return res.json();
+    }
 
-      setState((s) => ({ ...s, loading: true, error: null }));
-      try {
-        const url = buildUrl(employeeId, params);
-        const token = getToken();
+    throw new Error("No authentication token");
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch employment history analysis.");
+  }
+}
 
-        const res = await fetch(url, {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-          signal,
-          cache: "no-store",
-        });
-
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.detail || problem?.message || JSON.stringify(problem);
-          } catch {
-            // fall back to text if JSON parsing fails
-            try {
-              const text = await res.text();
-              if (text) msg = text;
-            } catch {}
-          }
-          throw new Error(msg);
-        }
-
-        const json = (await res.json()) as EmploymentHistoryAnalysis;
-        setState({ data: json, error: null, loading: false });
-        return json;
-      } catch (err: any) {
-        if (err?.name === "AbortError") {
-          // do not clobber state on abort; keep loading=false
-          setState((s) => ({ ...s, loading: false }));
-          return;
-        }
-        setState({ data: null, error: err?.message || "Failed to fetch analysis.", loading: false });
-        throw err;
-      }
-    },
-    [buildUrl, getToken]
+/** ---------- Hook (backwards compatible) ---------- */
+export function useEmploymentHistoryAnalysis(
+  employeeId?: number | string,
+  params?: AnalysisParams
+) {
+  const queryResult = useQuery(
+    ["employmentAnalysisCache", employeeId, params?.as_of, params?.include_details],
+    () => getEmploymentHistoryAnalysis(employeeId!, params),
+    {
+      enabled: !!employeeId,
+      refetchOnWindowFocus: false,
+    }
   );
 
-  const reset = useCallback(() => {
-    // abort any inflight if we created it
-    acRef.current?.abort();
-    setState({ data: null, error: null, loading: false });
-  }, []);
-
-  return useMemo(
-    () => ({
-      ...state,
-      fetchAnalysis, // <-- preserved
-      reset,
-    }),
-    [state, fetchAnalysis, reset]
-  );
+  return {
+    data: queryResult.data ?? null,
+    error: queryResult.error ? (queryResult.error as Error).message : null,
+    loading: queryResult.isLoading,
+    fetchAnalysis: queryResult.refetch,
+    reset: () => queryResult.remove(),
+  };
 }
