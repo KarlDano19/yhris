@@ -501,6 +501,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
   }, [isLetterModalOpen, selectedLetter]);
 
+  // Memoize default recipients
+  const useMemoDefaultRecipients = (modalId?: string | number) =>
+    useMemo(() => {
+      if (!modalId) return [];
+      const it = separationItems.find((s: any) => s.id === modalId);
+      return it?.email ? [it.email] : [];
+    }, [separationItems, modalId]);
+
+  const memoDefaultRecipientsDocument = useMemoDefaultRecipients(isDocumentModalOpen?.id);
+  const memoDefaultRecipientsLastPay = useMemoDefaultRecipients(isLastPayModalOpen?.id);
+  const memoDefaultRecipientsQuitclaim = useMemoDefaultRecipients(isQuitclaimModalOpen?.id);
+
   const memoDefaultRecipients = useMemo(() => {
     if (!isLetterModalOpen?.id) return [];
     const item = separationItems.find((item: any) => item.id === isLetterModalOpen.id);
@@ -940,7 +952,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isDocumentModalOpen}
           onClose={() => setIsDocumentModalOpen(null)}
           onSubmit={handleSignDocumentsSubmit}
-          defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsDocument}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send"
@@ -953,7 +965,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isLastPayModalOpen}
           onClose={() => setIsLastPayModalOpen(null)}
           onSubmit={handleLastPaySubmit}
-          defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsLastPay}
           showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
@@ -965,7 +977,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isQuitclaimModalOpen}
           onClose={() => setIsQuitclaimModalOpen(null)}
           onSubmit={handleQuitclaimSubmit}
-          defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsQuitclaim}
           showDragDropAttachment={true}
           submitButtonText="Send"
           isLoading={isLoading}
