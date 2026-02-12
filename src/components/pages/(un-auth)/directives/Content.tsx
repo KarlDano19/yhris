@@ -14,9 +14,9 @@ import useVerifyDirective from './hooks/useVerifyDirective';
 import EmailSelectionModal from './modals/EmailSelectionModal';
 import VerificationCodeModal from './modals/VerificationCodeModal';
 import FilePreviewModal from './modals/FilePreviewModal';
-import { linkify } from '@/helpers/linkify';
 
 import DropDownArrow from '@/svg/DropDownArrow';
+import { linkify } from '@/helpers/linkify';
 
 import 'react-quill/dist/quill.snow.css';
 
