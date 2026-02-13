@@ -1,9 +1,9 @@
 import { SessionOptions } from 'iron-session';
 
 // Access token lifetime constants (matches backend settings)
-export const ACCESS_TOKEN_LIFETIME_SECONDS = 60 * 60 * 3; // 3 hours
+// export const ACCESS_TOKEN_LIFETIME_SECONDS = 60 * 60 * 3; // 3 hours
 // For testing
-// export const ACCESS_TOKEN_LIFETIME_SECONDS = 60; // 1 minute
+export const ACCESS_TOKEN_LIFETIME_SECONDS = 60; // 1 minute
 export const TOKEN_EXPIRATION_WARNING_SECONDS = 30; // Show warning 30 seconds before expiration
 
 export interface SessionData {
