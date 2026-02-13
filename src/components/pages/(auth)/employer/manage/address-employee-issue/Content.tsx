@@ -105,8 +105,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
   const seedEmployeeIssuesMutation = useSeedEmployeeIssues();
   const unseedEmployeeIssuesMutation = useUnseedEmployeeIssues();
-  const { data: employeeIssueDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
-  const { data: decisionEmployeeIssueDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
+  const { data: employeeIssueDetails, isLoading: isLoadingNTEDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
+  const { data: decisionEmployeeIssueDetails, isLoading: isLoadingDecisionDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
     data: dataEmployeeIssues,
     isLoading: isGetEmployeeIssuesLoading,
@@ -1037,8 +1037,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedIssue={selectedIssue}
         />
       )}
-      {isSendNTEModalOpen && (
+      {isSendNTEModalOpen && !isLoadingNTEDetails && (
         <SendEmailModal
+          key={`send-nte-${isSendNTEModalOpen?.id || 'new'}`}
           title="Send NTE"
           isOpen={!!isSendNTEModalOpen}
           onClose={() => setIsSendNTEModalOpen(null)}
@@ -1056,6 +1057,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send & Mark as Sent"
           isLoading={isLoading}
+          disableCCBCC={true}
           prePopulatedData={employeeIssueDetails ? {
             subject: employeeIssueDetails.nte_subject,
             message: employeeIssueDetails.nte_message,
@@ -1071,8 +1073,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         isOpen={isInvestigateModalOpen}
         setIsOpen={setIsInvestigateModalOpen}
       />
-      {isSendDecisionModalOpen && (
+      {isSendDecisionModalOpen && !isLoadingDecisionDetails && (
         <SendEmailModal
+          key={`send-decision-${isSendDecisionModalOpen?.id || 'new'}`}
           title="Send Decision"
           isOpen={!!isSendDecisionModalOpen}
           onClose={() => setIsSendDecisionModalOpen(null)}
@@ -1098,6 +1101,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send"
           isLoading={isLoading}
+          disableCCBCC={true}
           prePopulatedData={decisionEmployeeIssueDetails ? {
             subject: decisionEmployeeIssueDetails.decision_subject,
             message: decisionEmployeeIssueDetails.decision_message,
