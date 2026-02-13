@@ -16,7 +16,6 @@ interface JobCardProps {
   };
   isSelected: boolean;
   isJobView: boolean;
-  isJobModalOpen: boolean;
   onJobClick: (jobId: any) => void;
   onCloseDetails: () => void;
 }
@@ -25,7 +24,6 @@ const JobCard = ({
   job,
   isSelected,
   isJobView,
-  isJobModalOpen,
   onJobClick,
   onCloseDetails,
 }: JobCardProps) => {
@@ -58,12 +56,7 @@ const JobCard = ({
       {/* Mobile Job Details Preview */}
       {isJobView && isSelected && (
         <div className='lg:border-l lg:border-gray-300 xl:pl-10 xl:pr-5 py-3 lg:w-[64%] lg:hidden block'>
-          <div
-            className={classNames(
-              'card border border-savoy-blue rounded-md sticky top-10',
-              isJobModalOpen ? '' : 'hidden'
-            )}
-          >
+          <div className='card border border-savoy-blue rounded-md sticky top-10'>
             <div className='flex justify-end px-3 mt-2'>
               <button onClick={onCloseDetails}>
                 <XMarkIcon className='h-5 w-5 text-indigo-dye' />
