@@ -242,8 +242,6 @@ export default function EmployeeHeader({
             active={activeTab === "documents"}
             onClick={() => setActiveTab("documents")}
             icon={<ArchiveBoxIcon className="h-7 w-7 md:h-9 md:w-9" />}
-            disabled
-            tooltip="Coming soon"
           >
             Document Repository
           </Tab>
