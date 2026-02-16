@@ -1285,3 +1285,174 @@ This fix ensures that whatever position the user selects in the dropdown is the 
 that gets sent to the backend and saved to the database.
 
 ================================================================================
+
+BUG ID: HRIS-010
+DATE FILED: 2026-02-13
+DATE FIXED: 2026-02-13
+CLIENT/REPORTER: Production Client - NTE Email Privacy Issue
+
+ISSUE DESCRIPTION:
+Users reported that when sending an NTE (Notice to Explain) or Decision email to an employee,
+the old/previous employee's email address would appear in the recipient field when opening
+the modal for a different employee. This critical bug affected email privacy and communication
+accuracy.
+
+The race condition occurred during the following workflow:
+1. User opens Send NTE modal for Employee A (email: john@example.com)
+2. Modal renders and starts loading Employee A's details from API
+3. User closes modal
+4. User opens Send NTE modal for Employee B (email: jane@example.com)
+5. Modal renders immediately with isSendNTEModalOpen = {id: 2}
+6. During the 100-300ms loading window, old state from Employee A could appear in the TO field
+7. When Employee B's data loads, recipients update, but if user was quick they might have
+   seen/used Employee A's data
+
+The same issue affected the Send Decision modal.
+
+Root cause analysis revealed:
+- Frontend Race Condition: Timing gap between modal opening and employeeIssueDetails data
+  loading from the API
+- State Persistence: SendEmailModal's internal state (tagsTo, tagsCc, tagsBcc) could briefly
+  show old employee data before new data loaded
+- useEffect Timing: The recipient initialization useEffect depended on prePopulatedData which
+  loaded asynchronously, creating a window where stale data appeared
+- No Loading Gate: Modal rendered immediately when isSendNTEModalOpen was truthy, even before
+  employeeIssueDetails finished loading
+
+Backend investigation confirmed no caching or accumulation issues - recipients were fetched
+fresh from database each time.
+
+DESIRED OUTCOME:
+When opening the Send NTE or Send Decision modal for a specific employee, ONLY that employee's
+email address should appear in the TO field. No data from previously opened modals should
+persist or appear when switching between employees. The modal should wait for employee details
+to fully load before rendering to prevent any race conditions.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required - no caching issues detected)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/address-employee-issue/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A - existing endpoints work correctly)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of NTE and Decision modals)
+☐ Custom hooks tested (useGetEmployeeIssueDetails already working correctly)
+☑ React Query hooks tested (verified loading states work correctly)
+☐ Form validation tested (N/A - no form changes)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified employee details fetch correctly)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (rapid switching, slow network, pre-populated data, CC/BCC disabled)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+Implemented a two-layer defense strategy to completely eliminate the race condition:
+
+**Layer 1: Force Complete Remount with Unique Key Prop (PRIMARY FIX)**
+
+Added dynamic `key` props to both SendEmailModal components in Content.tsx:
+
+Send NTE Modal (line 1042):
+```tsx
+{isSendNTEModalOpen && !isLoadingNTEDetails && (
+  <SendEmailModal
+    key={`send-nte-${isSendNTEModalOpen?.id || 'new'}`}  // ← Forces remount
+    title="Send NTE"
+    isOpen={!!isSendNTEModalOpen}
+    // ...
+  />
+)}
+```
+
+Send Decision Modal (line 1076):
+```tsx
+{isSendDecisionModalOpen && !isLoadingDecisionDetails && (
+  <SendEmailModal
+    key={`send-decision-${isSendDecisionModalOpen?.id || 'new'}`}  // ← Forces remount
+    title="Send Decision"
+    isOpen={!!isSendDecisionModalOpen}
+    // ...
+  />
+)}
+```
+
+Effect: When the employee ID changes, React's reconciliation algorithm detects the key change
+and performs a complete unmount of the old modal instance, destroying all internal state
+(tagsTo, tagsCc, tagsBcc, form data, etc.). A completely fresh modal instance is then mounted
+with clean state. This is the React-recommended way to reset component state and guarantees
+no state can persist between different employees.
+
+**Layer 2: Add Loading State Gate (SECONDARY DEFENSE)**
+
+Extracted loading states from the useGetEmployeeIssueDetails query hooks (line 108-109):
+```tsx
+const { data: employeeIssueDetails, isLoading: isLoadingNTEDetails } =
+  useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
+const { data: decisionEmployeeIssueDetails, isLoading: isLoadingDecisionDetails } =
+  useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
+```
+
+Added loading checks to conditional rendering (lines 1040, 1075):
+```tsx
+{isSendNTEModalOpen && !isLoadingNTEDetails && (  // ← Added loading check
+  <SendEmailModal ... />
+)}
+
+{isSendDecisionModalOpen && !isLoadingDecisionDetails && (  // ← Added loading check
+  <SendEmailModal ... />
+)}
+```
+
+Effect: The modal won't render at all until the employee details have finished loading from
+the API. This eliminates the 100-300ms race condition window completely. Users see nothing
+during data loading, then the modal appears with correct data already populated.
+
+**Why This Solution Works:**
+
+Multi-Layered Protection:
+- Layer 1 (Key): Nuclear option - complete remount ensures fresh state, no carryover possible
+- Layer 2 (Loading Gate): Prevents any rendering during data transition, better UX
+
+React Best Practices:
+- Uses `key` prop as intended for state reset (documented React pattern)
+- Respects loading states before rendering (proper data fetching pattern)
+- No modifications to global SendEmailModal component (safe for other pages)
+
+Minimally Invasive:
+- Changes localized to Content.tsx only (address-employee-issue page)
+- No changes to SendEmailModal.tsx (global component remains untouched)
+- No backend changes required
+- Zero impact on other pages using SendEmailModal
+
+User Experience:
+- Brief loading state (100-300ms) is better than showing wrong/stale data
+- Prevents catastrophic email privacy breach
+- No visible behavior change when data loads quickly from cache
+
+The fix completely eliminates the race condition that was causing old recipients to appear
+in new NTE/Decision emails. Each modal instance is guaranteed to start with clean state and
+only renders when correct employee data is available.
+
+================================================================================

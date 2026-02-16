@@ -27,6 +27,8 @@ const SignDocuments = ({
   setReceived,
   isLoading,
   isLetterReceived,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isDocumentsSent: boolean;
@@ -38,13 +40,15 @@ const SignDocuments = ({
   setReceived: any;
   isLoading: boolean;
   isLetterReceived: boolean;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
   const [selectedAttachmentUrl, setSelectedAttachmentUrl] = useState<string | null>(null);
-  
-  // Disabled if letter hasn't been received yet
-  const isDisabled = !isLetterReceived || isDocumentsSent;
+
+  // Disabled if already sent or if quit claim is in progress
+  const isDisabled = isDocumentsSent || isQuitclaimSigned || isQuitclaimReceived;
   
   // Get attachments to display - prefer documentAttachments array, fallback to single documentsAttachment
   const attachmentsToDisplay: DocumentAttachment[] = documentAttachments && documentAttachments.length > 0
@@ -68,7 +72,7 @@ const SignDocuments = ({
           )}
           disabled={isDisabled}
           data-tooltip-id='sign-documents-tooltip'
-          data-tooltip-content={!isLetterReceived ? 'Letter must be received first' : ''}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot send documents after quit claim' : isDocumentsSent ? 'Documents already sent' : 'Send documents'}
           data-tooltip-place='bottom'
           onClick={() =>
             setIsDocumentModalOpen({
@@ -88,10 +92,10 @@ const SignDocuments = ({
               : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isDocumentsSent || isDocumentsReceived || isLoading}
+          disabled={isDocumentsReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
           onClick={() => setReceived(id, 'sign documents')}
           data-tooltip-id='sign-documents-received-tooltip'
-          data-tooltip-content={!isDocumentsSent ? 'Documents must be sent first' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot receive documents after quit claim' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
           data-tooltip-place='bottom'
         >
           {isLoading && (

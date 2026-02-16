@@ -50,7 +50,7 @@ const Content = () => {
   return (
     <>
       {!!Object.keys(jobDetailData).length && (
-        <div className='py-4 mx-4 md:py-12'>
+        <div className='pt-[90px] pb-4 mx-4 md:pb-12'>
           <div className='md:w-[40em] mx-auto border border-gray-200 shadow-md rounded-[20px] py-2 px-3 sm:px-8 md:py-8 md:px-10'>
             <div className='grid sm:grid-cols-3 md:px-4 mt-5'>
               <div className='col-span-2 flex'>
@@ -197,7 +197,7 @@ const Content = () => {
         </div>
       )}
       {(!!!Object.keys(jobDetailData).length && !isLoading) && (
-        <div className='py-12 px-4 sm:px-6 lg:px-8'>
+        <div className='pt-[85px] pb-12 px-4 sm:px-6 lg:px-8'>
           <div className='max-w-3xl mx-auto lg:mt-32'>
             <div className='px-4 py-5 sm:p-6'>
               <div className='flex items-center justify-center'>
