@@ -33,9 +33,10 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     if (jobPost.qualifications) formData.append('qualifications', jobPost.qualifications);
     if (jobPost.notesRemarks) formData.append('job_remark', jobPost.notesRemarks);
 
-    // Always include job_url - use provided value or generate default
-    const jobUrl = jobPost.jobUrl || `${window.location.protocol}//${window.location.host}/jobs/`;
-    formData.append('job_url', jobUrl);
+    // Only include job_url if user provided a value
+    if (jobPost.jobUrl) {
+      formData.append('job_url', jobPost.jobUrl);
+    }
 
     // Always send poster_type (similar to CREATE flow)
     if (jobPost.postAs) formData.append('poster_type', jobPost.postAs);
