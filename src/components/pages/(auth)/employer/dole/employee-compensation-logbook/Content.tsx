@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, Fragment } from 'react';
+import { flushSync } from 'react-dom';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -83,6 +84,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: deleteEmployeeCompensationLogbook, isLoading: isDeleteEmployeeCompensationLogbookLoading } = useDeleteEmployeeCompensationLogbook();
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [isSelectBranchModalOpen, setIsSelectBranchModalOpen] = useState<boolean>(false);
+  const [filteredItemsForPrint, setFilteredItemsForPrint] = useState<any>(null);
+  const [shouldPrint, setShouldPrint] = useState<boolean>(false);
 
   // Form Methods
   const createFormMethods = useForm();
@@ -205,11 +208,30 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   useEffect(() => {
     if (employeeCompensationLogbookItems) {
       const allLogbookIds = new Set(employeeCompensationLogbookItems.map((item: any) => item.id));
-      const allSelected = allLogbookIds.size > 0 && 
+      const allSelected = allLogbookIds.size > 0 &&
         Array.from(allLogbookIds).every((id: any) => selectedLogbooks.has(id));
       setSelectAll(allSelected);
     }
   }, [selectedLogbooks, employeeCompensationLogbookItems]);
+
+  // Clear filtered items when modal is closed
+  useEffect(() => {
+    if (!isSelectBranchModalOpen) {
+      setFilteredItemsForPrint(null);
+      setShouldPrint(false);
+    }
+  }, [isSelectBranchModalOpen]);
+
+  // Trigger print after filtered items have been set and DOM has updated
+  useEffect(() => {
+    if (shouldPrint && filteredItemsForPrint !== null) {
+      // Use setTimeout to ensure React has finished rendering the updated DOM
+      setTimeout(() => {
+        handlePrint(filteredItemsForPrint);
+        setShouldPrint(false);
+      }, 1000);
+    }
+  }, [shouldPrint, filteredItemsForPrint]);
 
   const handlePrint = (items: any) => {
     // Create a new div element
@@ -219,6 +241,29 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     const originalPrintSection = document.getElementById('printSection');
     if (originalPrintSection) {
       printDiv.innerHTML = originalPrintSection.innerHTML;
+
+      // Now replace the tbody content with filtered items
+      const tbody = printDiv.querySelector('tbody');
+      if (tbody) {
+        // Clear existing rows
+        tbody.innerHTML = '';
+
+        // Add filtered rows
+        items.forEach((item: any) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.date_of_entry || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.date_of_notification || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.employee || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.date_of_contingency || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.place_of_contingency || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.nature_of_contingency || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.days_of_employee_absence || ''}</td>
+            <td class='border-2 border-gray-800 p-2 text-xl'>${item.remarks || ''}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
     }
 
     // Style the new div to be off-screen
@@ -246,11 +291,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     });
   };
 
-  const handlePrintWithBranch = () => {
-    if (selectedBranch) {
-      // Note: This function may need to be updated if employeeItems is no longer available
-      // For now, we'll pass an empty array as the filtering logic needs to be reimplemented
-      handlePrint([]);
+  const handlePrintWithBranch = (branch: string) => {
+    if (branch) {
+      // Filter employee compensation logbook items by the selected branch/location
+      const filtered = employeeCompensationLogbookItems.filter(
+        (item: any) => item.employee_location === branch
+      );
+
+      // Use flushSync to force synchronous state update
+      flushSync(() => {
+        setFilteredItemsForPrint(filtered);
+      });
+
+      // Set flag to trigger print after DOM updates
+      setShouldPrint(true);
     }
   };
 
@@ -659,7 +713,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsSelectBranchModalOpen}
           onBranchSelect={(branch) => {
             setSelectedBranch(branch);
-            handlePrintWithBranch();
+            handlePrintWithBranch(branch);
           }}
         />
       )}
@@ -688,7 +742,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       {/* Print Section */}
       <div className='container mx-auto p-4 hidden'>
         <div id='printSection'>
-          <Image className='mx-auto my-6' src='/assets/ec-logbook.png' alt='EC Logbook' width={1500} height={1000} />
+          <img
+            className='mx-auto my-6'
+            src='/assets/ec-logbook.png'
+            alt='EC Logbook'
+            style={{ width: '100%', height: 'auto', maxWidth: '1980px' }}
+          />
           <div className='overflow-x-auto'>
             <table className='w-full border-collapse border border-gray-800 table-fixed'>
               <thead>
@@ -720,7 +779,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </tr>
               </thead>
               <tbody>
-                {employeeCompensationLogbookItems.map((item: any, rowIndex: number) => (
+                {(filteredItemsForPrint !== null ? filteredItemsForPrint : employeeCompensationLogbookItems).map((item: any, rowIndex: number) => (
                   <tr key={rowIndex}>
                     <td className='border-2 border-gray-800 p-2 text-xl'>{item.date_of_entry}</td>
                     <td className='border-2 border-gray-800 p-2 text-xl'>{item.date_of_notification}</td>

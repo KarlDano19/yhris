@@ -50,6 +50,11 @@ const statuses = [
     value: 'passed',
     title: 'Passed',
   },
+  {
+    id: 'pooling',
+    value: 'pooling',
+    title: 'For Pooling',
+  },
 ];
 
 export default function Checklist({
@@ -491,6 +496,12 @@ export default function Checklist({
                   </div>
                 );
               })}
+              {/* Pooling info */}
+              {getValues('status') === 'pooling' && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Selecting <strong>For Pooling</strong> will move this applicant to the pooling list and archive the application. This action is audited.
+                </p>
+              )}
               {/* Stage Notes Tabs */}
               <div className='grid gap-4 mb-8 '>
                 <p className='font-medium'>Stage Notes</p>

@@ -12,6 +12,7 @@ declare global {
     screeningQuestions: any[];
     autoRejectEnabled: boolean;
     rejectionFeedback?: string;
+    isVideoIntroEnabled?: boolean;
   }
 }
 
@@ -23,6 +24,8 @@ export default function CreateJobPageJobSettings({
   autoRejectEnabled,
   setAutoRejectEnabled,
   initialRejectionFeedback,
+  isVideoIntroEnabled: initialIsVideoIntroEnabled,
+  setIsVideoIntroEnabled,
 }: {
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
@@ -31,6 +34,8 @@ export default function CreateJobPageJobSettings({
   autoRejectEnabled?: boolean;
   setAutoRejectEnabled?: (enabled: boolean) => void;
   initialRejectionFeedback?: string;
+  isVideoIntroEnabled?: boolean;
+  setIsVideoIntroEnabled?: (enabled: boolean) => void;
 }) {
   // Only use default questions if no screeningQuestions are provided
   const [screeningQuestions, setLocalScreeningQuestions] = useState<any[]>(() => {
@@ -167,6 +172,11 @@ export default function CreateJobPageJobSettings({
     return initialRejectionFeedback || window.rejectionFeedback || '';
   });
 
+  // Video intro enabled state
+  const [isVideoIntroEnabled, setLocalIsVideoIntroEnabled] = useState<boolean>(() => {
+    return initialIsVideoIntroEnabled || window.isVideoIntroEnabled || false;
+  });
+
   // Selected preset options - initialize from existing questions
   const [selectedPresets, setSelectedPresets] = useState(() => {
     const presets = new Set<string>();
@@ -261,6 +271,13 @@ export default function CreateJobPageJobSettings({
       setRejectionFeedback(initialRejectionFeedback);
     }
   }, [initialRejectionFeedback]);
+
+  // Update video intro enabled when prop changes (for editing existing job postings)
+  useEffect(() => {
+    if (initialIsVideoIntroEnabled !== undefined && initialIsVideoIntroEnabled !== isVideoIntroEnabled) {
+      setLocalIsVideoIntroEnabled(initialIsVideoIntroEnabled);
+    }
+  }, [initialIsVideoIntroEnabled]);
 
   // Handlers for question actions
   const handleRemove = (id: number) => {
@@ -555,20 +572,24 @@ export default function CreateJobPageJobSettings({
       setIsScreeningOpen(true);
       return;
     }
-    
+
     // NO MAXIMUM LIMIT - Users can add unlimited questions!
     setValidationError(null);
-    
+
     // Update parent component state if available
     if (setScreeningQuestions) {
       setScreeningQuestions(screeningQuestions);
     }
-    
+    if (setIsVideoIntroEnabled) {
+      setIsVideoIntroEnabled(isVideoIntroEnabled);
+    }
+
     // For backward compatibility, also update window globals
     window.screeningQuestions = screeningQuestions;
     window.autoRejectEnabled = true; // Always enabled
     window.rejectionFeedback = rejectionFeedback;
-    
+    window.isVideoIntroEnabled = isVideoIntroEnabled;
+
     onSubmit();
   };
 
@@ -584,6 +605,36 @@ export default function CreateJobPageJobSettings({
             Your settings control how you screen and collect applicants.
           </p>
 
+          {/* Video Enable Intro Section */}
+          <div className="border-b border-gray-200 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isVideoIntroEnabled}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setLocalIsVideoIntroEnabled(newValue);
+                      // Also update parent component state immediately
+                      if (setIsVideoIntroEnabled) {
+                        setIsVideoIntroEnabled(newValue);
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-savoy-blue"></div>
+                </label>
+                <div className="text-base sm:text-medium font-semibold text-gray-900">
+                  Video intro (Optional)
+                </div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 max-w-md mt-2">
+              Allow applicants to submit a video introduction along with their application.
+            </div>
+          </div>
+          
           {/* Screening Questions Section */}
           <div className="border-b border-gray-200 py-4">
             <div className="flex items-center justify-between mb-2">

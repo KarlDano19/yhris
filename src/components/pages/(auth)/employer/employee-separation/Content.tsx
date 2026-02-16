@@ -18,7 +18,6 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
-import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import useDeleteSeparation from './hooks/useDeleteSeparation';
@@ -28,6 +27,7 @@ import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
@@ -239,14 +239,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleLastPaySubmit = (data: any) => {
     if (isLastPayModalOpen && isLastPayModalOpen.id) {
       const updatedItem = handleEmailSending(data, 'last pay', separationItems, isLastPayModalOpen.id);
-      
+
       mutate(updatedItem, {
-        onSuccess: (data: any) => {
-          setSeparationItems(separationItems.map((item: any) => 
-            item.id === isLastPayModalOpen.id ? { ...item, ...updatedItem } : item
-          ));
+        onSuccess: (responseData: any) => {
+          // Refetch to get updated data including saved attachments from backend
+          refetch();
           setIsLastPayModalOpen(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -261,12 +260,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleQuitclaimSubmit = (data: any) => {
     if (isQuitclaimModalOpen && isQuitclaimModalOpen.id) {
       const updatedItem = handleEmailSending(data, 'quit claim', separationItems, isQuitclaimModalOpen.id);
-      
+
       mutate(updatedItem, {
-        onSuccess: (data: any) => {
-          setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
+        onSuccess: (responseData: any) => {
+          // Refetch to get updated data including saved attachments from backend
+          refetch();
           setIsQuitclaimModalOpen(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -334,15 +334,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
           separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
+          separation['letter_attachment'] = separation.letter_attachment;
+          separation['letter_attachments'] = separation.letter_attachments || [];
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
           separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['documents_attachment'] = separation.documents_attachment;  // Backward compatibility
           separation['document_attachments'] = separation.document_attachments || [];  // Multiple attachments
           separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['last_pay_attachment'] = separation.last_pay_attachment;
+          separation['last_pay_attachments'] = separation.last_pay_attachments || [];
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
           separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
+          separation['quit_claim_attachment'] = separation.quit_claim_attachment;
+          separation['quitclaim_attachments'] = separation.quitclaim_attachments || [];
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -395,15 +401,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
           separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
+          separation['letter_attachment'] = separation.letter_attachment;
+          separation['letter_attachments'] = separation.letter_attachments || [];
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
           separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['documents_attachment'] = separation.documents_attachment;  // Backward compatibility
           separation['document_attachments'] = separation.document_attachments || [];  // Multiple attachments
           separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['last_pay_attachment'] = separation.last_pay_attachment;
+          separation['last_pay_attachments'] = separation.last_pay_attachments || [];
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
           separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
+          separation['quit_claim_attachment'] = separation.quit_claim_attachment;
+          separation['quitclaim_attachments'] = separation.quitclaim_attachments || [];
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -652,6 +664,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLetterReceived={item.isLetterReceived}
               letterReceivedDate={item.letterReceivedDate}
               letterAttachment={item.letter_attachment}
+              letterAttachments={item.letter_attachments}
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-letters`] || false}
@@ -685,6 +698,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLastPayReleased={item.isLastPayReleased}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
               lastPayAttachment={item.last_pay_attachment}
+              lastPayAttachments={item.last_pay_attachments}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
               isDocumentsReceived={item.isDocumentsReceived}
               isQuitclaimSigned={item.isQuitclaimSigned}
@@ -698,6 +712,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isQuitclaimReceived={item.isQuitclaimReceived}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
               quitclaimAttachment={item.quit_claim_attachment}
+              quitclaimAttachments={item.quitclaim_attachments}
               setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-quit claim`] || false}
@@ -932,6 +947,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
           defaultRecipients={memoDefaultRecipients}
+          showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           showAttachment={true}
           customAttachmentSection={
             <SeparationLetterAttachmentSection
@@ -967,6 +984,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onSubmit={handleLastPaySubmit}
           defaultRecipients={memoDefaultRecipientsLastPay}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
@@ -979,6 +997,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           onSubmit={handleQuitclaimSubmit}
           defaultRecipients={memoDefaultRecipientsQuitclaim}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />

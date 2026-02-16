@@ -25,9 +25,10 @@ interface ProfileTabProps {
   setCurrentTab: any;
   setValue: UseFormSetValue<any>;
   watch: UseFormWatch<any>;
+  jobDetailData?: any;
 }
 
-const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch }: ProfileTabProps) => {
+const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch, jobDetailData }: ProfileTabProps) => {
   const [profilePhotoList, setProfilePhotoList] = useState<FileList | null>(null);
   const [educationInput, setEducationInput] = useState('');
   const [skillsInput, setSkillsInput] = useState('');
@@ -542,70 +543,86 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
 
   return (
     <form onSubmit={profileSubmit}>
-      <h5 className='text-xl font-semibold'>Profile</h5>
-      <div className='grid lg:grid-cols-7 gap-x-8 mt-7'>
-        <div className='lg:col-span-1'>
-          <div className='overflow-hidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 flex items-center justify-center'>
+      <h5 className="text-xl font-semibold">Profile</h5>
+      <div className="grid lg:grid-cols-7 gap-x-8 mt-7">
+        <div className="lg:col-span-1">
+          <div className="overflow-hidden h-[155px] w-36 md:w-auto md:max-w-[150px] mx-auto md:mx-0 md:cols-span-1 lg:col-span-3 flex items-center justify-center">
             <Image
-              src={profilePhotoList ? URL.createObjectURL(profilePhotoList[0]) : '/assets/no-user.png'}
+              src={
+                profilePhotoList
+                  ? URL.createObjectURL(profilePhotoList[0])
+                  : "/assets/no-user.png"
+              }
               width={143}
               height={155}
               priority={true}
-              alt='profile-logo'
-              className='rounded object-cover max-w-[143px] h-[155px]'
+              alt="profile-logo"
+              className="rounded object-cover max-w-[143px] h-[155px]"
             />
           </div>
         </div>
-        <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5'>
-          <div className='grid-item'>
-            <label htmlFor='first-name' className='text-sm font-medium leading-6 text-gray-900'>
-              First Name<span className='text-red-500'>*</span>
+        <div className="lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+          <div className="grid-item">
+            <label
+              htmlFor="first-name"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
+              First Name<span className="text-red-500">*</span>
             </label>
-            <div className='mt-2'>
+            <div className="mt-2">
               <input
-                type='text'
-                {...register('firstName', { required: true })}
-                id='first-name'
-                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                type="text"
+                {...register("firstName", { required: true })}
+                id="first-name"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
-          <div className='grid-item'>
-            <label htmlFor='middle-name' className='text-sm font-medium leading-6 text-gray-900'>
+          <div className="grid-item">
+            <label
+              htmlFor="middle-name"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
               Middle Name
             </label>
-            <div className='mt-2'>
+            <div className="mt-2">
               <input
-                type='text'
-                {...register('middleName')}
-                id='middle-name'
-                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                type="text"
+                {...register("middleName")}
+                id="middle-name"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
-          <div className='grid-item'>
-            <label htmlFor='last-name' className='text-sm font-medium leading-6 text-gray-900'>
-              Last Name<span className='text-red-500'>*</span>
+          <div className="grid-item">
+            <label
+              htmlFor="last-name"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
+              Last Name<span className="text-red-500">*</span>
             </label>
-            <div className='mt-2'>
+            <div className="mt-2">
               <input
-                type='text'
-                {...register('lastName', { required: true })}
-                id='last-name'
-                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                type="text"
+                {...register("lastName", { required: true })}
+                id="last-name"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
-          <div className='grid-item'>
-            <label htmlFor='email' className='text-sm font-medium leading-6 text-gray-900'>
-              Email Address<span className='text-red-500'>*</span>
+          <div className="grid-item">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
+              Email Address<span className="text-red-500">*</span>
             </label>
-            <div className='mt-2'>
+            <div className="mt-2">
               <input
-                type='email'
-                {...register('email', { required: true })}
-                id='email'
-                className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                type="email"
+                {...register("email", { required: true })}
+                id="email"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
@@ -618,11 +635,11 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             </label>
             <div className="relative mt-2">
               <select
-                {...register("gender", { 
+                {...register("gender", {
                   required: true,
                   onChange: (e) => {
                     setSelectedGender(e.target.value);
-                  }
+                  },
                 })}
                 id="gender"
                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none bg-white"
@@ -655,63 +672,75 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
               />
             </div>
           </div>
-          <div className='grid-item'>
-            <label htmlFor='mobile-no' className='text-sm font-medium leading-6 text-gray-900'>
-              Mobile No.<span className='text-red-500'>*</span>
+          <div className="grid-item">
+            <label
+              htmlFor="mobile-no"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
+              Mobile No.<span className="text-red-500">*</span>
             </label>
-            <div className='mt-2 flex'>
+            <div className="mt-2 flex">
               {/* Country Code Dropdown */}
-              <div className='relative flex-shrink-0'>
+              <div className="relative flex-shrink-0">
                 <button
-                  type='button'
+                  type="button"
                   onClick={() => setShowCountryDropdown(!showCountryDropdown)}
                   onBlur={handleCountryDropdownBlur}
-                  className='flex items-center justify-between w-20 h-9 px-3 py-1.5 text-sm text-gray-900 bg-white border border-r-0 border-gray-300 rounded-l-md focus:ring-2 focus:ring-inset focus:ring-black focus:outline-none'
+                  className="flex items-center justify-between w-20 h-9 px-3 py-1.5 text-sm text-gray-900 bg-white border border-r-0 border-gray-300 rounded-l-md focus:ring-2 focus:ring-inset focus:ring-black focus:outline-none"
                 >
-                  <span className='text-xs'>{countryCode[selectedCountryCode as keyof typeof countryCode]}</span>
+                  <span className="text-xs">
+                    {
+                      countryCode[
+                        selectedCountryCode as keyof typeof countryCode
+                      ]
+                    }
+                  </span>
                   <DropDownArrow />
                 </button>
-                
+
                 {/* Country Code Dropdown */}
                 {showCountryDropdown && (
-                  <div className='absolute z-20 w-28 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                  <div className="absolute z-20 w-28 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {Object.entries(countryCode).map(([countryKey, code]) => (
                       <div
                         key={countryKey}
-                        className='px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm'
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
                         onClick={() => handleCountryCodeSelect(countryKey)}
                       >
-                        <div className='flex justify-between items-center'>
-                          <span className='font-medium'>{countryKey}</span>
-                          <span className='text-gray-500'>{code}</span>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{countryKey}</span>
+                          <span className="text-gray-500">{code}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              
+
               {/* Mobile Number Input */}
               <input
-                type='tel'
+                type="tel"
                 value={mobileNumber}
                 onChange={handleMobileNumberChange}
-                id='mobile-no'
-                placeholder='Enter mobile number'
+                id="mobile-no"
+                placeholder="Enter mobile number"
                 maxLength={11}
-                className='flex-1 rounded-r-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                className="flex-1 rounded-r-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
           </div>
-          <div className='grid-item'>
-            <label htmlFor='address' className='text-sm font-medium leading-6 text-gray-900'>
+          <div className="grid-item">
+            <label
+              htmlFor="address"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
               City Address
-              <span className='text-red-500'>*</span>
+              <span className="text-red-500">*</span>
             </label>
-            <div className='relative mt-2'>
+            <div className="relative mt-2">
               <input
-                type='text'
-                id='address'
+                type="text"
+                id="address"
                 value={cityInput}
                 onChange={handleCityInputChange}
                 onKeyDown={handleCityKeyDown}
@@ -720,34 +749,39 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                   setShowCityDropdown(true);
                   setIsCityFocused(true);
                 }}
-                placeholder='Provide your current city address'
+                placeholder="Provide your current city address"
                 className={`rounded-md w-full border-0 px-3 pr-8 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 ${
-                  !isCityFocused && cityInput.length > 20 ? 'text-ellipsis overflow-hidden whitespace-nowrap' : ''
+                  !isCityFocused && cityInput.length > 20
+                    ? "text-ellipsis overflow-hidden whitespace-nowrap"
+                    : ""
                 }`}
                 style={{
-                  textOverflow: !isCityFocused && cityInput.length > 20 ? 'ellipsis' : 'clip',
+                  textOverflow:
+                    !isCityFocused && cityInput.length > 20
+                      ? "ellipsis"
+                      : "clip",
                 }}
               />
-              <div className='absolute right-3 top-[14px]'>
+              <div className="absolute right-3 top-[14px]">
                 <DropDownArrow />
               </div>
 
               {/* City autocomplete dropdown */}
               {showCityDropdown && filteredCities.length > 0 && (
-                <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {filteredCities.slice(0, 10).map((city, index) => (
                     <div
                       key={index}
                       className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                        index === selectedCityIndex ? 'bg-gray-100' : ''
+                        index === selectedCityIndex ? "bg-gray-100" : ""
                       }`}
                       onClick={() => handleCitySelect(city)}
                     >
-                      <div className='font-medium'>{city.label}</div>
+                      <div className="font-medium">{city.label}</div>
                     </div>
                   ))}
                   {filteredCities.length > 10 && (
-                    <div className='px-3 py-2 text-sm text-gray-500 border-t'>
+                    <div className="px-3 py-2 text-sm text-gray-500 border-t">
                       Showing first 10 results. Type more to narrow down.
                     </div>
                   )}
@@ -757,38 +791,44 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
           </div>
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
-        <div className='grid-item'>
-          <label htmlFor='educational-attainment' className='block text-sm font-medium leading-6 text-gray-900'>
-            Educational Attainment<span className='text-red-500'>*</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11">
+        <div className="grid-item">
+          <label
+            htmlFor="educational-attainment"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            Educational Attainment<span className="text-red-500">*</span>
           </label>
-          <div className='relative mt-2'>
+          <div className="relative mt-2">
             <select
-              id='educational-attainment'
-              {...register('educationalAttainment', { required: true })}
-              className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+              id="educational-attainment"
+              {...register("educationalAttainment", { required: true })}
+              className="rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               tabIndex={13}
             >
-              <option value=''>Select your educational attainment</option>
+              <option value="">Select your educational attainment</option>
               {educationalAttainment.map((attainment, index) => (
                 <option key={index} value={attainment}>
                   {attainment}
                 </option>
               ))}
             </select>
-            <div className='absolute right-3 top-[14px]'>
+            <div className="absolute right-3 top-[14px]">
               <DropDownArrow />
             </div>
           </div>
         </div>
-        <div className='grid-item'>
-          <label htmlFor='education' className='text-sm font-medium leading-6 text-gray-900'>
+        <div className="grid-item">
+          <label
+            htmlFor="education"
+            className="text-sm font-medium leading-6 text-gray-900"
+          >
             Course/Degree
           </label>
-          <div className='relative mt-2'>
+          <div className="relative mt-2">
             <input
-              type='text'
-              id='education'
+              type="text"
+              id="education"
               value={degreeInput}
               onChange={handleDegreeInputChange}
               onKeyDown={handleDegreeKeyDown}
@@ -797,37 +837,42 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                 setShowDegreeDropdown(true);
                 setIsDegreeFocused(true);
               }}
-              placeholder='Search for your degree or type custom...'
+              placeholder="Search for your degree or type custom..."
               className={`rounded-md w-full border-0 px-3 py-1.5 pr-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 ${
-                !isDegreeFocused && degreeInput.length > 20 ? 'text-ellipsis overflow-hidden whitespace-nowrap' : ''
+                !isDegreeFocused && degreeInput.length > 20
+                  ? "text-ellipsis overflow-hidden whitespace-nowrap"
+                  : ""
               }`}
               style={{
-                textOverflow: !isDegreeFocused && degreeInput.length > 20 ? 'ellipsis' : 'clip',
+                textOverflow:
+                  !isDegreeFocused && degreeInput.length > 20
+                    ? "ellipsis"
+                    : "clip",
               }}
             />
-            <div className='absolute right-3 top-[14px]'>
+            <div className="absolute right-3 top-[14px]">
               <DropDownArrow />
             </div>
 
             {/* Degree autocomplete dropdown */}
             {showDegreeDropdown && filteredDegrees.length > 0 && (
-              <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {filteredDegrees.slice(0, 10).map((degree, index) => (
                   <div
                     key={index}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                      index === selectedDegreeIndex ? 'bg-gray-100' : ''
+                      index === selectedDegreeIndex ? "bg-gray-100" : ""
                     }`}
                     onClick={() => handleDegreeSelect(degree)}
                   >
-                    <div className='font-medium'>{degree.degreeTitle}</div>
-                    <div className='text-sm text-gray-500'>
+                    <div className="font-medium">{degree.degreeTitle}</div>
+                    <div className="text-sm text-gray-500">
                       {degree.degreeReference} • {degree.degreeLevel}
                     </div>
                   </div>
                 ))}
                 {filteredDegrees.length > 10 && (
-                  <div className='px-3 py-2 text-sm text-gray-500 border-t'>
+                  <div className="px-3 py-2 text-sm text-gray-500 border-t">
                     Showing first 10 results. Type more to narrow down.
                   </div>
                 )}
@@ -835,19 +880,24 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             )}
 
             {/* Custom degree indicator */}
-            {isCustomDegree && degreeInput.trim() !== '' && (
-              <div className='mt-1 text-xs text-blue-600'>✓ Custom degree entered</div>
+            {isCustomDegree && degreeInput.trim() !== "" && (
+              <div className="mt-1 text-xs text-blue-600">
+                ✓ Custom degree entered
+              </div>
             )}
           </div>
         </div>
-        <div className='grid-item'>
-          <label htmlFor='college' className='text-sm font-medium leading-6 text-gray-900'>
+        <div className="grid-item">
+          <label
+            htmlFor="college"
+            className="text-sm font-medium leading-6 text-gray-900"
+          >
             School
           </label>
-          <div className='relative mt-2'>
+          <div className="relative mt-2">
             <input
-              type='text'
-              id='college'
+              type="text"
+              id="college"
               value={collegeInput}
               onChange={handleCollegeInputChange}
               onKeyDown={handleCollegeKeyDown}
@@ -856,37 +906,42 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                 setShowCollegeDropdown(true);
                 setIsCollegeFocused(true);
               }}
-              placeholder='Search for your school or type custom...'
+              placeholder="Search for your school or type custom..."
               className={`rounded-md w-full border-0 px-3 pr-8 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 ${
-                !isCollegeFocused && collegeInput.length > 20 ? 'text-ellipsis overflow-hidden whitespace-nowrap' : ''
+                !isCollegeFocused && collegeInput.length > 20
+                  ? "text-ellipsis overflow-hidden whitespace-nowrap"
+                  : ""
               }`}
               style={{
-                textOverflow: !isCollegeFocused && collegeInput.length > 20 ? 'ellipsis' : 'clip',
+                textOverflow:
+                  !isCollegeFocused && collegeInput.length > 20
+                    ? "ellipsis"
+                    : "clip",
               }}
             />
-            <div className='absolute right-3 top-[14px]'>
+            <div className="absolute right-3 top-[14px]">
               <DropDownArrow />
             </div>
 
             {/* Autocomplete dropdown */}
             {showCollegeDropdown && filteredColleges.length > 0 && (
-              <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {filteredColleges.slice(0, 10).map((college, index) => (
                   <div
                     key={index}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                      index === selectedCollegeIndex ? 'bg-gray-100' : ''
+                      index === selectedCollegeIndex ? "bg-gray-100" : ""
                     }`}
                     onClick={() => handleCollegeSelect(college)}
                   >
-                    <div className='font-medium'>{college.institutionName}</div>
-                    <div className='text-sm text-gray-500'>
+                    <div className="font-medium">{college.institutionName}</div>
+                    <div className="text-sm text-gray-500">
                       {college.municipality}, {college.province}
                     </div>
                   </div>
                 ))}
                 {filteredColleges.length > 10 && (
-                  <div className='px-3 py-2 text-sm text-gray-500 border-t'>
+                  <div className="px-3 py-2 text-sm text-gray-500 border-t">
                     Showing first 10 results. Type more to narrow down.
                   </div>
                 )}
@@ -894,44 +949,49 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             )}
 
             {/* Custom college indicator */}
-            {isCustomCollege && collegeInput.trim() !== '' && (
-              <div className='mt-1 text-xs text-blue-600'>✓ Custom school entered</div>
+            {isCustomCollege && collegeInput.trim() !== "" && (
+              <div className="mt-1 text-xs text-blue-600">
+                ✓ Custom school entered
+              </div>
             )}
           </div>
         </div>
 
-        <div className='grid-item'>
-          <label htmlFor='skills' className='text-sm font-medium leading-6 text-gray-900'>
+        <div className="grid-item">
+          <label
+            htmlFor="skills"
+            className="text-sm font-medium leading-6 text-gray-900"
+          >
             Skills
           </label>
-          <div className='mt-2'>
-            <div className='relative flex items-center'>
+          <div className="mt-2">
+            <div className="relative flex items-center">
               <input
-                type='text'
+                type="text"
                 value={skillsInput}
                 onChange={(e) => setSkillsInput(e.target.value)}
                 onKeyDown={handleKeyDownSkill}
-                className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-                placeholder='Enter skills and press Enter, Tab, or comma to add...'
+                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+                placeholder="Enter skills and press Enter, Tab, or comma to add..."
               />
             </div>
           </div>
         </div>
-        <div className='grid-item'>
+        <div className="grid-item">
           {/* Skills Tags Display */}
           {tagsSkill.length > 0 && (
-            <div className='mt-3 flex flex-wrap gap-2'>
+            <div className="mt-3 flex flex-wrap gap-2">
               {tagsSkill.map((tagSkill: string) => (
                 <div
                   key={tagSkill}
-                  className='flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm'
+                  className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
                 >
                   <span>{tagSkill}</span>
                   <button
-                    type='button'
+                    type="button"
                     onClick={() => handleRemoveTagSkill(tagSkill)}
-                    className='text-blue-600 hover:text-blue-800 font-bold text-lg leading-none'
-                    title='Remove skill'
+                    className="text-blue-600 hover:text-blue-800 font-bold text-lg leading-none"
+                    title="Remove skill"
                   >
                     ×
                   </button>
@@ -941,111 +1001,165 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
           )}
         </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11'>
-        <div className='grid-item'>
-          <h6 className='block text-sm font-medium leading-6 text-gray-900'>Photo (2x2 photo is recommended)</h6>
-          <div className='mt-2'>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5 mt-11">
+        <div className="grid-item">
+          <h6 className="block text-sm font-medium leading-6 text-gray-900">
+            Photo (2x2 photo is recommended)
+          </h6>
+          <div className="mt-2">
             <input
-              type='file'
-              {...register('profilePicture', {
+              type="file"
+              {...register("profilePicture", {
                 onChange: (e: any) => {
                   const file = e.target.files[0];
                   if (!file) return;
-                  
+
                   // Validate file type - only accept PNG, JPEG, JPG
-                  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                  const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
                   if (!allowedTypes.includes(file.type)) {
-                    toast.custom(() => <CustomToast message='Only PNG, JPEG, and JPG files are allowed' type='error' />, {
-                      duration: 7000,
-                    });
+                    toast.custom(
+                      () => (
+                        <CustomToast
+                          message="Only PNG, JPEG, and JPG files are allowed"
+                          type="error"
+                        />
+                      ),
+                      {
+                        duration: 7000,
+                      },
+                    );
                     e.target.value = null;
                     return;
                   }
-                  
+
                   // Validate file size
                   if (file.size > 5 * 1024 * 1024) {
-                    toast.custom(() => <CustomToast message='Photo size should not exceed 5 MB' type='error' />, {
-                      duration: 7000,
-                    });
+                    toast.custom(
+                      () => (
+                        <CustomToast
+                          message="Photo size should not exceed 5 MB"
+                          type="error"
+                        />
+                      ),
+                      {
+                        duration: 7000,
+                      },
+                    );
                     e.target.value = null;
                     return;
                   }
-                  
+
                   renderUploadPhoto(e);
                 },
               })}
-              id='profile-picture'
-              className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4 focus:ring-black'
-              accept='image/png, image/jpeg, image/jpg'
+              id="profile-picture"
+              className="rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4 focus:ring-black"
+              accept="image/png, image/jpeg, image/jpg"
             />
-            <h6 className='text-xs mt-3'>Maximum file size: 5 MB</h6>
+            <h6 className="text-xs mt-3">Maximum file size: 5 MB</h6>
           </div>
         </div>
-        <div className='grid-item'>
-          <h6 className='block text-sm font-medium leading-6 text-gray-900'>Curriculum Vitae/Resume (Optional)</h6>
-          <div className='mt-2'>
+        <div className="grid-item">
+          <h6 className="block text-sm font-medium leading-6 text-gray-900">
+            Curriculum Vitae/Resume (Optional)
+          </h6>
+          <div className="mt-2">
             <input
-              type='file'
-              {...register('resume', {
+              type="file"
+              {...register("resume", {
                 onChange: (e: any) => {
                   const file = e.target.files[0];
                   if (!file) return;
-                  
+
                   // Validate file type - only accept PDF, DOC, DOCX
                   const allowedTypes = [
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                   ];
                   if (!allowedTypes.includes(file.type)) {
                     toast.custom(
-                      () => <CustomToast message='Only PDF, DOC, and DOCX files are allowed' type='error' />,
+                      () => (
+                        <CustomToast
+                          message="Only PDF, DOC, and DOCX files are allowed"
+                          type="error"
+                        />
+                      ),
                       {
                         duration: 7000,
-                      }
+                      },
                     );
                     e.target.value = null;
                     return;
                   }
-                  
+
                   // Validate file size
                   if (file.size > 5 * 1024 * 1024) {
                     toast.custom(
-                      () => <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB' type='error' />,
+                      () => (
+                        <CustomToast
+                          message="Curriculum Vitae/Resume size should not exceed 5 MB"
+                          type="error"
+                        />
+                      ),
                       {
                         duration: 7000,
-                      }
+                      },
                     );
                     e.target.value = null;
                     return;
                   }
                 },
               })}
-              id='resume'
-              className='rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4'
-              accept='.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+              id="resume"
+              className="rounded-md w-full bg-white border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black text-sm leading-4"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
-            <h6 className='text-xs mt-3'>Maximum file size: 5 MB</h6>
+            <h6 className="text-xs mt-3">Maximum file size: 5 MB</h6>
           </div>
         </div>
-        <div className='grid-item'>
-          <label htmlFor='portfolio' className='text-sm font-medium leading-6 text-gray-900'>
+        <div className="grid-item">
+          <label
+            htmlFor="portfolio"
+            className="text-sm font-medium leading-6 text-gray-900"
+          >
             Portfolio (Optional)
           </label>
-          <div className='mt-2'>
+          <div className="mt-2">
             <input
-              type='text'
-              {...register('portfolio')}
-              id='portfolio'
-              className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+              type="text"
+              {...register("portfolio")}
+              id="portfolio"
+              className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
             />
           </div>
         </div>
+
+        {/* Video Introduction URL - Only show if enabled for this job posting */}
+        {jobDetailData?.is_video_intro_enabled && (
+          <div className="grid-item">
+            <label
+              htmlFor="video-introduction-url"
+              className="text-sm font-medium leading-6 text-gray-900"
+            >
+              Video Introduction URL
+            </label>
+            <div className="mt-2">
+              <input
+                type="text"
+                {...register("videoIntroductionUrl")}
+                id="videoIntroductionUrl"
+                placeholder="Enter your video introduction URL (e.g., YouTube, Loom)"
+                className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+        )}
       </div>
-      <div className='flex justify-end'>
+      <div className="flex justify-end">
         <button
-          type='submit'
-          className='w-full md:w-auto mt-10 md:mt-12 mb-7 rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+          type="submit"
+          className="w-full md:w-auto mt-10 md:mt-12 mb-7 rounded-md bg-savoy-blue px-14 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           NEXT
         </button>

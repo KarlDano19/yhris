@@ -37,6 +37,8 @@ export default function CreateJobModal({
   setScreeningQuestions,
   autoRejectEnabled,
   setAutoRejectEnabled,
+  isVideoIntroEnabled,
+  setIsVideoIntroEnabled,
   firstForm,
   secondForm,
   thirdForm,
@@ -62,6 +64,8 @@ export default function CreateJobModal({
   setScreeningQuestions: Dispatch<any[]>;
   autoRejectEnabled: boolean;
   setAutoRejectEnabled: Dispatch<boolean>;
+  isVideoIntroEnabled: boolean;
+  setIsVideoIntroEnabled: Dispatch<boolean>;
   firstForm: ReturnType<typeof useForm>;
   secondForm: ReturnType<typeof useForm>;
   thirdForm: ReturnType<typeof useForm>;
@@ -123,12 +127,13 @@ export default function CreateJobModal({
 
   const fifthFormSubmit = () => {
     const data = fifthForm.getValues();
-    // Include screening questions, auto-reject settings, and rejection feedback
+    // Include screening questions, auto-reject settings, rejection feedback, and video intro
     const jobSettings = {
       ...data,
       screeningQuestions: window.screeningQuestions || [],
       autoRejectEnabled: window.autoRejectEnabled !== undefined ? window.autoRejectEnabled : true,
-      rejectionFeedback: window.rejectionFeedback || ''
+      rejectionFeedback: window.rejectionFeedback || '',
+      isVideoIntroEnabled: window.isVideoIntroEnabled || false
     };
     setCombinedFormData((prev: any) => ({ ...prev, ...jobSettings }));
     setPageNumber(6);
@@ -257,6 +262,8 @@ export default function CreateJobModal({
                       setScreeningQuestions={setScreeningQuestions}
                       autoRejectEnabled={autoRejectEnabled}
                       setAutoRejectEnabled={setAutoRejectEnabled}
+                      isVideoIntroEnabled={isVideoIntroEnabled}
+                      setIsVideoIntroEnabled={setIsVideoIntroEnabled}
                     />
                   </div>
                   <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>

@@ -36,6 +36,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // Screening questions and auto reject state
   const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
   const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
+  const [isVideoIntroEnabled, setIsVideoIntroEnabled] = useState(false);
   
   const firstForm = useForm<any>({
     defaultValues: {
@@ -142,6 +143,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 // Reset screening questions and auto reject state for new job creation
                 setScreeningQuestions([]);
                 setAutoRejectEnabled(false);
+                setIsVideoIntroEnabled(false);
                 setIsCreateJobModalOpen(true);
               }}
               className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center enabled:hover:shadow-md focus:shadow-none disabled:opacity-50'
@@ -182,6 +184,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             setScreeningQuestions={setScreeningQuestions}
             autoRejectEnabled={autoRejectEnabled}
             setAutoRejectEnabled={setAutoRejectEnabled}
+            isVideoIntroEnabled={isVideoIntroEnabled}
+            setIsVideoIntroEnabled={setIsVideoIntroEnabled}
             firstForm={firstForm}
             secondForm={secondForm}
             thirdForm={thirdForm}
