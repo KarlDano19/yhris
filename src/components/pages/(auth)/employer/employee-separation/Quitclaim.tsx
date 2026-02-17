@@ -52,8 +52,8 @@ const Quitclaim = ({
 
   const hasAttachment = attachmentsToDisplay.length > 0;
 
-  // Disabled if last pay hasn't been released yet
-  const isDisabled = !isLastPayReleased || isQuitclaimSigned;
+  // Disabled only if quit claim already signed (no prerequisites)
+  const isDisabled = isQuitclaimSigned;
   
   return (
     <>
@@ -68,7 +68,7 @@ const Quitclaim = ({
           )}
           disabled={isDisabled}
           data-tooltip-id='quitclaim-tooltip'
-          data-tooltip-content={!isLastPayReleased ? 'Last pay must be released first' : ''}
+          data-tooltip-content={isQuitclaimSigned ? 'Quitclaim already signed' : 'Sign quitclaim'}
           data-tooltip-place='bottom'
           onClick={() =>
             setIsQuitclaimModalOpen({
@@ -88,10 +88,10 @@ const Quitclaim = ({
               : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isQuitclaimSigned || isQuitclaimReceived || isLoading}
+          disabled={isQuitclaimReceived || isLoading}
           onClick={() => setReceived(id, 'quit claim')}
           data-tooltip-id='quitclaim-received-tooltip'
-          data-tooltip-content={!isQuitclaimSigned ? 'Quitclaim must be signed first' : isQuitclaimReceived ? 'Quitclaim already received' : 'Mark quitclaim as received'}
+          data-tooltip-content={isQuitclaimReceived ? 'Quitclaim already received' : 'Mark quitclaim as received'}
           data-tooltip-place='bottom'
         >
           {isLoading && (

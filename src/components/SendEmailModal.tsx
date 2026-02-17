@@ -60,6 +60,7 @@ export interface SendEmailModalProps {
   showSubject?: boolean;
   showDragDropAttachment?: boolean;
   allowMultipleAttachments?: boolean;  // Enable multiple file attachments (default: false for single attachment)
+  disableCCBCC?: boolean;  // Disable CC and BCC buttons (default: false)
   // Pre-populated data props
   prePopulatedData?: {
     subject?: string;
@@ -88,6 +89,7 @@ export default function SendEmailModal({
   showSubject = true,
   showDragDropAttachment = false,
   allowMultipleAttachments = false,  // Default to single attachment mode
+  disableCCBCC = false,  // Default to enabled
   prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
@@ -366,21 +368,24 @@ export default function SendEmailModal({
         } else {
           setTagsTo(defaultRecipients);
         }
-        
-        if (prePopulatedData.cc && prePopulatedData.cc.length > 0) {
-          setTagsCc(prePopulatedData.cc);
-          setIsCCOpen(true);
-        }
-        
-        if (prePopulatedData.bcc && prePopulatedData.bcc.length > 0) {
-          setTagsBcc(prePopulatedData.bcc);
-          setIsBCCOpen(true);
+
+        // Only populate CC/BCC from pre-populated data if not disabled
+        if (!disableCCBCC) {
+          if (prePopulatedData.cc && prePopulatedData.cc.length > 0) {
+            setTagsCc(prePopulatedData.cc);
+            setIsCCOpen(true);
+          }
+
+          if (prePopulatedData.bcc && prePopulatedData.bcc.length > 0) {
+            setTagsBcc(prePopulatedData.bcc);
+            setIsBCCOpen(true);
+          }
         }
       } else {
         setTagsTo(defaultRecipients);
       }
     }
-  }, [isOpen, defaultRecipients, setTagsTo, prePopulatedData, setValue]);
+  }, [isOpen, defaultRecipients, setTagsTo, prePopulatedData, setValue, disableCCBCC]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -680,18 +685,21 @@ export default function SendEmailModal({
                               }
                             });
                             setTagsTo(newRecipients);
-                            
-                            if (template.bcc) {
-                              setIsBCCOpen(true);
-                              setTagsBcc(template.bcc);
-                            } else {
-                              setTagsBcc([]);
-                            }
-                            if (template.cc) {
-                              setIsCCOpen(true);
-                              setTagsCc(template.cc);
-                            } else {
-                              setTagsCc([]);
+
+                            // Only populate CC/BCC from template if not disabled
+                            if (!disableCCBCC) {
+                              if (template.bcc) {
+                                setIsBCCOpen(true);
+                                setTagsBcc(template.bcc);
+                              } else {
+                                setTagsBcc([]);
+                              }
+                              if (template.cc) {
+                                setIsCCOpen(true);
+                                setTagsCc(template.cc);
+                              } else {
+                                setTagsCc([]);
+                              }
                             }
                             setValue("message", template.body);
                             setValue("subject", template.subject);
@@ -731,12 +739,15 @@ export default function SendEmailModal({
                           } else {
                             // Clear template-related fields if no template is selected
                             setTagsTo(defaultRecipients);
-                            setTagsCc([]);
-                            setTagsBcc([]);
+                            // Only clear CC/BCC if not disabled
+                            if (!disableCCBCC) {
+                              setTagsCc([]);
+                              setTagsBcc([]);
+                            }
                             setValue("message", "");
                             setValue("subject", "");
                             setCustomSubject("");
-                            
+
                             // Clear template attachments when no template is selected
                             if (showDragDropAttachment) {
                               setTemplateAttachments([]);
@@ -861,7 +872,8 @@ export default function SendEmailModal({
                 </div>
                 <button
                   type="button"
-                  className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  disabled={disableCCBCC}
+                  className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isCCOpen
                       ? "bg-savoy-blue text-white hover:bg-blue-700"
                       : "bg-gray-50"
@@ -872,7 +884,8 @@ export default function SendEmailModal({
                 </button>
                 <button
                   type="button"
-                  className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  disabled={disableCCBCC}
+                  className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isBCCOpen
                       ? "bg-savoy-blue text-white hover:bg-blue-700"
                       : "bg-gray-50"
@@ -883,7 +896,7 @@ export default function SendEmailModal({
                 </button>
               </div>
             </div>
-            {isCCOpen && (
+            {isCCOpen && !disableCCBCC && (
               <div className="sm:col-span-4 mt-4">
                 <div className="flex items-center justify-between">
                   <label
@@ -930,7 +943,7 @@ export default function SendEmailModal({
                 </div>
               </div>
             )}
-            {isBCCOpen && (
+            {isBCCOpen && !disableCCBCC && (
               <div className="sm:col-span-4 mt-4">
                 <div className="flex items-center justify-between">
                   <label
