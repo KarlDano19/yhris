@@ -242,6 +242,31 @@ export default function UpdateJobModal({
     const page5Data = fifthForm.getValues();
     const posterData = sixthForm.getValues(); // Page 6: postAs, uploaded file
     const platformData = seventhForm.getValues(); // Page 7: shared_to, jobUrl
+
+    // Validation: Check if poster type (Page 6) is selected
+    if (!posterData.postAs) {
+      toast.custom(() => (
+        <CustomToast
+          message="Please complete Page 6 (Post As) - select Default or Upload before saving"
+          type='error'
+        />
+      ), { duration: 7000 });
+      setPageNumber(6); // Navigate to Page 6
+      return;
+    }
+
+    // Validation: Check if platform (Page 8) is selected
+    if (!platformData.postIn || (Array.isArray(platformData.postIn) && platformData.postIn.length === 0)) {
+      toast.custom(() => (
+        <CustomToast
+          message="Please complete Page 8 (Platform) - select at least one platform before saving"
+          type='error'
+        />
+      ), { duration: 7000 });
+      setPageNumber(8); // Navigate to Page 8
+      return;
+    }
+
     const finalData = {
       ...combinedFormData,
       ...page1Data,
@@ -343,6 +368,32 @@ export default function UpdateJobModal({
           processedData.screeningQuestions = screeningQuestions;
           processedData.autoRejectEnabled = autoRejectEnabled;
           processedData.isVideoIntroEnabled = isVideoIntroEnabled;
+        }
+
+        // Validation: Check if poster type (Page 6) is selected before allowing save
+        const posterData = sixthForm.getValues();
+        if (!posterData.postAs) {
+          toast.custom(() => (
+            <CustomToast
+              message="Please complete Page 6 (Post As) - select Default or Upload before saving"
+              type='error'
+            />
+          ), { duration: 7000 });
+          setPageNumber(6); // Navigate to Page 6
+          return;
+        }
+
+        // Validation: Check if platform (Page 8) is selected before allowing save
+        const platformData = seventhForm.getValues();
+        if (!platformData.postIn || (Array.isArray(platformData.postIn) && platformData.postIn.length === 0)) {
+          toast.custom(() => (
+            <CustomToast
+              message="Please complete Page 8 (Platform) - select at least one platform before saving"
+              type='error'
+            />
+          ), { duration: 7000 });
+          setPageNumber(8); // Navigate to Page 8
+          return;
         }
 
         // Build existing data from jobPostDataDetails to preserve required fields

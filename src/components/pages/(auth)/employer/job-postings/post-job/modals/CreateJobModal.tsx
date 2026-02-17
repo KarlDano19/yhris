@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
+import SaveDraftModal from './SaveDraftModal';
+import LoadDraftModal from './LoadDraftModal';
 import CreateJobPageJobTitleInfo from '../../modals/modal-pages/CreateJobPageJobTitleInfo';
 import CreateJobPageJobType from '../../modals/modal-pages/CreateJobPageJobType';
 import CreateJobPageSalary from '../../modals/modal-pages/CreateJobPageSalary';
@@ -17,8 +19,14 @@ import CreateJobPagePlatform from '../../modals/modal-pages/CreateJobPagePlatfor
 import classNames from '@/helpers/classNames';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
+import { draftStorage } from '@/helpers/draftStorage';
+import { useCreateJobDraft } from '../hooks/useCreateJobDraft';
+import useGetJobDrafts from '../hooks/useGetJobDrafts';
+import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
+import { T_JobPostingDraft } from '@/types/job_posting_draft';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 export default function CreateJobModal({
   isOpen,
@@ -77,15 +85,187 @@ export default function CreateJobModal({
 }) {
   const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useAddJobPostItems();
-  
+  const createDraftMutation = useCreateJobDraft();
+  const { data: backendDrafts = [], isLoading: isDraftsLoading } = useGetJobDrafts();
+  const deleteDraftMutation = useDeleteJobDraft();
+
   // Fetch positions data in the parent component
   const { data: positionData, refetch: refetchPositions } = useGetPositionItems();
 
+  // Draft management state
+  const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
+  const [isLoadDraftModalOpen, setIsLoadDraftModalOpen] = useState(false);
+  const [selectedDraft, setSelectedDraft] = useState<T_JobPostingDraft | null>(null);
+  const [allDrafts, setAllDrafts] = useState<T_JobPostingDraft[]>([]);
+  const [formKey, setFormKey] = useState(0);
+
+  // Load draft data when selectedDraft changes
+  useEffect(() => {
+    if (selectedDraft && isOpen) {
+      const draftData = selectedDraft.draft_data;
+
+      // Check if draftData exists and is an object
+      if (draftData && typeof draftData === 'object') {
+        // Page 1: Job Title Info (country, language, jobTitle, position, placeAdvertise)
+        firstForm.reset({
+          country: draftData.country || 'Philippines',
+          language: draftData.language || 'English',
+          jobTitle: draftData.jobTitle || '',
+          position: draftData.position || '',
+          placeAdvertise: draftData.placeAdvertise || draftData.advertiseTo || '',
+        });
+
+        // Page 2: Job Type (jobType, workSetup, schedule, hireCount, hireDate)
+        // Convert hireDate string to Date object for the date picker
+        let hireDateValue: Date | null = null;
+        if (draftData.hireDate || draftData.dateRequired) {
+          const dateStr = draftData.hireDate || draftData.dateRequired;
+          try {
+            hireDateValue = dateStr ? new Date(dateStr) : null;
+          } catch (e) {
+            hireDateValue = null;
+          }
+        }
+
+        secondForm.reset({
+          jobType: draftData.jobType || '',
+          workSetup: draftData.workSetup || '',
+          schedule: draftData.schedule || draftData.jobSchedule || '',
+          hireCount: draftData.hireCount || draftData.requiredSlot || '',
+          hireDate: hireDateValue,
+        });
+
+        // Page 3: Salary
+        const salaryData = draftData.salary || {};
+        thirdForm.reset({
+          salary: {
+            salaryType: draftData.salaryRangeType || salaryData.salaryType || 'Range',
+            rate: draftData.rate || salaryData.rate || '',
+            minimumAmount: draftData.minimumAmount || salaryData.minimumAmount || '',
+            maximumAmount: draftData.maximumAmount || salaryData.maximumAmount || '',
+            exactAmount: draftData.exactAmount || salaryData.exactAmount || '',
+            offeredBenefits: draftData.offeredBenefits || salaryData.offeredBenefits || '',
+            isShowSalary: draftData.isShowSalary || salaryData.isShowSalary || false,
+            isShowBenefits: draftData.isShowBenefits || salaryData.isShowBenefits || false,
+          },
+        });
+        if (draftData.salaryRangeType || draftData.salary) {
+          setIsRangeBenefitsAdded(true);
+        }
+
+        // Page 4: Job Description
+        fourthForm.reset({
+          jobDescription: draftData.jobDescription || draftData.positionDescription || '',
+          qualifications: draftData.qualifications || '',
+          notesRemarks: draftData.jobRemark || draftData.notesRemarks || '',
+          jobUrl: draftData.jobUrl || '',
+          isShowRoles: draftData.isShowRoles || false,
+          isShowRemarks: draftData.isShowRemarks || false,
+        });
+
+        // Page 5: Poster Settings
+        fifthForm.reset({
+          posterType: draftData.posterType || '',
+          ogUrl: draftData.ogUrl || '',
+          ogType: draftData.ogType || '',
+          ogTitle: draftData.ogTitle || '',
+          ogDescription: draftData.ogDescription || '',
+        });
+
+        // Page 6: Shared To
+        sixthForm.reset({
+          sharedTo: draftData.sharedTo || '',
+        });
+
+        // Page 7: Screening Questions
+        setScreeningQuestions(draftData.screeningQuestions || []);
+        setAutoRejectEnabled(draftData.autoRejectEnabled || false);
+        setIsVideoIntroEnabled(draftData.isVideoIntroEnabled || false);
+
+        // Set combined form data
+        setCombinedFormData(draftData);
+
+        // Set page number to current step
+        setPageNumber(selectedDraft.current_step);
+      }
+    }
+  }, [selectedDraft, isOpen]);
+
+  // Auto-save to localStorage whenever form data changes
+  useEffect(() => {
+    if (isOpen && Object.keys(combinedFormData).length > 0) {
+      draftStorage.save(combinedFormData, pageNumber);
+    }
+  }, [combinedFormData, pageNumber, isOpen]);
+
+  // Listen for session expiration
+  useEffect(() => {
+    const handleSessionExpiring = () => {
+      if (Object.keys(combinedFormData).length > 0) {
+        createDraftMutation.mutate({
+          draft_data: combinedFormData,
+          current_step: pageNumber,
+          source: 'session_expiry',
+        });
+      }
+    };
+
+    window.addEventListener('session-expiring', handleSessionExpiring);
+    return () => window.removeEventListener('session-expiring', handleSessionExpiring);
+  }, [combinedFormData, pageNumber]);
+
+  // Merge localStorage draft with backend drafts
+  useEffect(() => {
+    const localDraft = draftStorage.load();
+    const combinedDrafts = [...backendDrafts];
+
+    if (localDraft && localDraft.data && Object.keys(localDraft.data).length > 0) {
+      // Create a fake draft object from localStorage that matches T_JobPostingDraft interface
+      const localDraftObject: T_JobPostingDraft = {
+        id: 0, // Use 0 to indicate it's a local draft
+        draft_name: 'Local Draft (Not Synced)',
+        draft_data: localDraft.data,
+        current_step: localDraft.step || 1,
+        source: 'browser_close',
+        job_title: localDraft.data.jobTitle || 'Untitled Job',
+        position: localDraft.data.position || null,
+        uploaded_job_description: null,
+        uploaded_custom_poster: null,
+        created_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+        updated_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+      };
+
+      // Add local draft at the beginning of the list
+      combinedDrafts.unshift(localDraftObject);
+    }
+
+    setAllDrafts(combinedDrafts);
+  }, [backendDrafts]);
+
   const customCloseModal = () => {
-    setIsOpen(false);
+    if (Object.keys(combinedFormData).length > 0) {
+      setIsSaveDraftModalOpen(true);
+    } else {
+      setIsOpen(false);
+      draftStorage.clear();
+    }
   };
 
-  const resetForm = () => {
+  const resetForm = (closeModal: boolean = true) => {
+    // Clear selectedDraft and combinedFormData FIRST to prevent useEffect from repopulating
+    setSelectedDraft(null);
+    setCombinedFormData({});
+    draftStorage.clear();
+
+    // Reset all state
+    setPageNumber(1);
+    setIsRangeBenefitsAdded(false);
+    setScreeningQuestions([]);
+    setAutoRejectEnabled(true);
+    setIsVideoIntroEnabled(false);
+    setFileProps({});
+
+    // Reset all forms (will reset to their defaultValues from Content.tsx)
     firstForm.reset();
     secondForm.reset();
     thirdForm.reset();
@@ -93,8 +273,89 @@ export default function CreateJobModal({
     fifthForm.reset();
     sixthForm.reset();
     seventhForm.reset();
-    setPageNumber(1);
-    setIsOpen(false);
+
+    // Force React Select to clear
+    setTimeout(() => {
+      firstForm.resetField('position', { defaultValue: '' });
+      firstForm.setValue('position', '', { shouldValidate: false, shouldDirty: false });
+      firstForm.resetField('placeAdvertise', { defaultValue: [] });
+      firstForm.setValue('placeAdvertise', [], { shouldValidate: false, shouldDirty: false });
+    }, 0);
+
+    // Force complete remount of form components
+    setFormKey(prev => prev + 1);
+
+    // Close modal if requested
+    if (closeModal) {
+      setIsOpen(false);
+    }
+  };
+
+
+  const handleSaveDraft = () => {
+    createDraftMutation.mutate(
+      {
+        draft_data: combinedFormData,
+        current_step: pageNumber,
+        source: 'manual',
+      },
+      {
+        onSuccess: () => {
+          toast.custom(() => <CustomToast message="Draft saved successfully" type="success" />, {
+            duration: 3000,
+          });
+          setIsSaveDraftModalOpen(false);
+          draftStorage.clear();
+          resetForm();
+        },
+        onError: (error: any) => {
+          toast.custom(
+            () => <CustomToast message={error.message || 'Failed to save draft'} type="error" />,
+            { duration: 5000 }
+          );
+        },
+      }
+    );
+  };
+
+  const handleDiscardDraft = () => {
+    // Close the save draft modal first
+    setIsSaveDraftModalOpen(false);
+    // Reset form and close the main modal
+    resetForm(true);
+  };
+
+  const handleLoadDraftClick = (draft: T_JobPostingDraft) => {
+    setSelectedDraft(draft);
+    setIsLoadDraftModalOpen(false);
+    // The useEffect will handle populating the form data
+  };
+
+  const handleDeleteDraft = (draftId: number) => {
+    // Handle local draft deletion (id === 0)
+    if (draftId === 0) {
+      draftStorage.clear();
+      // Remove local draft from the list
+      setAllDrafts(allDrafts.filter(draft => draft.id !== 0));
+      toast.custom(() => <CustomToast message="Local draft cleared successfully" type="success" />, {
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Handle backend draft deletion
+    deleteDraftMutation.mutate(draftId, {
+      onSuccess: () => {
+        toast.custom(() => <CustomToast message="Draft deleted successfully" type="success" />, {
+          duration: 3000,
+        });
+      },
+      onError: (error: any) => {
+        toast.custom(() => <CustomToast message={error.message || 'Failed to delete draft'} type="error" />, {
+          duration: 5000,
+        });
+      },
+    });
   };
 
   const firstFormSubmit = (data: any) => {
@@ -205,6 +466,19 @@ export default function CreateJobModal({
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsLoadDraftModalOpen(true)}
+                      className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
+                      title="Load Draft"
+                    >
+                      <DocumentTextIcon className='w-6 h-6' />
+                      {allDrafts.length > 0 && (
+                        <span className='absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full'>
+                          {allDrafts.length}
+                        </span>
+                      )}
+                    </button>
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
 
@@ -274,7 +548,7 @@ export default function CreateJobModal({
                     </div>
                   </div>
 
-                  <div style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
+                  <div key={`page1-${formKey}`} style={{ display: pageNumber == 1 ? 'block' : 'none' }}>
                     <CreateJobPageJobTitleInfo
                       control={firstForm.control}
                       Controller={Controller}
@@ -378,6 +652,24 @@ export default function CreateJobModal({
                     setIsOpen={setIsSalaryRangeModalOpen}
                     setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
                     onSubmit={secondFormSubmit}
+                  />
+
+                  {/* Draft Modals - Rendered inside Dialog.Panel to prevent parent modal from closing */}
+                  <SaveDraftModal
+                    isOpen={isSaveDraftModalOpen}
+                    onClose={() => setIsSaveDraftModalOpen(false)}
+                    onSave={handleSaveDraft}
+                    onDiscard={handleDiscardDraft}
+                    isSaving={createDraftMutation.isLoading}
+                  />
+                  <LoadDraftModal
+                    isOpen={isLoadDraftModalOpen}
+                    onClose={() => setIsLoadDraftModalOpen(false)}
+                    drafts={allDrafts}
+                    onLoadDraft={handleLoadDraftClick}
+                    onDeleteDraft={handleDeleteDraft}
+                    isLoading={isDraftsLoading}
+                    isDeleting={deleteDraftMutation.isLoading}
                   />
                 </Dialog.Panel>
               </Transition.Child>

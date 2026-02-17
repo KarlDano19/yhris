@@ -33,8 +33,8 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     if (jobPost.qualifications) formData.append('qualifications', jobPost.qualifications);
     if (jobPost.notesRemarks) formData.append('job_remark', jobPost.notesRemarks);
 
-    // Only include job_url if user provided a value
-    if (jobPost.jobUrl) {
+    // Always include job_url for updates (even if empty) to allow clearing
+    if (jobPost.jobUrl !== undefined && jobPost.jobUrl !== null) {
       formData.append('job_url', jobPost.jobUrl);
     }
 
