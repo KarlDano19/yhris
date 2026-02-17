@@ -16,8 +16,8 @@ import CreateJobPagePreview from '../../modals/modal-pages/CreateJobPagePreview'
 import CreateJobPagePlatform from '../../modals/modal-pages/CreateJobPagePlatform';
 import classNames from '@/helpers/classNames';
 
-import useGetJobDetails from '../hooks/useGetJobPostDetails';
-import useUpdateJobPostItems from '../hooks/useUpdateJobPostItems';
+import useGetJobDetails from '../hooks/get/useGetJobPostDetails';
+import useUpdateJobPostItems from '../hooks/update/useUpdateJobPostItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
