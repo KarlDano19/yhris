@@ -61,11 +61,10 @@ export default function CreateJobPageJobDescription({
 
   // Helper function to check if field should be populated (empty or contains default content)
   const shouldPopulateField = (currentContent: string) => {
-    return !currentContent || 
-      currentContent === '<ul><li><br></li></ul>' || 
+    return !currentContent ||
+      currentContent === '<ul><li><br></li></ul>' ||
       currentContent === '<p><br></p>' ||
-      currentContent === CREATEJOB_TEMPLATE[0] ||
-      currentContent.includes('Ensuring the accounts of the company are accurate and free of error');
+      currentContent === CREATEJOB_TEMPLATE[0];
   };
 
   // Effect to populate role field with selected position description
@@ -73,11 +72,13 @@ export default function CreateJobPageJobDescription({
     const currentJobDescription = getValues('jobDescription');
     const currentPosition = firstForm?.getValues('position');
     
-    // Check if position has changed - ALWAYS update when position changes
+    // Check if position has changed - only update if current content is still template/empty
     if (currentPosition && currentPosition !== lastPositionRef.current) {
       lastPositionRef.current = currentPosition;
-      const newDescription = getPositionDescription(currentPosition);
-      setValue('jobDescription', newDescription);
+      if (shouldPopulateField(currentJobDescription)) {
+        const newDescription = getPositionDescription(currentPosition);
+        setValue('jobDescription', newDescription);
+      }
       return;
     }
     

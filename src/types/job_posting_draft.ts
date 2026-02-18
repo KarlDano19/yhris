@@ -83,7 +83,6 @@ export interface T_JobPostingDraftData {
 
 export interface T_JobPostingDraft {
   id: number;
-  draft_name: string | null;
   draft_data: T_JobPostingDraftData;
   current_step: number;
   source: 'manual' | 'session_expiry' | 'browser_close';
@@ -96,7 +95,6 @@ export interface T_JobPostingDraft {
 }
 
 export interface T_CreateJobDraftData {
-  draft_name?: string;
   draft_data: T_JobPostingDraftData;
   current_step: number;
   source?: 'manual' | 'session_expiry' | 'browser_close';
@@ -104,14 +102,6 @@ export interface T_CreateJobDraftData {
   uploaded_custom_poster?: File;
 }
 
-export interface T_UpdateJobDraftData {
-  draft_name?: string;
-  draft_data?: T_JobPostingDraftData;
-  current_step?: number;
-  source?: 'manual' | 'session_expiry' | 'browser_close';
-  uploaded_job_description?: File;
-  uploaded_custom_poster?: File;
-}
 
 export interface T_JobDraftResponse {
   message: string;

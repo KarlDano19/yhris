@@ -21,6 +21,7 @@ import classNames from '@/helpers/classNames';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import { draftStorage } from '@/helpers/draftStorage';
+import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 import { useCreateJobDraft } from '../hooks/useCreateJobDraft';
 import useGetJobDrafts from '../hooks/useGetJobDrafts';
 import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
@@ -196,7 +197,7 @@ export default function CreateJobModal({
   // Auto-save to localStorage whenever form data changes
   useEffect(() => {
     if (isOpen && Object.keys(combinedFormData).length > 0) {
-      draftStorage.save(combinedFormData, pageNumber);
+      draftStorage.save(getAllFormData(), pageNumber);
     }
   }, [combinedFormData, pageNumber, isOpen]);
 
@@ -206,7 +207,7 @@ export default function CreateJobModal({
       if (Object.keys(combinedFormData).length > 0) {
         const posterFile = sixthForm.getValues('postAsUpload');
         createDraftMutation.mutate({
-          draft_data: combinedFormData,
+          draft_data: getAllFormData(),
           current_step: pageNumber,
           source: 'session_expiry',
           ...(fileProps.file && { uploaded_job_description: fileProps.file }),
@@ -228,7 +229,6 @@ export default function CreateJobModal({
       // Create a fake draft object from localStorage that matches T_JobPostingDraft interface
       const localDraftObject: T_JobPostingDraft = {
         id: 0, // Use 0 to indicate it's a local draft
-        draft_name: 'Local Draft (Not Synced)',
         draft_data: localDraft.data,
         current_step: localDraft.step || 1,
         source: 'browser_close',
@@ -270,14 +270,18 @@ export default function CreateJobModal({
     setIsVideoIntroEnabled(false);
     setFileProps({});
 
-    // Reset all forms (will reset to their defaultValues from Content.tsx)
-    firstForm.reset();
-    secondForm.reset();
-    thirdForm.reset();
-    fourthForm.reset();
-    fifthForm.reset();
-    sixthForm.reset();
-    seventhForm.reset();
+    // Reset all forms with explicit values so draft-loaded defaultValues don't persist
+    firstForm.reset({ country: 'Philippines', language: 'English' });
+    secondForm.reset({});
+    thirdForm.reset({ salary: { salaryType: 'Range' } });
+    fourthForm.reset({
+      jobDescription: CREATEJOB_TEMPLATE[0],
+      qualifications: QUALIFICATION_TEMPLATE[0],
+      notesRemarks: '',
+    });
+    fifthForm.reset({});
+    sixthForm.reset({});
+    seventhForm.reset({});
 
     // Force React Select to clear
     setTimeout(() => {
@@ -297,11 +301,23 @@ export default function CreateJobModal({
   };
 
 
+  // Collect current values from all forms so drafts capture every page regardless of current step
+  const getAllFormData = () => ({
+    ...combinedFormData,
+    ...firstForm.getValues(),
+    ...secondForm.getValues(),
+    ...thirdForm.getValues(),
+    ...fourthForm.getValues(),
+    ...fifthForm.getValues(),
+    ...sixthForm.getValues(),
+    ...seventhForm.getValues(),
+  });
+
   const handleSaveDraft = () => {
     const posterFile = sixthForm.getValues('postAsUpload');
     createDraftMutation.mutate(
       {
-        draft_data: combinedFormData,
+        draft_data: getAllFormData(),
         current_step: pageNumber,
         source: 'manual',
         ...(fileProps.file && { uploaded_job_description: fileProps.file }),
