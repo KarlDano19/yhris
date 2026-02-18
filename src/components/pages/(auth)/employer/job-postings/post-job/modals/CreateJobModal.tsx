@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import ConfirmModal from '@/components/ConfirmModal';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
 import SaveDraftModal from './SaveDraftModal';
 import LoadDraftModal from './LoadDraftModal';
@@ -26,7 +27,7 @@ import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
 import { T_JobPostingDraft } from '@/types/job_posting_draft';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 export default function CreateJobModal({
   isOpen,
@@ -95,6 +96,7 @@ export default function CreateJobModal({
   // Draft management state
   const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
   const [isLoadDraftModalOpen, setIsLoadDraftModalOpen] = useState(false);
+  const [isStartOverModalOpen, setIsStartOverModalOpen] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<T_JobPostingDraft | null>(null);
   const [allDrafts, setAllDrafts] = useState<T_JobPostingDraft[]>([]);
   const [formKey, setFormKey] = useState(0);
@@ -139,15 +141,15 @@ export default function CreateJobModal({
         const salaryData = draftData.salary || {};
         thirdForm.reset({
           salary: {
-            salaryType: draftData.salaryRangeType || salaryData.salaryType || 'Range',
-            rate: draftData.rate || salaryData.rate || '',
-            minimumAmount: draftData.minimumAmount || salaryData.minimumAmount || '',
-            maximumAmount: draftData.maximumAmount || salaryData.maximumAmount || '',
-            exactAmount: draftData.exactAmount || salaryData.exactAmount || '',
-            offeredBenefits: draftData.offeredBenefits || salaryData.offeredBenefits || '',
-            isShowSalary: draftData.isShowSalary || salaryData.isShowSalary || false,
-            isShowBenefits: draftData.isShowBenefits || salaryData.isShowBenefits || false,
+            salaryType: salaryData.salaryType || draftData.salaryRangeType || '',
+            salaryRangeMin: (salaryData as any).salaryRangeMin || draftData.minimumAmount || '',
+            salaryRangeMax: (salaryData as any).salaryRangeMax || draftData.maximumAmount || '',
+            salaryValue: (salaryData as any).salaryValue || draftData.exactAmount || '',
           },
+          rate: draftData.rate || salaryData.rate || '',
+          is_show_salary: (draftData as any).is_show_salary ?? draftData.isShowSalary ?? false,
+          is_show_benefits: (draftData as any).is_show_benefits ?? draftData.isShowBenefits ?? false,
+          benefits: (draftData as any).benefits || [],
         });
         if (draftData.salaryRangeType || draftData.salary) {
           setIsRangeBenefitsAdded(true);
@@ -158,9 +160,8 @@ export default function CreateJobModal({
           jobDescription: draftData.jobDescription || draftData.positionDescription || '',
           qualifications: draftData.qualifications || '',
           notesRemarks: draftData.jobRemark || draftData.notesRemarks || '',
-          jobUrl: draftData.jobUrl || '',
-          isShowRoles: draftData.isShowRoles || false,
-          isShowRemarks: draftData.isShowRemarks || false,
+          is_show_roles: (draftData as any).is_show_roles ?? draftData.isShowRoles ?? false,
+          is_show_remarks: (draftData as any).is_show_remarks ?? draftData.isShowRemarks ?? false,
         });
 
         // Page 5: Poster Settings
@@ -172,9 +173,10 @@ export default function CreateJobModal({
           ogDescription: draftData.ogDescription || '',
         });
 
-        // Page 6: Shared To
+        // Page 6: Post As
         sixthForm.reset({
-          sharedTo: draftData.sharedTo || '',
+          postAs: (draftData as any).postAs || draftData.sharedTo || '',
+          ...(selectedDraft.uploaded_custom_poster && { uploaded_image: selectedDraft.uploaded_custom_poster }),
         });
 
         // Page 7: Screening Questions
@@ -202,10 +204,13 @@ export default function CreateJobModal({
   useEffect(() => {
     const handleSessionExpiring = () => {
       if (Object.keys(combinedFormData).length > 0) {
+        const posterFile = sixthForm.getValues('postAsUpload');
         createDraftMutation.mutate({
           draft_data: combinedFormData,
           current_step: pageNumber,
           source: 'session_expiry',
+          ...(fileProps.file && { uploaded_job_description: fileProps.file }),
+          ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
         });
       }
     };
@@ -293,15 +298,18 @@ export default function CreateJobModal({
 
 
   const handleSaveDraft = () => {
+    const posterFile = sixthForm.getValues('postAsUpload');
     createDraftMutation.mutate(
       {
         draft_data: combinedFormData,
         current_step: pageNumber,
         source: 'manual',
+        ...(fileProps.file && { uploaded_job_description: fileProps.file }),
+        ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
       },
       {
         onSuccess: () => {
-          toast.custom(() => <CustomToast message="Draft saved successfully" type="success" />, {
+          toast.custom(() => <CustomToast message="Draft saved successfully." type="success" />, {
             duration: 3000,
           });
           setIsSaveDraftModalOpen(false);
@@ -310,7 +318,7 @@ export default function CreateJobModal({
         },
         onError: (error: any) => {
           toast.custom(
-            () => <CustomToast message={error.message || 'Failed to save draft'} type="error" />,
+            () => <CustomToast message={error.message || 'Failed to save draft.'} type="error" />,
             { duration: 5000 }
           );
         },
@@ -468,6 +476,14 @@ export default function CreateJobModal({
                     <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
                     <button
                       type="button"
+                      onClick={() => setIsStartOverModalOpen(true)}
+                      className='mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
+                      title="Start Over"
+                    >
+                      <ArrowPathIcon className='w-6 h-6' />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setIsLoadDraftModalOpen(true)}
                       className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
                       title="Load Draft"
@@ -562,7 +578,7 @@ export default function CreateJobModal({
                       fourthForm={fourthForm}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
+                  <div key={`page2-${formKey}`} style={{ display: pageNumber == 2 ? 'block' : 'none' }}>
                     <CreateJobPageJobType
                       control={secondForm.control}
                       setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
@@ -576,7 +592,7 @@ export default function CreateJobModal({
                       thirdFormGetValues={thirdForm.getValues}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
+                  <div key={`page3-${formKey}`} style={{ display: pageNumber == 3 ? 'block' : 'none' }}>
                     <CreateJobPageSalary
                       watch={thirdForm.watch}
                       setValue={thirdForm.setValue}
@@ -586,9 +602,10 @@ export default function CreateJobModal({
                       setFocus={thirdForm.setFocus}
                       getValues={thirdForm.getValues}
                       onSubmit={thirdFormSubmit}
+                      pageNumber={pageNumber}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
+                  <div key={`page4-${formKey}`} style={{ display: pageNumber == 4 ? 'block' : 'none' }}>
                     <CreateJobPageJobDescription
                       setValue={fourthForm.setValue}
                       getValues={fourthForm.getValues}
@@ -601,7 +618,7 @@ export default function CreateJobModal({
                       firstForm={firstForm}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
+                  <div key={`page5-${formKey}`} style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
                     <CreateJobPageJobSettings
                       setPageNumber={setPageNumber}
                       onSubmit={fifthFormSubmit}
@@ -613,7 +630,7 @@ export default function CreateJobModal({
                       setIsVideoIntroEnabled={setIsVideoIntroEnabled}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
+                  <div key={`page6-${formKey}`} style={{ display: pageNumber == 6 ? 'block' : 'none' }}>
                     <CreateJobPagePostAs
                       setValue={sixthForm.setValue}
                       register={sixthForm.register}
@@ -624,7 +641,7 @@ export default function CreateJobModal({
                       pageNumber={pageNumber}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
+                  <div key={`page7-${formKey}`} style={{ display: pageNumber == 7 ? 'block' : 'none' }}>
                     <CreateJobPagePreview
                       firstFormGetValues={firstForm.getValues}
                       secondFormGetValues={secondForm.getValues}
@@ -635,7 +652,7 @@ export default function CreateJobModal({
                       fileProps={fileProps}
                     />
                   </div>
-                  <div style={{ display: pageNumber == 8 ? 'block' : 'none' }}>
+                  <div key={`page8-${formKey}`} style={{ display: pageNumber == 8 ? 'block' : 'none' }}>
                     <CreateJobPagePlatform
                       isLoading={isLoading}
                       setValue={seventhForm.setValue}
@@ -655,6 +672,16 @@ export default function CreateJobModal({
                   />
 
                   {/* Draft Modals - Rendered inside Dialog.Panel to prevent parent modal from closing */}
+                  <ConfirmModal
+                    message={'Are you sure you want to start over?\nAll unsaved progress will be lost.'}
+                    isOpen={isStartOverModalOpen}
+                    setIsOpen={setIsStartOverModalOpen}
+                    confirmAction={() => {
+                      setIsStartOverModalOpen(false);
+                      resetForm(false);
+                    }}
+                    isLoading={false}
+                  />
                   <SaveDraftModal
                     isOpen={isSaveDraftModalOpen}
                     onClose={() => setIsSaveDraftModalOpen(false)}

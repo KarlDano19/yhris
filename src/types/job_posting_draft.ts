@@ -19,16 +19,24 @@ export interface T_JobPostingDraftData {
   hireDate?: string | Date; // Alias for dateRequired
 
   // Page 3
-  salaryRangeType?: string;
+  salaryRangeType?: string; // legacy alias
   rate?: string;
-  minimumAmount?: string;
-  maximumAmount?: string;
-  exactAmount?: string;
-  offeredBenefits?: string;
-  isShowSalary?: boolean;
-  isShowBenefits?: boolean;
+  minimumAmount?: string; // legacy alias
+  maximumAmount?: string; // legacy alias
+  exactAmount?: string; // legacy alias
+  offeredBenefits?: string; // legacy alias
+  isShowSalary?: boolean; // legacy alias
+  isShowBenefits?: boolean; // legacy alias
+  // actual form fields
+  benefits?: string[];
+  is_show_salary?: boolean;
+  is_show_benefits?: boolean;
   salary?: {
     salaryType?: string;
+    salaryRangeMin?: string | number;
+    salaryRangeMax?: string | number;
+    salaryValue?: string | number;
+    // legacy aliases kept for backwards compat
     rate?: string;
     minimumAmount?: string;
     maximumAmount?: string;
@@ -45,8 +53,11 @@ export interface T_JobPostingDraftData {
   notesRemarks?: string; // Alias for jobRemark
   jobUrl?: string;
   uploadedJobDescription?: File | null;
-  isShowRoles?: boolean;
-  isShowRemarks?: boolean;
+  isShowRoles?: boolean; // legacy alias
+  isShowRemarks?: boolean; // legacy alias
+  // actual form fields
+  is_show_roles?: boolean;
+  is_show_remarks?: boolean;
 
   // Page 5
   posterType?: string;
@@ -57,7 +68,8 @@ export interface T_JobPostingDraftData {
   ogDescription?: string;
 
   // Page 6
-  sharedTo?: string;
+  postAs?: string;
+  sharedTo?: string; // legacy alias
 
   // Page 7
   screeningQuestions?: any[];
