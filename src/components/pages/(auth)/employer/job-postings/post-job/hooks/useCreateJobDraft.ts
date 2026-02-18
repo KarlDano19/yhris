@@ -10,11 +10,6 @@ async function createJobDraft(data: T_CreateJobDraftData): Promise<T_JobDraftRes
 
   // Append draft_data as JSON string
   formData.append('draft_data', JSON.stringify(data.draft_data));
-  formData.append('current_step', data.current_step.toString());
-
-  if (data.draft_name) {
-    formData.append('draft_name', data.draft_name);
-  }
 
   if (data.source) {
     formData.append('source', data.source);

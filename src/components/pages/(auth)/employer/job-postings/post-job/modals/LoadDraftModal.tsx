@@ -87,8 +87,6 @@ export default function LoadDraftModal({
                                 {draft.job_title}
                               </h4>
                               <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                                <span>Step {draft.current_step} of 8</span>
-                                <span>•</span>
                                 <span>
                                   {formatDistanceToNow(new Date(draft.updated_at), {
                                     addSuffix: true,

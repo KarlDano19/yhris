@@ -20,6 +20,7 @@ export default function CreateJobPageJobDescription({
   isEdit,
   onSave,
   isLoading,
+  uploadedJobDescriptionUrl,
 }: {
   register: any;
   setValue: any;
@@ -34,6 +35,7 @@ export default function CreateJobPageJobDescription({
   isEdit?: boolean;
   onSave?: () => void;
   isLoading?: boolean;
+  uploadedJobDescriptionUrl?: string | null;
 }) {
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
@@ -142,6 +144,19 @@ export default function CreateJobPageJobDescription({
                   Remove File
                 </button>
               </>
+            )}
+            {uploadedJobDescriptionUrl && !filePropsLocal.fileName && (
+              <div className='block ml-0 text-sm font-medium leading-6 text-gray-900'>
+                Current Uploaded File:{' '}
+                <a
+                  href={uploadedJobDescriptionUrl}
+                  className='text-savoy-blue underline'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  View Uploaded Job Description
+                </a>
+              </div>
             )}
             <div className='mt-2'>
               <input

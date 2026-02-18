@@ -1,5 +1,5 @@
 import { Dispatch, useRef, useState } from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -46,6 +46,12 @@ export default function CreateJobPageJobType({
     schedule: false,
     hireDate: false,
   });
+
+  // Subscribe to form values so buttons re-render when form is reset
+  const jobTypes = useWatch({ control, name: 'jobType' });
+  const workSetups = useWatch({ control, name: 'workSetup' });
+  const schedules = useWatch({ control, name: 'schedule' });
+
   const JobType = ['Full Time', 'Part Time', 'Internship/OJT', 'Project-based'];
   const WorkSetup = ['On-site', 'Work from Home', 'Hybrid'];
   const Schedule = ['Flexible', '8 Hours', '12 Hours', 'Night Shift'];
@@ -143,7 +149,6 @@ export default function CreateJobPageJobType({
             }`}
           >
             {JobType.map((job, index) => {
-              const jobTypes = getValues('jobType');
               return (
                 <button
                   key={index}
@@ -226,7 +231,6 @@ export default function CreateJobPageJobType({
             }`}
           >
             {WorkSetup.map((setup, index) => {
-              const workSetups = getValues('workSetup');
               return (
                 <button
                   key={index}
@@ -309,7 +313,6 @@ export default function CreateJobPageJobType({
             }`}
           >
             {Schedule.map((sched, index) => {
-              const schedules = getValues('schedule');
               return (
                 <button
                   key={index}

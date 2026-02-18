@@ -84,7 +84,6 @@ export interface T_JobPostingDraftData {
 export interface T_JobPostingDraft {
   id: number;
   draft_data: T_JobPostingDraftData;
-  current_step: number;
   source: 'manual' | 'session_expiry' | 'browser_close';
   job_title: string;
   position: string | null;
@@ -96,7 +95,6 @@ export interface T_JobPostingDraft {
 
 export interface T_CreateJobDraftData {
   draft_data: T_JobPostingDraftData;
-  current_step: number;
   source?: 'manual' | 'session_expiry' | 'browser_close';
   uploaded_job_description?: File;
   uploaded_custom_poster?: File;

@@ -21,13 +21,11 @@ async function getJobDrafts(): Promise<T_JobPostingDraft[]> {
         throw new Error(errorData.message || 'Failed to fetch drafts');
       }
       const data = await res.json();
-      console.log('Draft API Response:', data);
       // Handle both wrapped and direct array responses
       return Array.isArray(data) ? data : (data.data || []);
     }
     return [];
   } catch (error: any) {
-    console.error('Error fetching drafts:', error);
     throw new Error(error.message || 'Failed to fetch drafts');
   }
 }

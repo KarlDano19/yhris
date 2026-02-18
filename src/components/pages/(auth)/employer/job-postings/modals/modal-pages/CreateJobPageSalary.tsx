@@ -1,4 +1,4 @@
-import { Dispatch, ChangeEvent, useEffect, useState } from 'react';
+import { Dispatch, ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -44,6 +44,9 @@ export default function CreateJobPageSalary({
   });
   const [isOtherBenefitOpen, setIsOtherBenefitOpen] = useState(false);
   const SalarTypeValue = watch('salary.salaryType');
+  const watchedBenefits: string[] = watch('benefits') || [];
+  // Ref flag to distinguish form→local syncs from local→form syncs (prevents circular updates)
+  const isBenefitsFromLocalUpdate = useRef(false);
 
   const ListOfBenefits = [
     'Work from home',
@@ -63,33 +66,34 @@ export default function CreateJobPageSalary({
     'Meal Allowance',
   ];
 
-  // Initialize benefits from form on mount and when returning to this page
+  // Sync form benefits → local state (handles draft loading and external resets)
+  // Uses a ref flag to prevent circular updates when local state triggers setValue
   useEffect(() => {
-    const existingBenefits = getValues('benefits');
-    if (existingBenefits && existingBenefits.length > 0) {
-      setSelectedBenefitOptions(existingBenefits);
+    if (isBenefitsFromLocalUpdate.current) {
+      isBenefitsFromLocalUpdate.current = false;
+      return;
     }
-  }, []);
+    const knownBenefits = watchedBenefits.filter((b: string) => ListOfBenefits.includes(b));
+    const otherBenefits = watchedBenefits.filter((b: string) => !ListOfBenefits.includes(b));
+    setSelectedBenefitOptions(prev => {
+      if (prev.length === knownBenefits.length && prev.every((b, i) => b === knownBenefits[i])) return prev;
+      return knownBenefits;
+    });
+    if (otherBenefits.length > 0) {
+      setIsOtherBenefitOpen(true);
+      setSelectedOtherBenefit(prev => {
+        if (prev.length === otherBenefits.length && prev.every((b, i) => b === otherBenefits[i])) return prev;
+        return otherBenefits;
+      });
+    }
+  }, [watchedBenefits]);
 
-  // Update benefits when pageNumber changes to 3
+  // Sync local state → form benefits
   useEffect(() => {
-    if (pageNumber === 3) {
-      const existingBenefits = getValues('benefits');
-      if (existingBenefits && existingBenefits.length > 0) {
-        setSelectedBenefitOptions(existingBenefits);
-      }
-    }
-  }, [pageNumber, getValues]);
-
-  //combining the selectedBenefits and otherBenefits
-  useEffect(() => {
-    // check if the isOtherBenfitOpen is true
-    let concatenatedValue;
-    if (isOtherBenefitOpen) {
-      concatenatedValue = [...selectedBenefitOptions, ...selectedOtherBenefit];
-    } else {
-      concatenatedValue = selectedBenefitOptions;
-    }
+    isBenefitsFromLocalUpdate.current = true;
+    const concatenatedValue = isOtherBenefitOpen
+      ? [...selectedBenefitOptions, ...selectedOtherBenefit]
+      : selectedBenefitOptions;
     setValue('benefits', concatenatedValue);
   }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue]);
 

@@ -188,8 +188,8 @@ export default function CreateJobModal({
         // Set combined form data
         setCombinedFormData(draftData);
 
-        // Set page number to current step
-        setPageNumber(selectedDraft.current_step);
+        // Always start at page 1 so the user can review from the beginning
+        setPageNumber(1);
       }
     }
   }, [selectedDraft, isOpen]);
@@ -197,7 +197,7 @@ export default function CreateJobModal({
   // Auto-save to localStorage whenever form data changes
   useEffect(() => {
     if (isOpen && Object.keys(combinedFormData).length > 0) {
-      draftStorage.save(getAllFormData(), pageNumber);
+      draftStorage.save(getAllFormData());
     }
   }, [combinedFormData, pageNumber, isOpen]);
 
@@ -208,7 +208,6 @@ export default function CreateJobModal({
         const posterFile = sixthForm.getValues('postAsUpload');
         createDraftMutation.mutate({
           draft_data: getAllFormData(),
-          current_step: pageNumber,
           source: 'session_expiry',
           ...(fileProps.file && { uploaded_job_description: fileProps.file }),
           ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
@@ -230,7 +229,6 @@ export default function CreateJobModal({
       const localDraftObject: T_JobPostingDraft = {
         id: 0, // Use 0 to indicate it's a local draft
         draft_data: localDraft.data,
-        current_step: localDraft.step || 1,
         source: 'browser_close',
         job_title: localDraft.data.jobTitle || 'Untitled Job',
         position: localDraft.data.position || null,
@@ -272,7 +270,16 @@ export default function CreateJobModal({
 
     // Reset all forms with explicit values so draft-loaded defaultValues don't persist
     firstForm.reset({ country: 'Philippines', language: 'English' });
-    secondForm.reset({});
+    secondForm.reset({
+      jobType: undefined,
+      workSetup: undefined,
+      schedule: undefined,
+      hireCount: 1,
+      hireDate: null,
+      otherJobType: '',
+      otherWorkSetup: '',
+      otherSchedule: '',
+    });
     thirdForm.reset({ salary: { salaryType: 'Range' } });
     fourthForm.reset({
       jobDescription: CREATEJOB_TEMPLATE[0],
@@ -318,7 +325,6 @@ export default function CreateJobModal({
     createDraftMutation.mutate(
       {
         draft_data: getAllFormData(),
-        current_step: pageNumber,
         source: 'manual',
         ...(fileProps.file && { uploaded_job_description: fileProps.file }),
         ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
@@ -632,6 +638,7 @@ export default function CreateJobModal({
                       combinedFormData={combinedFormData}
                       positionData={positionData}
                       firstForm={firstForm}
+                      uploadedJobDescriptionUrl={selectedDraft?.uploaded_job_description ?? null}
                     />
                   </div>
                   <div key={`page5-${formKey}`} style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
