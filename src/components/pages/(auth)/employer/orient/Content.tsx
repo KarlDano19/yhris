@@ -148,6 +148,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           item['isContractReceived'] = item.is_contract_received;
           item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
+          item['isIntroductionReceived'] = item.is_introduction_received;
+          item['introductionReceivedDate'] = formatDateToLocal(item.introduction_received_date);
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
             to: '',
@@ -176,6 +178,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           item['isContractReceived'] = item.is_contract_received;
           item['contractReceivedDate'] = formatDateToLocal(item.contract_received_date);
           item['isIntroduced'] = item.is_introduction_sent;
+          item['isIntroductionReceived'] = item.is_introduction_received;
+          item['introductionReceivedDate'] = formatDateToLocal(item.introduction_received_date);
           item['isOriented'] = item.is_orientation_completed;
           item['introduceTeam'] = {
             to: '',
@@ -228,10 +232,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       orientItemCopy[itemIndex].isContractReceived = true;
       orientItemCopy[itemIndex].contractReceivedDate = formatDateToLocal(currentDate.toISOString());
     }
+    if (emailType === 'introduce') {
+      orientItemCopy[itemIndex].isIntroductionReceived = true;
+      orientItemCopy[itemIndex].introductionReceivedDate = formatDateToLocal(currentDate.toISOString());
+    }
+    const successMessage = emailType === 'contract' ? 'Sent contract mark as received.' : 'Introduction marked as received.';
     const callbackReq = {
       onSuccess: (data: any) => {
         setOrientItems([...orientItemCopy]);
-        toast.custom(() => <CustomToast message={'Sent contract mark as received.'} type='success' />, {
+        toast.custom(() => <CustomToast message={successMessage} type='success' />, {
           duration: 5000,
         });
       },
@@ -455,10 +464,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex justify-center'>
               <IntroduceToTeam
                 isIntroduced={item.isIntroduced}
+                isIntroductionReceived={item.isIntroductionReceived}
+                introductionReceivedDate={item.introductionReceivedDate}
                 setIsIntroducedModalOpen={(e) => {
                   setSelectedOrientId(item.id);
                   setIsIntroducedModalOpen(e);
                 }}
+                setReceived={() => {
+                  setReceived(item.id, 'introduce');
+                }}
+                isLoading={isLoading}
               />
             </div>
           </td>

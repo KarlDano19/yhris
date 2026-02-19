@@ -109,6 +109,103 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+FEATURE ID: HRIS-011
+DATE FILED: 2026-02-19
+DATE FIXED: 2026-02-19
+CLIENT/REPORTER: Internal - Feature Enhancement
+
+ISSUE DESCRIPTION:
+In the onboarding flow, the Send Contract and Introduce to Team buttons were disabled
+after the first send (showing "Sent" / "Introduced"), preventing users from resending
+emails. Additionally, the Introduce to Team column had no Receive button, so there was
+no way to mark an introduction as received with a date stamp.
+
+The employee-issue module already had a better "resend" pattern where the button stays
+enabled after sending and changes its label to "Resend". This pattern needed to be
+applied to both contract and introduce, and a receive button needed to be added to
+introduce.
+
+DESIRED OUTCOME:
+1. Contract Send button should remain clickable after first send, label changes to "Resend"
+2. Introduce button should remain clickable after first send, label changes to "Resend"
+3. Introduce column should have a Receive button (matching contract's receive pattern)
+4. Receive button should show received date with DocumentIcon when marked as received
+5. Disabled Receive buttons should show cursor-not-allowed on hover
+
+FILES CHANGED:
+Backend:
+- (See backend BUG_HISTORY.txt)
+
+Frontend:
+- src/components/pages/(auth)/employer/orient/SendContract.tsx (removed disabled prop and click guard on Send button; label changes to "Resend" after first send; added disabled:cursor-not-allowed on Receive button)
+- src/components/pages/(auth)/employer/orient/IntroduceToTeam.tsx (removed disabled prop and click guard on Introduce button; label changes to "Resend" after first send; added Receive button with received date display; added disabled:cursor-not-allowed on Receive button)
+- src/components/pages/(auth)/employer/orient/Content.tsx (mapped isIntroductionReceived and introductionReceivedDate from API response; updated setReceived to handle 'introduce' emailType; passed new props to IntroduceToTeam component; dynamic success toast message based on emailType)
+- src/components/pages/(auth)/employer/orient/functions/emailHandlers.ts (added isIntroductionReceived and introductionReceivedDate to OrientItem interface)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes in FE repo)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing - SendContract resend, IntroduceToTeam resend + receive)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A - existing mutation hooks reused)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (OrientItem interface updated, no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (manual testing - contract resend, introduce resend, introduce receive with date)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (resend after first send, receive button disabled states, cursor-not-allowed on disabled)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (pending deployment)
+
+FIX EXPLANATION:
+Four frontend files were modified:
+
+1. **SendContract.tsx:** Removed `disabled={isContractSent}` and the `!isContractSent &&`
+   click guard from the Send button. The button is now always clickable and opens the
+   modal. Label changes from "Send" to "Resend" after first send. Added
+   `disabled:cursor-not-allowed` to the Receive button for better UX on disabled state.
+
+2. **IntroduceToTeam.tsx:** Complete rework to match SendContract's pattern:
+   - Removed `disabled` and click guard from Introduce button; label changes to "Resend"
+   - Added new props: `isIntroductionReceived`, `introductionReceivedDate`, `setReceived`,
+     `isLoading`
+   - Added Receive button with same disabled logic as SendContract (disabled when not
+     introduced, when already received, or when loading)
+   - Added received date display with DocumentIcon (green checkmark pattern)
+   - Added `disabled:cursor-not-allowed` on the Receive button
+
+3. **Content.tsx:** Three areas updated:
+   - `useEffect` data mapping: Added `isIntroductionReceived` and
+     `introductionReceivedDate` (using formatDateToLocal) to both paginated and array
+     response branches
+   - `setReceived` function: Added `emailType === 'introduce'` handling that sets
+     `isIntroductionReceived = true` and formats the received date; dynamic success
+     toast message based on emailType
+   - `<IntroduceToTeam>` JSX: Passes new props (`isIntroductionReceived`,
+     `introductionReceivedDate`, `setReceived` with 'introduce' emailType, `isLoading`)
+
+4. **emailHandlers.ts:** Added `isIntroductionReceived: boolean` and
+   `introductionReceivedDate?: string` to the `OrientItem` interface for type safety.
+
+================================================================================
+
 BUG ID: HRIS-010
 DATE FILED: 2026-02-13
 DATE FIXED: 2026-02-13
