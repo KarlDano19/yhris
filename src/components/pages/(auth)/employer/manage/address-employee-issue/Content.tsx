@@ -1057,7 +1057,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send & Mark as Sent"
           isLoading={isLoading}
-          disableCCBCC={true}
           prePopulatedData={employeeIssueDetails ? {
             subject: employeeIssueDetails.nte_subject,
             message: employeeIssueDetails.nte_message,
@@ -1101,7 +1100,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send"
           isLoading={isLoading}
-          disableCCBCC={true}
           prePopulatedData={decisionEmployeeIssueDetails ? {
             subject: decisionEmployeeIssueDetails.decision_subject,
             message: decisionEmployeeIssueDetails.decision_message,
