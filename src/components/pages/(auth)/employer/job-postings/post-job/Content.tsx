@@ -48,7 +48,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const thirdForm = useForm<any>({
     defaultValues: {
       salary: {
-        salaryType: 'Range',
+        salaryType: '',
       },
     },
   });

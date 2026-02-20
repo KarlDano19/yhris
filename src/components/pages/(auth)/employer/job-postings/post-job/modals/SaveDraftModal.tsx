@@ -1,6 +1,5 @@
-'use client';
-
 import { Fragment, useRef } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
 
 import WarningRed from '@/svg/WarningRed';

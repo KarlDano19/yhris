@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
+import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm, Controller } from 'react-hook-form';
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import ConfirmModal from '@/components/ConfirmModal';
+import useGetPositionItems from '@/components/hooks/useGetPositionItems';
 import SalaryRangeModal from '../../modals/SalaryRangeModal';
 import SaveDraftModal from './SaveDraftModal';
 import LoadDraftModal from './LoadDraftModal';
@@ -17,18 +18,19 @@ import CreateJobPageJobSettings from '../../modals/modal-pages/CreateJobPageJobS
 import CreateJobPagePostAs from '../../modals/modal-pages/CreateJobPagePostAs';
 import CreateJobPagePreview from '../../modals/modal-pages/CreateJobPagePreview';
 import CreateJobPagePlatform from '../../modals/modal-pages/CreateJobPagePlatform';
-import classNames from '@/helpers/classNames';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
-import useGetPositionItems from '@/components/hooks/useGetPositionItems';
-import { draftStorage } from '@/helpers/draftStorage';
-import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 import { useCreateJobDraft } from '../hooks/useCreateJobDraft';
 import useGetJobDrafts from '../hooks/useGetJobDrafts';
 import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
-import { T_JobPostingDraft } from '@/types/job_posting_draft';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+
+import { T_JobPostingDraft } from '@/types/job_posting_draft';
+
+import { draftStorage } from '@/helpers/draftStorage';
+import classNames from '@/helpers/classNames';
+import { QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 
 export default function CreateJobModal({
   isOpen,
@@ -99,100 +101,31 @@ export default function CreateJobModal({
   const [isLoadDraftModalOpen, setIsLoadDraftModalOpen] = useState(false);
   const [isStartOverModalOpen, setIsStartOverModalOpen] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<T_JobPostingDraft | null>(null);
-  const [allDrafts, setAllDrafts] = useState<T_JobPostingDraft[]>([]);
+  const [localDraftCleared, setLocalDraftCleared] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
-  // Load draft data when selectedDraft changes
-  useEffect(() => {
-    if (selectedDraft && isOpen) {
-      const draftData = selectedDraft.draft_data;
-
-      // Check if draftData exists and is an object
-      if (draftData && typeof draftData === 'object') {
-        // Page 1: Job Title Info (country, language, jobTitle, position, placeAdvertise)
-        firstForm.reset({
-          country: draftData.country || 'Philippines',
-          language: draftData.language || 'English',
-          jobTitle: draftData.jobTitle || '',
-          position: draftData.position || '',
-          placeAdvertise: draftData.placeAdvertise || draftData.advertiseTo || '',
-        });
-
-        // Page 2: Job Type (jobType, workSetup, schedule, hireCount, hireDate)
-        // Convert hireDate string to Date object for the date picker
-        let hireDateValue: Date | null = null;
-        if (draftData.hireDate || draftData.dateRequired) {
-          const dateStr = draftData.hireDate || draftData.dateRequired;
-          try {
-            hireDateValue = dateStr ? new Date(dateStr) : null;
-          } catch (e) {
-            hireDateValue = null;
-          }
-        }
-
-        secondForm.reset({
-          jobType: draftData.jobType || '',
-          workSetup: draftData.workSetup || '',
-          schedule: draftData.schedule || draftData.jobSchedule || '',
-          hireCount: draftData.hireCount || draftData.requiredSlot || '',
-          hireDate: hireDateValue,
-        });
-
-        // Page 3: Salary
-        const salaryData = draftData.salary || {};
-        thirdForm.reset({
-          salary: {
-            salaryType: salaryData.salaryType || draftData.salaryRangeType || '',
-            salaryRangeMin: (salaryData as any).salaryRangeMin || draftData.minimumAmount || '',
-            salaryRangeMax: (salaryData as any).salaryRangeMax || draftData.maximumAmount || '',
-            salaryValue: (salaryData as any).salaryValue || draftData.exactAmount || '',
-          },
-          rate: draftData.rate || salaryData.rate || '',
-          is_show_salary: (draftData as any).is_show_salary ?? draftData.isShowSalary ?? false,
-          is_show_benefits: (draftData as any).is_show_benefits ?? draftData.isShowBenefits ?? false,
-          benefits: (draftData as any).benefits || [],
-        });
-        if (draftData.salaryRangeType || draftData.salary) {
-          setIsRangeBenefitsAdded(true);
-        }
-
-        // Page 4: Job Description
-        fourthForm.reset({
-          jobDescription: draftData.jobDescription || draftData.positionDescription || '',
-          qualifications: draftData.qualifications || '',
-          notesRemarks: draftData.jobRemark || draftData.notesRemarks || '',
-          is_show_roles: (draftData as any).is_show_roles ?? draftData.isShowRoles ?? false,
-          is_show_remarks: (draftData as any).is_show_remarks ?? draftData.isShowRemarks ?? false,
-        });
-
-        // Page 5: Poster Settings
-        fifthForm.reset({
-          posterType: draftData.posterType || '',
-          ogUrl: draftData.ogUrl || '',
-          ogType: draftData.ogType || '',
-          ogTitle: draftData.ogTitle || '',
-          ogDescription: draftData.ogDescription || '',
-        });
-
-        // Page 6: Post As
-        sixthForm.reset({
-          postAs: (draftData as any).postAs || draftData.sharedTo || '',
-          ...(selectedDraft.uploaded_custom_poster && { uploaded_image: selectedDraft.uploaded_custom_poster }),
-        });
-
-        // Page 7: Screening Questions
-        setScreeningQuestions(draftData.screeningQuestions || []);
-        setAutoRejectEnabled(draftData.autoRejectEnabled || false);
-        setIsVideoIntroEnabled(draftData.isVideoIntroEnabled || false);
-
-        // Set combined form data
-        setCombinedFormData(draftData);
-
-        // Always start at page 1 so the user can review from the beginning
-        setPageNumber(1);
+  const allDrafts = useMemo(() => {
+    const combinedDrafts = [...backendDrafts];
+    if (!localDraftCleared) {
+      const localDraft = draftStorage.load();
+      if (localDraft && localDraft.data && Object.keys(localDraft.data).length > 0) {
+        const localDraftObject: T_JobPostingDraft = {
+          id: 0,
+          draft_data: localDraft.data,
+          source: 'browser_close',
+          job_title: localDraft.data.jobTitle || 'Untitled Job',
+          position: localDraft.data.position || null,
+          uploaded_job_description: null,
+          uploaded_custom_poster: null,
+          created_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+          updated_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+        };
+        combinedDrafts.unshift(localDraftObject);
       }
     }
-  }, [selectedDraft, isOpen]);
+    return combinedDrafts;
+  }, [backendDrafts, localDraftCleared]);
+
 
   // Auto-save to localStorage whenever form data changes
   useEffect(() => {
@@ -219,31 +152,6 @@ export default function CreateJobModal({
     return () => window.removeEventListener('session-expiring', handleSessionExpiring);
   }, [combinedFormData, pageNumber]);
 
-  // Merge localStorage draft with backend drafts
-  useEffect(() => {
-    const localDraft = draftStorage.load();
-    const combinedDrafts = [...backendDrafts];
-
-    if (localDraft && localDraft.data && Object.keys(localDraft.data).length > 0) {
-      // Create a fake draft object from localStorage that matches T_JobPostingDraft interface
-      const localDraftObject: T_JobPostingDraft = {
-        id: 0, // Use 0 to indicate it's a local draft
-        draft_data: localDraft.data,
-        source: 'browser_close',
-        job_title: localDraft.data.jobTitle || 'Untitled Job',
-        position: localDraft.data.position || null,
-        uploaded_job_description: null,
-        uploaded_custom_poster: null,
-        created_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
-        updated_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
-      };
-
-      // Add local draft at the beginning of the list
-      combinedDrafts.unshift(localDraftObject);
-    }
-
-    setAllDrafts(combinedDrafts);
-  }, [backendDrafts]);
 
   const customCloseModal = () => {
     if (Object.keys(combinedFormData).length > 0) {
@@ -255,10 +163,10 @@ export default function CreateJobModal({
   };
 
   const resetForm = (closeModal: boolean = true) => {
-    // Clear selectedDraft and combinedFormData FIRST to prevent useEffect from repopulating
     setSelectedDraft(null);
     setCombinedFormData({});
     draftStorage.clear();
+    setLocalDraftCleared(false);
 
     // Reset all state
     setPageNumber(1);
@@ -280,14 +188,14 @@ export default function CreateJobModal({
       otherWorkSetup: '',
       otherSchedule: '',
     });
-    thirdForm.reset({ salary: { salaryType: 'Range' } });
+    thirdForm.reset({ salary: { salaryType: '' } });
     fourthForm.reset({
-      jobDescription: CREATEJOB_TEMPLATE[0],
+      jobDescription: '',
       qualifications: QUALIFICATION_TEMPLATE[0],
       notesRemarks: '',
     });
     fifthForm.reset({});
-    sixthForm.reset({});
+    sixthForm.reset({ postAs: '', postAsUpload: null, uploaded_image: null });
     seventhForm.reset({});
 
     // Force React Select to clear
@@ -356,17 +264,95 @@ export default function CreateJobModal({
   };
 
   const handleLoadDraftClick = (draft: T_JobPostingDraft) => {
+    const draftData = draft.draft_data;
+
+    if (draftData && typeof draftData === 'object') {
+      // Page 1: Job Title Info
+      firstForm.reset({
+        country: draftData.country || 'Philippines',
+        language: draftData.language || 'English',
+        jobTitle: draftData.jobTitle || '',
+        position: draftData.position || '',
+        placeAdvertise: draftData.placeAdvertise || draftData.advertiseTo || '',
+      });
+
+      // Page 2: Job Type
+      let hireDateValue: Date | null = null;
+      if (draftData.hireDate || draftData.dateRequired) {
+        const dateStr = draftData.hireDate || draftData.dateRequired;
+        try {
+          hireDateValue = dateStr ? new Date(dateStr) : null;
+        } catch (e) {
+          hireDateValue = null;
+        }
+      }
+
+      secondForm.reset({
+        jobType: draftData.jobType || '',
+        workSetup: draftData.workSetup || '',
+        schedule: draftData.schedule || draftData.jobSchedule || '',
+        hireCount: draftData.hireCount || draftData.requiredSlot || '',
+        hireDate: hireDateValue,
+      });
+
+      // Page 3: Salary
+      const salaryData = draftData.salary || {};
+      thirdForm.reset({
+        salary: {
+          salaryType: salaryData.salaryType || draftData.salaryRangeType || '',
+          salaryRangeMin: (salaryData as any).salaryRangeMin || draftData.minimumAmount || '',
+          salaryRangeMax: (salaryData as any).salaryRangeMax || draftData.maximumAmount || '',
+          salaryValue: (salaryData as any).salaryValue || draftData.exactAmount || '',
+        },
+        rate: draftData.rate || salaryData.rate || '',
+        is_show_salary: (draftData as any).is_show_salary ?? draftData.isShowSalary ?? false,
+        is_show_benefits: (draftData as any).is_show_benefits ?? draftData.isShowBenefits ?? false,
+        benefits: (draftData as any).benefits || [],
+      });
+      setIsRangeBenefitsAdded(!!(draftData.salaryRangeType || draftData.salary?.salaryType));
+
+      // Page 4: Job Description
+      fourthForm.reset({
+        jobDescription: draftData.jobDescription || draftData.positionDescription || '',
+        qualifications: draftData.qualifications || '',
+        notesRemarks: draftData.jobRemark || draftData.notesRemarks || '',
+        is_show_roles: (draftData as any).is_show_roles ?? draftData.isShowRoles ?? false,
+        is_show_remarks: (draftData as any).is_show_remarks ?? draftData.isShowRemarks ?? false,
+      });
+
+      // Page 5: Poster Settings
+      fifthForm.reset({
+        posterType: draftData.posterType || '',
+        ogUrl: draftData.ogUrl || '',
+        ogType: draftData.ogType || '',
+        ogTitle: draftData.ogTitle || '',
+        ogDescription: draftData.ogDescription || '',
+      });
+
+      // Page 6: Post As
+      sixthForm.reset({
+        postAs: (draftData as any).postAs || draftData.sharedTo || '',
+        ...(draft.uploaded_custom_poster && { uploaded_image: draft.uploaded_custom_poster }),
+      });
+
+      // Page 7: Screening Questions
+      setScreeningQuestions(draftData.screeningQuestions || []);
+      setAutoRejectEnabled(draftData.autoRejectEnabled || false);
+      setIsVideoIntroEnabled(draftData.isVideoIntroEnabled || false);
+
+      setCombinedFormData(draftData);
+      setPageNumber(1);
+    }
+
     setSelectedDraft(draft);
     setIsLoadDraftModalOpen(false);
-    // The useEffect will handle populating the form data
   };
 
   const handleDeleteDraft = (draftId: number) => {
     // Handle local draft deletion (id === 0)
     if (draftId === 0) {
       draftStorage.clear();
-      // Remove local draft from the list
-      setAllDrafts(allDrafts.filter(draft => draft.id !== 0));
+      setLocalDraftCleared(true);
       toast.custom(() => <CustomToast message="Local draft cleared successfully" type="success" />, {
         duration: 3000,
       });

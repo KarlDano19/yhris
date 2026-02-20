@@ -1,11 +1,10 @@
-'use client';
-
 import { Fragment } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
-import { XCircleIcon } from '@heroicons/react/24/solid';
 import { formatDistanceToNow } from 'date-fns';
 import { Tooltip } from 'react-tooltip';
 
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import { T_JobPostingDraft } from '@/types/job_posting_draft';
