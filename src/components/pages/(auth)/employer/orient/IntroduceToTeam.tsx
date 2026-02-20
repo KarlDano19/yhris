@@ -1,13 +1,22 @@
 import { Dispatch } from 'react';
 import classNames from '@/helpers/classNames';
+import { DocumentIcon } from '@heroicons/react/24/outline';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 export default function IntroduceToTeam({
   isIntroduced,
+  isIntroductionReceived,
+  introductionReceivedDate,
   setIsIntroducedModalOpen,
+  setReceived,
+  isLoading,
 }: {
   isIntroduced: boolean;
+  isIntroductionReceived: boolean;
+  introductionReceivedDate?: string;
   setIsIntroducedModalOpen: Dispatch<boolean>;
+  setReceived: any;
+  isLoading: boolean;
 }) {
   return (
     <>
@@ -21,11 +30,31 @@ export default function IntroduceToTeam({
                 : 'border-[1px] border-red-500 text-red-500',
               'relative rounded-md px-5 py-2 focus:z-10 w-[7rem] disabled:opacity-80'
             )}
-            onClick={() => !isIntroduced && setIsIntroducedModalOpen(true)}
-            disabled={isIntroduced ? true : false}
+            onClick={() => setIsIntroducedModalOpen(true)}
           >
-            {isIntroduced ? 'Introduced' : 'Introduce'}
+            {isIntroduced ? 'Resend' : 'Introduce'}
           </SmartButton>
+        </div>
+        <div>
+          <div>
+            <SmartButton
+              id="allow-onboarding-btn"
+              className={classNames(
+                !isIntroduced ? 'bg-blue-200 text-gray-900' : isIntroductionReceived ? 'bg-green-500 border-green-500 text-white' : 'bg-blue-200 text-gray-900 cursor-pointer',
+                'relative rounded-md px-5 py-2 focus:z-10 w-[7rem] disabled:opacity-80 disabled:cursor-not-allowed'
+              )}
+              onClick={() => setReceived()}
+              disabled={!isIntroduced ? true : isIntroductionReceived ? true : isLoading}
+            >
+              {isIntroduced && isIntroductionReceived ? 'Received' : 'Receive'}
+            </SmartButton>
+          </div>
+          {isIntroductionReceived ? (
+            <div className='flex gap-1 items-center mt-2'>
+              <DocumentIcon className='text-green-500 w-4 h-4' />
+              <p className='text-xs'>{introductionReceivedDate}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </>
