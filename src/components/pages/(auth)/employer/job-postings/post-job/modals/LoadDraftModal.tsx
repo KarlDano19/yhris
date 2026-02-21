@@ -7,7 +7,7 @@ import { Tooltip } from 'react-tooltip';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 
-import { T_JobPostingDraft } from '@/types/job_posting_draft';
+import { T_JobPostingDraft } from '@/types/job_posting';
 
 interface LoadDraftModalProps {
   isOpen: boolean;

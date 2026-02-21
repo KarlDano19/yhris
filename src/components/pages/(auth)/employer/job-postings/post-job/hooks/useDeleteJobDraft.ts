@@ -1,9 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_JobDraftResponse } from '@/types/job_posting_draft';
-
-async function deleteJobDraft(draftId: number): Promise<T_JobDraftResponse> {
+async function deleteJobDraft(draftId: number) {
   const token = getCookie('token');
 
   const config: RequestInit = {
@@ -29,7 +27,7 @@ async function deleteJobDraft(draftId: number): Promise<T_JobDraftResponse> {
 export function useDeleteJobDraft() {
   const queryClient = useQueryClient();
 
-  return useMutation<T_JobDraftResponse, Error, number>({
+  return useMutation({
     mutationFn: (draftId: number) => deleteJobDraft(draftId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobDraftsCache'] });

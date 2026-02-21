@@ -33,10 +33,10 @@ async function addJobPost(jobPost: any) {
     formData.append('og_image_height', '300');
     
     // Add is_show_roles and is_show_remarks fields
-    formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
-    formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
-    formData.append('is_show_salary', jobPost.is_show_salary === true ? 'true' : 'false');
-    formData.append('is_show_benefits', jobPost.is_show_benefits === true ? 'true' : 'false');
+    formData.append('is_show_roles', jobPost.isShowRoles === true ? 'true' : 'false');
+    formData.append('is_show_remarks', jobPost.isShowRemarks === true ? 'true' : 'false');
+    formData.append('is_show_salary', jobPost.isShowSalary === true ? 'true' : 'false');
+    formData.append('is_show_benefits', jobPost.isShowBenefits === true ? 'true' : 'false');
 
     // Add screening questions and auto-reject settings
     if (jobPost.screeningQuestions && jobPost.screeningQuestions.length > 0) {

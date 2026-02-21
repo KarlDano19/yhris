@@ -26,11 +26,38 @@ import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
-import { T_JobPostingDraft } from '@/types/job_posting_draft';
+import { T_JobPostingDraft } from '@/types/job_posting';
 
 import { draftStorage } from '@/helpers/draftStorage';
 import classNames from '@/helpers/classNames';
 import { QUALIFICATION_TEMPLATE } from '@/helpers/constants';
+
+function camelToSnake(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+function convertKeysToSnakeCase(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (obj instanceof File || obj instanceof Date) return obj;
+  if (Array.isArray(obj)) return obj.map((item) => (typeof item === 'object' && item !== null && !(item instanceof File) && !(item instanceof Date) ? convertKeysToSnakeCase(item) : item));
+  if (typeof obj === 'object') {
+    return Object.fromEntries(Object.entries(obj).map(([key, val]) => [camelToSnake(key), typeof val === 'object' && val !== null && !(val instanceof File) && !(val instanceof Date) ? convertKeysToSnakeCase(val) : val]));
+  }
+  return obj;
+}
+
+function convertKeysToCamelCase(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map((item) => (typeof item === 'object' && item !== null ? convertKeysToCamelCase(item) : item));
+  if (typeof obj === 'object') {
+    return Object.fromEntries(Object.entries(obj).map(([key, val]) => [snakeToCamel(key), typeof val === 'object' && val !== null ? convertKeysToCamelCase(val) : val]));
+  }
+  return obj;
+}
 
 export default function CreateJobModal({
   isOpen,
@@ -113,7 +140,7 @@ export default function CreateJobModal({
           id: 0,
           draft_data: localDraft.data,
           source: 'browser_close',
-          job_title: localDraft.data.jobTitle || 'Untitled Job',
+          job_title: localDraft.data.job_title || 'Untitled Job',
           position: localDraft.data.position || null,
           uploaded_job_description: null,
           uploaded_custom_poster: null,
@@ -217,7 +244,8 @@ export default function CreateJobModal({
 
 
   // Collect current values from all forms so drafts capture every page regardless of current step
-  const getAllFormData = () => ({
+  // Converts camelCase form values → snake_case for draft storage (T_JobPostingDraftData)
+  const getAllFormData = () => convertKeysToSnakeCase({
     ...combinedFormData,
     ...firstForm.getValues(),
     ...secondForm.getValues(),
@@ -264,10 +292,11 @@ export default function CreateJobModal({
   };
 
   const handleLoadDraftClick = (draft: T_JobPostingDraft) => {
-    const draftData = draft.draft_data;
+    // Convert snake_case draft data (T_JobPostingDraftData) → camelCase for React Hook Form
+    const draftData: any = convertKeysToCamelCase(draft.draft_data);
 
     if (draftData && typeof draftData === 'object') {
-      // Page 1: Job Title Info
+      // Page 1 - Job Info
       firstForm.reset({
         country: draftData.country || 'Philippines',
         language: draftData.language || 'English',
@@ -276,7 +305,7 @@ export default function CreateJobModal({
         placeAdvertise: draftData.placeAdvertise || draftData.advertiseTo || '',
       });
 
-      // Page 2: Job Type
+      // Page 2 - Job Type
       let hireDateValue: Date | null = null;
       if (draftData.hireDate || draftData.dateRequired) {
         const dateStr = draftData.hireDate || draftData.dateRequired;
@@ -295,50 +324,47 @@ export default function CreateJobModal({
         hireDate: hireDateValue,
       });
 
-      // Page 3: Salary
+      // Page 3 - Salary & Benefits
       const salaryData = draftData.salary || {};
       thirdForm.reset({
         salary: {
-          salaryType: salaryData.salaryType || draftData.salaryRangeType || '',
-          salaryRangeMin: (salaryData as any).salaryRangeMin || draftData.minimumAmount || '',
-          salaryRangeMax: (salaryData as any).salaryRangeMax || draftData.maximumAmount || '',
-          salaryValue: (salaryData as any).salaryValue || draftData.exactAmount || '',
+          salaryType: salaryData.salaryType || '',
+          salaryRangeMin: salaryData.salaryRangeMin || '',
+          salaryRangeMax: salaryData.salaryRangeMax || '',
+          salaryValue: salaryData.salaryValue || '',
         },
-        rate: draftData.rate || salaryData.rate || '',
-        is_show_salary: (draftData as any).is_show_salary ?? draftData.isShowSalary ?? false,
-        is_show_benefits: (draftData as any).is_show_benefits ?? draftData.isShowBenefits ?? false,
-        benefits: (draftData as any).benefits || [],
+        rate: draftData.rate || '',
+        isShowSalary: draftData.isShowSalary ?? false,
+        isShowBenefits: draftData.isShowBenefits ?? false,
+        benefits: draftData.benefits || [],
       });
-      setIsRangeBenefitsAdded(!!(draftData.salaryRangeType || draftData.salary?.salaryType));
+      setIsRangeBenefitsAdded(!!draftData.salary?.salaryType);
 
-      // Page 4: Job Description
+      // Page 4 - Job Description
       fourthForm.reset({
         jobDescription: draftData.jobDescription || draftData.positionDescription || '',
         qualifications: draftData.qualifications || '',
         notesRemarks: draftData.jobRemark || draftData.notesRemarks || '',
-        is_show_roles: (draftData as any).is_show_roles ?? draftData.isShowRoles ?? false,
-        is_show_remarks: (draftData as any).is_show_remarks ?? draftData.isShowRemarks ?? false,
+        isShowRoles: draftData.isShowRoles ?? false,
+        isShowRemarks: draftData.isShowRemarks ?? false,
       });
 
-      // Page 5: Poster Settings
-      fifthForm.reset({
-        posterType: draftData.posterType || '',
-        ogUrl: draftData.ogUrl || '',
-        ogType: draftData.ogType || '',
-        ogTitle: draftData.ogTitle || '',
-        ogDescription: draftData.ogDescription || '',
-      });
-
-      // Page 6: Post As
-      sixthForm.reset({
-        postAs: (draftData as any).postAs || draftData.sharedTo || '',
-        ...(draft.uploaded_custom_poster && { uploaded_image: draft.uploaded_custom_poster }),
-      });
-
-      // Page 7: Screening Questions
+      // Page 5 - Job Settings
       setScreeningQuestions(draftData.screeningQuestions || []);
       setAutoRejectEnabled(draftData.autoRejectEnabled || false);
       setIsVideoIntroEnabled(draftData.isVideoIntroEnabled || false);
+
+      // Page 6 - Post As
+      sixthForm.reset({
+        postAs: draftData.postAs || '',
+        ...(draft.uploaded_custom_poster && { uploaded_image: draft.uploaded_custom_poster }),
+      });
+
+      // Page 8 - Platform
+      seventhForm.reset({
+        postIn: draftData.sharedTo || '',
+        jobUrl: draftData.jobUrl || '',
+      });
 
       setCombinedFormData(draftData);
       setPageNumber(1);

@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function updateJobPostStatus(data: any) {
+import { T_ToggleJobPostStatusPayload } from '@/types/job_posting';
+
+async function updateJobPostStatus(data: T_ToggleJobPostStatusPayload) {
   try {
     const jobId = data['jobId'];
-    // Ensure the boolean value is correctly converted to string
-    const boolValue = data['is_active'] === true || data['is_active'] === 'true';
+    const boolValue = data['is_active'];
     
     const payload = {
       is_active: boolValue ? 'true' : 'false',
@@ -38,7 +39,7 @@ async function updateJobPostStatus(data: any) {
 }
 
 function useUpdateJobPostStatus() {
-  const query = useMutation((data: any) => updateJobPostStatus(data));
+  const query = useMutation((data: T_ToggleJobPostStatusPayload) => updateJobPostStatus(data));
   return query;
 }
 

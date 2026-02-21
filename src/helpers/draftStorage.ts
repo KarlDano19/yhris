@@ -1,4 +1,4 @@
-import { T_JobPostingDraftData } from '@/types/job_posting_draft';
+import { T_JobPostingDraftData } from '@/types/job_posting';
 
 const DRAFT_STORAGE_KEY = 'job_posting_draft';
 const DRAFT_TIMESTAMP_KEY = 'job_posting_draft_timestamp';

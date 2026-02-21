@@ -50,6 +50,14 @@ import AssignUsersModal from './modals/AssignUsersModal';
 import ConfirmSocialShareModal from '../modals/ConfirmSocialShareModal';
 
 import { T_JobPreviewModal } from '@/types/globals';
+import {
+  T_JobPostingTable,
+  T_ToggleJobPostStatusPayload,
+  T_ToggleJobSalaryPayload,
+  T_ToggleJobRolesPayload,
+  T_ToggleJobRemarkPayload,
+  T_ToggleJobBenefitPayload,
+} from '@/types/job_posting';
 import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
@@ -69,6 +77,7 @@ type T_BulkDeleteModalData = DeleteModalData & {
   selectedCount: number;
 };
 
+
 const Content = () => {
   const componentMap: ComponentMap = {
     Facebook,
@@ -82,7 +91,7 @@ const Content = () => {
   const [selectedJobId, setSelectedJobId] = useState<any>();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuOptions, setContextMenuOptions] = useState<any>([]);
-  const [jobPostHistoryItems, setJobPostHistoryItems] = useState<any>([]);
+  const [jobPostHistoryItems, setJobPostHistoryItems] = useState<T_JobPostingTable[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [assignUsersModal, setAssignUsersModal] = useState<T_ModalData | null>(null);
@@ -217,9 +226,10 @@ const Content = () => {
 
     menuOptions['label'] = rightClickItemLabel;
     menuOptions['action'] = (jobId: any) => {
-      let data: any = {};
-      data['jobId'] = jobId;
-      data['is_active'] = !jobPost['is_active'];
+      const data: T_ToggleJobPostStatusPayload = {
+        jobId: jobId,
+        is_active: !jobPost['is_active'],
+      };
       const callbackReq = {
         onSuccess: () => {
           refetch();
@@ -243,9 +253,10 @@ const Content = () => {
   };
 
   const handleSetAsInactive = (jobId: any, isActive: boolean) => {
-    let data: any = {};
-    data['jobId'] = jobId;
-    data['is_active'] = !isActive;
+    const data: T_ToggleJobPostStatusPayload = {
+      jobId: jobId,
+      is_active: !isActive,
+    };
     const successMessage = isActive ? 'Successfully set job as inactive.' : 'Successfully set job as active.';
 
     const callbackReq = {
@@ -266,9 +277,10 @@ const Content = () => {
   };
 
   const handleShowRoles = (jobId: any, isShowRoles: boolean) => {
-    let data: any = {};
-    data['jobId'] = jobId;
-    data['is_show_roles'] = !isShowRoles;
+    const data: T_ToggleJobRolesPayload = {
+      jobId: jobId,
+      is_show_roles: !isShowRoles,
+    };
     const successMessage = isShowRoles ? 'Successfully HIDE ROLES.' : 'Successfully SHOW ROLES.';
     const callbackReq = {
       onSuccess: () => {
@@ -287,9 +299,10 @@ const Content = () => {
   };
 
   const handleShowSalary = (jobId: any, isShowSalary: boolean) => {
-    let data: any = {};
-    data['jobId'] = jobId;
-    data['is_show_salary'] = !isShowSalary;
+    const data: T_ToggleJobSalaryPayload = {
+      jobId: jobId,
+      is_show_salary: !isShowSalary,
+    };
     const successMessage = isShowSalary ? 'Successfully HIDE SALARY.' : 'Successfully SHOW SALARY.';
     const callbackReq = {
       onSuccess: () => {
@@ -308,9 +321,10 @@ const Content = () => {
   };
 
   const handleShowNotes = (jobId: any, isShowNotes: boolean) => {
-    let data: any = {};
-    data['jobId'] = jobId;
-    data['is_show_remarks'] = !isShowNotes;
+    const data: T_ToggleJobRemarkPayload = {
+      jobId: jobId,
+      is_show_remarks: !isShowNotes,
+    };
     const successMessage = isShowNotes ? 'Successfully HIDE NOTES & REMARKS.' : 'Successfully SHOW NOTES & REMARKS.';
     const callbackReq = {
       onSuccess: () => {
@@ -324,9 +338,10 @@ const Content = () => {
   };
 
   const handleShowBenefits = (jobId: any, isShowBenefits: boolean) => {
-    let data: any = {};
-    data['jobId'] = jobId;
-    data['is_show_benefits'] = !isShowBenefits;
+    const data: T_ToggleJobBenefitPayload = {
+      jobId: jobId,
+      is_show_benefits: !isShowBenefits,
+    };
     const successMessage = isShowBenefits ? 'Successfully HIDE BENEFITS.' : 'Successfully SHOW BENEFITS.';
     const callbackReq = {
       onSuccess: () => {
@@ -350,33 +365,7 @@ const Content = () => {
 
   useEffect(() => {
     if (dataJobPost && !isGetJobPostLoading) {
-      dataJobPost.records.map((jobPost: any) => {
-        jobPost['jobTitle'] = jobPost['job_title'];
-        jobPost['jobType'] = jobPost['job_type'];
-        jobPost['jobDescription'] = jobPost['job_description'];
-        jobPost['placeAdvertise'] = jobPost['advertise_to'];
-        jobPost['workSetup'] = jobPost['work_setup'];
-        jobPost['schedule'] = jobPost['job_schedule'];
-        jobPost['hireCount'] = jobPost['required_slot'];
-        // Add dynamic slot fields
-        jobPost['hiredCount'] = jobPost['hired_count'];
-        jobPost['remainingSlots'] = jobPost['remaining_slots'];
-        jobPost['slotsDisplay'] = jobPost['slots_display'];
-        jobPost['isFullyStaffed'] = jobPost['is_fully_staffed'];
-        jobPost['postIn'] = jobPost['shared_to'].split(',');
-        jobPost['isActive'] = jobPost['is_active'];
-        jobPost['position_name'] = jobPost['position_name'] || 'N/A'; // Add this line
-        // Use the exact same property names as in the API response
-        // This ensures the toggle works correctly
-        jobPost['is_show_salary'] = jobPost['is_show_salary'];
-        jobPost['is_show_remarks'] = jobPost['is_show_remarks'];
-        jobPost['is_show_benefits'] = jobPost['is_show_benefits'];
-        jobPost['is_show_roles'] = jobPost['is_show_roles'];
-        jobPost['company_logo'] = jobPost['company_logo'];
-        jobPost['job_url'] = jobPost['job_url'];
-        jobPost['created_at'] = formatDateToLocal(jobPost['created_at']);
-      });
-      setJobPostHistoryItems(dataJobPost.records);
+      setJobPostHistoryItems(dataJobPost.records as T_JobPostingTable[]);
       setPagination({
         totalPages: dataJobPost.total_pages,
         totalRecords: dataJobPost.total_records,
@@ -423,7 +412,7 @@ const Content = () => {
   // Update select all state when job postings change
   useEffect(() => {
     if (jobPostHistoryItems) {
-      const allJobPostingIds = new Set(jobPostHistoryItems.map((j: any) => j.id));
+      const allJobPostingIds = new Set(jobPostHistoryItems.map((j: T_JobPostingTable) => j.id));
       const allSelected = allJobPostingIds.size > 0 && 
         Array.from(allJobPostingIds).every((id: any) => selectedJobPostings.has(id));
       setSelectAll(allSelected);
@@ -511,7 +500,7 @@ const Content = () => {
     if (selectAll) {
       setSelectedJobPostings(new Set());
     } else {
-      const allIds = jobPostHistoryItems.map((j: any) => j.id);
+      const allIds = jobPostHistoryItems.map((j: T_JobPostingTable) => j.id);
       setSelectedJobPostings(new Set(allIds));
     }
   };
@@ -627,7 +616,7 @@ const Content = () => {
       );
     }
     if (jobPostHistoryItems && jobPostHistoryItems.length > 0) {
-      return jobPostHistoryItems.map((jobPost: any) => (
+      return jobPostHistoryItems.map((jobPost: T_JobPostingTable) => (
         <tr
           onContextMenu={(event) => {
             handleRightClick(event, jobPost);
@@ -645,62 +634,60 @@ const Content = () => {
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.id}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.created_at}
+            {formatDateToLocal(jobPost.created_at)}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             <SetJob
-              item={jobPost}
               id={jobPost.id}
-              jobTitle={jobPost.jobTitle}
-              setIsSetJobInactiveModalOpen={setIsSetJobInactiveModalOpen}
+              jobTitle={jobPost.job_title}
               setIsJobPreviewOpen={setIsJobPreviewOpen}
             />
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.position || 'N/A'}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.jobType}
+            {jobPost.job_type}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.schedule}
+            {jobPost.job_schedule}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             <div className="flex flex-col items-center gap-0.5">
-              <span className={`font-semibold ${jobPost.isFullyStaffed ? 'text-green-600' : 'text-gray-700'}`}>
-                {jobPost.slotsDisplay}
+              <span className={`font-semibold ${jobPost.is_fully_staffed ? 'text-green-600' : 'text-gray-700'}`}>
+                {jobPost.slots_display}
               </span>
-              {jobPost.isFullyStaffed && (
+              {jobPost.is_fully_staffed && (
                 <span 
                   className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
                   data-tooltip-id="fully-staffed-tooltip"
@@ -709,23 +696,23 @@ const Content = () => {
                   ✓ Full
                 </span>
               )}
-              {!jobPost.isFullyStaffed && jobPost.remainingSlots > 0 && (
+              {!jobPost.is_fully_staffed && jobPost.remaining_slots > 0 && (
                 <span className="text-xs text-amber-600">
-                  {jobPost.remainingSlots} remaining
+                  {jobPost.remaining_slots} remaining
                 </span>
               )}
             </div>
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
-            {jobPost.workSetup}
+            {jobPost.work_setup}
           </td>
           <td
             className={`whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center ${
-              jobPost.isActive ? 'text-gray-500' : 'text-red-500'
+              jobPost.is_active ? 'text-gray-500' : 'text-red-500'
             }`}
           >
             {jobPost.assignments_count || 0} users
@@ -820,13 +807,13 @@ const Content = () => {
                               </Menu.Item>
                               {showShareOptions[jobPost.id] && (
                                 <div className='pl-4 flex flex-wrap'>
-                                  {jobPost.postIn.map((social: any) => {
+                                  {jobPost.shared_to.split(',').map((social: any) => {
                                     const DynamicComponent = componentMap[social];
                                     return (
                                       <span
                                         key={social}
                                         className='px-2 py-1 hover:bg-gray-100 cursor-pointer'
-                                        onClick={() => socialMediaShare(social, jobPost.og_url)}
+                                        onClick={() => socialMediaShare(social, jobPost.og_url!)}
                                       >
                                         <DynamicComponent />
                                       </span>

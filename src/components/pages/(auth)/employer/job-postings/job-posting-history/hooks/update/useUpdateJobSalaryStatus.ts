@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function updateJobSalaryStatus(data: any) {
+import { T_ToggleJobSalaryPayload } from '@/types/job_posting';
+
+async function updateJobSalaryStatus(data: T_ToggleJobSalaryPayload) {
   try {
     const jobId = data['jobId'];
-    // Ensure the boolean value is correctly converted to string
-    const boolValue = data['is_show_salary'] === true || data['is_show_salary'] === 'true';
+    const boolValue = data['is_show_salary'];
     
     const payload = {
       is_show_salary: boolValue ? 'true' : 'false',
@@ -38,7 +39,7 @@ async function updateJobSalaryStatus(data: any) {
 }
 
 function useUpdateJobSalaryStatus() {
-  const query = useMutation((data: any) => updateJobSalaryStatus(data));
+  const query = useMutation((data: T_ToggleJobSalaryPayload) => updateJobSalaryStatus(data));
   return query;
 }
 

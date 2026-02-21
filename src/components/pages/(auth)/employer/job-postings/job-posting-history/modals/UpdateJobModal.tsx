@@ -94,7 +94,7 @@ export default function UpdateJobModal({
           : [],
         country: jobPostDataDetails.country,
         language: jobPostDataDetails.language,
-        position: jobPostDataDetails.position_id || jobPostDataDetails.position, 
+        position: jobPostDataDetails.position_id || jobPostDataDetails.position,
       });
       secondForm.reset({
         jobType: jobPostDataDetails.job_type ? jobPostDataDetails.job_type.split(',') : [],
@@ -104,12 +104,12 @@ export default function UpdateJobModal({
         hireCount: jobPostDataDetails.required_slot,
         hiredCount: jobPostDataDetails.hired_count || 0, // Store hired count for validation
       });
-      if (jobPostDataDetails?.salary_range_type) {
+      if (jobPostDataDetails.salary_range_type) {
         setIsRangeBenefitsAdded(true);
         setUserDeclinedSalary(false); // Reset declined flag since salary data exists
         thirdForm.reset({
-          is_show_salary: jobPostDataDetails.is_show_salary,
-          is_show_benefits: jobPostDataDetails.is_show_benefits,
+          isShowSalary: jobPostDataDetails.is_show_salary,
+          isShowBenefits: jobPostDataDetails.is_show_benefits,
           salary: {
             salaryType: jobPostDataDetails.salary_range_type,
             salaryRangeMin: jobPostDataDetails.minimum_amount,
@@ -122,8 +122,8 @@ export default function UpdateJobModal({
         });
       }
       fourthForm.reset({
-        is_show_roles: jobPostDataDetails.is_show_roles,
-        is_show_remarks: jobPostDataDetails.is_show_remarks,
+        isShowRoles: jobPostDataDetails.is_show_roles,
+        isShowRemarks: jobPostDataDetails.is_show_remarks,
         jobDescription: jobPostDataDetails.job_description,
         qualifications: jobPostDataDetails.qualifications,
         notesRemarks: jobPostDataDetails.job_remark,
@@ -148,7 +148,7 @@ export default function UpdateJobModal({
             ? jobPostDataDetails.auto_reject_enabled
             : true
         );
-        
+
         // Load rejection feedback if available
         if (jobPostDataDetails.rejection_feedback) {
           window.rejectionFeedback = jobPostDataDetails.rejection_feedback;
@@ -163,10 +163,10 @@ export default function UpdateJobModal({
       fifthForm.reset();
       sixthForm.reset({
         postAs: jobPostDataDetails.poster_type,
-        uploaded_image: jobPostDataDetails.uploaded_image,
+        uploadedImage: jobPostDataDetails.uploaded_image,
       });
       seventhForm.reset({
-        shared_to: jobPostDataDetails.shared_to.split(','),
+        sharedTo: jobPostDataDetails.shared_to.split(','),
         jobUrl: jobPostDataDetails.job_url,
       });
 
@@ -303,8 +303,8 @@ export default function UpdateJobModal({
       delete finalData.salary;
       delete finalData.rate;
       delete finalData.benefits;
-      delete finalData.is_show_salary;
-      delete finalData.is_show_benefits;
+      delete finalData.isShowSalary;
+      delete finalData.isShowBenefits;
     }
 
     const callbackReq = {
@@ -401,7 +401,7 @@ export default function UpdateJobModal({
         if (jobPostDataDetails) {
           // Add shared_to (required field) from existing data if not in current changes
           if (jobPostDataDetails.shared_to) {
-            existingData.shared_to = jobPostDataDetails.shared_to.split(',');
+            existingData.sharedTo = jobPostDataDetails.shared_to.split(',');
           }
         }
 
@@ -453,8 +453,8 @@ export default function UpdateJobModal({
           delete finalData.salary;
           delete finalData.rate;
           delete finalData.benefits;
-          delete finalData.is_show_salary;
-          delete finalData.is_show_benefits;
+          delete finalData.isShowSalary;
+          delete finalData.isShowBenefits;
         }
 
         // Call the mutation

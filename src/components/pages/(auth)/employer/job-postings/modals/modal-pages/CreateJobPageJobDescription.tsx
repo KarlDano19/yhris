@@ -202,13 +202,13 @@ export default function CreateJobPageJobDescription({
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
-          <input 
-            type='checkbox' 
-            {...register('is_show_roles')} 
-            id='is_show_roles' 
-            onChange={(e) => setValue('is_show_roles', e.target.checked)} 
+          <input
+            type='checkbox'
+            {...register('isShowRoles')}
+            id='isShowRoles'
+            onChange={(e) => setValue('isShowRoles', e.target.checked)}
           />
-          <label htmlFor='is_show_roles' className='ml-2'>
+          <label htmlFor='isShowRoles' className='ml-2'>
             Show Roles
           </label>
         </div>
@@ -254,11 +254,11 @@ export default function CreateJobPageJobDescription({
         <div className='relative mt-2 flex gap-2'>
           <input
             type='checkbox'
-            {...register('is_show_remarks')}
-            id='is_show_remarks'
-            onChange={(e) => setValue('is_show_remarks', e.target.checked)}
+            {...register('isShowRemarks')}
+            id='isShowRemarks'
+            onChange={(e) => setValue('isShowRemarks', e.target.checked)}
           />
-          <label htmlFor='is_show_remarks' className='ml-2'>
+          <label htmlFor='isShowRemarks' className='ml-2'>
             Show Notes/Remarks
           </label>
         </div>

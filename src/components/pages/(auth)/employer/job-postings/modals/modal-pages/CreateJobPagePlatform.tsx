@@ -43,7 +43,7 @@ export default function CreateJobPagePlatform({
   useEffect(() => {
     if (getValues) {
       // Check for shared_to first (from API data)
-      const sharedTo = getValues('shared_to');
+      const sharedTo = getValues('sharedTo');
       if (sharedTo && isEdit) {
         let platforms: string[] = [];
         if (typeof sharedTo === 'string') {
@@ -74,7 +74,7 @@ export default function CreateJobPagePlatform({
         }
       }
     }
-  }, [pageNumber, getValues, getValues && getValues('shared_to'), isEdit, originalPlatforms.length]);
+  }, [pageNumber, getValues, getValues && getValues('sharedTo'), isEdit, originalPlatforms.length]);
 
   return (
     <>

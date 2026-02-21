@@ -9,10 +9,10 @@ import formatPrice from '@/helpers/currencyFormat';
 // Extend Window interface to include our custom properties
 declare global {
   interface Window {
-    is_show_roles?: boolean;
-    is_show_salary?: boolean;
-    is_show_benefits?: boolean;
-    is_show_remarks?: boolean;
+    isShowRoles?: boolean;
+    isShowSalary?: boolean;
+    isShowBenefits?: boolean;
+    isShowRemarks?: boolean;
   }
 }
 
@@ -116,7 +116,7 @@ export default function CreateJobPagePreview({
           <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
           <div className='details mx-5 mt-2'>
             {/* Role section - only show if is_show_roles is true */}
-            {window.is_show_roles !== false && fourthFormGetValues('jobDescription') && (
+            {window.isShowRoles !== false && fourthFormGetValues('jobDescription') && (
               <>
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                   <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
@@ -180,7 +180,7 @@ export default function CreateJobPagePreview({
             </p>
             
             {/* Salary Range - only show if is_show_salary is true AND salary data exists */}
-            {window.is_show_salary !== false && thirdFormGetValues('salary')?.salaryType && (
+            {window.isShowSalary !== false && thirdFormGetValues('salary')?.salaryType && (
               (thirdFormGetValues('salary')?.salaryType === 'Range'
                 ? (thirdFormGetValues('salary')?.salaryRangeMin > 0 || thirdFormGetValues('salary')?.salaryRangeMax > 0)
                 : thirdFormGetValues('salary')?.salaryValue > 0
@@ -205,7 +205,7 @@ export default function CreateJobPagePreview({
             )}
             
             {/* Benefits - only show if is_show_benefits is true */}
-            {window.is_show_benefits !== false && thirdFormGetValues('benefits') && thirdFormGetValues('benefits').length > 0 && (
+            {window.isShowBenefits !== false && thirdFormGetValues('benefits') && thirdFormGetValues('benefits').length > 0 && (
               <>
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                   <BenefitsIcon className='h-4 w-4 mt-1 ml-0.5 mr-1.5' />
@@ -218,7 +218,7 @@ export default function CreateJobPagePreview({
             )}
             
             {/* Notes/Remarks - only show if is_show_remarks is true */}
-            {window.is_show_remarks !== false && firstFormGetValues('notesRemarks') && (
+            {window.isShowRemarks !== false && firstFormGetValues('notesRemarks') && (
               <>
                 <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-4'>
                   <ClipboardDocumentIcon className='h-5 w-5 mr-1' />

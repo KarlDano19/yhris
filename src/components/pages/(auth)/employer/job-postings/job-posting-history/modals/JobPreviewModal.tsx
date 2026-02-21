@@ -5,6 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XCircleIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 import { T_JobPreviewModal } from "@/types/globals";
+import { T_JobPostingTable } from "@/types/job_posting";
 import formatPrice from '@/helpers/currencyFormat';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -21,7 +22,7 @@ export default function JobPreviewModal({
   isOpen: T_JobPreviewModal | null;
   setIsOpen: Dispatch<T_JobPreviewModal | null>;
   id: number | null;
-  jobPostHistoryItems: any;
+  jobPostHistoryItems: T_JobPostingTable[];
 }) {
   const cancelButtonRef = useRef(null);
 
@@ -82,7 +83,7 @@ export default function JobPreviewModal({
                   />
                 </div>
                 {jobPostHistoryItems &&
-                  jobPostHistoryItems.map((item: any, index: number) => {
+                  jobPostHistoryItems.map((item: T_JobPostingTable, index: number) => {
                     if (item.id == id) {
                       return (
                         <div key={index} className="px-4 pb-6">
@@ -94,13 +95,13 @@ export default function JobPreviewModal({
                               </span>
                               <div className='ml-6'>
                                 <h5 className='text-xl font-semibold text-indigo-dye'>
-                                  {item.jobTitle}
+                                  {item.job_title}
                                 </h5>
                                 <h6 className='text-indigo-dye text-sm'> 
                                   for a Technology Company
                                 </h6>
                                 <h6 className='text-indigo-dye text-sm'> 
-                                  {item.placeAdvertise}
+                                  {item.advertise_to}
                                 </h6>
                               </div>
                             </div>
@@ -122,14 +123,14 @@ export default function JobPreviewModal({
                             <h5 className='text-xl font-semibold text-indigo-dye'>Job Details</h5>
                             <div className='details mx-5 mt-2'>
                               {/* Role section - only show if is_show_roles is true */}
-                              {item.is_show_roles && item.jobDescription && (
+                              {item.is_show_roles && item.job_description && (
                                 <>
                                   <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                                     <ClipboardDocumentIcon className='h-5 w-5 mr-1' />
                                     Role
                                   </h6>
                                   <div className='text-[13px] text-indigo-dye mt-1 ml-6'>
-                                    {renderRoleDescription(item.jobDescription)}
+                                    {renderRoleDescription(item.job_description)}
                                   </div>
                                 </>
                               )}
@@ -140,7 +141,7 @@ export default function JobPreviewModal({
                                 Location
                               </h6>
                               <p className='text-[13px] text-indigo-dye mt-1 list-disc ml-6 mb-2'>
-                                {item.placeAdvertise}
+                                {item.advertise_to}
                               </p>
                               
                               {/* Qualifications */}
@@ -158,18 +159,18 @@ export default function JobPreviewModal({
                                 Job Type
                               </h6>
                               <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-                                {item.jobType}
+                                {item.job_type}
                               </p>
                               
                               {/* Work Setup */}
-                              {item.workSetup && (
+                              {item.work_setup && (
                                 <>
                                   <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                                     <HomeIcon className='h-5 w-5 mr-1' />
                                     Work Setup
                                   </h6>
                                   <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-                                    {item.workSetup}
+                                    {item.work_setup}
                                   </p>
                                 </>
                               )}
@@ -180,14 +181,14 @@ export default function JobPreviewModal({
                                 Schedule
                               </h6>
                               <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
-                                {item.schedule}
+                                {item.job_schedule}
                               </p>
                               
                               {/* Salary Range - only show if is_show_salary is true AND salary data exists */}
                               {item.is_show_salary && item.salary_range_type && (
                                 (item.salary_range_type === 'Range'
-                                  ? (item.minimum_amount > 0 || item.maximum_amount > 0)
-                                  : item.exact_amount > 0
+                                  ? (Number(item.minimum_amount) > 0 || Number(item.maximum_amount) > 0)
+                                  : Number(item.exact_amount) > 0
                                 ) && item.rate
                               ) && (
                                 <>
@@ -198,10 +199,10 @@ export default function JobPreviewModal({
                                   <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
                                     {item.salary_range_type === 'Range' ? (
                                       <>
-                                        PHP {formatPrice(item.minimum_amount || 0)} - {formatPrice(item.maximum_amount || 0)}
+                                        PHP {formatPrice(Number(item.minimum_amount) || 0)} - {formatPrice(Number(item.maximum_amount) || 0)}
                                       </>
                                     ) : (
-                                      <>PHP {formatPrice(item.exact_amount || 0)}</>
+                                      <>PHP {formatPrice(Number(item.exact_amount) || 0)}</>
                                     )}
                                     &nbsp;/ {item.rate}
                                   </p>

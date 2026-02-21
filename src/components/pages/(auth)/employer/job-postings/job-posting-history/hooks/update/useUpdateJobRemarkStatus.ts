@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function updateJobRemarkStatus(data: any) {
+import { T_ToggleJobRemarkPayload } from '@/types/job_posting';
+
+async function updateJobRemarkStatus(data: T_ToggleJobRemarkPayload) {
   try {
     const jobId = data['jobId'];
-    // Ensure the boolean value is correctly converted to string
-    const boolValue = data['is_show_remarks'] === true || data['is_show_remarks'] === 'true';
+    const boolValue = data['is_show_remarks'];
     
     const payload = {
       is_show_remarks: boolValue ? 'true' : 'false',
@@ -38,7 +39,7 @@ async function updateJobRemarkStatus(data: any) {
 }
 
 function useUpdateJobRemarkStatus() {
-  const query = useMutation((data: any) => updateJobRemarkStatus(data));
+  const query = useMutation((data: T_ToggleJobRemarkPayload) => updateJobRemarkStatus(data));
   return query;
 }
 

@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getJobDetails(job_post_id: any) {
+import { T_JobPostingEdit } from '@/types/job_posting';
+
+async function getJobDetails(job_post_id: any): Promise<T_JobPostingEdit> {
   try {
     let newFilters = { view_type: 'edit' };
     const searchParams = new URLSearchParams(newFilters);

@@ -92,11 +92,11 @@ export default function CreateJobPagePostAs({
               <span className='ml-2 text-sm font-medium leading-6 text-gray-900'>Upload</span>
             </label>
 
-            {getValues('postAs') === 'upload' && getValues('uploaded_image') && !getValues('postAsUpload') && (
+            {getValues('postAs') === 'upload' && getValues('uploadedImage') && !getValues('postAsUpload') && (
               <div className='block ml-7 text-sm font-medium leading-6 text-gray-900'>
                 Current Uploaded Image:{' '}
                 <a
-                  href={getValues('uploaded_image')}
+                  href={getValues('uploadedImage')}
                   className='text-savoy-blue underline'
                   target='_blank'
                   rel='noopener noreferrer'
@@ -194,7 +194,7 @@ export default function CreateJobPagePostAs({
               if ((postAs && postAs !== 'upload') || (postAs === 'upload' && fileProps.fileName)) {
                 onSubmit();
               } else {
-                if (getValues('uploaded_image')) {
+                if (getValues('uploadedImage')) {
                   onSubmit();
                 } else {
                   setManualInputFocus(true);

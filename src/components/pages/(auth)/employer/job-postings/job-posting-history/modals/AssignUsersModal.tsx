@@ -6,28 +6,14 @@ import { getCookie } from 'cookies-next';
 
 import CustomToast from '@/components/CustomToast';
 
+import { T_JobPostingAssignment, T_JobPostingAvailableUser } from '@/types/job_posting';
+
 import { XCircleIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 
 type T_ModalData = {
   id: number | null;
   open: boolean;
   jobTitle?: string;
-};
-
-type T_User = {
-  id: number;
-  name: string;
-  email: string;
-};
-
-type T_Assignment = {
-  id: number;
-  assigned_user: number;
-  assigned_user_name: string;
-  assigned_user_email: string;
-  can_view: boolean;
-  can_edit: boolean;
-  can_view_applicants: boolean;
 };
 
 export default function AssignUsersModal({
@@ -40,8 +26,8 @@ export default function AssignUsersModal({
   onAssignmentComplete?: () => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const [availableUsers, setAvailableUsers] = useState<T_User[]>([]);
-  const [currentAssignments, setCurrentAssignments] = useState<T_Assignment[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<T_JobPostingAvailableUser[]>([]);
+  const [currentAssignments, setCurrentAssignments] = useState<T_JobPostingAssignment[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -103,7 +89,7 @@ export default function AssignUsersModal({
         setCurrentAssignments(assignments);
         
         // Set currently selected users
-        const currentlySelected = assignments.map((a: T_Assignment) => a.assigned_user);
+        const currentlySelected = assignments.map((a: T_JobPostingAssignment) => a.assigned_user);
         setSelectedUsers(currentlySelected);
       }
       

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_JobPostingDraft } from '@/types/job_posting_draft';
+import { T_JobPostingDraft } from '@/types/job_posting';
 
 async function getJobDrafts(): Promise<T_JobPostingDraft[]> {
   try {

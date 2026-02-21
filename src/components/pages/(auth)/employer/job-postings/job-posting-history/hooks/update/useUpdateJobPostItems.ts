@@ -52,19 +52,19 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('og_image_height', '300');
 
     // Show/hide flags
-    formData.append('is_show_roles', jobPost.is_show_roles === true ? 'true' : 'false');
-    formData.append('is_show_remarks', jobPost.is_show_remarks === true ? 'true' : 'false');
-    formData.append('is_show_salary', jobPost.is_show_salary === true ? 'true' : 'false');
-    formData.append('is_show_benefits', jobPost.is_show_benefits === true ? 'true' : 'false');
+    formData.append('is_show_roles', jobPost.isShowRoles === true ? 'true' : 'false');
+    formData.append('is_show_remarks', jobPost.isShowRemarks === true ? 'true' : 'false');
+    formData.append('is_show_salary', jobPost.isShowSalary === true ? 'true' : 'false');
+    formData.append('is_show_benefits', jobPost.isShowBenefits === true ? 'true' : 'false');
     
     // Handle both postIn and shared_to properties for platform sharing
     // Only send shared_to if it has a value (for PATCH requests, omit empty fields)
     if (jobPost.postIn && Array.isArray(jobPost.postIn) && jobPost.postIn.length > 0) {
       formData.append('shared_to', jobPost.postIn.join());
-    } else if (jobPost.shared_to && Array.isArray(jobPost.shared_to) && jobPost.shared_to.length > 0) {
-      formData.append('shared_to', jobPost.shared_to.join());
-    } else if (typeof jobPost.shared_to === 'string' && jobPost.shared_to.trim() !== '') {
-      formData.append('shared_to', jobPost.shared_to);
+    } else if (jobPost.sharedTo && Array.isArray(jobPost.sharedTo) && jobPost.sharedTo.length > 0) {
+      formData.append('shared_to', jobPost.sharedTo.join());
+    } else if (typeof jobPost.sharedTo === 'string' && jobPost.sharedTo.trim() !== '') {
+      formData.append('shared_to', jobPost.sharedTo);
     }
     
     formData.append('og_url', `${window.location.protocol}//${window.location.host}/jobs/`);

@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_CreateJobDraftData, T_JobDraftResponse } from '@/types/job_posting_draft';
+import { T_CreateJobDraftData } from '@/types/job_posting';
 
-async function createJobDraft(data: T_CreateJobDraftData): Promise<T_JobDraftResponse> {
+async function createJobDraft(data: T_CreateJobDraftData) {
   const token = getCookie('token');
 
   const formData = new FormData();
@@ -47,7 +47,7 @@ async function createJobDraft(data: T_CreateJobDraftData): Promise<T_JobDraftRes
 export function useCreateJobDraft() {
   const queryClient = useQueryClient();
 
-  return useMutation<T_JobDraftResponse, Error, T_CreateJobDraftData>({
+  return useMutation({
     mutationFn: (data: T_CreateJobDraftData) => createJobDraft(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobDraftsCache'] });
