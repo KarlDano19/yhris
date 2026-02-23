@@ -156,6 +156,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
 
       // Show warning before expiration (30 seconds for 3-hour tokens)
       if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        if (!isExpiring) {
+          // Dispatch event for draft auto-save before showing modal
+          window.dispatchEvent(new Event('session-expiring'));
+        }
         setIsExpiring(true);
         setTimeRemaining(remaining);
       } else {
