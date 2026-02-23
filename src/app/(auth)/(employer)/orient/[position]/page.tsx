@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { getIronSession } from "iron-session";
 
-import Content from "@/components/pages/(auth)/employer/orient/Content";
+import Content from "@/components/pages/(auth)/employer/onboarding/orient/Content";
 
 import { SessionData, sessionOptions } from "@/lib/session";
 

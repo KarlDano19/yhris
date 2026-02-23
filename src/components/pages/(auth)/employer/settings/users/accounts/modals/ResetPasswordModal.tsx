@@ -238,9 +238,9 @@ export default function ResetPasswordModal({
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     id='confirm-password'
                                     className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                                    value={confirmPassword}
-                                    {...register('confirmPassword', { required: true })}
-                                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                                  value={confirmPassword}
+                                  {...register('confirm_password', { required: true })}
+                                  onChange={(e) => setConfirmPassword(e.currentTarget.value)}
                                   />
                                   <button
                                     type='button'
