@@ -1,13 +1,19 @@
 import React, { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import { formatDateToLocal } from '@/helpers/date';
 import ModalLayout from '../../../../../ModalLayout';
 import ArchiveButton from '../ArchiveButton';
 import RestoreApplicationModal from './RestoreApplicationModal';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
+import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+import useRestoreDeletedApplication from '../hooks/useRestoreDeletedApplication';
+import useGetDeletedApplicants from '../hooks/useGetDeletedApplicants';
+import usePurgeApplication from '../hooks/usePurgeApplication';
 
-import { ArchiveBoxIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ArchiveBoxIcon, MagnifyingGlassIcon, TrashIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
 interface ArchivedApplicantsModalProps {
   isOpen: boolean;
@@ -21,8 +27,8 @@ interface ArchivedApplicantsModalProps {
 const ApplicantAvatar = ({ applicant, size = 40 }: { applicant: any; size?: number }) => {
   const [imageError, setImageError] = useState(false);
 
-  const hasValidImage = applicant.applicant?.photo_url && 
-    applicant.applicant.photo_url.trim() !== '' && 
+  const hasValidImage = applicant.applicant?.photo_url &&
+    applicant.applicant.photo_url.trim() !== '' &&
     !imageError;
 
   if (!hasValidImage) {
@@ -57,12 +63,19 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   onUnarchive,
   onRefresh
 }) => {
-  
-  const [activeTab, setActiveTab] = useState<'rejected' | 'withdrawn' | 'pooling'>('rejected');
+
+  const [activeTab, setActiveTab] = useState<'rejected' | 'withdrawn' | 'pooling' | 'deleted'>('rejected');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const queryClient = useQueryClient();
   const { mutate: unarchiveBatch, isLoading: isUnarchiving } = useBatchUnarchiveApplications();
+  const { mutate: softDelete, isLoading: isSoftDeleting } = useSoftDeleteApplication();
+  const { mutate: restoreDeleted, isLoading: isRestoringDeleted } = useRestoreDeletedApplication();
+  const { data: deletedData, refetch: refetchDeleted } = useGetDeletedApplicants(jobPostingId);
+  const deletedApplicants: any[] = (deletedData as any[]) || [];
+  const { mutate: purgeApplication, isLoading: isPurging } = usePurgeApplication();
+  const [purgeModal, setPurgeModal] = useState<DeleteModalData | null>(null);
 
   // Add refresh state
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -85,27 +98,17 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   const withdrawnApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'withdrawn') || [];
   const poolingApplicants = archivedApplicants?.filter((applicant: any) => applicant.status === 'pooling') || [];
 
+  const searchFilter = (applicant: any) =>
+    `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
   // Filter applications based on search term
-  const filteredRejectedApplicants = rejectedApplicants.filter((applicant: any) =>
-    `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-    applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredWithdrawnApplicants = withdrawnApplicants.filter((applicant: any) =>
-    `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-    applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredPoolingApplicants = poolingApplicants.filter((applicant: any) =>
-    `${applicant.applicant?.firstname || ''} ${applicant.applicant?.lastname || ''}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-    applicant.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRejectedApplicants = rejectedApplicants.filter(searchFilter);
+  const filteredWithdrawnApplicants = withdrawnApplicants.filter(searchFilter);
+  const filteredPoolingApplicants = poolingApplicants.filter(searchFilter);
+  const filteredDeletedApplicants = deletedApplicants.filter(searchFilter);
 
 
   // ============================================================================
@@ -117,7 +120,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
     if (onUnarchive) {
       onUnarchive();
     }
-    
+
     // Clear selection after successful unarchive
     setSelectedApplicants([]);
   }, [onUnarchive]);
@@ -148,7 +151,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
     if (!selectedApplicants.length) {
       return;
     }
-    
+
     const callBackReq = {
       onSuccess: (data: any) => {
         setShowRestoreModal(false);
@@ -161,9 +164,52 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
         // Progress tracking
       }
     };
-    
+
     unarchiveBatch({ appliedJobIds: selectedApplicants, fallbackStageId, progressCallback: callBackReq.onProgress }, callBackReq);
   }, [selectedApplicants, unarchiveBatch, handleUnarchive]);
+
+  const handleSoftDelete = useCallback((appliedJobId: number) => {
+    softDelete(appliedJobId, {
+      onSuccess: () => {
+        if (onRefresh) onRefresh();
+        refetchDeleted();
+      },
+      onError: (err: any) => {
+        alert(`Error: ${err.message || 'Failed to delete application'}`);
+      },
+    });
+  }, [softDelete, onRefresh, refetchDeleted]);
+
+  const handleRestoreDeleted = useCallback((appliedJobId: number) => {
+    restoreDeleted(appliedJobId, {
+      onSuccess: () => {
+        refetchDeleted();
+        if (onRefresh) onRefresh();
+        queryClient.invalidateQueries(['appliedApplicantsCache']);
+      },
+      onError: (err: any) => {
+        alert(`Error: ${err.message || 'Failed to restore application'}`);
+      },
+    });
+  }, [restoreDeleted, refetchDeleted, onRefresh, queryClient]);
+
+  const handlePurge = useCallback((applicant: any) => {
+    setPurgeModal({ open: true, applicationId: applicant.id });
+  }, []);
+
+  const handleConfirmPurge = useCallback(() => {
+    if (!purgeModal) return;
+    purgeApplication(purgeModal.applicationId, {
+      onSuccess: () => {
+        setPurgeModal(null);
+        refetchDeleted();
+      },
+      onError: (err: any) => {
+        setPurgeModal(null);
+        alert(`Error: ${err.message || 'Failed to permanently delete'}`);
+      },
+    });
+  }, [purgeModal, purgeApplication, refetchDeleted]);
 
   // ============================================================================
   // COMPUTED VALUES
@@ -176,7 +222,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
       ? filteredWithdrawnApplicants
       : activeTab === 'pooling'
       ? filteredPoolingApplicants
-      : [];
+      : filteredDeletedApplicants;
   const allSelected = currentApplicants.length > 0 && selectedApplicants.length === currentApplicants.length;
 
 
@@ -228,16 +274,77 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
             </div>
           </div>
         </div>
-        <ArchiveButton
-          appliedJobId={applicant.id}
-          isArchived={true}
-          status={applicant.status}
-          onSuccess={() => {
-            handleUnarchive();
-          }}
-          applicantName={`${applicant.applicant?.firstname} ${applicant.applicant?.lastname}`}
-          jobPostingId={jobPostingId}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleSoftDelete(applicant.id)}
+            disabled={isSoftDeleting}
+            title="Delete application"
+            className="inline-flex items-center p-1.5 border border-red-200 text-red-500 rounded hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 transition-colors"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+          <ArchiveButton
+            appliedJobId={applicant.id}
+            isArchived={true}
+            status={applicant.status}
+            onSuccess={() => {
+              handleUnarchive();
+            }}
+            applicantName={`${applicant.applicant?.firstname} ${applicant.applicant?.lastname}`}
+            jobPostingId={jobPostingId}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDeletedApplicantCard = (applicant: any) => (
+    <div
+      key={applicant.id}
+      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 overflow-hidden rounded-full">
+            <ApplicantAvatar applicant={applicant} size={40} />
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900">
+              {applicant.applicant?.firstname} {applicant.applicant?.lastname}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {applicant.applicant?.email}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
+                {applicant.status.charAt(0).toUpperCase() + applicant.status.slice(1)}
+              </span>
+              <span className="text-xs text-gray-400">
+                {applicant.job_stages_title || 'Archived'} • {formatDateToLocal(applicant.updated_at)}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handlePurge(applicant)}
+            disabled={isPurging}
+            title="Permanently delete"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-600 text-sm rounded hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 transition-colors"
+          >
+            <TrashIcon className="w-4 h-4" />
+            Delete
+          </button>
+          <button
+            onClick={() => handleRestoreDeleted(applicant.id)}
+            disabled={isRestoringDeleted}
+            title="Restore application"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-sm rounded hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 transition-colors"
+          >
+            <ArrowUturnLeftIcon className="w-4 h-4" />
+            Restore
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -307,8 +414,26 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                   Pooling ({poolingApplicants.length})
                 </div>
               </button>
+              {/* Deleted Tab */}
+              <button
+                onClick={() => {
+                  setActiveTab('deleted');
+                  setSearchTerm('');
+                  setSelectedApplicants([]);
+                }}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'deleted'
+                    ? 'bg-white text-red-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <TrashIcon className="w-3.5 h-3.5 text-gray-500" />
+                  Deleted ({deletedApplicants.length})
+                </div>
+              </button>
             </div>
-            
+
 
             {/* Search Bar and Actions */}
             <div className="flex items-center gap-3">
@@ -327,7 +452,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              
+
               {/* Add refresh button */}
               <button
                 onClick={handleRefresh}
@@ -345,8 +470,8 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                   </svg>
                 )}
               </button>
-              
-              {selectedApplicants.length > 0 && (
+
+              {selectedApplicants.length > 0 && activeTab !== 'deleted' && (
                 <button
                   onClick={() => setShowRestoreModal(true)}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -388,7 +513,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                         </label>
                       </div>
                     )}
-                    
+
                     {filteredRejectedApplicants.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -425,7 +550,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                         </label>
                       </div>
                     )}
-                    
+
                     {filteredWithdrawnApplicants.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -461,7 +586,7 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                         </label>
                       </div>
                     )}
-                    
+
                     {filteredPoolingApplicants.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <ArchiveBoxIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -476,6 +601,24 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
                     ) : (
                       <div className="space-y-3">
                         {filteredPoolingApplicants.map(renderApplicantCard)}
+                      </div>
+                    )}
+                  </>
+                )}
+                {activeTab === 'deleted' && (
+                  <>
+                    {filteredDeletedApplicants.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <TrashIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        {searchTerm ? (
+                          <p>No deleted applications found matching &quot;{searchTerm}&quot;</p>
+                        ) : (
+                          <p>No deleted applications found</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {filteredDeletedApplicants.map(renderDeletedApplicantCard)}
                       </div>
                     )}
                   </>
@@ -497,9 +640,19 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
           onSuccess={handleUnarchive}
         />
       )}
-      </ModalLayout> 
+
+      {purgeModal && (
+        <DeleteModal
+          isOpen={purgeModal}
+          setIsOpen={setPurgeModal}
+          onConfirm={handleConfirmPurge}
+          isLoading={isPurging}
+          customText="this application permanently"
+        />
+      )}
+      </ModalLayout>
     </>
   );
 };
 
-export default ArchivedApplicantsModal; 
+export default ArchivedApplicantsModal;
