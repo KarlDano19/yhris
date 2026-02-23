@@ -52,15 +52,15 @@ const Content = () => {
     if (isConfirmed) {
       const finalData = { ...combinedFormData, ...secondForm.getValues() };
       finalData['jobPosting'] = params.id;
-      
+
       // Add screening question answers if they exist
       if (screeningForm.getValues().screeningAnswers) {
         finalData['screeningAnswers'] = screeningForm.getValues().screeningAnswers;
       }
-      
+
       // Set an empty array for setupPreference since it's no longer collected
       finalData['setupPreference'] = [];
-      
+
       const callBackReq = {
         onSuccess: () => {
           toast.custom(() => <CustomToast message="You have successfully submitted application." type="success" />, {
@@ -104,6 +104,7 @@ const Content = () => {
               setCurrentTab={setCurrentTab}
               setValue={firstForm.setValue}
               watch={firstForm.watch}
+              jobDetailData={jobDetailData}
             />
           </div>
           <div style={{ display: currentTab === 2 ? 'block' : 'none' }}>

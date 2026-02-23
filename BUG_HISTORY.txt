@@ -3,9 +3,10 @@
 ================================================================================
 
 INSTRUCTIONS FOR CLAUDE CODE:
-When a developer requests to document a bug fix, APPEND a new entry to the end
-of this file following the template format below. Always maintain chronological
-order with newest entries at the bottom. Preserve all existing entries.
+When a developer requests to document a bug fix, PREPEND a new entry after the
+separator below the "[NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]" marker,
+following the template format below. Always maintain chronological order with
+newest entries at the top. Preserve all existing entries.
 
 Required information to collect:
 - Bug ID (unique identifier)
@@ -106,789 +107,520 @@ FIX EXPLANATION:
 
 ================================================================================
 
-BUG ID: EXAMPLE-001
-DATE FILED: 2024-12-15
-DATE FIXED: 2024-12-20
-CLIENT/REPORTER: QA Team - Maria Santos
+[NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
+
+FEATURE ID: HRIS-011
+DATE FILED: 2026-02-19
+DATE FIXED: 2026-02-19
+CLIENT/REPORTER: Internal - Feature Enhancement
 
 ISSUE DESCRIPTION:
-Employee sync from HRIS to Payroll was failing when department name contained
-special characters (e.g., "R&D Department", "Sales & Marketing"). The sync
-process would throw a validation error and skip the employee record silently.
+In the onboarding flow, the Send Contract and Introduce to Team buttons were disabled
+after the first send (showing "Sent" / "Introduced"), preventing users from resending
+emails. Additionally, the Introduce to Team column had no Receive button, so there was
+no way to mark an introduction as received with a date stamp.
+
+The employee-issue module already had a better "resend" pattern where the button stays
+enabled after sending and changes its label to "Resend". This pattern needed to be
+applied to both contract and introduce, and a receive button needed to be added to
+introduce.
 
 DESIRED OUTCOME:
-Employee sync should handle all valid department names including those with
-special characters. Any sync errors should be logged and reported clearly.
+1. Contract Send button should remain clickable after first send, label changes to "Resend"
+2. Introduce button should remain clickable after first send, label changes to "Resend"
+3. Introduce column should have a Receive button (matching contract's receive pattern)
+4. Receive button should show received date with DocumentIcon when marked as received
+5. Disabled Receive buttons should show cursor-not-allowed on hover
 
 FILES CHANGED:
 Backend:
-- app/views/yahshua_payroll.py
-- app/serializers/employee.py
-- utils/oauth.py
-- tests/views/test_yahshua_payroll.py
+- (See backend BUG_HISTORY.txt)
 
 Frontend:
-- src/app/(employer)/settings/integration/payroll-sync/page.tsx
-- src/components/settings/PayrollSyncStatus.tsx
-- src/hooks/usePayrollSync.ts
+- src/components/pages/(auth)/employer/orient/SendContract.tsx (removed disabled prop and click guard on Send button; label changes to "Resend" after first send; added disabled:cursor-not-allowed on Receive button)
+- src/components/pages/(auth)/employer/orient/IntroduceToTeam.tsx (removed disabled prop and click guard on Introduce button; label changes to "Resend" after first send; added Receive button with received date display; added disabled:cursor-not-allowed on Receive button)
+- src/components/pages/(auth)/employer/orient/Content.tsx (mapped isIntroductionReceived and introductionReceivedDate from API response; updated setReceived to handle 'introduce' emailType; passed new props to IntroduceToTeam component; dynamic success toast message based on emailType)
+- src/components/pages/(auth)/employer/orient/functions/emailHandlers.ts (added isIntroductionReceived and introductionReceivedDate to OrientItem interface)
 
 UNIT TESTING CHECKLIST:
 
 Backend (Django REST Framework):
-☑ Python unit tests written/updated (APITestCase for sync endpoints)
-☑ All backend tests passing: python manage.py test tests.views.test_yahshua_payroll
-☑ Backend test coverage: 94% - sync views and serializers fully covered
-☑ Models tested (N/A - no model changes)
-☑ Serializers tested (special character handling in department field)
-☑ Views/API endpoints tested (sync endpoint with various department names)
-☑ Permissions tested (employer-only access verified)
-☑ Celery tasks tested (N/A - sync is synchronous)
-☑ Database migrations tested (N/A - no schema changes)
+☐ Python unit tests written/updated (N/A - no backend changes in FE repo)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
 
 Frontend (Next.js/React/TypeScript):
 ☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
 ☐ All frontend tests passing: N/A
 ☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of PayrollSyncStatus)
-☐ Custom hooks tested (usePayrollSync manual verification)
-☐ React Query hooks tested (manual cache invalidation check)
+☑ Components tested (manual testing - SendContract resend, IntroduceToTeam resend + receive)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A - existing mutation hooks reused)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (OrientItem interface updated, no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (manual testing - contract resend, introduce resend, introduce receive with date)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (resend after first send, receive button disabled states, cursor-not-allowed on disabled)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (pending deployment)
+
+FIX EXPLANATION:
+Four frontend files were modified:
+
+1. **SendContract.tsx:** Removed `disabled={isContractSent}` and the `!isContractSent &&`
+   click guard from the Send button. The button is now always clickable and opens the
+   modal. Label changes from "Send" to "Resend" after first send. Added
+   `disabled:cursor-not-allowed` to the Receive button for better UX on disabled state.
+
+2. **IntroduceToTeam.tsx:** Complete rework to match SendContract's pattern:
+   - Removed `disabled` and click guard from Introduce button; label changes to "Resend"
+   - Added new props: `isIntroductionReceived`, `introductionReceivedDate`, `setReceived`,
+     `isLoading`
+   - Added Receive button with same disabled logic as SendContract (disabled when not
+     introduced, when already received, or when loading)
+   - Added received date display with DocumentIcon (green checkmark pattern)
+   - Added `disabled:cursor-not-allowed` on the Receive button
+
+3. **Content.tsx:** Three areas updated:
+   - `useEffect` data mapping: Added `isIntroductionReceived` and
+     `introductionReceivedDate` (using formatDateToLocal) to both paginated and array
+     response branches
+   - `setReceived` function: Added `emailType === 'introduce'` handling that sets
+     `isIntroductionReceived = true` and formats the received date; dynamic success
+     toast message based on emailType
+   - `<IntroduceToTeam>` JSX: Passes new props (`isIntroductionReceived`,
+     `introductionReceivedDate`, `setReceived` with 'introduce' emailType, `isLoading`)
+
+4. **emailHandlers.ts:** Added `isIntroductionReceived: boolean` and
+   `introductionReceivedDate?: string` to the `OrientItem` interface for type safety.
+
+================================================================================
+
+BUG ID: HRIS-010
+DATE FILED: 2026-02-13
+DATE FIXED: 2026-02-13
+CLIENT/REPORTER: Production Client - NTE Email Privacy Issue
+
+ISSUE DESCRIPTION:
+Users reported that when sending an NTE (Notice to Explain) or Decision email to an employee,
+the old/previous employee's email address would appear in the recipient field when opening
+the modal for a different employee. This critical bug affected email privacy and communication
+accuracy.
+
+The race condition occurred during the following workflow:
+1. User opens Send NTE modal for Employee A (email: john@example.com)
+2. Modal renders and starts loading Employee A's details from API
+3. User closes modal
+4. User opens Send NTE modal for Employee B (email: jane@example.com)
+5. Modal renders immediately with isSendNTEModalOpen = {id: 2}
+6. During the 100-300ms loading window, old state from Employee A could appear in the TO field
+7. When Employee B's data loads, recipients update, but if user was quick they might have
+   seen/used Employee A's data
+
+The same issue affected the Send Decision modal.
+
+Root cause analysis revealed:
+- Frontend Race Condition: Timing gap between modal opening and employeeIssueDetails data
+  loading from the API
+- State Persistence: SendEmailModal's internal state (tagsTo, tagsCc, tagsBcc) could briefly
+  show old employee data before new data loaded
+- useEffect Timing: The recipient initialization useEffect depended on prePopulatedData which
+  loaded asynchronously, creating a window where stale data appeared
+- No Loading Gate: Modal rendered immediately when isSendNTEModalOpen was truthy, even before
+  employeeIssueDetails finished loading
+
+Backend investigation confirmed no caching or accumulation issues - recipients were fetched
+fresh from database each time.
+
+DESIRED OUTCOME:
+When opening the Send NTE or Send Decision modal for a specific employee, ONLY that employee's
+email address should appear in the TO field. No data from previously opened modals should
+persist or appear when switching between employees. The modal should wait for employee details
+to fully load before rendering to prevent any race conditions.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required - no caching issues detected)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/address-employee-issue/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A - existing endpoints work correctly)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of NTE and Decision modals)
+☐ Custom hooks tested (useGetEmployeeIssueDetails already working correctly)
+☑ React Query hooks tested (verified loading states work correctly)
 ☐ Form validation tested (N/A - no form changes)
-☐ API service functions tested (manual API call verification)
-☑ TypeScript types verified (no type errors)
-
-Integration & E2E:
-☑ API integration tests completed (verified sync with Payroll staging)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (special chars: &, ', ", <, >, unicode)
-☐ Cross-browser testing completed (N/A - no UI changes)
-☐ Mobile responsiveness verified (N/A - settings page desktop-only)
-
-FIX EXPLANATION:
-The issue was caused by URL encoding not being applied to department names
-before sending to the Payroll API. Updated utils/oauth.py to properly encode
-all string parameters using urllib.parse.quote(). Added explicit error logging
-in the sync view to capture and report validation failures. Frontend sync
-status component now displays detailed error messages when sync fails,
-allowing users to identify and fix problematic records.
-
-================================================================================
-
-BUG ID: EXAMPLE-002
-DATE FILED: 2024-12-18
-DATE FIXED: 2024-12-22
-CLIENT/REPORTER: Systech Internal - Dev Team
-
-ISSUE DESCRIPTION:
-Notification bell showing incorrect unread count after marking notifications
-as read. The count would only update after page refresh, and sometimes show
-negative numbers when rapidly clicking notifications.
-
-DESIRED OUTCOME:
-Notification count should update instantly when notifications are marked as
-read, with optimistic updates and proper error handling. Count should never
-show negative values.
-
-FILES CHANGED:
-Backend:
-- app/views/notification.py
-- app/serializers/notification.py
-- tests/views/test_notification.py
-
-Frontend:
-- src/components/layout/NotificationBell.tsx
-- src/components/notifications/NotificationList.tsx
-- src/hooks/useNotifications.ts
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☑ Python unit tests written/updated (APITestCase for notification endpoints)
-☑ All backend tests passing: python manage.py test tests.views.test_notification
-☑ Backend test coverage: 91% - notification views covered
-☑ Models tested (notification count aggregation)
-☑ Serializers tested (unread count serialization)
-☑ Views/API endpoints tested (mark as read, bulk mark, count endpoint)
-☑ Permissions tested (user can only access own notifications)
-☑ Celery tasks tested (N/A)
-☑ Database migrations tested (N/A - no schema changes)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of NotificationBell, NotificationList)
-☑ Custom hooks tested (useNotifications optimistic updates verified)
-☑ React Query hooks tested (cache invalidation on mark as read)
-☐ Form validation tested (N/A)
-☐ API service functions tested (manual verification)
-☑ TypeScript types verified (no type errors)
-
-Integration & E2E:
-☑ API integration tests completed (rapid click scenarios)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (rapid clicks, network errors, empty state, concurrent tabs)
-☑ Cross-browser testing completed (tested Chrome, Firefox, Safari)
-☑ Mobile responsiveness verified (notification dropdown on mobile)
-
-FIX EXPLANATION:
-Implemented optimistic updates in useNotifications hook using React Query's
-onMutate callback to immediately decrement count before API response. Added
-Math.max(0, count) guard in the component's local state to prevent negative
-values. Backend now returns updated unread_count in mark-as-read response for
-reconciliation. Added debouncing (300ms) to prevent rapid-fire API calls
-when clicking multiple notifications quickly. React Query's cache is now
-properly invalidated after successful mutation to ensure consistency.
-
-================================================================================
-
-BUG ID: HRIS-003
-DATE FILED: 2026-01-26
-DATE FIXED: 2026-01-26
-CLIENT/REPORTER: Internal
-
-ISSUE DESCRIPTION:
-Users were unable to upload image files (JPEG, PNG) through the SendEmailModal component.
-When attempting to select image files using the file input dialog or drag-and-drop,
-image files would not appear in the file selection list. Only document file types
-(Word, PDF, CSV, Excel) were selectable. This limitation prevented users from attaching
-screenshots, photos, or other image files to their emails.
-
-DESIRED OUTCOME:
-The SendEmailModal should accept both document files AND image files (JPEG, PNG) as
-valid attachment types. Users should be able to:
-1. Select image files from the file picker dialog
-2. Drag and drop image files into the attachment upload area
-3. Upload multiple images if multiple attachment mode is enabled
-4. See previews and manage uploaded image files just like document files
-
-FILES CHANGED:
-Backend:
-- (No backend changes required)
-
-Frontend:
-- src/components/SendEmailModal.tsx
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☐ Python unit tests written/updated (N/A - no backend changes)
-☐ All backend tests passing (N/A)
-☐ Backend test coverage: N/A
-☐ Models tested (N/A)
-☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A)
-☐ Permissions tested (N/A)
-☐ Celery tasks tested (N/A)
-☐ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of image upload in all attachment modes)
-☐ Custom hooks tested (N/A - no hook changes)
-☐ React Query hooks tested (N/A)
-☐ Form validation tested (10MB file size limit applies to images)
 ☐ API service functions tested (N/A)
 ☑ TypeScript types verified (no type errors)
 
 Integration & E2E:
-☑ API integration tests completed (verified image uploads to backend)
+☑ API integration tests completed (verified employee details fetch correctly)
 ☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
 ☑ Manual regression testing completed
-☑ Edge cases tested (JPEG, PNG, large images, mixed file types, single/multiple mode)
-☑ Cross-browser testing completed (file picker shows images in Chrome, Firefox)
-☐ Mobile responsiveness verified (N/A - modal responsive design unchanged)
-
-FIX EXPLANATION:
-The issue was caused by the HTML file input `accept` attribute being too restrictive.
-All six file input elements in the component only accepted specific document MIME types:
-- application/msword (DOC)
-- application/pdf (PDF)
-- text/csv (CSV)
-- application/vnd.openxmlformats-officedocument.wordprocessingml.document (DOCX)
-- application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (XLSX)
-- application/vnd.ms-excel (XLS)
-
-The fix added image MIME types to ALL file input accept attributes:
-- image/jpeg (JPEG/JPG files)
-- image/png (PNG files)
-
-File inputs updated (6 total):
-1. Line 1053: Initial drag-drop file input (showDragDropAttachment mode)
-2. Line 1068: Replace file input for single attachment mode (showDragDropAttachment)
-3. Line 1158: "Add more files" input for multiple attachment mode (showDragDropAttachment)
-4. Line 1195: Initial file input (regular attachment mode)
-5. Line 1210: Replace file input for single attachment mode (regular mode)
-6. Line 1300: "Add more files" input for multiple attachment mode (regular mode)
-
-This change allows users to upload image files while maintaining all existing
-functionality:
-- 10MB file size limit still enforced for all file types
-- Single vs multiple attachment mode logic unchanged
-- Template attachments still work correctly
-- File preview and removal features work for images
-
-The fix is backward compatible and does not affect existing document upload functionality.
-
-================================================================================
-
-BUG ID: HRIS-001
-DATE FILED: 2026-01-15
-DATE FIXED: 2026-01-15
-CLIENT/REPORTER: Production Client - Job Posting #276
-
-ISSUE DESCRIPTION:
-When applicants applied to a specific job posting (ID 276), the screen-applicants page
-would crash with a client-side exception: "TypeError: Cannot read properties of null
-(reading 'toLowerCase')". The error occurred during screening answer evaluation when
-comparing applicant responses against ideal answers. The page displayed "Application
-error: a client-side exception has occurred" and was completely unusable for that
-job posting.
-
-DESIRED OUTCOME:
-The screen-applicants page should load and display all applicants regardless of
-whether their screening answers contain null values. Applicants with null/missing
-screening answers should be treated as "not fit" for those questions rather than
-crashing the entire page.
-
-FILES CHANGED:
-Backend:
-- (No backend changes required)
-
-Frontend:
-- src/components/pages/(auth)/employer/screen-applicants/[id]/Content.tsx
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☐ Python unit tests written/updated (N/A - no backend changes)
-☐ All backend tests passing (N/A)
-☐ Backend test coverage: N/A
-☐ Models tested (N/A)
-☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A)
-☐ Permissions tested (N/A)
-☐ Celery tasks tested (N/A)
-☐ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing with job posting #276)
-☐ Custom hooks tested (N/A - no hook changes)
-☐ React Query hooks tested (N/A)
-☐ Form validation tested (N/A)
-☐ API service functions tested (N/A)
-☑ TypeScript types verified (no type errors)
-
-Integration & E2E:
-☑ API integration tests completed (verified page loads with null screening data)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (null idealAnswer, null applicant answer, array with null values)
-☐ Cross-browser testing completed (pending deployment)
-☐ Mobile responsiveness verified (N/A - no UI changes)
-
-FIX EXPLANATION:
-The bug was in the `processApplicants` function (Content.tsx:230-254) which evaluates
-applicant screening answers against the job posting's ideal answers. The code called
-`.toLowerCase()` directly on values that could be null:
-
-1. Multiple Choice comparison (line 237): `app.toLowerCase() === ideal.toLowerCase()`
-   - Both `app` (applicant's answer) and `ideal` (ideal answer) could be null
-
-2. Yes/No comparison (line 244): `applicantAnswer.toLowerCase() === idealAnswer.toLowerCase()`
-   - Both values could be null if screening data was incomplete
-
-The fix added null checks before calling `.toLowerCase()`:
-- For Multiple Choice: Added guard `if (app == null || ideal == null) return false;`
-  and wrapped values with `String()` for type safety
-- For Yes/No: Added conditional check that sets `isMatch = false` when either value
-  is null, otherwise performs the comparison with `String()` wrapper
-
-This ensures applicants with null/missing screening answers are treated as "not fit"
-for those specific questions (conservative approach) rather than crashing the page.
-The root cause was likely incomplete screening question data in the database for
-job posting #276.
-
-================================================================================
-
-FEATURE ID: HRIS-002
-DATE REQUESTED: 2026-01-21
-DATE IMPLEMENTED: 2026-01-21
-CLIENT/REPORTER: Systech Internal - Feature Request
-
-FEATURE DESCRIPTION:
-Add CSV export functionality to the Individual Evaluations page. Currently, users
-can only print evaluation data to PDF. The request was to allow users to choose
-between PDF and CSV export formats when exporting individual evaluation records.
-
-DESIRED OUTCOME:
-Users should be able to:
-1. Click the export button on the Individual Evaluations page
-2. Select export format: PDF (existing) or CSV (new)
-3. Select evaluation forms to include: All or Selected specific forms
-4. Download the file in the chosen format
-
-FILES CHANGED:
-Backend:
-- (No backend changes required - CSV generation handled on frontend)
-
-Frontend:
-- src/components/pages/(auth)/employer/manage/evaluation-history/tabs/IndividualEvaluations.tsx
-- src/components/pages/(auth)/employer/manage/evaluation-history/modals/PrintIndividualEvaluationsSelectionModal.tsx
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☐ Python unit tests written/updated (N/A - no backend changes)
-☐ All backend tests passing (N/A)
-☐ Backend test coverage: N/A
-☐ Models tested (N/A)
-☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A)
-☐ Permissions tested (N/A)
-☐ Celery tasks tested (N/A)
-☐ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of export modal and CSV download)
-☐ Custom hooks tested (N/A - no new hooks)
-☐ React Query hooks tested (N/A)
-☐ Form validation tested (N/A)
-☐ API service functions tested (N/A)
-☑ TypeScript types verified (no type errors, new ExportFormat type added)
-
-Integration & E2E:
-☑ API integration tests completed (verified data fetch for CSV export)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (empty data, special characters in names, large datasets)
-☑ Cross-browser testing completed (CSV download works in Chrome, Firefox)
-☐ Mobile responsiveness verified (modal responsive design maintained)
-
-IMPLEMENTATION DETAILS:
-
-1. PrintIndividualEvaluationsSelectionModal.tsx:
-   - Added new `ExportFormat` type ('pdf' | 'csv') exported for reuse
-   - Added format selection UI with radio buttons (PDF/CSV options)
-   - Added DocumentArrowDownIcon and DocumentTextIcon for visual distinction
-   - Updated `onConfirm` callback to include selected format parameter
-   - Dynamic button text: "Print Report" for PDF, "Export CSV" for CSV
-   - Added state management for `selectedFormat` with 'pdf' as default
-   - Reset format selection on modal close
-
-2. IndividualEvaluations.tsx:
-   - Added `isExportingCSV` state for loading state management
-   - Added `handleCSVExport` function for CSV generation:
-     * Defines CSV headers: Employee Name, Date of Evaluation, Evaluation Period,
-       Evaluation Form, Total Score, Max Score, Passing Score, Status
-     * Converts data to CSV rows with proper escaping (quotes, special chars)
-     * Creates Blob with CSV content and triggers browser download
-     * Filename pattern: individual-evaluations-{from}-to-{to}.csv
-   - Updated `handlePrintConfirm` to handle both PDF and CSV formats
-   - Added tooltip for export button
-   - Import ExportFormat type from modal component
-
-CSV Export Format:
-- Headers: Employee Name, Date of Evaluation, Evaluation Period, Evaluation Form,
-          Total Score, Max Score, Passing Score, Status
-- Status column: "Passed" if form_total_score >= passing_score, else "Failed"
-- Special character handling: Values wrapped in quotes, internal quotes escaped
-- File encoding: UTF-8 with proper MIME type (text/csv;charset=utf-8)
-
-Design Decisions:
-- Frontend-only CSV generation: Since data is already fetched when modal opens,
-  generating CSV on frontend is efficient and avoids additional API calls
-- Consistent filtering: Same form selection logic applies to both PDF and CSV
-- User experience: Format selection appears first, then record selection
-- Backward compatible: PDF remains the default format selection
-
-================================================================================
-
-BUG ID: HRIS-004
-DATE FILED: 2026-01-26
-DATE FIXED: 2026-01-26
-CLIENT/REPORTER: Internal
-
-ISSUE DESCRIPTION:
-The "Sync All to YP" button in the HRIS general settings (employees section) and the
-FloatingSyncButton (master sync) were only pushing data from HRIS TO Yahshua Payroll
-(YP) in one direction. Users were unable to get updated data FROM YP back into HRIS.
-When departments, locations, positions, or employment types were added/updated in YP,
-clicking the sync button would NOT pull those changes into HRIS.
-
-The backend endpoints for pulling data FROM YP already existed but were not connected
-to the frontend UI:
-- /api/departments/sync-third-party-integration/
-- /api/locations/sync-third-party-integration/
-- /api/positions/sync-third-party-integration/
-- /api/employee-status/sync-third-party-integration/
-
-The sync button was misleadingly named "Sync All to YP" which implied one-directional
-syncing, causing user confusion.
-
-DESIRED OUTCOME:
-Implement bidirectional sync so that clicking the sync button performs:
-1. FIRST: Pull data FROM YP to HRIS (fetch and update departments, locations,
-   positions, employment types)
-2. THEN: Push data FROM HRIS TO YP (ensure YP has latest HRIS records)
-
-Both systems should stay fully synchronized after each sync operation.
-
-FILES CHANGED:
-Backend:
-- (No backend changes - endpoints already existed and were working)
-
-Frontend:
-- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartmentFromYP.ts (NEW)
-- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/location/useSyncLocationFromYP.ts (NEW)
-- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/position/useSyncPositionFromYP.ts (NEW)
-- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/employee-status/useSyncEmployeeStatusFromYP.ts (NEW)
-- src/components/pages/(auth)/employer/settings/general-settings/employees/Content.tsx (UPDATED)
-- src/components/FloatingSyncButton.tsx (UPDATED)
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☑ Python unit tests written/updated (N/A - no backend changes, endpoints tested previously)
-☑ All backend tests passing (existing tests still pass)
-☑ Backend test coverage: N/A - no new code
-☑ Models tested (N/A)
-☑ Serializers tested (N/A)
-☑ Views/API endpoints tested (existing sync-third-party-integration endpoints verified working)
-☑ Permissions tested (N/A - no permission changes)
-☑ Celery tasks tested (N/A)
-☑ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of both Content.tsx and FloatingSyncButton.tsx)
-☑ Custom hooks tested (all 4 new FROM YP hooks manually verified)
-☑ React Query hooks tested (useMutation wrappers working correctly)
-☐ Form validation tested (N/A)
-☐ API service functions tested (N/A)
-☑ TypeScript types verified (no type errors, proper typing for all hooks)
-
-Integration & E2E:
-☑ API integration tests completed (verified bidirectional sync with YP staging)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed (tested both sync buttons)
-☑ Edge cases tested (empty data FROM YP, partial failures, network errors)
-☐ Cross-browser testing completed (pending deployment)
-☐ Mobile responsiveness verified (N/A - settings page desktop-only)
-
-FIX EXPLANATION:
-
-Created 4 new frontend hooks to pull data FROM YP:
-
-1. useSyncDepartmentFromYP.ts - Calls /api/departments/sync-third-party-integration/
-   - Backend fetches from YP's /sso/departments-info/
-   - Creates/updates departments in HRIS database
-
-2. useSyncLocationFromYP.ts - Calls /api/locations/sync-third-party-integration/
-   - Backend fetches from YP's /sso/locations-info/
-   - Creates/updates locations in HRIS database
-
-3. useSyncPositionFromYP.ts - Calls /api/positions/sync-third-party-integration/
-   - Backend fetches from YP's /sso/positions-info/
-   - Creates/updates positions in HRIS database
-
-4. useSyncEmployeeStatusFromYP.ts - Calls /api/employee-status/sync-third-party-integration/
-   - Backend fetches from YP's /sso/employment-types-info/
-   - Creates/updates employment types in HRIS database
-
-Updated Content.tsx (/settings/general-settings/employees):
-- Imported 4 new FROM YP hooks
-- Added hook instances for pulling FROM YP
-- Updated isSyncingAll state to include new loading states
-- Rewrote handleSyncAll function from 4 operations to 8 operations:
-  * Phase 1: Execute 4 operations to pull FROM YP (departments, locations, positions, employment status)
-  * Phase 2: After Phase 1 completes (500ms delay), execute 4 operations to push TO YP
-  * Shows individual toast notifications for each operation
-  * Shows final summary when all 8 operations complete
-- Changed button text from "Sync All to YP" to "Sync All with YP" for clarity
-
-Updated FloatingSyncButton.tsx (master sync):
-- Imported 4 new FROM YP hooks
-- Added hook instances for pulling FROM YP
-- Updated sync steps from 7 to 11 steps:
-  * Step 1: Users
-  * Step 2: Employee ID Settings
-  * Steps 3-10: Bidirectional sync for Locations, Positions, Departments, Employment Status
-    - Each entity now has "FROM YP" step followed by "TO YP" step
-  * Step 11: Employees
-- Updated handleMasterSync to execute bidirectional sync sequentially:
-  * Pull Locations FROM YP → Push Locations TO YP
-  * Pull Positions FROM YP → Push Positions TO YP
-  * Pull Departments FROM YP → Push Departments TO YP
-  * Pull Employment Status FROM YP → Push Employment Status TO YP
-- Updated UI text to clarify bidirectional sync in modal description
-- Each step shows clear "(FROM YP)" or "(TO YP)" label in progress UI
-
-Data Flow:
-1. FROM YP Phase:
-   - HRIS makes GET request to YP endpoints (/sso/departments-info/, etc.)
-   - YP returns latest data
-   - HRIS creates/updates records using payroll_id as primary matching key
-   - Falls back to name matching for legacy records without payroll_id
-
-2. TO YP Phase:
-   - HRIS fetches records from local database
-   - Formats data for YP's expected structure
-   - POST to YP bulk-sync endpoints (/sso/departments-bulk-sync/, etc.)
-   - YP creates/updates records and returns updated IDs
-   - HRIS updates local records with YP's payroll_id for future syncs
-
-Benefits:
-- Both systems stay synchronized in both directions
-- User sees clear progress for each operation with direction labels
-- Individual errors don't block entire sync - partial success supported
-- Button text now accurately describes bidirectional behavior
-- No backend changes required - leveraged existing endpoints
-
-User Testing Results:
-- Tested adding department in YP → synced successfully to HRIS
-- Tested adding department in HRIS → synced successfully to YP
-- Verified all 4 entity types (departments, locations, positions, employment types)
-- Verified both sync buttons (Content.tsx and FloatingSyncButton.tsx)
-- Confirmed toast notifications show clear messages for each step
-- Verified proper error handling when YP is unreachable
-
-================================================================================
-
-BUG ID: HRIS-005
-DATE FILED: 2026-01-28
-DATE FIXED: 2026-01-28
-CLIENT/REPORTER: Internal
-
-ISSUE DESCRIPTION:
-Two signature-related issues were identified:
-
-1. Public Directives Page: When a directive entry did not have a signature image uploaded,
-   the system was displaying a placeholder SVG squiggly line as a fallback. This squiggly line
-   looked unprofessional and could be mistaken for an actual signature, causing confusion for
-   users viewing company directives and memos.
-
-2. Create Memo Modal: The "Remove" button for the signature file input was showing even when
-   no file was actually selected. The condition `watch('signature')` was truthy even when the
-   FileList was empty, causing the remove button to appear incorrectly.
-
-DESIRED OUTCOME:
-1. When a directive does not have a signature image, the signature area should simply be empty
-   (show nothing) rather than displaying a placeholder graphic.
-
-2. The "Remove" button in the Create Memo Modal should only appear when a signature file has
-   actually been selected by the user.
-
-FILES CHANGED:
-Backend:
-- (No backend changes required)
-
-Frontend:
-- src/components/pages/(un-auth)/directives/Content.tsx
-- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/CreateMemoModal.tsx
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☐ Python unit tests written/updated (N/A - no backend changes)
-☐ All backend tests passing (N/A)
-☐ Backend test coverage: N/A
-☐ Models tested (N/A)
-☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A)
-☐ Permissions tested (N/A)
-☐ Celery tasks tested (N/A)
-☐ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of directives page and create memo modal)
-☐ Custom hooks tested (N/A - no hook changes)
-☐ React Query hooks tested (N/A)
-☐ Form validation tested (N/A)
-☐ API service functions tested (N/A)
-☑ TypeScript types verified (no type errors)
-
-Integration & E2E:
-☑ API integration tests completed (verified page renders correctly)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (directives with signature, directives without signature)
+☑ Edge cases tested (rapid switching, slow network, pre-populated data, CC/BCC disabled)
 ☐ Cross-browser testing completed (pending deployment)
 ☐ Mobile responsiveness verified (N/A - no layout changes)
 
 FIX EXPLANATION:
+Implemented a two-layer defense strategy to completely eliminate the race condition:
 
-1. Content.tsx (Directives Page):
-   The issue was in the conditional rendering logic for directive signatures.
-   When a directive had a signature image (`directive.signature`), it would display the image.
-   However, when no signature was present, the fallback was rendering an SVG element that
-   drew a squiggly line path intended to look like a placeholder signature:
+**Layer 1: Force Complete Remount with Unique Key Prop (PRIMARY FIX)**
 
-   Before (lines 427-432):
-   ```jsx
-   <div className="h-10 flex items-center -ml-5">
-     <svg viewBox="0 0 200 50" className="w-32 -mb-1">
-       <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
-     </svg>
-   </div>
-   ```
+Added dynamic `key` props to both SendEmailModal components in Content.tsx:
 
-   After:
-   ```jsx
-   null
-   ```
-
-   The fix simply returns `null` when there is no signature image, which causes React to render
-   nothing in that space.
-
-2. CreateMemoModal.tsx:
-   The "Remove" button for the signature field was conditionally rendered based only on
-   `watch('signature')` being truthy. However, when using React Hook Form with file inputs,
-   the watched value can be a FileList object that is truthy but empty (length === 0).
-
-   Before:
-   ```jsx
-   {watch('signature') && (
-     <button ...>Remove</button>
-   )}
-   ```
-
-   After:
-   ```jsx
-   {watch('signature') && watch('signature') instanceof FileList && watch('signature')!.length > 0 && (
-     <button ...>Remove</button>
-   )}
-   ```
-
-   The fix adds proper type checking to ensure:
-   - The value exists (`watch('signature')`)
-   - The value is a FileList (`instanceof FileList`)
-   - The FileList actually contains files (`length > 0`)
-
-================================================================================
-
-BUG ID: HRIS-006
-DATE FILED: 2026-01-28
-DATE FIXED: 2026-01-28
-CLIENT/REPORTER: Internal
-
-ISSUE DESCRIPTION:
-When creating a memo in the Create Memo/Policy page, uploading a signature file using the
-"Choose File" button (as opposed to drawing a signature) did not save the signature to the
-database. After submission, the signature field remained null in the database, even though
-a file was selected and the form submission appeared successful. Drawing a signature worked
-correctly, but uploading a file did not.
-
-DESIRED OUTCOME:
-Both signature methods (drawing and uploading) should work correctly:
-1. Drawing a signature → signature saved as base64 image data
-2. Uploading a signature file → signature saved to storage and path stored in database
-
-FILES CHANGED:
-Backend:
-- (No backend changes required)
-
-Frontend:
-- src/components/pages/(auth)/employer/manage/create-memo-policy/hooks/useAddDirectivesItems.ts
-- src/types/directives.ts
-
-UNIT TESTING CHECKLIST:
-
-Backend (Django REST Framework):
-☐ Python unit tests written/updated (N/A - no backend changes)
-☐ All backend tests passing (N/A)
-☐ Backend test coverage: N/A
-☐ Models tested (N/A)
-☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A)
-☐ Permissions tested (N/A)
-☐ Celery tasks tested (N/A)
-☐ Database migrations tested (N/A)
-
-Frontend (Next.js/React/TypeScript):
-☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
-☐ All frontend tests passing: N/A
-☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of signature upload)
-☐ Custom hooks tested (useAddDirectivesItems manually verified)
-☐ React Query hooks tested (N/A)
-☐ Form validation tested (N/A)
-☐ API service functions tested (N/A)
-☑ TypeScript types verified (updated DirectiveData interface)
-
-Integration & E2E:
-☑ API integration tests completed (verified signature upload to backend)
-☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
-☑ Manual regression testing completed
-☑ Edge cases tested (FileList upload, File object, drawn signature base64)
-☐ Cross-browser testing completed (pending deployment)
-☐ Mobile responsiveness verified (N/A - no layout changes)
-
-FIX EXPLANATION:
-The issue was in the signature handling logic in useAddDirectivesItems.ts. The code only
-checked for string signatures (base64 from drawn signatures) and did not handle file uploads:
-
-Before (lines 35-38):
-```typescript
-if (directive.signature && typeof directive.signature === 'string' && directive.signature.length) {
-  const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
-  data.append('signature', signatureBlob, 'signature.jpg');
-}
+Send NTE Modal (line 1042):
+```tsx
+{isSendNTEModalOpen && !isLoadingNTEDetails && (
+  <SendEmailModal
+    key={`send-nte-${isSendNTEModalOpen?.id || 'new'}`}  // ← Forces remount
+    title="Send NTE"
+    isOpen={!!isSendNTEModalOpen}
+    // ...
+  />
+)}
 ```
 
-This condition only passed for drawn signatures (base64 strings). When a user uploaded a file,
-React Hook Form provided a FileList object, which failed the `typeof === 'string'` check,
-causing the signature to be skipped entirely.
+Send Decision Modal (line 1076):
+```tsx
+{isSendDecisionModalOpen && !isLoadingDecisionDetails && (
+  <SendEmailModal
+    key={`send-decision-${isSendDecisionModalOpen?.id || 'new'}`}  // ← Forces remount
+    title="Send Decision"
+    isOpen={!!isSendDecisionModalOpen}
+    // ...
+  />
+)}
+```
 
-The fix updated the logic to handle three signature formats:
+Effect: When the employee ID changes, React's reconciliation algorithm detects the key change
+and performs a complete unmount of the old modal instance, destroying all internal state
+(tagsTo, tagsCc, tagsBcc, form data, etc.). A completely fresh modal instance is then mounted
+with clean state. This is the React-recommended way to reset component state and guarantees
+no state can persist between different employees.
 
-After (lines 35-47):
+**Layer 2: Add Loading State Gate (SECONDARY DEFENSE)**
+
+Extracted loading states from the useGetEmployeeIssueDetails query hooks (line 108-109):
+```tsx
+const { data: employeeIssueDetails, isLoading: isLoadingNTEDetails } =
+  useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
+const { data: decisionEmployeeIssueDetails, isLoading: isLoadingDecisionDetails } =
+  useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
+```
+
+Added loading checks to conditional rendering (lines 1040, 1075):
+```tsx
+{isSendNTEModalOpen && !isLoadingNTEDetails && (  // ← Added loading check
+  <SendEmailModal ... />
+)}
+
+{isSendDecisionModalOpen && !isLoadingDecisionDetails && (  // ← Added loading check
+  <SendEmailModal ... />
+)}
+```
+
+Effect: The modal won't render at all until the employee details have finished loading from
+the API. This eliminates the 100-300ms race condition window completely. Users see nothing
+during data loading, then the modal appears with correct data already populated.
+
+**Why This Solution Works:**
+
+Multi-Layered Protection:
+- Layer 1 (Key): Nuclear option - complete remount ensures fresh state, no carryover possible
+- Layer 2 (Loading Gate): Prevents any rendering during data transition, better UX
+
+React Best Practices:
+- Uses `key` prop as intended for state reset (documented React pattern)
+- Respects loading states before rendering (proper data fetching pattern)
+- No modifications to global SendEmailModal component (safe for other pages)
+
+Minimally Invasive:
+- Changes localized to Content.tsx only (address-employee-issue page)
+- No changes to SendEmailModal.tsx (global component remains untouched)
+- No backend changes required
+- Zero impact on other pages using SendEmailModal
+
+User Experience:
+- Brief loading state (100-300ms) is better than showing wrong/stale data
+- Prevents catastrophic email privacy breach
+- No visible behavior change when data loads quickly from cache
+
+The fix completely eliminates the race condition that was causing old recipients to appear
+in new NTE/Decision emails. Each modal instance is guaranteed to start with clean state and
+only renders when correct employee data is available.
+
+================================================================================
+
+BUG ID: HRIS-009
+DATE FILED: 2026-02-03
+DATE FIXED: 2026-02-03
+CLIENT/REPORTER: Developer
+
+ISSUE DESCRIPTION:
+When updating a job posting's position field through the Update Job Form modal (changing
+from one position to another, e.g., from "tes" to "Admin 3"), the form showed a success
+message "Job posting updated successfully" but the position was not actually updated in
+the database. The job posting history table continued to display the old position value
+after the update. This made it impossible to change job posting positions through the
+update modal, forcing users to recreate job postings if they needed to change the position.
+
+User workflow:
+1. Click edit icon on a job posting in the job posting history table
+2. Update Job Form modal opens with current position shown (e.g., "tes")
+3. User selects a new position from dropdown (e.g., "Admin 3")
+4. User clicks "Next" through all form pages and submits
+5. Success toast appears: "Job posting updated successfully"
+6. Modal closes and table refreshes
+7. BUG: Position column still shows old value "tes" instead of "Admin 3"
+
+DESIRED OUTCOME:
+Selecting a new position from the dropdown and submitting the update form should correctly
+update the job posting's position field in the database. The job posting history table
+should reflect the new position value after a successful update.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required - serializer and view already handled position updates correctly)
+
+Frontend:
+- src/components/pages/(auth)/employer/job-posting-history/modals/UpdateJobModal.tsx
+- src/components/pages/(auth)/employer/job-posting-history/hooks/useUpdateJobPostItems.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A - existing tests still pass)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of UpdateJobModal with position changes)
+☑ Custom hooks tested (useUpdateJobPostItems manually verified)
+☐ React Query hooks tested (cache invalidation working correctly)
+☐ Form validation tested (N/A - no validation changes)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified position update via PATCH /api/jobs/{id}/)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (change position, keep same position, update other fields)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - modal already responsive)
+
+FIX EXPLANATION:
+The bug was in UpdateJobModal.tsx in the firstFormSubmit function (lines 160-171). The
+code had flawed logic that was overwriting the newly selected position with the old
+position ID from the existing job posting data.
+
+Root Cause:
+After the user selected a new position from the dropdown, the code checked if the OLD
+job posting had a position_id value. If it did (which was always true for existing job
+postings), it would overwrite BOTH position_id AND position in the form data with the
+OLD position value, completely discarding the user's new selection.
+
+Before (lines 160-176):
 ```typescript
-if (directive.signature) {
-  if (typeof directive.signature === 'string' && directive.signature.length) {
-    // Handle drawn signature (base64 data URL)
-    const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
-    data.append('signature', signatureBlob, 'signature.jpg');
-  } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
-    // Handle uploaded file from file input (FileList)
-    data.append('signature', directive.signature[0]);
-  } else if (directive.signature instanceof File) {
-    // Handle uploaded file (File object)
-    data.append('signature', directive.signature);
+const firstFormSubmit = (data: any) => {
+  // Ensure we're using position_id for the API call
+  const formData = { ...data };
+  if (jobPostDataDetails?.position_id && !formData.position_id) {
+    formData.position_id = jobPostDataDetails.position_id;
+    formData.position = jobPostDataDetails.position_id; // ← BUG: Overwrote new selection!
   }
-}
+
+  // Find the selected position and add its description to the data
+  const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
+  if (selectedPosition?.description) {
+    formData.positionDescription = selectedPosition.description;
+  }
+
+  setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
+  setPageNumber(2);
+};
 ```
 
-Additionally, the TypeScript interface was updated to properly reflect all possible signature types:
-
-Before (directives.ts):
+After (lines 160-171):
 ```typescript
-signature?: string | File;
+const firstFormSubmit = (data: any) => {
+  const formData = { ...data };
+
+  // Find the selected position and add its description to the data
+  const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
+  if (selectedPosition?.description) {
+    formData.positionDescription = selectedPosition.description;
+  }
+
+  setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
+  setPageNumber(2);
+};
 ```
 
-After (directives.ts):
+Additionally, simplified useUpdateJobPostItems.ts (line 13) from:
 ```typescript
-signature?: string | File | FileList;
+formData.append('position', jobPost.position_id || jobPost.position);
 ```
 
-This ensures proper type checking and allows the hook to handle all three signature formats:
-1. Base64 string (drawn signature)
-2. FileList (from file input)
-3. File object (direct file reference)
+To:
+```typescript
+formData.append('position', jobPost.position);
+```
+
+================================================================================
+
+BUG ID: HRIS-008
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Navigating to the Create Memo/Policy page caused a React hydration error in the browser console:
+"Warning: In HTML, <button> cannot be a descendant of <button>. This will cause a hydration
+error." The error was caused by nested button elements where a SmartButton component (which
+renders a <button>) was wrapping a Headless UI Menu.Button component (which also renders a
+<button>). This created invalid HTML structure and prevented proper server-side rendering.
+
+Additional error appeared when attempting to fix by using Menu.Button's `as` prop:
+"Function components cannot be given refs." This occurred because Menu.Button tried to attach
+a ref to SmartButton, but SmartButton was not forwarding refs.
+
+DESIRED OUTCOME:
+The "CREATE" button should work correctly with both permission checking (SmartButton) and
+dropdown menu functionality (Headless UI Menu.Button) without any hydration errors or ref
+warnings. The button should have a single <button> element in the DOM, not nested buttons.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/create-memo-policy/Content.tsx
+- src/components/SmartPermissions/SmartButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of CREATE button dropdown)
+☑ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (forwardRef types correct)
+
+Integration & E2E:
+☑ API integration tests completed (N/A - UI only)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (permission checks still work, dropdown still works, ref forwarding)
+☑ Cross-browser testing completed (Chrome, Firefox - no hydration errors)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+
+Phase 1 - Fix Nested Buttons (Content.tsx):
+Changed from nested button structure to using Headless UI's `as` prop for component composition.
+
+Before (lines 393-400):
+```tsx
+<SmartButton id="create_memo_btn" className='...'>
+  <Menu.Button className="w-full h-full">
+    CREATE
+  </Menu.Button>
+</SmartButton>
+```
+
+After:
+```tsx
+<Menu.Button
+  as={SmartButton}
+  id="create_memo_btn"
+  className='...'
+>
+  CREATE
+</Menu.Button>
+```
+
+Phase 2 - Add Ref Forwarding (SmartButton.tsx):
+Updated SmartButton to forward refs using React.forwardRef() so Menu.Button can attach its
+internal ref for focus management and accessibility.
+
+Before:
+```typescript
+export const SmartButton: React.FC<SmartButtonProps> = ({
+  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
+}) => {
+  return (
+    <button type={type} onClick={onClick} ...>
+      {children}
+    </button>
+  );
+};
+```
+
+After:
+```typescript
+export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>(({
+  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
+}, ref) => {
+  return (
+    <button ref={ref} type={type} onClick={onClick} ...>
+      {children}
+    </button>
+  );
+});
+
+SmartButton.displayName = 'SmartButton';
+```
 
 ================================================================================
 
@@ -1001,34 +733,30 @@ Additional improvements:
 
 ================================================================================
 
-BUG ID: HRIS-008
+BUG ID: HRIS-006
 DATE FILED: 2026-01-28
 DATE FIXED: 2026-01-28
 CLIENT/REPORTER: Internal
 
 ISSUE DESCRIPTION:
-Navigating to the Create Memo/Policy page caused a React hydration error in the browser console:
-"Warning: In HTML, <button> cannot be a descendant of <button>. This will cause a hydration
-error." The error was caused by nested button elements where a SmartButton component (which
-renders a <button>) was wrapping a Headless UI Menu.Button component (which also renders a
-<button>). This created invalid HTML structure and prevented proper server-side rendering.
-
-Additional error appeared when attempting to fix by using Menu.Button's `as` prop:
-"Function components cannot be given refs." This occurred because Menu.Button tried to attach
-a ref to SmartButton, but SmartButton was not forwarding refs.
+When creating a memo in the Create Memo/Policy page, uploading a signature file using the
+"Choose File" button (as opposed to drawing a signature) did not save the signature to the
+database. After submission, the signature field remained null in the database, even though
+a file was selected and the form submission appeared successful. Drawing a signature worked
+correctly, but uploading a file did not.
 
 DESIRED OUTCOME:
-The "CREATE" button should work correctly with both permission checking (SmartButton) and
-dropdown menu functionality (Headless UI Menu.Button) without any hydration errors or ref
-warnings. The button should have a single <button> element in the DOM, not nested buttons.
+Both signature methods (drawing and uploading) should work correctly:
+1. Drawing a signature → signature saved as base64 image data
+2. Uploading a signature file → signature saved to storage and path stored in database
 
 FILES CHANGED:
 Backend:
 - (No backend changes required)
 
 Frontend:
-- src/components/pages/(auth)/employer/manage/create-memo-policy/Content.tsx
-- src/components/SmartPermissions/SmartButton.tsx
+- src/components/pages/(auth)/employer/manage/create-memo-policy/hooks/useAddDirectivesItems.ts
+- src/types/directives.ts
 
 UNIT TESTING CHECKLIST:
 
@@ -1047,129 +775,89 @@ Frontend (Next.js/React/TypeScript):
 ☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
 ☐ All frontend tests passing: N/A
 ☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of CREATE button dropdown)
-☑ Custom hooks tested (N/A - no hook changes)
+☑ Components tested (manual testing of signature upload)
+☐ Custom hooks tested (useAddDirectivesItems manually verified)
 ☐ React Query hooks tested (N/A)
 ☐ Form validation tested (N/A)
 ☐ API service functions tested (N/A)
-☑ TypeScript types verified (forwardRef types correct)
+☑ TypeScript types verified (updated DirectiveData interface)
 
 Integration & E2E:
-☑ API integration tests completed (N/A - UI only)
+☑ API integration tests completed (verified signature upload to backend)
 ☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
 ☑ Manual regression testing completed
-☑ Edge cases tested (permission checks still work, dropdown still works, ref forwarding)
-☑ Cross-browser testing completed (Chrome, Firefox - no hydration errors)
+☑ Edge cases tested (FileList upload, File object, drawn signature base64)
+☐ Cross-browser testing completed (pending deployment)
 ☐ Mobile responsiveness verified (N/A - no layout changes)
 
 FIX EXPLANATION:
+The issue was in the signature handling logic in useAddDirectivesItems.ts. The code only
+checked for string signatures (base64 from drawn signatures) and did not handle file uploads:
 
-Phase 1 - Fix Nested Buttons (Content.tsx):
-Changed from nested button structure to using Headless UI's `as` prop for component composition.
-
-Before (lines 393-400):
-```tsx
-<SmartButton id="create_memo_btn" className='...'>
-  <Menu.Button className="w-full h-full">
-    CREATE
-  </Menu.Button>
-</SmartButton>
-```
-
-After:
-```tsx
-<Menu.Button
-  as={SmartButton}
-  id="create_memo_btn"
-  className='...'
->
-  CREATE
-</Menu.Button>
-```
-
-This tells Menu.Button to render using SmartButton instead of wrapping it, resulting in a
-single button element with both Menu functionality and permission checking.
-
-Phase 2 - Add Ref Forwarding (SmartButton.tsx):
-Updated SmartButton to forward refs using React.forwardRef() so Menu.Button can attach its
-internal ref for focus management and accessibility.
-
-Before:
+Before (lines 35-38):
 ```typescript
-export const SmartButton: React.FC<SmartButtonProps> = ({
-  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
-}) => {
-  // ... component logic
-  return (
-    <button type={type} onClick={onClick} ...>
-      {children}
-    </button>
-  );
-};
+if (directive.signature && typeof directive.signature === 'string' && directive.signature.length) {
+  const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
+  data.append('signature', signatureBlob, 'signature.jpg');
+}
 ```
 
-After:
+The fix updated the logic to handle three signature formats:
+
+After (lines 35-47):
 ```typescript
-export const SmartButton = React.forwardRef<HTMLButtonElement, SmartButtonProps>(({
-  id, children, onClick, className = '', disabled = false, type = 'button', title = '',
-}, ref) => {
-  // ... component logic
-  return (
-    <button ref={ref} type={type} onClick={onClick} ...>
-      {children}
-    </button>
-  );
-});
-
-SmartButton.displayName = 'SmartButton';
+if (directive.signature) {
+  if (typeof directive.signature === 'string' && directive.signature.length) {
+    // Handle drawn signature (base64 data URL)
+    const signatureBlob = await fetch(`${directive.signature}`).then((res) => res.blob());
+    data.append('signature', signatureBlob, 'signature.jpg');
+  } else if (directive.signature instanceof FileList && directive.signature.length > 0) {
+    // Handle uploaded file from file input (FileList)
+    data.append('signature', directive.signature[0]);
+  } else if (directive.signature instanceof File) {
+    // Handle uploaded file (File object)
+    data.append('signature', directive.signature);
+  }
+}
 ```
 
-Benefits of the fix:
-1. Valid HTML - single button element instead of nested buttons
-2. No hydration errors - server and client render identically
-3. Backward compatible - all existing SmartButton usage continues to work
-4. More flexible - SmartButton can now be composed with other component libraries
-5. Maintains all functionality - permission checking and dropdown menu both work
-
-The forwardRef change is purely additive and doesn't affect existing code that doesn't
-pass refs to SmartButton.
+TypeScript interface updated in directives.ts:
+Before: `signature?: string | File;`
+After:  `signature?: string | File | FileList;`
 
 ================================================================================
 
-BUG ID: HRIS-009
-DATE FILED: 2026-02-03
-DATE FIXED: 2026-02-03
-CLIENT/REPORTER: Developer
+BUG ID: HRIS-005
+DATE FILED: 2026-01-28
+DATE FIXED: 2026-01-28
+CLIENT/REPORTER: Internal
 
 ISSUE DESCRIPTION:
-When updating a job posting's position field through the Update Job Form modal (changing
-from one position to another, e.g., from "tes" to "Admin 3"), the form showed a success
-message "Job posting updated successfully" but the position was not actually updated in
-the database. The job posting history table continued to display the old position value
-after the update. This made it impossible to change job posting positions through the
-update modal, forcing users to recreate job postings if they needed to change the position.
+Two signature-related issues were identified:
 
-User workflow:
-1. Click edit icon on a job posting in the job posting history table
-2. Update Job Form modal opens with current position shown (e.g., "tes")
-3. User selects a new position from dropdown (e.g., "Admin 3")
-4. User clicks "Next" through all form pages and submits
-5. Success toast appears: "Job posting updated successfully"
-6. Modal closes and table refreshes
-7. BUG: Position column still shows old value "tes" instead of "Admin 3"
+1. Public Directives Page: When a directive entry did not have a signature image uploaded,
+   the system was displaying a placeholder SVG squiggly line as a fallback. This squiggly line
+   looked unprofessional and could be mistaken for an actual signature, causing confusion for
+   users viewing company directives and memos.
+
+2. Create Memo Modal: The "Remove" button for the signature file input was showing even when
+   no file was actually selected. The condition `watch('signature')` was truthy even when the
+   FileList was empty, causing the remove button to appear incorrectly.
 
 DESIRED OUTCOME:
-Selecting a new position from the dropdown and submitting the update form should correctly
-update the job posting's position field in the database. The job posting history table
-should reflect the new position value after a successful update.
+1. When a directive does not have a signature image, the signature area should simply be empty
+   (show nothing) rather than displaying a placeholder graphic.
+
+2. The "Remove" button in the Create Memo Modal should only appear when a signature file has
+   actually been selected by the user.
 
 FILES CHANGED:
 Backend:
-- (No backend changes required - serializer and view already handled position updates correctly)
+- (No backend changes required)
 
 Frontend:
-- src/components/pages/(auth)/employer/job-posting-history/modals/UpdateJobModal.tsx
-- src/components/pages/(auth)/employer/job-posting-history/hooks/useUpdateJobPostItems.ts
+- src/components/pages/(un-auth)/directives/Content.tsx
+- src/components/pages/(auth)/employer/manage/create-memo-policy/modals/CreateMemoModal.tsx
 
 UNIT TESTING CHECKLIST:
 
@@ -1179,7 +867,7 @@ Backend (Django REST Framework):
 ☐ Backend test coverage: N/A
 ☐ Models tested (N/A)
 ☐ Serializers tested (N/A)
-☐ Views/API endpoints tested (N/A - existing tests still pass)
+☐ Views/API endpoints tested (N/A)
 ☐ Permissions tested (N/A)
 ☐ Celery tasks tested (N/A)
 ☐ Database migrations tested (N/A)
@@ -1188,100 +876,498 @@ Frontend (Next.js/React/TypeScript):
 ☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
 ☐ All frontend tests passing: N/A
 ☐ Frontend test coverage: N/A
-☑ Components tested (manual testing of UpdateJobModal with position changes)
-☑ Custom hooks tested (useUpdateJobPostItems manually verified)
-☐ React Query hooks tested (cache invalidation working correctly)
-☐ Form validation tested (N/A - no validation changes)
+☑ Components tested (manual testing of directives page and create memo modal)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
 ☐ API service functions tested (N/A)
 ☑ TypeScript types verified (no type errors)
 
 Integration & E2E:
-☑ API integration tests completed (verified position update via PATCH /api/jobs/{id}/)
+☑ API integration tests completed (verified page renders correctly)
 ☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
 ☑ Manual regression testing completed
-☑ Edge cases tested (change position, keep same position, update other fields)
+☑ Edge cases tested (directives with signature, directives without signature)
 ☐ Cross-browser testing completed (pending deployment)
-☐ Mobile responsiveness verified (N/A - modal already responsive)
+☐ Mobile responsiveness verified (N/A - no layout changes)
 
 FIX EXPLANATION:
-The bug was in UpdateJobModal.tsx in the firstFormSubmit function (lines 160-171). The
-code had flawed logic that was overwriting the newly selected position with the old
-position ID from the existing job posting data.
 
-Root Cause:
-After the user selected a new position from the dropdown, the code checked if the OLD
-job posting had a position_id value. If it did (which was always true for existing job
-postings), it would overwrite BOTH position_id AND position in the form data with the
-OLD position value, completely discarding the user's new selection.
+1. Content.tsx (Directives Page):
+   Replaced the SVG squiggly line fallback with `null` when no signature is present.
 
-Before (lines 160-176):
-```typescript
-const firstFormSubmit = (data: any) => {
-  // Ensure we're using position_id for the API call
-  const formData = { ...data };
-  if (jobPostDataDetails?.position_id && !formData.position_id) {
-    formData.position_id = jobPostDataDetails.position_id;
-    formData.position = jobPostDataDetails.position_id; // ← BUG: Overwrote new selection!
-  }
+   Before:
+   ```jsx
+   <div className="h-10 flex items-center -ml-5">
+     <svg viewBox="0 0 200 50" className="w-32 -mb-1">
+       <path d="M10,30 Q30,5 50,30 T90,30" stroke="black" fill="transparent" strokeWidth="2"/>
+     </svg>
+   </div>
+   ```
 
-  // Find the selected position and add its description to the data
-  const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
-  if (selectedPosition?.description) {
-    formData.positionDescription = selectedPosition.description;
-  }
+   After: `null`
 
-  setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
-  setPageNumber(2);
-};
-```
+2. CreateMemoModal.tsx:
+   Added proper FileList type checking for the Remove button condition.
 
-The problematic check `if (jobPostDataDetails?.position_id && !formData.position_id)`
-was intended to ensure position_id was present, but it failed to consider that `data.position`
-(the user's new selection) already contained the correct position ID. The code then set
-`formData.position = jobPostDataDetails.position_id`, which restored the OLD position.
+   Before:
+   ```jsx
+   {watch('signature') && (<button ...>Remove</button>)}
+   ```
 
-After (lines 160-171):
-```typescript
-const firstFormSubmit = (data: any) => {
-  const formData = { ...data };
+   After:
+   ```jsx
+   {watch('signature') && watch('signature') instanceof FileList && watch('signature')!.length > 0 && (
+     <button ...>Remove</button>
+   )}
+   ```
 
-  // Find the selected position and add its description to the data
-  const selectedPosition = positionData?.find((pos: any) => pos.id === data.position);
-  if (selectedPosition?.description) {
-    formData.positionDescription = selectedPosition.description;
-  }
+================================================================================
 
-  setCombinedFormData((prev: any) => ({ ...prev, ...formData }));
-  setPageNumber(2);
-};
-```
+BUG ID: HRIS-004
+DATE FILED: 2026-01-26
+DATE FIXED: 2026-01-26
+CLIENT/REPORTER: Internal
 
-The fix removed the problematic conditional logic entirely. The form data already contains
-the correct position value from React Hook Form's `data.position`, so there's no need to
-manipulate it further.
+ISSUE DESCRIPTION:
+The "Sync All to YP" button in the HRIS general settings (employees section) and the
+FloatingSyncButton (master sync) were only pushing data from HRIS TO Yahshua Payroll
+(YP) in one direction. Users were unable to get updated data FROM YP back into HRIS.
+When departments, locations, positions, or employment types were added/updated in YP,
+clicking the sync button would NOT pull those changes into HRIS.
 
-Additionally, simplified useUpdateJobPostItems.ts (line 13) from:
-```typescript
-formData.append('position', jobPost.position_id || jobPost.position);
-```
+The backend endpoints for pulling data FROM YP already existed but were not connected
+to the frontend UI:
+- /api/departments/sync-third-party-integration/
+- /api/locations/sync-third-party-integration/
+- /api/positions/sync-third-party-integration/
+- /api/employee-status/sync-third-party-integration/
 
-To:
-```typescript
-formData.append('position', jobPost.position);
-```
+The sync button was misleadingly named "Sync All to YP" which implied one-directional
+syncing, causing user confusion.
 
-This ensures the position field from the combined form data (which contains the user's
-selection from the dropdown) is sent directly to the backend without any fallback logic
-that could reintroduce the old value. The backend's JobPostingCreateUpdateSerializer
-already properly handles the position foreign key field, so no backend changes were needed.
+DESIRED OUTCOME:
+Implement bidirectional sync so that clicking the sync button performs:
+1. FIRST: Pull data FROM YP to HRIS (fetch and update departments, locations,
+   positions, employment types)
+2. THEN: Push data FROM HRIS TO YP (ensure YP has latest HRIS records)
 
-Technical Details:
-- JobPosting model has a ForeignKey to Position: `position = models.ForeignKey("Position", ...)`
-- The serializer accepts the position ID and handles the foreign key relationship
-- React Hook Form's watch/setValue already tracked the position field correctly
-- The bug was purely in the form submission handler, not in the form state or API layer
+Both systems should stay fully synchronized after each sync operation.
 
-This fix ensures that whatever position the user selects in the dropdown is the position
-that gets sent to the backend and saved to the database.
+FILES CHANGED:
+Backend:
+- (No backend changes - endpoints already existed and were working)
+
+Frontend:
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartmentFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/location/useSyncLocationFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/position/useSyncPositionFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/hooks/employee-status/useSyncEmployeeStatusFromYP.ts (NEW)
+- src/components/pages/(auth)/employer/settings/general-settings/employees/Content.tsx (UPDATED)
+- src/components/FloatingSyncButton.tsx (UPDATED)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (N/A - no backend changes, endpoints tested previously)
+☑ All backend tests passing (existing tests still pass)
+☑ Backend test coverage: N/A - no new code
+☑ Models tested (N/A)
+☑ Serializers tested (N/A)
+☑ Views/API endpoints tested (existing sync-third-party-integration endpoints verified working)
+☑ Permissions tested (N/A - no permission changes)
+☑ Celery tasks tested (N/A)
+☑ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of both Content.tsx and FloatingSyncButton.tsx)
+☑ Custom hooks tested (all 4 new FROM YP hooks manually verified)
+☑ React Query hooks tested (useMutation wrappers working correctly)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors, proper typing for all hooks)
+
+Integration & E2E:
+☑ API integration tests completed (verified bidirectional sync with YP staging)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed (tested both sync buttons)
+☑ Edge cases tested (empty data FROM YP, partial failures, network errors)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - settings page desktop-only)
+
+FIX EXPLANATION:
+
+Created 4 new frontend hooks to pull data FROM YP:
+
+1. useSyncDepartmentFromYP.ts - Calls /api/departments/sync-third-party-integration/
+2. useSyncLocationFromYP.ts - Calls /api/locations/sync-third-party-integration/
+3. useSyncPositionFromYP.ts - Calls /api/positions/sync-third-party-integration/
+4. useSyncEmployeeStatusFromYP.ts - Calls /api/employee-status/sync-third-party-integration/
+
+Updated Content.tsx: Rewrote handleSyncAll from 4 to 8 operations (4 FROM YP + 4 TO YP).
+Changed button text from "Sync All to YP" to "Sync All with YP" for clarity.
+
+Updated FloatingSyncButton.tsx: Updated sync steps from 7 to 11 steps with bidirectional
+sync for all 4 entity types. Each step shows clear "(FROM YP)" or "(TO YP)" label in UI.
+
+================================================================================
+
+BUG ID: HRIS-003
+DATE FILED: 2026-01-26
+DATE FIXED: 2026-01-26
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Users were unable to upload image files (JPEG, PNG) through the SendEmailModal component.
+When attempting to select image files using the file input dialog or drag-and-drop,
+image files would not appear in the file selection list. Only document file types
+(Word, PDF, CSV, Excel) were selectable. This limitation prevented users from attaching
+screenshots, photos, or other image files to their emails.
+
+DESIRED OUTCOME:
+The SendEmailModal should accept both document files AND image files (JPEG, PNG) as
+valid attachment types. Users should be able to:
+1. Select image files from the file picker dialog
+2. Drag and drop image files into the attachment upload area
+3. Upload multiple images if multiple attachment mode is enabled
+4. See previews and manage uploaded image files just like document files
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/SendEmailModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of image upload in all attachment modes)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (10MB file size limit applies to images)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified image uploads to backend)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (JPEG, PNG, large images, mixed file types, single/multiple mode)
+☑ Cross-browser testing completed (file picker shows images in Chrome, Firefox)
+☐ Mobile responsiveness verified (N/A - modal responsive design unchanged)
+
+FIX EXPLANATION:
+The HTML file input `accept` attribute was too restrictive — only accepting document MIME
+types. Added `image/jpeg` and `image/png` to ALL six file input accept attributes in the
+component (covering drag-drop and regular attachment modes, single and multiple).
+
+================================================================================
+
+FEATURE ID: HRIS-002
+DATE REQUESTED: 2026-01-21
+DATE IMPLEMENTED: 2026-01-21
+CLIENT/REPORTER: Systech Internal - Feature Request
+
+FEATURE DESCRIPTION:
+Add CSV export functionality to the Individual Evaluations page. Currently, users
+can only print evaluation data to PDF. The request was to allow users to choose
+between PDF and CSV export formats when exporting individual evaluation records.
+
+DESIRED OUTCOME:
+Users should be able to:
+1. Click the export button on the Individual Evaluations page
+2. Select export format: PDF (existing) or CSV (new)
+3. Select evaluation forms to include: All or Selected specific forms
+4. Download the file in the chosen format
+
+FILES CHANGED:
+Backend:
+- (No backend changes required - CSV generation handled on frontend)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/evaluation-history/tabs/IndividualEvaluations.tsx
+- src/components/pages/(auth)/employer/manage/evaluation-history/modals/PrintIndividualEvaluationsSelectionModal.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of export modal and CSV download)
+☐ Custom hooks tested (N/A - no new hooks)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors, new ExportFormat type added)
+
+Integration & E2E:
+☑ API integration tests completed (verified data fetch for CSV export)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (empty data, special characters in names, large datasets)
+☑ Cross-browser testing completed (CSV download works in Chrome, Firefox)
+☐ Mobile responsiveness verified (modal responsive design maintained)
+
+IMPLEMENTATION DETAILS:
+
+1. PrintIndividualEvaluationsSelectionModal.tsx:
+   - Added new `ExportFormat` type ('pdf' | 'csv') exported for reuse
+   - Added format selection UI with radio buttons (PDF/CSV options)
+   - Added DocumentArrowDownIcon and DocumentTextIcon for visual distinction
+   - Updated `onConfirm` callback to include selected format parameter
+   - Dynamic button text: "Print Report" for PDF, "Export CSV" for CSV
+   - Added state management for `selectedFormat` with 'pdf' as default
+   - Reset format selection on modal close
+
+2. IndividualEvaluations.tsx:
+   - Added `isExportingCSV` state for loading state management
+   - Added `handleCSVExport` function for CSV generation
+   - Updated `handlePrintConfirm` to handle both PDF and CSV formats
+   - Import ExportFormat type from modal component
+
+CSV Export Format:
+- Headers: Employee Name, Date of Evaluation, Evaluation Period, Evaluation Form,
+          Total Score, Max Score, Passing Score, Status
+- Status column: "Passed" if form_total_score >= passing_score, else "Failed"
+- Special character handling: Values wrapped in quotes, internal quotes escaped
+- File encoding: UTF-8 with proper MIME type (text/csv;charset=utf-8)
+
+================================================================================
+
+BUG ID: HRIS-001
+DATE FILED: 2026-01-15
+DATE FIXED: 2026-01-15
+CLIENT/REPORTER: Production Client - Job Posting #276
+
+ISSUE DESCRIPTION:
+When applicants applied to a specific job posting (ID 276), the screen-applicants page
+would crash with a client-side exception: "TypeError: Cannot read properties of null
+(reading 'toLowerCase')". The error occurred during screening answer evaluation when
+comparing applicant responses against ideal answers. The page displayed "Application
+error: a client-side exception has occurred" and was completely unusable for that
+job posting.
+
+DESIRED OUTCOME:
+The screen-applicants page should load and display all applicants regardless of
+whether their screening answers contain null values. Applicants with null/missing
+screening answers should be treated as "not fit" for those questions rather than
+crashing the entire page.
+
+FILES CHANGED:
+Backend:
+- (No backend changes required)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing with job posting #276)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified page loads with null screening data)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (null idealAnswer, null applicant answer, array with null values)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no UI changes)
+
+FIX EXPLANATION:
+The bug was in the `processApplicants` function (Content.tsx:230-254) which evaluates
+applicant screening answers against the job posting's ideal answers. The code called
+`.toLowerCase()` directly on values that could be null.
+
+For Multiple Choice: Added guard `if (app == null || ideal == null) return false;`
+and wrapped values with `String()` for type safety.
+
+For Yes/No: Added conditional check that sets `isMatch = false` when either value
+is null, otherwise performs the comparison with `String()` wrapper.
+
+================================================================================
+
+BUG ID: EXAMPLE-002
+DATE FILED: 2024-12-18
+DATE FIXED: 2024-12-22
+CLIENT/REPORTER: Systech Internal - Dev Team
+
+ISSUE DESCRIPTION:
+Notification bell showing incorrect unread count after marking notifications
+as read. The count would only update after page refresh, and sometimes show
+negative numbers when rapidly clicking notifications.
+
+DESIRED OUTCOME:
+Notification count should update instantly when notifications are marked as
+read, with optimistic updates and proper error handling. Count should never
+show negative values.
+
+FILES CHANGED:
+Backend:
+- app/views/notification.py
+- app/serializers/notification.py
+- tests/views/test_notification.py
+
+Frontend:
+- src/components/layout/NotificationBell.tsx
+- src/components/notifications/NotificationList.tsx
+- src/hooks/useNotifications.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (APITestCase for notification endpoints)
+☑ All backend tests passing: python manage.py test tests.views.test_notification
+☑ Backend test coverage: 91% - notification views covered
+☑ Models tested (notification count aggregation)
+☑ Serializers tested (unread count serialization)
+☑ Views/API endpoints tested (mark as read, bulk mark, count endpoint)
+☑ Permissions tested (user can only access own notifications)
+☑ Celery tasks tested (N/A)
+☑ Database migrations tested (N/A - no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of NotificationBell, NotificationList)
+☑ Custom hooks tested (useNotifications optimistic updates verified)
+☑ React Query hooks tested (cache invalidation on mark as read)
+☐ Form validation tested (N/A)
+☐ API service functions tested (manual verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (rapid click scenarios)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (rapid clicks, network errors, empty state, concurrent tabs)
+☑ Cross-browser testing completed (tested Chrome, Firefox, Safari)
+☑ Mobile responsiveness verified (notification dropdown on mobile)
+
+FIX EXPLANATION:
+Implemented optimistic updates in useNotifications hook using React Query's
+onMutate callback to immediately decrement count before API response. Added
+Math.max(0, count) guard in the component's local state to prevent negative
+values. Backend now returns updated unread_count in mark-as-read response for
+reconciliation. Added debouncing (300ms) to prevent rapid-fire API calls
+when clicking multiple notifications quickly. React Query's cache is now
+properly invalidated after successful mutation to ensure consistency.
+
+================================================================================
+
+BUG ID: EXAMPLE-001
+DATE FILED: 2024-12-15
+DATE FIXED: 2024-12-20
+CLIENT/REPORTER: QA Team - Maria Santos
+
+ISSUE DESCRIPTION:
+Employee sync from HRIS to Payroll was failing when department name contained
+special characters (e.g., "R&D Department", "Sales & Marketing"). The sync
+process would throw a validation error and skip the employee record silently.
+
+DESIRED OUTCOME:
+Employee sync should handle all valid department names including those with
+special characters. Any sync errors should be logged and reported clearly.
+
+FILES CHANGED:
+Backend:
+- app/views/yahshua_payroll.py
+- app/serializers/employee.py
+- utils/oauth.py
+- tests/views/test_yahshua_payroll.py
+
+Frontend:
+- src/app/(employer)/settings/integration/payroll-sync/page.tsx
+- src/components/settings/PayrollSyncStatus.tsx
+- src/hooks/usePayrollSync.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ Python unit tests written/updated (APITestCase for sync endpoints)
+☑ All backend tests passing: python manage.py test tests.views.test_yahshua_payroll
+☑ Backend test coverage: 94% - sync views and serializers fully covered
+☑ Models tested (N/A - no model changes)
+☑ Serializers tested (special character handling in department field)
+☑ Views/API endpoints tested (sync endpoint with various department names)
+☑ Permissions tested (employer-only access verified)
+☑ Celery tasks tested (N/A - sync is synchronous)
+☑ Database migrations tested (N/A - no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing of PayrollSyncStatus)
+☐ Custom hooks tested (usePayrollSync manual verification)
+☐ React Query hooks tested (manual cache invalidation check)
+☐ Form validation tested (N/A - no form changes)
+☐ API service functions tested (manual API call verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (verified sync with Payroll staging)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (special chars: &, ', ", <, >, unicode)
+☐ Cross-browser testing completed (N/A - no UI changes)
+☐ Mobile responsiveness verified (N/A - settings page desktop-only)
+
+FIX EXPLANATION:
+The issue was caused by URL encoding not being applied to department names
+before sending to the Payroll API. Updated utils/oauth.py to properly encode
+all string parameters using urllib.parse.quote(). Added explicit error logging
+in the sync view to capture and report validation failures. Frontend sync
+status component now displays detailed error messages when sync fails,
+allowing users to identify and fix problematic records.
 
 ================================================================================

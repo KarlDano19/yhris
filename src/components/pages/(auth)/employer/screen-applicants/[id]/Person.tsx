@@ -1,4 +1,4 @@
-import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ArchiveButton from '../ArchiveButton';
 import Image from 'next/image';
 import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
@@ -10,6 +10,9 @@ import classNames from '@/helpers/classNames';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import { useParams } from 'next/navigation';
 import { formatDateToLocal } from '@/helpers/date';
+import { useQueryClient } from '@tanstack/react-query';
+import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 
 const menuList = [
   {
@@ -99,6 +102,9 @@ export default function Person({
   const menuRef = useRef<HTMLDivElement>(null);
   const { photo_url, name, id } = applicant;
   const params = useParams();
+  const queryClient = useQueryClient();
+  const { mutate: softDelete, isLoading: isSoftDeleting } = useSoftDeleteApplication();
+  const [deleteModal, setDeleteModal] = useState<DeleteModalData | null>(null);
 
   // Check if applicant is hired - check both 'hired' and 'passed' in final stage
   const isPassedFinalInterview = applicant.status === 'hired';
@@ -132,9 +138,30 @@ export default function Person({
     setOpenMenuId(isOpenMenu ? null : applicant.id);
   };
 
+  const handleDelete = () => {
+    setOpenMenuId(null);
+    setDeleteModal({ open: true, applicationId: applicant.applicationId });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteModal) return;
+    softDelete(deleteModal.applicationId, {
+      onSuccess: () => {
+        setDeleteModal(null);
+        queryClient.invalidateQueries(['appliedApplicantsCache']);
+        queryClient.invalidateQueries(['deletedApplicants']);
+      },
+      onError: (err: any) => {
+        setDeleteModal(null);
+        alert(`Error: ${err.message || 'Failed to delete application'}`);
+      },
+    });
+  };
+
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
+  const isPooling = applicant.status === 'pooling';
   const isArchived = applicant.is_archived === true;
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
@@ -169,6 +196,11 @@ export default function Person({
     backgroundColorClass = 'bg-red-100';
   }
 
+  // If applicant is pooled, always show green background regardless of screening fit
+  if (isPooling) {
+    backgroundColorClass = 'bg-green-100';
+  }
+ 
   return (
     <div
       className={classNames(
@@ -241,8 +273,8 @@ export default function Person({
         )}
       </div>
       
-      {/* Archive Button - only show for rejected or withdrawn applicants and if user has permissions */}
-      {(isRejected || isWithdrawn) && canInteract && (
+      {/* Archive Button - show for rejected, withdrawn, or pooling applicants and if user has permissions */}
+      {(isRejected || isWithdrawn || isPooling) && canInteract && (
         <div className='mr-2'>
           <ArchiveButton
             appliedJobId={applicant.applicationId}
@@ -275,7 +307,7 @@ export default function Person({
           <ul className='absolute right-0 top-16 p-2 bg-white z-10 grid gap-2 rounded-2xl text-indigo-dye shadow-md min-w-48'>
             {menuList.map((list) => {
               const { id, icon, name, whichModal, modalTitle } = list;
-              
+
               // Check if user has permission for specific actions
               const canPerformAction = () => {
                 if (whichModal === 'APPLICANT_FORM') return permissions.can_view;
@@ -338,6 +370,20 @@ export default function Person({
                 </React.Fragment>
               );
             })}
+            {permissions.can_update && (
+              <>
+                <li className='border-t border-gray-100 mt-1 pt-1'>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isSoftDeleting}
+                    className='flex items-center gap-3 w-full hover:bg-red-50 text-red-600 p-1 rounded disabled:opacity-50'
+                  >
+                    <span><TrashIcon className='w-4 h-4' /></span>
+                    <p>Delete</p>
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       )}
@@ -349,6 +395,16 @@ export default function Person({
             🔒 Restricted
           </div>
         </div>
+      )}
+
+      {deleteModal && (
+        <DeleteModal
+          isOpen={deleteModal}
+          setIsOpen={setDeleteModal}
+          onConfirm={handleConfirmDelete}
+          isLoading={isSoftDeleting}
+          customText={`the application for ${name}`}
+        />
       )}
     </div>
   );

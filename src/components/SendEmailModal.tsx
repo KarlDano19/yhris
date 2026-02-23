@@ -20,6 +20,7 @@ import useTagBcc from "@/components/hooks/useTagBcc";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 import DeleteIcon from "@/svg/DeleteIcon";
 import EyePassword from "@/svg/EyePassword";
+import InfoIcon from "@/svg/InfoIcon";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 import "react-quill/dist/quill.snow.css";
@@ -60,6 +61,7 @@ export interface SendEmailModalProps {
   showSubject?: boolean;
   showDragDropAttachment?: boolean;
   allowMultipleAttachments?: boolean;  // Enable multiple file attachments (default: false for single attachment)
+  disableCCBCC?: boolean;  // Disable CC and BCC buttons (default: false)
   // Pre-populated data props
   prePopulatedData?: {
     subject?: string;
@@ -88,6 +90,7 @@ export default function SendEmailModal({
   showSubject = true,
   showDragDropAttachment = false,
   allowMultipleAttachments = false,  // Default to single attachment mode
+  disableCCBCC = false,  // Default to enabled
   prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
@@ -108,6 +111,7 @@ export default function SendEmailModal({
   const [effectiveAllowMultiple, setEffectiveAllowMultiple] = useState(allowMultipleAttachments);
   // Simple state for tooltip visibility
   const [showTooltip, setShowTooltip] = useState(true);
+  const [showEmailTemplateTooltip, setShowEmailTemplateTooltip] = useState(false);
   const [isToFocused, setIsToFocused] = useState(false);
   const [isCcFocused, setIsCcFocused] = useState(false);
   const [isBccFocused, setIsBccFocused] = useState(false);
@@ -140,7 +144,7 @@ export default function SendEmailModal({
       message: "",
     },
   });
-  
+
   const { data: dataEmailTemplate, refetch: refetchEmailTemplates } = useGetEmailTemplateItems();
 
 
@@ -340,6 +344,17 @@ export default function SendEmailModal({
     }
   };
 
+  // Show email template tooltip on mount for 2 seconds when defaultRecipients exist
+  useEffect(() => {
+    if (isOpen && defaultRecipients.length > 0) {
+      setShowEmailTemplateTooltip(true);
+      const timer = setTimeout(() => {
+        setShowEmailTemplateTooltip(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, defaultRecipients]);
+
   // Sync effectiveAllowMultiple with prop when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -366,21 +381,24 @@ export default function SendEmailModal({
         } else {
           setTagsTo(defaultRecipients);
         }
-        
-        if (prePopulatedData.cc && prePopulatedData.cc.length > 0) {
-          setTagsCc(prePopulatedData.cc);
-          setIsCCOpen(true);
-        }
-        
-        if (prePopulatedData.bcc && prePopulatedData.bcc.length > 0) {
-          setTagsBcc(prePopulatedData.bcc);
-          setIsBCCOpen(true);
+
+        // Only populate CC/BCC from pre-populated data if not disabled
+        if (!disableCCBCC) {
+          if (prePopulatedData.cc && prePopulatedData.cc.length > 0) {
+            setTagsCc(prePopulatedData.cc);
+            setIsCCOpen(true);
+          }
+
+          if (prePopulatedData.bcc && prePopulatedData.bcc.length > 0) {
+            setTagsBcc(prePopulatedData.bcc);
+            setIsBCCOpen(true);
+          }
         }
       } else {
         setTagsTo(defaultRecipients);
       }
     }
-  }, [isOpen, defaultRecipients, setTagsTo, prePopulatedData, setValue]);
+  }, [isOpen, defaultRecipients, setTagsTo, prePopulatedData, setValue, disableCCBCC]);
 
   // Clear errors when tagsTo changes
   useEffect(() => {
@@ -648,7 +666,30 @@ export default function SendEmailModal({
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
                     Email Template
+                    {defaultRecipients.length > 0 && (
+                      <div
+                        className='inline-block ml-1 cursor-pointer'
+                        data-tooltip-id='email-template-tooltip'
+                        data-tooltip-place='right'
+                        onMouseEnter={() => setShowEmailTemplateTooltip(true)}
+                        onMouseLeave={() => setShowEmailTemplateTooltip(false)}
+                      >
+                        <InfoIcon />
+                      </div>
+                    )}
                   </label>
+                  {defaultRecipients.length > 0 && (
+                    <Tooltip
+                      id='email-template-tooltip'
+                      opacity={1}
+                      style={{ fontSize: '10px', zIndex: 9999 }}
+                      isOpen={showEmailTemplateTooltip}
+                    >
+                      <div>
+                        <h2 className='text-[12px] font-medium'>Note: To, CC, and BCC from the email template will not be applied when recipients are pre-assigned.</h2>
+                      </div>
+                    </Tooltip>
+                  )}
                   <button
                     type="button"
                     onClick={handleAddEmailTemplate}
@@ -671,27 +712,31 @@ export default function SendEmailModal({
                           onChange(val?.value || '');
                           if (val?.template) {
                             const template = val.template;
-                            // Check if template.to already contains the default recipients to avoid duplicates
-                            const templateRecipients = template.to || [];
-                            const newRecipients = [...defaultRecipients];
-                            templateRecipients.forEach((email: string) => {
-                              if (!newRecipients.includes(email)) {
-                                newRecipients.push(email);
+                            // Only modify recipients from template if no default recipients provided
+                            if (defaultRecipients.length === 0) {
+                              const templateRecipients = template.to || [];
+                              const newRecipients = [...defaultRecipients];
+                              templateRecipients.forEach((email: string) => {
+                                if (!newRecipients.includes(email)) {
+                                  newRecipients.push(email);
+                                }
+                              });
+                              setTagsTo(newRecipients);
+
+                              if (!disableCCBCC) {
+                                if (template.bcc) {
+                                  setIsBCCOpen(true);
+                                  setTagsBcc(template.bcc);
+                                } else {
+                                  setTagsBcc([]);
+                                }
+                                if (template.cc) {
+                                  setIsCCOpen(true);
+                                  setTagsCc(template.cc);
+                                } else {
+                                  setTagsCc([]);
+                                }
                               }
-                            });
-                            setTagsTo(newRecipients);
-                            
-                            if (template.bcc) {
-                              setIsBCCOpen(true);
-                              setTagsBcc(template.bcc);
-                            } else {
-                              setTagsBcc([]);
-                            }
-                            if (template.cc) {
-                              setIsCCOpen(true);
-                              setTagsCc(template.cc);
-                            } else {
-                              setTagsCc([]);
                             }
                             setValue("message", template.body);
                             setValue("subject", template.subject);
@@ -730,13 +775,17 @@ export default function SendEmailModal({
                             }
                           } else {
                             // Clear template-related fields if no template is selected
-                            setTagsTo(defaultRecipients);
-                            setTagsCc([]);
-                            setTagsBcc([]);
+                            if (defaultRecipients.length === 0) {
+                              setTagsTo(defaultRecipients);
+                              if (!disableCCBCC) {
+                                setTagsCc([]);
+                                setTagsBcc([]);
+                              }
+                            }
                             setValue("message", "");
                             setValue("subject", "");
                             setCustomSubject("");
-                            
+
                             // Clear template attachments when no template is selected
                             if (showDragDropAttachment) {
                               setTemplateAttachments([]);
@@ -753,7 +802,7 @@ export default function SendEmailModal({
                           ),
                           IndicatorSeparator: () => null,
                         }}
-                        isClearable={false}
+                        isClearable={true}
                         noOptionsMessage={() => 'No email templates available'}
                         placeholder="Select an email template..."
                         formatGroupLabel={(group) => (
@@ -861,7 +910,8 @@ export default function SendEmailModal({
                 </div>
                 <button
                   type="button"
-                  className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  disabled={disableCCBCC}
+                  className={`relative -ml-px inline-flex items-center gap-x-1.5 px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isCCOpen
                       ? "bg-savoy-blue text-white hover:bg-blue-700"
                       : "bg-gray-50"
@@ -872,7 +922,8 @@ export default function SendEmailModal({
                 </button>
                 <button
                   type="button"
-                  className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 ${
+                  disabled={disableCCBCC}
+                  className={`relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                     isBCCOpen
                       ? "bg-savoy-blue text-white hover:bg-blue-700"
                       : "bg-gray-50"
@@ -883,7 +934,7 @@ export default function SendEmailModal({
                 </button>
               </div>
             </div>
-            {isCCOpen && (
+            {isCCOpen && !disableCCBCC && (
               <div className="sm:col-span-4 mt-4">
                 <div className="flex items-center justify-between">
                   <label
@@ -930,7 +981,7 @@ export default function SendEmailModal({
                 </div>
               </div>
             )}
-            {isBCCOpen && (
+            {isBCCOpen && !disableCCBCC && (
               <div className="sm:col-span-4 mt-4">
                 <div className="flex items-center justify-between">
                   <label
