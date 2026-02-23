@@ -1,17 +1,21 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+
+import { useCallback, useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
 import type { Employee } from "@/types/employee-201-records/employee";
 
 export type EmployeeQuery = {
   q: string;
-  location: string;       
-  department: string;     
-  position: string;       
+  location: string;
+  department: string;
+  position: string;
   recordStatus: string;
-  isActive: string[];     // Array of 'true' and/or 'false'
-  page: number;           
-  pageSize: number;       
+  isActive: string[]; // Array of 'true' and/or 'false'
+  page: number;
+  pageSize: number;
 };
 
 const DEFAULT_QUERY: EmployeeQuery = {
@@ -20,18 +24,26 @@ const DEFAULT_QUERY: EmployeeQuery = {
   department: "ALL",
   position: "ALL",
   recordStatus: "ALL",
-  isActive: ["true"],     // Active only by default
+  isActive: ["true"], // Active only by default
   page: 1,
   pageSize: 12,
 };
 
 type Meta = { total: number; totalPages: number };
 
+type EmployeesResponse = {
+  data: Partial<Employee>[];
+  meta: Meta;
+};
+
 function buildParams(q: EmployeeQuery) {
   const params = new URLSearchParams();
   if (q.q.trim()) params.set("search", q.q.trim());
 
-  const setIfNotAll = (key: "department" | "position" | "location" | "recordStatus", val: string) => {
+  const setIfNotAll = (
+    key: "department" | "position" | "location" | "recordStatus",
+    val: string
+  ) => {
     const s = (val || "").trim();
     if (s && s.toLowerCase() !== "all") params.set(key, s);
   };
@@ -42,7 +54,7 @@ function buildParams(q: EmployeeQuery) {
 
   // Handle isActive array
   if (q.isActive && q.isActive.length > 0) {
-    params.set("is_active", q.isActive.join(','));
+    params.set("is_active", q.isActive.join(","));
   }
 
   params.set("current_page", String(q.page));
@@ -50,37 +62,29 @@ function buildParams(q: EmployeeQuery) {
   return params;
 }
 
-export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
-  const [query, setQuery] = useState<EmployeeQuery>({ ...DEFAULT_QUERY, ...initial });
-  const [data, setData] = useState<Partial<Employee>[] | null>(null);
-  const [meta, setMeta] = useState<Meta>({ total: 0, totalPages: 1 });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+async function getEmployees(q: EmployeeQuery): Promise<EmployeesResponse> {
+  try {
+    const token = getCookie("token");
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    };
 
-  const fetchEmployees = useCallback(async (q: EmployeeQuery) => {
-    setIsLoading(true);
-    setError(null);
+    if (token) {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(
+        /\/+$/,
+        ""
+      );
+      const url = `${baseUrl}/api/employee-201/employees/?${buildParams(
+        q
+      ).toString()}`;
 
-    try {
-      const token = getCookie("token") as string | undefined;
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-      const url = `${baseUrl}/api/employee-201/employees/?${buildParams(q).toString()}`;
-
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-      });
-
+      const res = await fetch(url, config);
       if (!res.ok) {
-        let errMessage = `Request failed (${res.status})`;
-        try {
-          const problem = await res.json();
-          errMessage = typeof problem === "string" ? problem : problem?.message || JSON.stringify(problem);
-        } catch {}
-        throw new Error(errMessage);
+        throw res.json();
       }
 
       const payload = await res.json();
@@ -107,27 +111,57 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
         Number(payload?.totalPages) ??
         Math.max(1, Math.ceil(total / q.pageSize));
 
-      setData(list);
-      setMeta({ total, totalPages });
-    } catch (e: any) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-      setData(null);
-      setMeta({ total: 0, totalPages: 1 });
-    } finally {
-      setIsLoading(false);
+      return {
+        data: list,
+        meta: { total, totalPages },
+      };
     }
-  }, []);
 
-  useEffect(() => {
-    fetchEmployees(query);
-  }, [fetchEmployees, query]);
+    return {
+      data: [],
+      meta: { total: 0, totalPages: 1 },
+    };
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch employees.");
+  }
+}
+
+export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
+  const [query, setQuery] = useState<EmployeeQuery>({
+    ...DEFAULT_QUERY,
+    ...initial,
+  });
+
+  const queryResult = useQuery(
+    ["employeesCache", query],
+    () => getEmployees(query),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   const setSearch = useCallback((qstr: string) => {
     setQuery((prev) => ({ ...prev, q: qstr, page: 1 }));
   }, []);
 
   const applyFilters = useCallback(
-    (filters: Pick<EmployeeQuery, "location" | "department" | "position" | "recordStatus" | "isActive">) => {
+    (
+      filters: Pick<
+        EmployeeQuery,
+        "location" | "department" | "position" | "recordStatus" | "isActive"
+      >
+    ) => {
       setQuery((prev) => ({ ...prev, ...filters, page: 1 }));
     },
     []
@@ -141,14 +175,12 @@ export function useEmployees(initial: Partial<EmployeeQuery> = {}) {
     setQuery((prev) => ({ ...prev, pageSize, page: 1 }));
   }, []);
 
-  const refetch = useCallback(() => fetchEmployees(query), [fetchEmployees, query]);
-
   return {
-    data,         // Partial<Employee>[] in API field names
-    meta,         // { total, totalPages }
-    isLoading,
-    error,
-    refetch,
+    data: queryResult.data?.data ?? null,
+    meta: queryResult.data?.meta ?? { total: 0, totalPages: 1 },
+    isLoading: queryResult.isLoading,
+    error: queryResult.error as Error | null,
+    refetch: queryResult.refetch,
     query,
     setSearch,
     applyFilters,

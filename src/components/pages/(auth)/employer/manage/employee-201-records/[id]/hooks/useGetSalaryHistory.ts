@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 /** UI shape you already use */
@@ -45,20 +45,14 @@ type UseGetSalaryHistoryResult = {
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 
-export function useGetSalaryHistory(
-  employeeId?: number | string,
+async function getSalaryHistory(
+  employeeId: number | string,
   opts: UseGetSalaryHistoryOptions = {}
-): UseGetSalaryHistoryResult {
-  const [entries, setEntries] = useState<SalaryHistoryEntry[]>([]);
-  const [meta, setMeta] = useState<UseGetSalaryHistoryResult["meta"] | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState<boolean>(!!employeeId);
-  const [error, setError] = useState<Error | undefined>(undefined);
-
-  const fetchAll = useCallback(async () => {
-    if (!employeeId) return;
-    setIsLoading(true);
-    setError(undefined);
-
+): Promise<{
+  entries: SalaryHistoryEntry[];
+  meta?: UseGetSalaryHistoryResult["meta"];
+}> {
+  try {
     const token = getCookie("token") as string | undefined;
 
     const params = new URLSearchParams();
@@ -72,25 +66,18 @@ export function useGetSalaryHistory(
         String(employeeId)
       )}/salary-history/` + (params.toString() ? `?${params.toString()}` : "");
 
-    try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-      });
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Token ${token}` } : {}),
+      },
+    };
 
+    if (token) {
+      const res = await fetch(url, config);
       if (!res.ok) {
-        let msg = `Request failed (${res.status})`;
-        try {
-          const problem = await res.json();
-          msg =
-            typeof problem === "string"
-              ? problem
-              : problem?.message || problem?.detail || JSON.stringify(problem);
-        } catch {}
-        throw new Error(msg);
+        throw res.json();
       }
 
       const payload = await res.json();
@@ -132,27 +119,44 @@ export function useGetSalaryHistory(
         effectiveDate: r.effective_date,
       }));
 
-      setEntries(mapped);
-      setMeta(metaOut);
-    } catch (e: any) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-      setEntries([]);
-      setMeta(undefined);
-    } finally {
-      setIsLoading(false);
+      return { entries: mapped, meta: metaOut };
     }
-  }, [employeeId, opts.pageSize, opts.page, opts.start, opts.end]);
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    return { entries: [], meta: undefined };
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch salary history.");
+  }
+}
 
+export function useGetSalaryHistory(
+  employeeId?: number | string,
+  opts: UseGetSalaryHistoryOptions = {}
+): UseGetSalaryHistoryResult {
+  const queryResult = useQuery(
+    ["salaryHistoryCache", employeeId, opts.pageSize, opts.page, opts.start, opts.end],
+    () => getSalaryHistory(employeeId!, opts),
+    {
+      enabled: !!employeeId,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   return {
-    entries,
-    isLoading,
-    error,
-    meta,
-    refetch: fetchAll,
+    entries: queryResult.data?.entries ?? [],
+    meta: queryResult.data?.meta,
+    isLoading: queryResult.isLoading,
+    error: queryResult.error as Error | undefined,
+    refetch: queryResult.refetch,
   };
 }

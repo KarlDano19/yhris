@@ -1,46 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
+type DeleteEmploymentHistoryParams = {
+  employeeId: number | string;
+  histId: number;
+};
 
-export function useDeleteEmploymentHistory(employeeId?: number | string) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
+async function deleteEmploymentHistory(
+  params: DeleteEmploymentHistoryParams
+): Promise<void> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    String(params.employeeId)
+  )}/employment-history/${params.histId}/`;
 
-  const deleteEntry = async (
-    histId: number
-  ): Promise<{ ok: boolean; error?: Error }> => {
-    if (!employeeId) return { ok: false, error: new Error("No employee ID provided") };
-    setIsDeleting(true);
-    setError(undefined);
-
-    const token = getCookie("token") as string | undefined;
-    const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(String(employeeId))}/employment-history/${histId}/`;
-
-    try {
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-      });
-
-      if (!res.ok) {
-        const problem = await res.json().catch(() => ({}));
-        throw new Error(problem?.detail || problem?.message || `Request failed (${res.status})`);
-      }
-
-      return { ok: true };
-    } catch (e: any) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-      return { ok: false, error: err };
-    } finally {
-      setIsDeleting(false);
-    }
+  const config = {
+    method: "DELETE",
+    headers: {
+      Authorization: `Token ${token}`,
+    },
   };
 
-  return { isDeleting, error, deleteEntry };
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.detail || errorData?.message || "Failed to delete employment history."
+    );
+  }
+}
+
+export function useDeleteEmploymentHistory(employeeId?: number | string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, number>(
+    (histId: number) => {
+      if (!employeeId) {
+        throw new Error("No employee ID provided");
+      }
+      return deleteEmploymentHistory({ employeeId, histId });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employmentHistoryCache", employeeId]);
+        queryClient.invalidateQueries(["employee", employeeId]);
+      },
+    }
+  );
 }

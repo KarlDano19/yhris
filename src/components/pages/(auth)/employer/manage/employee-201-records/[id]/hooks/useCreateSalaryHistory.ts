@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 /** UI shape you already use elsewhere */
@@ -20,12 +20,6 @@ type ApiSalaryRecord = {
 export type CreateResult<T = unknown> =
   | { ok: true; data: T; status: number }
   | { ok: false; error: Error; status?: number };
-
-type UseCreateSalaryHistoryOptions = {
-  withTokenHeader?: boolean;
-  headers?: Record<string, string>;
-  credentials?: RequestCredentials;
-};
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 
@@ -54,106 +48,54 @@ function fromApiPayload(api: ApiSalaryRecord): SalaryHistoryEntry {
   };
 }
 
-export function useCreateSalaryHistory(
-  employeeId?: number | string,
-  options: UseCreateSalaryHistoryOptions = {}
-) {
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [lastCreated, setLastCreated] = useState<SalaryHistoryEntry | null>(null);
+async function createSalaryHistory(
+  employeeId: number | string,
+  entry: SalaryHistoryEntry
+): Promise<SalaryHistoryEntry> {
+  validate(entry);
 
-  const abortRef = useRef<AbortController | null>(null);
-  useEffect(() => () => abortRef.current?.abort(), []);
+  const token = getCookie("token") as string | undefined;
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    String(employeeId)
+  )}/salary-history/`;
 
-  const create = useCallback(
-    async (entry: SalaryHistoryEntry): Promise<CreateResult<SalaryHistoryEntry>> => {
-      if (!employeeId) {
-        const err = new Error("Missing employeeId");
-        setError(err);
-        return { ok: false, error: err };
-      }
-
-      try {
-        validate(entry);
-      } catch (e: any) {
-        const err = e instanceof Error ? e : new Error(String(e));
-        setError(err);
-        return { ok: false, error: err };
-      }
-
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      setIsSaving(true);
-      setError(null);
-
-      const { withTokenHeader = true, headers, credentials } = options;
-
-      try {
-        const token = withTokenHeader ? (getCookie("token") as string | undefined) : undefined;
-        const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
-          String(employeeId)
-        )}/salary-history/`;
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-            ...(headers || {}),
-          },
-          credentials,
-          body: JSON.stringify(toApiPayload(entry)),
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          // Try JSON problem details; fallback to text
-          let msg: string;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.detail || problem?.message || JSON.stringify(problem);
-          } catch {
-            msg = await res.text().catch(() => res.statusText || `HTTP ${res.status}`);
-          }
-          throw new Error(msg || `HTTP ${res.status}`);
-        }
-
-        let dataObj: any = {};
-        try {
-          dataObj = await res.json();
-        } catch {
-          dataObj = {};
-        }
-
-        // If server returns the created record -> map it; else fallback to the submitted entry
-        const created =
-          dataObj && typeof dataObj === "object" && ("effective_date" in dataObj || "position" in dataObj)
-            ? fromApiPayload(dataObj as ApiSalaryRecord)
-            : entry;
-
-        setLastCreated(created);
-        setIsSaving(false);
-        return { ok: true, data: created, status: res.status };
-      } catch (e: any) {
-        if (e?.name === "AbortError") {
-          setIsSaving(false);
-          return { ok: false, error: e };
-        }
-        const err = e instanceof Error ? e : new Error(String(e));
-        setError(err);
-        setIsSaving(false);
-        return { ok: false, error: err };
-      }
+  const config: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
     },
-    [employeeId, options]
+    body: JSON.stringify(toApiPayload(entry)),
+  };
+
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || errorData.detail || "Failed to create salary history.");
+  }
+
+  const responseData = await res.json();
+
+  // If server returns the created record -> map it; else fallback to the submitted entry
+  const created =
+    responseData && typeof responseData === "object" && ("effective_date" in responseData || "position" in responseData)
+      ? fromApiPayload(responseData as ApiSalaryRecord)
+      : entry;
+
+  return created;
+}
+
+export function useCreateSalaryHistory(employeeId?: number | string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<SalaryHistoryEntry, Error, SalaryHistoryEntry>(
+    (entry: SalaryHistoryEntry) => createSalaryHistory(employeeId!, entry),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["salaryHistoryCache", employeeId]);
+        queryClient.invalidateQueries(["salaryAnalysisCache", employeeId]);
+      },
+    }
   );
-
-  const abort = useCallback(() => abortRef.current?.abort(), []);
-
-  return { create, isSaving, error, lastCreated, abort } as const;
 }

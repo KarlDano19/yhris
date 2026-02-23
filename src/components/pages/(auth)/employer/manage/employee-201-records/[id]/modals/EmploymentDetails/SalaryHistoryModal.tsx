@@ -1,11 +1,14 @@
 "use client";
 
+// 1. React imports
 import { useRef, useState } from "react";
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
-
+// 2. Internal component imports
 import SalaryHistoryHistory from "./SalaryHistoryHistory";
 import SalaryHistoryAnalysis from "./SalaryHistoryAnalysis";
+
+// 3. Icon imports
+import { XCircleIcon } from '@heroicons/react/24/solid';
 
 type Props = {
   isOpen: boolean;
