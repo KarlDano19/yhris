@@ -1,24 +1,18 @@
 "use client";
 
-// 1. React imports
 import { useEffect, useMemo } from "react";
 
-// 2. Third-party library imports
 import { useForm, Controller } from "react-hook-form";
 
-// 3. Internal component imports
 import Section from "../common/Section";
 import Grid from "../common/Grid";
 import Field from "../common/Field";
 import CustomDatePicker from "@/components/CustomDatePicker";
 
-// 4. Internal utility imports
 import { s } from "../utils/_shared";
 
-// 5. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
 
-// 6. SVG imports
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {

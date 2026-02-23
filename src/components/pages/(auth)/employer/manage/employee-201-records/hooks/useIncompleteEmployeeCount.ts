@@ -1,8 +1,5 @@
 "use client";
 
-// 1. React imports (none needed)
-
-// 2. Third-party library imports
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 

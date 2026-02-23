@@ -1,13 +1,8 @@
 "use client";
 
-// 1. React imports
-import { useCallback } from "react";
-
-// 2. Third-party library imports
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-// 3. Internal imports
 import { detailUrl } from "../utils/trainingRecordUtils";
 
 type DeleteTrainingParams = {

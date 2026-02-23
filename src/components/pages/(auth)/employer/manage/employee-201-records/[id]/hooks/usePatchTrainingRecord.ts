@@ -1,15 +1,10 @@
 "use client";
 
-// 1. React imports (none needed)
-
-// 2. Third-party library imports
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-// 3. Internal imports
 import { detailUrl, toFormData } from "../utils/trainingRecordUtils";
 
-// 4. Type imports
 import type {
   TrainingRecord,
   UpdateTrainingInput,

@@ -1,12 +1,8 @@
 "use client";
 
-// 1. React imports (none needed)
-
-// 2. Third-party library imports
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-// 3. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
 
 type UploadPhotoParams = {

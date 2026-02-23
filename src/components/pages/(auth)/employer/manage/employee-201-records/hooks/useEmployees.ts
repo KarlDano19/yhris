@@ -1,13 +1,10 @@
 "use client";
 
-// 1. React imports
 import { useCallback, useState } from "react";
 
-// 2. Third-party library imports
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
-// 3. Type imports
 import type { Employee } from "@/types/employee-201-records/employee";
 
 export type EmployeeQuery = {

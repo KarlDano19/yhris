@@ -1,9 +1,6 @@
 "use client";
 
-// 1. React imports
 import { useState } from "react";
-
-// 2. Third-party library imports
 import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 

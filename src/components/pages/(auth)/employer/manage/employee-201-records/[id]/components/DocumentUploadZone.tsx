@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { CloudArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
 import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
+
 import { useUploadDocuments } from '../hooks/useUploadDocuments';
+import CustomToast from '@/components/CustomToast';
+
+import { CloudArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface DocumentUploadZoneProps {
   employeeId: number;
