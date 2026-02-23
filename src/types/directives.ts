@@ -25,6 +25,7 @@ export interface DirectiveData {
 
   body?: string;
   name?: string;
+  employee_id?: string | number | null;  // synthetic field for EmployeeSelect display; not sent to backend
   position?: string;
   signature?: string | File | FileList;
   qr_code?: string | File;

@@ -93,6 +93,9 @@ export default function EditMemoModal({
       setEmployeeSearch(data.name || '');
       setEmployeeSelected(Boolean(data.name));
       setQrCodeUrl(data.qr_code || '');
+      if (data.name) {
+        setValue('employee_id', data.name);
+      }
       setExistingAttachments(data.attachments || []);
       try {
         const toArr = Array.isArray(data.to) ? data.to : JSON.parse(data.to || '[]');
@@ -443,6 +446,7 @@ export default function EditMemoModal({
                             employeeSearch={employeeSearch}
                             setEmployeeSearch={setEmployeeSearch}
                             setEmployeeSelected={setEmployeeSelected}
+                            employeeName={data?.name || ''}
                             className=""
                             onChange={(selectedOption: any) => {
                               if (selectedOption && !selectedOption.isShowMore) {
