@@ -44,11 +44,11 @@ const Content = () => {
 
   useEffect(() => {
     if (data && data.total_pages && data.total_records) {
-      // Sort: records with hired_applicant_applied_no > 0 first
+      // Sort: records with hired_count > 0 first
       if (data.records && Array.isArray(data.records)) {
         data.records = [...data.records].sort((a, b) => {
-          const aHasHired = (a.hired_applicant_applied_no || 0) > 0 ? 1 : 0;
-          const bHasHired = (b.hired_applicant_applied_no || 0) > 0 ? 1 : 0;
+          const aHasHired = (a.hired_count || 0) > 0 ? 1 : 0;
+          const bHasHired = (b.hired_count || 0) > 0 ? 1 : 0;
           return bHasHired - aHasHired;
         });
       }
@@ -146,7 +146,7 @@ const Content = () => {
                       href={'/orient/' + hiredApplicant.id}
                       className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                     >
-                      {hiredApplicant.hired_applicant_applied_no} Hired Applicant/s
+                      {hiredApplicant.hired_count} Hired Applicant/s
                     </Link>
                   </div>
                 ))
