@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import useSeedEvaluations from './hooks/useSeedEvaluations';
 import useUnseedEvaluations from './hooks/useUnseedEvaluations';
+import useGetAllEvaluationSchedulers from './hooks/useGetAllEvaluationSchedulers';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -21,15 +22,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [activeTab, setActiveTab] = useState<TabType>('individual');
   const seedEvaluationsMutation = useSeedEvaluations();
   const unseedEvaluationsMutation = useUnseedEvaluations();
+  const schedulersQuery = useGetAllEvaluationSchedulers();
 
   const tabs = [
     { id: 'individual' as TabType, name: 'Individual Evaluations' },
     { id: 'template-responses' as TabType, name: 'Template Responses' },
   ];
 
-  const handleSeedEvaluations = async (count: number) => {
+  const handleSeedEvaluations = async (count: number, extras?: any) => {
     try {
-      const result = await seedEvaluationsMutation.mutateAsync({ count });
+      const schedulerId = extras?.schedulerId ? Number(extras.schedulerId) : undefined;
+      const result = await seedEvaluationsMutation.mutateAsync({ count, schedulerId });
       toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
     } catch (error: any) {
       const errorMessage = typeof error === 'string'
@@ -41,6 +44,32 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       throw error;
     }
   };
+
+  const schedulerOptions: any[] = schedulersQuery.data ?? [];
+
+  const renderSchedulerField = (extras: any, setExtras: (v: any) => void) => (
+    <div>
+      <label htmlFor="scheduler-select" className="block text-sm font-medium text-gray-700 text-left">
+        Evaluation Scheduler
+      </label>
+      <select
+        id="scheduler-select"
+        value={extras.schedulerId ?? ''}
+        onChange={(e) => setExtras({ ...extras, schedulerId: e.target.value || undefined })}
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+      >
+        <option value="">— Auto-select (first active scheduler) —</option>
+        {schedulerOptions.map((s: any) => (
+          <option key={s.id} value={s.id}>
+            {s.name} ({s.evaluation_template})
+          </option>
+        ))}
+      </select>
+      <p className="mt-1 text-xs text-gray-500">
+        Leave blank to use the first active scheduler automatically.
+      </p>
+    </div>
+  );
 
   const handleUnseedEvaluations = async () => {
     try {
@@ -75,6 +104,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             isLoading={seedEvaluationsMutation.isLoading}
             isUnseeding={unseedEvaluationsMutation.isLoading}
             disabled={!hasActiveSubscription}
+            renderExtraFields={renderSchedulerField}
           />
         </div>
 
