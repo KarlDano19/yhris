@@ -5,12 +5,7 @@ interface AnalyticsPrintAuditData {
   report_type: string;
 }
 
-interface AnalyticsPrintAuditResponse {
-  message: string;
-  audit_data: Record<string, any>;
-}
-
-async function logAnalyticsPrint(data: AnalyticsPrintAuditData): Promise<AnalyticsPrintAuditResponse> {
+async function logAnalyticsPrint(data: AnalyticsPrintAuditData) {
   try {
     const token = getCookie('token');
     const config = {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -14,18 +14,23 @@ import useFileforge from "@/components/hooks/useFileforge";
 import WorkforceOverview from './tabs/WorkforceOverview';
 import EmployeePerformance from './tabs/EmployeePerformance';
 import CompliancePolicy from './tabs/CompliancePolicy';
-import CompensationBenefits from './tabs/CompensationBenefits';
+// import CompensationBenefits from './tabs/CompensationBenefits';
 import PrintRolePipelineRecordsSelectionModal from './modals/PrintRolePipelineRecordsSelectionModal';
 import PrintEmpPerformanceSelectionModal from './modals/PrintEmpPerformanceSelectionModal/PrintEmpPerformanceSelectionModal';
 import useAddAnalyticsPrintAudit from './hooks/useAddAnalyticsPrintAudit';
 
 import { handlePrintAnalytics } from './PrintData';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, MagnifyingGlassIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import PrintIcon from "@/svg/PrintIcon";
+
+import { useQueryClient } from '@tanstack/react-query';
+
+const REFRESH_COOLDOWN_SECONDS = 30;
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const { mutate: logAudit } = useAddAnalyticsPrintAudit();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(1);
@@ -46,27 +51,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   // State for print functionality
   const [workforceData, setWorkforceData] = useState<{
     activeSubTab: number;
-    employeeData: any[];
-    appliedApplicantsData: any[];
-    separationData: any[];
-    allJobPostData: any[];
-    pipelineData: any;
     rolePipelineData: any[];
     rolePipelineCurrentPage: number;
     rolePipelinePageSize: number;
-    validRegions?: string[];
-    selectedJobFilter?: string;
     allJobPostsForPrint?: any[];
+    analyticsKPIs?: any;
+    analyticsApplicantVsHired?: any;
+    analyticsAttrition?: any;
   } | null>(null);
-  
+
   const [employeePerformanceData, setEmployeePerformanceData] = useState<{
     activeSubTab: number;
-    evaluationData: any[];
-    employeeIssueData: any[];
     employeePerformanceTableData: any[];
     employeeIssuesTableData: any[];
-    showAllDepartments: boolean;
-    showAllIssueTypes: boolean;
     departmentRecords?: Array<{
       name: string;
       score: number;
@@ -95,9 +92,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       dateReported: string;
       status: string;
     }>;
+    analyticsKPIs?: any;
+    analyticsPerformanceTrend?: any[];
+    analyticsMonthlyIssueVolume?: any[];
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleRefresh = useCallback(() => {
+    if (refreshCooldown > 0) return;
+    queryClient.invalidateQueries();
+    setRefreshCooldown(REFRESH_COOLDOWN_SECONDS);
+    cooldownTimerRef.current = setInterval(() => {
+      setRefreshCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownTimerRef.current!);
+          cooldownTimerRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [refreshCooldown, queryClient]);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    };
+  }, []);
   const [showEmpPerformancePrintModal, setShowEmpPerformancePrintModal] = useState(false);
 
   // Get current tab's date filter
@@ -215,19 +239,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             activeTab,
             currentTab.name,
             generatePDFLocally,
-            workforceData.employeeData,
-            workforceData.appliedApplicantsData,
-            workforceData.separationData,
-            workforceData.allJobPostData,
             currentAppliedDateFilter,
             workforceData.activeSubTab,
-            workforceData.pipelineData,
             workforceData.rolePipelineData,
-            workforceData.validRegions,
-            workforceData.selectedJobFilter,
             selectedOption,
-            workforceData.allJobPostsForPrint,
-            selectedRecords as number[]
+            selectedRecords as number[],
+            workforceData.analyticsKPIs,
+            workforceData.analyticsApplicantVsHired,
+            workforceData.analyticsAttrition
           );
           
           // Log audit after successful print
@@ -247,39 +266,33 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           const selectedEmployeeIssues = employeeIssueRecords || (step === 4 ? selectedRecords as string[] : undefined);
           
           await handlePrintAnalytics(
-              activeTab,
-              currentTab.name,
-              generatePDFLocally,
-              [], // employeeData - not needed for employee performance
-              [], // appliedApplicantsData - not needed for employee performance
-              [], // separationData - not needed for employee performance
-              [], // allJobPostData - not needed for employee performance
-              currentAppliedDateFilter,
-              employeePerformanceData.activeSubTab,
-              undefined, // pipelineData - not needed for employee performance
-              undefined, // rolePipelineData - not needed for employee performance
-              undefined, // validRegions - not needed for employee performance
-              undefined, // selectedJobFilter - not needed for employee performance
-              selectedOption, // main printOption (fallback)
-              undefined, // allJobPostsForPrint - not needed for employee performance
-              undefined, // selectedRecords - not needed for employee performance
-              employeePerformanceData.evaluationData,
-              employeePerformanceData.employeeIssueData,
-              employeePerformanceData.employeePerformanceTableData,
-              employeePerformanceData.employeeIssuesTableData,
-              employeePerformanceData.showAllDepartments,
-              employeePerformanceData.showAllIssueTypes,
-              selectedDepartments, // selected departments for employee performance
-              selectedEmployees, // selected employees for employee performance
-              employeePerformanceData.evaluationData, // allEvaluationData - use the same data for now
-              selectedIssueTypes, // selected issue types for employee performance
-              selectedEmployeeIssues, // selected employee issues for employee performance
-              employeePerformanceData.employeeIssueData, // allEmployeeIssueData - use the same data for now
-              departmentOption, // department-specific print option
-              employeeOption, // employee-specific print option
-              issueTypeOption, // issue type-specific print option
-              employeeIssueOption // employee issue-specific print option
-            );
+            activeTab,
+            currentTab.name,
+            generatePDFLocally,
+            currentAppliedDateFilter,
+            employeePerformanceData.activeSubTab,
+            undefined, // rolePipelineData
+            selectedOption,
+            undefined, // selectedRecords (workforce)
+            undefined, // analyticsKPIs (workforce)
+            undefined, // analyticsApplicantVsHired
+            undefined, // analyticsAttrition
+            employeePerformanceData.employeePerformanceTableData,
+            employeePerformanceData.employeeIssuesTableData,
+            selectedDepartments,
+            selectedEmployees,
+            selectedIssueTypes,
+            selectedEmployeeIssues,
+            departmentOption,
+            employeeOption,
+            issueTypeOption,
+            employeeIssueOption,
+            employeePerformanceData.analyticsKPIs,
+            employeePerformanceData.analyticsPerformanceTrend,
+            employeePerformanceData.analyticsMonthlyIssueVolume,
+            employeePerformanceData.departmentRecords,
+            employeePerformanceData.issueTypeRecords
+          );
           
           // Log audit after successful print
           logAudit({
@@ -424,6 +437,16 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 ) : (
                   <PrintIcon />
                 )}
+              </button>
+              <button
+                data-tooltip-id='content-tab-tooltip'
+                data-tooltip-content={refreshCooldown > 0 ? `Refresh available in ${refreshCooldown}s` : 'Refresh data'}
+                data-tooltip-place='bottom'
+                className={`bg-white border border-gray-300 rounded-md p-2 transition-colors ${refreshCooldown > 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                onClick={handleRefresh}
+                disabled={refreshCooldown > 0}
+              >
+                <ArrowPathIcon className='h-5 w-5' />
               </button>
             </div>
           </div>

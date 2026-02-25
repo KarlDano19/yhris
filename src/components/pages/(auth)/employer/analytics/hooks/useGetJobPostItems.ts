@@ -4,7 +4,8 @@ import { getCookie } from 'cookies-next';
 async function getJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
-    newFilters.view_type = 'job-posting-history';
+    newFilters.view_type = 'select';
+    newFilters.search_type = 'analytics';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     const searchParams = new URLSearchParams(newFilters);
@@ -33,10 +34,11 @@ async function getJobPostItems(filters: any) {
   }
 }
 
-function useGetJobPostItems(filters: any) {
+function useGetJobPostItems(filters: any, enabled = false) {
   const query = useQuery(['jobPostItemCache', filters], () => getJobPostItems(filters), {
-    enabled: false,
+    enabled,
     keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
   return query;

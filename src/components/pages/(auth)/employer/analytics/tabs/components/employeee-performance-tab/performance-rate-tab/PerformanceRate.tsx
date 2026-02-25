@@ -12,7 +12,6 @@ import {
 import { Bar } from 'react-chartjs-2';
 
 import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
-import { calculateDepartmentPerformance } from './calculations/performanceRateCalc';
 
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
@@ -25,20 +24,37 @@ ChartJS.register(
   Legend
 );
 
+
 interface PerformanceRateProps {
-  evaluationData?: any;
   onShowAllChange?: (showAll: boolean) => void;
   showAllDepartments?: boolean;
+  precomputedDepartments?: Array<{ name: string; score: number; count: number }>;
 }
 
-const PerformanceRate: React.FC<PerformanceRateProps> = ({ evaluationData, onShowAllChange, showAllDepartments = false }) => {
+const PerformanceRate: React.FC<PerformanceRateProps> = ({
+  onShowAllChange,
+  showAllDepartments = false,
+  precomputedDepartments,
+}) => {
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
 
-  // Calculate department performance using shared utility
   const { departmentPerformanceData, totalDepartments } = useMemo(() => {
-    return calculateDepartmentPerformance(evaluationData, showAllDepartments, customColors);
-  }, [evaluationData, showAllDepartments, customColors]);
+    if (precomputedDepartments) {
+      let colorMapping: { [key: string]: string } = {};
+      try {
+        const saved = localStorage.getItem('departmentColorMapping');
+        if (saved) colorMapping = JSON.parse(saved);
+      } catch {}
+      const defaultColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+      const data = precomputedDepartments.map((dept, index) => ({
+        ...dept,
+        color: customColors[index] || colorMapping[dept.name] || defaultColors[index % defaultColors.length],
+      }));
+      return { departmentPerformanceData: data, totalDepartments: data.length };
+    }
+    return { departmentPerformanceData: [], totalDepartments: 0 };
+  }, [showAllDepartments, customColors, precomputedDepartments]);
 
 
 

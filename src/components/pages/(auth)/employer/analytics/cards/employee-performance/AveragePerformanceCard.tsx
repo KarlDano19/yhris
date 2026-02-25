@@ -2,23 +2,27 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Card from '../../Card';
-import { calculateAveragePerformance } from './calculations/averagePerformanceCalc';
 
 interface AveragePerformanceCardProps {
-  evaluationData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedValue?: number;
+  evaluationCount?: number;
 }
 
 const AveragePerformanceCard: React.FC<AveragePerformanceCardProps> = ({
-  evaluationData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedValue,
+  evaluationCount,
 }) => {
-  // Calculate average performance score using shared utility
   const performanceData = useMemo(() => {
-    return calculateAveragePerformance(evaluationData);
-  }, [evaluationData]);
+    return {
+      averageScore: (precomputedValue ?? 0).toFixed(1),
+      maxScore: 100,
+      totalEmployees: evaluationCount ?? 0,
+    };
+  }, [precomputedValue, evaluationCount]);
 
   if (isLoading) {
     return (
