@@ -24,6 +24,7 @@ ChartJS.register(
   Filler
 );
 
+
 interface PoliciesAcknowledgementTrendProps {
   acknowledgementData?: any;
   dateFilter?: {

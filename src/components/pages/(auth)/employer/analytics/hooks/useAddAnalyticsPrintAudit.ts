@@ -6,8 +6,9 @@ interface AnalyticsPrintAuditData {
 }
 
 interface AnalyticsPrintAuditResponse {
+  success: boolean;
   message: string;
-  audit_data: Record<string, any>;
+  data?: any;
 }
 
 async function logAnalyticsPrint(data: AnalyticsPrintAuditData): Promise<AnalyticsPrintAuditResponse> {
@@ -37,7 +38,7 @@ async function logAnalyticsPrint(data: AnalyticsPrintAuditData): Promise<Analyti
 }
 
 function useAddAnalyticsPrintAudit() {
-  const mutation = useMutation({
+  const mutation = useMutation<AnalyticsPrintAuditResponse, Error, AnalyticsPrintAuditData>({
     mutationFn: logAnalyticsPrint,
   });
   return mutation;

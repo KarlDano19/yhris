@@ -3,7 +3,14 @@ import React from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 
-import { getStatusColor } from './calculations/employeePerformanceTableCalc';
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'Passed': return 'text-green-600 font-medium';
+    case 'Failed': return 'text-red-500 font-medium';
+    case 'Ongoing': return 'text-yellow-500 font-medium';
+    default: return 'text-gray-500 font-medium';
+  }
+};
 
 interface EmployeeData {
   name: string;
@@ -13,10 +20,14 @@ interface EmployeeData {
   status: string;
 }
 
+const getScoreColor = (status: string): string =>
+  status === 'Failed' ? 'text-red-500 font-medium' : 'text-gray-900';
+
 interface PaginationData {
   totalRecords: number;
   totalPages: number;
 }
+
 
 interface EmployeePerformanceTableProps {
   data?: EmployeeData[];
@@ -64,7 +75,7 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-red-500">Error loading data: {error}</div>
+            <div className="text-red-500">Error loading data: {error?.message || 'An error occurred'}</div>
           </div>
         </div>
       </div>
@@ -109,8 +120,15 @@ const EmployeePerformanceTable: React.FC<EmployeePerformanceTableProps> = ({
                     <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center whitespace-nowrap">
                       {employee.department}
                     </td>
-                    <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center whitespace-nowrap">
-                      {employee.score}
+                    <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-center whitespace-nowrap">
+                      {employee.score.includes('/') ? (
+                        <>
+                          <span className={getScoreColor(employee.status)}>{employee.score.split('/')[0]}</span>
+                          <span className="text-gray-900">/{employee.score.split('/')[1]}</span>
+                        </>
+                      ) : (
+                        <span className={getScoreColor(employee.status)}>{employee.score}</span>
+                      )}
                     </td>
                     <td className="px-2 sm:px-3 py-3 md:py-4 text-xs sm:text-sm md:text-sm text-gray-900 text-center whitespace-nowrap">
                       {employee.lastEvaluation}

@@ -22,6 +22,7 @@ interface PaginationData {
   totalPages: number;
 }
 
+
 interface PolicyComplianceTableProps {
   data?: PolicyData[];
   pagination?: PaginationData;
@@ -142,7 +143,7 @@ const PolicyComplianceTable: React.FC<PolicyComplianceTableProps> = ({
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-red-500">Error loading data: {error}</div>
+            <div className="text-red-500">Error loading data: {error?.message || 'An error occurred'}</div>
           </div>
         </div>
       </div>

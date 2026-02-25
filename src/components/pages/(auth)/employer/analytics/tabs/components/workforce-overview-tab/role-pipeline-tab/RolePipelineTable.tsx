@@ -4,18 +4,56 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import PipelineInfoModal from '../../../../modals/PipelineInfoModal';
 
-import { 
-  RolePipelineData, 
-  PipelineData, 
-  formatTurnaroundTime, 
-  formatPipelineInfo, 
-  getStatusColor 
-} from './calculation/rolePipelineTableCalc';
+export interface RolePipelineData {
+  role: string;
+  numberOfApplicants: number;
+  status: string;
+  dateJobOpened: string;
+  dateJobClosed: string;
+  turnaroundTime: number | null;
+  currentPipeline: string;
+  jobId?: number;
+}
+
+export type PipelineData = { [jobId: number]: { [stageTitle: string]: number } };
+
+const formatTurnaroundTime = (days: number | null): string => {
+  if (!days && days !== 0) return '—';
+  if (days === 0) return 'Today';
+  if (days === 1) return '1 day';
+  if (days < 30) return `${days} days`;
+  const months = Math.floor(days / 30);
+  const remainingDays = days % 30;
+  if (remainingDays === 0) return `${months} month${months > 1 ? 's' : ''}`;
+  return `${months} month${months > 1 ? 's' : ''} ${remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+};
+
+const formatPipelineInfo = (
+  currentPipeline: string,
+  numberOfApplicants: number,
+  jobId: number | undefined,
+  pipelineData: PipelineData
+): string => {
+  if (jobId && pipelineData[jobId]) {
+    const stages = pipelineData[jobId];
+    const stageEntries = Object.entries(stages);
+    if (stageEntries.length > 0) {
+      return stageEntries.map(([stage, count]) => `${stage}: ${count}`).join(', ');
+    }
+  }
+  return currentPipeline || (numberOfApplicants > 0 ? `${numberOfApplicants} applicants` : 'No applicants yet');
+};
+
+const getStatusColor = (status: string): string =>
+  status === 'Ongoing'
+    ? 'text-blue-600 bg-blue-50 border-blue-200'
+    : 'text-red-600 bg-red-50 border-red-200';
 
 interface PaginationData {
   totalRecords: number;
   totalPages: number;
 }
+
 
 interface RolePipelineTableProps {
   data?: RolePipelineData[];
