@@ -5,7 +5,13 @@ interface AnalyticsPrintAuditData {
   report_type: string;
 }
 
-async function logAnalyticsPrint(data: AnalyticsPrintAuditData) {
+interface AnalyticsPrintAuditResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+async function logAnalyticsPrint(data: AnalyticsPrintAuditData): Promise<AnalyticsPrintAuditResponse> {
   try {
     const token = getCookie('token');
     const config = {
@@ -32,7 +38,7 @@ async function logAnalyticsPrint(data: AnalyticsPrintAuditData) {
 }
 
 function useAddAnalyticsPrintAudit() {
-  const mutation = useMutation({
+  const mutation = useMutation<AnalyticsPrintAuditResponse, Error, AnalyticsPrintAuditData>({
     mutationFn: logAnalyticsPrint,
   });
   return mutation;

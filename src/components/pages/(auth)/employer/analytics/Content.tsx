@@ -103,7 +103,24 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const handleRefresh = useCallback(() => {
     if (refreshCooldown > 0) return;
-    queryClient.invalidateQueries();
+
+    // Invalidate only analytics-related queries to avoid 'thundering herd' problem
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        // Check if query key is analytics-related
+        return Array.isArray(query.queryKey) &&
+               query.queryKey.some(key =>
+                 typeof key === 'string' &&
+                 (key.toLowerCase().includes('analytics') ||
+                  key.toLowerCase().includes('workforce') ||
+                  key.toLowerCase().includes('performance') ||
+                  key.toLowerCase().includes('compliance') ||
+                  key.toLowerCase().includes('attrition') ||
+                  key.toLowerCase().includes('issue'))
+               );
+      }
+    });
+
     setRefreshCooldown(REFRESH_COOLDOWN_SECONDS);
     cooldownTimerRef.current = setInterval(() => {
       setRefreshCooldown((prev) => {

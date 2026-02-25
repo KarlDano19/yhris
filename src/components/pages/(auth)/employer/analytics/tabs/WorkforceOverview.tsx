@@ -19,7 +19,7 @@ import useGetWorkforceOverviewKPIs from '../hooks/useGetWorkforceOverviewKPIs';
 import useGetApplicantVsHired from '../hooks/useGetApplicantVsHired';
 import useGetRolePipeline from '../hooks/useGetRolePipeline';
 import useGetAttritionRate from '../hooks/useGetAttritionRate';
-import useGetJobPostItems from '../hooks/useGetJobPostItems';
+import useGetAnalyticsJobPostItems from '../hooks/useGetAnalyticsJobPostItems';
 
 import { ApplicantSummaryItem } from './components/workforce-overview-tab/applicant-vs-hired-tab/OverallApplicantsSummary';
 import { AttritionRateData } from './components/workforce-overview-tab/attrition-rate-tab/AttritionRate';
@@ -74,7 +74,7 @@ const WorkforceOverview: React.FC<WorkforceOverviewProps> = ({ dateFilter, onDat
   } = useGetWorkforceOverviewKPIs({ from: fromDate, to: toDate });
 
   // Fetch job list (always enabled: needed for filter + print)
-  const { data: jobPostData } = useGetJobPostItems({}, true);
+  const { data: jobPostData } = useGetAnalyticsJobPostItems({}, true);
   const jobPostRecords: any[] = Array.isArray(jobPostData)
     ? jobPostData
     : (jobPostData as any)?.records || [];
