@@ -44,7 +44,7 @@ export default function EditPolicyModal({
   const [isToFocused, setIsToFocused] = useState(false);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setFocus, setValue, getFieldState, getValues, reset, clearErrors, watch, control, formState: { errors }, setError } = useForm<any>({
+  const { register, handleSubmit, setValue, reset, clearErrors, watch, control, formState: { errors }, setError } = useForm<any>({
     defaultValues: {
       custom_policy_fields: DEFAULT_POLICY_FIELDS,
     },
@@ -87,12 +87,7 @@ export default function EditPolicyModal({
     }
   }, [isOpen]);
 
-  const increaseWidth = (text: HTMLInputElement) => {
-    let textLength = text.value.length;
-    if (textLength >= 10) {
-      text.style.width = textLength + 'ch';
-    }
-  };
+  const watchedFields = watch('custom_policy_fields');
 
   const handleAttachmentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -144,11 +139,19 @@ export default function EditPolicyModal({
 
   const onSubmit = handleSubmit((dataForm) => {
     if (!isNextForm) return;
-    const payload: any = { ...dataForm };
-    payload.to = tagsTo;
-    payload.directive_type = 'policy';
-    if (files.length > 0) payload.attachments = files;
-    updateMutation.mutate({ id: directiveId as number, payload }, {
+
+    updateMutation.mutate({
+      id: directiveId as number,
+      directive_type: 'policy',
+      title: dataForm.title,
+      eligibility: dataForm.eligibility,
+      application: dataForm.application,
+      coverage: dataForm.coverage,
+      termination: dataForm.termination,
+      to: tagsTo,
+      custom_policy_fields: dataForm.custom_policy_fields,
+      attachments: files,
+    }, {
       onSuccess: () => {
         toast.custom(() => <CustomToast message={'Successfully updated a policy'} type='success' />, { duration: 5000 });
         setIsNextForm(false);
@@ -164,39 +167,40 @@ export default function EditPolicyModal({
     });
   });
 
-  const handleNextClick = async (e: React.MouseEvent) => {
+  const handleNextClick = (e: React.MouseEvent) => {
     e.preventDefault();
     const titleValue = watch('title');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const customFields = watch('custom_policy_fields');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let hasErrors = false;
+
     clearErrors(['title', 'to', 'custom_policy_fields']);
-    if (!titleValue || titleValue === "") { setError("title", { type: "manual", message: "Title is required." }); hasErrors = true; }
-    if (tagsTo.length === 0) { setError("to", { type: "manual", message: "To field is required." }); hasErrors = true; } else { const invalidEmails = tagsTo.filter(email => !emailRegex.test(email)); if (invalidEmails.length > 0) { setError("to", { type: "manual", message: "Please enter valid email addresses." }); hasErrors = true; } }
-    if (customFields && customFields.length > 0) {
-      customFields.forEach((field: any, index: number) => {
-        if (!field.inputLabel || field.inputLabel.trim() === "") { setError(`custom_policy_fields.${index}.inputLabel` as any, { type: "manual", message: "Field title is required." }); hasErrors = true; }
-        if (!field.inputName || field.inputName.trim() === "") { setError(`custom_policy_fields.${index}.inputName` as any, { type: "manual", message: "Field content is required." }); hasErrors = true; }
-      });
+
+    if (!titleValue) {
+      setError('title', { type: 'manual', message: 'Title is required.' });
+      hasErrors = true;
     }
-    if (hasErrors) {
-      if (!titleValue || titleValue === "") { const el = document.getElementById("title"); if (el) el.focus(); } else if (tagsTo.length === 0) { const emailInput = document.querySelector('input[type="text"]') as HTMLInputElement; if (emailInput) emailInput.focus(); } else if (customFields && customFields.length > 0) {
-        for (let i = 0; i < customFields.length; i++) {
-          const field = customFields[i];
-          if (!field.inputLabel || field.inputLabel.trim() === "") {
-            const el = document.getElementById(`title${i}`);
-            if (el) { el.removeAttribute('disabled'); el.focus(); }
-            break;
-          } else if (!field.inputName || field.inputName.trim() === "") {
-            const el = document.getElementById(`custom_policy_fields.${i}.inputName`);
-            if (el) el.focus();
-            break;
-          }
-        }
+
+    if (tagsTo.length === 0) {
+      setError('to', { type: 'manual', message: 'To field is required.' });
+      hasErrors = true;
+    } else if (tagsTo.some(email => !emailRegex.test(email))) {
+      setError('to', { type: 'manual', message: 'Please enter valid email addresses.' });
+      hasErrors = true;
+    }
+
+    customFields?.forEach((field: any, index: number) => {
+      if (!field.inputLabel?.trim()) {
+        setError(`custom_policy_fields.${index}.inputLabel` as any, { type: 'manual', message: 'Field title is required.' });
+        hasErrors = true;
       }
-      return;
-    }
-    setIsNextForm(true);
+      if (!field.inputName?.trim()) {
+        setError(`custom_policy_fields.${index}.inputName` as any, { type: 'manual', message: 'Field content is required.' });
+        hasErrors = true;
+      }
+    });
+
+    if (!hasErrors) setIsNextForm(true);
   };
 
   return (
@@ -254,19 +258,17 @@ export default function EditPolicyModal({
                               <div>
                                 <input
                                   type='text'
-                                  defaultValue={item.inputLabel}
-                                  className=' w-[10ch]'
+                                  style={{ width: `${Math.max(10, watchedFields?.[index]?.inputLabel?.length || 0)}ch` }}
                                   id={`title${index}`}
                                   {...register(`custom_policy_fields.${index}.inputLabel`, { required: "Field title is required." })}
-                                  onInput={(e: any) => {
-                                    increaseWidth(e.currentTarget);
+                                  onInput={() => {
                                     if (labelError) clearErrors(`custom_policy_fields.${index}.inputLabel` as any);
                                   }}
                                   disabled={true}
                                 />
                                 <button type='button' onClick={() => {
-                                  document.getElementById(`title${index}`)?.removeAttribute('disabled');
-                                  setFocus(`custom_policy_fields.${index}.inputLabel`);
+                                  const el = document.getElementById(`title${index}`);
+                                  if (el) { el.removeAttribute('disabled'); el.focus(); }
                                 }}>
                                   <PencilIcon className='h-3 text-gray-500 ml-2' />
                                 </button>

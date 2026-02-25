@@ -22,7 +22,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 import EyePassword from '@/svg/EyePassword';
 
-import { DirectiveData } from '@/types/directives';
+import { MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
@@ -59,7 +59,7 @@ export default function EditMemoModal({
   const [existingAttachments, setExistingAttachments] = useState<Array<{id: number; attachment: string; attachment_name: string}>>([]);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<DirectiveData>();
+  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
   const updateMutation = useUpdateDirective();
   const queryClient = useQueryClient();
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
@@ -70,7 +70,7 @@ export default function EditMemoModal({
     state: { data: CachedProfileData } | undefined;
   };
 
-  const { data, refetch: refetchDetails } = useGetDirectiveDetails(directiveId);
+  const { data, refetch: refetchDetails, isFetching } = useGetDirectiveDetails(directiveId);
 
   useEffect(() => {
     if (isOpen && directiveId) {
@@ -79,7 +79,7 @@ export default function EditMemoModal({
   }, [isOpen, directiveId, refetchDetails]);
 
   useEffect(() => {
-    if (data) {
+    if (isOpen && data && !isFetching) {
       reset({
         title: data.title || '',
         body: data.body || '',
@@ -104,37 +104,25 @@ export default function EditMemoModal({
         setTagsTo([]);
       }
     }
-  }, [data, reset, setValue, cachedProfile, setTagsTo]);
+  }, [data, isFetching, reset, setValue, cachedProfile, setTagsTo, isOpen]);
 
   const onSubmit = handleSubmit((data) => {
-    // Check if To field has any entries with valid email format
     if (tagsTo.length === 0) {
-      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
-        duration: 5000,
-      });
-      return; // Prevent form submission
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, { duration: 5000 });
+      return;
     }
-
-    // Validate that all email addresses in tagsTo are valid
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
     if (invalidEmails.length > 0) {
-      toast.custom(() => <CustomToast message={'Please enter valid email addresses'} type='error' />, {
-        duration: 5000,
-      });
-      return; // Prevent form submission
+      toast.custom(() => <CustomToast message={'Please enter valid email addresses'} type='error' />, { duration: 5000 });
+      return;
     }
 
     const callbackReq = {
       onSuccess: () => {
-        toast.custom(
-          () => <CustomToast message={'Successfully updated memo'} type='success' />,
-          { duration: 5000 }
-        );
+        toast.custom(() => <CustomToast message={'Successfully updated memo'} type='success' />, { duration: 5000 });
         setIsOpen(false);
-
         if (refetch) refetch();
-
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
@@ -142,23 +130,25 @@ export default function EditMemoModal({
         setFiles([]);
         setQrCodeExist(false);
         setSignatureFileExist(false);
-        setToSaveData(null);
         setSignatureUrl('');
+        setToSaveData(null);
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 5000,
-        });
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
       },
     };
-    data['to'] = tagsTo;
-    data.directive_type = 'memo';
-    // Add multiple attachments - pass files array directly
-    const payload: any = { ...toSaveData, ...data };
-    if (files.length > 0) {
-      payload.attachments = files;
-    }
-    updateMutation.mutate({ id: directiveId as number, payload }, callbackReq);
+    updateMutation.mutate({
+      id: directiveId as number,
+      directive_type: 'memo',
+      title: data.title,
+      body: data.body,
+      name: data.name,
+      position: data.position,
+      to: tagsTo,
+      attachments: files,
+      signature: data.signature,
+      qr_code: toSaveData?.qr_code instanceof File ? toSaveData.qr_code : undefined,
+    }, callbackReq);
   });
 
   const uploadOnChange = ({ target }: { target: any }) => {
@@ -300,6 +290,7 @@ export default function EditMemoModal({
       setSignatureFileExist(false);
       setExistingAttachments([]);
       setQrCodeUrl('');
+      setToSaveData(null);
       if (attachmentInputRef.current) {
         attachmentInputRef.current.value = '';
       }

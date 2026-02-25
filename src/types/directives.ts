@@ -25,12 +25,16 @@ export interface DirectiveData {
 
   body?: string;
   name?: string;
-  employee_id?: string | number | null;  // synthetic field for EmployeeSelect display; not sent to backend
   position?: string;
   signature?: string | File | FileList;
   qr_code?: string | File;
   attachments?: string | File | File[] | DirectiveAttachment[];
   attachment?: string; // Backward compatibility field - URL of first attachment
+}
+
+// MemoFormData — form state type (extends DirectiveData with UI-only fields)
+export interface MemoFormData extends DirectiveData {
+  employee_id?: string | number | null; // UI-only: seeds EmployeeSelect; not sent to backend
 }
 
 export interface PolicyField {

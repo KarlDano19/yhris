@@ -30,7 +30,6 @@ import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
 import Image from 'next/image';
 import useSendDirectiveEmail from './hooks/useSendDirectiveEmail';
-import useGetDirectiveDetails from './hooks/useGetDirectiveDetails';
 
 import classNames from '@/helpers/classNames';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -88,7 +87,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     currentPage: currentPage,
   });
   const sendMutation = useSendDirectiveEmail();
-  const directiveDetailsQuery = useGetDirectiveDetails(selectedDirectiveId);
 
   useEffect(() => {
     if (dataDirectives) {
@@ -327,13 +325,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     {!item.is_sent && (
                       <button
                         type='button'
-                        onClick={async () => {
+                        onClick={() => {
                           setSelectedDirectiveId(item.id);
-                          try {
-                            await directiveDetailsQuery.refetch();
-                          } catch {
-                            // ignore
-                          }
                           if (item.directive_type === 'memo') {
                             setIsEditMemoOpen(true);
                           } else {
