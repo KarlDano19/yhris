@@ -5,15 +5,11 @@ import { Tooltip } from 'react-tooltip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DemographicBreakdownFilterModal from '../../../../modals/DemographicBreakdownFilterModal';
 
-import { calculateDemographicBreakdown } from './calculations/demographicBreakdownCalc';
-
 import FilterLogo from '@/svg/FilterLogo';
 
 
 interface DemographicBreakdownProps {
-  appliedApplicantsData?: any[];
   jobPostData?: any;
-  validRegions?: string[];
   isLoading?: boolean;
   error?: any;
   selectedJobFilter?: string;
@@ -21,50 +17,26 @@ interface DemographicBreakdownProps {
   applicantStatusOptions?: string[];
   selectedStatusFilter?: string;
   onStatusFilterChange?: (status: string) => void;
+  precomputedDemographic?: Array<{ demographic: string; details: string }>;
 }
 
-const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({ 
-  appliedApplicantsData, 
+const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   jobPostData,
-  validRegions = [],
-  isLoading = false, 
+  isLoading = false,
   error = null,
   selectedJobFilter = 'All Jobs',
   onJobFilterChange,
   applicantStatusOptions,
   selectedStatusFilter = 'All Statuses',
-  onStatusFilterChange
+  onStatusFilterChange,
+  precomputedDemographic,
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  // Calculate demographic data using shared utility
   const demographicData = useMemo(() => {
-    const breakdownData = calculateDemographicBreakdown(
-      appliedApplicantsData, 
-      jobPostData, 
-      validRegions, 
-      selectedJobFilter
-    );
-    
-    return [
-      {
-        demographic: 'Female Applicants',
-        details: breakdownData.femalePercentage
-      },
-      {
-        demographic: 'Male Applicants',
-        details: breakdownData.malePercentage
-      },
-      {
-        demographic: 'Most Common Regions',
-        details: breakdownData.mostCommonRegion
-      },
-      {
-        demographic: 'Most Common Age Group',
-        details: breakdownData.mostCommonAgeGroup
-      }
-    ];
-  }, [appliedApplicantsData, jobPostData, validRegions, selectedJobFilter]);
+    if (precomputedDemographic) return precomputedDemographic;
+    return [];
+  }, [precomputedDemographic]);
 
   const handleFilterApply = (filters: any) => {
     if (filters.selectedJob !== undefined && onJobFilterChange) {
@@ -157,10 +129,9 @@ const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
             </table>
           </div>
         ) : (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center text-gray-500">
-              <div className="text-lg font-semibold mb-2">No Data Available</div>
-              <div className="text-sm">No demographic data found for the selected criteria</div>
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="text-gray-500 font-semibold mb-2">No data available</div>
             </div>
           </div>
         )}

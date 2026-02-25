@@ -1,10 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-async function getJobPostItems(filters: any) {
+/**
+ * Fetch job post items specifically for analytics
+ * This hook is dedicated to analytics and uses analytics-specific parameters
+ */
+async function getAnalyticsJobPostItems(filters: any) {
   try {
     let newFilters = { ...filters };
-    newFilters.view_type = 'job-posting-history';
+    // Analytics-specific parameters
+    newFilters.view_type = 'select';
+    newFilters.search_type = 'analytics';
     if (filters.currentPage) newFilters.current_page = filters.currentPage;
     if (filters.pageSize) newFilters.page_size = filters.pageSize;
     const searchParams = new URLSearchParams(newFilters);
@@ -33,13 +39,18 @@ async function getJobPostItems(filters: any) {
   }
 }
 
-function useGetJobPostItems(filters: any) {
-  const query = useQuery(['jobPostItemCache', filters], () => getJobPostItems(filters), {
-    enabled: false,
+/**
+ * Custom hook for fetching analytics-specific job post items
+ * Uses view_type='select' and search_type='analytics' parameters
+ */
+function useGetAnalyticsJobPostItems(filters: any, enabled = false) {
+  const query = useQuery(['analyticsJobPostItemsCache', filters], () => getAnalyticsJobPostItems(filters), {
+    enabled,
     keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
   return query;
 }
 
-export default useGetJobPostItems;
+export default useGetAnalyticsJobPostItems;

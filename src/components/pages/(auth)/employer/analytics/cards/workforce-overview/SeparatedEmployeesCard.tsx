@@ -2,23 +2,44 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Card from '../../Card';
-import { calculateSeparatedEmployees } from './calculations/separatedEmployeesCalc';
 
 interface SeparatedEmployeesCardProps {
-  separationData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedValue?: number;
+  prevQ4Value?: number;
+  prevQ4Year?: number;
 }
 
 const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
-  separationData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedValue,
+  prevQ4Value,
+  prevQ4Year,
 }) => {
-  // Calculate separated employees using shared utility
   const separatedEmployeesData = useMemo(() => {
-    return calculateSeparatedEmployees(separationData);
-  }, [separationData]);
+    const current = precomputedValue ?? 0;
+    let trend = '';
+    let isPositive = false;
+
+    if (prevQ4Value !== undefined && prevQ4Year !== undefined) {
+      const diff = current - prevQ4Value;
+      const pct = prevQ4Value > 0 ? Math.abs(Math.round((diff / prevQ4Value) * 100)) : 0;
+      if (diff > 0) {
+        trend = `Increased by +${diff} from last Q4 of ${prevQ4Year} (${pct}%)`;
+        isPositive = false;
+      } else if (diff < 0) {
+        trend = `Decreased by ${diff} from last Q4 of ${prevQ4Year} (${pct}%)`;
+        isPositive = true;
+      } else {
+        trend = `No change from last Q4 of ${prevQ4Year} (0%)`;
+        isPositive = true;
+      }
+    }
+
+    return { separatedEmployees: current, trend, isPositive };
+  }, [precomputedValue, prevQ4Value, prevQ4Year]);
 
   if (isLoading) {
     return (
@@ -54,4 +75,4 @@ const SeparatedEmployeesCard: React.FC<SeparatedEmployeesCardProps> = ({
   );
 };
 
-export default SeparatedEmployeesCard; 
+export default SeparatedEmployeesCard;
