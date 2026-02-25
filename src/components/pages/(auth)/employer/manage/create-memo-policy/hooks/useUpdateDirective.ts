@@ -54,7 +54,7 @@ async function updateDirective(directive: DirectiveData) {
       headers: { Authorization: `Token ${token}` },
       body: formData,
     };
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive.id}/`, config);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive.id}/manage/`, config);
     if (!res.ok) throw res.json();
     return res.json();
   } catch (err: any) {
