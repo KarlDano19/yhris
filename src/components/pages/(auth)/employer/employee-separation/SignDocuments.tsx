@@ -6,6 +6,7 @@ import { T_DocumentsModal } from '@/types/globals';
 import classNames from '@/helpers/classNames';
 import AttachmentViewModal from './modals/AttachmentViewModal';
 import AttachmentListModal from './modals/AttachmentListModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -46,6 +47,7 @@ const SignDocuments = ({
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
   const [selectedAttachmentUrl, setSelectedAttachmentUrl] = useState<string | null>(null);
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
 
   // Disabled if already sent or if quit claim is in progress
   const isDisabled = isDocumentsSent || isQuitclaimSigned || isQuitclaimReceived;
@@ -93,7 +95,7 @@ const SignDocuments = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={isDocumentsReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
-          onClick={() => setReceived(id, 'sign documents')}
+          onClick={() => setIsConfirmReceiveOpen(true)}
           data-tooltip-id='sign-documents-received-tooltip'
           data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot receive documents after quit claim' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
           data-tooltip-place='bottom'
@@ -185,6 +187,17 @@ const SignDocuments = ({
         title="Sign Documents Attachments"
       />
     )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the documents as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'sign documents');
+      }}
+      isLoading={false}
+    />
     </>
   );
 };
