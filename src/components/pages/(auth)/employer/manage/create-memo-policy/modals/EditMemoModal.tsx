@@ -11,7 +11,8 @@ import { Tooltip } from 'react-tooltip';
 
 import useTagTo from '@/components/hooks/useTagTo';
 import CustomToast from '@/components/CustomToast';
-import useAddDirectivesItems from '../hooks/useAddDirectivesItems';
+import useUpdateDirective from '../hooks/useUpdateDirective';
+import useGetDirectiveDetails from '../hooks/useGetDirectiveDetails';
 import SignatureModal from './SignatureModal';
 import EmailField from '@/components/common/EmailField';
 import EmployeeSelect from '@/components/common/EmployeeSelect';
@@ -21,7 +22,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 import EyePassword from '@/svg/EyePassword';
 
-import { DirectiveData, MemoFormData } from '@/types/directives';
+import { MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
@@ -30,14 +31,16 @@ interface CachedProfileData {
   name: string;
 }
 
-export default function CreateMemoModal({
+export default function EditMemoModal({
   isOpen,
   setIsOpen,
+  directiveId,
   refetch,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
-  refetch: any;
+  directiveId: number | null;
+  refetch?: any;
 }) {
   const cancelButtonRef = useRef(null);
   const [signatureUrl, setSignatureUrl] = useState<string>('');
@@ -53,49 +56,73 @@ export default function CreateMemoModal({
   const [isToFocused, setIsToFocused] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
+  const [existingAttachments, setExistingAttachments] = useState<Array<{id: number; attachment: string; attachment_name: string}>>([]);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
-  const { mutate, isLoading } = useAddDirectivesItems();
+  const updateMutation = useUpdateDirective();
   const queryClient = useQueryClient();
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
-  
+
   const cachedProfile = queryClient
     .getQueryCache()
     .find(['employerProfileCache']) as {
     state: { data: CachedProfileData } | undefined;
   };
 
+  const { data, refetch: refetchDetails, isFetching } = useGetDirectiveDetails(directiveId);
+
+  useEffect(() => {
+    if (isOpen && directiveId) {
+      refetchDetails();
+    }
+  }, [isOpen, directiveId, refetchDetails]);
+
+  useEffect(() => {
+    if (isOpen && data && !isFetching) {
+      reset({
+        title: data.title || '',
+        body: data.body || '',
+        name: data.name || '',
+        position: data.position || '',
+        company_name: data.company_name || cachedProfile?.state?.data?.name || '',
+      });
+      setValue('body', data.body || '');
+      setSignatureUrl(data.signature || '');
+      setQrCodeExist(Boolean(data.qr_code));
+      setEmployeeSearch(data.name || '');
+      setEmployeeSelected(Boolean(data.name));
+      setQrCodeUrl(data.qr_code || '');
+      if (data.name) {
+        setValue('employee_id', data.name);
+      }
+      setExistingAttachments(data.attachments || []);
+      try {
+        const toArr = Array.isArray(data.to) ? data.to : JSON.parse(data.to || '[]');
+        setTagsTo(toArr);
+      } catch {
+        setTagsTo([]);
+      }
+    }
+  }, [data, isFetching, reset, setValue, cachedProfile, setTagsTo, isOpen]);
 
   const onSubmit = handleSubmit((data) => {
-    // Check if To field has any entries with valid email format
     if (tagsTo.length === 0) {
-      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, {
-        duration: 5000,
-      });
-      return; // Prevent form submission
+      toast.custom(() => <CustomToast message={'To field is required'} type='error' />, { duration: 5000 });
+      return;
     }
-    
-    // Validate that all email addresses in tagsTo are valid
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const invalidEmails = tagsTo.filter(email => !emailRegex.test(email));
     if (invalidEmails.length > 0) {
-      toast.custom(() => <CustomToast message={'Please enter valid email addresses'} type='error' />, {
-        duration: 5000,
-      });
-      return; // Prevent form submission
+      toast.custom(() => <CustomToast message={'Please enter valid email addresses'} type='error' />, { duration: 5000 });
+      return;
     }
 
     const callbackReq = {
       onSuccess: () => {
-        toast.custom(
-          () => <CustomToast message={'Successfully created a memo'} type='success' />,
-
-          { duration: 5000 }
-        );
+        toast.custom(() => <CustomToast message={'Successfully updated memo'} type='success' />, { duration: 5000 });
         setIsOpen(false);
-
-        refetch();
-
+        if (refetch) refetch();
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
@@ -103,23 +130,25 @@ export default function CreateMemoModal({
         setFiles([]);
         setQrCodeExist(false);
         setSignatureFileExist(false);
-        setToSaveData(null);
         setSignatureUrl('');
+        setToSaveData(null);
       },
       onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 5000,
-        });
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
       },
     };
-    data['to'] = tagsTo;
-    data.directive_type = 'memo';
-    // Add multiple attachments - pass files array directly
-    const payload: any = { ...toSaveData, ...data };
-    if (files.length > 0) {
-      payload.attachments = files;
-    }
-    mutate(payload, callbackReq);
+    updateMutation.mutate({
+      id: directiveId as number,
+      directive_type: 'memo',
+      title: data.title,
+      body: data.body,
+      name: data.name,
+      position: data.position,
+      to: tagsTo,
+      attachments: files,
+      signature: data.signature,
+      qr_code: toSaveData?.qr_code instanceof File ? toSaveData.qr_code : undefined,
+    }, callbackReq);
   });
 
   const uploadOnChange = ({ target }: { target: any }) => {
@@ -140,7 +169,7 @@ export default function CreateMemoModal({
     if (event.target.files && event.target.files.length > 0) {
       const selectedFiles = Array.from(event.target.files);
       const validFiles: File[] = [];
-      
+
       for (const file of selectedFiles) {
         // Check file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
@@ -151,12 +180,12 @@ export default function CreateMemoModal({
         }
         validFiles.push(file);
       }
-      
+
       if (validFiles.length > 0) {
         // Append to existing files
         setFiles(prev => [...prev, ...validFiles]);
       }
-      
+
       // Clear the file input
       if (attachmentInputRef.current) {
         attachmentInputRef.current.value = '';
@@ -174,10 +203,10 @@ export default function CreateMemoModal({
     e.preventDefault();
     e.stopPropagation();
     const droppedFiles = Array.from(e?.dataTransfer?.files || []);
-    
+
     if (droppedFiles.length > 0) {
       const validFiles: File[] = [];
-      
+
       for (const file of droppedFiles) {
         // Check file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
@@ -188,7 +217,7 @@ export default function CreateMemoModal({
         }
         validFiles.push(file);
       }
-      
+
       if (validFiles.length > 0) {
         // Append to existing files
         setFiles(prev => [...prev, ...validFiles]);
@@ -259,6 +288,9 @@ export default function CreateMemoModal({
       setIsToFocused(false);
       setQrCodeExist(false);
       setSignatureFileExist(false);
+      setExistingAttachments([]);
+      setQrCodeUrl('');
+      setToSaveData(null);
       if (attachmentInputRef.current) {
         attachmentInputRef.current.value = '';
       }
@@ -300,7 +332,7 @@ export default function CreateMemoModal({
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                 <div className='flex bg-savoy-blue p-2 items-center'>
-                  <h3 className='flex-1 text-white ml-2 font-semibold'>Create Memo</h3>
+                  <h3 className='flex-1 text-white ml-2 font-semibold'>Edit Memo</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                 </div>
                 <form onSubmit={onSubmit}>
@@ -405,6 +437,7 @@ export default function CreateMemoModal({
                             employeeSearch={employeeSearch}
                             setEmployeeSearch={setEmployeeSearch}
                             setEmployeeSelected={setEmployeeSelected}
+                            employeeName={data?.name || ''}
                             className=""
                             onChange={(selectedOption: any) => {
                               if (selectedOption && !selectedOption.isShowMore) {
@@ -445,8 +478,8 @@ export default function CreateMemoModal({
                             data-tooltip-content="Auto-populated from selected employee"
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-600 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 bg-gray-100 sm:text-sm sm:leading-6'
                           />
-                          <Tooltip 
-                            id="position-tooltip" 
+                          <Tooltip
+                            id="position-tooltip"
                             place="bottom"
                             style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
@@ -530,14 +563,24 @@ export default function CreateMemoModal({
                             onChange={uploadOnChange}
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100'
                           />
+                          {qrCodeUrl && !toSaveData?.qr_code && (
+                            <div className='mt-2 flex items-center gap-2'>
+                              <a href={qrCodeUrl} target='_blank' rel='noopener noreferrer'>
+                                <img src={qrCodeUrl} alt='Existing QR Code' className='w-16 h-16 object-contain border rounded' />
+                              </a>
+                              <span className='text-xs text-gray-500'>Existing QR Code</span>
+                            </div>
+                          )}
                           {qrCodeExist ? (
                             <button
                               type='button'
                               className='underline text-savoy-blue text-sm mt-1'
                               onClick={() => {
-                                delete toSaveData.qr_code;
-                                setToSaveData({ ...toSaveData });
+                                const updated = { ...(toSaveData || {}) };
+                                delete updated.qr_code;
+                                setToSaveData(updated);
                                 setQrCodeExist(false);
+                                setQrCodeUrl('');
                                 if (qrCodeInputRef.current) {
                                   qrCodeInputRef.current.value = '';
                                 }
@@ -560,6 +603,23 @@ export default function CreateMemoModal({
                             onDrop={handleDrop}
                             className='block w-full rounded-md border-0 py-8 px-3 text-[#ACB9CB] shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6 text-center'
                           >
+                            {existingAttachments.length > 0 && (
+                              <div className='mb-4'>
+                                <p className='text-xs text-gray-600 mb-2'>Existing Attachments:</p>
+                                {existingAttachments.map((att) => (
+                                  <div key={att.id} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
+                                    <div className='flex-1 min-w-0'>
+                                      <p className='text-sm text-slate-800 font-light truncate' title={att.attachment_name}>
+                                        {att.attachment_name}
+                                      </p>
+                                    </div>
+                                    <a href={att.attachment} target='_blank' rel='noopener noreferrer' className='cursor-pointer ml-2'>
+                                      <EyePassword visible />
+                                    </a>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                             <label
                               className={`${
                                 files.length === 0
@@ -579,7 +639,7 @@ export default function CreateMemoModal({
                                 accept='application/msword, application/pdf, text/csv, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                               />
                             </label>
-                            
+
                             {/* Show uploaded files */}
                             {files.length > 0 && (
                               <div className='mb-4'>
@@ -590,10 +650,10 @@ export default function CreateMemoModal({
                                       <p className='text-sm text-slate-800 font-light truncate' title={file.name}>{file.name}</p>
                                     </div>
                                     <div className='flex gap-2 items-center'>
-                                      <a 
-                                        href={URL.createObjectURL(file)} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                      <a
+                                        href={URL.createObjectURL(file)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className='cursor-pointer'
                                         onClick={(e) => e.stopPropagation()}
                                       >
@@ -614,7 +674,7 @@ export default function CreateMemoModal({
                                 ))}
                               </div>
                             )}
-                            
+
                             {/* Show "Add more files" option when files exist */}
                             {files.length > 0 && (
                               <label className='text-sm text-blue-600 cursor-pointer hover:underline'>
@@ -643,10 +703,10 @@ export default function CreateMemoModal({
                         const titleValue = watch('title');
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         let hasErrors = false;
-                        
+
                         // Clear any existing errors first
                         clearErrors(['title', 'to']);
-                        
+
                         // Validate title field
                         if (!titleValue || titleValue === "") {
                           setError("title", {
@@ -655,7 +715,7 @@ export default function CreateMemoModal({
                           });
                           hasErrors = true;
                         }
-                        
+
                         // Validate To field
                         if (tagsTo.length === 0) {
                           setError("to", {
@@ -691,9 +751,9 @@ export default function CreateMemoModal({
                       }}
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
-                      disabled={isLoading}
+                      disabled={updateMutation.isLoading}
                     >
-                      {isLoading && (
+                      {updateMutation.isLoading && (
                         <div role='status'>
                           <svg
                             aria-hidden='true'
@@ -714,7 +774,7 @@ export default function CreateMemoModal({
                           <span className='sr-only'>Loading...</span>
                         </div>
                       )}
-                      {!isLoading && 'Create'}
+                      {!updateMutation.isLoading && 'Save'}
                     </button>
                     <button
                       type='button'

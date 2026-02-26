@@ -32,6 +32,11 @@ export interface DirectiveData {
   attachment?: string; // Backward compatibility field - URL of first attachment
 }
 
+// MemoFormData — form state type (extends DirectiveData with UI-only fields)
+export interface MemoFormData extends DirectiveData {
+  employee_id?: string | number | null; // UI-only: seeds EmployeeSelect; not sent to backend
+}
+
 export interface PolicyField {
   inputLabel: string;
   inputName: string
