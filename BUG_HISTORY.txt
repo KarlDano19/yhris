@@ -109,6 +109,89 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-012
+DATE FILED: 2026-02-26
+DATE FIXED: 2026-02-26
+CLIENT/REPORTER: Internal Dev
+
+ISSUE DESCRIPTION:
+The Email Monitoring list and detail views always displayed the email status as "Sent"
+(shown as "Success" in the modal), even for emails that had not been sent (is_send=False).
+
+Root cause: Both EmailMonitoringDetailViewSerializer and EmailMonitoringTableViewSerializer
+converted the boolean is_send field to a human-readable string:
+  response["status"] = "Sent" if getattr(instance, "is_send", False) else "Not Sent"
+
+The frontend evaluated this string with a truthiness check. Since "Not Sent" is a
+non-empty string, it evaluated as truthy → always showed "Success" / "Sent" in the UI.
+
+DESIRED OUTCOME:
+- Both serializers expose status as a raw boolean (true/false) in the API response.
+- The frontend reads the boolean and renders "Sent" (green) or "Not Sent" (red) correctly.
+- Clicking a "Not Sent" row in the table opens a modal showing "Not Sent", not "Success".
+
+FILES CHANGED:
+Backend:
+- app/serializers/email_monitoring.py (N/A - backend changes tracked in BE repo)
+
+Frontend:
+- src/components/pages/(auth)/employer/audit-logs/modals/ViewEmailMonitoringLogDetails.tsx
+- src/components/pages/(auth)/employer/audit-logs/tabs/EmailMonitoring.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - tracked in BE repo)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A - no model changes)
+☐ Serializers tested (N/A - tracked in BE repo)
+☐ Views/API endpoints tested (N/A - tracked in BE repo)
+☐ Permissions tested (N/A - no permission changes)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A - no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual testing - table row colors correct, modal STATUS label correct)
+☐ Custom hooks tested (N/A - no hook changes)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☑ API integration tests completed (manual - verified boolean in network response)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (is_send=True shows "Sent" green, is_send=False shows "Not Sent" red)
+☐ Cross-browser testing completed (pending deployment)
+☐ Mobile responsiveness verified (N/A - no layout changes)
+
+FIX EXPLANATION:
+Two-part fix:
+
+1. Backend (app/serializers/email_monitoring.py — see BE repo HRIS-2026-009):
+   In both EmailMonitoringDetailViewSerializer and EmailMonitoringTableViewSerializer,
+   changed the status assignment from:
+     response["status"] = "Sent" if getattr(instance, "is_send", False) else "Not Sent"
+   to:
+     response["status"] = bool(getattr(instance, "is_send", False))
+   The API now returns "status": true or "status": false (JSON boolean).
+
+2. Frontend:
+   - ViewEmailMonitoringLogDetails.tsx (modal): Changed the STATUS display from
+     `emailRecord?.is_send ? 'Success' : 'Unsuccessful'` to `logDetails?.status ? 'Sent' : 'Not Sent'`.
+     This reads the boolean directly from the top-level API response, bypassing the
+     fragile extractEmailRecord() path that was losing the boolean type.
+   - EmailMonitoring.tsx (table): Changed from hardcoded 'Success' fallback via
+     `item.applicant_talent_email_monitoring_record?.status` to `item.status ? 'Sent' : 'Not Sent'`
+     with dynamic Tailwind color (text-green-500 for sent, text-red-500 for not sent).
+
+================================================================================
+
 FEATURE ID: HRIS-011
 DATE FILED: 2026-02-19
 DATE FIXED: 2026-02-19
