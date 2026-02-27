@@ -294,11 +294,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
                   <p
-                    className='font-bold hover:underline cursor-pointer'
+                    className={`font-bold ${item.is_sent ? 'hover:underline cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
                     onClick={() => {
+                      if (!item.is_sent) return;
                       setSelectedMemoTitle(item);
                       setIsEmployeeResponsesModalOpen(true);
                     }}
+                    title={!item.is_sent ? 'Send the directive first to view responses' : undefined}
                   >
                     View Responses
                   </p>
