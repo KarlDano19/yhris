@@ -49,7 +49,7 @@ export default function CreateEditEmailTemplateModal({
   const [inputBcc, setInputBcc] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<Array<{id: number; attachment: string; created_at: string}>>([]);
+  const [existingAttachments, setExistingAttachments] = useState<Array<{id: number; attachment: string; file_size: number; created_at: string}>>([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<number[]>([]);
   const [isToFocused, setIsToFocused] = useState(false);
   const [isCcFocused, setIsCcFocused] = useState(false);
@@ -209,15 +209,20 @@ export default function CreateEditEmailTemplateModal({
     e.preventDefault();
     e.stopPropagation();
     const droppedFiles = Array.from(e?.dataTransfer?.files || []);
-    
+
     if (droppedFiles.length > 0) {
+      const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
+      const existingSize = existingAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+      const currentTotalSize = existingSize + files.reduce((sum, f) => sum + f.size, 0);
+      let runningTotal = currentTotalSize;
       const validFiles: File[] = [];
+
       for (const file of droppedFiles) {
-        // Check file size (10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+        if (runningTotal + file.size > MAX_TOTAL_BYTES) {
+          toast.custom(() => <CustomToast message={`Cannot add "${file.name}": total attachments would exceed the 10MB limit.`} type='error' />, { duration: 2000 });
           continue;
         }
+        runningTotal += file.size;
         validFiles.push(file);
       }
       if (validFiles.length > 0) {
@@ -230,21 +235,25 @@ export default function CreateEditEmailTemplateModal({
     e.preventDefault();
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
+      const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
+      const existingSize = existingAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+      const currentTotalSize = existingSize + files.reduce((sum, f) => sum + f.size, 0);
+      let runningTotal = currentTotalSize;
       const validFiles: File[] = [];
-      
+
       for (const file of selectedFiles) {
-        // Check file size (10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+        if (runningTotal + file.size > MAX_TOTAL_BYTES) {
+          toast.custom(() => <CustomToast message={`Cannot add "${file.name}": total attachments would exceed the 10MB limit.`} type='error' />, { duration: 2000 });
           continue;
         }
+        runningTotal += file.size;
         validFiles.push(file);
       }
-      
+
       if (validFiles.length > 0) {
         setFiles(prev => [...prev, ...validFiles]);
       }
-      
+
       // Clear the file input
       e.target.value = '';
     }
@@ -509,8 +518,8 @@ export default function CreateEditEmailTemplateModal({
                                 <p className='text-xs text-gray-600 mb-2'>Existing Attachments:</p>
                                 {existingAttachments.map((attachment) => (
                                   <div key={attachment.id} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
-                                    <div className='flex-1'>
-                                      <p className='text-sm text-slate-800 font-light'>
+                                    <div className='flex-1 min-w-0'>
+                                      <p className='text-sm text-slate-800 font-light truncate'>
                                         {attachment.attachment.split('/').pop()}
                                       </p>
                                     </div>
@@ -546,8 +555,8 @@ export default function CreateEditEmailTemplateModal({
                                 <p className='text-xs text-gray-600 mb-2'>New Files to Upload:</p>
                                 {files.map((file, index) => (
                                   <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
-                                    <div className='flex-1'>
-                                      <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                    <div className='flex-1 min-w-0'>
+                                      <p className='text-sm text-slate-800 font-light truncate'>{file.name}</p>
                                     </div>
                                     <div className='flex gap-2 items-center'>
                                       <a 
@@ -592,7 +601,15 @@ export default function CreateEditEmailTemplateModal({
                               </label>
                             )}
                           </div>
-                          <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
+                          {(() => {
+                            const existingSize = existingAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+                            const remainingMB = 10 - (existingSize + files.reduce((sum, f) => sum + f.size, 0)) / (1024 * 1024);
+                            if (remainingMB < 0) {
+                              return <h1 className='text-xs pl-2'><span className='text-red-500'>{Math.abs(remainingMB).toFixed(1)} MB exceeds</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                            }
+                            const colorClass = remainingMB < 1 ? 'text-red-500' : remainingMB < 3 ? 'text-orange-500' : 'text-green-600';
+                            return <h1 className='text-xs pl-2'><span className={colorClass}>{remainingMB.toFixed(1)} MB remaining</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                          })()}
                         </div>
                       </div>
                     </div>
