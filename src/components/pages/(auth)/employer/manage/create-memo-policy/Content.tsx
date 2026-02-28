@@ -669,7 +669,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         <ConfirmModal
           isOpen={isSendConfirmOpen}
           setIsOpen={setIsSendConfirmOpen}
-          message={"SEND EMAIL\nAre you sure you want to send this email?"}
+          message={"Are you sure you want to send this email?"}
           confirmAction={confirmSend}
           cancelAction={() => {
             setIsSendConfirmOpen(false);
