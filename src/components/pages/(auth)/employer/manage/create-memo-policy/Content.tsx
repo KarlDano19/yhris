@@ -22,7 +22,7 @@ import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
 import EditMemoModal from './modals/EditMemoModal';
 import EditPolicyModal from './modals/EditPolicyModal';
-import NoticeModal from './modals/NoticeModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
@@ -666,31 +666,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       {/* Send Email Confirmation Modal */}
       {isSendConfirmOpen && (
-        <NoticeModal isOpen={isSendConfirmOpen} setIsOpen={setIsSendConfirmOpen}>
-          <div className="text-center">
-            <h3 className="text-xl font-bold">SEND EMAIL</h3>
-            <p className="text-base text-gray-600 mt-2">Are you sure you want to send this email?</p>
-            <div className="mt-4 flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSendConfirmOpen(false);
-                  setPendingSendId(null);
-                }}
-                className="text-lg text-center flex-1 font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all"
-              >
-                CANCEL
-              </button>
-              <button
-                type="button"
-                onClick={confirmSend}
-                className="text-lg text-center flex-1 font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
-              >
-                SEND
-              </button>
-            </div>
-          </div>
-        </NoticeModal>
+        <ConfirmModal
+          isOpen={isSendConfirmOpen}
+          setIsOpen={setIsSendConfirmOpen}
+          message={"SEND EMAIL\nAre you sure you want to send this email?"}
+          confirmAction={confirmSend}
+          cancelAction={() => {
+            setIsSendConfirmOpen(false);
+            setPendingSendId(null);
+          }}
+          isLoading={sendMutation.isLoading}
+        />
       )}
 
       <Tooltip id='search-tooltip'/>
