@@ -666,25 +666,25 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       {isSendConfirmOpen && (
         <NoticeModal isOpen={isSendConfirmOpen} setIsOpen={setIsSendConfirmOpen}>
           <div className="text-center">
-            <h3 className="text-lg font-semibold">Send Email</h3>
+            <h3 className="text-xl font-bold">SEND EMAIL</h3>
             <p className="text-base text-gray-600 mt-2">Are you sure you want to send this email?</p>
-            <div className="mt-2 flex justify-center gap-4">
+            <div className="mt-4 flex gap-3">
+              <button
+                type="button"
+                onClick={confirmSend}
+                className="text-lg text-center flex-1 font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
+              >
+                SEND
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   setIsSendConfirmOpen(false);
                   setPendingSendId(null);
                 }}
-                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700"
+                className="text-lg text-center flex-1 font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all"
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmSend}
-                className="px-4 py-2 rounded-md bg-green-600 text-white"
-              >
-                Send
+                CANCEL
               </button>
             </div>
           </div>
