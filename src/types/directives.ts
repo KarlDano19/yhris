@@ -42,8 +42,13 @@ export interface PolicyField {
   inputName: string
 }
 
+export interface MaskedEmail {
+  index: number;
+  masked: string;
+}
+
 export interface SendVerificationRequest {
-  email: string;
+  emailIndex: number;
 }
 
 export interface SendVerificationResponse {
@@ -58,7 +63,7 @@ export interface SendVerificationError {
 
 export interface VerifyDirectiveParams {
   directiveId: number;
-  email: string;
+  emailIndex: number;
   code: string;
 }
 
