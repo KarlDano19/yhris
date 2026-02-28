@@ -293,17 +293,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
-                  <p
-                    className={`font-bold ${item.is_sent ? 'hover:underline cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+                  <button
+                    type='button'
+                    disabled={!item.is_sent}
                     onClick={() => {
-                      if (!item.is_sent) return;
                       setSelectedMemoTitle(item);
                       setIsEmployeeResponsesModalOpen(true);
                     }}
-                    title={!item.is_sent ? 'Send the directive first to view responses' : undefined}
+                    className={`font-bold bg-transparent border-0 p-0 ${item.is_sent ? 'hover:underline cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                    data-tooltip-id={!item.is_sent ? 'view-responses-tooltip' : undefined}
+                    data-tooltip-content='Send the directive first to view responses'
                   >
                     View Responses
-                  </p>
+                  </button>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <div className='flex items-center justify-center gap-3'>
@@ -671,13 +673,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className="mt-4 flex gap-3">
               <button
                 type="button"
-                onClick={confirmSend}
-                className="text-lg text-center flex-1 font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
-              >
-                SEND
-              </button>
-              <button
-                type="button"
                 onClick={() => {
                   setIsSendConfirmOpen(false);
                   setPendingSendId(null);
@@ -685,6 +680,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 className="text-lg text-center flex-1 font-bold leading-6 text-savoy-blue shadow-sm border border-savoy-blue py-3 px-6 rounded-lg transition-all"
               >
                 CANCEL
+              </button>
+              <button
+                type="button"
+                onClick={confirmSend}
+                className="text-lg text-center flex-1 font-bold leading-6 text-white bg-savoy-blue shadow-sm p-3 rounded-md transition-all"
+              >
+                SEND
               </button>
             </div>
           </div>
