@@ -16,6 +16,7 @@ import VerificationCodeModal from './modals/VerificationCodeModal';
 import FilePreviewModal from './modals/FilePreviewModal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
+import { linkify } from '@/helpers/linkify';
 
 import 'react-quill/dist/quill.snow.css';
 
@@ -26,14 +27,14 @@ const Content = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState('');
-  
+
   // File preview states
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showFilePreviewModal, setShowFilePreviewModal] = useState(false);
   const [filePreviewUrl, setFilePreviewUrl] = useState('');
   const [filePreviewTitle, setFilePreviewTitle] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,10 +62,10 @@ const Content = () => {
 
   const { mutate: verifyDirective, isLoading: isVerifying } = useVerifyDirective();
 
-  // Render HTML formatted body content
+  // Render HTML formatted body content with linkified URLs
   const renderBodyContent = (bodyContent: any) => {
     if (!bodyContent) return null;
-    const markup = { __html: bodyContent };
+    const markup = { __html: linkify(bodyContent) };
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
@@ -283,36 +284,36 @@ const Content = () => {
             {directive.custom_policy_fields.map((field, index) => (
               <div className="mb-6" key={index}>
                 <h3 className="font-semibold text-lg">{field.inputLabel}</h3>
-                <p>{field.inputName}</p>
+                <p dangerouslySetInnerHTML={{ __html: linkify(field.inputName) }} />
               </div>
             ))}
-            
+
             {/* Provisions sections */}
             {directive.eligibility && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Eligibility</h3>
-                <p>{directive.eligibility}</p>
+                <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
               </div>
             )}
-            
+
             {directive.application && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Application</h3>
-                <p>{directive.application}</p>
+                <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
               </div>
             )}
-            
+
             {directive.coverage && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Coverage</h3>
-                <p>{directive.coverage}</p>
+                <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
               </div>
             )}
-            
+
             {directive.termination && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Termination</h3>
-                <p>{directive.termination}</p>
+                <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
               </div>
             )}
           </div>
@@ -349,36 +350,36 @@ const Content = () => {
               {legacyPolicyFields.map((field, index) => (
                 <div className="mb-6" key={index}>
                   <h3 className="font-semibold text-lg">{field.fieldName.charAt(0).toUpperCase() + field.fieldName.slice(1)}</h3>
-                  <p>{field.fieldValue}</p>
+                  <p dangerouslySetInnerHTML={{ __html: linkify(field.fieldValue) }} />
                 </div>
               ))}
-              
+
               {/* Render provision fields */}
               {directive.eligibility && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Eligibility</h3>
-                  <p>{directive.eligibility}</p>
+                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.eligibility) }} />
                 </div>
               )}
-              
+
               {directive.application && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Application</h3>
-                  <p>{directive.application}</p>
+                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.application) }} />
                 </div>
               )}
-              
+
               {directive.coverage && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Coverage</h3>
-                  <p>{directive.coverage}</p>
+                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.coverage) }} />
                 </div>
               )}
-              
+
               {directive.termination && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Termination</h3>
-                  <p>{directive.termination}</p>
+                  <p dangerouslySetInnerHTML={{ __html: linkify(directive.termination) }} />
                 </div>
               )}
             </div>

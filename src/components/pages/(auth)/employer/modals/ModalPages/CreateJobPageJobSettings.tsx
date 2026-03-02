@@ -780,6 +780,7 @@ export default function CreateJobPageJobSettings({
                   <PresetQuestionOptions
                     onSelectOption={handleSelectPreset}
                     selectedOptions={selectedPresets}
+                    customQuestionsCount={customQuestions.length}
                   />
                 )}
               </div>

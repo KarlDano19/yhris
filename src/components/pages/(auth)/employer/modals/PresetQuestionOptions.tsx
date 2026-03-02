@@ -9,6 +9,7 @@ interface PresetOption {
 interface PresetQuestionOptionsProps {
   onSelectOption: (option: string) => void;
   selectedOptions: string[];
+  customQuestionsCount?: number;
 }
 
 // Predefined questions for preset options
@@ -66,7 +67,7 @@ export const PRESET_QUESTIONS = {
   }
 };
 
-const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectOption, selectedOptions }) => {
+const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectOption, selectedOptions, customQuestionsCount }) => {
   const presetOptions: PresetOption[] = [
     { id: 'background-check', label: 'Background Check' },
     { id: 'drivers-license', label: 'Driver\'s License' },
@@ -82,9 +83,11 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
 
   ];
 
-  // Check if any custom questions are selected and count them
-  const customQuestionsCount = selectedOptions.filter(option => option.startsWith('custom-question')).length;
-  const hasCustomQuestions = customQuestionsCount > 0;
+  // Use provided customQuestionsCount if given; otherwise fall back to counting entries in selectedOptions
+  const resolvedCustomQuestionsCount = typeof customQuestionsCount === 'number'
+    ? customQuestionsCount
+    : selectedOptions.filter(option => option.startsWith('custom-question')).length;
+  const hasCustomQuestions = resolvedCustomQuestionsCount > 0;
 
   return (
     <div className="mt-4">
@@ -107,9 +110,9 @@ const PresetQuestionOptions: React.FC<PresetQuestionOptionsProps> = ({ onSelectO
                     : 'bg-blue-100 text-blue-600 border border-transparent font-semibold'
               }`}
             >
-              {option.id === 'custom-question' && customQuestionsCount > 0 ? (
+              {option.id === 'custom-question' && resolvedCustomQuestionsCount > 0 ? (
                 <span className="mr-1 bg-white text-savoy-blue px-1.5 py-0.5 rounded-full text-xs font-bold">
-                  {customQuestionsCount}
+                  {resolvedCustomQuestionsCount}
                 </span>
               ) : isSelected ? (
                 <span className="mr-1 text-white">✓</span>

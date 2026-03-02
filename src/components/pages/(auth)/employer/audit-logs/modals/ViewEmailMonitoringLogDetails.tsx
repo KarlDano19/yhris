@@ -253,7 +253,7 @@ export default function ViewEmailMonitoringLogDetails({
                     <div>
                       <label className='text-xs text-gray-500 uppercase'>Status</label>
                       <div className='text-sm font-medium text-gray-900 mt-1'>
-                        {emailRecord?.is_send ? 'Success' : 'Unsuccessful'}
+                        {logDetails?.status ? 'Sent' : 'Not Sent'}
                       </div>
                     </div>
                   </div>

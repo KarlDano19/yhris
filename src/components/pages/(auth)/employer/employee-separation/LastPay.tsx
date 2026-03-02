@@ -24,6 +24,8 @@ const LastPay = ({
   lastPayAttachment,
   lastPayAttachments = [],
   isDocumentsReceived,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isLastPayReleased: boolean;
@@ -32,6 +34,8 @@ const LastPay = ({
   lastPayAttachments?: LastPayAttachment[];
   setIsLastPayModalOpen: Dispatch<T_LastPayModal>;
   isDocumentsReceived: boolean;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
@@ -46,8 +50,8 @@ const LastPay = ({
 
   const hasAttachment = attachmentsToDisplay.length > 0;
 
-  // Disabled if documents haven't been received yet
-  const isDisabled = !isDocumentsReceived || isLastPayReleased;
+  // Disabled if already released or if quit claim is in progress
+  const isDisabled = isLastPayReleased || isQuitclaimSigned || isQuitclaimReceived;
   
   return (
     <>
@@ -60,7 +64,7 @@ const LastPay = ({
         )}
         disabled={isDisabled}
         data-tooltip-id='last-pay-tooltip'
-        data-tooltip-content={!isDocumentsReceived ? 'Documents must be received first' : ''}
+        data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot release last pay after quit claim' : isLastPayReleased ? 'Last pay already released' : 'Release last pay'}
         data-tooltip-place='bottom'
         onClick={() =>
           !isDisabled &&

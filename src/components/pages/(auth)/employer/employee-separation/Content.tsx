@@ -513,6 +513,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
   }, [isLetterModalOpen, selectedLetter]);
 
+  // Memoize default recipients
+  const useMemoDefaultRecipients = (modalId?: string | number) =>
+    useMemo(() => {
+      if (!modalId) return [];
+      const it = separationItems.find((s: any) => s.id === modalId);
+      return it?.email ? [it.email] : [];
+    }, [separationItems, modalId]);
+
+  const memoDefaultRecipientsDocument = useMemoDefaultRecipients(isDocumentModalOpen?.id);
+  const memoDefaultRecipientsLastPay = useMemoDefaultRecipients(isLastPayModalOpen?.id);
+  const memoDefaultRecipientsQuitclaim = useMemoDefaultRecipients(isQuitclaimModalOpen?.id);
+
   const memoDefaultRecipients = useMemo(() => {
     if (!isLetterModalOpen?.id) return [];
     const item = separationItems.find((item: any) => item.id === isLetterModalOpen.id);
@@ -660,6 +672,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               employerName={item.employer_name}
               effectiveDate={item.effective_date || item.date_of_separation}
               menuKey={menuKey}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -674,6 +688,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-sign documents`] || false}
               isLetterReceived={item.isLetterReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -685,6 +701,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               lastPayAttachments={item.last_pay_attachments}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
               isDocumentsReceived={item.isDocumentsReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -951,7 +969,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isDocumentModalOpen}
           onClose={() => setIsDocumentModalOpen(null)}
           onSubmit={handleSignDocumentsSubmit}
-          defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsDocument}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send"
@@ -964,7 +982,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isLastPayModalOpen}
           onClose={() => setIsLastPayModalOpen(null)}
           onSubmit={handleLastPaySubmit}
-          defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsLastPay}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send"
@@ -977,7 +995,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isQuitclaimModalOpen}
           onClose={() => setIsQuitclaimModalOpen(null)}
           onSubmit={handleQuitclaimSubmit}
-          defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsQuitclaim}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send"

@@ -6,6 +6,7 @@ import { T_DocumentsModal } from '@/types/globals';
 import classNames from '@/helpers/classNames';
 import AttachmentViewModal from './modals/AttachmentViewModal';
 import AttachmentListModal from './modals/AttachmentListModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -27,6 +28,8 @@ const SignDocuments = ({
   setReceived,
   isLoading,
   isLetterReceived,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isDocumentsSent: boolean;
@@ -38,13 +41,16 @@ const SignDocuments = ({
   setReceived: any;
   isLoading: boolean;
   isLetterReceived: boolean;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
   const [selectedAttachmentUrl, setSelectedAttachmentUrl] = useState<string | null>(null);
-  
-  // Disabled if letter hasn't been received yet
-  const isDisabled = !isLetterReceived || isDocumentsSent;
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
+
+  // Disabled if already sent or if quit claim is in progress
+  const isDisabled = isDocumentsSent || isQuitclaimSigned || isQuitclaimReceived;
   
   // Get attachments to display - prefer documentAttachments array, fallback to single documentsAttachment
   const attachmentsToDisplay: DocumentAttachment[] = documentAttachments && documentAttachments.length > 0
@@ -68,7 +74,7 @@ const SignDocuments = ({
           )}
           disabled={isDisabled}
           data-tooltip-id='sign-documents-tooltip'
-          data-tooltip-content={!isLetterReceived ? 'Letter must be received first' : ''}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot send documents after quit claim' : isDocumentsSent ? 'Documents already sent' : 'Send documents'}
           data-tooltip-place='bottom'
           onClick={() =>
             setIsDocumentModalOpen({
@@ -88,10 +94,10 @@ const SignDocuments = ({
               : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isDocumentsSent || isDocumentsReceived || isLoading}
-          onClick={() => setReceived(id, 'sign documents')}
+          disabled={isDocumentsReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
+          onClick={() => setIsConfirmReceiveOpen(true)}
           data-tooltip-id='sign-documents-received-tooltip'
-          data-tooltip-content={!isDocumentsSent ? 'Documents must be sent first' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot receive documents after quit claim' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
           data-tooltip-place='bottom'
         >
           {isLoading && (
@@ -181,6 +187,17 @@ const SignDocuments = ({
         title="Sign Documents Attachments"
       />
     )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the documents as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'sign documents');
+      }}
+      isLoading={false}
+    />
     </>
   );
 };

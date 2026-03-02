@@ -6,6 +6,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Tooltip } from 'react-tooltip';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import classNames from '@/helpers/classNames';
 import AttachmentViewModal from './modals/AttachmentViewModal';
@@ -42,6 +43,8 @@ export default function SeparationLetter({
   employerName,
   effectiveDate,
   menuKey,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isLetterSent: boolean;
@@ -56,10 +59,13 @@ export default function SeparationLetter({
   employerName?: string;
   effectiveDate?: string;
   menuKey?: number;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isCreateLetterModalOpen, setIsCreateLetterModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
   const [selectedLetterType, setSelectedLetterType] = useState<'Acceptance' | 'Separation'>('Acceptance');
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -101,12 +107,14 @@ export default function SeparationLetter({
   };
  
   // Determine send button disabled state and title
-  const sendDisabled = isLoading || isLetterReceived;
-  const sendTitle = isLetterReceived
-    ? 'Letter already received'
-    : (letterAttachment
-        ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
-        : 'Click to Generate & Send Letter');
+  const sendDisabled = isLoading || isLetterReceived || isQuitclaimSigned || isQuitclaimReceived;
+  const sendTitle = isQuitclaimSigned || isQuitclaimReceived
+    ? 'Cannot send letter after quit claim'
+    : isLetterReceived
+      ? 'Letter already received'
+      : (letterAttachment
+          ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
+          : 'Click to Generate & Send Letter');
 
   return (
     <>
@@ -120,7 +128,7 @@ export default function SeparationLetter({
                 <SmartButton
                   id="create-separation-btn"
                   className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80'
-                  disabled={isLetterSent}
+                  disabled={isLetterSent || isQuitclaimSigned || isQuitclaimReceived}
                 >
                   <Menu.Button
                     ref={menuButtonRef}
@@ -211,10 +219,10 @@ export default function SeparationLetter({
                   : 'bg-blue-100 text-blue-400',
                 'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
               )}
-              disabled={!isLetterSent || isLetterReceived || isLoading}
-              onClick={() => setReceived(id, 'letters')}
+              disabled={isLetterReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
+              onClick={() => setIsConfirmReceiveOpen(true)}
               data-tooltip-id='letter-received-tooltip'
-              data-tooltip-content={!isLetterSent ? 'Letter must be sent first' : isLetterReceived ? 'Letter already received' : 'Mark letter as received'}
+              data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot mark letter as received after quit claim' : isLetterReceived ? 'Letter already received' : 'Mark letter as received'}
               data-tooltip-place='bottom'
             >
               {isLoading && (
@@ -319,6 +327,17 @@ export default function SeparationLetter({
         title="Letter Attachments"
       />
     )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the letter as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'letters');
+      }}
+      isLoading={false}
+    />
     </>
   );
 }

@@ -33,6 +33,8 @@ export interface OrientItem {
   };
   isContractSent: boolean;
   isIntroduced: boolean;
+  isIntroductionReceived: boolean;
+  introductionReceivedDate?: string;
   actionType: string;
   emailType: string;
 }
