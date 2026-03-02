@@ -22,7 +22,7 @@ import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
 import EditMemoModal from './modals/EditMemoModal';
 import EditPolicyModal from './modals/EditPolicyModal';
-import NoticeModal from './modals/NoticeModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
@@ -293,15 +293,19 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
-                  <p
-                    className='font-bold hover:underline cursor-pointer'
+                  <button
+                    type='button'
+                    disabled={!item.is_sent}
                     onClick={() => {
                       setSelectedMemoTitle(item);
                       setIsEmployeeResponsesModalOpen(true);
                     }}
+                    className={`font-bold bg-transparent border-0 p-0 ${item.is_sent ? 'hover:underline cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                    data-tooltip-id={!item.is_sent ? 'view-responses-tooltip' : undefined}
+                    data-tooltip-content='Send the directive first to view responses'
                   >
                     View Responses
-                  </p>
+                  </button>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
                   <div className='flex items-center justify-center gap-3'>
@@ -662,31 +666,17 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
       {/* Send Email Confirmation Modal */}
       {isSendConfirmOpen && (
-        <NoticeModal isOpen={isSendConfirmOpen} setIsOpen={setIsSendConfirmOpen}>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">Send Email</h3>
-            <p className="text-base text-gray-600 mt-2">Are you sure you want to send this email?</p>
-            <div className="mt-2 flex justify-center gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSendConfirmOpen(false);
-                  setPendingSendId(null);
-                }}
-                className="px-4 py-2 rounded-md bg-gray-200 text-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmSend}
-                className="px-4 py-2 rounded-md bg-green-600 text-white"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </NoticeModal>
+        <ConfirmModal
+          isOpen={isSendConfirmOpen}
+          setIsOpen={setIsSendConfirmOpen}
+          message={"Are you sure you want to send this email?"}
+          confirmAction={confirmSend}
+          cancelAction={() => {
+            setIsSendConfirmOpen(false);
+            setPendingSendId(null);
+          }}
+          isLoading={sendMutation.isLoading}
+        />
       )}
 
       <Tooltip id='search-tooltip'/>
