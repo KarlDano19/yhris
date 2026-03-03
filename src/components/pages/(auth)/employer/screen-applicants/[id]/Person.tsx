@@ -5,19 +5,21 @@ import { useParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import ArchiveButton from '../ArchiveButton';
-import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
 
-import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
-
 import StateContext from '../contexts/StateContext';
 import { initialActionState } from '../lib/initialActionState';
+
+import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
+
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 
 import { ArrowRightStartOnRectangleIcon, CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
+
 import CheckListIcon from '@/svg/CheckListIcon';
 
 const menuList = [
