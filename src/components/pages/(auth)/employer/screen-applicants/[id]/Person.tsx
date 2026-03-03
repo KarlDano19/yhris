@@ -1,18 +1,24 @@
-import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
-import ArchiveButton from '../ArchiveButton';
-import Image from 'next/image';
-import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
-import CheckListIcon from '@/svg/CheckListIcon';
-import { initialActionState } from '../lib/initialActionState';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import StateContext from '../contexts/StateContext';
-import classNames from '@/helpers/classNames';
-import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+
 import { useParams } from 'next/navigation';
-import { formatDateToLocal } from '@/helpers/date';
+
 import { useQueryClient } from '@tanstack/react-query';
-import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+
+import ArchiveButton from '../ArchiveButton';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+
+import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+
+import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
+
+import StateContext from '../contexts/StateContext';
+import { initialActionState } from '../lib/initialActionState';
+import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
+
+import { ArrowRightStartOnRectangleIcon, CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
+import CheckListIcon from '@/svg/CheckListIcon';
 
 const menuList = [
   {
@@ -43,6 +49,13 @@ const menuList = [
     modalTitle: 'Schedule Interview',
     name: 'Schedule Interview',
     icon: <CalendarIcon className='w-4 h-4' />,
+  },
+  {
+    id: 5,
+    whichModal: 'MOVE_TO_JOB',
+    modalTitle: 'Transfer Applicant to Another Job',
+    name: 'Move to Another Job',
+    icon: <ArrowRightStartOnRectangleIcon className='w-4 h-4' />,
   },
 ];
 
@@ -82,13 +95,13 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
   );
 };
 
-export default function Person({ 
-  applicant, 
-  isOpenMenu, 
-  setOpenMenuId, 
+export default function Person({
+  applicant,
+  isOpenMenu,
+  setOpenMenuId,
   stage,
   permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
-  isStageDisabled = false 
+  isStageDisabled = false,
 }: PropTypes & {
   permissions?: {
     can_view: boolean;
@@ -314,6 +327,7 @@ export default function Person({
                 if (whichModal === 'CHECKLIST') return permissions.can_update;
                 if (whichModal === 'SEND_EMAIL') return permissions.can_update;
                 if (whichModal === 'SCHEDULE_INTERVIEW') return permissions.can_update;
+                if (whichModal === 'MOVE_TO_JOB') return permissions.can_update;
                 return true;
               };
 
@@ -323,14 +337,14 @@ export default function Person({
 
               return (
                 <React.Fragment key={id}>
-                  {isPassedFinalInterview && name !== 'Checklist' && (
+                  {isPassedFinalInterview && name !== 'Checklist' && whichModal !== 'MOVE_TO_JOB' && (
                     <li>
                       <button
                         onClick={() =>
                           setActionState({
                             ...initialActionState,
                             email: applicant.email,
-                            applicantId: applicant.id,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
                             stageId: stage.id,
                             modal: { whichModal, isOpen: true, title: modalTitle },
                           })
@@ -354,7 +368,7 @@ export default function Person({
                           setActionState({
                             ...initialActionState,
                             email: applicant.email,
-                            applicantId: applicant.id,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
                             stageId: stage.id,
                             modal: { whichModal, isOpen: true, title: modalTitle },
                             isFinalStage: isFinalStage,

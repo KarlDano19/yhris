@@ -25,6 +25,7 @@ import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
 import StageAssignment from '../modals/StageAssignment';
+import MoveToAnotherJobModal from './modals/MoveToAnotherJobModal';
 import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
@@ -124,8 +125,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
     return dataArchivedApplicants.filter((applicant: any) => {
-    // Only count if actually archived with rejected/withdrawn/pooling status
-    const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn' || applicant.status === 'pooling';
+    // Only count if actually archived with rejected/withdrawn/pooling/ongoing(transferred) status
+    const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn' || applicant.status === 'pooling' || applicant.status === 'ongoing';
     if (!isArchivedStatus) return false;
       
       // Check if archived within the last 30 days
@@ -578,6 +579,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     APPLICANT_FORM: {
       component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} jobPostingDetails={dataJobPostDetails} />,
     },
+    MOVE_TO_JOB: {
+      component: (
+        <MoveToAnotherJobModal
+          appliedJobId={actionState.applicantId as unknown as number}
+          currentJobPostingId={params.id as string}
+          onClose={() => setActionState(initialActionState)}
+        />
+      ),
+    },
   };
 
   const handleAddStage = () => {
@@ -960,29 +970,38 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           </div>
         </StateContext.Provider>
       )}
-      <AddApplicantModal
-        refetch={appliedApplicantRefetch}
-        isOpen={isAddApplicantModalOpen}
-        setIsOpen={setIsAddApplicantModalOpen}
-        jobPostingId={params.id as string}
-      />
-      <ArchivedApplicantsModal
-        isOpen={isArchivedApplicantsModalOpen}
-        handleClose={() => setIsArchivedApplicantsModalOpen(false)}
-        jobPostingId={params.id as string}
-        archivedApplicants={dataArchivedApplicants}
-        onUnarchive={() => {
-          appliedApplicantRefetch();
-          archivedApplicantRefetch();
-          setIsArchivedApplicantsModalOpen(false);
-        }}
-        onRefresh={archivedApplicantRefetch}
-      />
-      <NavigationModal
+
+      {isAddApplicantModalOpen && (
+        <AddApplicantModal
+          refetch={appliedApplicantRefetch}
+          isOpen={isAddApplicantModalOpen}
+          setIsOpen={setIsAddApplicantModalOpen}
+          jobPostingId={params.id as string}
+        />
+      )}
+
+      {isArchivedApplicantsModalOpen && (
+        <ArchivedApplicantsModal
+          isOpen={isArchivedApplicantsModalOpen}
+          handleClose={() => setIsArchivedApplicantsModalOpen(false)}
+          jobPostingId={params.id as string}
+          archivedApplicants={dataArchivedApplicants}
+          onUnarchive={() => {
+            appliedApplicantRefetch();
+            archivedApplicantRefetch();
+            setIsArchivedApplicantsModalOpen(false);
+          }}
+          onRefresh={archivedApplicantRefetch}
+        />
+      )}
+
+      {isNavigationModalOpen && (
+        <NavigationModal
         isOpen={isNavigationModalOpen}
         setIsOpen={setIsNavigationModalOpen}
-        jobPostingId={params.id as string}
-      />
+          jobPostingId={params.id as string}
+        />
+      )}
     </>
   );
 }
