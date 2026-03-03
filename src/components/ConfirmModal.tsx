@@ -30,7 +30,7 @@ export default function ConfirmModal({
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-black dark:bg-opacity-60 transition-opacity' />
         </Transition.Child>
 
         <div className='fixed inset-0 z-50 overflow-y-auto'>
@@ -44,14 +44,14 @@ export default function ConfirmModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white dark:bg-[var(--card-bg)] pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <div className='px-4 pt-12 pb-6'>
                   <h2 className='text-xl font-semibold text-center whitespace-pre-line'>{message}</h2>
                 </div>
                 <div className='mt-2 px-6 mb-6 flex gap-6'>
                   <button
                     type='button'
-                    className='w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue  hover:bg-gray-50 sm:mt-0'
+                    className='w-full justify-center rounded-md bg-white dark:bg-[var(--subtle-bg)] px-3 py-2 text-sm font-semibold text-savoy-blue shadow-sm ring-1 ring-inset ring-savoy-blue hover:bg-gray-50 dark:hover:bg-gray-700 sm:mt-0'
                     onClick={() => {
                       if (cancelAction) {
                         cancelAction();
@@ -75,7 +75,7 @@ export default function ConfirmModal({
                       <div role='status'>
                         <svg
                           aria-hidden='true'
-                          className='inline w-6 h-6 mr-2 text-gray-200 animate-spin fill-blue-600'
+                          className='inline w-6 h-6 mr-2 text-gray-200 dark:text-gray-600 animate-spin fill-blue-600'
                           viewBox='0 0 100 101'
                           fill='none'
                           xmlns='http://www.w3.org/2000/svg'

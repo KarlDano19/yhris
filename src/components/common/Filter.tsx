@@ -144,11 +144,11 @@ export default function Filter({
     setDraftFilters(resetState);
   };
 
-  const defaultButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white px-4 h-10 text-sm rounded-md hover:bg-gray-50";
-  
-  const smallButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white px-3 h-10 text-sm rounded-md hover:bg-gray-50";
-  
-  const connectedButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white px-3 h-10 text-sm rounded-r-md hover:bg-gray-50 border-l-0";
+  const defaultButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white dark:bg-[var(--subtle-bg)] px-4 h-10 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700";
+
+  const smallButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white dark:bg-[var(--subtle-bg)] px-3 h-10 text-sm rounded-md hover:bg-gray-50 dark:hover:bg-gray-700";
+
+  const connectedButtonClassName = "flex items-center gap-2 border border-gray-300 bg-white dark:bg-[var(--subtle-bg)] px-3 h-10 text-sm rounded-r-md hover:bg-gray-50 dark:hover:bg-gray-700 border-l-0";
 
   return (
     <div className="relative" ref={filterRef}>
@@ -171,7 +171,7 @@ export default function Filter({
         <div
           role="dialog"
           aria-label="Filter options"
-          className="absolute z-40 mt-3 right-0 w-64 rounded-xl border border-gray-200 bg-white shadow-xl"
+          className="absolute z-40 mt-3 right-0 w-64 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-[var(--subtle-bg)] shadow-xl"
         >
           <div className="p-4 space-y-4">
             {filterGroups.map((group, groupIndex) => (
@@ -186,7 +186,7 @@ export default function Filter({
                     <select
                       value={draftFilters[group.id]?.[0] || group.options[0]?.value}
                       onChange={(e) => handleOptionChange(group.id, e.target.value)}
-                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 pr-9 text-sm text-gray-700 focus:border-[#355fd0] outline-none truncate"
+                      className="w-full appearance-none rounded-md border border-gray-300 bg-gray-50 dark:bg-[var(--subtle-bg)] px-3 py-2.5 pr-9 text-sm text-gray-700 dark:text-[var(--body-text)] focus:border-[#355fd0] outline-none truncate"
                       title={group.options.find(opt => opt.value === draftFilters[group.id]?.[0])?.label || group.options[0]?.label}
                     >
                       {group.options.map((option) => (

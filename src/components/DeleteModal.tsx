@@ -95,7 +95,7 @@ export default function DeleteModal<T extends DeleteModalData = DeleteModalData>
           leaveFrom='opacity-100'
           leaveTo='opacity-0'
         >
-          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-black dark:bg-opacity-60 transition-opacity' />
         </Transition.Child>
 
         <div className='fixed inset-0 z-[9999] overflow-y-auto'>
@@ -109,7 +109,7 @@ export default function DeleteModal<T extends DeleteModalData = DeleteModalData>
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[90vw] sm:max-w-[500px] mx-2 sm:mx-4'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white dark:bg-[var(--card-bg)] pb-4 text-left shadow-xl transition-all sm:my-8 w-full max-w-[90vw] sm:max-w-[500px] mx-2 sm:mx-4'>
                 <div className='flex justify-center py-6 sm:py-8 px-2'>
                   <WarningRed />
                 </div>
@@ -121,7 +121,7 @@ export default function DeleteModal<T extends DeleteModalData = DeleteModalData>
                 <div className='flex flex-col sm:flex-row justify-center w-full px-4 space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-8 pt-6 sm:pt-10 pb-4 sm:pb-7'>
                   <button
                     type='button'
-                    className='w-full sm:w-auto sm:flex-1 max-w-[200px] sm:max-w-none mx-auto rounded-md border border-blue-600 px-6 sm:px-12 lg:px-20 py-2.5 sm:py-2 bg-white text-sm sm:text-base font-bold text-gray-700 hover:text-gray-500 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
+                    className='w-full sm:w-auto sm:flex-1 max-w-[200px] sm:max-w-none mx-auto rounded-md border border-blue-600 px-6 sm:px-12 lg:px-20 py-2.5 sm:py-2 bg-white dark:bg-[var(--subtle-bg)] text-sm sm:text-base font-bold text-gray-700 hover:text-gray-500 dark:hover:bg-gray-700 focus:outline-none focus:border-blue-300 transition ease-in-out duration-150'
                     onClick={customCloseModal}
                     ref={cancelButtonRef}
                   >
@@ -137,7 +137,7 @@ export default function DeleteModal<T extends DeleteModalData = DeleteModalData>
                       <div role='status'>
                         <svg
                           aria-hidden='true'
-                          className='inline w-6 h-6 mr-2 text-gray-200 animate-spin fill-blue-600'
+                          className='inline w-6 h-6 mr-2 text-gray-200 dark:text-gray-600 animate-spin fill-blue-600'
                           viewBox='0 0 100 101'
                           fill='none'
                           xmlns='http://www.w3.org/2000/svg'

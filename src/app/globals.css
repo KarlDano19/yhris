@@ -219,6 +219,23 @@ html.dark .toggle-ios-checkbox:checked + .toggle-ios-label {
   scrollbar-color: #2d3e58 #f1f1f1;
 }
 
+/* Dark mode scrollbar overrides */
+html.dark ::-webkit-scrollbar-track {
+  background: var(--subtle-bg); /* #1A1F26 — dark surface instead of #f1f1f1 */
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #4B5563; /* gray-600 — visible on dark bg */
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6B7280; /* gray-500 — slightly lighter on hover */
+}
+html.dark * {
+  scrollbar-color: #4B5563 var(--subtle-bg);
+}
+html.dark .hide-scrollbar:hover {
+  scrollbar-color: #4B5563 var(--subtle-bg);
+}
+
 .nested-decimal {
   counter-reset: section;
 }
@@ -306,7 +323,7 @@ html.dark body,
 body.dark {
   /* Use the theme background token (dark) to ensure consistency */
   background-color: var(--bg) !important; /* expected: #0F1419 */
-  color: #ffffff !important;
+  color: var(--body-text) !important; /* #E8EAED per palette */
 }
 
 /* Backgrounds that are commonly used in components */
@@ -314,7 +331,7 @@ html.dark .bg-white,
 html.dark .bg-gray-50,
 html.dark .bg-gray-100,
 html.dark .bg-gray-200 {
-  background-color: #0b1220 !important; /* a slightly lighter dark */
+  background-color: var(--subtle-bg) !important; /* #1A1F26 per palette */
 }
 
 /* Make most text utilities white in dark mode */
@@ -325,27 +342,15 @@ html.dark [class*="text-"] {
 
 /* Borders */
 html.dark .border,
-html.dark .border-gray-200 {
-  border-color: #374151 !important; /* tailwind gray-700 */
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.2) !important; /* visible white border */
 }
 
 /* Utility for components that expect .card class */
 html.dark .card {
-  background-color: #0b1220 !important;
-  color: #fff !important;
-}
-
-:root {
-  --primary: #355FD0;
-  --primary-yellow: #FFC008;
-  --success: #65C979;
-  --error: #D86841;
-  --warning: #EAC645;
-  --bg: #FFFFFF;
-  --body-text: #2C3F58;
-  --card-bg: #FFFFFF;
-  --subtle-bg: #F9FBFC;
-  --muted: #6B7280;
+  background-color: var(--card-bg) !important;  /* #1A1F26 per palette */
+  color: var(--body-text) !important;           /* #E8EAED per palette */
 }
 
 /* Form controls: dark-mode styling so inputs/selects/textareas use dark backgrounds and readable text */
@@ -461,6 +466,20 @@ html.dark .ql-toolbar button svg {
   fill: var(--body-text) !important;
 }
 
+/* === Action button SVG icon visibility in dark mode ===
+   SVG presentation attributes (fill/stroke) are overridden by CSS rules.
+   Attribute selectors preserve the red delete icon (#D65846). */
+
+/* Icon path fills — #2C3F58 (dark slate) is invisible on dark backgrounds */
+html.dark svg path[fill="#2C3F58"] {
+  fill: var(--body-text) !important;  /* #E8EAED */
+}
+
+/* Icon outer border strokes — #ACB9CB (light gray) is barely visible */
+html.dark svg rect[stroke="#ACB9CB"] {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
 /* Picker label (the visible control) */
 html.dark .ql-picker {
   color: var(--body-text) !important;
@@ -532,8 +551,8 @@ html.dark .react-select__control--is-focused {
   border-color: #5B8AFF !important;
 }
 
-/* Pagination and DatePicker: use subtle-bg and body-text in dark mode */
-html.dark .my-3 {
+/* Pagination: use subtle-bg and body-text in dark mode */
+html.dark .pagination-wrapper {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   /* keep layout spacing intact */
@@ -542,24 +561,24 @@ html.dark .my-3 {
 }
 
 /* React Paginate list and items inside pagination area */
-html.dark .my-3 .grid,
-html.dark .my-3 .grid * {
+html.dark .pagination-wrapper .grid,
+html.dark .pagination-wrapper .grid * {
   background-color: transparent !important;
   color: var(--body-text) !important;
 }
 
 /* Style pagination page items (list items and links) */
-html.dark .my-3 .grid li,
-html.dark .my-3 .grid a,
-html.dark .my-3 .grid button {
+html.dark .pagination-wrapper .grid li,
+html.dark .pagination-wrapper .grid a,
+html.dark .pagination-wrapper .grid button {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   border-color: #374151 !important;
 }
 
 /* Active page */
-html.dark .my-3 .grid .bg-gray-300,
-html.dark .my-3 .grid .active {
+html.dark .pagination-wrapper .grid .bg-gray-300,
+html.dark .pagination-wrapper .grid .active {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   box-shadow: none !important;
@@ -568,7 +587,7 @@ html.dark .my-3 .grid .active {
 /* Records per page select (desktop & mobile) */
 html.dark select#role-desktop,
 html.dark select#role-mobile,
-html.dark .my-3 select {
+html.dark .pagination-wrapper select {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   border-color: #374151 !important;
@@ -612,6 +631,15 @@ html.dark .bg-white\/80.backdrop-blur {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   border-color: #374151 !important;
+}
+
+/* bg-white opacity variants used in nav/header backdrops (bg-white/70, /90, /95) */
+/* Tailwind opacity-modifier classes produce a different selector than plain bg-white */
+html.dark .bg-white\/70,
+html.dark .bg-white\/80,
+html.dark .bg-white\/90,
+html.dark .bg-white\/95 {
+  background-color: rgba(26, 31, 38, 0.85) !important; /* var(--card-bg) at 85% */
 }
 
 html.dark .react-select__single-value,
@@ -810,6 +838,16 @@ html.dark .border-blue-200 {
 }
 html.dark .text-blue-800 {
   color: var(--primary) !important;
+}
+
+/* Green info/status boxes — matches existing blue and red rules */
+html.dark .bg-green-50 {
+  background-color: rgba(95, 224, 125, 0.08) !important;
+  color: var(--success) !important;
+  border-color: rgba(95, 224, 125, 0.12) !important;
+}
+html.dark .border-green-200 {
+  border-color: rgba(95, 224, 125, 0.12) !important;
 }
 
 /* Map common blue utilities to primary token in dark mode */

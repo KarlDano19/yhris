@@ -6,7 +6,7 @@ delete colors["trueGray"];
 delete colors["coolGray"];
 delete colors["blueGray"];
 module.exports = {
-  darkMode: 'media',
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
