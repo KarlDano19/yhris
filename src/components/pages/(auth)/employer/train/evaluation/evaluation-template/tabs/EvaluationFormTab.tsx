@@ -1,9 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { Tooltip } from 'react-tooltip';
 import classNames from '@/helpers/classNames';
+
+import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
@@ -21,6 +26,7 @@ function EvaluationFormTab({
   handleSubmit: any;
   setSelectedTab: any;
 }) {
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [remarks, setRemarks] = useState<boolean | null>(watch('is_show_remarks'));
   const [commentCriteria, setCommentCriteria] = useState<boolean | null>(watch('is_show_criteria_comment'));
 
@@ -55,12 +61,16 @@ function EvaluationFormTab({
                     <label htmlFor='description' className='block text-sm font-medium leading-6 text-gray-900'>
                       Description<span className='text-red-600'>*</span>
                     </label>
-                    <input
-                      id='description'
-                      type='text'
-                      {...register('description', { required: true })}
-                      className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                    />
+                    <div className='mt-2 h-40'>
+                      <input type='text' {...register('description', { required: true })} hidden />
+                      <ReactQuill
+                        onChange={(value) => setValue('description', value)}
+                        formats={QUILL_FORMATS}
+                        modules={QUILL_MODULES_NO_TOOLBAR}
+                        style={{ height: '100%' }}
+                        value={watch('description') || ''}
+                      />
+                    </div>
                     <Tooltip id='description-tooltip' style={{ fontSize: '10px' }} />
                   </div>
                   {/* <div

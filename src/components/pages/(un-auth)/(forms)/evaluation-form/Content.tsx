@@ -10,6 +10,7 @@ import Confetti from 'react-confetti';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import { linkify } from '@/helpers/linkify';
 import ConfirmSubmitModal from './modals/ConfirmSubmitModal';
 import useGetEvaluationTemplateDetails from './hooks/useGetEvaluationTemplateDetails';
 import useGetEvaluationEmployeeFormDetails from './hooks/useGetEvaluationEmployeeFormDetails';
@@ -193,7 +194,7 @@ function Content() {
                   <div className='border-2 rounded-lg mx-4 mt-4 mb-12'>
                     <div className='p-6 border-b-2'>
                       <p className='text-[1.2rem] font-semibold'>{evaluationTemplateDetails.name}</p>
-                      <p>{evaluationTemplateDetails.description}</p>
+                      <div dangerouslySetInnerHTML={{ __html: linkify(evaluationTemplateDetails.description || '') }} />
                     </div>
                     <div className='px-6 py-8 mb-8'>
                       <div className='w-full mb-8'>
@@ -249,15 +250,16 @@ function Content() {
                           {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
                           {evaluationForm[evaluationCriterionIndex].section_title}
                         </p>
-                        <p>{evaluationForm[evaluationCriterionIndex].section_description}</p>
+                        <div dangerouslySetInnerHTML={{ __html: linkify(evaluationForm[evaluationCriterionIndex].section_description || '') }} />
                       </div>
                     )}
                     {evaluationForm[evaluationCriterionIndex].criterion.map((item: any, index: number) => {
                       return (
                         <div key={index} className='px-[1.55rem] py-6'>
                           <div className='flex justify-between mb-8'>
-                            <div>
-                              {index + 1}. {item.title}
+                            <div className='flex gap-1 items-start'>
+                              <span className='shrink-0'>{index + 1}.</span>
+                              <div dangerouslySetInnerHTML={{ __html: linkify(item.title || '') }} />
                             </div>
                             {evaluationTemplateDetails.criteria_rating_view_type === 'default' && (
                               <div className='flex gap-4 items-center justify-end whitespace-nowrap'>
