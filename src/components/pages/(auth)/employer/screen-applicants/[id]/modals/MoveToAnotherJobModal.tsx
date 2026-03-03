@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import toast from 'react-hot-toast';
 
-import { ArrowLeftIcon, ArrowRightStartOnRectangleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ArrowRightStartOnRectangleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import CustomToast from '@/components/CustomToast';
 import ModalLayout from '@/components/ModalLayout';
@@ -239,9 +239,8 @@ export default function MoveToAnotherJobModal({
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-bold text-savoy-blue bg-white border border-savoy-blue rounded-md hover:bg-blue-50 transition-colors"
               >
-                <ArrowLeftIcon className="w-4 h-4" />
                 Back
               </button>
               <div className="flex gap-3">
