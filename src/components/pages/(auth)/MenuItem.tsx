@@ -17,6 +17,7 @@ function MenuItem({ menu, onGrayedOutClick }: { menu: any; onGrayedOutClick?: (l
         <Link
           href={menu.link}
           aria-disabled={isGrayedOut}
+          data-ignore-spinner={isGrayedOut ? "true" : undefined}
           className={`bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80 ${
             isGrayedOut ? 'opacity-50 cursor-pointer' : ''
           }`}

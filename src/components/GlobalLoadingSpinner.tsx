@@ -22,7 +22,7 @@
           const anchor = target.closest('a');
           if (!anchor) return;
           // Don't trigger spinner for disabled/blocked navigation items (permission or subscription denied)
-          if (anchor.getAttribute('aria-disabled') === 'true') return;
+          if (anchor.getAttribute('data-ignore-spinner') === 'true') return;
           const href = anchor.getAttribute('href');
           const targetAttr = anchor.getAttribute('target');
           if (!href || targetAttr === '_blank') return;
