@@ -37,7 +37,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'employer-profile',
     'setup-employer-profile',
     'admin',
-    'train',
+    'evaluation',
     'settings',
     'dole',
     'analytics',

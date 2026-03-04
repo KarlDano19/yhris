@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     'employer-profile',
     'setup-employer-profile',
     'admin',
-    'train',
+    'evaluation',
     'settings',
     'dole',
     'analytics',
@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'checkout' ||
           firstRoute === 'employer-profile' ||
           firstRoute === 'setup-employer-profile' ||
-          firstRoute === 'train' ||
+          firstRoute === 'evaluation' ||
           firstRoute === 'settings' ||
           firstRoute === 'dole' ||
           firstRoute === 'talent-search' ||

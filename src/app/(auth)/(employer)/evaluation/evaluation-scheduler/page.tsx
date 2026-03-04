@@ -4,12 +4,12 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import Content from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/Content';
+import Content from '@/components/pages/(auth)/employer/evaluation/evaluation-scheduler/Content';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: 'Train - Evaluation Template - Yahshua HRIS',
+  title: 'Train - Evaluation Scheduler - Yahshua HRIS',
 };
 
 async function getSession() {
@@ -17,10 +17,10 @@ async function getSession() {
   return session;
 }
 
-const EvaluationPage = async () => {
+const EvaluationSchedulerPage = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
   return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
-export default EvaluationPage;
+export default EvaluationSchedulerPage;

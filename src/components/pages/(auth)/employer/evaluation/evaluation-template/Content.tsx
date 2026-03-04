@@ -18,7 +18,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Pagination from '@/components/Pagination';
 import SelectionModal from './modals/SelectionTemplateModal';
 import EditEvaluationModal from './modals/EditEvaluationTemplateModal';
-import ViewEvaluationModal from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal';
+import ViewEvaluationModal from '@/components/pages/(auth)/employer/evaluation/evaluation-template/modals/ViewEvaluationTemplateModal';
 import useGetEvaluationTemplateItems from './hooks/useGetEvaluationTemplateItems';
 import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
@@ -375,14 +375,14 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <EditIcon />
                 </button>
               )}
-                              <button 
-                                onClick={() => openDuplicateModal(item)}
-                                data-tooltip-id={`duplicate-tooltip-${item.id}`}
-                                data-tooltip-content="Duplicate"
-                                title='Duplicate'
-                                className='p-[7px] bg-white border border-gray-300 rounded-md'
-                              >
-                                <DuplicateIcon />
+              <button 
+                onClick={() => openDuplicateModal(item)}
+                data-tooltip-id={`duplicate-tooltip-${item.id}`}
+                data-tooltip-content="Duplicate"
+                title='Duplicate'
+                className='p-[7px] bg-white border border-gray-300 rounded-md'
+              >
+                <DuplicateIcon />
               </button>
               <button 
                 onClick={() => openDeleteEvaluationModal(item)}
@@ -449,9 +449,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/train' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Train</h4>
+            <h4>Evaluation</h4>
           </Link>
         </div>
         

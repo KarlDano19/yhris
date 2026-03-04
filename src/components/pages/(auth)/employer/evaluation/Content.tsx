@@ -7,27 +7,34 @@ import Link from 'next/link';
 import MenuItem from '../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import Training from '@/svg/TrainingsLogo';
-import Evaluation from '@/svg/EvaluationLogo';
+// import Training from '@/svg/TrainingsLogo';
+import EvaluationTemplateLogo from '@/svg/EvaluationTemplateLogo';
 import EvaluationScheduler from '@/svg/EvaluationSchedulerLogo';
+import EvaluationHistory from '@/svg/EvalHistoryLogo';
 
 const menus = [
+  // {
+  //   icon: <Training />,
+  //   text: 'Training',
+  //   link: '/training',
+  //   isAvailable: false,
+  // },
   {
-    icon: <Training />,
-    text: 'Training',
-    link: '/train/training',
-    isAvailable: false,
-  },
-  {
-    icon: <Evaluation />,
+    icon: <EvaluationTemplateLogo />,
     text: 'Evaluation Template',
-    link: '/train/evaluation-template',
+    link: '/evaluation/evaluation-template',
     isAvailable: true,
   },
   {
     icon: <EvaluationScheduler />,
     text: 'Evaluation Scheduler',
-    link: '/train/evaluation-scheduler',
+    link: '/evaluation/evaluation-scheduler',
+    isAvailable: true,
+  },
+  {
+    icon: <EvaluationHistory />,
+    text: 'Evaluation History',
+    link: '/evaluation/evaluation-history',
     isAvailable: true,
   },
 ];
@@ -44,7 +51,7 @@ const Content = () => {
             </Link>
           </div>
           <div className='px-2 md:px-8 lg:px-4'>
-            <h2 className='text-xl font-bold text-indigo-dye'>Train</h2>
+            <h2 className='text-xl font-bold text-indigo-dye'>Evaluation</h2>
             <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
               {menus.map((menu, index) => {
                 return <MenuItem key={index} menu={menu} />;
