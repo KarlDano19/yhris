@@ -109,6 +109,71 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-014
+DATE FILED: 2026-03-04
+DATE FIXED: 2026-03-04
+CLIENT/REPORTER: Internal Dev
+
+ISSUE DESCRIPTION:
+Follow-up refinement from HRIS-013: a custom data-ignore-spinner="true" attribute was
+introduced on blocked <Link> elements (SmartDashboardItem, MenuItem) to decouple the
+GlobalLoadingSpinner guard from accessibility semantics. Decision reversed — aria-disabled
+is already set on every blocked <Link> for its primary accessibility/tooltip purpose, so
+reading it in the spinner guard is correct and intentional. A redundant second attribute
+adds maintenance overhead with no practical benefit.
+
+DESIRED OUTCOME:
+- GlobalLoadingSpinner checks aria-disabled="true" (original HRIS-013 guard).
+- No data-ignore-spinner attribute on any element.
+- Behaviour unchanged from HRIS-013: blocked items suppress the spinner, permitted items show it.
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/GlobalLoadingSpinner.tsx
+- src/components/SmartPermissions/SmartDashboardItem.tsx
+- src/components/pages/(auth)/MenuItem.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (N/A)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (manual verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — frontend-only)
+☐ Cypress/Playwright e2e tests updated (N/A)
+☑ Manual regression testing completed
+☑ Edge cases tested
+  - Blocked dashboard items: no spinner, modal shows correctly
+  - Permitted dashboard items: spinner still appears during navigation
+
+FIX EXPLANATION:
+Reverted the data-ignore-spinner refinement introduced after HRIS-013:
+1. GlobalLoadingSpinner.tsx: restored aria-disabled check (line 25).
+2. SmartDashboardItem.tsx: removed data-ignore-spinner prop from the blocked <Link>.
+3. MenuItem.tsx: removed data-ignore-spinner prop from the blocked <Link>.
+aria-disabled={isGrayedOut} remains on both Link elements for its intended
+accessibility and tooltip-trigger purpose, and the spinner guard continues to read it.
+
+================================================================================
+
 BUG ID: HRIS-013
 DATE FILED: 2026-03-04
 DATE FIXED: 2026-03-04
