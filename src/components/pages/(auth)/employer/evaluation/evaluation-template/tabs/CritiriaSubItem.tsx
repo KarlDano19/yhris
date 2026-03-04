@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
+
+import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 import DeleteModal from '@/components/DeleteModal';
 
@@ -30,6 +35,7 @@ function CritiriaSubItem({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: `evaluation_criterion[${sectionIndex}].criterion`,
@@ -221,13 +227,17 @@ function CritiriaSubItem({
                             <MoveIcon />
                           </div>
                           <div className='sm:col-span-4 w-full border rounded-xl border-[#ACB9CB] py-6 px-4 bg-white'>
-                            <input
-                              type='text'
-                              placeholder='Enter criteria...'
-                              className='bg-transparent block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                              defaultValue={item.title}
-                              {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`)}
-                            />
+                            <div className='h-32'>
+                              <input type='text' hidden {...register(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`)} />
+                              <ReactQuill
+                                onChange={(value) => setValue(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`, value)}
+                                formats={QUILL_FORMATS}
+                                modules={QUILL_MODULES_NO_TOOLBAR}
+                                style={{ height: '100%' }}
+                                value={watch(`evaluation_criterion[${sectionIndex}].criterion[${index}].title`) || ''}
+                                placeholder='Enter criteria...'
+                              />
+                            </div>
                             <div className='flex flex-row px-2 py-4 space-x-8'>
                               <label className='text-slate-700 mt-5 text-sm'>How many points is this criteria?</label>
                               <div className='flex gap-4 items-center mt-4 text-center whitespace-nowrap text-slate-500'>
@@ -315,14 +325,16 @@ function CritiriaSubItem({
                                   </div>
                                   <Tooltip id={`duplicate-criteria-tooltip-${sectionIndex}-${index}`} style={{ fontSize: '10px', }} />
                                 </div>
-                                <div 
+                                <div
                                   className='cursor-pointer'
                                   data-tooltip-id={`delete-criteria-tooltip-${sectionIndex}-${index}`}
                                   data-tooltip-content='Delete criteria'
-                                  data-tooltip-place='top'  
+                                  data-tooltip-place='top'
                                   onClick={() => handleOpenModal(index)}
                                 >
-                                  <DeleteIconNoBorder />
+                                  <div className='p-1.5 bg-white border border-gray-300 rounded-md inline-flex items-center justify-center'>
+                                    <DeleteIconNoBorder />
+                                  </div>
                                   <Tooltip id={`delete-criteria-tooltip-${sectionIndex}-${index}`} style={{ fontSize: '10px' }} />
                                 </div>
                               </div>

@@ -7,6 +7,7 @@ import { Tooltip } from 'react-tooltip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import InfoIcon from '@/svg/InfoIcon';
 import useGetEvaluationTemplateDetails from '../hooks/useGetEvaluationTemplateDetails';
+import { linkify } from '@/helpers/linkify';
 
 type T_ViewEvaluationTemplateModalProps = {
   isOpen: boolean;
@@ -92,16 +93,24 @@ export default function ViewEvaluationModal({
       const sectionTitle = section.title || section.section_title || `Section ${sectionIndex + 1}`;
       return (
         <div key={section.id || sectionTitle} className='rounded-lg border border-gray-200 p-4 space-y-3'>
-          <div className='flex items-center justify-between'>
+          <div className='flex flex-col gap-1'>
             <h4 className='text-base font-semibold text-gray-900'>{sectionTitle}</h4>
-            {section.description && <p className='text-xs text-gray-500'>{section.description}</p>}
+            {section.section_description && (
+              <div
+                className='text-xs text-gray-500'
+                dangerouslySetInnerHTML={{ __html: linkify(section.section_description) }}
+              />
+            )}
           </div>
           {Array.isArray(section.criterion) && section.criterion.length > 0 ? (
             <div className='space-y-2'>
               {section.criterion.map((criterion: any, criterionIndex: number) => (
                 <div key={criterion.id || `${sectionTitle}-${criterionIndex}`} className='rounded-md bg-gray-50 p-3'>
-                  <p className='text-sm font-semibold text-gray-900'>{criterion.title || `Criterion ${criterionIndex + 1}`}</p>
-                  <p className='text-xs text-gray-500'>
+                  <div
+                    className='text-sm font-semibold text-gray-900'
+                    dangerouslySetInnerHTML={{ __html: linkify(criterion.title || `Criterion ${criterionIndex + 1}`) }}
+                  />
+                  <p className='text-xs text-gray-500 mt-2'>
                     Max Score: <span className='font-semibold text-gray-900'>{criterion.max_score ?? '—'}</span>
                   </p>
                   <p className='text-xs text-gray-500'>
@@ -221,7 +230,10 @@ export default function ViewEvaluationModal({
                         {evaluationTemplateData?.description && (
                           <section className='space-y-2'>
                             <h4 className='text-lg font-semibold text-gray-900'>Description</h4>
-                            <p className='text-sm text-gray-700 whitespace-pre-line'>{evaluationTemplateData.description}</p>
+                            <div
+                              className='text-sm text-gray-700'
+                              dangerouslySetInnerHTML={{ __html: linkify(evaluationTemplateData.description) }}
+                            />
                           </section>
                         )}
 

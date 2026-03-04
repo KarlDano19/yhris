@@ -21,7 +21,7 @@ import {
   normalizeFormSections
 } from '../helpers/evaluationHelpers';
 import { handlePrintEvaluationTemplateResponse } from '../PrintData';
-import useGetEvaluationTemplateDetails from '@/components/pages/(auth)/employer/train/evaluation/evaluation-template/hooks/useGetEvaluationTemplateDetails';
+import useGetEvaluationTemplateDetails from '@/components/pages/(auth)/employer/evaluation/evaluation-template/hooks/useGetEvaluationTemplateDetails';
 import useGetEvaluationResponseRespondents from '../hooks/useGetEvaluationResponseRespondents';
 import useGetEvaluationResponseQuestions from '../hooks/useGetEvaluationResponseQuestions';
 import useGetEvaluationResponseAnalytics from '../hooks/useGetEvaluationResponseAnalytics';

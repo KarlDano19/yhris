@@ -11,7 +11,7 @@ import AddPostLogo from '@/svg/AddPostLogo';
 import ScreenApplicantsLogo from '@/svg/ScreenApplicantsLogo';
 import OrientLogo from '@/svg/OrientLogo';
 import ManageLogo from '@/svg/ManageLogo';
-import TrainLogo from '@/svg/TrainLogo';
+import EvaluationLogo from '@/svg/EvaluationLogo';
 import PayrollLogo from '@/svg/PayrollLogo';
 import EmployeeSeparationLogo from '@/svg/EmployeeSeparationLogo';
 import DoleLogo from '@/svg/DoleLogo';
@@ -97,9 +97,9 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       permissionId: 'manage-page',
     },
     {
-      icon: <TrainLogo />,
-      text: 'Train',
-      link: '/train',
+      icon: <EvaluationLogo />,
+      text: 'Evaluation',
+      link: '/evaluation',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
       permissionId: 'train-page',
