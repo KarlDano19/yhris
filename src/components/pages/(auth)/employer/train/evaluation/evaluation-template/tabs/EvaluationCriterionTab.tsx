@@ -1,11 +1,16 @@
 'use client';
 
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 
+import dynamic from 'next/dynamic';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
+
+import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
+
+import 'react-quill/dist/quill.snow.css';
 
 import CritiriaSubItem from './CritiriaSubItem';
 import CustomToast from '@/components/CustomToast';
@@ -35,6 +40,7 @@ function EvaluationCriterionTab({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const childrenRef = useRef<any>({});
   const sectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const { fields, append, remove, move } = useFieldArray({
@@ -316,13 +322,17 @@ function EvaluationCriterionTab({
                                       defaultValue={item.section_title}
                                       {...register(`evaluation_criterion[${index}].section_title`)}
                                     />
-                                    <input
-                                      type='text'
-                                      placeholder='Enter Section Description...'
-                                      className='bg-transparent block w-full border-0 py-1.5 px-3 text-gray-900 border-b-2 placeholder:text-gray-400 sm:text-sm sm:leading-6 mb-4'
-                                      defaultValue={item.section_description}
-                                      {...register(`evaluation_criterion[${index}].section_description`)}
-                                    />
+                                    <div className='h-32'>
+                                      <input type='text' hidden {...register(`evaluation_criterion[${index}].section_description`)} />
+                                      <ReactQuill
+                                        onChange={(value) => setValue(`evaluation_criterion[${index}].section_description`, value)}
+                                        formats={QUILL_FORMATS}
+                                        modules={QUILL_MODULES_NO_TOOLBAR}
+                                        style={{ height: '100%' }}
+                                        value={watch(`evaluation_criterion[${index}].section_description`) || ''}
+                                        placeholder='Enter Section Description...'
+                                      />
+                                    </div>
                                   </div>
                                   <div className='flex flex-col'>
                                     <div
