@@ -102,7 +102,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       link: '/evaluation',
       isAvailable: true,
       isGrayedOut: !hasActiveSubscription,
-      permissionId: 'train-page',
+      permissionId: 'evaluation-page',
     },
     // {
     //   icon: <PayrollLogo />,
