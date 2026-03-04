@@ -892,8 +892,10 @@ const Content = () => {
     } else {
       return (
         <tr>
-          <td colSpan={10}>
-            <h4 className='text-center text-gray-300 text-sm my-4'>There{`'`}s no data yet.</h4>
+          <td colSpan={100}>
+            <div className='flex justify-center items-center py-4'>
+              <p className='text-gray-300 text-sm'>There&apos;s no data found.</p>
+            </div>
           </td>
         </tr>
       );
