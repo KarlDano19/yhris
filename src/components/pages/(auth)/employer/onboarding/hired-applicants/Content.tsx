@@ -143,7 +143,7 @@ const Content = () => {
                     <h2 className='font-semibold text-xl'>{hiredApplicant.job_title}</h2>
                     <p className='text-[15px] mb-12'>{hiredApplicant.advertise_to}</p>
                     <Link
-                      href={'/orient/' + hiredApplicant.id}
+                      href={'/onboarding/' + hiredApplicant.id}
                       className='bg-[#EAC645] text-[#2C3F58] font-semibold px-10 py-4 rounded-md hover:bg-opacity-90'
                     >
                       {hiredApplicant.hired_count} Hired Applicant/s
