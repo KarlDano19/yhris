@@ -13,7 +13,7 @@ async function getDirectiveDetails(directive_id: number | null) {
     };
     if (token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive_id}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directive_id}/manage/`,
         config
       );
       if (!res.ok) {
