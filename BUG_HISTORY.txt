@@ -109,6 +109,84 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-016
+DATE FILED: 2026-03-02
+DATE FIXED: 2026-03-05
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+In the Screen Applicants module, clicking "View Attached CV/Resume" on an applicant who uploaded
+a DOCX file either showed a blank iframe or triggered no visible response. The button always
+called setViewCV(true) which rendered an <iframe> regardless of file type. Browsers cannot
+display DOCX files in an iframe, so the result was a blank/broken preview with no feedback
+to the user.
+
+Steps to reproduce:
+1. Navigate to Screen Applicants and open a job posting.
+2. Open an applicant whose uploaded CV/Resume is a .docx or .doc file.
+3. Click "View Attached CV/Resume" — the iframe renders but shows nothing (blank).
+
+DESIRED OUTCOME:
+- PDF resumes: existing iframe preview behavior (no change).
+- DOCX/DOC resumes: a dedicated modal appears explaining the file cannot be previewed,
+  with a "Download CV/Resume" button that opens the file in a new tab for download.
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/modals/ApplicantForm.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (Django TestCase or APITestCase)
+☐ All backend tests passing: python manage.py test
+☐ Backend test coverage: N/A - No backend changes
+☐ Models tested (validation, methods, relationships, signals)
+☐ Serializers tested (field validation, nested data, custom methods)
+☐ Views/API endpoints tested (GET, POST, PUT, PATCH, DELETE responses)
+☐ Permissions tested (authentication, authorization, role-based access)
+☐ Celery tasks tested (task execution, error handling, retries)
+☐ Database migrations tested (forward/backward compatibility)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☐ Frontend test coverage: N/A
+☑ Components tested (rendering, props, state changes) - Manual testing
+☐ Custom hooks tested (useQuery, useMutation wrappers)
+☐ React Query hooks tested (queries, mutations, cache invalidation)
+☐ Form validation tested (React Hook Form rules, error states)
+☐ API service functions tested (Axios calls, error handling)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (frontend ↔ backend)
+☐ Cypress/Playwright e2e tests updated (if applicable)
+☑ Manual regression testing completed
+☑ Edge cases and error scenarios tested
+☐ Cross-browser testing completed (if UI changes)
+☐ Mobile responsiveness verified (if UI changes)
+
+FIX EXPLANATION:
+Added an isCvDocx() helper inside ApplicantForm.tsx that checks if the cv_url ends with
+.doc or .docx. The "View Attached CV/Resume" button onClick was updated to call isCvDocx()
+and conditionally show a new DOCX download modal (setShowDocxDownloadModal(true)) instead
+of the iframe view (setViewCV(true)) for DOCX files.
+
+The DOCX download modal (renderDocxDownloadModal) uses the same Headless UI Transition/Dialog
+pattern already in the file. It informs the user the file cannot be previewed and provides a
+"Download CV/Resume" button that calls handleDocxDownload(), which uses window.open(url, '_blank')
+to open the file in a new tab. This approach works in both local and production/S3 environments
+without requiring CORS configuration, as it is a navigation request rather than a fetch request.
+
+The showDocxDownloadModal state is also reset in handleClose() so the modal does not persist
+when the parent ApplicantForm modal is closed and reopened.
+
+================================================================================
+
 BUG ID: HRIS-015
 DATE FILED: 2026-03-05
 DATE FIXED: 2026-03-05
