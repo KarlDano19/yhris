@@ -109,7 +109,7 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
-BUG ID: HRIS-013
+BUG ID: HRIS-015
 DATE FILED: 2026-03-05
 DATE FIXED: 2026-03-05
 CLIENT/REPORTER: Internal - QA
@@ -225,6 +225,150 @@ Pages NOT affected (already had the fix or used a different pattern):
 - All dole/ pages — already had setCurrentPage(1) in handleSearch
 - employee-201-records/Content.tsx — uses useEmployees hook which resets page internally
 - apply-job-without-signup/jobs/Content.tsx — uses infinite scroll (no setCurrentPage)
+
+================================================================================
+
+BUG ID: HRIS-014
+DATE FILED: 2026-03-04
+DATE FIXED: 2026-03-04
+CLIENT/REPORTER: Internal Dev
+
+ISSUE DESCRIPTION:
+Follow-up refinement from HRIS-013: a custom data-ignore-spinner="true" attribute was
+introduced on blocked <Link> elements (SmartDashboardItem, MenuItem) to decouple the
+GlobalLoadingSpinner guard from accessibility semantics. Decision reversed — aria-disabled
+is already set on every blocked <Link> for its primary accessibility/tooltip purpose, so
+reading it in the spinner guard is correct and intentional. A redundant second attribute
+adds maintenance overhead with no practical benefit.
+
+DESIRED OUTCOME:
+- GlobalLoadingSpinner checks aria-disabled="true" (original HRIS-013 guard).
+- No data-ignore-spinner attribute on any element.
+- Behaviour unchanged from HRIS-013: blocked items suppress the spinner, permitted items show it.
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/GlobalLoadingSpinner.tsx
+- src/components/SmartPermissions/SmartDashboardItem.tsx
+- src/components/pages/(auth)/MenuItem.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (N/A)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (manual verification)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — frontend-only)
+☐ Cypress/Playwright e2e tests updated (N/A)
+☑ Manual regression testing completed
+☑ Edge cases tested
+  - Blocked dashboard items: no spinner, modal shows correctly
+  - Permitted dashboard items: spinner still appears during navigation
+
+FIX EXPLANATION:
+Reverted the data-ignore-spinner refinement introduced after HRIS-013:
+1. GlobalLoadingSpinner.tsx: restored aria-disabled check (line 25).
+2. SmartDashboardItem.tsx: removed data-ignore-spinner prop from the blocked <Link>.
+3. MenuItem.tsx: removed data-ignore-spinner prop from the blocked <Link>.
+aria-disabled={isGrayedOut} remains on both Link elements for its intended
+accessibility and tooltip-trigger purpose, and the spinner guard continues to read it.
+
+================================================================================
+
+BUG ID: HRIS-013
+DATE FILED: 2026-03-04
+DATE FIXED: 2026-03-04
+CLIENT/REPORTER: Internal Dev
+
+ISSUE DESCRIPTION:
+Clicking a dashboard item that the user lacks permission for (e.g., "Train") caused the
+GlobalLoadingSpinner overlay (z-index 9999) to appear and block interaction with the
+"Access Restricted" (InsufficientPermissionsModal) modal.
+
+Root cause: GlobalLoadingSpinner registers its click handler in the DOM capture phase
+(`addEventListener('click', onClick, true)`), which fires before React's synthetic
+bubble-phase event. SmartDashboardItem's React onClick calls e.preventDefault() to
+suppress navigation and open the modal, but by that time the spinner's handler had
+already set visible = true. Because background React Query fetches kept isFetching > 0
+within the 2-second navigation-click window, the spinner persisted and covered the modal,
+making it impossible for the user to click "I Understand" to dismiss it.
+
+DESIRED OUTCOME:
+- Clicking a permission-denied or subscription-blocked dashboard item shows the
+  "Access Restricted" modal immediately with no loading spinner visible.
+- Clicking a permitted dashboard item still shows the loading spinner normally during
+  navigation.
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/GlobalLoadingSpinner.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A — no model changes)
+☐ Serializers tested (N/A — no serializer changes)
+☐ Views/API endpoints tested (N/A — no view changes)
+☐ Permissions tested (N/A — no permission changes)
+☐ Celery tasks tested (N/A — no task changes)
+☐ Database migrations tested (N/A — no migration changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (N/A — no test suite for this component)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (manual verification)
+☑ Custom hooks tested (N/A — no hook changes)
+☑ React Query hooks tested (N/A — no hook changes)
+☐ Form validation tested (N/A — no form changes)
+☐ API service functions tested (N/A — no API changes)
+☑ TypeScript types verified (no type errors — change is pure logic, no new types)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — frontend-only fix)
+☐ Cypress/Playwright e2e tests updated (N/A)
+☑ Manual regression testing completed
+☑ Edge cases and error scenarios tested
+  - Verified spinner still appears normally for permitted dashboard item clicks
+  - Verified "Access Restricted" modal is visible and interactive for blocked items
+☐ Cross-browser testing completed (N/A — pending)
+☐ Mobile responsiveness verified (N/A — no layout changes)
+
+FIX EXPLANATION:
+Added a single early-return guard in the onClick handler inside GlobalLoadingSpinner.tsx,
+immediately after resolving the clicked anchor element:
+
+  if (anchor.getAttribute('aria-disabled') === 'true') return;
+
+SmartDashboardItem already sets aria-disabled={isGrayedOut} on every blocked <Link>
+element, where isGrayedOut = hasPermissionIssue || hasSubscriptionIssue. The new guard
+checks this attribute before the handler can set visible = true, so the spinner is never
+triggered for blocked navigation items. All other (permitted) anchor clicks continue to
+show the spinner as before. No changes were needed in SmartDashboardItem or any other file.
 
 ================================================================================
 
