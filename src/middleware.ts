@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     'post-job',
     'screen-applicants',
     'screening-question-guideline',
-    'orient',
+    'onboarding',
     'manage',
     'employee-separation',
     'employer-profile',
@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'manage' ||
           firstRoute === 'post-job' ||
           firstRoute === 'screen-applicants' ||
-          firstRoute === 'orient' ||
+          firstRoute === 'onboarding' ||
           firstRoute === 'manage-subscriptions' ||
           firstRoute === 'checkout' ||
           firstRoute === 'employer-profile' ||

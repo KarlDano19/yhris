@@ -15,10 +15,10 @@ async function getSession() {
   return session;
 }
 
-const OrientPosition = async () => {
+const OnboardingPosition = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
   return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
-export default OrientPosition;
+export default OnboardingPosition;

@@ -508,7 +508,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/orient' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
+          <Link href='/onboarding' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
             <h4>Positions</h4>
           </Link>

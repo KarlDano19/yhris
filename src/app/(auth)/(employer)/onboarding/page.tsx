@@ -5,8 +5,8 @@ export const metadata = {
   title: "Onboarding - Yahshua HRIS",
 };
 
-const Orient = async () => {
+const Onboarding = async () => {
   return <Content />;
 };
 
-export default Orient;
+export default Onboarding;
