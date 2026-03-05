@@ -340,6 +340,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,

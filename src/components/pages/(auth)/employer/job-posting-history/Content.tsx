@@ -420,6 +420,7 @@ const Content = () => {
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };

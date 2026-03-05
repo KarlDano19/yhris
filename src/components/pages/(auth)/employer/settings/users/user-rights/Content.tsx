@@ -124,6 +124,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [isUserRightsListLoading, isSearching]);
 
   const handleSearch = () => {
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
     // No need to call refetch; useGetUserRightsList will refetch on appliedFilter change

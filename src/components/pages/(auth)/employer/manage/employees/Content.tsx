@@ -335,6 +335,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };
