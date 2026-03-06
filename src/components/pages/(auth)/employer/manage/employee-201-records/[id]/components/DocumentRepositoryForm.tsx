@@ -10,6 +10,7 @@ import Section from '../common/Section';
 import DocumentFolderList from './DocumentFolderList';
 import DocumentList from './DocumentList';
 import DocumentUploadZone from './DocumentUploadZone';
+import TrashView from './TrashView';
 import CreateFolderModal from './modals/CreateFolderModal';
 import RenameFolderModal from './modals/RenameFolderModal';
 import DeleteFolderModal from './modals/DeleteFolderModal';
@@ -21,12 +22,15 @@ import { useDeleteDocument } from '../hooks/useDeleteDocument';
 import type { Employee } from '@/types/employee-201-records/employee';
 import type { T_EmployeeDocumentFolder } from '@/types/employee-201-records/document-repository';
 
+import { TrashIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+
 export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee> }) {
   const params = useParams();
   const employeeId = parseInt(params.id as string);
 
   const [selectedFolderId, setSelectedFolderId] = useState<number | null | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isTrashViewOpen, setIsTrashViewOpen] = useState(false);
 
   // Modal states
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
@@ -57,7 +61,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
 
   const handleUploadSuccess = () => {
     toast.custom((t) => (
-      <CustomToast toast={toast} t={t} message="Documents uploaded successfully" type="success" />
+      <CustomToast message="Documents uploaded successfully" type="success" />
     ));
     refetchDocuments();
     refetchFolders();
@@ -87,7 +91,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
       deleteDocument(documentId, {
         onSuccess: () => {
           toast.custom((t) => (
-            <CustomToast toast={toast} t={t} message="Document deleted successfully" type="success" />
+            <CustomToast message="Document deleted successfully" type="success" />
           ));
           refetchDocuments();
           refetchFolders();
@@ -95,8 +99,6 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
         onError: (error) => {
           toast.custom((t) => (
             <CustomToast
-              toast={toast}
-              t={t}
               message={error.message || 'Failed to delete document'}
               type="error"
             />
@@ -108,38 +110,63 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
 
   return (
     <Section>
-      <div className="flex gap-6">
-        {/* Sidebar: Folder List */}
-        <div className="w-64 flex-shrink-0">
-          <DocumentFolderList
-            folders={folders || []}
-            selectedFolderId={selectedFolderId}
-            onFolderSelect={handleFolderSelect}
-            onCreateFolder={() => setIsCreateFolderModalOpen(true)}
-            onRenameFolder={handleRenameFolder}
-            onDeleteFolder={handleDeleteFolder}
-            isLoading={foldersLoading}
-          />
-        </div>
-
-        {/* Main Content: Upload Zone + Document List */}
-        <div className="flex-1 space-y-6">
-          <DocumentUploadZone
-            employeeId={employeeId}
-            folderId={selectedFolderId}
-            onUploadSuccess={handleUploadSuccess}
-          />
-
-          <DocumentList
-            documents={documents || []}
-            isLoading={documentsLoading}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onDownload={handleDownload}
-            onDelete={handleDeleteDocument}
-          />
-        </div>
+      {/* Toolbar */}
+      <div className="flex justify-end mb-4">
+        {isTrashViewOpen ? (
+          <button
+            onClick={() => setIsTrashViewOpen(false)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+          >
+            <ArrowUturnLeftIcon className="w-4 h-4" />
+            Back to Files
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsTrashViewOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+          >
+            <TrashIcon className="w-4 h-4" />
+            Trash
+          </button>
+        )}
       </div>
+
+      {isTrashViewOpen ? (
+        <TrashView employeeId={employeeId} />
+      ) : (
+        <div className="flex gap-6">
+          {/* Sidebar: Folder List */}
+          <div className="w-64 flex-shrink-0">
+            <DocumentFolderList
+              folders={folders || []}
+              selectedFolderId={selectedFolderId}
+              onFolderSelect={handleFolderSelect}
+              onCreateFolder={() => setIsCreateFolderModalOpen(true)}
+              onRenameFolder={handleRenameFolder}
+              onDeleteFolder={handleDeleteFolder}
+              isLoading={foldersLoading}
+            />
+          </div>
+
+          {/* Main Content: Upload Zone + Document List */}
+          <div className="flex-1 space-y-6">
+            <DocumentUploadZone
+              employeeId={employeeId}
+              folderId={selectedFolderId}
+              onUploadSuccess={handleUploadSuccess}
+            />
+
+            <DocumentList
+              documents={documents || []}
+              isLoading={documentsLoading}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onDownload={handleDownload}
+              onDelete={handleDeleteDocument}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <CreateFolderModal
