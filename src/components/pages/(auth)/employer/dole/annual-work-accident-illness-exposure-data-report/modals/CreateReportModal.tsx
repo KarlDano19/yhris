@@ -36,7 +36,7 @@ function CreateReportModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
   const [selectedTab, setSelectedTab] = useState(1);
   const { mutate: addAnnualAccidentIllnessReport, isLoading: isLoadingAddAnnualAccidentIllnessReport } = useAddAnnualAccidentIllnessReport();
   const queryClient = useQueryClient();
@@ -145,6 +145,7 @@ function CreateReportModal({
                     setValue={setValue}
                     register={register}
                     handleSubmit={handleSubmit}
+                    errors={errors}
                     setSelectedTab={setSelectedTab}
                   />
                 )}
@@ -157,6 +158,7 @@ function CreateReportModal({
                     isLoading={isLoadingAddAnnualAccidentIllnessReport}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
               </Dialog.Panel>

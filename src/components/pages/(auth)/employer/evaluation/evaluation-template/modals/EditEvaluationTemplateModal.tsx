@@ -31,7 +31,7 @@ export default function EditEvaluationModal({
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
-  const { register, handleSubmit, setValue, getValues, watch, control } = useForm();
+  const { register, handleSubmit, setValue, getValues, watch, control, formState: { errors } } = useForm();
   const {
     data: dataEvaluationDetail,
     refetch: refetchEvaluationDetail,
@@ -218,6 +218,7 @@ export default function EditEvaluationModal({
                       register,
                       handleSubmit,
                       setSelectedTab,
+                      errors,
                     }}
                   />
                 )}
@@ -229,6 +230,7 @@ export default function EditEvaluationModal({
                       setValue,
                       handleSubmit,
                       setSelectedTab,
+                      errors,
                     }}
                   />
                 )}

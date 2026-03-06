@@ -100,6 +100,7 @@ export default function AddEmployeeModal({
                               <Controller
                                 control={control}
                                 name='date_hired'
+                                rules={{ required: true }}
                                 render={({ field }) => (
                                   <CustomDatePicker
                                     id='employee-date-hired-datepicker'
@@ -115,6 +116,7 @@ export default function AddEmployeeModal({
                                 )}
                               />
                             </div>
+                            {errors.date_hired && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                           <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5'>
                             <div className='grid-item'>
@@ -130,6 +132,7 @@ export default function AddEmployeeModal({
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
+                              {errors.firstname && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                             </div>
                             <div className='grid-item'>
                               <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -157,6 +160,7 @@ export default function AddEmployeeModal({
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
+                              {errors.lastname && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                             </div>
                             <div className='grid-item'>
                               <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -171,6 +175,7 @@ export default function AddEmployeeModal({
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
+                              {errors.email && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                             </div>
                             <div className='grid-item'>
                               <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -198,6 +203,7 @@ export default function AddEmployeeModal({
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
+                              {errors.address && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                             </div>
                           </div>
                         </div>
@@ -233,6 +239,7 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
+                            {errors.gender && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                           <div>
                             <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -268,6 +275,7 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
+                            {errors.location && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                           <div>
                             <label htmlFor='position' className='text-sm font-medium leading-6 text-gray-900'>
@@ -288,6 +296,7 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
+                            {errors.position && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                           <div>
                             <label htmlFor='department' className='text-sm font-medium leading-6 text-gray-900'>
@@ -308,6 +317,7 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
+                            {errors.department && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                         </div>
                         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4'>
@@ -330,6 +340,7 @@ export default function AddEmployeeModal({
                                 <SelectChevronDown />
                               </div>
                             </div>
+                            {errors.employment_status && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                           </div>
                         </div>
                       </div>

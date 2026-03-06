@@ -41,6 +41,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   const [positionName, setPositionName] = useState(editingPosition?.position_name || '');
   const [selectedPosition, setSelectedPosition] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [positionError, setPositionError] = useState("");
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<{ id: number; open: boolean } | null>(null);
 
@@ -192,6 +193,11 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedPosition) {
+      setPositionError('Position is required.');
+      return;
+    }
+    setPositionError('');
     if (selectedPosition) {
       setIsLoading(true);
       try {
@@ -264,7 +270,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           classNamePrefix='select'
                           options={positionOptions}
                           value={selectedPosition}
-                          onChange={(val) => setSelectedPosition(val)}
+                          onChange={(val) => { setSelectedPosition(val); if (val) setPositionError(""); }}
                           components={{
                             DropdownIndicator: () => (
                               <div className='pointer-events-none px-2'>
@@ -283,6 +289,9 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           )}
                         />
                       </div>
+                      {positionError && (
+                        <p className="text-xs text-red-600 mt-1">{positionError}</p>
+                      )}
                       
                       {/* Display Position Description */}
                       {selectedPosition && (

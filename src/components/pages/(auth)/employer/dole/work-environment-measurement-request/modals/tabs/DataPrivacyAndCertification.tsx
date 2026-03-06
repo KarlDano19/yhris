@@ -137,29 +137,43 @@ function DataPrivacyAndCertification({
     }
   }, [signatureValue, clearErrors]);
 
+  useEffect(() => {
+    const nameValue = watch("requesting_personnel_name");
+    if (nameValue) {
+      clearErrors("requesting_personnel_name");
+    }
+  }, [watch("requesting_personnel_name"), clearErrors]);
+
+  useEffect(() => {
+    const positionValue = watch("requesting_personnel_position");
+    if (positionValue) {
+      clearErrors("requesting_personnel_position");
+    }
+  }, [watch("requesting_personnel_position"), clearErrors]);
+
   // Handle form submission with validation (name, position, then signature)
   const onValid = (data: any) => {
     const nameValue = watch("requesting_personnel_name");
     const positionValue = watch("requesting_personnel_position");
     const signatureValue = watch("signature");
 
+    let hasError = false;
     if (!nameValue || nameValue === "") {
-      const el = document.getElementById("requesting_personnel_name");
-      if (el) el.focus();
-      return;
+      setError("requesting_personnel_name", { type: "manual", message: "Requesting Personnel Name is required." });
+      hasError = true;
     }
     if (!positionValue || positionValue === "") {
-      const el = document.getElementById("requesting_personnel_position");
-      if (el) el.focus();
-      return;
+      setError("requesting_personnel_position", { type: "manual", message: "Requesting Personnel Position is required." });
+      hasError = true;
     }
     if (!signatureValue || signatureValue === "") {
       setError("signature", {
         type: "manual",
         message: "Signature is required (draw or upload)."
       });
-      return;
+      hasError = true;
     }
+    if (hasError) return;
     onSubmit();
   };
 
@@ -218,6 +232,9 @@ function DataPrivacyAndCertification({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.requesting_personnel_name && (
+              <p className="text-xs text-red-600 mt-1">Requesting Personnel Name is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -235,6 +252,9 @@ function DataPrivacyAndCertification({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.requesting_personnel_position && (
+              <p className="text-xs text-red-600 mt-1">Requesting Personnel Position is required.</p>
+            )}
           </div>
         </div>
         <div className="mt-4 pl-4 md:pl-6 pr-4 md:pr-6">

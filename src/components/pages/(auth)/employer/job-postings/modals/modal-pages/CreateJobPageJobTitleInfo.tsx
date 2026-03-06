@@ -162,6 +162,9 @@ export default function CreateJobPageTitleInfo({
                 <SelectChevronDown />
               </div>
             </div>
+            {errors?.country && (
+              <p className='text-xs text-red-600 mt-1'>{errors.country.message || "This field is required."}</p>
+            )}
           </div>
           <div className='sm:col-span-4 mt-4'>
             <label htmlFor='language' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -180,6 +183,9 @@ export default function CreateJobPageTitleInfo({
                 <SelectChevronDown />
               </div>
             </div>
+            {errors?.language && (
+              <p className='text-xs text-red-600 mt-1'>{errors.language.message || "This field is required."}</p>
+            )}
           </div>
           <div className='sm:col-span-4 mt-4'>
             <div>
@@ -194,6 +200,9 @@ export default function CreateJobPageTitleInfo({
                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                 />
               </div>
+              {errors?.jobTitle && (
+                <p className='text-xs text-red-600 mt-1'>{errors.jobTitle.message || "This field is required."}</p>
+              )}
             </div>
           </div>
           <div className='sm:col-span-4 mt-4'>
@@ -258,6 +267,9 @@ export default function CreateJobPageTitleInfo({
                   )}
                 />
               </div>
+              {errors?.position && (
+                <p className='text-xs text-red-600 mt-1'>{errors.position.message || "Please select a position."}</p>
+              )}
             </div>
           </div>
           <div className='sm:col-span-4 mt-4'>

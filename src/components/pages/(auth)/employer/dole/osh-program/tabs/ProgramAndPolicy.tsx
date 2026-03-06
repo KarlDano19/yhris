@@ -270,7 +270,7 @@ export default function ProgramAndPolicy({
                       placeholder={"mm/dd/yyyy"}
                       className={
                         `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset 
-                        ${isMissingField('date') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
+                        ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
                       }
                       selected={selectedDate}
                       pickerOnChange={(date: any) => {
@@ -300,6 +300,7 @@ export default function ProgramAndPolicy({
                   );
                 }}
               />
+              {isMissingField('date') && <p className="text-red-500 text-xs mt-1">Date is required</p>}
             </div>
           </div>
           <div>
@@ -316,8 +317,9 @@ export default function ProgramAndPolicy({
                 {...register("name_of_owner")}
                 id="name_of_owner"
                 className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
-                ${isMissingField('name_of_owner') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('name_of_owner') && <p className="text-red-500 text-xs mt-1">Name of Owner is required</p>}
             </div>
           </div>
           <div>
@@ -332,11 +334,12 @@ export default function ProgramAndPolicy({
               <button
                 type="button"
                 className={`w-full rounded-md bg-white border px-4 sm:px-14 py-2 sm:py-1.5 text-sm font-semibold text-savoy-blue shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600
-                ${isMissingField('signature') ? 'border-red-500' : 'border-savoy-blue'}`}
+                border-savoy-blue`}
                 onClick={toggleDrawSignatureModal}
               >
                 Draw
               </button>
+              {isMissingField('signature') && <p className="text-red-500 text-xs mt-1">Signature is required</p>}
               {drawnSignaturePreview && (
                 <div className="mt-3 border rounded-lg overflow-hidden bg-gray-50">
                   <div className="p-3 border-b bg-white flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
@@ -377,7 +380,7 @@ export default function ProgramAndPolicy({
                 type="file"
                 accept="image/*"
                 className={`block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset 
-                ${isMissingField('name_of_owner') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100`}
+                ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100`}
               />
               <p className="mt-1 text-sm text-gray-500">Maximum file size: 10 MB</p>
               {uploadedSignaturePreview && (

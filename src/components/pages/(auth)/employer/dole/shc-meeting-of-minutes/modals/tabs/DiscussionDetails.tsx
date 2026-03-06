@@ -11,49 +11,46 @@ import "react-quill/dist/quill.snow.css";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function DiscussionDetails({
   control,
   register,
-  handleSubmit,
   setValue,
   watch,
   setSelectedTab,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
-  handleSubmit: any;
   setValue: any;
   watch: any;
   setSelectedTab: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
-  const onSubmit = handleSubmit(() => {
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const detailsValue = watch("details_of_meeting");
+    const isEmpty = !detailsValue || detailsValue === "" || detailsValue === "<p><br></p>";
+    if (isEmpty) {
+      setError("details_of_meeting", { type: "manual", message: "Discussion Details is required." });
+      return;
+    }
+    clearErrors("details_of_meeting");
     setSelectedTab(3);
-  });
+  };
 
 
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-16 md:pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="mt-4">
-          <h1 className="text-lg font-semibold">Discussion Details</h1>
+          <h1 className="text-lg font-semibold">Discussion Details<span className="text-red-600">*</span>
+          </h1>
         </div>
         <div className="sm:col-span-4 mt-4">
           <div className="mt-2 h-72 mb-12">
@@ -71,6 +68,7 @@ export default function DiscussionDetails({
               value={watch("details_of_meeting")}
             />
           </div>
+          {errors?.details_of_meeting && <p className="text-xs text-red-600 mt-1">Discussion Details is required.</p>}
         </div>
       </div>
       <hr />

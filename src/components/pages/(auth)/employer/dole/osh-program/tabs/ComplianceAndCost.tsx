@@ -264,8 +264,9 @@ export default function ComplianceAndCost({
                 type="text"
                 {...register("name_of_owner_manager")}
                 id="name_of_owner_manager"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('name_of_owner_manager') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('name_of_owner_manager') && <p className="text-red-500 text-xs mt-1">Name of Owner / Manager is required</p>}
             </div>
           </div>
           <div>
@@ -281,8 +282,9 @@ export default function ComplianceAndCost({
                 type="text"
                 {...register("employees_representative")}
                 id="employees_representative"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('employees_representative') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('employees_representative') && <p className="text-red-500 text-xs mt-1">Employees' Representative is required</p>}
             </div>
           </div>
           <div>
@@ -305,7 +307,7 @@ export default function ComplianceAndCost({
                       id="date_filled"
                       placeholder={"mm/dd/yyyy"}
                       className={
-                        `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('date_filled') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
+                        `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
                       }
                       selected={selectedDate}
                       pickerOnChange={(date: any) => {
@@ -335,6 +337,7 @@ export default function ComplianceAndCost({
                   );
                 }}
               />
+              {isMissingField('date_filled') && <p className="text-red-500 text-xs mt-1">Date is required</p>}
             </div>
           </div>
         </div>

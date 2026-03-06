@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { Tooltip } from 'react-tooltip';
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
 import DrawSignatureModal from "../DrawSignatureModals";
 import InfoIcon from '@/svg/InfoIcon';
 
@@ -42,6 +40,10 @@ function TechnicalAndSignature({
   const [previousSignatureFile, setPreviousSignatureFile] = useState<string>("");
   const [showTechTooltip, setShowTechTooltip] = useState(false);
   const [showSignatureTooltip, setShowSignatureTooltip] = useState(false);
+  const [showTechFileError, setShowTechFileError] = useState(false);
+  const [showSignatureError, setShowSignatureError] = useState(false);
+  const [showSubmittedByError, setShowSubmittedByError] = useState(false);
+  const [showPositionError, setShowPositionError] = useState(false);
 
   // Watch for existing file URLs from form
   const existingTechnicalFileUrl = watch("technical_information_file");
@@ -85,6 +87,7 @@ function TechnicalAndSignature({
       setTechnicalFileSource("upload");
       setTechnicalFileUrl(URL.createObjectURL(file));
       setAttachmentTechnicalExist(true);
+      setShowTechFileError(false);
     }
   };
 
@@ -97,6 +100,7 @@ function TechnicalAndSignature({
       setSignatureSource("upload");
       setSignatureUrl(URL.createObjectURL(file));
       setAttachmentExist(true);
+      setShowSignatureError(false);
     }
   };
 
@@ -118,6 +122,7 @@ function TechnicalAndSignature({
         setValue("signature_source", "draw");
         setSignatureSource("draw");
         setSignatureUrl(drawnSignatureDataUrl);
+        setShowSignatureError(false);
       });
   };
 
@@ -220,26 +225,14 @@ function TechnicalAndSignature({
             : null;
 
       // Show toast for each missing required field
-      if (isTechFileMissing) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />);
-        return;
-      }
-      if (!submittedByValue) {
-        const el = document.getElementById("submitted_by");
-        if (el) el.focus();
-        return;
-      }
-      if (!positionValue) {
-        const el = document.getElementById("position");
-        if (el) el.focus();
-        return;
-      }
-      if (!signatureValue) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
-        return;
-      }
+      setShowTechFileError(false); setShowSignatureError(false);
+      setShowSubmittedByError(false); setShowPositionError(false);
+      let hasError = false;
+      if (isTechFileMissing) { setShowTechFileError(true); hasError = true; }
+      if (!submittedByValue) { setShowSubmittedByError(true); hasError = true; }
+      if (!positionValue) { setShowPositionError(true); hasError = true; }
+      if (!signatureValue) { setShowSignatureError(true); hasError = true; }
+      if (hasError) return;
       // Call the original onSubmit
       if (typeof onSubmit === 'function') onSubmit(e);
     }}>
@@ -295,6 +288,7 @@ function TechnicalAndSignature({
                 onChange={handleTechnicalFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              {showTechFileError && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
               {attachmentTechnicalExist ? (
                 <div className="mt-2">
                   {existingTechnicalFileUrl && typeof existingTechnicalFileUrl === 'string' && existingTechnicalFileUrl.startsWith('http') ? (
@@ -330,6 +324,7 @@ function TechnicalAndSignature({
                 id="submitted_by"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {showSubmittedByError && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
           <div>
@@ -347,6 +342,7 @@ function TechnicalAndSignature({
                 id="position"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {showPositionError && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>
@@ -413,6 +409,7 @@ function TechnicalAndSignature({
           </div>
         </div>
       </div>
+      {showSignatureError && <p className="text-red-500 text-xs mt-1 px-8">This field is required.</p>}
       
       {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) */}
       {signatureUrl && (

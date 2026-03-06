@@ -202,6 +202,7 @@ function EditHealthAndSafetyReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (

@@ -25,6 +25,7 @@ interface EditEvaluationSchedulerModalProps {
   control: any;
   reset: any;
   Controller: any;
+  errors: any;
 }
 
 function EditEvaluationSchedulerModal({
@@ -39,6 +40,7 @@ function EditEvaluationSchedulerModal({
   control,
   reset,
   Controller,
+  errors,
 }: EditEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
@@ -262,6 +264,7 @@ function EditEvaluationSchedulerModal({
                       setIsCustomModalOpen={setIsCustomModalOpen}
                       control={control}
                       Controller={Controller}
+                      errors={errors}
                       key={refreshKey} // Add a key prop to force re-render when refreshKey changes
                     />
                   )}
@@ -279,6 +282,7 @@ function EditEvaluationSchedulerModal({
                       recipientEmails={dataEvaluationSchedulerDetails?.recipient_emails}
                       employeeEmails={dataEvaluationSchedulerDetails?.employee_emails}
                       setValue={setValue}
+                      errors={errors}
                     />
                   )}
                 </Dialog.Panel>

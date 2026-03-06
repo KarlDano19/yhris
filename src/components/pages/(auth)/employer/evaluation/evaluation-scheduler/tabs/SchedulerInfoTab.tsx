@@ -17,6 +17,7 @@ function SchedulerInfoTab({
   setIsCustomModalOpen,
   control,
   Controller,
+  errors,
 }: {
   register: any;
   handleSubmit: any;
@@ -26,6 +27,7 @@ function SchedulerInfoTab({
   setIsCustomModalOpen: (isOpen: boolean) => void;
   control: any;
   Controller: any;
+  errors?: any;
 }) {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const {
@@ -387,6 +389,7 @@ function SchedulerInfoTab({
               </>
             )}
           </div>
+          {(errors?.frequency_value || errors?.frequency_unit) && <p className="text-red-500 text-xs mt-1">Evaluation Schedule is required.</p>}
         </div>
         {(selectedFrequencyUnit || isCustomUnit) && (
         <div className='sm:col-span-4 mt-2 w-full'>
@@ -414,6 +417,7 @@ function SchedulerInfoTab({
                   }}
                   placeholder='-'
                 />
+                {errors?.deadline_day && <p className="text-red-500 text-xs mt-1">Day is required.</p>}
               </div>
               <div className='relative'>
                 <label htmlFor='deadline_time' className='block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide'>
@@ -475,6 +479,7 @@ function SchedulerInfoTab({
             {...register('name', { required: true })}
             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
           />
+          {errors?.name && <p className="text-red-500 text-xs mt-1">Scheduler Name is required.</p>}
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -490,6 +495,7 @@ function SchedulerInfoTab({
               noOptionsMessage={({ inputValue }) => 'No evaluation templates available'}
             />
           </div>
+          {errors?.evaluation_template && <p className="text-red-500 text-xs mt-1">Evaluation Template is required.</p>}
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -504,6 +510,7 @@ function SchedulerInfoTab({
               placeholder='Select...'
             />
           </div>
+          {errors?.reminder_schedule && <p className="text-red-500 text-xs mt-1">Reminder Schedule is required.</p>}
         </div>
       </div>
       <hr />

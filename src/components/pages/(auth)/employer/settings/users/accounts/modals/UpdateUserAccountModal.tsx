@@ -27,7 +27,7 @@ export default function UpdateUserAccountModal({
   formMethods: UseFormReturn;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
   const {
     data: accountDetailsData,
     refetch: refetchAccountDetails,
@@ -109,18 +109,6 @@ export default function UpdateUserAccountModal({
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
-                        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-                          <div className='flex'>
-                            <div className='flex-shrink-0'>
-                              <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                            </div>
-                            <div className='ml-3'>
-                              <h3 className='text-sm font-medium text-red-800'>
-                                You cannot proceed due to incomplete fields. Please review.
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
                         <div className='grid lg:grid-cols-6 gap-x-8 mt-7'>
                           <div className='lg:col-span-6 grid mt-8 lg:mt-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-5'>
                             <div className='grid-item'>
@@ -136,6 +124,7 @@ export default function UpdateUserAccountModal({
                                   className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                                 />
                               </div>
+                              {errors.name && <p className='text-xs text-red-600 mt-1'>Name is required.</p>}
                             </div>
                             <div className='grid-item'>
                               <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>

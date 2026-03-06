@@ -1,12 +1,10 @@
 import { Dispatch, Fragment, useRef, useState, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import dynamic from 'next/dynamic';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import CustomToast from '@/components/CustomToast';
 
 import useAddLocation from '../hooks/location/useAddLocation';
 import useAddDepartment from '../hooks/department/useAddDepartment';
@@ -30,7 +28,7 @@ export default function CreateLocationModal({
   hideDescription?: boolean;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
   const [description, setDescription] = useState('');
   const { mutate: addLocation, isLoading: isLoadingAddLocation } = useAddLocation();
   const { mutate: addDepartment, isLoading: isLoadingAddDepartment } = useAddDepartment();
@@ -49,19 +47,11 @@ export default function CreateLocationModal({
     
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, {
-          duration: 5000,
-        });
         setIsOpen(false);
         reset();
         setDescription('');
         refetch();
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
+      }
     };
     if (module === 'location') {
       addLocation(submitData, callbackReq);
@@ -116,6 +106,9 @@ export default function CreateLocationModal({
                       {...register('name', { required: true })}
                       className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                     />
+                    {errors?.name && (
+                      <p className='text-xs text-red-600 mt-1'>Name is required.</p>
+                    )}
                   </div>
                   {module === 'position' && !hideDescription && (
                     <div className='px-4 pb-6'>

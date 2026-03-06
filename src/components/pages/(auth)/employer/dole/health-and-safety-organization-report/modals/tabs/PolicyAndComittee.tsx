@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import toast from "react-hot-toast";
 import { Tooltip } from 'react-tooltip';
 
-import CustomToast from "@/components/CustomToast";
 import InfoIcon from '@/svg/InfoIcon';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -18,6 +16,7 @@ function PolicyAndComittee({
   setValue,
   watch,
   isCreateModal,
+  errors,
   errors,
 }: {
   control: any;
@@ -61,6 +60,7 @@ function PolicyAndComittee({
       setFileSource("upload");
       setFileUrl(URL.createObjectURL(file));
       setAttachmentExist(true);
+      setShowFileError(false);
       setShowFileError(false);
     }
   };
@@ -188,6 +188,7 @@ function PolicyAndComittee({
                 onChange={handleFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              {showFileError && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
               {attachmentExist ? (
                 <div className="mt-2">
                   {existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http') ? (
@@ -250,6 +251,7 @@ function PolicyAndComittee({
               <input
                 type="text"
                 {...register(`chairman_name`, { required: true })}
+                {...register(`chairman_name`, { required: true })}
                 id={`chairman_name`}
                 placeholder={`Chairman Name`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
@@ -261,6 +263,7 @@ function PolicyAndComittee({
             <div className="mt-2">
               <input
                 type="text"
+                {...register(`chairman_position`, { required: true })}
                 {...register(`chairman_position`, { required: true })}
                 id={`chairman_position`}
                 placeholder={`Chairman Position`}

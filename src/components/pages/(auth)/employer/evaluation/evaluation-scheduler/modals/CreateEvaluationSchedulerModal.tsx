@@ -22,6 +22,7 @@ interface CreateEvaluationSchedulerModalProps {
   control: any;
   setValue: any;
   Controller: any;
+  errors: any;
 }
 
 function CreateEvaluationSchedulerModal({
@@ -35,6 +36,7 @@ function CreateEvaluationSchedulerModal({
   control,
   setValue,
   Controller,
+  errors,
 }: CreateEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
@@ -127,6 +129,7 @@ function CreateEvaluationSchedulerModal({
                       setIsCustomModalOpen={setIsCustomModalOpen}
                       control={control}
                       Controller={Controller}
+                      errors={errors}
                     />
                   )}
                   {selectedTab === 2 && (
@@ -138,6 +141,7 @@ function CreateEvaluationSchedulerModal({
                       isLoading={isLoading}
                       setSelectedTab={setSelectedTab}
                       setValue={setValue}
+                      errors={errors}
                     />
                   )}
                 </Dialog.Panel>

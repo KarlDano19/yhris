@@ -327,7 +327,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Form validation and processing handler (Form layer)
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
-    // Process form data (validation already done in submitCurrentTab)
+    // Validate required fields
+    if (!validateFormSubmission(data, selectedTab, setMissingFields, setValidationMessage)) {
+      // Throw an error to prevent submission and show error toast
+      throw new Error("");
+    }
+
+    // Process form data
     const processedData = processFormData(data, selectedTab, oshProgramDetails, watch);
 
     // Submit data to server
@@ -367,8 +373,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message="Successfully updated OSH Program Details." type="success" />);
       
     } catch (error: any) {
-      // Show error toast
-      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
+      if (error.message) {
+        toast.custom(() => <CustomToast message={error.message} type="error" />);
+      }
     } finally {
       // Reset loading state
       setIsSaving(false);
@@ -643,21 +650,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </SmartButton>
           </div>
         </div>
-            
-        {/* Validation message */}
-        {validationMessage && (
-          <div className="mt-2 px-2 md:px-8 lg:px-4">
-            <div className="rounded-md bg-red-50 p-2">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    {validationMessage}
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
             
         {/* Version Limit Warning */}
         {versionHistoryData?.version_info && (

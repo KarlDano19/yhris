@@ -85,14 +85,13 @@ export const DatePickerField = ({
           disabled={disabled}
           className={`w-full px-3 py-2 rounded-md focus:outline-none ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } ${
-            showValidation 
-              ? 'border border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-              : 'border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-          }`}
+          } border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
           required={required}
         />
       </div>
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
     </div>
   );
 }; 

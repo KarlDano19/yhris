@@ -29,7 +29,7 @@ export default function AddSeparationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const queryClient = useQueryClient();
-  const { register, handleSubmit, control, reset, trigger, setValue } = useForm<T_Separation>({
+  const { register, handleSubmit, control, reset, trigger, setValue, formState: { errors } } = useForm<T_Separation>({
     defaultValues: {
       date: new Date().toISOString(),
     },
@@ -115,6 +115,7 @@ export default function AddSeparationModal({
                         <Controller
                           control={control}
                           name='date'
+                          rules={{ required: 'Date of Separation is required' }}
                           render={({ field }) => (
                             <CustomDatePicker
                               id='create-separation-datepicker'
@@ -129,6 +130,7 @@ export default function AddSeparationModal({
                             />
                           )}
                         />
+                        {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -165,6 +167,7 @@ export default function AddSeparationModal({
                             }
                           }}
                         />
+                        {errors.name && <p className="text-red-500 text-xs mt-1">{(errors.name as any).message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -174,7 +177,7 @@ export default function AddSeparationModal({
                       <div className='relative mt-2'>
                         {/* <select
                           id='position'
-                          {...register('position', { required: true })}
+                          {...register('position', { required: 'Position is required' })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value='' disabled>Select...</option>
@@ -191,7 +194,7 @@ export default function AddSeparationModal({
                         </div> */}
                         <input
                           id='position'
-                          {...register('position', { required: true })}
+                          {...register('position', { required: 'Position is required' })}
                           type='text'
                           readOnly
                           data-tooltip-id="position-tooltip"
@@ -203,6 +206,7 @@ export default function AddSeparationModal({
                           place="bottom"
                           style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
+                        {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -212,7 +216,7 @@ export default function AddSeparationModal({
                       <div className='relative mt-2'>
                         {/* <select
                           id='department'
-                          {...register('department', { required: true })}
+                          {...register('department', { required: 'Department is required' })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value='' disabled>Select...</option>
@@ -229,7 +233,7 @@ export default function AddSeparationModal({
                         </div> */}
                         <input
                           id='department'
-                          {...register('department', { required: true })}
+                          {...register('department', { required: 'Department is required' })}
                           type='text'
                           readOnly
                           data-tooltip-id="department-tooltip"
@@ -241,6 +245,7 @@ export default function AddSeparationModal({
                           place="bottom"
                           style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
+                        {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -250,7 +255,7 @@ export default function AddSeparationModal({
                       <div className='relative mt-2'>
                         <select
                           id='reason'
-                          {...register('reason', { required: true })}
+                          {...register('reason', { required: 'Reason of Leaving is required' })}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                         >
                           <option value='' disabled>Select...</option>
@@ -262,6 +267,7 @@ export default function AddSeparationModal({
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
                         </div>
+                        {errors.reason && <p className="text-red-500 text-xs mt-1">{errors.reason.message}</p>}
                       </div>
                     </div>
                   </div>

@@ -7,7 +7,6 @@ import { Controller } from "react-hook-form";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import EmployeeSelect from '@/components/common/EmployeeSelect';
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ClockIcon } from "@heroicons/react/24/outline";
 
 export default function MeetingInfo({
@@ -61,21 +60,23 @@ export default function MeetingInfo({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const dateOfMeeting = watch("date_of_meeting");
     const timeOfMeeting = watch("time_of_meeting");
     const venue = watch("venue");
 
+    let hasError = false;
+    if (!dateOfMeeting) {
+      setError("date_of_meeting", { type: "manual", message: "Date of Meeting is required." });
+      hasError = true;
+    }
     if (!timeOfMeeting) {
-      const el = document.getElementById("time_of_meeting");
-      if (el) el.focus();
-      return;
+      setError("time_of_meeting", { type: "manual", message: "Time of Meeting is required." });
+      hasError = true;
     }
     if (!venue) {
-      const el = document.getElementById("venue");
-      if (el) el.focus();
-      return;
+      setError("venue", { type: "manual", message: "Venue is required." });
+      hasError = true;
     }
-
-    let hasError = false;
     if (!selectedAttendees || !Array.isArray(selectedAttendees) || selectedAttendees.length === 0) {
       setError("attendees", {
         type: "manual",
@@ -91,21 +92,6 @@ export default function MeetingInfo({
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
           <div>
             <label
@@ -119,6 +105,7 @@ export default function MeetingInfo({
               <Controller
                 control={control}
                 name="date_of_meeting"
+                rules={{ required: true }}
                 render={({ field }) => (
                   <CustomDatePicker
                     id="shc-meeting-of-minutes-datepicker"
@@ -134,6 +121,9 @@ export default function MeetingInfo({
                 )}
               />
             </div>
+            {errors?.date_of_meeting && (
+              <p className="text-xs text-red-600 mt-1">Date of Meeting is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -161,6 +151,7 @@ export default function MeetingInfo({
                 <ClockIcon className="h-6 w-6 text-savoy-blue hover:text-indigo-300" />
               </div>
             </div>
+            {errors?.time_of_meeting && <p className="text-xs text-red-600 mt-1">Time of Meeting is required.</p>}
           </div>
           <div>
             <label
@@ -178,6 +169,7 @@ export default function MeetingInfo({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.venue && <p className="text-xs text-red-600 mt-1">Venue is required.</p>}
           </div>
         </div>
         <div className="mt-4">

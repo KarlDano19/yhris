@@ -537,6 +537,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsCreateEvaluationSchedulerOpen}
           {...formMethods}
           Controller={Controller}
+          errors={formMethods.formState.errors}
         />
       )}
       {isEditEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
@@ -547,6 +548,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
           {...editFormMethods}
           Controller={Controller}
+          errors={editFormMethods.formState.errors}
         />
       )}
       {isDeleteEvaluationSchedulerModalOpen && (

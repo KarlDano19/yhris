@@ -1,9 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import useAddWorkAccidentIllnessReport from "../hooks/useAddWorkAccidentIllnessReports";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -32,7 +29,7 @@ function CreateWorkAccidentIllnessReportModal({
   setEmployeeSelected: (value: boolean) => void;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const {
     mutate: addWorkAccidentIllnessReport,
     isLoading: isLoadingAddWorkAccidentIllnessReport,
@@ -41,24 +38,12 @@ function CreateWorkAccidentIllnessReportModal({
 
   const onSubmit = handleSubmit((data: any) => {
     const callbackReq = {
-      onSuccess: (data: any) => { 
-        toast.custom(
-          () => <CustomToast message={data.message} type="success" />,
-          {
-            duration: 5000,
-          }
-        );
+      onSuccess: (data: any) => {
         setIsOpen(false);
         reset();
         setEmployeeSearch('');
         setEmployeeSelected(false);
         refetch();
-      },
-      onError: (err: any) => {
-        const errorMessage = err.message || "An unexpected error occurred."; // Extract message from error
-        toast.custom(() => <CustomToast message={errorMessage} type="error" />, {
-          duration: 7000,
-        });
       },
     };
     addWorkAccidentIllnessReport(data, callbackReq);
@@ -117,6 +102,7 @@ function CreateWorkAccidentIllnessReportModal({
                     setEmployeeSearch={setEmployeeSearch}
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -124,6 +110,7 @@ function CreateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 3 && (
