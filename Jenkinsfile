@@ -80,7 +80,7 @@ pipeline {
                           -u "$HARBOR_USERNAME" --password-stdin
 
                         docker build \
-                          -f Dockerfile.prod \
+                          -f Dockerfile \
                           -t ${IMAGE_REPO}:${SAFE_IMAGE_TAG} \
                           .
 
