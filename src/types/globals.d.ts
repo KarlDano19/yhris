@@ -131,6 +131,7 @@ export type T_Register = {
   email: string;
   password: string;
   confirmPassword: string;
+  client_source?: string;
 };
 
 export type T_EmployerProfile = {

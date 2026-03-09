@@ -13,6 +13,7 @@ async function register(user: T_Register) {
       password: user.password,
       confirm_password: user.confirmPassword,
       account_type: user.accountType.toLowerCase(),
+      client_source: user.client_source || "",
     };
     const config = {
       method: 'POST',

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
@@ -23,6 +23,8 @@ import MainIconOnly from '@/svg/MainIconOnly';
 import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
+
+const CLIENT_SOURCE_OPTIONS = ["Direct Client", "RCBC Partner", "GLOBE Partner"];
 
 const getPasswordRequirements = (pass: string) => ({
   length: pass.length >= 12,
@@ -47,7 +49,9 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, control, formState: { errors }, clearErrors } = useForm<T_Register>({
+    defaultValues: { client_source: "Direct Client" },
+  });
   const { mutate, isLoading } = useRegisterAccount();
   const { syncToLoops } = useLoopsSync();
   const [backendPasswordError, setBackendPasswordError] = useState('');
@@ -322,22 +326,47 @@ const Content = () => {
                         </div>
                       </>
                     ) : (
-                      <div className='mb-2'>
-                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          Name
-                         <span className='text-red-500'>*</span>
-                        </label>
-                        <input
-                          type='text'
-                          id='name'
-                          {...register('name', { required: "Please enter a name" })}
-                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                          tabIndex={2}
-                        />
-                        {errors.name && (
-                          <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
-                        )}
-                      </div>
+                      <>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            Name
+                           <span className='text-red-500'>*</span>
+                          </label>
+                          <input
+                            type='text'
+                            id='name'
+                            {...register('name', { required: "Please enter a name" })}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                          {errors.name && (
+                            <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+                          )}
+                        </div>
+                        <div className='mb-2'>
+                          <label className='text-sm leading-6 text-gray-900'>
+                            Client Source <span className='text-red-500'>*</span>
+                          </label>
+                          <Controller
+                            control={control}
+                            name="client_source"
+                            rules={{ required: "Client Source is required" }}
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6'
+                              >
+                                {CLIENT_SOURCE_OPTIONS.map((opt) => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                          {errors.client_source && (
+                            <p className="text-red-600 text-xs mt-1">{errors.client_source.message}</p>
+                          )}
+                        </div>
+                      </>
                     )}
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>

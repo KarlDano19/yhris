@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 
-import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
 import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader';
@@ -23,7 +22,6 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
   const lastRoute = slicePaths[slicePaths.length - 1];
 
   const unAuthRoutes: string[] = ['', 'jobs', 'job-app-form', 'pricing'];
-  const adminRoutes: string[] = ['admin'];
   const employerRoutes: string[] = [
     'manage-subscriptions',
     'checkout',
@@ -60,7 +58,6 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
-          {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
           {type === 'employer' && employerRoutes.includes(firstRoute) && (
             <MainHeader
               hasProfile={hasProfile}
