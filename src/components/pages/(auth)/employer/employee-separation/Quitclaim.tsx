@@ -6,6 +6,7 @@ import { T_QuitclaimModal } from '@/types/globals';
 import classNames from '@/helpers/classNames';
 import AttachmentViewModal from './modals/AttachmentViewModal';
 import AttachmentListModal from './modals/AttachmentListModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -41,6 +42,7 @@ const Quitclaim = ({
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
 
   // Determine which attachments to display (prefer new format, fallback to old)
   const attachmentsToDisplay: QuitclaimAttachment[] =
@@ -89,7 +91,7 @@ const Quitclaim = ({
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
           disabled={isQuitclaimReceived || isLoading}
-          onClick={() => setReceived(id, 'quit claim')}
+          onClick={() => setIsConfirmReceiveOpen(true)}
           data-tooltip-id='quitclaim-received-tooltip'
           data-tooltip-content={isQuitclaimReceived ? 'Quitclaim already received' : 'Mark quitclaim as received'}
           data-tooltip-place='bottom'
@@ -178,6 +180,17 @@ const Quitclaim = ({
         title="Quitclaim Attachments"
       />
     )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the quitclaim as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'quit claim');
+      }}
+      isLoading={false}
+    />
     </>
   );
 };

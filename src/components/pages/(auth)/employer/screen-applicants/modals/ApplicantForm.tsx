@@ -28,6 +28,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
+  const [showDocxDownloadModal, setShowDocxDownloadModal] = useState<boolean>(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -55,6 +56,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
 
   const handleClose = () => {
     setViewCV(false);
+    setShowDocxDownloadModal(false);
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
   };
@@ -150,6 +152,12 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         ></div>
       </div>
     );
+  };
+
+  const isCvDocx = () => {
+    if (!applicantProfile.cv_url) return false;
+    const url = applicantProfile.cv_url.toLowerCase();
+    return url.includes('.docx') || url.includes('.doc');
   };
 
   const renderProfileTab = () => {
@@ -256,7 +264,13 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           <button
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
-            onClick={() => setViewCV(true)}
+            onClick={() => {
+              if (isCvDocx()) {
+                setShowDocxDownloadModal(true);
+              } else {
+                setViewCV(true);
+              }
+            }}
             disabled={!applicantProfile.cv_url}
             title={!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
           >
@@ -604,7 +618,68 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     );
   };
 
+  const handleDocxDownload = () => {
+    window.open(applicantProfile.cv_url, '_blank');
+    setShowDocxDownloadModal(false);
+  };
+
+  const renderDocxDownloadModal = () => {
+    return (
+      <Transition.Root show={showDocxDownloadModal} as={Fragment}>
+        <Dialog as='div' className='relative z-40' onClose={() => setShowDocxDownloadModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300' enterFrom='opacity-0' enterTo='opacity-100'
+            leave='ease-in duration-200' leaveFrom='opacity-100' leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-center justify-center p-4 text-center'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300' enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200' leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
+                  <div className='flex bg-savoy-blue p-2 items-center gap-4'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Download CV/Resume</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setShowDocxDownloadModal(false)} />
+                  </div>
+                  <div className='p-6 text-center space-y-4'>
+                    <p className='text-gray-600'>
+                      This CV/Resume is in DOCX format and cannot be previewed in the browser. Click the button below to download it.
+                    </p>
+                    <button
+                      type='button'
+                      className='inline-block px-6 py-2 rounded-md text-white bg-[#355FD0] hover:bg-blue-700'
+                      onClick={handleDocxDownload}
+                    >
+                      Download CV/Resume
+                    </button>
+                  </div>
+                  <div className='flex justify-end p-4 border-t border-[#355FD0]'>
+                    <button
+                      type='button'
+                      className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+                      onClick={() => setShowDocxDownloadModal(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    );
+  };
+
   return (
+    <>
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleClose}>
         <Transition.Child
@@ -741,5 +816,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         </div>
       </Dialog>
     </Transition.Root>
+    {renderDocxDownloadModal()}
+    </>
   );
 }

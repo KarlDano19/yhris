@@ -267,6 +267,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleSearch = () => {
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,

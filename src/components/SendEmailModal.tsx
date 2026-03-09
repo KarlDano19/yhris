@@ -10,7 +10,6 @@ import { Tooltip } from 'react-tooltip';
 import CustomToast from "@/components/CustomToast";
 import UnsavedChangesModal from "@/components/UnsavedChangesModal";
 import ModalLayout from "@/components/ModalLayout";
-import CreateEditEmailTemplateModal from "@/components/pages/(auth)/employer/settings/general-settings/email-template/modal/CreateEditEmailTemplateModal";
 import EmailField from "@/components/common/EmailField";
 import useGetEmailTemplateItems from "@/components/hooks/useGetEmailTemplateItems";
 import useTagTo from "@/components/hooks/useTagTo";
@@ -29,12 +28,6 @@ interface Field {
   onChange: (value: any) => void;
   value: any;
 }
-
-type T_EmailTemplateModalData = {
-  id: number | null;
-  open: boolean;
-  mode: 'create' | 'edit';
-};
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
@@ -105,7 +98,7 @@ export default function SendEmailModal({
   const [inputBcc, setInputBcc] = useState("");
   const [customSubject, setCustomSubject] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [templateAttachments, setTemplateAttachments] = useState<Array<{id?: number; attachment: string; created_at?: string}>>([]);
+  const [templateAttachments, setTemplateAttachments] = useState<Array<{id?: number; attachment: string; file_size?: number; created_at?: string}>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   // Internal state to track if multiple attachments should be enabled (based on template or prop)
   const [effectiveAllowMultiple, setEffectiveAllowMultiple] = useState(allowMultipleAttachments);
@@ -121,8 +114,6 @@ export default function SendEmailModal({
   const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState<boolean>(false);
   const isInitialized = useRef(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
-  const [emailTemplateModal, setEmailTemplateModal] = useState<T_EmailTemplateModalData | null>({ id: null, open: false, mode: 'create' });
-  
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(
     inputTo,
     setInputTo
@@ -147,7 +138,17 @@ export default function SendEmailModal({
 
   const { data: dataEmailTemplate, refetch: refetchEmailTemplates } = useGetEmailTemplateItems();
 
-
+  // Refetch email templates when the user returns (e.g. after editing in a new tab)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetchEmailTemplates();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isOpen, refetchEmailTemplates]);
 
   // Handle employee selection for TO field
   const handleEmployeeSelectTo = (employee: any) => {
@@ -229,10 +230,9 @@ export default function SendEmailModal({
         return bDate.getTime() - aDate.getTime(); // Most recent first
       });
     
-    // Filter and sort regular templates alphabetically
+    // Filter regular templates, preserving API order (latest first)
     const regularTemplates = filteredTemplates
-      .filter((template: any) => !isWithin24Hours(template.createdAt))
-      .sort((a: any, b: any) => a.label.localeCompare(b.label)); // Alphabetical order
+      .filter((template: any) => !isWithin24Hours(template.createdAt));
     
     // Create options with separation
     const options = [];
@@ -440,17 +440,24 @@ export default function SendEmailModal({
     
     if (event.target.files && event.target.files.length > 0) {
       const selectedFiles = Array.from(event.target.files);
-      const validFiles: File[] = [];
-      
+      const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
+
       // If multiple attachments not allowed, only take the first file
       const filesToProcess = effectiveAllowMultiple ? selectedFiles : [selectedFiles[0]];
-      
+
+      // In single mode the new file replaces the existing one, so start from 0 for new files;
+      // template attachments still count regardless of mode
+      const templateSize = templateAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+      const currentTotalSize = templateSize + (effectiveAllowMultiple ? files.reduce((sum, f) => sum + f.size, 0) : 0);
+      let runningTotal = currentTotalSize;
+      const validFiles: File[] = [];
+
       for (const file of filesToProcess) {
-        // Check file size (10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+        if (runningTotal + file.size > MAX_TOTAL_BYTES) {
+          toast.custom(() => <CustomToast message={`Cannot add "${file.name}": total attachments would exceed the 10MB limit.`} type='error' />, { duration: 2000 });
           continue;
         }
+        runningTotal += file.size;
         validFiles.push(file);
       }
       
@@ -480,16 +487,23 @@ export default function SendEmailModal({
     const droppedFiles = Array.from(e?.dataTransfer?.files || []);
     
     if (droppedFiles.length > 0) {
-      const validFiles: File[] = [];
+      const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
       // If multiple attachments not allowed, only take the first file
       const filesToProcess = effectiveAllowMultiple ? droppedFiles : [droppedFiles[0]];
-      
+
+      // In single mode the new file replaces the existing one, so start from 0 for new files;
+      // template attachments still count regardless of mode
+      const templateSize = templateAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+      const currentTotalSize = templateSize + (effectiveAllowMultiple ? files.reduce((sum, f) => sum + f.size, 0) : 0);
+      let runningTotal = currentTotalSize;
+      const validFiles: File[] = [];
+
       for (const file of filesToProcess) {
-        // Check file size (10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.custom(() => <CustomToast message={`${file.name} exceeds 10MB limit.`} type='error' />, { duration: 2000 });
+        if (runningTotal + file.size > MAX_TOTAL_BYTES) {
+          toast.custom(() => <CustomToast message={`Cannot add "${file.name}": total attachments would exceed the 10MB limit.`} type='error' />, { duration: 2000 });
           continue;
         }
+        runningTotal += file.size;
         validFiles.push(file);
       }
       if (validFiles.length > 0) {
@@ -537,14 +551,7 @@ export default function SendEmailModal({
   };
 
   const handleAddEmailTemplate = () => {
-    setEmailTemplateModal({ id: null, open: true, mode: 'create' });
-  };
-
-  const handleEmailTemplateCreated = () => {
-    // Refresh email templates list to get the updated data with new creation dates
-    refetchEmailTemplates();
-    // Reset the modal state to close the create/edit modal
-    setEmailTemplateModal({ id: null, open: false, mode: 'create' });
+    window.open('/settings/general-settings/email-template', '_blank');
   };
 
   const handleEmailSent = () => {
@@ -583,6 +590,19 @@ export default function SendEmailModal({
       return;
     }
 
+
+    // Validate total attachment size (10MB limit)
+    if (shouldManageAttachment || showDragDropAttachment) {
+      const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
+      const templateSize = templateAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+      const newFilesSize = files.reduce((sum, f) => sum + f.size, 0);
+      if (templateSize + newFilesSize > MAX_TOTAL_BYTES) {
+        toast.custom(() => (
+          <CustomToast message='Total attachment size exceeds the 10MB limit. Please remove some attachments before sending.' type='error' />
+        ), { duration: 4000 });
+        return;
+      }
+    }
 
     const template = data.template ? dataEmailTemplate.find(
       (item: any) => item.id === parseInt(data.template)
@@ -641,19 +661,6 @@ export default function SendEmailModal({
         title={title} 
         isOpen={isOpen} 
         handleClose={handleClose}
-        nestedModals={
-          <>
-            {/* Create/Edit Email Template Modal */}
-            {emailTemplateModal && (
-              <CreateEditEmailTemplateModal
-                isOpen={emailTemplateModal}
-                setIsOpen={setEmailTemplateModal}
-                refetch={handleEmailTemplateCreated}
-                onSuccess={handleEmailTemplateCreated}
-              />
-            )}
-          </>
-        }
       >
         <form onSubmit={onSubmitWithCleanup}>
           <div className="px-4 pt-4 pb-6">
@@ -695,7 +702,7 @@ export default function SendEmailModal({
                     onClick={handleAddEmailTemplate}
                     className="text-sm text-savoy-blue hover:text-blue-700 font-medium"
                   >
-                    + Add New Email Template
+                    Manage Email Templates
                   </button>
                 </div>
                 <div className="mt-2">
@@ -749,6 +756,7 @@ export default function SendEmailModal({
                               const templateAtts = template.attachments.map((att: any) => ({
                                 id: att.id,
                                 attachment: typeof att === 'string' ? att : att.attachment,
+                                file_size: att.file_size || 0,
                                 created_at: att.created_at
                               }));
                               // If template has multiple attachments but prop doesn't allow multiple, only keep first
@@ -1136,8 +1144,8 @@ export default function SendEmailModal({
                             <p className='text-xs text-gray-600 mb-2'>Template Attachments:</p>
                             {(effectiveAllowMultiple ? templateAttachments : templateAttachments.slice(0, 1)).map((attachment, index) => (
                               <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
-                                <div className='flex-1'>
-                                  <p className='text-sm text-slate-800 font-light'>
+                                <div className='flex-1 min-w-0'>
+                                  <p className='text-sm text-slate-800 font-light truncate'>
                                     {attachment.attachment.split('/').pop()}
                                   </p>
                                 </div>
@@ -1175,8 +1183,8 @@ export default function SendEmailModal({
                             </p>
                             {files.map((file, index) => (
                               <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
-                                <div className='flex-1'>
-                                  <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                <div className='flex-1 min-w-0'>
+                                  <p className='text-sm text-slate-800 font-light truncate'>{file.name}</p>
                                 </div>
                                 <div className='flex gap-2 items-center'>
                                   <a 
@@ -1220,7 +1228,15 @@ export default function SendEmailModal({
                           </label>
                         )}
                       </div>
-                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
+                      {(() => {
+                        const templateSize = templateAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+                        const remainingMB = 10 - (templateSize + files.reduce((sum, f) => sum + f.size, 0)) / (1024 * 1024);
+                        if (remainingMB < 0) {
+                          return <h1 className='text-xs pl-2'><span className='text-red-500'>{Math.abs(remainingMB).toFixed(1)} MB exceeds</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                        }
+                        const colorClass = remainingMB < 1 ? 'text-red-500' : remainingMB < 3 ? 'text-orange-500' : 'text-green-600';
+                        return <h1 className='text-xs pl-2'><span className={colorClass}>{remainingMB.toFixed(1)} MB remaining</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                      })()}
                     </div>
                   </>
                 ) : (
@@ -1278,8 +1294,8 @@ export default function SendEmailModal({
                             <p className='text-xs text-gray-600 mb-2'>Template Attachments:</p>
                             {(effectiveAllowMultiple ? templateAttachments : templateAttachments.slice(0, 1)).map((attachment, index) => (
                               <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-gray-50 rounded'>
-                                <div className='flex-1'>
-                                  <p className='text-sm text-slate-800 font-light'>
+                                <div className='flex-1 min-w-0'>
+                                  <p className='text-sm text-slate-800 font-light truncate'>
                                     {attachment.attachment.split('/').pop()}
                                   </p>
                                 </div>
@@ -1317,8 +1333,8 @@ export default function SendEmailModal({
                             </p>
                             {files.map((file, index) => (
                               <div key={index} className='flex items-center justify-between py-2 px-3 mb-2 bg-blue-50 rounded'>
-                                <div className='flex-1'>
-                                  <p className='text-sm text-slate-800 font-light'>{file.name}</p>
+                                <div className='flex-1 min-w-0'>
+                                  <p className='text-sm text-slate-800 font-light truncate'>{file.name}</p>
                                 </div>
                                 <div className='flex gap-2 items-center'>
                                   <a 
@@ -1362,7 +1378,15 @@ export default function SendEmailModal({
                           </label>
                         )}
                       </div>
-                      <h1 className='text-xs pl-2'>Maximum file size: 10 mb per file</h1>
+                      {(() => {
+                        const templateSize = templateAttachments.reduce((sum, a) => sum + (a.file_size || 0), 0);
+                        const remainingMB = 10 - (templateSize + files.reduce((sum, f) => sum + f.size, 0)) / (1024 * 1024);
+                        if (remainingMB < 0) {
+                          return <h1 className='text-xs pl-2'><span className='text-red-500'>{Math.abs(remainingMB).toFixed(1)} MB exceeds</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                        }
+                        const colorClass = remainingMB < 1 ? 'text-red-500' : remainingMB < 3 ? 'text-orange-500' : 'text-green-600';
+                        return <h1 className='text-xs pl-2'><span className={colorClass}>{remainingMB.toFixed(1)} MB remaining</span><span className='text-gray-500'> of 10 MB total limit.</span></h1>;
+                      })()}
                     </div>
                   </>
                 )}
