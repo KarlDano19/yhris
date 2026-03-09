@@ -109,6 +109,7 @@ const TemplateResponses = ({ hasActiveSubscription, isActive }: { hasActiveSubsc
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,

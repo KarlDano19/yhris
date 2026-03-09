@@ -142,11 +142,12 @@ const Content = () => {
       );
     }
     
+    setCurrentPage(1);
     setIsSearching(true);
-    setAppliedFilter({ 
-      ...pendingFilter, 
-      from: formattedFrom, 
-      to: formattedTo 
+    setAppliedFilter({
+      ...pendingFilter,
+      from: formattedFrom,
+      to: formattedTo
     });
   };
 

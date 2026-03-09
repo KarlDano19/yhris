@@ -54,6 +54,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleSearch = () => {
+    setCurrentPage(1);
     setAppliedFilter({
       ...itemsFilter,
       search: searchText
