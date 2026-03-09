@@ -68,28 +68,43 @@ pipeline {
                 expression { return params.BUILD }
             }
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'harborCreds',
-                    usernameVariable: 'HARBOR_USERNAME',
-                    passwordVariable: 'HARBOR_PASSWORD'
-                )]) {
+                withCredentials([
+                    string(credentialsId: 'INFISICAL_TOKEN_HRIS_FE', variable: 'INFISICAL_TOKEN'),
+                    usernamePassword(
+                        credentialsId: 'harborCreds',
+                        usernameVariable: 'HARBOR_USERNAME',
+                        passwordVariable: 'HARBOR_PASSWORD'
+                    )
+                ]) {
                     sh '''
-                        set -e
+set -euo pipefail
 
-                        echo "$HARBOR_PASSWORD" | docker login "$REGISTRY" \
-                          -u "$HARBOR_USERNAME" --password-stdin
+infisical export \
+  --domain="https://usdc-vault.cytechint.io" \
+  --token="${INFISICAL_TOKEN}" \
+  --env="production" \
+  --path="/hris-fe" \
+  --format=dotenv > .env.production 2>/dev/null || true
 
-                        docker build \
-                          -f Dockerfile \
-                          -t ${IMAGE_REPO}:${SAFE_IMAGE_TAG} \
-                          .
+[ -s .env.production ] || { echo "Infisical /hris-fe returned no env vars"; exit 1; }
+sed -i -E "s/^([A-Za-z_][A-Za-z0-9_]*=)'(.*)'$/\\1\\2/" .env.production
 
-                        docker push ${IMAGE_REPO}:${SAFE_IMAGE_TAG}
+echo "$HARBOR_PASSWORD" | docker login "$REGISTRY" \
+  -u "$HARBOR_USERNAME" --password-stdin
 
-                        docker logout "$REGISTRY"
+docker build \
+  -f Dockerfile \
+  -t ${IMAGE_REPO}:${SAFE_IMAGE_TAG} \
+  .
 
-                        echo "Pushed ${IMAGE_REPO}:${SAFE_IMAGE_TAG}"
-                    '''
+docker push ${IMAGE_REPO}:${SAFE_IMAGE_TAG}
+
+docker logout "$REGISTRY"
+
+echo "Pushed ${IMAGE_REPO}:${SAFE_IMAGE_TAG}"
+
+rm -f .env.production
+'''
                 }
             }
         }
@@ -100,7 +115,6 @@ pipeline {
             }
             steps {
                 withCredentials([
-                    string(credentialsId: 'INFISICAL_TOKEN_HRIS_FE', variable: 'INFISICAL_TOKEN'),
                     usernamePassword(
                         credentialsId: 'payroll-sterling-prod-deploy-userpass',
                         usernameVariable: 'REMOTE_USER',
@@ -111,28 +125,11 @@ pipeline {
 set -euo pipefail
 
 sshpass -p "${REMOTE_PASS}" ssh -o StrictHostKeyChecking=no "${REMOTE_USER}@${REMOTE_HOST}" \
-  "IMAGE_TAG='${SAFE_IMAGE_TAG}' INFISICAL_TOKEN='${INFISICAL_TOKEN}' bash -se" <<'REMOTE_EOF'
+  "IMAGE_TAG='${SAFE_IMAGE_TAG}' bash -se" <<'REMOTE_EOF'
 set -euo pipefail
 
-# Optional: export FE env from Infisical and create ConfigMap (remove block if FE has no Infisical path)
-infisical export \
-  --domain="https://usdc-vault.cytechint.io" \
-  --token="${INFISICAL_TOKEN}" \
-  --env="production" \
-  --path="/hris-fe" \
-  --format=dotenv > /tmp/hris-fe.env 2>/dev/null || true
-
-if [ -s /tmp/hris-fe.env ]; then
-  sed -i -E "s/^([A-Za-z_][A-Za-z0-9_]*=)'(.*)'$/\\1\\2/" /tmp/hris-fe.env
-  kubectl -n hris create configmap hris-fe-env \
-    --from-env-file=/tmp/hris-fe.env \
-    --dry-run=client -o yaml | kubectl apply -f -
-fi
-
-# apply FE manifests
 kubectl apply -f /home/crnd/workspace/yahshua-kubernetes/envs/prod/hris-fe/deployment.yaml
 
-# set image to the tag we just built
 kubectl -n hris set image deployment/hris-fe \
   hris-fe=10.0.10.228/yahshua/hris-fe:${IMAGE_TAG}
 
@@ -140,8 +137,6 @@ kubectl -n hris rollout restart deployment/hris-fe
 kubectl -n hris rollout status deployment/hris-fe --timeout=300s
 
 kubectl -n hris get pods
-
-rm -f /tmp/hris-fe.env
 REMOTE_EOF
 '''
                 }
