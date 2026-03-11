@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ import MainIconOnly from '@/svg/MainIconOnly';
 import YahshuaPayrollLogo from '@/svg/YahshuaPayrollLogo';
 
 function Content() {
-  const broadcastChannel = new BroadcastChannel('integration-channel');
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   const searchParams = useSearchParams();
 
   const setSession = async (data: any) => {
@@ -44,28 +44,35 @@ function Content() {
     }
   };
 
-  const setSSOSession = async (data: any) => {
-    await updateSession({
-      token: data.token,
-      email: data.email,
-      hasPendingTransaction: data.has_pending_transaction,
-      hasActiveSubscription: data.has_active_subscription,
-      hasProfile: data.has_profile,
-      accountType: data.account_type,
-      loginType: data.login_type,
-      isLoggedIn: true,
-    });
-    setSession(data);
-  };
-
   useEffect(() => {
-    broadcastChannel.onmessage = (event) => {
+    const channel = new BroadcastChannel('integration-channel');
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
       if (event.data.isGranted) {
-        setSSOSession(event.data);
+        updateSession({
+          token: event.data.token,
+          email: event.data.email,
+          hasPendingTransaction: event.data.has_pending_transaction,
+          hasActiveSubscription: event.data.has_active_subscription,
+          hasProfile: event.data.has_profile,
+          accountType: event.data.account_type,
+          loginType: event.data.login_type,
+          isLoggedIn: true,
+        })
+          .catch((err) => {
+            console.error('SSO updateSession failed, proceeding with redirect:', err);
+            // Note: redirect still happens via .finally() below
+          })
+          .finally(() => {
+            setSession(event.data);
+          });
       }
     };
+
     return () => {
-      broadcastChannel.close();
+      channel.close();
+      broadcastChannelRef.current = null;
     };
   }, []);
 
