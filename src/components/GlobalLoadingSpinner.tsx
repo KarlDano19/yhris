@@ -13,6 +13,46 @@ const GlobalLoadingSpinner = () => {
   const prevPathRef = useRef<string | null>(null);
   const suppressNextNavRef = useRef(false);
   const prevSettledPathnameRef = useRef<string | null>(null);
+  const suppressResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Intercept programmatic navigation (router.push / router.replace)
+  useEffect(() => {
+    const handleProgrammaticNav = (url: string | URL | null | undefined) => {
+      if (!url) return;
+      try {
+        const parsed = new URL(String(url), location.href);
+        if (parsed.pathname === location.pathname) return;
+        if (suppressNextNavRef.current) return;
+        if (parsed.pathname === prevSettledPathnameRef.current) {
+          suppressNextNavRef.current = true;
+          lastNavClickRef.current = null;
+          setVisible(false);
+          return;
+        }
+        setVisible(true);
+        lastNavClickRef.current = Date.now();
+      } catch {
+        // ignore malformed urls
+      }
+    };
+
+    const originalPushState = history.pushState.bind(history);
+    const originalReplaceState = history.replaceState.bind(history);
+
+    history.pushState = function (state, unused, url) {
+      handleProgrammaticNav(url);
+      return originalPushState(state, unused, url);
+    };
+    history.replaceState = function (state, unused, url) {
+      handleProgrammaticNav(url);
+      return originalReplaceState(state, unused, url);
+    };
+
+    return () => {
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, []);
 
   // Show on anchor click (captures before client navigation)
   useEffect(() => {
@@ -55,6 +95,13 @@ const GlobalLoadingSpinner = () => {
       suppressNextNavRef.current = true;
       lastNavClickRef.current = null;
       setVisible(false);
+      // Safety: reset flag after 500ms if pathname never changes
+      // (guards against hash changes or cancelled navigations)
+      if (suppressResetTimerRef.current) clearTimeout(suppressResetTimerRef.current);
+      suppressResetTimerRef.current = setTimeout(() => {
+        suppressNextNavRef.current = false;
+        suppressResetTimerRef.current = null;
+      }, 500);
     };
     window.addEventListener('popstate', onPopstate);
     return () => window.removeEventListener('popstate', onPopstate);
@@ -68,6 +115,10 @@ const GlobalLoadingSpinner = () => {
     if (suppressNextNavRef.current) {
       if (pathnameChanged) {
         suppressNextNavRef.current = false;
+        if (suppressResetTimerRef.current) {
+          clearTimeout(suppressResetTimerRef.current);
+          suppressResetTimerRef.current = null;
+        }
         prevPathRef.current = pathname;
       }
       setVisible(false);
