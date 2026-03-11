@@ -44,29 +44,33 @@ function Content() {
     }
   };
 
+  const handleSSOData = (data: any) => {
+    updateSession({
+      token: data.token,
+      email: data.email,
+      hasPendingTransaction: data.has_pending_transaction,
+      hasActiveSubscription: data.has_active_subscription,
+      hasProfile: data.has_profile,
+      accountType: data.account_type,
+      loginType: data.login_type,
+      isLoggedIn: true,
+    })
+      .catch((err) => {
+        console.error('SSO updateSession failed, proceeding with redirect:', err);
+      })
+      .finally(() => {
+        setSession(data);
+      });
+  };
+
+  // Primary: BroadcastChannel (Chrome, Firefox, modern Safari 15.4+)
   useEffect(() => {
     const channel = new BroadcastChannel('integration-channel');
     broadcastChannelRef.current = channel;
 
     channel.onmessage = (event) => {
       if (event.data.isGranted) {
-        updateSession({
-          token: event.data.token,
-          email: event.data.email,
-          hasPendingTransaction: event.data.has_pending_transaction,
-          hasActiveSubscription: event.data.has_active_subscription,
-          hasProfile: event.data.has_profile,
-          accountType: event.data.account_type,
-          loginType: event.data.login_type,
-          isLoggedIn: true,
-        })
-          .catch((err) => {
-            console.error('SSO updateSession failed, proceeding with redirect:', err);
-            // Note: redirect still happens via .finally() below
-          })
-          .finally(() => {
-            setSession(event.data);
-          });
+        handleSSOData(event.data);
       }
     };
 
@@ -76,7 +80,46 @@ function Content() {
     };
   }, []);
 
+  // Fallback: localStorage storage event (older Safari, restricted browsers)
+  useEffect(() => {
+    const handleStorageEvent = (event: StorageEvent) => {
+      if (event.key === 'sso_result' && event.newValue) {
+        try {
+          const data = JSON.parse(event.newValue);
+          if (data?.isGranted) {
+            localStorage.removeItem('sso_result');
+            handleSSOData(data);
+          }
+        } catch (e) {
+          console.error('SSO localStorage fallback parse error:', e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+    return () => window.removeEventListener('storage', handleStorageEvent);
+  }, []);
+
+  const consumeStoredSSOResult = () => {
+    try {
+      const stored = localStorage.getItem('sso_result');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data?.isGranted) {
+          localStorage.removeItem('sso_result');
+          handleSSOData(data);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('SSO localStorage poll error:', e);
+    }
+    return false;
+  };
+
   const loginWithYGPayroll = () => {
+    localStorage.removeItem('sso_result');
+
     const left = (window.innerWidth - 900) / 2;
     const top = (window.innerHeight - 700) / 2;
     const popup = window.open(
@@ -87,8 +130,9 @@ function Content() {
     const checkOAuthStatus = setInterval(function () {
       if (popup?.closed) {
         clearInterval(checkOAuthStatus);
+        setTimeout(() => consumeStoredSSOResult(), 300);
       }
-    }, 1000);
+    }, 500);
   };
 
   return (
