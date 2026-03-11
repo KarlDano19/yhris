@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useIsFetching } from '@tanstack/react-query';
-import LoadingSpinner from './LoadingSpinner';
 import YahshuaLoadingLogo from './YahshuaLoadingLogo';
 
 const GlobalLoadingSpinner = () => {
@@ -13,7 +12,7 @@ const GlobalLoadingSpinner = () => {
   const lastNavClickRef = useRef<number | null>(null);
   const prevPathRef = useRef<string | null>(null);
   const suppressNextNavRef = useRef(false);
-  const pathnameHistoryRef = useRef<string[]>([]);
+  const prevSettledPathnameRef = useRef<string | null>(null);
 
   // Show on anchor click (captures before client navigation)
   useEffect(() => {
@@ -23,19 +22,17 @@ const GlobalLoadingSpinner = () => {
         if (!target) return;
         const anchor = target.closest('a');
         if (!anchor) return;
-        // Don't trigger spinner for disabled/blocked navigation items (permission or subscription denied)
         if (anchor.getAttribute('aria-disabled') === 'true') return;
+        if (anchor.hasAttribute('download')) return;
         const href = anchor.getAttribute('href');
         const targetAttr = anchor.getAttribute('target');
         if (!href || targetAttr === '_blank') return;
-        // ignore hash-only links and javascript:
         if (href.startsWith('#') || href.startsWith('javascript:')) return;
         const url = new URL(href, location.href);
         if (url.origin !== location.origin) return;
         if (url.pathname !== location.pathname) {
-          // Detect in-app back navigation: destination was a previously-settled page
-          const prevPages = pathnameHistoryRef.current.slice(0, -1); // all except current page
-          if (prevPages.includes(url.pathname)) {
+          suppressNextNavRef.current = false;
+          if (url.pathname === prevSettledPathnameRef.current) {
             suppressNextNavRef.current = true;
             lastNavClickRef.current = null;
             setVisible(false);
@@ -49,17 +46,15 @@ const GlobalLoadingSpinner = () => {
       }
     };
     window.addEventListener('click', onClick, true);
-    return () => {
-      window.removeEventListener('click', onClick, true);
-    };
+    return () => window.removeEventListener('click', onClick, true);
   }, []);
 
   // Suppress spinner for browser back/forward navigation (popstate)
   useEffect(() => {
     const onPopstate = () => {
       suppressNextNavRef.current = true;
-      lastNavClickRef.current = null;  // clear so recentNavClick can't re-show spinner
-      setVisible(false);               // immediately hide any visible spinner
+      lastNavClickRef.current = null;
+      setVisible(false);
     };
     window.addEventListener('popstate', onPopstate);
     return () => window.removeEventListener('popstate', onPopstate);
@@ -70,7 +65,6 @@ const GlobalLoadingSpinner = () => {
     const now = Date.now();
     const pathnameChanged = prevPathRef.current !== null && prevPathRef.current !== pathname;
 
-    // Skip spinner for back/forward navigation — page is already cached
     if (suppressNextNavRef.current) {
       if (pathnameChanged) {
         suppressNextNavRef.current = false;
@@ -81,22 +75,20 @@ const GlobalLoadingSpinner = () => {
     }
 
     if (isFetching > 0) {
-      // Only show spinner for fetches triggered by navigation clicks or when pathname changed.
       const recentNavClick = lastNavClickRef.current && now - lastNavClickRef.current < 2000;
       if (recentNavClick || pathnameChanged) {
         setVisible(true);
         return;
       }
-      // otherwise don't show spinner for background/modal fetches
       return;
     }
-    // update previous path for next effect run
-    prevPathRef.current = pathname;
-    // track settled pages for in-app back-navigation detection (keep last 10)
-    if (pathnameHistoryRef.current[pathnameHistoryRef.current.length - 1] !== pathname) {
-      pathnameHistoryRef.current = [...pathnameHistoryRef.current.slice(-9), pathname];
+
+    // Page has settled — only record previous pathname on actual page transitions,
+    // not on background re-fetches (which have pathnameChanged = false)
+    if (pathnameChanged) {
+      prevSettledPathnameRef.current = prevPathRef.current;
     }
-    // if pathname changed and nothing is fetching, hide after short delay
+    prevPathRef.current = pathname;
     const t = setTimeout(() => setVisible(false), 120);
     return () => clearTimeout(t);
   }, [isFetching, pathname]);
@@ -107,7 +99,6 @@ const GlobalLoadingSpinner = () => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="relative pointer-events-auto">
-        {/* Yahshua logo loading animation */}
         <div className="flex flex-col items-center justify-center">
           <YahshuaLoadingLogo size={96} durationMs={1000} />
           <div className="mt-3 text-xl text-yellow-100 font-semibold">Loading...</div>
