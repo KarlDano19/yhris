@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ import { T_Login } from '@/types/globals';
 import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 function Content() {
-  const broadcastChannel = new BroadcastChannel('integration-channel');
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -190,33 +190,42 @@ function Content() {
     }
   };
 
-  const setSSOSession = async (data: any) => {
-    await updateSession({
-      token: data.token,
-      email: data.email,
-      hasPendingTransaction: data.has_pending_transaction,
-      hasActiveSubscription: data.has_active_subscription,
-      hasProfile: data.has_profile,
-      accountType: data.account_type,
-      loginType: data.login_type,
-      isLoggedIn: true,
-    });
-    setSession(data);
-  };
-
   const handleOTPSuccess = (data: any) => {
     setSession(data);
     setShowOTPModal(false);
   };
 
   useEffect(() => {
-    broadcastChannel.onmessage = (event) => {
+    const channel = new BroadcastChannel('integration-channel');
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
       if (event.data.isGranted) {
-        setSSOSession(event.data);
+        // Fire-and-forget with explicit fallback: even if updateSession fails
+        // (e.g. iron-session timeout on prod), we still redirect via setSession.
+        updateSession({
+          token: event.data.token,
+          email: event.data.email,
+          hasPendingTransaction: event.data.has_pending_transaction,
+          hasActiveSubscription: event.data.has_active_subscription,
+          hasProfile: event.data.has_profile,
+          accountType: event.data.account_type,
+          loginType: event.data.login_type,
+          isLoggedIn: true,
+        })
+          .catch((err) => {
+            console.error('SSO updateSession failed, proceeding with redirect:', err);
+            toast.custom(() => <CustomToast message='Session sync failed — redirecting anyway. If issues persist, please contact support.' type='error' />, { duration: 5000 });
+          })
+          .finally(() => {
+            setSession(event.data);
+          });
       }
     };
+
     return () => {
-      broadcastChannel.close();
+      channel.close();
+      broadcastChannelRef.current = null;
     };
   }, []);
 
