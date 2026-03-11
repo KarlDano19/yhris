@@ -71,6 +71,12 @@ const GlobalLoadingSpinner = () => {
     const now = Date.now();
     const pathnameChanged = prevPathRef.current !== null && prevPathRef.current !== pathname;
 
+    // If pathname didn't change (cancelled/hash navigation), suppression flags are stale — reset them
+    if (!pathnameChanged) {
+      isPopstateRef.current = false;
+      suppressNextSpinnerRef.current = false;
+    }
+
     // Skip spinner for browser back/forward or in-app back-links to cached pages
     if ((isPopstateRef.current || suppressNextSpinnerRef.current) && pathnameChanged) {
       isPopstateRef.current = false;
