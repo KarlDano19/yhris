@@ -5,13 +5,36 @@ import { usePathname } from 'next/navigation';
 import { useIsFetching } from '@tanstack/react-query';
 import YahshuaLoadingLogo from './YahshuaLoadingLogo';
 
-// Module-level symbol survives StrictMode double-invocation (module is loaded once per session).
+// ─── Module-level singleton patch ────────────────────────────────────────────
+// Applied once at module load. Never inside component lifecycle.
+// Components add/remove callbacks; the patch itself is permanent for the session.
+// This eliminates recursive wrapper chains and cleanup-order races.
+
 const PATCHED = Symbol('yahshua_nav_spinner_patched');
 
-type PatchableFunction = {
-  (...args: Parameters<typeof history.pushState>): void;
-  [PATCHED]?: true;
-};
+type NavHandler = (url: string | URL | null | undefined) => void;
+const navHandlers = new Set<NavHandler>();
+
+if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
+  const origPush = history.pushState.bind(history);
+  const origReplace = history.replaceState.bind(history);
+
+  const patchedPush = function (state: unknown, unused: string, url?: string | URL | null) {
+    navHandlers.forEach(h => h(url));
+    return origPush(state as any, unused, url);
+  };
+  (patchedPush as any)[PATCHED] = true;
+
+  const patchedReplace = function (state: unknown, unused: string, url?: string | URL | null) {
+    navHandlers.forEach(h => h(url));
+    return origReplace(state as any, unused, url);
+  };
+  (patchedReplace as any)[PATCHED] = true;
+
+  history.pushState = patchedPush as typeof history.pushState;
+  history.replaceState = patchedReplace as typeof history.replaceState;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const GlobalLoadingSpinner = () => {
   const pathname = usePathname();
@@ -24,9 +47,9 @@ const GlobalLoadingSpinner = () => {
   const prevSettledPathnameRef = useRef<string | null>(null);
   const suppressResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Intercept programmatic navigation (router.push / router.replace)
+  // Register with module-level singleton — no history patching here
   useEffect(() => {
-    const handleProgrammaticNav = (url: string | URL | null | undefined) => {
+    const handler: NavHandler = (url) => {
       if (!url) return;
       try {
         const parsed = new URL(String(url), location.href);
@@ -44,59 +67,8 @@ const GlobalLoadingSpinner = () => {
         // ignore malformed urls
       }
     };
-
-    // Double-patch guard: only the first invocation applies the patch.
-    // StrictMode's second invocation finds the symbol already set and skips.
-    const iOwnThePatch = !(history.pushState as PatchableFunction)[PATCHED];
-
-    if (iOwnThePatch) {
-      const originalPushState = history.pushState.bind(history);
-      const originalReplaceState = history.replaceState.bind(history);
-
-      const patchedPush: PatchableFunction = function (state, unused, url) {
-        handleProgrammaticNav(url);
-        return originalPushState(state, unused, url);
-      };
-      patchedPush[PATCHED] = true;
-
-      const patchedReplace: PatchableFunction = function (state, unused, url) {
-        handleProgrammaticNav(url);
-        return originalReplaceState(state, unused, url);
-      };
-      patchedReplace[PATCHED] = true;
-
-      history.pushState = patchedPush as typeof history.pushState;
-      history.replaceState = patchedReplace as typeof history.replaceState;
-
-      return () => {
-        history.pushState = originalPushState;
-        history.replaceState = originalReplaceState;
-      };
-    }
-
-    // Non-owner path: refresh handler closure without re-patching.
-    const savedPush = history.pushState;
-    const savedReplace = history.replaceState;
-
-    const wrappedPush: PatchableFunction = function (state, unused, url) {
-      handleProgrammaticNav(url);
-      return savedPush.call(history, state, unused, url);
-    };
-    wrappedPush[PATCHED] = true;
-
-    const wrappedReplace: PatchableFunction = function (state, unused, url) {
-      handleProgrammaticNav(url);
-      return savedReplace.call(history, state, unused, url);
-    };
-    wrappedReplace[PATCHED] = true;
-
-    history.pushState = wrappedPush as typeof history.pushState;
-    history.replaceState = wrappedReplace as typeof history.replaceState;
-
-    return () => {
-      history.pushState = savedPush;
-      history.replaceState = savedReplace;
-    };
+    navHandlers.add(handler);
+    return () => { navHandlers.delete(handler); };
   }, []);
 
   // Show on anchor click (captures before client navigation)
