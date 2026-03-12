@@ -63,7 +63,18 @@ function Content() {
       });
   };
 
-  // Primary: BroadcastChannel (Chrome, Firefox, modern Safari 15.4+)
+  // Primary: window.opener.postMessage listener (works cross-origin, e.g. www vs non-www)
+  useEffect(() => {
+    const handlePostMessage = (event: MessageEvent) => {
+      if (event.data?.isGranted) {
+        handleSSOData(event.data);
+      }
+    };
+    window.addEventListener('message', handlePostMessage);
+    return () => window.removeEventListener('message', handlePostMessage);
+  }, []);
+
+  // Secondary: BroadcastChannel (Chrome, Firefox, modern Safari 15.4+)
   useEffect(() => {
     const channel = new BroadcastChannel('integration-channel');
     broadcastChannelRef.current = channel;
