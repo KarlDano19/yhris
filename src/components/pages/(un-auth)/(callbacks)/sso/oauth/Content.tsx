@@ -43,7 +43,13 @@ function Content() {
             postMessageData.account_type = data.account_type;
             postMessageData.login_type = data.login_type;
           }
-          // Primary: BroadcastChannel (modern browsers)
+          // Primary: window.opener.postMessage (works cross-origin, e.g. www vs non-www)
+          try {
+            window.opener?.postMessage(postMessageData, '*');
+          } catch (e) {
+            console.warn('window.opener.postMessage failed:', e);
+          }
+          // Secondary: BroadcastChannel (same-origin, modern browsers)
           try {
             broadcastChannel.postMessage(postMessageData);
           } catch (e) {
@@ -57,7 +63,7 @@ function Content() {
           }
           setTimeout(() => {
             window.close();
-          }, 500);
+          }, 1500);
         },
         onError: (err: any) => {
           setErrorMessage(err);
