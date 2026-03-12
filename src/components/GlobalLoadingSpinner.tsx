@@ -38,14 +38,13 @@ if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
 
 const GlobalLoadingSpinner = () => {
   const pathname = usePathname();
-  const isFetching = useIsFetching();
+  const isFetching = useIsFetching() > 0;
   const [visible, setVisible] = useState(false);
 
   const lastNavClickRef = useRef<number | null>(null);
   const prevPathRef = useRef<string | null>(null);
   const suppressNextNavRef = useRef(false);
   const prevSettledPathnameRef = useRef<string | null>(null);
-  const suppressResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Register with module-level singleton — no history patching here
   useEffect(() => {
@@ -54,7 +53,10 @@ const GlobalLoadingSpinner = () => {
       try {
         const parsed = new URL(String(url), location.href);
         if (parsed.pathname === location.pathname) return;
-        if (suppressNextNavRef.current) return;
+        if (suppressNextNavRef.current) {
+          suppressNextNavRef.current = false; // consumed — next pushState is new navigation
+          return;
+        }
         if (parsed.pathname === prevSettledPathnameRef.current) {
           suppressNextNavRef.current = true;
           lastNavClickRef.current = null;
@@ -112,20 +114,10 @@ const GlobalLoadingSpinner = () => {
       suppressNextNavRef.current = true;
       lastNavClickRef.current = null;
       setVisible(false);
-      if (suppressResetTimerRef.current) clearTimeout(suppressResetTimerRef.current);
-      suppressResetTimerRef.current = setTimeout(() => {
-        suppressNextNavRef.current = false;
-        suppressResetTimerRef.current = null;
-      }, 500);
     };
     window.addEventListener('popstate', onPopstate);
     return () => {
       window.removeEventListener('popstate', onPopstate);
-      // Timer leak fix: clear pending timer so callback never fires on orphaned refs.
-      if (suppressResetTimerRef.current) {
-        clearTimeout(suppressResetTimerRef.current);
-        suppressResetTimerRef.current = null;
-      }
     };
   }, []);
 
@@ -137,17 +129,13 @@ const GlobalLoadingSpinner = () => {
     if (suppressNextNavRef.current) {
       if (pathnameChanged) {
         suppressNextNavRef.current = false;
-        if (suppressResetTimerRef.current) {
-          clearTimeout(suppressResetTimerRef.current);
-          suppressResetTimerRef.current = null;
-        }
         prevPathRef.current = pathname;
       }
       setVisible(false);
       return;
     }
 
-    if (isFetching > 0) {
+    if (isFetching) {
       const recentNavClick = lastNavClickRef.current !== null && now - lastNavClickRef.current < 2000;
       if (recentNavClick || pathnameChanged) {
         setVisible(true);
