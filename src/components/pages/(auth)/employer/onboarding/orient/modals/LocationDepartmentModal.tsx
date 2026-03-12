@@ -6,11 +6,11 @@ import toast from 'react-hot-toast';
 import Select from 'react-select';
 
 import CustomToast from '@/components/CustomToast';
-import useGetLocationItems from '../../settings/general-settings/employees/hooks/location/useGetLocationItems';
-import useGetDepartmentItems from '../../settings/general-settings/employees/hooks/department/useGetDepartmentItems';
+import useGetLocationItems from '../../../settings/general-settings/employees/hooks/location/useGetLocationItems';
+import useGetDepartmentItems from '../../../settings/general-settings/employees/hooks/department/useGetDepartmentItems';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useUpdateApplicantOrient from '../hooks/useUpdateApplicantOrient';
-import CreateModal from '../../settings/general-settings/employees/modals/CreateModal';
+import CreateModal from '../../../settings/general-settings/employees/modals/CreateModal';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';

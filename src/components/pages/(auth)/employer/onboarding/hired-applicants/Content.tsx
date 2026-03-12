@@ -8,7 +8,7 @@ import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
 import useGetHiredApplicants from './hooks/useGetHiredApplicants';
-import SkeletonGrid from '../../../../SkeletonGrid';
+import SkeletonGrid from '@/components/SkeletonGrid';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
