@@ -10,8 +10,8 @@ import CustomToast from '@/components/CustomToast';
 import ModalLayout from '@/components/ModalLayout';
 
 import useGetAllJobPostItems from '@/components/hooks/useGetAllJobPostItems';
-import useGetJobPostDetails from '../../hooks/useGetJobPostDetails';
-import useMoveApplicantToJob from '../../hooks/useMoveApplicantToJob';
+import useGetJobPostDetails from '../../hooks/job/useGetJobPostDetails';
+import useMoveApplicantToJob from '../../hooks/applicant/useMoveApplicantToJob';
 
 interface MoveToAnotherJobModalProps {
   appliedJobId: number;
