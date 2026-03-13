@@ -427,9 +427,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/train' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
+          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Train</h4>
+            <h4>Evaluation</h4>
           </Link>
         </div>
         

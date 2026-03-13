@@ -1,15 +1,13 @@
-import React from 'react';
-
 import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import Content from '@/components/pages/(auth)/employer/train/evaluation/evaluation-scheduler/Content';
+import Content from '@/components/pages/(auth)/employer/evaluation/evaluation-history/Content';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
 export const metadata = {
-  title: 'Train - Evaluation Scheduler - Yahshua HRIS',
+  title: 'Evaluation - Evaluation History - Yahshua HRIS',
 };
 
 async function getSession() {
@@ -17,10 +15,10 @@ async function getSession() {
   return session;
 }
 
-const EvaluationPage = async () => {
+const EvaluationHistoryPage = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
   return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
-export default EvaluationPage;
+export default EvaluationHistoryPage;

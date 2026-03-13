@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { getIronSession } from "iron-session";
 
-import Content from "@/components/pages/(auth)/employer/orient/Content";
+import Content from "@/components/pages/(auth)/employer/onboarding/orient/Content";
 
 import { SessionData, sessionOptions } from "@/lib/session";
 
@@ -15,10 +15,10 @@ async function getSession() {
   return session;
 }
 
-const OrientPosition = async () => {
+const OnboardingPosition = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
   return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
-export default OrientPosition;
+export default OnboardingPosition;
