@@ -69,7 +69,7 @@ const AuthorizedHeader = ({ hasProfile, initialTokenExpiresAt }: { hasProfile: b
   };
 
   useEffect(() => {
-    if (error && error.detail.includes('Invalid token')) {
+    if (error && typeof error.detail === 'string' && error.detail.includes('Invalid token')) {
       logout(true);
     }
   }, [error]);

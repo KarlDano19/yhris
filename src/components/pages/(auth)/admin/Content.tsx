@@ -22,6 +22,11 @@ const menus = [
     text: 'Management',
     link: '/admin/management',
   },
+  {
+    icon: <AccountBalanceLogo />,
+    text: 'Kickoff Management',
+    link: '/admin/kickoff-management',
+  },
 ];
 
 const Content = () => {
