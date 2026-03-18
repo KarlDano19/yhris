@@ -187,26 +187,26 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     return (
       <div className="relative overflow-hidden">
         {/* Actions revealed on swipe: Mark as read (eye) + Delete */}
-        <div className="absolute right-2 top-2 bottom-2 w-44 flex items-center justify-end gap-2 pr-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!notification.is_read) {
+        <div className={`absolute right-2 top-2 bottom-2 ${notification.is_read ? 'w-20' : 'w-44'} flex items-center justify-end gap-2 pr-2`}>
+          {!notification.is_read && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 markAsRead(notification.id);
-              }
-            }}
-            className="h-10 px-3 flex items-center justify-center bg-gray-50 text-gray-700 rounded-md shadow-sm"
-          >
-            <EyeIcon className="h-5 w-5" />
-          </button>
+              }}
+              className="h-10 px-3 flex items-center justify-center bg-gray-50 text-gray-700 rounded-md shadow-sm"
+            >
+              <EyeIcon className="h-5 w-5" />
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteNotification(notification.id);
             }}
-            className="h-10 px-3 flex items-center justify-center bg-red-50 text-red-600 rounded-md shadow-sm"
+            className="h-10 px-3 flex items-center justify-center bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 active:bg-red-700 transition-colors"
           >
-            <span className="h-5 w-5 inline-flex text-red-600"><DeleteIconNoBorder/></span>
+            <span className="h-5 w-5 inline-flex text-white"><DeleteIconNoBorder/></span>
           </button>
         </div>
 
@@ -356,12 +356,14 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
       <div className="p-4 text-center">
         <div className="flex items-center justify-center gap-4">
-          <button
-            onClick={handleMarkAllAsRead}
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            Mark all as read
-          </button>
+          {notifications.some((n: any) => !n.is_read) && (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Mark all as read
+            </button>
+          )}
           {hasNextPage && (
             <button
               onClick={() => fetchNextPage()}

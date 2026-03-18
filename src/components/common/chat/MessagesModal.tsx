@@ -371,7 +371,7 @@ const MessagesModal = ({
 
         {/* Modal Container */}
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-start justify-center p-4 pt-16">
             <Transition.Child
               as="div"
               enter="ease-out duration-300"
@@ -380,7 +380,7 @@ const MessagesModal = ({
               leave="ease-in duration-200"
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
-              className="w-full max-w-md"
+              className="w-full max-w-2xl"
             >
               <Dialog.Panel className="w-full transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                 {/* Header */}

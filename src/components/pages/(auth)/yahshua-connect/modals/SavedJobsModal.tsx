@@ -109,7 +109,6 @@ const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsMod
           () => <CustomToast message="Job removed from saved jobs." type="success" />,
           { duration: 3000 }
         );
-        queryClient.invalidateQueries(['savedJobsCache']); // Invalidate cache to update the list
       },
       onError: (error: any) => {
         const errorMessage = error?.message || error || 'Failed to remove job from saved jobs';

@@ -33,8 +33,15 @@ function useUpdateSavedJobs() {
   const query = useMutation(
     (jobPostingId: number) => deleteSavedJob(jobPostingId),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['savedJobsCache']);
+      onSuccess: (_, jobPostingId) => {
+        queryClient.setQueryData(['savedJobsCache'], (old: any) => {
+          if (!old) return old;
+          const arr = Array.isArray(old) ? old : old?.data ?? old;
+          const filtered = arr.filter((item: any) =>
+            (item.job_posting?.id ?? item.job_posting_id ?? item.job_posting) !== jobPostingId
+          );
+          return Array.isArray(old) ? filtered : { ...old, data: filtered };
+        });
       },
     }
   );

@@ -3,9 +3,9 @@
 import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 
 import useGetApplicationByUser from '../../hooks/useGetApplicationByUser';
+import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
@@ -26,14 +26,8 @@ const Content = ({ averageRating }: ContentProps) => {
   // Get applications data reactively
   const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser({});
 
-  // Get saved jobs data from cache
-  const queryClient = useQueryClient();
-  const cachedSavedJobs = queryClient
-    .getQueryCache()
-    .find(['savedJobsCache']) as {
-    state: { data: any[] } | undefined;
-  };
-  const savedJobsData = cachedSavedJobs?.state?.data;
+  // Get saved jobs data reactively
+  const { data: savedJobsData } = useGetSavedJobs();
 
   // Fetch matched jobs (only jobs with matching skills, sorted by match)
   const { data: highMatchJobsData, isLoading: isHighMatchJobsLoading } = useGetHighMatchJobs({
