@@ -17,8 +17,8 @@ export default function Content({ token }: ContentProps) {
 
   const { data, isLoading, isError } = useGetKickoffPortal(token);
 
-  const youtubeVideoId = process.env.NEXT_PUBLIC_KICKOFF_YOUTUBE_VIDEO_ID;
-  const canvaEmbedUrl = process.env.NEXT_PUBLIC_KICKOFF_CANVA_EMBED_URL;
+  const youtubeVideoId = 'rHVN2IrpoC0';
+  const canvaEmbedUrl = 'https://www.canva.com/design/DAHC9n5k93s/6b0gbns2cTzuBzXMv_eoHw/view?embed';
 
   if (isLoading) {
     return (
@@ -141,6 +141,7 @@ export default function Content({ token }: ContentProps) {
               <iframe
                 src={canvaEmbedUrl}
                 title="YAHSHUA HRIS Project Presentation"
+                allow="fullscreen"
                 allowFullScreen
                 className="w-full aspect-video"
               />
