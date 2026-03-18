@@ -1,18 +1,25 @@
 "use client";
 
+// 1. React imports
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { TrashIcon } from "@heroicons/react/24/solid";
+// 2. Third-party library imports
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 
+// 3. Internal component imports
+import ConfirmModal from "../modals/ConfirmModal";
+import Section from "../common/Section";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import Pagination from "@/components/Pagination";
 
-import ConfirmModal from "../modals/ConfirmModal";
-import Section from "../common/Section";
-import Field from "../common/Field";
-
+// 4. Internal hook imports
 import { useGetTrainingRecordsList } from "../hooks/useGetTrainingRecordsList";
+
+// 5. Type imports
 import { TrainingRecord } from "../types/trainingRecords";
+
+// 6. Icon imports
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 /* ------------------------------- Types ------------------------------- */
 type FileAction = "keep" | "replace" | "clear";
@@ -170,6 +177,8 @@ export default function TrainingDevelopmentForm({
   refreshKey?: number;
 }) {
   /* ----------------------------- Pagination state ----------------------------- */
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // GET list from backend (refetches automatically when page changes)
   const {
@@ -177,15 +186,11 @@ export default function TrainingDevelopmentForm({
     isLoading,
     error,
     refetch,
-    setPage,
-    setPageSize,
   } = useGetTrainingRecordsList(employeeId, {
-    current_page: 1,
-    page_size: 10,
+    current_page: currentPage,
+    page_size: pageSize,
   });
 
-  const currentPage = listData?.current_page ?? 1;
-  const pageSize = listData?.page_size ?? 10;
   const totalRecords = listData?.total_records ?? 0;
   const totalPages =
     listData?.total_pages ??
@@ -193,7 +198,7 @@ export default function TrainingDevelopmentForm({
 
   useEffect(() => {
     if (listData?.total_pages && currentPage > listData.total_pages) {
-      setPage(listData.total_pages);
+      setCurrentPage(listData.total_pages);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listData?.total_pages]);
@@ -204,9 +209,26 @@ export default function TrainingDevelopmentForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
 
-  /** Local rows and bookkeeping */
-  const [rows, setRows] = useState<Row[]>([]);
-  const [errorsBag, setErrorsBag] = useState<ErrorsBag>({});
+  /* ----------------------------- React Hook Form ----------------------------- */
+  const {
+    register,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+    trigger,
+  } = useForm<{ rows: Row[] }>({
+    mode: "onChange",
+    defaultValues: {
+      rows: [],
+    },
+  });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "rows",
+  });
+
   const [deletedServerIds, setDeletedServerIds] = useState<
     Array<number | string>
   >([]);
@@ -240,51 +262,39 @@ export default function TrainingDevelopmentForm({
         existingFileUrl: url,
         isNew: false,
         isDirty: false,
-        fileAction: "keep",
+        fileAction: "keep" as FileAction,
       }));
-    setRows(seeded);
-    const bag: ErrorsBag = {};
-    for (const row of seeded) bag[row.id] = validateRow(row);
-    setErrorsBag(bag);
+    setValue('rows', seeded);
     setDeletedServerIds([]);
     onDirtyChange?.(false);
-  }, [listData, onDirtyChange]);
+  }, [listData, setValue, onDirtyChange]);
 
   // errors aggregate
-  const hasErrors = useMemo(
-    () =>
-      Object.values(errorsBag).some(
-        (e) =>
-          !!(e?.title || e?.dateCompleted || e?.provider || e?.fileError)
-      ),
-    [errorsBag]
-  );
+  const hasErrors = useMemo(() => {
+    const rowsValue = watch('rows');
+    return rowsValue.some((row: Row) => {
+      const errs = validateRow(row);
+      return !!(errs.title || errs.dateCompleted || errs.provider || errs.fileError);
+    });
+  }, [watch]);
+
   useEffect(() => onErrorsChange?.(hasErrors), [hasErrors, onErrorsChange]);
 
   // dirty aggregate
-  const dirty = useMemo(
-    () => rows.some((r) => r.isDirty || r.isNew) || deletedServerIds.length > 0,
-    [rows, deletedServerIds]
-  );
+  const dirty = useMemo(() => {
+    const rowsValue = watch('rows');
+    return rowsValue.some((r: Row) => r.isDirty || r.isNew) || deletedServerIds.length > 0;
+  }, [watch, deletedServerIds]);
+
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   /* -------------------------- Row operations -------------------------- */
-  const touchValidate = useCallback((next: Row) => {
-    setErrorsBag((prev) => ({ ...prev, [next.id]: validateRow(next) }));
-  }, []);
-
   const updateRow = useCallback(
-    (id: string, patch: Partial<Row>) => {
-      setRows((prev) => {
-        const next = prev.map((r) =>
-          r.id === id ? { ...r, ...patch, isDirty: true } : r
-        );
-        const changed = next.find((r) => r.id === id)!;
-        touchValidate(changed);
-        return next;
-      });
+    (index: number, patch: Partial<Row>) => {
+      const current = fields[index];
+      update(index, { ...current, ...patch, isDirty: true });
     },
-    [touchValidate]
+    [fields, update]
   );
 
   const addRow = useCallback(() => {
@@ -299,34 +309,29 @@ export default function TrainingDevelopmentForm({
       isDirty: true,
       fileAction: "keep",
     };
-    setRows((prev) => [fresh, ...prev]);
-    touchValidate(fresh);
-  }, [touchValidate]);
+    append(fresh);
+  }, [append]);
 
-  const queueDelete = useCallback((row: Row) => {
+  const queueDelete = useCallback((index: number) => {
+    const row = fields[index];
     if (row.serverId != null) {
       setDeletedServerIds((prev) =>
         prev.includes(row.serverId!) ? prev : [...prev, row.serverId!]
       );
     }
-    setRows((prev) => prev.filter((r) => r.id !== row.id));
-    setErrorsBag((prev) => {
-      const { [row.id]: _rm, ...rest } = prev;
-      return rest;
-    });
-  }, []);
+    remove(index);
+  }, [fields, remove]);
 
   /* ------------------------- Confirm delete modal ------------------------ */
-  const askDelete = (id: string) => {
-    setConfirmRowId(id);
+  const askDelete = (index: number) => {
+    setConfirmRowId(String(index));
     setConfirmOpen(true);
   };
   const handleConfirmDelete = async () => {
-    if (!confirmRowId) return;
+    if (confirmRowId === null) return;
     try {
       setConfirmBusy(true);
-      const target = rows.find((r) => r.id === confirmRowId);
-      if (target) queueDelete(target);
+      queueDelete(Number(confirmRowId));
     } finally {
       setConfirmBusy(false);
       setConfirmOpen(false);
@@ -341,25 +346,27 @@ export default function TrainingDevelopmentForm({
 
   /* ------------------------------- Collector ------------------------------- */
   const collect = useCallback<() => TrainingChangeSet>(() => {
-    const bag: ErrorsBag = {};
-    for (const r of rows) bag[r.id] = validateRow(r);
-    setErrorsBag(bag);
-    const anyErrors = Object.values(bag).some(
-      (e) => !!(e.title || e.dateCompleted || e.provider || e.fileError)
-    );
+    // Trigger validation
+    trigger();
 
-    const creates = rows
-      .filter((r) => r.isNew)
-      .map((r) => ({
+    const currentRows = watch('rows');
+    const anyErrors = currentRows.some((row: Row) => {
+      const errs = validateRow(row);
+      return !!(errs.title || errs.dateCompleted || errs.provider || errs.fileError);
+    });
+
+    const creates = currentRows
+      .filter((r: Row) => r.isNew)
+      .map((r: Row) => ({
         training_title: r.title,
         date_completed: r.dateCompleted || null,
         training_provider: r.provider || "",
-        proof_of_completion: r.file || null, // required is enforced by validateRow
+        proof_of_completion: r.file || null,
       }));
 
-    const updates = rows
-      .filter((r) => !r.isNew && r.isDirty && r.serverId != null)
-      .map((r) => {
+    const updates = currentRows
+      .filter((r: Row) => !r.isNew && r.isDirty && r.serverId != null)
+      .map((r: Row) => {
         const clear = r.fileAction === "clear" && !!r.existingFileUrl;
         return {
           id: r.serverId!,
@@ -375,7 +382,7 @@ export default function TrainingDevelopmentForm({
 
     const deletes = [...deletedServerIds];
     return { creates, updates, deletes, hasErrors: anyErrors };
-  }, [rows, deletedServerIds]);
+  }, [watch, deletedServerIds, trigger]);
 
   useEffect(() => {
     registerCollector?.(collect);
@@ -417,18 +424,18 @@ export default function TrainingDevelopmentForm({
           {error.message}
         </div>
       )}
-      {!isLoading && !error && rows.length === 0 && (
+      {!isLoading && !error && fields.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
           <p className="text-sm">
-            No trainings yet. Click “Add Training” to get started.
+            No trainings yet. Click "Add Training" to get started.
           </p>
         </div>
       )}
 
       {/* Rows */}
       {!isLoading &&
-        rows.map((row) => {
-          const rowErr = errorsBag[row.id] ?? {};
+        fields.map((row, index) => {
+          const rowErr = validateRow(row);
           const hasServerFile =
             !!row.existingFileUrl && row.fileAction === "keep";
           return (
@@ -437,7 +444,7 @@ export default function TrainingDevelopmentForm({
                 {/* Delete */}
                 <button
                   type="button"
-                  onClick={() => askDelete(row.id)}
+                  onClick={() => askDelete(index)}
                   className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-red-300 text-red-500 hover:bg-red-50"
                   title="Remove Training"
                   aria-label="Remove Training"
@@ -448,70 +455,116 @@ export default function TrainingDevelopmentForm({
 
                 {/* Fields */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <Field
-                    dataTestid="title-field"
-                    label="Training Title"
-                    placeholder="Enter Training Title..."
-                    value={row.title}
-                    onChange={(e) =>
-                      updateRow(row.id, { title: e.target.value })
-                    }
-                    error={rowErr.title ?? null}
-                    required
-                  />
-
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                      Date Completed
+                  {/* Training Title Field */}
+                  <div data-testid="title-field">
+                    <label htmlFor={`title-${row.id}`} className="mb-1 block text-sm font-medium text-gray-700">
+                      Training Title
                       <span className="ml-0.5 text-red-600">*</span>
                     </label>
-                    <div className="relative">
-                      <CustomDatePicker
-                        id={`training-date-${row.id}`}
-                        selected={toDate(row.dateCompleted)}
-                        pickerOnChange={(d: Date | null) =>
-                          updateRow(row.id, {
-                            dateCompleted: d ? toISODateInput(d) : "",
-                          })
-                        }
-                        inputOnChange={(d: Date | null) =>
-                          updateRow(row.id, {
-                            dateCompleted: d ? toISODateInput(d) : "",
-                          })
-                        }
-                        placeholder="MM/DD/YYYY"
-                        className={[
-                          "w-full rounded-md bg-white px-3 py-2 text-sm",
-                          rowErr.dateCompleted
-                            ? "border border-red-500 focus:border-red-500"
-                            : "border border-gray-300 focus:border-[#355fd0]",
-                        ].join(" ")}
-                      />
-                    </div>
-                    <p
-                      className={`mt-1 text-xs ${
-                        rowErr.dateCompleted
-                          ? "text-red-600"
-                          : "text-transparent"
+                    <input
+                      id={`title-${row.id}`}
+                      {...register(`rows.${index}.title`, {
+                        required: "Training Title is required.",
+                      })}
+                      type="text"
+                      placeholder="Enter Training Title..."
+                      className={`w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
+                        errors.rows?.[index]?.title
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:border-[#355fd0]"
                       }`}
-                    >
-                      {rowErr.dateCompleted || "placeholder"}
-                    </p>
+                    />
+                    {errors.rows?.[index]?.title && (
+                      <p className="mt-1 text-xs text-red-600">
+                        {errors.rows[index]?.title?.message}
+                      </p>
+                    )}
                   </div>
 
-                  <Field
-                    dataTestid="provider-field"
-                    label="Training Provider"
-                    placeholder="Enter Training Provider..."
-                    value={row.provider}
-                    onChange={(e) =>
-                      updateRow(row.id, { provider: e.target.value })
-                    }
-                    error={rowErr.provider ?? null}
-                    required
+                  <Controller
+                    name={`rows.${index}.dateCompleted`}
+                    control={control}
+                    rules={{
+                      required: "Date Completed is required.",
+                      validate: (value) => {
+                        const d = toDate(value);
+                        if (!d) return "Invalid date.";
+                        const today = new Date();
+                        const dOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                        const tOnly = new Date(
+                          today.getFullYear(),
+                          today.getMonth(),
+                          today.getDate()
+                        );
+                        if (dOnly > tOnly) return "Date Completed cannot be in the future.";
+                        return true;
+                      },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Date Completed
+                          <span className="ml-0.5 text-red-600">*</span>
+                        </label>
+                        <div className="relative">
+                          <CustomDatePicker
+                            id={`training-date-${row.id}`}
+                            selected={toDate(field.value)}
+                            pickerOnChange={(d: Date | null) =>
+                              field.onChange(d ? toISODateInput(d) : "")
+                            }
+                            inputOnChange={(d: Date | null) =>
+                              field.onChange(d ? toISODateInput(d) : "")
+                            }
+                            placeholder="MM/DD/YYYY"
+                            className={[
+                              "w-full rounded-md bg-white px-3 py-2 text-sm",
+                              fieldState.error
+                                ? "border border-red-500 focus:border-red-500"
+                                : "border border-gray-300 focus:border-[#355fd0]",
+                            ].join(" ")}
+                          />
+                        </div>
+                        <p
+                          className={`mt-1 text-xs ${
+                            fieldState.error
+                              ? "text-red-600"
+                              : "text-transparent"
+                          }`}
+                        >
+                          {fieldState.error?.message || "placeholder"}
+                        </p>
+                      </div>
+                    )}
                   />
 
-                  {/* Proof of completion (REQUIRED) */}
+                  {/* Training Provider Field */}
+                  <div data-testid="provider-field">
+                    <label htmlFor={`provider-${row.id}`} className="mb-1 block text-sm font-medium text-gray-700">
+                      Training Provider
+                      <span className="ml-0.5 text-red-600">*</span>
+                    </label>
+                    <input
+                      id={`provider-${row.id}`}
+                      {...register(`rows.${index}.provider`, {
+                        required: "Training Provider is required.",
+                      })}
+                      type="text"
+                      placeholder="Enter Training Provider..."
+                      className={`w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-gray-400 ${
+                        errors.rows?.[index]?.provider
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:border-[#355fd0]"
+                      }`}
+                    />
+                    {errors.rows?.[index]?.provider && (
+                      <p className="mt-1 text-xs text-red-600">
+                        {errors.rows[index]?.provider?.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Proof of completion (REQUIRED) - Manual handling due to file complexity */}
                   <div data-testid="proof-field">
                     <label className="mb-1 block text-sm font-medium text-gray-700">
                       Proof of Completion (PDF or Image) <span className="ml-0.5 text-red-600">*</span>
@@ -532,18 +585,10 @@ export default function TrainingDevelopmentForm({
                             data-testid="remove-file-btn"
                             type="button"
                             onClick={() => {
-                              // clearing requires replacement (required)
-                              updateRow(row.id, {
+                              updateRow(index, {
                                 fileAction: "clear",
                                 file: null,
                               });
-                              setErrorsBag((prev) => ({
-                                ...prev,
-                                [row.id]: {
-                                  ...(prev[row.id] || {}),
-                                  fileError: "Proof of Completion is required.",
-                                },
-                              }));
                             }}
                             className="text-xs text-red-600 hover:underline"
                           >
@@ -562,17 +607,10 @@ export default function TrainingDevelopmentForm({
                                 const f = e.target.files?.[0] ?? null;
                                 const err = validateProofFile(f);
                                 if (err) {
-                                  setErrorsBag((prev) => ({
-                                    ...prev,
-                                    [row.id]: {
-                                      ...(prev[row.id] || {}),
-                                      fileError: err,
-                                    },
-                                  }));
                                   e.currentTarget.value = "";
                                   return;
                                 }
-                                updateRow(row.id, {
+                                updateRow(index, {
                                   file: f,
                                   fileAction: f ? "replace" : "keep",
                                 });
@@ -592,20 +630,10 @@ export default function TrainingDevelopmentForm({
                               data-testid="remove-file-btn"
                               type="button"
                               onClick={() => {
-                                // after removing local file, still required
-                                updateRow(row.id, {
+                                updateRow(index, {
                                   file: null,
-                                  fileAction: row.existingFileUrl
-                                    ? "clear"
-                                    : "keep",
+                                  fileAction: row.existingFileUrl ? "clear" : "keep",
                                 });
-                                setErrorsBag((prev) => ({
-                                  ...prev,
-                                  [row.id]: {
-                                    ...(prev[row.id] || {}),
-                                    fileError: "Proof of Completion is required.",
-                                  },
-                                }));
                               }}
                               className="text-xs text-red-600 hover:underline"
                             >
@@ -620,17 +648,10 @@ export default function TrainingDevelopmentForm({
                               const f = e.target.files?.[0] ?? null;
                               const err = validateProofFile(f);
                               if (err) {
-                                setErrorsBag((prev) => ({
-                                  ...prev,
-                                  [row.id]: {
-                                    ...(prev[row.id] || {}),
-                                    fileError: err,
-                                  },
-                                }));
                                 e.currentTarget.value = "";
                                 return;
                               }
-                              updateRow(row.id, {
+                              updateRow(index, {
                                 file: f,
                                 fileAction: f
                                   ? "replace"
@@ -655,12 +676,12 @@ export default function TrainingDevelopmentForm({
 
                     <p
                       className={`mt-1 text-xs ${
-                        errorsBag[row.id]?.fileError
+                        rowErr.fileError
                           ? "text-red-600"
                           : "text-transparent"
                       }`}
                     >
-                      {errorsBag[row.id]?.fileError || "placeholder"}
+                      {rowErr.fileError || "placeholder"}
                     </p>
                   </div>
                 </div>
@@ -674,8 +695,8 @@ export default function TrainingDevelopmentForm({
         pagination={{ totalPages, totalRecords }}
         currentPage={currentPage}
         pageSize={pageSize}
-        onPageSizeChange={(size: number) => setPageSize(size)} // calls hook
-        onPageChange={({ selected }) => setPage(selected + 1)} // calls hook
+        onPageSizeChange={(size: number) => setPageSize(size)}
+        onPageChange={({ selected }) => setCurrentPage(selected + 1)}
         pageType="standard"
       />
 

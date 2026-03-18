@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import classNames from '@/helpers/classNames';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
+import { useDeleteNotification, useDeleteAllReadNotifications } from '@/components/hooks/useDeleteNotification';
 
 type TabType = 'all' | 'unread';
 
@@ -19,6 +20,8 @@ const Content = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [pageSize] = useState(10);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const { 
     data, 
@@ -30,6 +33,8 @@ const Content = () => {
   } = useGetNotification({ page_size: pageSize, tab: activeTab });
   
   const { mutate: markAsRead } = useMarkNotificationRead();
+  const { mutate: deleteNotification, isLoading: isDeleting } = useDeleteNotification();
+  const { mutate: deleteAllRead, isLoading: isDeletingAll } = useDeleteAllReadNotifications();
 
   // Flatten all pages into a single array
   const notifications = useMemo(() => {
@@ -40,6 +45,9 @@ const Content = () => {
   const totalRecords = data?.pages[0]?.total_records || 0;
   const unreadCount = data?.pages[0]?.unread_count || 
     notifications.filter((n: any) => !n.is_read).length;
+  
+  // Count of read notifications
+  const readCount = notifications.filter((n: any) => n.is_read).length;
 
   const formatTimeAgo = (dateString: string) => {
     if (!dateString) return '';
@@ -71,20 +79,48 @@ const Content = () => {
     });
   };
 
+  const handleDeleteNotification = (e: React.MouseEvent, notificationId: number) => {
+    e.stopPropagation();
+    setShowDeleteConfirm(notificationId);
+  };
+
+  const confirmDelete = (notificationId: number) => {
+    deleteNotification(notificationId, {
+      onSuccess: () => {
+        setShowDeleteConfirm(null);
+      },
+    });
+  };
+
+  const handleDeleteAllRead = () => {
+    setShowBulkDeleteConfirm(true);
+  };
+
+  const confirmDeleteAllRead = () => {
+    deleteAllRead(undefined, {
+      onSuccess: () => {
+        setShowBulkDeleteConfirm(false);
+      },
+    });
+  };
+
   const tabs: { key: TabType; label: string; count?: number }[] = [
     { key: 'all', label: 'All', count: totalRecords },
     { key: 'unread', label: 'Unread', count: unreadCount },
   ];
 
   const renderNotificationItem = (notification: any) => {
+    const isConfirmingDelete = showDeleteConfirm === notification.id;
+
     return (
       <div
         key={notification.id}
-        onClick={() => handleNotificationClick(notification)}
+        onClick={() => !isConfirmingDelete && handleNotificationClick(notification)}
         className={classNames(
-          'flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer transition-colors',
+          'flex items-start gap-4 px-6 py-4 border-b border-gray-100 cursor-pointer transition-colors relative',
           'hover:bg-gray-50',
-          !notification.is_read ? 'bg-blue-50/50' : 'bg-white'
+          !notification.is_read ? 'bg-blue-50/50' : 'bg-white',
+          isConfirmingDelete ? 'bg-red-50' : ''
         )}
       >
         {/* Content */}
@@ -116,9 +152,44 @@ const Content = () => {
               {!notification.is_read && (
                 <span className='h-2 w-2 rounded-full bg-blue-500 flex-shrink-0' />
               )}
+              {/* Delete button */}
+              {!isConfirmingDelete && (
+                <button
+                  onClick={(e) => handleDeleteNotification(e, notification.id)}
+                  className='p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors'
+                  title='Delete notification'
+                >
+                  <TrashIcon className='h-4 w-4' />
+                </button>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Delete confirmation overlay */}
+        {isConfirmingDelete && (
+          <div 
+            className='absolute inset-0 bg-red-50 flex items-center justify-between px-6'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className='text-sm text-red-700'>Delete this notification?</span>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                className='px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmDelete(notification.id)}
+                disabled={isDeleting}
+                className='px-3 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors disabled:opacity-50'
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -162,6 +233,15 @@ const Content = () => {
         <div className='flex items-center justify-between'>
           <h2 className='text-xl font-bold text-indigo-dye'>Notifications</h2>
           <div className='flex items-center gap-4'>
+            {readCount > 0 && (
+              <button
+                onClick={handleDeleteAllRead}
+                className='text-sm text-red-600 hover:text-red-700 flex items-center gap-1'
+              >
+                <TrashIcon className='h-4 w-4' />
+                Delete all read
+              </button>
+            )}
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
@@ -170,10 +250,6 @@ const Content = () => {
                 Mark all as read
               </button>
             )}
-            {/* <button className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50'>
-              <Cog6ToothIcon className='h-4 w-4' />
-              Settings
-            </button> */}
           </div>
         </div>
       </div>
@@ -238,6 +314,51 @@ const Content = () => {
           Showing {notifications.length} of {totalRecords} notifications
         </p>
       </div>
+
+      {/* Bulk Delete Confirmation Modal */}
+      {showBulkDeleteConfirm && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-semibold text-gray-900'>Delete All Read Notifications</h3>
+              <button
+                onClick={() => setShowBulkDeleteConfirm(false)}
+                className='text-gray-400 hover:text-gray-600'
+              >
+                <XMarkIcon className='h-5 w-5' />
+              </button>
+            </div>
+            <p className='text-sm text-gray-600 mb-6'>
+              Are you sure you want to delete all read notifications? This action cannot be undone.
+            </p>
+            <div className='flex justify-end gap-3'>
+              <button
+                onClick={() => setShowBulkDeleteConfirm(false)}
+                className='px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteAllRead}
+                disabled={isDeletingAll}
+                className='px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2'
+              >
+                {isDeletingAll ? (
+                  <>
+                    <LoadingSpinner size='sm' color='white' />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <TrashIcon className='h-4 w-4' />
+                    Delete All Read
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

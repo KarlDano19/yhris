@@ -7,7 +7,7 @@ import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import CustomToast from '@/components/CustomToast';
 
 interface SeederButtonProps {
-  onSeed: (count: number, budgetType?: 'fixed_rate' | 'hourly_rate' | 'mix') => Promise<void>;
+  onSeed: (count: number, extras?: any) => Promise<void>;
   onUnseed?: () => Promise<void>;
   isLoading?: boolean;
   isUnseeding?: boolean;
@@ -16,11 +16,13 @@ interface SeederButtonProps {
   defaultCount?: number;
   showSeeder?: boolean;
   showBudgetType?: boolean;
+  renderExtraFields?: (extras: any, setExtras: (v: any) => void) => React.ReactNode;
 }
 
 export default function SeederButton({
   onSeed,
   onUnseed,
+  renderExtraFields,
   isLoading = false,
   isUnseeding = false,
   disabled = false,
@@ -38,6 +40,7 @@ export default function SeederButton({
   const [isUnseedModalOpen, setIsUnseedModalOpen] = useState(false);
   const [count, setCount] = useState(defaultCount);
   const [budgetType, setBudgetType] = useState<'fixed_rate' | 'hourly_rate' | 'mix'>('mix');
+  const [extras, setExtras] = useState<any>({});
   const [isSeeding, setIsSeeding] = useState(false);
 
   const handleSeed = async () => {
@@ -51,10 +54,12 @@ export default function SeederButton({
 
     setIsSeeding(true);
     try {
-      await onSeed(count, showBudgetType ? budgetType : undefined);
+      const seedExtras = showBudgetType ? { ...extras, budgetType } : extras;
+      await onSeed(count, seedExtras);
       setIsModalOpen(false);
       setCount(defaultCount);
       setBudgetType('mix');
+      setExtras({});
     } catch (error) {
       // Error handling is done by the parent component
       console.error('Seeding error:', error);
@@ -65,7 +70,7 @@ export default function SeederButton({
 
   const handleUnseed = async () => {
     if (!onUnseed) return;
-    
+
     try {
       await onUnseed();
       setIsUnseedModalOpen(false);
@@ -116,7 +121,7 @@ export default function SeederButton({
                   </button>
                 )}
               </Menu.Item>
-              
+
               {onUnseed && (
                 <Menu.Item>
                   {({ active }) => (
@@ -184,6 +189,13 @@ export default function SeederButton({
                     </div>
 
                     <div className="mt-6 space-y-4">
+                      {/* Extra Fields (optional, passed by parent) */}
+                      {renderExtraFields && (
+                        <div>
+                          {renderExtraFields(extras, setExtras)}
+                        </div>
+                      )}
+
                       {/* Count Input */}
                       <div>
                         <label htmlFor="count" className="block text-sm font-medium text-gray-700 text-left">
@@ -342,4 +354,3 @@ export default function SeederButton({
     </>
   );
 }
-

@@ -1,25 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface BusinessJobReview {
-  id: number;
-  rating: number;
-  comment: string | null;
-  created_at: string;
-  applicant_name: string;
-  applicant_photo: string | null;
-}
+import { T_BusinessJobReviewsResponse } from '@/types/business-mode';
 
-interface BusinessJobReviewsResponse {
-  data: {
-    reviews: BusinessJobReview[];
-    average_rating: number | null;
-    reviews_count: number;
-    job_title: string;
-  };
-}
-
-async function getBusinessJobReviews(jobId: number): Promise<BusinessJobReviewsResponse> {
+async function getBusinessJobReviews(
+  jobId: number,
+  filters: { currentPage: number; pageSize: number }
+): Promise<T_BusinessJobReviewsResponse> {
   try {
     const token = getCookie('token');
     const config = {
@@ -31,8 +18,14 @@ async function getBusinessJobReviews(jobId: number): Promise<BusinessJobReviewsR
     };
 
     if (token) {
+      // Build query parameters
+      const params = new URLSearchParams({
+        current_page: filters.currentPage.toString(),
+        page_size: filters.pageSize.toString(),
+      });
+
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/business-jobs/${jobId}/reviews/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/business-jobs/${jobId}/reviews/?${params.toString()}`,
         config
       );
       if (!res.ok) {
@@ -41,12 +34,14 @@ async function getBusinessJobReviews(jobId: number): Promise<BusinessJobReviewsR
       return res.json();
     }
     return {
-      data: {
-        reviews: [],
-        average_rating: null,
-        reviews_count: 0,
-        job_title: '',
-      },
+      records: [],
+      total_records: 0,
+      total_pages: 0,
+      starting: 0,
+      ending: 0,
+      average_rating: null,
+      reviews_count: 0,
+      job_title: '',
     };
   } catch (error: any) {
     let errStringify = await error;
@@ -60,10 +55,14 @@ async function getBusinessJobReviews(jobId: number): Promise<BusinessJobReviewsR
   }
 }
 
-function useGetBusinessJobReviews(jobId: number | null, enabled: boolean = true) {
+function useGetBusinessJobReviews(
+  jobId: number | null,
+  filters: { currentPage: number; pageSize: number },
+  enabled: boolean = true
+) {
   const query = useQuery(
-    ['businessJobReviews', jobId],
-    () => getBusinessJobReviews(jobId!),
+    ['businessJobReviews', jobId, filters.currentPage, filters.pageSize],
+    () => getBusinessJobReviews(jobId!, filters),
     {
       enabled: enabled && jobId !== null,
       refetchOnWindowFocus: false,

@@ -7,11 +7,11 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 
 interface JobRecord {
   id: number;
-  job_title?: string;
-  applicant_applied_no?: number;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  role?: string;
+  number_of_applicants?: number;
+  status?: string;
+  date_job_opened?: string;
+  date_job_closed?: string;
 }
 
 interface PrintRolePipelineRecordsSelectionModalProps {
@@ -223,7 +223,7 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
                             {selectedRecords.size === 0 
                               ? 'Select roles to include...' 
                               : selectedRecords.size === 1
-                                ? jobRecords.find(record => selectedRecords.has(record.id))?.job_title || 
+                                ? jobRecords.find(record => selectedRecords.has(record.id))?.role ||
                                   'Selected job'
                                 : selectedRecords.size === jobRecords.length
                                   ? 'All jobs selected'
@@ -283,21 +283,21 @@ const PrintRolePipelineRecordsSelectionModal: React.FC<PrintRolePipelineRecordsS
                                 />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-900 truncate">
-                                    {record.job_title || 'Unknown Role'}
+                                    {record.role || 'Unknown Role'}
                                   </p>
                                   <div className="flex items-center text-xs text-gray-500 mt-1">
                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-2 ${
-                                      (record.is_active) 
-                                        ? 'text-blue-600 bg-blue-50 border-blue-200' 
+                                      record.status === 'Ongoing'
+                                        ? 'text-blue-600 bg-blue-50 border-blue-200'
                                         : 'text-red-600 bg-red-50 border-red-200'
                                     }`}>
-                                      {(record.is_active ? 'Ongoing' : 'Closed')}
+                                      {record.status || 'Unknown'}
                                     </span>
-                                    <span className="mr-3">Applicants: { record.applicant_applied_no || 0}</span>
+                                    <span className="mr-3">Applicants: {record.number_of_applicants || 0}</span>
                                     <span className="mr-3">|</span>
-                                    <span className="mr-3">Opened: {record.created_at ? new Date(record.created_at).toLocaleDateString() : 'Unknown'}</span>
-                                    {!record.is_active && record.updated_at && (
-                                      <span>Closed: {new Date(record.updated_at).toLocaleDateString()}</span>
+                                    <span className="mr-3">Opened: {record.date_job_opened ? new Date(record.date_job_opened).toLocaleDateString() : 'Unknown'}</span>
+                                    {record.status === 'Closed' && record.date_job_closed && (
+                                      <span>Closed: {new Date(record.date_job_closed).toLocaleDateString()}</span>
                                     )}
                                   </div>
                                 </div>

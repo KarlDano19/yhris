@@ -13,6 +13,10 @@ import usePullEmployeeIdSettingsFromPayroll from './pages/(auth)/employer/settin
 import useSyncEmployeeStatus from './pages/(auth)/employer/settings/general-settings/employees/hooks/employee-status/useSyncEmployeeStatus';
 import useSyncLocation from './pages/(auth)/employer/settings/general-settings/employees/hooks/location/useSyncLocation';
 import useSyncPosition from './pages/(auth)/employer/settings/general-settings/employees/hooks/position/useSyncPosition';
+import useSyncDepartmentFromYP from './pages/(auth)/employer/settings/general-settings/employees/hooks/department/useSyncDepartmentFromYP';
+import useSyncLocationFromYP from './pages/(auth)/employer/settings/general-settings/employees/hooks/location/useSyncLocationFromYP';
+import useSyncPositionFromYP from './pages/(auth)/employer/settings/general-settings/employees/hooks/position/useSyncPositionFromYP';
+import useSyncEmployeeStatusFromYP from './pages/(auth)/employer/settings/general-settings/employees/hooks/employee-status/useSyncEmployeeStatusFromYP';
 
 import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
 import SyncingIcon from '@/svg/SyncingIcon';
@@ -45,10 +49,14 @@ const FloatingSyncButton = () => {
   const initialSteps: SyncStep[] = [
     { id: 'users', name: 'Users', status: 'pending' },
     { id: 'employee-id-settings', name: 'Employee ID Settings', status: 'pending' },
-    { id: 'locations', name: 'Locations', status: 'pending' },
-    { id: 'positions', name: 'Positions', status: 'pending' },
-    { id: 'departments', name: 'Departments', status: 'pending' },
-    { id: 'employee-status', name: 'Employment Status', status: 'pending' },
+    { id: 'locations-from-yp', name: 'Locations (FROM YP)', status: 'pending' },
+    { id: 'locations-to-yp', name: 'Locations (TO YP)', status: 'pending' },
+    { id: 'positions-from-yp', name: 'Positions (FROM YP)', status: 'pending' },
+    { id: 'positions-to-yp', name: 'Positions (TO YP)', status: 'pending' },
+    { id: 'departments-from-yp', name: 'Departments (FROM YP)', status: 'pending' },
+    { id: 'departments-to-yp', name: 'Departments (TO YP)', status: 'pending' },
+    { id: 'employee-status-from-yp', name: 'Employment Status (FROM YP)', status: 'pending' },
+    { id: 'employee-status-to-yp', name: 'Employment Status (TO YP)', status: 'pending' },
     { id: 'employees', name: 'Employees', status: 'pending' },
   ];
   
@@ -62,6 +70,11 @@ const FloatingSyncButton = () => {
   const { mutate: syncEmployeeStatus } = useSyncEmployeeStatus();
   const { mutate: syncLocation } = useSyncLocation();
   const { mutate: syncPosition } = useSyncPosition();
+  // FROM YP hooks
+  const { mutate: syncDepartmentFromYP } = useSyncDepartmentFromYP();
+  const { mutate: syncLocationFromYP } = useSyncLocationFromYP();
+  const { mutate: syncPositionFromYP } = useSyncPositionFromYP();
+  const { mutate: syncEmployeeStatusFromYP } = useSyncEmployeeStatusFromYP();
 
   // Helper function to update step status
   const updateStepStatus = (stepId: string, status: SyncStep['status'], message?: string) => {
@@ -113,72 +126,136 @@ const FloatingSyncButton = () => {
         });
       });
 
-      // Step 3: Sync Locations
+      // Step 3: Pull Locations FROM YP
       setCurrentStep(2);
-      updateStepStatus('locations', 'running');
+      updateStepStatus('locations-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
-        syncLocation(undefined, {
+        syncLocationFromYP({ syncType: 'all' }, {
           onSuccess: (data: any) => {
-            updateStepStatus('locations', 'success', data.message || 'Locations synced');
+            updateStepStatus('locations-from-yp', 'success', data.message || 'Locations pulled from YP');
             resolve();
           },
           onError: (error: any) => {
-            updateStepStatus('locations', 'error', error.message || 'Failed to sync locations');
+            updateStepStatus('locations-from-yp', 'error', error.message || 'Failed to pull locations from YP');
             reject(error);
           }
         });
       });
 
-      // Step 4: Sync Positions
+      // Step 4: Push Locations TO YP
       setCurrentStep(3);
-      updateStepStatus('positions', 'running');
+      updateStepStatus('locations-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
-        syncPosition(undefined, {
+        syncLocation({}, {
           onSuccess: (data: any) => {
-            updateStepStatus('positions', 'success', data.message || 'Positions synced');
+            updateStepStatus('locations-to-yp', 'success', data.message || 'Locations pushed to YP');
             resolve();
           },
           onError: (error: any) => {
-            updateStepStatus('positions', 'error', error.message || 'Failed to sync positions');
+            updateStepStatus('locations-to-yp', 'error', error.message || 'Failed to push locations to YP');
             reject(error);
           }
         });
       });
 
-      // Step 5: Sync Departments
+      // Step 5: Pull Positions FROM YP
       setCurrentStep(4);
-      updateStepStatus('departments', 'running');
+      updateStepStatus('positions-from-yp', 'running');
       await new Promise<void>((resolve, reject) => {
-        syncDepartment(undefined, {
+        syncPositionFromYP({ syncType: 'all' }, {
           onSuccess: (data: any) => {
-            updateStepStatus('departments', 'success', data.message || 'Departments synced');
+            updateStepStatus('positions-from-yp', 'success', data.message || 'Positions pulled from YP');
             resolve();
           },
           onError: (error: any) => {
-            updateStepStatus('departments', 'error', error.message || 'Failed to sync departments');
+            updateStepStatus('positions-from-yp', 'error', error.message || 'Failed to pull positions from YP');
             reject(error);
           }
         });
       });
 
-      // Step 6: Sync Employee Status
+      // Step 6: Push Positions TO YP
       setCurrentStep(5);
-      updateStepStatus('employee-status', 'running');
+      updateStepStatus('positions-to-yp', 'running');
       await new Promise<void>((resolve, reject) => {
-        syncEmployeeStatus(undefined, {
+        syncPosition({}, {
           onSuccess: (data: any) => {
-            updateStepStatus('employee-status', 'success', data.message || 'Employment status synced');
+            updateStepStatus('positions-to-yp', 'success', data.message || 'Positions pushed to YP');
             resolve();
           },
           onError: (error: any) => {
-            updateStepStatus('employee-status', 'error', error.message || 'Failed to sync employment status');
+            updateStepStatus('positions-to-yp', 'error', error.message || 'Failed to push positions to YP');
             reject(error);
           }
         });
       });
 
-      // Step 7: Sync Employees (Final step)
+      // Step 7: Pull Departments FROM YP
       setCurrentStep(6);
+      updateStepStatus('departments-from-yp', 'running');
+      await new Promise<void>((resolve, reject) => {
+        syncDepartmentFromYP({ syncType: 'all' }, {
+          onSuccess: (data: any) => {
+            updateStepStatus('departments-from-yp', 'success', data.message || 'Departments pulled from YP');
+            resolve();
+          },
+          onError: (error: any) => {
+            updateStepStatus('departments-from-yp', 'error', error.message || 'Failed to pull departments from YP');
+            reject(error);
+          }
+        });
+      });
+
+      // Step 8: Push Departments TO YP
+      setCurrentStep(7);
+      updateStepStatus('departments-to-yp', 'running');
+      await new Promise<void>((resolve, reject) => {
+        syncDepartment({}, {
+          onSuccess: (data: any) => {
+            updateStepStatus('departments-to-yp', 'success', data.message || 'Departments pushed to YP');
+            resolve();
+          },
+          onError: (error: any) => {
+            updateStepStatus('departments-to-yp', 'error', error.message || 'Failed to push departments to YP');
+            reject(error);
+          }
+        });
+      });
+
+      // Step 9: Pull Employee Status FROM YP
+      setCurrentStep(8);
+      updateStepStatus('employee-status-from-yp', 'running');
+      await new Promise<void>((resolve, reject) => {
+        syncEmployeeStatusFromYP({ syncType: 'all' }, {
+          onSuccess: (data: any) => {
+            updateStepStatus('employee-status-from-yp', 'success', data.message || 'Employment status pulled from YP');
+            resolve();
+          },
+          onError: (error: any) => {
+            updateStepStatus('employee-status-from-yp', 'error', error.message || 'Failed to pull employment status from YP');
+            reject(error);
+          }
+        });
+      });
+
+      // Step 10: Push Employee Status TO YP
+      setCurrentStep(9);
+      updateStepStatus('employee-status-to-yp', 'running');
+      await new Promise<void>((resolve, reject) => {
+        syncEmployeeStatus({}, {
+          onSuccess: (data: any) => {
+            updateStepStatus('employee-status-to-yp', 'success', data.message || 'Employment status pushed to YP');
+            resolve();
+          },
+          onError: (error: any) => {
+            updateStepStatus('employee-status-to-yp', 'error', error.message || 'Failed to push employment status to YP');
+            reject(error);
+          }
+        });
+      });
+
+      // Step 11: Sync Employees (Final step)
+      setCurrentStep(10);
       updateStepStatus('employees', 'running');
       await new Promise<void>((resolve, reject) => {
         syncEmployees({ syncType: selectedOption }, {
@@ -282,7 +359,7 @@ const FloatingSyncButton = () => {
                       <div>
                         <h3 className="font-medium text-blue-900 mb-1">Master Sync Configuration</h3>
                         <p className="text-sm text-blue-700">
-                          This will sync all systems in the following order: Users → Employee ID Settings → Locations → Positions → Departments → Employment Status → Employees.
+                          This will perform bidirectional sync for all systems: Users → Employee ID Settings → Locations (FROM/TO YP) → Positions (FROM/TO YP) → Departments (FROM/TO YP) → Employment Status (FROM/TO YP) → Employees.
                         </p>
                       </div>
                     </div>

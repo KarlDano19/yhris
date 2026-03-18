@@ -1,19 +1,11 @@
 import { ArrowDownTrayIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import Modal from '../../../../components/Modal';
-
-interface Transaction {
-  id: number;
-  description: string;
-  clientName: string;
-  amount: number;
-  date: string;
-  category: string;
-}
+import { T_Transaction } from '@/types/business-mode';
 
 interface TransactionDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  transaction: Transaction | null;
+  transaction: T_Transaction | null;
   onDownloadReceipt: () => void;
 }
 

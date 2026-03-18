@@ -1,38 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
+import { T_SearchTalentParams, T_TalentSearchResult } from '@/types/business-mode';
 
-export interface TalentSearchResult {
-  id: number;
-  name: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  mobile: string;
-  address: string;
-  photo: string | null;
-  skills: string[];
-  education: string;
-  average_rating: number;
-  reviews_count: number;
-  jobs_done_count: number;
-  available_for_bookings: boolean;
-  expected_salary: number | null;
-  portfolio_url: string | null;
-  description: string | null;
-  setup_preference: string | null;
-}
-
-interface SearchTalentParams {
-  search?: string;
-  location?: string[];
-  gender?: string;
-  salary?: string;
-  from?: string;
-  to?: string;
-  pageSize?: number;
-}
-
-async function searchTalent(params: SearchTalentParams, pageParam: number = 1) {
+async function searchTalent(params: T_SearchTalentParams, pageParam: number = 1) {
   try {
     const token = getCookie('token');
 
@@ -94,7 +64,7 @@ async function searchTalent(params: SearchTalentParams, pageParam: number = 1) {
   }
 }
 
-export function useSearchTalent(params: SearchTalentParams = {}) {
+export function useSearchTalent(params: T_SearchTalentParams = {}) {
   const query = useInfiniteQuery(
     ['talentSearchCache', params.search, params.location, params.gender, params.salary, params.from, params.to, params.pageSize],
     ({ pageParam = 1 }) => searchTalent(params, pageParam),

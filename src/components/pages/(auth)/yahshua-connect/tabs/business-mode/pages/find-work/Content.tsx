@@ -20,19 +20,7 @@ import { formatDateToLocal } from '@/helpers/date';
 
 import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import formatPrice from '@/helpers/currencyFormat';
-
-interface BusinessJobFilters {
-  category?: string;
-  location?: string | string[];
-  date_from?: string;
-  date_to?: string;
-  min_budget?: number;
-  max_budget?: number;
-  is_urgent?: boolean;
-  status?: string;
-  latitude?: number;
-  longitude?: number;
-}
+import { T_BusinessJobFilters } from '@/types/business-mode';
 
 const Content = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);

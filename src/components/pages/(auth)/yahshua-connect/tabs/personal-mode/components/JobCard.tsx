@@ -8,6 +8,8 @@ import CustomToast from '@/components/CustomToast';
 import useAddSavedJobs from '../pages/jobs/hooks/useAddSavedJobs';
 import useUpdateSavedJobs from '../../../hooks/useUpdateSavedJobs';
 
+import { T_JobCard } from '@/types/personal-mode';
+
 import { BookmarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 
@@ -31,6 +33,7 @@ interface JobCardProps {
   isSelected?: boolean;
   isHighlighted?: boolean;
 }
+
 
 const JobCard = ({
   id,

@@ -7,11 +7,12 @@ import { Toaster } from 'react-hot-toast';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import GlobalErrorHandler from '@/components/GlobalErrorHandler';
 import ReactQueryWrapper from '@/app/reactQueryWrapper';
+import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
 
 import './quill-tooltips.css';
 import './globals.css';
-
+  
 export const metadata = {
   title: 'Yahshua HRIS',
   description: 'HRIS',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PostHogProvider>
           <GlobalErrorHandler />
           <ReactQueryWrapper>
+            <GlobalLoadingSpinner />
             <Auth>{children}</Auth>
           </ReactQueryWrapper>
           <Toaster position='top-right' />

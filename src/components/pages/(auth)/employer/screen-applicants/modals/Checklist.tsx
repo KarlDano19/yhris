@@ -1,6 +1,8 @@
-import { ChangeEvent, ChangeEventHandler, FormEventHandler, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, ChangeEventHandler, FormEventHandler, Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { Dialog, Transition } from '@headlessui/react';
+import { ExclamationTriangleIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline';
 
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
 import ModalLayout from '../../../../../ModalLayout';
@@ -8,13 +10,13 @@ import ModalFooterLayout from '../layouts/ModalFooterLayout';
 import StateContext from '../contexts/StateContext';
 import titleCase from '@/helpers/titleCase';
 import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
-import ScreenApplicantGoPremiumModal from '../../modals/SubsriptionModals/ScreenApplicantGoPremiumModal';
+import ScreenApplicantGoPremiumModal from '../../job-postings/modals/ScreenApplicantGoPremiumModal';
 import useGetStageRequirements from '../hooks/useGetStageRequirements';
 import useUpdateStageRequirements from '../hooks/useUpdateStageRequirements';
 import useGetStageNotes from '../hooks/useGetStageNotes';
 import useUpdateStageNotes from '../hooks/useUpdateStageNotes';
 import CustomToast from '@/components/CustomToast';
-import ConfirmModal from '@/components/ConfirmModal';
+import JobCapacityModal from './JobCapacityModal';
 
 import { initialActionState } from '../lib/initialActionState';
 import { ApplicantType, ContextTypes, ChecklistPropTypes as PropTypes, StageType } from '../types';
@@ -41,14 +43,19 @@ const statuses = [
     title: 'Withdrawn',
   },
   {
+    id: 'passed',
+    value: 'passed',
+    title: 'Passed',
+  },
+  {
     id: 'rejected',
     value: 'rejected',
     title: 'Rejected',
   },
   {
-    id: 'passed',
-    value: 'passed',
-    title: 'Passed',
+    id: 'pooling',
+    value: 'pooling',
+    title: 'For Pooling',
   },
 ];
 
@@ -61,6 +68,7 @@ export default function Checklist({
 }: PropTypes & { hasActiveSubscription?: boolean; jobPostingDetails?: any }) {
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { getValues, setValue, register, watch } = useForm();
+  const isConfirmingRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [activeTab, setActiveTab] = useState<number | null>(null);
@@ -68,10 +76,12 @@ export default function Checklist({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
-  const [isDeactivationConfirmationModalOpen, setIsDeactivationConfirmationModalOpen] = useState(false);
-  const [isSlotIncreaseModalOpen, setIsSlotIncreaseModalOpen] = useState(false);
+  const [isJobCapacityModalOpen, setIsJobCapacityModalOpen] = useState(false);
   const [pendingHireData, setPendingHireData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+  const [showPoolingConfirmation, setShowPoolingConfirmation] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState<DataTypes | null>(null);
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -267,6 +277,12 @@ export default function Checklist({
   }, [stageNotesData, actionState.stageId]);
 
   const handleClose = () => {
+    // Skip unsaved changes check if a confirmation dialog was recently closed.
+    // Do NOT reset the ref here — the timeout in handleCancelConfirmation resets it
+    // after Headless UI finishes all transition-related events.
+    if (isConfirmingRef.current) {
+      return;
+    }
     handleModalClose(() => {
       resetFormData();
       setIsOpen(false);
@@ -284,13 +300,25 @@ export default function Checklist({
     };
     data.id = applicant?.applicationId;
 
+    // Intercept rejected/pooling statuses for confirmation
+    if (data.status === 'rejected') {
+      setPendingSubmitData(data);
+      setShowRejectConfirmation(true);
+      return;
+    }
+    if (data.status === 'pooling') {
+      setPendingSubmitData(data);
+      setShowPoolingConfirmation(true);
+      return;
+    }
+
     // Check if applicant is being marked as "Hired" (passed status in final stage)
     const isBeingHired = data.status === 'passed' && actionState.isFinalStage;
 
-    // Check if job posting is fully staffed (show deactivation modal first)
+    // Check if job posting is fully staffed (show job capacity modal)
     if (isBeingHired && jobPostingDetails?.hired_count >= jobPostingDetails?.required_slot) {
       setPendingHireData(data);
-      setIsDeactivationConfirmationModalOpen(true);
+      setIsJobCapacityModalOpen(true);
       return;
     }
 
@@ -333,21 +361,21 @@ export default function Checklist({
     }, 400);
   };
 
-  const handleDeactivationConfirmation = () => {
+  const handleSetInactive = () => {
     if (pendingHireData) {
       setIsLoading(true);
-      
+
       // Just deactivate the job posting, don't hire the applicant
       const dataWithDeactivation = {
         ...pendingHireData,
         status: 'ongoing', // Keep applicant in ongoing status, don't hire
         deactivate_job_posting: true
       };
-      
-      setIsDeactivationConfirmationModalOpen(false);
+
+      setIsJobCapacityModalOpen(false);
       resetFormData();
       setIsOpen(false);
-      
+
       setTimeout(() => {
         handleFormSubmit(dataWithDeactivation);
         setTimeout(() => {
@@ -359,28 +387,21 @@ export default function Checklist({
     }
   };
 
-
-  const handleDeactivationCancel = () => {
-    // Close deactivation modal and show slot increase modal
-    setIsDeactivationConfirmationModalOpen(false);
-    setIsSlotIncreaseModalOpen(true);
-  };
-
-  const handleSlotIncreaseConfirmation = () => {
+  const handleIncreaseLimit = () => {
     if (pendingHireData) {
       setIsLoading(true);
-      
+
       // Hire the applicant and increase the required slot
       const dataWithSlotIncrease = {
         ...pendingHireData,
         new_required_slot: (jobPostingDetails?.required_slot || 0) + 1,
         deactivate_job_posting: false
       };
-      
-      setIsSlotIncreaseModalOpen(false);
+
+      setIsJobCapacityModalOpen(false);
       resetFormData();
       setIsOpen(false);
-      
+
       setTimeout(() => {
         handleFormSubmit(dataWithSlotIncrease);
         setTimeout(() => {
@@ -392,9 +413,50 @@ export default function Checklist({
     }
   };
 
-  const handleSlotIncreaseCancel = () => {
-    setIsSlotIncreaseModalOpen(false);
+  const handleKeepActive = () => {
+    // Close the modal without any changes
+    setIsJobCapacityModalOpen(false);
     setPendingHireData(null);
+  };
+
+  const handleConfirmReject = () => {
+    setShowRejectConfirmation(false);
+    if (!pendingSubmitData) return;
+    isConfirmingRef.current = true;
+    resetFormData();
+    setIsOpen(false);
+    setTimeout(() => {
+      handleFormSubmit(pendingSubmitData);
+      setTimeout(() => { refetchStageRequirements(); refetchStageNotes(); }, 1000);
+    }, 400);
+    setPendingSubmitData(null);
+  };
+
+  const handleConfirmPooling = () => {
+    setShowPoolingConfirmation(false);
+    if (!pendingSubmitData) return;
+    isConfirmingRef.current = true;
+    resetFormData();
+    setIsOpen(false);
+    setTimeout(() => {
+      handleFormSubmit(pendingSubmitData);
+      setTimeout(() => { refetchStageRequirements(); refetchStageNotes(); }, 1000);
+    }, 400);
+    setPendingSubmitData(null);
+  };
+
+  const handleCancelConfirmation = () => {
+    // Block any spurious handleClose calls on ModalLayout while the
+    // confirmation dialog's leave transition is running.
+    isConfirmingRef.current = true;
+    setShowRejectConfirmation(false);
+    setShowPoolingConfirmation(false);
+    setPendingSubmitData(null);
+    setValue('status', applicant?.status || '');
+    // Reset after Headless UI finishes all transition-related events (300ms + buffer)
+    setTimeout(() => {
+      isConfirmingRef.current = false;
+    }, 500);
   };
 
   const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
@@ -448,6 +510,7 @@ export default function Checklist({
           <div className='p-8'>
             {requirements?.length > 0 && (
               <div className='grid gap-4 mb-8'>
+                <p className='text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3'>Stage Tasks</p>
                 {requirements.map((requirement, index) => {
                   const isInherited = checks.includes(requirement);
                   return (
@@ -461,11 +524,6 @@ export default function Checklist({
                       />
                       <label htmlFor={requirement} className="flex items-center gap-2">
                         {titleCase(requirement)}
-                        {/* {isInherited && (
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                            Inherited
-                          </span>
-                        )} */}
                       </label>
                     </div>
                   );
@@ -473,31 +531,53 @@ export default function Checklist({
               </div>
             )}
             <div className='grid gap-4'>
-              <p className='font-medium'>Status</p>
-              {statuses.map((status) => {
-                const { title, id } = status;
-                const disabled = id === 'passed' && isDisabled;
-                return (
-                  <div
-                    key={id}
-                    className={`${disabled && 'opacity-75'} flex items-center gap-4 text-indigo-dye text-[15px]`}
-                  >
-                    <input
-                      onChange={(e) => setValue('status', e.target.id)}
-                      defaultChecked={applicant?.status === id}
-                      checked={disabled ? false : getValues('status') === id ? true : undefined}
-                      disabled={disabled}
-                      id={id}
-                      type='radio'
-                      name='status'
-                      className='w-5 h-5'
-                    />
-                    <label htmlFor={id}>
-                      {title == 'Passed' ? (actionState.isFinalStage ? 'Hired' : title) : title}
-                    </label>
-                  </div>
-                );
-              })}
+              <p className='text-xs font-semibold text-gray-500 uppercase tracking-wide'>Status</p>
+              <div className='grid gap-2'>
+                {statuses.map((status, index) => {
+                  const { title, id } = status;
+                  const disabled = id === 'passed' && isDisabled;
+                  const isSelected = !disabled && getValues('status') === id;
+                  return (
+                    <Fragment key={id}>
+                      {index === 3 && (
+                        <div className='flex items-center gap-3 my-1'>
+                          <hr className='flex-1 border-gray-200' />
+                        </div>
+                      )}
+                      <label
+                        htmlFor={id}
+                        className={`flex items-center border rounded-lg px-4 py-3 transition-colors ${
+                          disabled ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'
+                        } ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          onChange={(e) => setValue('status', e.target.id)}
+                          defaultChecked={applicant?.status === id}
+                          checked={disabled ? false : getValues('status') === id ? true : undefined}
+                          disabled={disabled}
+                          id={id}
+                          type='radio'
+                          name='status'
+                          className='w-4 h-4 text-blue-600'
+                        />
+                        <span className={`flex-1 ml-3 text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>
+                          {title === 'Passed' ? (actionState.isFinalStage ? 'Hired' : title) : title}
+                        </span>
+                        {id === 'rejected' && (
+                          <ExclamationTriangleIcon className='w-5 h-5 text-red-500' />
+                        )}
+                        {id === 'pooling' && (
+                          <ArchiveBoxIcon className='w-5 h-5 text-blue-500' />
+                        )}
+                      </label>
+                    </Fragment>
+                  );
+                })}
+              </div>
               {/* Stage Notes Tabs */}
               <div className='grid gap-4 mb-8 '>
                 <p className='font-medium'>Stage Notes</p>
@@ -675,46 +755,158 @@ export default function Checklist({
               Close
             </button>
             <button type='submit' className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd]'>
-              Update
+              Save Changes
             </button>
           </ModalFooterLayout>
         </form>
 
         {/* Unsaved Changes Confirmation Modal */}
-          {isUnsavedChangesModalOpen && (
-            <UnsavedChangesModal
-              isOpen={isUnsavedChangesModalOpen}
-              onClose={handleUnsavedChangesCancel}
-              onConfirm={handleUnsavedChangesConfirm}
-              isLoading={false}
-              isSwitchingEmployee={false}
-              contentType="checklist"
-            />
+        {isUnsavedChangesModalOpen && (
+          <UnsavedChangesModal
+            isOpen={isUnsavedChangesModalOpen}
+            onClose={handleUnsavedChangesCancel}
+            onConfirm={handleUnsavedChangesConfirm}
+            isLoading={false}
+            isSwitchingEmployee={false}
+            contentType="checklist"
+          />
         )}
-          
-      {/* Deactivation Confirmation Modal - for fully staffed jobs */}
-      {isDeactivationConfirmationModalOpen && (
-        <ConfirmModal
-          message={`Job posting "${jobPostingDetails?.job_title || 'this position'}" is full (${jobPostingDetails?.hired_count || 0}/${jobPostingDetails?.required_slot || 0}).\nDo you want to set this job posting to inactive?`}
-          isOpen={isDeactivationConfirmationModalOpen}
-          setIsOpen={setIsDeactivationConfirmationModalOpen}
-          confirmAction={handleDeactivationConfirmation}
-          cancelAction={handleDeactivationCancel}
-          isLoading={isLoading}
-        />
-      )}
 
-      {/* Slot Increase Confirmation Modal */}
-      {isSlotIncreaseModalOpen && (
-        <ConfirmModal
-          message={`Do you want to increase the required slot from ${jobPostingDetails?.required_slot || 0} to ${(jobPostingDetails?.required_slot || 0) + 1} and hire ${applicant?.name || 'this applicant'}?`}
-          isOpen={isSlotIncreaseModalOpen}
-          setIsOpen={setIsSlotIncreaseModalOpen}
-          confirmAction={handleSlotIncreaseConfirmation}
-          cancelAction={handleSlotIncreaseCancel}
-          isLoading={isLoading}
-        />
-      )}
+        {/* Job Capacity Modal - for fully staffed jobs */}
+        {isJobCapacityModalOpen && (
+          <JobCapacityModal
+            isOpen={isJobCapacityModalOpen}
+            setIsOpen={setIsJobCapacityModalOpen}
+            jobTitle={jobPostingDetails?.job_title || 'this position'}
+            hiredCount={jobPostingDetails?.hired_count || 0}
+            requiredSlot={jobPostingDetails?.required_slot || 0}
+            applicantName={applicant?.name || 'this applicant'}
+            onSetInactive={handleSetInactive}
+            onIncreaseLimit={handleIncreaseLimit}
+            onKeepActive={handleKeepActive}
+            isLoading={isLoading}
+          />
+        )}
+
+        {/* Reject Confirmation Dialog */}
+      <Transition.Root show={showRejectConfirmation} as={Fragment}>
+        <Dialog as='div' className='relative z-50' onClose={handleCancelConfirmation}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-center justify-center p-4'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-6 pb-6 pt-6 shadow-xl transition-all sm:w-full sm:max-w-md'>
+                  <div className='flex flex-col items-center text-center'>
+                    <div className='flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mb-4'>
+                      <ExclamationTriangleIcon className='h-8 w-8 text-red-600' />
+                    </div>
+                    <Dialog.Title as='h3' className='text-lg font-semibold text-gray-900 mb-2'>
+                      Reject Applicant?
+                    </Dialog.Title>
+                    <p className='text-sm text-gray-600 mb-6'>
+                      This action will mark the applicant as rejected and remove them from the current hiring process.
+                    </p>
+                    <div className='flex gap-3 w-full'>
+                      <button
+                        type='button'
+                        onClick={handleCancelConfirmation}
+                        className='flex-1 border border-gray-300 rounded-lg py-2 px-4 text-gray-700 hover:bg-gray-50 text-sm font-medium'
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='button'
+                        onClick={handleConfirmReject}
+                        className='flex-1 bg-red-600 text-white rounded-lg py-2 px-4 hover:bg-red-700 text-sm font-medium'
+                      >
+                        Reject Applicant
+                      </button>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
+      {/* Pooling Confirmation Dialog */}
+      <Transition.Root show={showPoolingConfirmation} as={Fragment}>
+        <Dialog as='div' className='relative z-50' onClose={handleCancelConfirmation}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-center justify-center p-4'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-6 pb-6 pt-6 shadow-xl transition-all sm:w-full sm:max-w-md'>
+                  <div className='flex flex-col items-center text-center'>
+                    <div className='flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 mb-4'>
+                      <ArchiveBoxIcon className='h-8 w-8 text-blue-600' />
+                    </div>
+                    <Dialog.Title as='h3' className='text-lg font-semibold text-gray-900 mb-2'>
+                      Move Applicant to Pool?
+                    </Dialog.Title>
+                    <p className='text-sm text-gray-600 mb-6'>
+                      This will move the applicant to the talent pool for future openings. They will not continue in the current stage of the hiring process.
+                    </p>
+                    <div className='flex gap-3 w-full'>
+                      <button
+                        type='button'
+                        onClick={handleCancelConfirmation}
+                        className='flex-1 border border-gray-300 rounded-lg py-2 px-4 text-gray-700 hover:bg-gray-50 text-sm font-medium'
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='button'
+                        onClick={handleConfirmPooling}
+                        className='flex-1 bg-blue-600 text-white rounded-lg py-2 px-4 hover:bg-blue-700 text-sm font-medium'
+                      >
+                        Move to Pool
+                      </button>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
         
       </ModalLayout>
       {!hasActiveSubscription && (

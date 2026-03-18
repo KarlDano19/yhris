@@ -8,6 +8,7 @@ import classNames from '@/helpers/classNames';
 import { T_NTEAttachmentViewModal, T_SendNTEModal, T_UploadEmployeeIssueAttachmentModal } from '@/types/globals';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { formatDateToLocal } from '@/helpers/date';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
 
@@ -42,6 +43,7 @@ const SendNTE = ({
   const isLoading = loadingItemId === `${id}-nte`;
   const router = useRouter();
   const [checkingAttachment, setCheckingAttachment] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   
   // const customOnclick = () => {
   //   setIsUploadEmployeeIssueAttachmentModalOpen({
@@ -55,7 +57,7 @@ const SendNTE = ({
     if (employeeIssueDetails?.status !== 'approved') {
       return; // Do nothing if status is not approved
     }
-    
+
     setCheckingAttachment(true);
     try {
       // Check if there's an attachment
@@ -72,6 +74,11 @@ const SendNTE = ({
     } finally {
       setCheckingAttachment(false);
     }
+  };
+
+  const handleConfirmReceived = () => {
+    setReleased(id, 'nte');
+    setIsConfirmModalOpen(false);
   };
 
   // Format incident_received_date as MM/DD/YYYY
@@ -109,13 +116,17 @@ const SendNTE = ({
             isNTEReceived ? 'bg-savoy-blue text-white' : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={true}
+          disabled={!isNTESent || isNTEReceived}
           data-tooltip-id='nte-received-tooltip'
-          data-tooltip-html={isNTEReceived ?
-            'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully' :
-            'Will be marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span> when email is sent successfully'}
+          data-tooltip-html={
+            isNTEReceived
+              ? 'Marked as <span style="background-color: #4A90E2; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 600;">received</span>'
+              : !isNTESent
+              ? 'NTE must be sent before marking as received'
+              : 'Click to manually mark as received if employee does not respond'
+          }
           data-tooltip-place='bottom'
-          onClick={() => setReleased(id, 'nte')}
+          onClick={() => setIsConfirmModalOpen(true)}
         >
           {isLoading && (
             <div role='status'>
@@ -171,6 +182,16 @@ const SendNTE = ({
 
       <Tooltip id='nte-received-tooltip' />
       <Tooltip id='nte-clip-tooltip' />
+
+      <ConfirmModal
+        message={`Are you sure you want to manually mark this NTE as received?
+
+This will enable the Investigation and Send Decision features.`}
+        isOpen={isConfirmModalOpen}
+        setIsOpen={setIsConfirmModalOpen}
+        confirmAction={handleConfirmReceived}
+        isLoading={isLoading}
+      />
     </div>
   );
 };

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 import useGetLocationItems from "@/components/hooks/useGetLocationItems";
@@ -22,13 +23,66 @@ type UseEmployeeResult = {
 const uniqSorted = (xs: string[]) =>
   Array.from(new Set(xs.filter(Boolean))).sort((a, b) => a.localeCompare(b));
 
+async function getEmployee(id: string): Promise<Employee> {
+  try {
+    const token = getCookie("token") as string | undefined;
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+    const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(id)}`;
+
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Token ${token}` } : {}),
+      },
+    };
+
+    if (token) {
+      const res = await fetch(url, config);
+      if (!res.ok) {
+        throw res.json();
+      }
+
+      const payload = await res.json();
+      const item = (payload?.data ?? payload) as Employee;
+
+      if (!item || typeof item !== "object" || (item as any).id == null) {
+        throw new Error("Invalid employee payload");
+      }
+
+      return item;
+    }
+
+    throw new Error("No authentication token");
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch employee.");
+  }
+}
+
 export function useEmployee(
   id?: string,
   _opts: UseEmployeeOptions = {}
 ): UseEmployeeResult {
-  const [emp, setEmp] = useState<Employee | undefined>(undefined);
-  const [isEmpLoading, setIsEmpLoading] = useState<boolean>(!!id);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  // Fetch employee data
+  const {
+    data: emp,
+    isLoading: isEmpLoading,
+    error: empError,
+    refetch: refetchEmp,
+  } = useQuery(["employee", id], () => getEmployee(id!), {
+    enabled: !!id,
+    refetchOnWindowFocus: false,
+  });
 
   // option lists (also grab their refetch functions)
   const {
@@ -58,58 +112,6 @@ export function useEmployee(
     error: estError,
     refetch: refetchEst,
   } = useGetEmployeeStatusItems();
-
-  const fetchEmployee = useCallback(async () => {
-    if (!id) return;
-    setIsEmpLoading(true);
-    setError(undefined);
-
-    const token = getCookie("token") as string | undefined;
-    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-    const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
-      id
-    )}`;
-
-    try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-      });
-
-      if (!res.ok) {
-        let msg = `Request failed (${res.status})`;
-        try {
-          const problem = await res.json();
-          msg =
-            typeof problem === "string"
-              ? problem
-              : problem?.message || problem?.detail || JSON.stringify(problem);
-        } catch {}
-        throw new Error(msg);
-      }
-
-      const payload = await res.json();
-      const item = (payload?.data ?? payload) as Employee;
-
-      if (!item || typeof item !== "object" || (item as any).id == null) {
-        throw new Error("Invalid employee payload");
-      }
-
-      setEmp(item);
-    } catch (e: any) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-      setEmp(undefined);
-    } finally {
-      setIsEmpLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchEmployee();
-  }, [fetchEmployee]);
 
   // merge API option hooks into the employee (fallback to inline lists if hooks empty)
   const data = useMemo(() => {
@@ -153,14 +155,6 @@ export function useEmployee(
     } as Employee;
   }, [emp, posItems, deptItems, locItems, estItems]);
 
-  // bubble list-fetch errors if employee isn’t set yet
-  useEffect(() => {
-    if (!data) {
-      const listErr = locError || deptError || posError || estError;
-      if (listErr && !error) setError(listErr as Error);
-    }
-  }, [data, locError, deptError, posError, estError, error]);
-
   const isLoading =
     isEmpLoading ||
     isLocLoading ||
@@ -168,16 +162,19 @@ export function useEmployee(
     isPosLoading ||
     isEstLoading;
 
+  // Combine errors - prioritize employee error, then list errors
+  const error = empError || locError || deptError || posError || estError;
+
   // composite refetch: employee + all option lists
-  const refetch = useCallback(() => {
+  const refetch = () => {
     void Promise.all([
-      fetchEmployee(),
+      refetchEmp(),
       refetchLoc(),
       refetchDept(),
       refetchPos(),
       refetchEst(),
     ]);
-  }, [fetchEmployee, refetchLoc, refetchDept, refetchPos, refetchEst]);
+  };
 
-  return { data, isLoading, error, refetch };
+  return { data, isLoading, error: error as Error | undefined, refetch };
 }

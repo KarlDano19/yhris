@@ -15,7 +15,6 @@ import { Line } from 'react-chartjs-2';
 
 import useGetDepartmentItems from '@/components/hooks/useGetDepartmentItems';
 import PerformanceTrendFilterModal from '../../../../modals/PerformanceTrendFilterModal';
-import { calculatePerformanceTrend } from './calculations/performanceTrendCalc';
 
 import FilterLogo from '@/svg/FilterLogo';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';
@@ -31,38 +30,46 @@ ChartJS.register(
   Filler
 );
 
+
 interface PerformanceTrendProps {
-  evaluationData?: any;
   dateFilter?: {
     from: string;
     to: string;
   };
   showAllDepartments?: boolean;
+  precomputedTrend?: Array<{ month: string; year: number; score: number; count: number }>;
+  externalSelectedDepartment?: string;
+  onDepartmentChange?: (dept: string) => void;
 }
 
-const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dateFilter, showAllDepartments = false }) => {
+const PerformanceTrend: React.FC<PerformanceTrendProps> = ({
+  dateFilter,
+  showAllDepartments = false,
+  precomputedTrend,
+  externalSelectedDepartment,
+  onDepartmentChange,
+}) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
+  const [internalSelectedDepartment, setInternalSelectedDepartment] = useState('All Departments');
   const [chartKey, setChartKey] = useState(0);
   const [userManuallySelected, setUserManuallySelected] = useState(false);
   const { data: departmentItems } = useGetDepartmentItems();
 
-  // Set default selected department to "All Departments" by default
-  useEffect(() => {
-    const dataArray = evaluationData?.records || evaluationData;
-    if (dataArray && dataArray.length > 0) {
-      // Only update if user hasn't manually selected a department
-      if (!userManuallySelected) {
-        setSelectedDepartment('All Departments');
-        setUserManuallySelected(false); // Reset for next auto-selection
-      }
-    }
-  }, [evaluationData, selectedDepartment]);
+  const selectedDepartment = externalSelectedDepartment !== undefined ? externalSelectedDepartment : internalSelectedDepartment;
 
-  // Calculate Performance Trend using shared utility
   const { displayData } = useMemo(() => {
-    return calculatePerformanceTrend(evaluationData, dateFilter, selectedDepartment);
-  }, [evaluationData, selectedDepartment, dateFilter]);
+    if (precomputedTrend) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const data = precomputedTrend.map(item => ({
+        month: typeof item.month === 'number' ? monthNames[item.month - 1] || String(item.month) : item.month,
+        score: item.score,
+        count: item.count,
+      }));
+      return { displayData: data };
+    }
+    return { displayData: [] };
+  }, [precomputedTrend]);
 
   const data = {
     labels: displayData.map(item => {
@@ -158,9 +165,32 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
     },
   };
 
+  const getDateRangeLabel = () => {
+    if (dateFilter?.from && dateFilter?.to) {
+      const from = new Date(dateFilter.from);
+      const to = new Date(dateFilter.to);
+      const fromMonth = from.toLocaleDateString('en-US', { month: 'long' });
+      const toMonth = to.toLocaleDateString('en-US', { month: 'long' });
+      const fromYear = from.getFullYear();
+      const toYear = to.getFullYear();
+      if (fromMonth === toMonth && fromYear === toYear) return `${fromMonth} ${fromYear}`;
+      if (fromYear === toYear) return `${fromMonth} - ${toMonth} ${fromYear}`;
+      return `${fromMonth} ${fromYear} - ${toMonth} ${toYear}`;
+    }
+    if (displayData.length === 0) return 'No Data';
+    const first = displayData[0];
+    const last = displayData[displayData.length - 1];
+    const firstYear = precomputedTrend?.[0]?.year ?? new Date().getFullYear();
+    const lastYear = precomputedTrend?.[precomputedTrend.length - 1]?.year ?? firstYear;
+    if (displayData.length === 1 || first.month === last.month) return `${first.month} ${firstYear}`;
+    if (firstYear !== lastYear) return `${first.month} ${firstYear} - ${last.month} ${lastYear}`;
+    return `${first.month} - ${last.month} ${firstYear}`;
+  };
+
   const handleDepartmentSelect = (department: string) => {
-    setSelectedDepartment(department);
-    setUserManuallySelected(true); // Mark that user has manually selected
+    setInternalSelectedDepartment(department);
+    setUserManuallySelected(true);
+    onDepartmentChange?.(department);
   };
 
   // Calculate dynamic height to match PerformanceRate chart
@@ -190,17 +220,10 @@ const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ evaluationData, dat
             <FilterLogo className="w-5 h-5" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900 text-center flex-1 px-4">
-            {selectedDepartment !== 'All Departments' 
-              ? `${selectedDepartment} Performance Trend` 
+            {selectedDepartment !== 'All Departments'
+              ? `${selectedDepartment} Performance Trend`
               : 'All Departments Performance Trend'
-            } {
-              dateFilter?.from && dateFilter?.to 
-                ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` 
-                : `(${displayData.length > 0 
-                    ? `${displayData[0]?.month} - ${displayData[displayData.length - 1]?.month} ${new Date().getFullYear()}` 
-                    : 'No Data'
-                  })`
-            }
+            } ({getDateRangeLabel()})
           </h3>
           <div className="w-10 flex-shrink-0"></div>
         </div>

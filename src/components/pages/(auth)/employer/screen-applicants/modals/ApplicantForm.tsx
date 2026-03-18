@@ -22,11 +22,13 @@ type PropTypes = {
   title: string;
   JobTitle?: string;
   screeningQuestions?: any[];
+  jobPostingDetails?: any;
 };
-export default function ApplicantForm({ title, JobTitle, screeningQuestions = [] }: PropTypes) {
+export default function ApplicantForm({ title, JobTitle, screeningQuestions = [], jobPostingDetails }: PropTypes) {
   const cancelButtonRef = useRef(null);
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
+  const [showDocxDownloadModal, setShowDocxDownloadModal] = useState<boolean>(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -54,6 +56,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
 
   const handleClose = () => {
     setViewCV(false);
+    setShowDocxDownloadModal(false);
     setIsOpen(false);
     setTimeout(() => setActionState(initialActionState), 400);
   };
@@ -149,6 +152,12 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         ></div>
       </div>
     );
+  };
+
+  const isCvDocx = () => {
+    if (!applicantProfile.cv_url) return false;
+    const url = applicantProfile.cv_url.toLowerCase();
+    return url.includes('.docx') || url.includes('.doc');
   };
 
   const renderProfileTab = () => {
@@ -255,7 +264,13 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           <button
             type='button'
             className='px-4 py-2 rounded-md text-[#355FD0] border-[1px] border-[#355FD0] disabled:opacity-50'
-            onClick={() => setViewCV(true)}
+            onClick={() => {
+              if (isCvDocx()) {
+                setShowDocxDownloadModal(true);
+              } else {
+                setViewCV(true);
+              }
+            }}
             disabled={!applicantProfile.cv_url}
             title={!applicantProfile.cv_url ? 'No CV/Resume Attached' : ''}
           >
@@ -498,6 +513,103 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     );
   };
 
+  const getVideoEmbedUrl = (url: string): string | null => {
+    if (!url) return null;
+
+    try {
+      // YouTube URL patterns
+      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const youtubeMatch = url.match(youtubeRegex);
+      if (youtubeMatch && youtubeMatch[1]) {
+        return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+      }
+
+      // Loom URL patterns
+      const loomRegex = /loom\.com\/share\/([a-zA-Z0-9]+)/;
+      const loomMatch = url.match(loomRegex);
+      if (loomMatch && loomMatch[1]) {
+        return `https://www.loom.com/embed/${loomMatch[1]}`;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error parsing video URL:', error);
+      return null;
+    }
+  };
+
+  const renderVideoIntroTab = () => {
+    const videoUrl = applicantProfile.video_intro_url;
+    const embedUrl = getVideoEmbedUrl(videoUrl);
+
+    if (!videoUrl || !embedUrl) {
+      return (
+        <div className='mt-8 text-center'>
+          <div className='bg-gray-50 rounded-lg p-8 border border-gray-200'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='h-12 w-12 text-gray-400 mx-auto mb-4'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z'
+              />
+            </svg>
+            <h4 className='text-gray-600 font-medium mb-2'>No Video Introduction</h4>
+            <p className='text-gray-500 text-sm'>
+              {!videoUrl
+                ? 'This applicant did not submit a video introduction.'
+                : 'Unable to play video. The URL format may not be supported.'}
+            </p>
+            {videoUrl && !embedUrl && (
+              <div className='mt-4'>
+                <a
+                  href={videoUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-600 hover:underline text-sm'
+                >
+                  View original link
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className='mt-6'>
+        <div className='bg-gray-900 rounded-lg overflow-hidden'>
+          <div className='relative' style={{ paddingTop: '56.25%' }}>
+            <iframe
+              className='absolute top-0 left-0 w-full h-full'
+              src={embedUrl}
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+              allowFullScreen
+              title='Video Introduction'
+            />
+          </div>
+        </div>
+        <div className='mt-4 text-sm text-gray-600'>
+          <a
+            href={videoUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-600 hover:underline'
+          >
+            Open video in new tab
+          </a>
+        </div>
+      </div>
+    );
+  };
+
   const renderResumeView = () => {
     return (
       <>
@@ -506,7 +618,68 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     );
   };
 
+  const handleDocxDownload = () => {
+    window.open(applicantProfile.cv_url, '_blank');
+    setShowDocxDownloadModal(false);
+  };
+
+  const renderDocxDownloadModal = () => {
+    return (
+      <Transition.Root show={showDocxDownloadModal} as={Fragment}>
+        <Dialog as='div' className='relative z-40' onClose={() => setShowDocxDownloadModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300' enterFrom='opacity-0' enterTo='opacity-100'
+            leave='ease-in duration-200' leaveFrom='opacity-100' leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-center justify-center p-4 text-center'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300' enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200' leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md'>
+                  <div className='flex bg-savoy-blue p-2 items-center gap-4'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Download CV/Resume</h3>
+                    <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setShowDocxDownloadModal(false)} />
+                  </div>
+                  <div className='p-6 text-center space-y-4'>
+                    <p className='text-gray-600'>
+                      This CV/Resume is in DOCX format and cannot be previewed in the browser. Click the button below to download it.
+                    </p>
+                    <button
+                      type='button'
+                      className='inline-block px-6 py-2 rounded-md text-white bg-[#355FD0] hover:bg-blue-700'
+                      onClick={handleDocxDownload}
+                    >
+                      Download CV/Resume
+                    </button>
+                  </div>
+                  <div className='flex justify-end p-4 border-t border-[#355FD0]'>
+                    <button
+                      type='button'
+                      className='border border-[#355FD0] rounded-lg py-2 px-6 text-[#355FD0] hover:bg-[#355FD0]/[.15]'
+                      onClick={() => setShowDocxDownloadModal(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    );
+  };
+
   return (
+    <>
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-30' initialFocus={cancelButtonRef} onClose={handleClose}>
         <Transition.Child
@@ -544,7 +717,10 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 <div className={classNames('m-7', viewCV ? 'h-[43rem]' : 'h-auto')}>
                   {!viewCV && (
                     <div className='w-full overflow-x-auto md:overflow-x-visible justify-center md:justify-stretch'>
-                      <div className='flex md:grid md:grid-cols-4 gap-2 md:gap-0 min-w-max md:min-w-0 justify-center md:justify-stretch'>
+                      <div className={classNames(
+                        'flex md:grid gap-2 md:gap-0 min-w-max md:min-w-0 justify-center md:justify-stretch',
+                        jobPostingDetails?.is_video_intro_enabled ? 'md:grid-cols-5' : 'md:grid-cols-4'
+                      )}>
                         <div className='mr-2 md:mr-2 flex-shrink-0'>
                           <button
                             className={classNames(
@@ -578,7 +754,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                             Summary
                           </button>
                         </div>
-                        <div className='ml-2 md:ml-2 flex-shrink-0'>
+                        <div className='mx-2 md:mx-2 flex-shrink-0'>
                           <button
                             className={classNames(
                               'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
@@ -589,6 +765,19 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                             Answers
                           </button>
                         </div>
+                        {jobPostingDetails?.is_video_intro_enabled && (
+                          <div className='ml-2 md:ml-2 flex-shrink-0'>
+                            <button
+                              className={classNames(
+                                'px-4 py-2 font-bold rounded-md w-full whitespace-nowrap',
+                                currentTab == 5 ? 'bg-[#355FD0] hover:bg-blue-700 text-white' : 'text-gray-400'
+                              )}
+                              onClick={() => setCurrentTab(5)}
+                            >
+                              Video Intro
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -596,6 +785,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   {!viewCV && currentTab == 2 && <div className='h-[28rem] overflow-y-auto'>{renderJobExpTab()}</div>}
                   {!viewCV && currentTab == 3 && <div className='h-[28rem] overflow-y-auto'>{renderSummaryTab()}</div>}
                   {!viewCV && currentTab == 4 && <div className='h-[28rem] overflow-y-auto'>{renderAnswersTab()}</div>}
+                  {!viewCV && currentTab == 5 && jobPostingDetails?.is_video_intro_enabled && <div className='h-[28rem] overflow-y-auto'>{renderVideoIntroTab()}</div>}
                   {viewCV && renderResumeView()}
                 </div>
                 {!viewCV && (
@@ -626,5 +816,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
         </div>
       </Dialog>
     </Transition.Root>
+    {renderDocxDownloadModal()}
+    </>
   );
 }

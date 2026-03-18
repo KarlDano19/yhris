@@ -1,23 +1,14 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-interface JobFilters {
-  job_title?: string;
-  location?: string | string[];
-  search_type?: 'job_title' | 'location';
-  view_type?: 'jobs_select' | 'location_select' | 'listing' | 'applicant_personal';
-  current_page?: number;
-  page_size?: number;
-  search?: string;
-  useApplicantPersonal?: boolean; // Flag to use applicant_personal view type
-}
+import { T_JobFilters } from '@/types/personal-mode';
 
 /**
  * Unified hook for fetching jobs - supports both autocomplete suggestions and job listings
  * @param filters - Filter object containing search parameters
  * @param mode - 'autocomplete' for suggestions, 'listing' for job listings with infinite scroll
  */
-async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode: 'autocomplete' | 'listing' = 'listing') {
+async function fetchJobs(filters: T_JobFilters | null, pageParam: number = 1, mode: 'autocomplete' | 'listing' = 'listing') {
   try {
     if (!filters && mode === 'autocomplete') {
       return { records: [], total_records: 0, total_pages: 0 };
@@ -131,7 +122,7 @@ async function fetchJobs(filters: JobFilters | null, pageParam: number = 1, mode
 /**
  * Hook for fetching job listings with infinite scroll
  */
-function useFindJobs(itemsFilter: JobFilters | null) {
+function useFindJobs(itemsFilter: T_JobFilters | null) {
   const query = useInfiniteQuery(
     [
       'findJobsPublicCache',
@@ -162,7 +153,7 @@ function useFindJobs(itemsFilter: JobFilters | null) {
   const totalRecords = query.data?.pages[0]?.total_records || 0;
 
   // Create a manual search function that resets to page 1
-  const searchWithFilter = async (currentFilter: JobFilters | null) => {
+  const searchWithFilter = async (currentFilter: T_JobFilters | null) => {
     const result = await fetchJobs(currentFilter, 1, 'listing');
     return result.records;
   };
@@ -178,7 +169,7 @@ function useFindJobs(itemsFilter: JobFilters | null) {
 /**
  * Hook for fetching autocomplete suggestions (job titles or locations)
  */
-function useGetJobAutocomplete(filters: JobFilters | null) {
+function useGetJobAutocomplete(filters: T_JobFilters | null) {
   // Normalize search term: trim spaces and check if it's meaningful
   const normalizedSearch = filters?.search?.trim();
   const hasValidSearch = normalizedSearch && normalizedSearch.length >= 2;

@@ -2,11 +2,13 @@ import React, { Dispatch, useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import classNames from '@/helpers/classNames';
 import { T_DocumentsModal } from '@/types/globals';
+import classNames from '@/helpers/classNames';
+import AttachmentViewModal from './modals/AttachmentViewModal';
+import AttachmentListModal from './modals/AttachmentListModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import ClipIcon from '@/svg/ClipIcon';
-import AttachmentViewModal from './modals/AttachmentViewModal';
 
 interface DocumentAttachment {
   id?: number;
@@ -26,6 +28,8 @@ const SignDocuments = ({
   setReceived,
   isLoading,
   isLetterReceived,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isDocumentsSent: boolean;
@@ -37,12 +41,16 @@ const SignDocuments = ({
   setReceived: any;
   isLoading: boolean;
   isLetterReceived: boolean;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
   const [selectedAttachmentUrl, setSelectedAttachmentUrl] = useState<string | null>(null);
-  
-  // Disabled if letter hasn't been received yet
-  const isDisabled = !isLetterReceived || isDocumentsSent;
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
+
+  // Disabled if already sent or if quit claim is in progress
+  const isDisabled = isDocumentsSent || isQuitclaimSigned || isQuitclaimReceived;
   
   // Get attachments to display - prefer documentAttachments array, fallback to single documentsAttachment
   const attachmentsToDisplay: DocumentAttachment[] = documentAttachments && documentAttachments.length > 0
@@ -66,7 +74,7 @@ const SignDocuments = ({
           )}
           disabled={isDisabled}
           data-tooltip-id='sign-documents-tooltip'
-          data-tooltip-content={!isLetterReceived ? 'Letter must be received first' : ''}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot send documents after quit claim' : isDocumentsSent ? 'Documents already sent' : 'Send documents'}
           data-tooltip-place='bottom'
           onClick={() =>
             setIsDocumentModalOpen({
@@ -86,10 +94,10 @@ const SignDocuments = ({
               : 'bg-blue-100 text-blue-400',
             'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
           )}
-          disabled={!isDocumentsSent || isDocumentsReceived || isLoading}
-          onClick={() => setReceived(id, 'sign documents')}
+          disabled={isDocumentsReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
+          onClick={() => setIsConfirmReceiveOpen(true)}
           data-tooltip-id='sign-documents-received-tooltip'
-          data-tooltip-content={!isDocumentsSent ? 'Documents must be sent first' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
+          data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot receive documents after quit claim' : isDocumentsReceived ? 'Documents already received' : 'Mark documents as received'}
           data-tooltip-place='bottom'
         >
           {isLoading && (
@@ -113,47 +121,53 @@ const SignDocuments = ({
               <span className='sr-only'>Loading...</span>
               </div>
           )}
-          {!isLoading && 'Received'}
+          {!isLoading && (isDocumentsReceived ? 'Received' : 'Receive')}
         </button>
       </div>
       {isDocumentsReceived ? (
         <div className='flex flex-col gap-1'>
           <div className='flex gap-1 items-center justify-center'>
             {hasAttachments ? (
-              <div className='flex flex-wrap gap-1 justify-center'>
-                {attachmentsToDisplay.map((att, index) => (
-                  <div
-                    key={att.id || index}
-                    className='cursor-pointer'
-                    data-tooltip-id={`documents-attachment-tooltip-${index}`}
-                    data-tooltip-content={`Click to view: ${att.attachment_name || 'Attachment'}`}
-                    data-tooltip-place='bottom'
-                    onClick={() => {
-                      setSelectedAttachmentUrl(att.attachment);
-                      setIsViewModalOpen(true);
-                    }}
-                  >
-                    <ClipIcon hasFile={true} />
-                  </div>
-                ))}
+              <div className='flex items-center gap-1'>
+                <div
+                  className='cursor-pointer'
+                  data-tooltip-id='documents-attachment-tooltip'
+                  data-tooltip-content={
+                    attachmentsToDisplay.length === 1
+                      ? attachmentsToDisplay[0].attachment_name
+                      : `${attachmentsToDisplay.length} attachments - Click to view list`
+                  }
+                  data-tooltip-place='bottom'
+                  onClick={() => {
+                    if (attachmentsToDisplay.length === 1) {
+                      // Single attachment - open directly
+                      window.open(attachmentsToDisplay[0].attachment, '_blank');
+                    } else {
+                      // Multiple attachments - open modal
+                      setIsAttachmentListModalOpen(true);
+                    }
+                  }}
+                >
+                  <ClipIcon hasFile={true} />
+                </div>
+                {attachmentsToDisplay.length > 1 && (
+                  <span className='text-xs text-gray-500 ml-1'>
+                    ({attachmentsToDisplay.length})
+                  </span>
+                )}
               </div>
             ) : (
               <ClipIcon hasFile={false} />
             )}
             <p className='ml-2 text-xs'>{documentReceivedDate}</p>
           </div>
-          {hasAttachments && attachmentsToDisplay.length > 1 && (
-            <p className='text-xs text-gray-500 text-center'>{attachmentsToDisplay.length} attachment(s)</p>
-          )}
         </div>
       ) : null}
+
+      <Tooltip id='documents-attachment-tooltip' style={{ zIndex: 9999 }} />
       
       <Tooltip id='sign-documents-tooltip' style={{ zIndex: 9999 }} />
       <Tooltip id='sign-documents-received-tooltip' style={{ zIndex: 9999 }} />
-      <Tooltip id='sign-documents-received-tooltip' />
-      {attachmentsToDisplay.map((_, index) => (
-        <Tooltip key={index} id={`documents-attachment-tooltip-${index}`} style={{ zIndex: 9999 }}/>
-      ))}
     </div>
     
     {isViewModalOpen && selectedAttachmentUrl && (
@@ -164,6 +178,26 @@ const SignDocuments = ({
         title="Sign Documents Attachment"
       />
     )}
+
+    {isAttachmentListModalOpen && (
+      <AttachmentListModal
+        isOpen={isAttachmentListModalOpen}
+        setIsOpen={setIsAttachmentListModalOpen}
+        attachments={attachmentsToDisplay}
+        title="Sign Documents Attachments"
+      />
+    )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the documents as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'sign documents');
+      }}
+      isLoading={false}
+    />
     </>
   );
 };

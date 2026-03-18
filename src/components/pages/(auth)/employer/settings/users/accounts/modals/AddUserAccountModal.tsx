@@ -176,32 +176,34 @@ export default function AddUserAccountModal({
                                 Password
                                 <span className='text-red-600'>*</span>
                               </label>
-                              <div className='mt-2 relative'>
-                                <input
-                                  id='password'
-                                  {...register('password', { required: true })}
-                                  type={showPassword ? 'text' : 'password'}
-                                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                                  value={password}
-                                  onChange={(e) => {
-                                    setPassword(e.currentTarget.value);
-                                    setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
-                                    setBackendPasswordError('');
-                                  }}
-                                />
-                                <button
-                                  type='button'
-                                  className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                  onClick={() => {
-                                    setShowPassword(!showPassword);
-                                  }}
-                                >
-                                  {showPassword ? (
-                                    <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                  ) : (
-                                    <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                  )}
-                                </button>
+                              <div className='mt-2'>
+                                <div className='relative'>
+                                  <input
+                                    id='password'
+                                    {...register('password', { required: true })}
+                                    type={showPassword ? 'text' : 'password'}
+                                    className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                    value={password}
+                                    onChange={(e) => {
+                                      setPassword(e.currentTarget.value);
+                                      setPasswordRequirements(getPasswordRequirements(e.currentTarget.value));
+                                      setBackendPasswordError('');
+                                    }}
+                                  />
+                                  <button
+                                    type='button'
+                                    className='absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center px-2 text-blue-400'
+                                    onClick={() => {
+                                      setShowPassword(!showPassword);
+                                    }}
+                                  >
+                                    {showPassword ? (
+                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                                    ) : (
+                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                                    )}
+                                  </button>
+                                </div>
                                 {backendPasswordError && (
                                   <p className='text-red-600 text-xs mt-1'>{backendPasswordError}</p>
                                 )}
@@ -235,28 +237,30 @@ export default function AddUserAccountModal({
                                 Confirm Password
                                 <span className='text-red-600'>*</span>
                               </label>
-                              <div className='mt-2 relative'>
-                                <input
-                                  id='confirm_password'
-                                  {...register('confirm_password', { required: true })}
-                                  type={showConfirmPassword ? 'text' : 'password'}
-                                  className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
-                                  value={confirmPassword}
-                                  onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-                                />
-                                <button
-                                  type='button'
-                                  className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
-                                  onClick={() => {
-                                    setShowConfirmPassword(!showConfirmPassword);
-                                  }}
-                                >
-                                  {showConfirmPassword ? (
-                                    <EyeIcon className='h-5 w-5 text-savoy-blue' />
-                                  ) : (
-                                    <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
-                                  )}
-                                </button>
+                              <div className='mt-2'>
+                                <div className='relative'>
+                                  <input
+                                    id='confirm_password'
+                                    {...register('confirm_password', { required: true })}
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                                  />
+                                  <button
+                                    type='button'
+                                    className='absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center px-2 text-blue-400'
+                                    onClick={() => {
+                                      setShowConfirmPassword(!showConfirmPassword);
+                                    }}
+                                  >
+                                    {showConfirmPassword ? (
+                                      <EyeIcon className='h-5 w-5 text-savoy-blue' />
+                                    ) : (
+                                      <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+                                    )}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>

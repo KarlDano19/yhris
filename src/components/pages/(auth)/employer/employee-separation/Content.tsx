@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 
 import Link from 'next/link';
 
@@ -18,7 +18,6 @@ import CustomToast from '@/components/CustomToast';
 import Pagination from '@/components/Pagination';
 import AddSeparationModal from './modals/AddSeparationModal';
 import SendEmailModal from '@/components/SendEmailModal';
-import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import { handleEmailSending, handleLetterSending, updateSeparationItems, LetterData } from './functions/emailHandlers';
 import useGetSeparationItems from './hooks/useGetSeparationItems';
 import useDeleteSeparation from './hooks/useDeleteSeparation';
@@ -28,6 +27,7 @@ import SeparationLetter from './SeparationLetter';
 import SignDocuments from './SignDocuments';
 import LastPay from './LastPay';
 import Quitclaim from './Quitclaim';
+import SeparationLetterAttachmentSection from './components/SeparationLetterAttachmentSection';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
@@ -239,14 +239,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleLastPaySubmit = (data: any) => {
     if (isLastPayModalOpen && isLastPayModalOpen.id) {
       const updatedItem = handleEmailSending(data, 'last pay', separationItems, isLastPayModalOpen.id);
-      
+
       mutate(updatedItem, {
-        onSuccess: (data: any) => {
-          setSeparationItems(separationItems.map((item: any) => 
-            item.id === isLastPayModalOpen.id ? { ...item, ...updatedItem } : item
-          ));
+        onSuccess: (responseData: any) => {
+          // Refetch to get updated data including saved attachments from backend
+          refetch();
           setIsLastPayModalOpen(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -261,12 +260,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const handleQuitclaimSubmit = (data: any) => {
     if (isQuitclaimModalOpen && isQuitclaimModalOpen.id) {
       const updatedItem = handleEmailSending(data, 'quit claim', separationItems, isQuitclaimModalOpen.id);
-      
+
       mutate(updatedItem, {
-        onSuccess: (data: any) => {
-          setSeparationItems(updateSeparationItems(separationItems, updatedItem, isQuitclaimModalOpen.id));
+        onSuccess: (responseData: any) => {
+          // Refetch to get updated data including saved attachments from backend
+          refetch();
           setIsQuitclaimModalOpen(null);
-          toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={responseData.message} type='success' />, { duration: 5000 });
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
@@ -302,6 +302,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,
@@ -334,15 +335,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
           separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
+          separation['letter_attachment'] = separation.letter_attachment;
+          separation['letter_attachments'] = separation.letter_attachments || [];
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
           separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['documents_attachment'] = separation.documents_attachment;  // Backward compatibility
           separation['document_attachments'] = separation.document_attachments || [];  // Multiple attachments
           separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['last_pay_attachment'] = separation.last_pay_attachment;
+          separation['last_pay_attachments'] = separation.last_pay_attachments || [];
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
           separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
+          separation['quit_claim_attachment'] = separation.quit_claim_attachment;
+          separation['quitclaim_attachments'] = separation.quitclaim_attachments || [];
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -395,15 +402,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           separation['isLetterSent'] = separation.is_letter_sent;
           separation['isLetterReceived'] = separation.is_letter_received;
           separation['letterReceivedDate'] = formatDateToLocal(separation.letter_received_date);
+          separation['letter_attachment'] = separation.letter_attachment;
+          separation['letter_attachments'] = separation.letter_attachments || [];
           separation['isDocumentsSent'] = separation.is_documents_sent;
           separation['isDocumentsReceived'] = separation.is_documents_received;
           separation['documentReceivedDate'] = formatDateToLocal(separation.documents_received_date);
           separation['documents_attachment'] = separation.documents_attachment;  // Backward compatibility
           separation['document_attachments'] = separation.document_attachments || [];  // Multiple attachments
           separation['isLastPayReleased'] = separation.is_last_pay_released;
+          separation['last_pay_attachment'] = separation.last_pay_attachment;
+          separation['last_pay_attachments'] = separation.last_pay_attachments || [];
           separation['isQuitclaimSigned'] = separation.is_quit_claim_signed;
           separation['isQuitclaimReceived'] = separation.is_quit_claim_received;
           separation['quitclaimReceivedDate'] = formatDateToLocal(separation.quit_claim_received_date);
+          separation['quit_claim_attachment'] = separation.quit_claim_attachment;
+          separation['quitclaim_attachments'] = separation.quitclaim_attachments || [];
           separation['separationLetter'] = {
             subject: '',
             to: '',
@@ -457,6 +470,77 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       });
     }
   }, [dataSeparation, pageSize]);
+
+  // Memoize selected letter item and prePopulatedData to avoid passing
+  // a new object reference on each parent re-render (prevents modal from
+  // resetting when parent re-renders, e.g., on scroll).
+  const selectedLetter = useMemo(() => {
+    return isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id) : null;
+  }, [separationItems, isLetterModalOpen?.id]);
+
+  const memoPrePopulatedData = useMemo(() => {
+    if (!isLetterModalOpen) return undefined;
+    const name = selectedLetter?.name || 'Employee';
+    // Prefer saved separation_subject/message/to if present
+    const subject = selectedLetter?.separation_subject && selectedLetter.separation_subject.trim() !== ''
+      ? selectedLetter.separation_subject
+      : `Letter of ${isLetterModalOpen.type} - ${name}`;
+    const message = selectedLetter?.separation_message && selectedLetter.separation_message.trim() !== ''
+      ? selectedLetter.separation_message
+      : `<p>Dear ${name},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`;
+    // separation_to may be stored as JSON string or plain email
+    let toEmails: string[] = [];
+    if (selectedLetter?.separation_to) {
+      try {
+        const parsed = JSON.parse(selectedLetter.separation_to);
+        toEmails = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        toEmails = selectedLetter.separation_to ? [selectedLetter.separation_to] : [];
+      }
+    } else {
+      toEmails = selectedLetter?.email ? [selectedLetter.email] : [];
+    }
+
+    return {
+      subject,
+      message,
+      to: toEmails,
+      cc: selectedLetter?.separation_cc ? (() => {
+        try { const p = JSON.parse(selectedLetter.separation_cc); return Array.isArray(p) ? p : [p]; } catch { return [selectedLetter.separation_cc]; }
+      })() : [],
+      bcc: selectedLetter?.separation_bcc ? (() => {
+        try { const p = JSON.parse(selectedLetter.separation_bcc); return Array.isArray(p) ? p : [p]; } catch { return [selectedLetter.separation_bcc]; }
+      })() : []
+    };
+  }, [isLetterModalOpen, selectedLetter]);
+
+  // Memoize default recipients
+  const useMemoDefaultRecipients = (modalId?: string | number) =>
+    useMemo(() => {
+      if (!modalId) return [];
+      const it = separationItems.find((s: any) => s.id === modalId);
+      return it?.email ? [it.email] : [];
+    }, [separationItems, modalId]);
+
+  const memoDefaultRecipientsDocument = useMemoDefaultRecipients(isDocumentModalOpen?.id);
+  const memoDefaultRecipientsLastPay = useMemoDefaultRecipients(isLastPayModalOpen?.id);
+  const memoDefaultRecipientsQuitclaim = useMemoDefaultRecipients(isQuitclaimModalOpen?.id);
+
+  const memoDefaultRecipients = useMemo(() => {
+    if (!isLetterModalOpen?.id) return [];
+    const item = separationItems.find((item: any) => item.id === isLetterModalOpen.id);
+    if (!item) return [];
+    // Prefer saved separation_to if present
+    if (item.separation_to) {
+      try {
+        const parsed = JSON.parse(item.separation_to);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        return item.separation_to ? [item.separation_to] : (item.email ? [item.email] : []);
+      }
+    }
+    return item.email ? [item.email] : [];
+  }, [separationItems, isLetterModalOpen?.id]);
 
   // Update select all state when separations change
   useEffect(() => {
@@ -581,6 +665,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLetterReceived={item.isLetterReceived}
               letterReceivedDate={item.letterReceivedDate}
               letterAttachment={item.letter_attachment}
+              letterAttachments={item.letter_attachments}
               setIsLetterModalOpen={setIsLetterModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-letters`] || false}
@@ -588,6 +673,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               employerName={item.employer_name}
               effectiveDate={item.effective_date || item.date_of_separation}
               menuKey={menuKey}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -602,6 +689,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-sign documents`] || false}
               isLetterReceived={item.isLetterReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -610,8 +699,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isLastPayReleased={item.isLastPayReleased}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
               lastPayAttachment={item.last_pay_attachment}
+              lastPayAttachments={item.last_pay_attachments}
               setIsLastPayModalOpen={setIsLastPayModalOpen}
               isDocumentsReceived={item.isDocumentsReceived}
+              isQuitclaimSigned={item.isQuitclaimSigned}
+              isQuitclaimReceived={item.isQuitclaimReceived}
             />
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 align-top'>
@@ -621,6 +713,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               isQuitclaimReceived={item.isQuitclaimReceived}
               quitclaimReceivedDate={item.quitclaimReceivedDate}
               quitclaimAttachment={item.quit_claim_attachment}
+              quitclaimAttachments={item.quitclaim_attachments}
               setIsQuitclaimModalOpen={setIsQuitclaimModalOpen}
               setReceived={setReceived}
               isLoading={loadingStates[`${item.id}-quit claim`] || false}
@@ -854,7 +947,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isLetterModalOpen}
           onClose={() => setIsLetterModalOpen(null)}
           onSubmit={handleLetterSubmit}
-          defaultRecipients={isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipients}
+          showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           showAttachment={true}
           customAttachmentSection={
             <SeparationLetterAttachmentSection
@@ -866,13 +961,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           }
           submitButtonText="Send Letter"
           isLoading={isLoading}
-          prePopulatedData={{
-            subject: `Letter of ${isLetterModalOpen.type} - ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'}`,
-            message: `<p>Dear ${isLetterModalOpen?.id ? separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.name || 'Employee' : 'Employee'},</p><p>Please find attached your Letter of ${isLetterModalOpen.type}.</p><p>Best regards,<br>HR Department</p>`,
-            to: isLetterModalOpen?.id ? [separationItems.find((item: any) => item.id === isLetterModalOpen.id)?.email].filter(Boolean) : [],
-            cc: [],
-            bcc: []
-          }}
+          prePopulatedData={memoPrePopulatedData}
         />
       )}
       {isDocumentModalOpen && (
@@ -881,7 +970,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isDocumentModalOpen}
           onClose={() => setIsDocumentModalOpen(null)}
           onSubmit={handleSignDocumentsSubmit}
-          defaultRecipients={isDocumentModalOpen?.id ? [separationItems.find((item: any) => item.id === isDocumentModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsDocument}
           showDragDropAttachment={true}
           allowMultipleAttachments={true}
           submitButtonText="Send"
@@ -894,8 +983,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isLastPayModalOpen}
           onClose={() => setIsLastPayModalOpen(null)}
           onSubmit={handleLastPaySubmit}
-          defaultRecipients={isLastPayModalOpen?.id ? [separationItems.find((item: any) => item.id === isLastPayModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsLastPay}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />
@@ -906,8 +996,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isOpen={!!isQuitclaimModalOpen}
           onClose={() => setIsQuitclaimModalOpen(null)}
           onSubmit={handleQuitclaimSubmit}
-          defaultRecipients={isQuitclaimModalOpen?.id ? [separationItems.find((item: any) => item.id === isQuitclaimModalOpen.id)?.email].filter(Boolean) : []}
+          defaultRecipients={memoDefaultRecipientsQuitclaim}
           showDragDropAttachment={true}
+          allowMultipleAttachments={true}
           submitButtonText="Send"
           isLoading={isLoading}
         />

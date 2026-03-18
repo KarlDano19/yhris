@@ -2,25 +2,25 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Card from '../../Card';
-import { calculateAttritionRate } from './calculations/attritionRateCalc';
 
 interface AttritionRateCardProps {
-  separationData?: any[];
-  employeeData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedValue?: number;
 }
 
 const AttritionRateCard: React.FC<AttritionRateCardProps> = ({
-  separationData,
-  employeeData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedValue,
 }) => {
-  // Calculate attrition rate using shared utility
   const attritionData = useMemo(() => {
-    return calculateAttritionRate(separationData, employeeData);
-  }, [separationData, employeeData]);
+    const rate = precomputedValue ?? 0;
+    const now = new Date();
+    const quarter = Math.ceil((now.getMonth() + 1) / 3);
+    const trend = `New data in Q${quarter} ${now.getFullYear()}`;
+    return { attritionRate: rate.toFixed(2), trend, isPositive: false };
+  }, [precomputedValue]);
 
   if (isLoading) {
     return (

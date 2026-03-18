@@ -2,11 +2,18 @@
  * Types and interfaces for directives functionality
  */
 
+export interface DirectiveAttachment {
+  id: number;
+  attachment: string;
+  attachment_name: string;
+  created_at?: string;
+}
+
 export interface DirectiveData {
   id: number;
   directive_type?: 'memo' | 'policy';
   title: string;
-  to?: string | string[]; 
+  to?: string | string[];
   is_active?: boolean;
   company_name?: string;
 
@@ -19,15 +26,15 @@ export interface DirectiveData {
   body?: string;
   name?: string;
   position?: string;
-  signature?: string | File;
+  signature?: string | File | FileList;
   qr_code?: string | File;
-  attachments?: string | File | Array<{
-    id: number;
-    attachment: string;
-    attachment_name: string;
-    created_at?: string;
-  }>;
+  attachments?: string | File | File[] | DirectiveAttachment[];
   attachment?: string; // Backward compatibility field - URL of first attachment
+}
+
+// MemoFormData — form state type (extends DirectiveData with UI-only fields)
+export interface MemoFormData extends DirectiveData {
+  employee_id?: string | number | null; // UI-only: seeds EmployeeSelect; not sent to backend
 }
 
 export interface PolicyField {
@@ -35,8 +42,13 @@ export interface PolicyField {
   inputName: string
 }
 
+export interface MaskedEmail {
+  index: number;
+  masked: string;
+}
+
 export interface SendVerificationRequest {
-  email: string;
+  emailIndex: number;
 }
 
 export interface SendVerificationResponse {
@@ -51,7 +63,7 @@ export interface SendVerificationError {
 
 export interface VerifyDirectiveParams {
   directiveId: number;
-  email: string;
+  emailIndex: number;
   code: string;
 }
 

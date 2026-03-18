@@ -25,6 +25,7 @@ import ApplicantForm from '../modals/ApplicantForm';
 import BatchResumeUpload from '../modals/BatchResumeUpload';
 import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
 import StageAssignment from '../modals/StageAssignment';
+import MoveToAnotherJobModal from './modals/MoveToAnotherJobModal';
 import NavigationModal from './modals/NavigationModal';
 import StateContext from '../contexts/StateContext';
 import AddStageBtn from './AddStageBtn';
@@ -124,9 +125,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
     return dataArchivedApplicants.filter((applicant: any) => {
-      // Only count if actually archived with rejected/withdrawn status
-      const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-      if (!isArchivedStatus) return false;
+    // Only count if actually archived with rejected/withdrawn/pooling/ongoing(transferred) status
+    const isArchivedStatus = applicant.status === 'rejected' || applicant.status === 'withdrawn' || applicant.status === 'pooling' || applicant.status === 'ongoing';
+    if (!isArchivedStatus) return false;
       
       // Check if archived within the last 30 days
       const archivedDate = new Date(applicant.updated_at || applicant.created_at);
@@ -174,8 +175,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
    * Check if status update should trigger archived modal refresh
    */
   const shouldTriggerArchivedRefresh = useCallback((status: string) => {
-    // Only trigger if status is rejected or withdrawn (archived statuses)
-    return status === 'rejected' || status === 'withdrawn';
+    // Trigger when status is one of the archived statuses (rejected, withdrawn, pooling)
+    return status === 'rejected' || status === 'withdrawn' || status === 'pooling';
   }, []);
 
   /**
@@ -234,15 +235,18 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
               isMatch = Boolean(
                 idealAnswers.some((ideal: any) =>
-                  applicantAnswers.some((app: any) =>
-                    app != null && ideal != null && String(app).toLowerCase() === String(ideal).toLowerCase()
-                  )
+                  applicantAnswers.some((app: any) => {
+                    // Skip comparison if either value is null/undefined
+                    if (app == null || ideal == null) return false;
+                    return String(app).toLowerCase() === String(ideal).toLowerCase();
+                  })
                 )
               );
             } else if (responseType === 'Yes / No') {
               // Yes/No questions - check if answer matches ideal answer
               const idealAnswer = Array.isArray(question.idealAnswer) ? question.idealAnswer[0] : question.idealAnswer;
               const applicantAnswer = Array.isArray(answer.answer) ? answer.answer[0] : answer.answer;
+              // Skip comparison if either value is null/undefined
               if (applicantAnswer == null || idealAnswer == null) {
                 isMatch = false;
               } else {
@@ -352,6 +356,25 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   }, [dataJobPostDetails, dataAppliedApplicants, screeningQuestions]);
 
+  // Listen for local archive events to refresh lists immediately
+  useEffect(() => {
+    const handler = (e: any) => {
+      // Refresh both active and archived lists when an applicant is archived
+      appliedApplicantRefetch();
+      archivedApplicantRefetch();
+    };
+
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('applicant:archived', handler as EventListener);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined' && window.removeEventListener) {
+        window.removeEventListener('applicant:archived', handler as EventListener);
+      }
+    };
+  }, [appliedApplicantRefetch, archivedApplicantRefetch]);
+
   const handleFormSubmit = (data: any, isOpen?: any) => {
     if (whichModal) {
       const modalSelected: ModalSelectedTypes = modals[whichModal];
@@ -389,8 +412,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             
             // Create dynamic success message based on the action performed
             let successMessage = 'Successfully updated the checklist.';
-            
-            if (data.status === 'hired') {
+
+            // Check if this is only a job posting deactivation without status change
+            if (data.deactivate_job_posting && data.status === 'ongoing') {
+              successMessage = 'Job posting deactivated.';
+            } else if (data.status === 'passed' && data.new_required_slot) {
+              // Hiring in final stage with slot increase
+              successMessage = 'Successfully hired the applicant! Required slot increased.';
+            } else if (data.status === 'hired') {
               successMessage = 'Successfully hired the applicant!';
             } else if (data.status === 'rejected') {
               successMessage = 'Successfully rejected the applicant.';
@@ -401,12 +430,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             } else if (data.status === 'passed') {
               successMessage = 'Successfully moved applicant to next stage.';
             }
-            
-            // Add additional context for special actions
-            if (data.new_required_slot) {
-              successMessage += ' Required slot increased.';
-            }
-            if (data.deactivate_job_posting) {
+
+            // Add additional context for special actions (only if not already handled above)
+            if (data.deactivate_job_posting && data.status !== 'ongoing') {
               successMessage += ' Job posting deactivated.';
             }
             
@@ -551,7 +577,16 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }} />,
     },
     APPLICANT_FORM: {
-      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} />,
+      component: <ApplicantForm title={title} JobTitle={dataJobPostDetails?.job_title} screeningQuestions={screeningQuestions} jobPostingDetails={dataJobPostDetails} />,
+    },
+    MOVE_TO_JOB: {
+      component: (
+        <MoveToAnotherJobModal
+          appliedJobId={actionState.applicantId as unknown as number}
+          currentJobPostingId={params.id as string}
+          onClose={() => setActionState(initialActionState)}
+        />
+      ),
     },
   };
 
@@ -935,29 +970,38 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           </div>
         </StateContext.Provider>
       )}
-      <AddApplicantModal
-        refetch={appliedApplicantRefetch}
-        isOpen={isAddApplicantModalOpen}
-        setIsOpen={setIsAddApplicantModalOpen}
-        jobPostingId={params.id as string}
-      />
-      <ArchivedApplicantsModal
-        isOpen={isArchivedApplicantsModalOpen}
-        handleClose={() => setIsArchivedApplicantsModalOpen(false)}
-        jobPostingId={params.id as string}
-        archivedApplicants={dataArchivedApplicants}
-        onUnarchive={() => {
-          appliedApplicantRefetch();
-          archivedApplicantRefetch();
-          setIsArchivedApplicantsModalOpen(false);
-        }}
-        onRefresh={archivedApplicantRefetch}
-      />
-      <NavigationModal
+
+      {isAddApplicantModalOpen && (
+        <AddApplicantModal
+          refetch={appliedApplicantRefetch}
+          isOpen={isAddApplicantModalOpen}
+          setIsOpen={setIsAddApplicantModalOpen}
+          jobPostingId={params.id as string}
+        />
+      )}
+
+      {isArchivedApplicantsModalOpen && (
+        <ArchivedApplicantsModal
+          isOpen={isArchivedApplicantsModalOpen}
+          handleClose={() => setIsArchivedApplicantsModalOpen(false)}
+          jobPostingId={params.id as string}
+          archivedApplicants={dataArchivedApplicants}
+          onUnarchive={() => {
+            appliedApplicantRefetch();
+            archivedApplicantRefetch();
+            setIsArchivedApplicantsModalOpen(false);
+          }}
+          onRefresh={archivedApplicantRefetch}
+        />
+      )}
+
+      {isNavigationModalOpen && (
+        <NavigationModal
         isOpen={isNavigationModalOpen}
         setIsOpen={setIsNavigationModalOpen}
-        jobPostingId={params.id as string}
-      />
+          jobPostingId={params.id as string}
+        />
+      )}
     </>
   );
 }

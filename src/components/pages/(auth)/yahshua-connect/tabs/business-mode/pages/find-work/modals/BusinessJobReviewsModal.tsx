@@ -5,21 +5,15 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import Modal from '@/components/pages/(auth)/yahshua-connect/components/Modal';
+import Pagination from '@/components/Pagination';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import useGetBusinessJobReviews from '../hooks/useGetBusinessJobReviews';
 
 import { formatDateToLocal } from '@/helpers/date';
+import { T_BusinessJobReview } from '@/types/business-mode';
 
 import { StarIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
-
-interface BusinessJobReview {
-  id: number;
-  rating: number;
-  comment: string | null;
-  created_at: string;
-  applicant_name: string;
-  applicant_photo: string | null;
-}
 
 interface BusinessJobReviewsModalProps {
   isOpen: boolean;
@@ -28,12 +22,24 @@ interface BusinessJobReviewsModalProps {
 }
 
 const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsModalProps) => {
-  const { data: reviewsData, isLoading } = useGetBusinessJobReviews(jobId, isOpen);
-  const [reviews, setReviews] = useState<BusinessJobReview[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
+
+  const { data: reviewsData, isLoading } = useGetBusinessJobReviews(
+    jobId,
+    { currentPage, pageSize },
+    isOpen
+  );
+
+  const [reviews, setReviews] = useState<T_BusinessJobReview[]>([]);
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [reviewsCount, setReviewsCount] = useState<number>(0);
   const [jobTitle, setJobTitle] = useState<string>('');
-  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!reviewsData) {
@@ -41,22 +47,19 @@ const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsM
       setAverageRating(null);
       setReviewsCount(0);
       setJobTitle('');
-      setExpandedReviews(new Set());
+      setPagination({ totalPages: 1, totalRecords: 0 });
       return;
     }
 
-    // Handle response structure
-    const data = reviewsData.data || reviewsData;
-
-    if (data.reviews && Array.isArray(data.reviews)) {
-      setReviews(data.reviews);
-    } else {
-      setReviews([]);
-    }
-
-    setAverageRating(data.average_rating || null);
-    setReviewsCount(data.reviews_count || 0);
-    setJobTitle(data.job_title || '');
+    // Update with new paginated response structure
+    setReviews(reviewsData.records || []);
+    setAverageRating(reviewsData.average_rating || null);
+    setReviewsCount(reviewsData.reviews_count || 0);
+    setJobTitle(reviewsData.job_title || '');
+    setPagination({
+      totalPages: reviewsData.total_pages || 1,
+      totalRecords: reviewsData.total_records || 0,
+    });
   }, [reviewsData]);
 
   const toggleReview = (reviewId: number) => {
@@ -95,6 +98,18 @@ const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsM
     return name.substring(0, 2).toUpperCase();
   };
 
+  const paginationChange = (event: any) => {
+    const newCurrentPage = event.selected + 1;
+    setCurrentPage(newCurrentPage);
+    setExpandedReviews(new Set()); // Reset expanded reviews when page changes
+  };
+
+  const pageSizeChange = (value: number) => {
+    setCurrentPage(1);
+    setPageSize(value);
+    setExpandedReviews(new Set());
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -103,8 +118,8 @@ const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsM
       size="2xl"
     >
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading reviews...</div>
+        <div className="py-8">
+          <LoadingSpinner size="md" showText text="Loading reviews..." />
         </div>
       ) : reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
@@ -136,7 +151,7 @@ const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsM
           )}
 
           {/* Reviews List */}
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {reviews.map((review) => {
               const isExpanded = expandedReviews.has(review.id);
               const hasComment = review.comment !== null &&
@@ -205,6 +220,17 @@ const BusinessJobReviewsModal = ({ isOpen, onClose, jobId }: BusinessJobReviewsM
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {!isLoading && reviews.length > 0 && (
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
+          )}
         </div>
       )}
     </Modal>

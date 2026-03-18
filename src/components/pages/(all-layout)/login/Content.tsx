@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ import { T_Login } from '@/types/globals';
 import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 function Content() {
-  const broadcastChannel = new BroadcastChannel('integration-channel');
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -190,8 +190,13 @@ function Content() {
     }
   };
 
-  const setSSOSession = async (data: any) => {
-    await updateSession({
+  const handleOTPSuccess = (data: any) => {
+    setSession(data);
+    setShowOTPModal(false);
+  };
+
+  const handleSSOData = (data: any) => {
+    updateSession({
       token: data.token,
       email: data.email,
       hasPendingTransaction: data.has_pending_transaction,
@@ -200,27 +205,85 @@ function Content() {
       accountType: data.account_type,
       loginType: data.login_type,
       isLoggedIn: true,
-    });
-    setSession(data);
+    })
+      .catch((err) => {
+        console.error('SSO updateSession failed, proceeding with redirect:', err);
+        toast.custom(() => <CustomToast message='Session sync failed — redirecting anyway. If issues persist, please contact support.' type='error' />, { duration: 5000 });
+      })
+      .finally(() => {
+        setSession(data);
+      });
   };
 
-  const handleOTPSuccess = (data: any) => {
-    setSession(data);
-    setShowOTPModal(false);
-  };
-
+  // Primary: window.opener.postMessage listener (works cross-origin, e.g. www vs non-www)
   useEffect(() => {
-    broadcastChannel.onmessage = (event) => {
-      if (event.data.isGranted) {
-        setSSOSession(event.data);
+    const handlePostMessage = (event: MessageEvent) => {
+      if (event.data?.isGranted) {
+        handleSSOData(event.data);
       }
     };
+    window.addEventListener('message', handlePostMessage);
+    return () => window.removeEventListener('message', handlePostMessage);
+  }, []);
+
+  // Secondary: BroadcastChannel (Chrome, Firefox, modern Safari 15.4+)
+  useEffect(() => {
+    const channel = new BroadcastChannel('integration-channel');
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
+      if (event.data.isGranted) {
+        handleSSOData(event.data);
+      }
+    };
+
     return () => {
-      broadcastChannel.close();
+      channel.close();
+      broadcastChannelRef.current = null;
     };
   }, []);
 
+  // Fallback: localStorage storage event (older Safari, restricted browsers)
+  useEffect(() => {
+    const handleStorageEvent = (event: StorageEvent) => {
+      if (event.key === 'sso_result' && event.newValue) {
+        try {
+          const data = JSON.parse(event.newValue);
+          if (data?.isGranted) {
+            localStorage.removeItem('sso_result');
+            handleSSOData(data);
+          }
+        } catch (e) {
+          console.error('SSO localStorage fallback parse error:', e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+    return () => window.removeEventListener('storage', handleStorageEvent);
+  }, []);
+
+  const consumeStoredSSOResult = () => {
+    try {
+      const stored = localStorage.getItem('sso_result');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data?.isGranted) {
+          localStorage.removeItem('sso_result');
+          handleSSOData(data);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('SSO localStorage poll error:', e);
+    }
+    return false;
+  };
+
   const loginWithYahshuaPayroll = () => {
+    // Clear any stale SSO result before starting
+    localStorage.removeItem('sso_result');
+
     const left = (window.innerWidth - 900) / 2;
     const top = (window.innerHeight - 700) / 2;
     const popup = window.open(
@@ -231,8 +294,12 @@ function Content() {
     const checkOAuthStatus = setInterval(function () {
       if (popup?.closed) {
         clearInterval(checkOAuthStatus);
+        // Last-resort: poll localStorage after popup closes.
+        // Catches cases where BroadcastChannel and the storage event
+        // both fail (e.g. macOS Chrome cross-origin popup isolation).
+        setTimeout(() => consumeStoredSSOResult(), 300);
       }
-    }, 1000);
+    }, 500);
   };
 
   // Show the login page but redirect if already logged in
@@ -510,19 +577,6 @@ function Content() {
                     </Link>
                     .
                   </div>
-                  
-                  {/* YAHSHUA CONNECT Quick Access */}
-                  {/* <div className='mt-6 pt-6 border-t border-gray-200'>
-                    <Link
-                      href='/personal-mode'
-                      className='flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg'
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                      </svg>
-                      Access YAHSHUA CONNECT (No Login Required)
-                    </Link>
-                  </div> */}
                 </div>
               </div>
               <EmailVerificationModal

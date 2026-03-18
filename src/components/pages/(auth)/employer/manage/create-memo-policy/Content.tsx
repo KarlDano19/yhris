@@ -20,10 +20,16 @@ import useBulkDeleteDirectives from './hooks/useBulkDeleteDirectives';
 import CreateMemoModal from './modals/CreateMemoModal';
 import CreatePolicyModal from './modals/CreatePolicyModal';
 import EmployeeResponsesModal from './modals/ResponsesModal';
+import EditMemoModal from './modals/EditMemoModal';
+import EditPolicyModal from './modals/EditPolicyModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import EditIcon from '@/svg/EditIcon';
+import Image from 'next/image';
+import useSendDirectiveEmail from './hooks/useSendDirectiveEmail';
 
 import classNames from '@/helpers/classNames';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
@@ -55,6 +61,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isEmployeeResponsesModalOpen, setIsEmployeeResponsesModalOpen] = useState(false);
   const [selectedMemoTitle, setSelectedMemoTitle] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditMemoOpen, setIsEditMemoOpen] = useState(false);
+  const [isEditPolicyOpen, setIsEditPolicyOpen] = useState(false);
+  const [selectedDirectiveId, setSelectedDirectiveId] = useState<number | null>(null);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationProps>({
@@ -62,6 +71,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     totalRecords: 0,
   });
   const [isSearching, setIsSearching] = useState(false);
+  const [isSendConfirmOpen, setIsSendConfirmOpen] = useState(false);
+  const [pendingSendId, setPendingSendId] = useState<number | null>(null);
   
   // Bulk delete states
   const [selectedDirectives, setSelectedDirectives] = useState<Set<number>>(new Set());
@@ -75,6 +86,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const sendMutation = useSendDirectiveEmail();
 
   useEffect(() => {
     if (dataDirectives) {
@@ -192,6 +204,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetch();
   };
 
+  const confirmSend = async () => {
+    setIsSendConfirmOpen(false);
+    const idToSend = pendingSendId;
+    if (!idToSend) return;
+    try {
+      await sendMutation.mutateAsync(idToSend);
+      toast.custom(() => <CustomToast message={'Email Sent'} type='success' />, { duration: 4000 });
+      refetch();
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.custom(() => <CustomToast message={msg} type='error' />, { duration: 4000 });
+    } finally {
+      setPendingSendId(null);
+    }
+  };
+
   const paginationChange = (event: any) => {
     const newCurrentPage = event.selected + 1;
     setCurrentPage(newCurrentPage);
@@ -265,27 +293,66 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-savoy-blue'>
-                  <p
-                    className='font-bold hover:underline cursor-pointer'
+                  <button
+                    type='button'
+                    disabled={!item.is_sent}
                     onClick={() => {
                       setSelectedMemoTitle(item);
                       setIsEmployeeResponsesModalOpen(true);
                     }}
+                    className={`font-bold bg-transparent border-0 p-0 ${item.is_sent ? 'hover:underline cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                    data-tooltip-id={!item.is_sent ? 'view-responses-tooltip' : undefined}
+                    data-tooltip-content='Send the directive first to view responses'
                   >
                     View Responses
-                  </p>
+                  </button>
                 </td>
                 <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-                  <SmartButton
-                    id="edit-memo-btn"
-                    onClick={() => {
-                      setIsDeleteModalOpen({ id: item.id, open: true });
-                    }}
-                    disabled={selectedDirectives.size > 1}
-                    className={selectedDirectives.size > 1 ? 'opacity-50 cursor-not-allowed' : ''}
-                  >
-                    <DeleteIcon />
-                  </SmartButton>
+                  <div className='flex items-center justify-center gap-3'>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setPendingSendId(item.id);
+                        setIsSendConfirmOpen(true);
+                      }}
+                      className='border rounded-md py-[0.65em] px-[0.65em] border-[#3d6cee9f]'
+                    >
+                      <Image
+                        src='/assets/send-icon.png'
+                        width={20}
+                        height={20}
+                        alt='send-icon'
+                        className='max-w-[20px] max-h-[20px]'
+                      />
+                    </button>
+
+                    {!item.is_sent && (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSelectedDirectiveId(item.id);
+                          if (item.directive_type === 'memo') {
+                            setIsEditMemoOpen(true);
+                          } else {
+                            setIsEditPolicyOpen(true);
+                          }
+                        }}
+                        className='cursor-pointer hover:opacity-75'
+                      >
+                        <EditIcon />
+                      </button>
+                    )}
+
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setIsDeleteModalOpen({ id: item.id, open: true });
+                      }}
+                      className='cursor-pointer hover:opacity-75'
+                    >
+                      <DeleteIcon />
+                    </button>
+                  </div>
                 </td>
               </tr>
             )
@@ -390,14 +457,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
                 <div>
-                  <SmartButton
+                  <Menu.Button
+                    as={SmartButton}
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                   >
-                    <Menu.Button className="w-full h-full">
-                      CREATE
-                    </Menu.Button>
-                  </SmartButton>
+                    CREATE
+                  </Menu.Button>
                 </div>
 
                 <Transition
@@ -503,7 +569,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Responses
                       </th>
                       <th scope='col' className='px-3 py-3.5 text-center text-sm font-semibold text-gray-900'>
-                        <span className='sr-only'>Delete</span>
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -535,6 +601,18 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <CreatePolicyModal 
         isOpen={isCreatePolicyModalOpen} 
         setIsOpen={setIsCreatePolicyModalOpen} 
+        refetch={refetch}
+      />
+      <EditMemoModal
+        isOpen={isEditMemoOpen}
+        setIsOpen={setIsEditMemoOpen}
+        directiveId={selectedDirectiveId}
+        refetch={refetch}
+      />
+      <EditPolicyModal
+        isOpen={isEditPolicyOpen}
+        setIsOpen={setIsEditPolicyOpen}
+        directiveId={selectedDirectiveId}
         refetch={refetch}
       />
       <EmployeeResponsesModal 
@@ -583,6 +661,21 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           title={`Deleting ${bulkDeleteCount} directive${bulkDeleteCount > 1 ? 's' : ''}...`}
           isProcessing={bulkDeleteMutation.isLoading}
           onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
+
+      {/* Send Email Confirmation Modal */}
+      {isSendConfirmOpen && (
+        <ConfirmModal
+          isOpen={isSendConfirmOpen}
+          setIsOpen={setIsSendConfirmOpen}
+          message={"Are you sure you want to send this email?"}
+          confirmAction={confirmSend}
+          cancelAction={() => {
+            setIsSendConfirmOpen(false);
+            setPendingSendId(null);
+          }}
+          isLoading={sendMutation.isLoading}
         />
       )}
 

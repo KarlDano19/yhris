@@ -7,19 +7,21 @@ import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import DropDownArrow from '@/svg/DropDownArrow';
 
+import { MaskedEmail } from '@/types/directives';
+
 interface EmailSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => void;
-  emails: string[];
+  onSubmit: (emailIndex: number) => void;
+  emails: MaskedEmail[];
 }
 
 const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelectionModalProps) => {
-  const [selectedEmail, setSelectedEmail] = useState<string>('');
+  const [selectedIndex, setSelectedIndex] = useState<string>('');
 
   const handleSubmit = () => {
-    if (selectedEmail) {
-      onSubmit(selectedEmail);
+    if (selectedIndex !== '') {
+      onSubmit(Number(selectedIndex));
     }
   };
 
@@ -54,8 +56,8 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
                   <Dialog.Title as="h3" className="flex-1 text-white ml-2 font-semibold text-lg">
                     Select Your Email
                   </Dialog.Title>
-                  <XCircleIcon 
-                    className="w-8 h-8 text-white cursor-pointer" 
+                  <XCircleIcon
+                    className="w-8 h-8 text-white cursor-pointer"
                     onClick={onClose}
                   />
                 </div>
@@ -66,21 +68,21 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
                       <p className="text-sm text-gray-500 mb-4">
                         Please select your email from the list to receive a verification code.
                       </p>
-                      
+
                       <div className="space-y-4">
                         <div className="relative">
                           <select
-                            value={selectedEmail}
-                            onChange={(e) => setSelectedEmail(e.target.value)}
+                            value={selectedIndex}
+                            onChange={(e) => setSelectedIndex(e.target.value)}
                             className="rounded-md appearance-none w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                             defaultValue=""
                           >
                             <option value="" disabled className="text-gray-400">
                               Select your email...
                             </option>
-                            {emails.map((email) => (
-                              <option key={email} value={email}>
-                                {email}
+                            {emails.map(({ index, masked }) => (
+                              <option key={index} value={String(index)}>
+                                {masked}
                               </option>
                             ))}
                           </select>
@@ -98,7 +100,7 @@ const EmailSelectionModal = ({ isOpen, onClose, onSubmit, emails }: EmailSelecti
                           </button>
                           <button
                             onClick={handleSubmit}
-                            disabled={!selectedEmail}
+                            disabled={selectedIndex === ''}
                             className="px-4 py-2 text-sm font-medium text-white bg-[#355FD0] rounded-md hover:bg-[#2347B2] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Send Verification Code

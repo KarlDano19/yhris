@@ -903,8 +903,21 @@ const Content = () => {
                     job.workStatus === 'started' &&
                     job.budgetType === 'hourly_rate' && (
                       <>
+                        {/* ORIGINAL CODE WITH RESTRICTIONS (COMMENTED OUT FOR TESTING) */}
                         {/* No time record today - show Clock In button */}
-                        {!job.todayTimeRecord && (
+                        {/* {!job.todayTimeRecord && (
+                          <button
+                            onClick={() => handleClockInClick(job)}
+                            disabled={isClockingIn}
+                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          >
+                            <ClockIcon className="h-5 w-5" />
+                            {isClockingIn ? 'Clocking In...' : 'Clock In'}
+                          </button>
+                        )} */}
+
+                        {/* TESTING CODE: Show Clock In button if not currently clocked in (allows multiple cycles) */}
+                        {job.todayTimeRecord?.status !== 'clocked_in' && (
                           <button
                             onClick={() => handleClockInClick(job)}
                             disabled={isClockingIn}
@@ -927,8 +940,9 @@ const Content = () => {
                           </button>
                         )}
 
+                        {/* ORIGINAL CODE WITH RESTRICTIONS (COMMENTED OUT FOR TESTING) */}
                         {/* Clocked out for today */}
-                        {job.todayTimeRecord?.status === 'clocked_out' && (
+                        {/* {job.todayTimeRecord?.status === 'clocked_out' && (
                           <button
                             disabled
                             className="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed flex items-center justify-center gap-2"
@@ -936,15 +950,15 @@ const Content = () => {
                             <CheckCircleIcon className="h-5 w-5" />
                             Clocked Out Today
                           </button>
-                        )}
+                        )} */}
                       </>
                     )}
 
                   {/* Started - Contractual Job */}
                   {job.status === 'accepted' &&
                     job.isContractual &&
-                    (job.workStatus === 'started' ||
-                     (job.workStatus === 'completed' && job.submittedProgressCount < job.totalContractDays)) &&
+                    job.paymentStatus !== 'paid' &&  // Hide when payment received
+                    job.workStatus === 'started' &&  // Only show when actively working (not completed)
                     // For hourly rate jobs, only show when clocked out
                     (job.budgetType !== 'hourly_rate' || job.todayTimeRecord?.status === 'clocked_out') && (() => {
                       // Check if today's progress is already submitted
