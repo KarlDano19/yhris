@@ -1,4 +1,4 @@
-import { Dispatch, Fragment } from 'react';
+import { Dispatch, Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import SelectChevronDown from '@/svg/SelectChevronDown';
@@ -12,13 +12,8 @@ type SelectBranchModalProps = {
 
 
 export default function SelectBranchModal({ isOpen, setIsOpen, onBranchSelect }: SelectBranchModalProps) {
-  const handleBranchSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedBranch = event.target.value;
-    onBranchSelect(selectedBranch); 
-    setIsOpen(false);
-  };
-
   const {data: locationItems} = useGetLocationItems();
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -58,9 +53,11 @@ export default function SelectBranchModal({ isOpen, setIsOpen, onBranchSelect }:
                   <div className='relative mt-2'>
                     <select
                       id='location'
-                      onChange={handleBranchSelect}
+                      value={selectedLocation}
+                      onChange={(e) => setSelectedLocation(e.target.value)}
                       className='rounded-md appearance-none w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-stone-50 disabled:text-opacity-100'
                     >
+                      <option value='' disabled>Select a location...</option>
                       {locationItems && locationItems.map((item: any) => (
                         <option key={item.id} value={item.name}>{item.name}</option>
                       ))}
@@ -70,13 +67,24 @@ export default function SelectBranchModal({ isOpen, setIsOpen, onBranchSelect }:
                     </div>
                   </div>
                 </div>
-                <div className='mt-6 px-4'>
+                <div className='mt-6 px-4 flex justify-end gap-3'>
                   <button
                     type='button'
-                    className='inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                    onClick={() => setIsOpen(false)} // Close modal without selection
+                    className='inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+                    onClick={() => setIsOpen(false)}
                   >
                     Cancel
+                  </button>
+                  <button
+                    type='button'
+                    className='inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+                    onClick={() => {
+                      onBranchSelect(selectedLocation);
+                      setIsOpen(false);
+                    }}
+                    disabled={!selectedLocation}
+                  >
+                    Generate
                   </button>
                 </div>
               </Dialog.Panel>

@@ -2,17 +2,25 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 
+import Image from 'next/image';
+import { Tooltip } from 'react-tooltip';
+
+import JobDetails from './JobDetails';
 import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
 import JobSearchAutocomplete from './components/JobSearchAutocomplete';
 import LocationSearchAutocomplete from './components/LocationSearchAutocomplete';
 import Tabs from './Tabs';
+import classNames from '@/helpers/classNames';
 
 import { dummyGigOpportunities, type GigOpportunity } from './hooks/GigOpportunity';
 import { dummyTalents, type Talent } from './hooks/HireTalentDummy';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MagnifyingGlassIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import jobIllustration from '@/assets/find-job-illustration.svg';
 
 const Content = () => {
+  // Initialize search section visibility
+  const [isSearchSectionVisible, setIsSearchSectionVisible] = useState(true);
   // Pending filter (user input state)
   const [pendingFilter, setPendingFilter] = useState<any>({
     job_title: '',
@@ -43,26 +51,26 @@ const Content = () => {
   // Track focus state to control when autocomplete API calls are made
   const [isJobTitleFocused, setIsJobTitleFocused] = useState(false);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
-  
+
   // Tab state
   const [activeTab, setActiveTab] = useState<'company-jobs' | 'gig-opportunities' | 'hire-talent'>('company-jobs');
-  
+
   // Separate state for the actual search query (only updates on form submit)
   const [searchQuery, setSearchQuery] = useState<any>({
     job_title: '',
     location: [],
     page_size: 10, // Page size for pagination
   });
-  
-  const { 
-    data: dataJobs, 
+
+  const {
+    data: dataJobs,
     isLoading: isGetJobsLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     totalRecords
   } = useFindJobs(activeTab === 'company-jobs' ? searchQuery : { job_title: '', location: [] });
-  
+
   // Company Jobs State
   const [hasJob, setJob] = useState(false);
   const [isJobView, setIsJobView] = useState(false);
@@ -94,7 +102,7 @@ const Content = () => {
   const [gigOpportunitiesFilteredCount, setGigOpportunitiesFilteredCount] = useState(0);
   const [hireTalentCount, setHireTalentCount] = useState(0);
   const [hireTalentFilteredCount, setHireTalentFilteredCount] = useState(0);
-  
+
   // Filter state for each tab
   const [appliedFilters, setAppliedFilters] = useState<any>({
     'company-jobs': {
@@ -113,10 +121,10 @@ const Content = () => {
       hourlyRate: 'Any Rate',
     },
   });
-  
+
   // Job modal state
   const [jobModal, setJobModal] = useState(false);
-  
+
   // Apply filters to jobs (Company Jobs)
   const filteredJobs = useMemo(() => {
     if (!appliedFilters['company-jobs'] || !jobsItems || jobsItems.length === 0) {
@@ -158,7 +166,7 @@ const Content = () => {
       if (filters.salaryRange !== 'Any Salary') {
         const salary = job.salary_range || job.expected_salary || job.min_salary || job.max_salary || 0;
         const salaryNum = typeof salary === 'string' ? parseFloat(salary.replace(/[^0-9.]/g, '')) : salary;
-        
+
         if (filters.salaryRange === 'Below ₱15,000' && salaryNum >= 15000) return false;
         if (filters.salaryRange === '₱15,000 - ₱25,000' && (salaryNum < 15000 || salaryNum > 25000)) return false;
         if (filters.salaryRange === '₱25,000 - ₱35,000' && (salaryNum < 25000 || salaryNum > 35000)) return false;
@@ -307,7 +315,7 @@ const Content = () => {
 
     return filtered;
   }, [appliedFilters, searchQuery]);
-  
+
   // Calculate filtered count for company-jobs tab
   const filteredCount = useMemo(() => {
     if (activeTab !== 'company-jobs' || !filteredJobs || filteredJobs.length === 0) {
@@ -315,7 +323,7 @@ const Content = () => {
     }
     return filteredJobs.length;
   }, [filteredJobs, activeTab]);
-  
+
   // Get current tab counts
   const getTotalCount = () => {
     if (activeTab === 'company-jobs') {
@@ -327,7 +335,7 @@ const Content = () => {
     }
     return 0;
   };
-  
+
   const getFilteredCount = () => {
     if (activeTab === 'company-jobs') {
       return filteredCount;
@@ -340,25 +348,6 @@ const Content = () => {
   };
 
   // Company Jobs Effects
-  useEffect(() => {
-    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
-
-    if (previousDataJobsRef.current !== dataJobsString) {
-      previousDataJobsRef.current = dataJobsString;
-
-      if (dataJobs && dataJobs.length !== 0) {
-        setJob(true);
-        setJobsItems(dataJobs);
-        setSelectedJobId(null);
-        setIsJobView(false);
-      } else {
-        setJob(false);
-        setJobsItems([]);
-        setIsJobView(false);
-      }
-    }
-  }, [dataJobs]);
-
   useEffect(() => {
     if (filteredJobs && filteredJobs.length > 0) {
       setJob(true);
@@ -385,7 +374,7 @@ const Content = () => {
 
   // Gig Opportunities Effects
   const totalGigsCount = dummyGigOpportunities.length;
-  
+
   useEffect(() => {
     if (filteredGigs && filteredGigs.length > 0) {
       setHasGig(true);
@@ -396,14 +385,14 @@ const Content = () => {
     } else {
       setHasGig(false);
     }
-    
+
     setGigOpportunitiesCount(totalGigsCount);
     setGigOpportunitiesFilteredCount(filteredGigs.length);
   }, [filteredGigs, selectedGigId, totalGigsCount]);
 
   // Hire Talent Effects
   const totalTalentsCount = dummyTalents.length;
-  
+
   useEffect(() => {
     if (filteredTalents && filteredTalents.length > 0) {
       setHasTalent(true);
@@ -414,7 +403,7 @@ const Content = () => {
     } else {
       setHasTalent(false);
     }
-    
+
     setHireTalentCount(totalTalentsCount);
     setHireTalentFilteredCount(filteredTalents.length);
   }, [filteredTalents, selectedTalentId, totalTalentsCount]);
@@ -430,7 +419,7 @@ const Content = () => {
       setJob(false);
     }
   }, [activeTab, hasJob, hasGig, hasTalent]);
-  
+
   // Memoize search parameters for job title autocomplete - only when focused
   const jobTitleSearchParams = useMemo(() => {
     if (!isJobTitleFocused) return null;
@@ -447,7 +436,7 @@ const Content = () => {
       current_page: 1,
     };
   }, [debouncedJobTitle, shouldShowJobTitleAutocomplete, isJobTitleFocused]);
-  
+
   // Memoize search parameters for location autocomplete - only when focused
   const locationSearchParams = useMemo(() => {
     if (!isLocationFocused) return null;
@@ -464,20 +453,20 @@ const Content = () => {
       current_page: 1,
     };
   }, [debouncedLocation, shouldShowLocationAutocomplete, isLocationFocused]);
-  
-  const { 
-    data: jobTitleAutocompleteResults, 
-    isLoading: isJobTitleAutocompleteLoading 
+
+  const {
+    data: jobTitleAutocompleteResults,
+    isLoading: isJobTitleAutocompleteLoading
   } = useGetJobAutocomplete(
     jobTitleSearchParams ? {
       ...jobTitleSearchParams,
       view_type: 'jobs_select'
     } : null
   );
-  
-  const { 
-    data: locationAutocompleteResults, 
-    isLoading: isLocationAutocompleteLoading 
+
+  const {
+    data: locationAutocompleteResults,
+    isLoading: isLocationAutocompleteLoading
   } = useGetJobAutocomplete(
     locationSearchParams ? {
       ...locationSearchParams,
@@ -521,21 +510,6 @@ const Content = () => {
     };
   }, [pendingFilter.location]);
 
-  // Reset selected job when search query changes (not filter changes)
-  useEffect(() => {
-    setSelectedJobId(null);
-    setIsJobView(false);
-    setJobModal(false);
-    // Reset the ref when search query changes so new data is processed
-    previousDataJobsRef.current = '';
-  }, [
-    searchQuery.job_title,
-    Array.isArray(searchQuery.location)
-      ? searchQuery.location.join('|')
-      : searchQuery.location,
-  ]);
-  
-  
   // Handle search submission
   const handleSearch = () => {
     const normalizedLocations = pendingFilter.locations.length
@@ -561,7 +535,7 @@ const Content = () => {
     setSelectedJobTitleIndex(-1);
     setSelectedLocationIndex(-1);
   };
-  
+
   useEffect(() => {
     if (!isGetJobsLoading && isSearching) {
       setIsSearching(false);
@@ -571,25 +545,24 @@ const Content = () => {
   useEffect(() => {
     // Create a stable string representation of dataJobs to compare
     const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
-    
+
     // Only update if dataJobs actually changed (by comparing job IDs)
     if (previousDataJobsRef.current !== dataJobsString) {
       previousDataJobsRef.current = dataJobsString;
-      
+
       if (dataJobs && dataJobs.length !== 0) {
         setJob(true);
         setJobsItems(dataJobs);
+
         // Only auto-select first job if no job is currently selected
         if (!selectedJobId && dataJobs[0]) {
           setSelectedJobId(dataJobs[0].id);
           setIsJobView(true);
-          setJobModal(true);
         }
       } else {
         setJob(false);
         setJobsItems([]);
         setIsJobView(false);
-        setJobModal(false);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -612,6 +585,24 @@ const Content = () => {
     setIsJobView(false);
     setIsJobModalOpen(false);
   };
+
+  // Control navbar visibility based on search section state
+  useEffect(() => {
+    const navbar = document.querySelector('nav');
+    if (navbar) {
+      if (isSearchSectionVisible) {
+        navbar.style.transform = 'translateY(0)';
+        navbar.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+        navbar.style.opacity = '1';
+        navbar.style.visibility = 'visible';
+      } else {
+        navbar.style.transform = 'translateY(-100%)';
+        navbar.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+        navbar.style.opacity = '0';
+        navbar.style.visibility = 'hidden';
+      }
+    }
+  }, [isSearchSectionVisible]);
 
   // Gig Opportunities Handlers
   const handleLoadMoreGigs = () => {
@@ -665,7 +656,13 @@ const Content = () => {
 
   return (
     <>
-      <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`}>
+      {/* Search Section - Collapsible */}
+      <div
+        className={classNames(
+          'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out overflow-hidden',
+          isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
         <div className='px-4 pt-[85px]'>
           <h4 className='text-lg md:text-2xl text-indigo-dye font-bold md:font-semibold'>
             Find a job that&#39;s right for you!
@@ -701,7 +698,7 @@ const Content = () => {
                   onFocus={() => setIsJobTitleFocused(true)}
                   onBlur={() => setIsJobTitleFocused(false)}
                 />
-                
+
                 {/* Location Search */}
                 <LocationSearchAutocomplete
                   value={pendingFilter.location}
@@ -728,7 +725,7 @@ const Content = () => {
                     setPendingFilter((prev: any) => ({ ...prev, locations: values }))
                   }
                 />
-                
+
                 <div className='flex justify-center lg:block mt-5 lg:mt-0'>
                   <button
                     type='submit'
@@ -743,6 +740,27 @@ const Content = () => {
           </div>
         </div>
       </div>
+
+      {/* Toggle Search Visibility */}
+      <div className='relative border-t border-gray-300'>
+        <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
+          <button
+            onClick={() => setIsSearchSectionVisible(!isSearchSectionVisible)}
+            className='flex items-center justify-center w-8 h-8 rounded-md bg-savoy-blue text-white shadow-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-savoy-blue transition-all duration-300'
+            data-tooltip-id='toggle-search-tooltip'
+            data-tooltip-content={isSearchSectionVisible ? 'Hide top section' : 'Show top section'}
+            data-tooltip-place='bottom'
+            aria-label={isSearchSectionVisible ? 'Hide top section' : 'Show top section'}
+          >
+            {isSearchSectionVisible ? (
+              <ChevronUpIcon className='h-5 w-5' strokeWidth={3} />
+            ) : (
+              <ChevronDownIcon className='h-5 w-5' strokeWidth={3} />
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Tabs Navigation and Content */}
       <div className="mt-6">
         <Tabs
@@ -808,9 +826,10 @@ const Content = () => {
           }}
         />
       </div>
+
+      <Tooltip id='toggle-search-tooltip' />
     </>
   );
 };
 
 export default Content;
-

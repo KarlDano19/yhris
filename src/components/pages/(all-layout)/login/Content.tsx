@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ import { T_Login } from '@/types/globals';
 import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 
 function Content() {
-  const broadcastChannel = new BroadcastChannel('integration-channel');
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -190,8 +190,13 @@ function Content() {
     }
   };
 
-  const setSSOSession = async (data: any) => {
-    await updateSession({
+  const handleOTPSuccess = (data: any) => {
+    setSession(data);
+    setShowOTPModal(false);
+  };
+
+  const handleSSOData = (data: any) => {
+    updateSession({
       token: data.token,
       email: data.email,
       hasPendingTransaction: data.has_pending_transaction,
@@ -200,27 +205,85 @@ function Content() {
       accountType: data.account_type,
       loginType: data.login_type,
       isLoggedIn: true,
-    });
-    setSession(data);
+    })
+      .catch((err) => {
+        console.error('SSO updateSession failed, proceeding with redirect:', err);
+        toast.custom(() => <CustomToast message='Session sync failed — redirecting anyway. If issues persist, please contact support.' type='error' />, { duration: 5000 });
+      })
+      .finally(() => {
+        setSession(data);
+      });
   };
 
-  const handleOTPSuccess = (data: any) => {
-    setSession(data);
-    setShowOTPModal(false);
-  };
-
+  // Primary: window.opener.postMessage listener (works cross-origin, e.g. www vs non-www)
   useEffect(() => {
-    broadcastChannel.onmessage = (event) => {
-      if (event.data.isGranted) {
-        setSSOSession(event.data);
+    const handlePostMessage = (event: MessageEvent) => {
+      if (event.data?.isGranted) {
+        handleSSOData(event.data);
       }
     };
+    window.addEventListener('message', handlePostMessage);
+    return () => window.removeEventListener('message', handlePostMessage);
+  }, []);
+
+  // Secondary: BroadcastChannel (Chrome, Firefox, modern Safari 15.4+)
+  useEffect(() => {
+    const channel = new BroadcastChannel('integration-channel');
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
+      if (event.data.isGranted) {
+        handleSSOData(event.data);
+      }
+    };
+
     return () => {
-      broadcastChannel.close();
+      channel.close();
+      broadcastChannelRef.current = null;
     };
   }, []);
 
+  // Fallback: localStorage storage event (older Safari, restricted browsers)
+  useEffect(() => {
+    const handleStorageEvent = (event: StorageEvent) => {
+      if (event.key === 'sso_result' && event.newValue) {
+        try {
+          const data = JSON.parse(event.newValue);
+          if (data?.isGranted) {
+            localStorage.removeItem('sso_result');
+            handleSSOData(data);
+          }
+        } catch (e) {
+          console.error('SSO localStorage fallback parse error:', e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+    return () => window.removeEventListener('storage', handleStorageEvent);
+  }, []);
+
+  const consumeStoredSSOResult = () => {
+    try {
+      const stored = localStorage.getItem('sso_result');
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data?.isGranted) {
+          localStorage.removeItem('sso_result');
+          handleSSOData(data);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('SSO localStorage poll error:', e);
+    }
+    return false;
+  };
+
   const loginWithYahshuaPayroll = () => {
+    // Clear any stale SSO result before starting
+    localStorage.removeItem('sso_result');
+
     const left = (window.innerWidth - 900) / 2;
     const top = (window.innerHeight - 700) / 2;
     const popup = window.open(
@@ -231,8 +294,12 @@ function Content() {
     const checkOAuthStatus = setInterval(function () {
       if (popup?.closed) {
         clearInterval(checkOAuthStatus);
+        // Last-resort: poll localStorage after popup closes.
+        // Catches cases where BroadcastChannel and the storage event
+        // both fail (e.g. macOS Chrome cross-origin popup isolation).
+        setTimeout(() => consumeStoredSSOResult(), 300);
       }
-    }, 1000);
+    }, 500);
   };
 
   // Show the login page but redirect if already logged in

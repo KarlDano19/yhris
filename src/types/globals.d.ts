@@ -39,35 +39,6 @@ export type T_JobPreviewModal = {
   id: number | null;
 };
 
-// Post a Job
-
-export type T_CreateJob = {
-  id: number;
-  JobNo: string;
-  country: string;
-  isActive: boolean;
-  language: string;
-  jobTitle: string;
-  placeAdvertise: string;
-  jobType: string[];
-  schedule: string[];
-  hireCount: number;
-  hireDate: string;
-  salary: {
-    salaryType: string;
-    salaryValue: string;
-  };
-  rate: string;
-  benefits: string[];
-  jobDescription: string;
-  qualifications: string;
-  skills: string[];
-  jobDescriptionFile: File;
-  postAs: string;
-  postAsUpload: File;
-  postIn: string[];
-};
-
 export type T_Separation = {
   date: string;
   name: string;

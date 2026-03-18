@@ -126,7 +126,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     if (data) {
       setProfile(data);
     }
-    if (error && error.detail.includes('Invalid token')) {
+    if (error && error.detail === 'string' && error.detail.includes('Invalid token')) {
       logout(true);
     }
   }, [data, error]);
@@ -175,6 +175,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
 
       // Show warning before expiration (30 seconds for 3-hour tokens)
       if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        if (!isExpiring) {
+          // Dispatch event for draft auto-save before showing modal
+          window.dispatchEvent(new Event('session-expiring'));
+        }
         setIsExpiring(true);
         setTimeRemaining(remaining);
       } else {

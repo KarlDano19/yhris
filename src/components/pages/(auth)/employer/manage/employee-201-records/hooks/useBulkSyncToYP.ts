@@ -1,9 +1,9 @@
-import { useMutation } from '@tanstack/react-query';
-import { getCookie } from 'cookies-next';
+import { useMutation } from "@tanstack/react-query";
+import { getCookie } from "cookies-next";
 
 export interface BulkSyncData {
-  sync_type: 'all' | 'active' | 'inactive';
-  sync_mode: 'all' | 'changed' | 'specific_ids';
+  sync_type: "all" | "active" | "inactive";
+  sync_mode: "all" | "changed" | "specific_ids";
   employee_ids?: number[];
 }
 
@@ -31,11 +31,11 @@ export interface BulkSyncResponse {
 async function bulkSyncEmployeesToYP(syncData: BulkSyncData): Promise<BulkSyncResponse> {
   try {
     console.log("bulkSyncEmployeesToYP", syncData);
-    const token = getCookie('token');
+    const token = getCookie("token");
     const config = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Token ${token}`,
       },
       body: JSON.stringify(syncData),
@@ -47,7 +47,7 @@ async function bulkSyncEmployeesToYP(syncData: BulkSyncData): Promise<BulkSyncRe
     return res.json();
   } catch (err: any) {
     let errStringify = await err;
-    if (Object.hasOwn(errStringify, 'response')) {
+    if (Object.hasOwn(errStringify, "response")) {
       throw errStringify.response.data.message;
     }
     throw errStringify.message;

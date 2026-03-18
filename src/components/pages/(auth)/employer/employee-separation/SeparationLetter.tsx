@@ -3,21 +3,31 @@ import { createPortal } from 'react-dom';
 
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-
-import classNames from '@/helpers/classNames';
-import { T_LetterModal } from '@/types/globals';
 import { Tooltip } from 'react-tooltip';
 
-import ClipIcon from '@/svg/ClipIcon';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+import ConfirmModal from '@/components/ConfirmModal';
+
+import classNames from '@/helpers/classNames';
 import AttachmentViewModal from './modals/AttachmentViewModal';
 import CreateSeparationLetterModal from './modals/CreateSeparationLetterModal';
+import AttachmentListModal from './modals/AttachmentListModal';
+
+import ClipIcon from '@/svg/ClipIcon';
+
+import { T_LetterModal } from '@/types/globals';
 
 const items = [
   { name: 'Letter of Acceptance', type: 'Acceptance' },
   { name: 'Letter of Separation', type: 'Separation' },
 ];
+
+interface LetterAttachment {
+  id?: number;
+  attachment: string;
+  attachment_name: string;
+  created_at?: string;
+}
 
 export default function SeparationLetter({
   id,
@@ -25,6 +35,7 @@ export default function SeparationLetter({
   isLetterReceived,
   letterReceivedDate,
   letterAttachment,
+  letterAttachments = [],
   setIsLetterModalOpen,
   setReceived,
   isLoading,
@@ -32,12 +43,15 @@ export default function SeparationLetter({
   employerName,
   effectiveDate,
   menuKey,
+  isQuitclaimSigned,
+  isQuitclaimReceived,
 }: {
   id: number;
   isLetterSent: boolean;
   isLetterReceived: boolean;
   letterReceivedDate?: string;
   letterAttachment?: string | null;
+  letterAttachments?: LetterAttachment[];
   setIsLetterModalOpen: Dispatch<T_LetterModal>;
   setReceived: any;
   isLoading: boolean;
@@ -45,11 +59,25 @@ export default function SeparationLetter({
   employerName?: string;
   effectiveDate?: string;
   menuKey?: number;
+  isQuitclaimSigned: boolean;
+  isQuitclaimReceived: boolean;
 }) {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isCreateLetterModalOpen, setIsCreateLetterModalOpen] = useState(false);
+  const [isAttachmentListModalOpen, setIsAttachmentListModalOpen] = useState(false);
+  const [isConfirmReceiveOpen, setIsConfirmReceiveOpen] = useState(false);
   const [selectedLetterType, setSelectedLetterType] = useState<'Acceptance' | 'Separation'>('Acceptance');
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Determine which attachments to display (prefer new format, fallback to old)
+  const attachmentsToDisplay: LetterAttachment[] =
+    letterAttachments && letterAttachments.length > 0
+      ? letterAttachments
+      : letterAttachment
+        ? [{ attachment: letterAttachment, attachment_name: 'Letter Document' }]
+        : [];
+
+  const hasAttachment = attachmentsToDisplay.length > 0;
 
   // Calculate dropdown position synchronously based on button position
   const getDropdownPosition = () => {
@@ -66,7 +94,7 @@ export default function SeparationLetter({
 
   const handleSendClick = async () => {
     // Check if there's an attachment (PDF already generated)
-    if (letterAttachment) {
+    if (hasAttachment) {
       // Open the existing separation email modal with the PDF
       setIsLetterModalOpen({
         type: selectedLetterType,
@@ -77,6 +105,16 @@ export default function SeparationLetter({
       setIsCreateLetterModalOpen(true);
     }
   };
+ 
+  // Determine send button disabled state and title
+  const sendDisabled = isLoading || isLetterReceived || isQuitclaimSigned || isQuitclaimReceived;
+  const sendTitle = isQuitclaimSigned || isQuitclaimReceived
+    ? 'Cannot send letter after quit claim'
+    : isLetterReceived
+      ? 'Letter already received'
+      : (letterAttachment
+          ? (isLetterSent ? 'Resend Letter' : 'Send Letter')
+          : 'Click to Generate & Send Letter');
 
   return (
     <>
@@ -90,7 +128,7 @@ export default function SeparationLetter({
                 <SmartButton
                   id="create-separation-btn"
                   className='w-full relative inline-flex items-center shadow-sm rounded-md bg-green-500 pl-14 pr-4 py-2 text-white enabled:hover:bg-green-600 focus:z-10 disabled:opacity-80'
-                  disabled={isLetterSent}
+                  disabled={isLetterSent || isQuitclaimSigned || isQuitclaimReceived}
                 >
                   <Menu.Button
                     ref={menuButtonRef}
@@ -160,18 +198,16 @@ export default function SeparationLetter({
         <div>
           <button
             className={classNames(
-              letterAttachment
+              hasAttachment
                 ? 'bg-red-500 border-[1px] border-red-500 text-white'
                 : 'bg-transparent border-[1.5px] border-red-400 text-red-400',
               'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-50'
             )}
-            disabled={isLoading}
+            disabled={sendDisabled}
             onClick={handleSendClick}
-            title={letterAttachment
-              ? (isLetterSent ? 'Resend Letter' : 'Send Letter') 
-              : 'Click to Generate & Send Letter'}
+            title={sendTitle}
           >
-            {isLetterSent ? 'Resent' : 'Send'}
+            {isLetterSent ? 'Resend' : 'Send'}
           </button>
         </div>
         <div className='flex flex-col'>
@@ -183,10 +219,10 @@ export default function SeparationLetter({
                   : 'bg-blue-100 text-blue-400',
                 'items-center rounded-md px-2 py-1 focus:z-10 w-24 disabled:opacity-75'
               )}
-              disabled={!isLetterSent || isLetterReceived || isLoading}
-              onClick={() => setReceived(id, 'letters')}
+              disabled={isLetterReceived || isLoading || isQuitclaimSigned || isQuitclaimReceived}
+              onClick={() => setIsConfirmReceiveOpen(true)}
               data-tooltip-id='letter-received-tooltip'
-              data-tooltip-content={!isLetterSent ? 'Letter must be sent first' : isLetterReceived ? 'Letter already received' : 'Mark letter as received'}
+              data-tooltip-content={isQuitclaimSigned || isQuitclaimReceived ? 'Cannot mark letter as received after quit claim' : isLetterReceived ? 'Letter already received' : 'Mark letter as received'}
               data-tooltip-place='bottom'
             >
               {isLoading && (
@@ -210,23 +246,38 @@ export default function SeparationLetter({
                   <span className='sr-only'>Loading...</span>
                 </div>
               )}
-              {!isLoading && 'Received'}
+              {!isLoading && (isLetterReceived ? 'Received' : 'Receive')}
             </button>
           </div>
           {isLetterReceived ? (
             <div className='flex gap-1 items-center mt-2 justify-center'>
-              <div
-                className={letterAttachment ? 'cursor-pointer' : ''}
-                data-tooltip-id='letter-attachment-tooltip'
-                data-tooltip-content={letterAttachment ? 'Click to view attachment' : 'No attachment'}
-                data-tooltip-place='bottom'
-                onClick={() => {
-                  if (letterAttachment) {
-                    setIsViewModalOpen(true);
+              <div className='flex items-center gap-1'>
+                <div
+                  className='cursor-pointer'
+                  data-tooltip-id='letter-attachment-tooltip'
+                  data-tooltip-content={
+                    attachmentsToDisplay.length === 1
+                      ? attachmentsToDisplay[0].attachment_name
+                      : `${attachmentsToDisplay.length} attachments - Click to view list`
                   }
-                }}
-              >
-                <ClipIcon hasFile={!!letterAttachment} />
+                  data-tooltip-place='bottom'
+                  onClick={() => {
+                    if (attachmentsToDisplay.length === 1) {
+                      // Single attachment - open directly
+                      window.open(attachmentsToDisplay[0].attachment, '_blank');
+                    } else {
+                      // Multiple attachments - open modal
+                      setIsAttachmentListModalOpen(true);
+                    }
+                  }}
+                >
+                  <ClipIcon hasFile={true} />
+                </div>
+                {attachmentsToDisplay.length > 1 && (
+                  <span className='text-xs text-gray-500 ml-1'>
+                    ({attachmentsToDisplay.length})
+                  </span>
+                )}
               </div>
               <p className='ml-2 text-xs'>{letterReceivedDate}</p>
             </div>
@@ -266,6 +317,27 @@ export default function SeparationLetter({
         title="Letter Attachment"
       />
     )}
+
+    {/* Attachment List Modal */}
+    {isAttachmentListModalOpen && (
+      <AttachmentListModal
+        isOpen={isAttachmentListModalOpen}
+        setIsOpen={setIsAttachmentListModalOpen}
+        attachments={attachmentsToDisplay}
+        title="Letter Attachments"
+      />
+    )}
+
+    <ConfirmModal
+      isOpen={isConfirmReceiveOpen}
+      setIsOpen={setIsConfirmReceiveOpen}
+      message={"Do you want to mark the letter as received?"}
+      confirmAction={() => {
+        setIsConfirmReceiveOpen(false);
+        setReceived(id, 'letters');
+      }}
+      isLoading={false}
+    />
     </>
   );
 }

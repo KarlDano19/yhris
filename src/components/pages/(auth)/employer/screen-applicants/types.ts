@@ -80,7 +80,7 @@ export type ApplicantType = {
   image?: string | null;
   name: string;
   checklists: string[];
-  status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | null | undefined;
+  status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | 'pooling' | null | undefined;
   stagePosition: number;
   stage_notes?: StageNoteType[];
   job_stages_title?: string;

@@ -39,6 +39,14 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
         if (onSuccess) {
           onSuccess();
         }
+        // Dispatch a global event so parent containers can refresh applicant lists
+        try {
+          if (typeof window !== 'undefined' && window.dispatchEvent) {
+            window.dispatchEvent(new CustomEvent('applicant:archived', { detail: { appliedJobId, status } }));
+          }
+        } catch (err) {
+          // ignore
+        }
       },
       onError: (err: any) => {
         console.error('Archive error:', err);
@@ -66,8 +74,9 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
     unarchive({ appliedJobId, fallbackStageId }, callBackReq);
   };
 
-  // Only show archive button for rejected or withdrawn applications
-  if (!isArchived && status !== 'rejected' && status !== 'withdrawn') {
+  // Only show archive button for rejected, withdrawn, or pooling applications
+  const allowedArchiveStatuses = ['rejected', 'withdrawn', 'pooling'];
+  if (!isArchived && !allowedArchiveStatuses.includes(status)) {
     return null;
   }
 
@@ -86,7 +95,13 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
           'flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors duration-200',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
-        title={isArchived ? 'Restore application' : 'Archive application'}
+        title={
+          isArchived
+            ? 'Restore application'
+            : status === 'pooling'
+            ? 'Move to pool'
+            : 'Archive application'
+        }
       >
         {isArchived ? (
           <>
@@ -96,7 +111,7 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
         ) : (
           <>
             <ArchiveBoxIcon className="w-3 h-3" />
-            Archive
+            {status === 'pooling' ? 'Pool' : 'Archive'}
           </>
         )}
       </SmartButton>
