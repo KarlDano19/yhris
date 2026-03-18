@@ -118,7 +118,7 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
       setSelectedDocument(null);
     } catch {
       toast.custom((t) => (
-        <CustomToast toast={toast} t={t} message="Failed to download file." type="error" />
+        <CustomToast message="Failed to download file." type="error" />
       ));
     } finally {
       setIsDownloading(false);
