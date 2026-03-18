@@ -101,24 +101,24 @@ const ProfileCard = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Gradient Header - Same style for both modes */}
-      <div className="h-28 bg-gradient-to-r from-blue-300/60 via-purple-300/60 to-amber-200/60 relative">
-        {/* Profile Picture - Square with shadow for both modes */}
-        <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
-          <div className="w-24 h-24 rounded-lg border-4 border-white bg-gray-200 overflow-hidden shadow-lg">
+      {/* Header */}
+      <div className="h-28 relative" style={{ backgroundColor: '#FFC107' }}>
+        {/* Profile Picture */}
+        <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2">
+          <div className="w-40 h-40 rounded-lg border-4 border-white bg-gray-200 overflow-hidden shadow-lg">
             {profilePhoto && profilePhoto !== '/assets/no-user.png' ? (
               <Image
                 src={profilePhoto}
                 alt={`${firstName} ${lastName}`.trim() || 'Profile'}
-                width={96}
-                height={96}
+                width={160}
+                height={160}
                 className="w-full h-full object-cover"
                 unoptimized
               />
             ) : (
               <PlaceholderAvatar
-                width={96}
-                height={96}
+                width={160}
+                height={160}
                 className="rounded-lg"
                 firstName={firstName}
                 lastName={lastName}
@@ -129,7 +129,7 @@ const ProfileCard = ({
       </div>
 
       {/* Profile Info */}
-      <div className="pt-14 px-6 pb-6 text-center">
+      <div className="pt-[104px] px-6 pb-6 text-center">
         {/* Name - Centered, Bold, Dark */}
         <div className="text-center mb-2">
           <h3 className="text-xl font-bold text-gray-900">{`${firstName} ${lastName}`.trim() || 'Loading...'}</h3>
@@ -140,7 +140,7 @@ const ProfileCard = ({
           <p className="text-sm text-gray-600 line-clamp-3">{aboutDisplay}</p>
         </div>
 
-        {/* Rating - Centered with Star, Rating, and Review Count - Same style for both modes - Clickable */}
+        {/* Rating - Hidden for now (business mode feature)
         <div className={`flex justify-center ${isBusinessMode ? 'mb-4' : profileCompletion !== undefined && profileCompletion < 100 ? 'mb-6' : ''}`}>
           <button
             type="button"
@@ -155,6 +155,7 @@ const ProfileCard = ({
             <span className="text-sm text-blue-600">({reviewCount} reviews)</span>
           </button>
         </div>
+        */}
 
         {/* Business Mode: Available Toggle - Only show if onAvailabilityChange is provided */}
         {isBusinessMode && onAvailabilityChange !== undefined && (

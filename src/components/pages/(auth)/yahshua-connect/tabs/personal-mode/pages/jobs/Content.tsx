@@ -159,21 +159,21 @@ const Content = () => {
 
       setSelectedJobId(parsedJobId);
       setHighlightedJobId(parsedJobId);
-      // scroll & highlight
+      // scroll & highlight, then fade after 3 seconds
       setTimeout(() => {
         try {
           const el = document.getElementById(`job-${parsedJobId}`);
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-            setTimeout(() => {
-              el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
-            }, 3000);
           }
         } catch (err) {
           // ignore
         }
       }, 200);
+      // Clear highlight state after 3 seconds
+      setTimeout(() => {
+        setHighlightedJobId(null);
+      }, 3000);
 
       try {
         router.replace('/personal-mode/jobs');

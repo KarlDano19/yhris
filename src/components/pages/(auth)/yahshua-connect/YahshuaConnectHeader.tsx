@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getCookie, deleteCookie } from 'cookies-next';
 
 import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
@@ -313,27 +314,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
             )}
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-lg mx-6">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                disabled={disabled}
-                className={classNames(
-                  "block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-100",
-                  disabled 
-                    ? "bg-gray-100 cursor-not-allowed opacity-50" 
-                    : "bg-gray-50 focus:bg-white"
-                )}
-              />
-            </div>
-          </div>
+          <div className="flex-1" />
 
           {/* Right Section */}
           <div className="flex items-center gap-3">
@@ -353,15 +334,10 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 Personal
               </button>
               <button
-                onClick={() => handleModeChange('business')}
-                disabled={disabled}
-                className={classNames(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                  activeMode === 'business'
-                    ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600',
-                  disabled && 'cursor-not-allowed'
-                )}
+                disabled
+                data-tooltip-id="business-mode-tooltip"
+                data-tooltip-content="Coming Soon"
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-400 cursor-not-allowed opacity-50"
               >
                 Business
               </button>
@@ -611,42 +587,16 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 Personal
               </button>
               <button
-                onClick={() => handleModeChange('business')}
-                disabled={disabled}
-                className={classNames(
-                  'flex-1 px-4 py-1.5 rounded-lg text-xs font-medium transition-all',
-                  activeMode === 'business'
-                    ? 'bg-white text-indigo-dye shadow-sm'
-                    : 'text-gray-600',
-                  disabled && 'cursor-not-allowed'
-                )}
+                disabled
+                data-tooltip-id="business-mode-tooltip"
+                data-tooltip-content="Coming Soon"
+                className="flex-1 px-4 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-400 cursor-not-allowed opacity-50"
               >
                 Business
               </button>
             </div>
           </div>
 
-          {/* Bottom Row - Search Bar */}
-          <div className="pb-3">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                disabled={disabled}
-                className={classNames(
-                  "block w-full pl-11 pr-4 py-2 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-100",
-                  disabled 
-                    ? "bg-gray-100 cursor-not-allowed opacity-50" 
-                    : "bg-gray-50 focus:bg-white"
-                )}
-              />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -723,6 +673,8 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
         onClose={() => setShowLocationModal(false)}
         onLocationObtained={handleLocationObtained}
       />
+
+      <Tooltip id="business-mode-tooltip" />
     </header>
   );
 };

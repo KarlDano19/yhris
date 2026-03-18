@@ -103,11 +103,20 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
-        if (firstRoute === 'personal-mode' || firstRoute === 'business-mode') {
+        // Business mode is temporarily disabled — redirect to personal mode
+        if (firstRoute === 'business-mode') {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
+        }
+        if (firstRoute === 'personal-mode') {
           if (!hasProfile) {
             return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
           }
-          // Allow access to personal-mode and business-mode if profile exists
+          // Block coming soon sub-routes
+          const secondRoute = slicePaths[1];
+          const comingSoonRoutes = ['trainings', 'transactions'];
+          if (secondRoute && comingSoonRoutes.includes(secondRoute)) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
           return NextResponse.next();
         }
         if (firstRoute === 'setup-applicant-profile') {

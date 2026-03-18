@@ -185,8 +185,8 @@ const Content = ({ averageRating }: ContentProps) => {
           </div>
         </div>
 
-        {/* Trainings In Progress Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        {/* Trainings In Progress Card - Coming Soon */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 opacity-50">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
               <AcademicCapIcon className="h-6 w-6 text-green-600" />
@@ -210,17 +210,14 @@ const Content = ({ averageRating }: ContentProps) => {
         </div>
         */}
 
-        {/* Rating Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        {/* Rating Card - Coming Soon (business mode feature) */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 opacity-50">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
               <StarIcon className="h-6 w-6 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {rating !== null && rating !== undefined ? rating : 'N/A'}
-              </p>
-              <p className="text-sm text-gray-600">Rating</p>
+              <p className="text-sm font-medium text-gray-500">Coming Soon</p>
             </div>
           </div>
         </div>

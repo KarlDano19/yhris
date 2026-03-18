@@ -147,9 +147,9 @@ const JobCard = ({
   return (
     <div
       id={`job-${id}`}
-      className={`bg-white rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow cursor-pointer ${
+      className={`bg-white rounded-lg shadow-sm border p-5 hover:shadow-md transition-all duration-700 cursor-pointer ${
         isSelected ? 'border-savoy-blue border-2' : 'border-gray-200'
-      } ${isHighlighted ? 'ring-4 ring-yellow-300 ring-opacity-60' : ''}`}
+      } ${isHighlighted ? 'ring-4 ring-yellow-300 ring-opacity-60' : 'ring-0 ring-transparent'}`}
       onClick={onCardClick}
     >
       <div className="flex items-start justify-between mb-3">

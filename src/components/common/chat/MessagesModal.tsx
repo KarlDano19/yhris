@@ -3,6 +3,7 @@
 import { Fragment, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+import { Tooltip } from 'react-tooltip';
 import { XMarkIcon, BriefcaseIcon, UserIcon } from '@heroicons/react/24/outline';
 
 import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
@@ -324,19 +325,13 @@ const MessagesModal = ({
         {activeTab === 'personal' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-savoy-blue" />}
       </button>
       <button
-        onClick={() => setActiveTab('business')}
-        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${
-          activeTab === 'business' ? 'text-green-600' : 'text-gray-500 hover:text-gray-700'
-        }`}
+        disabled
+        data-tooltip-id="business-chat-tooltip"
+        data-tooltip-content="Coming Soon"
+        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 relative"
       >
         <BriefcaseIcon className="h-5 w-5" />
         <span>Business</span>
-        {businessUnreadCount > 0 && (
-          <span className="min-w-[20px] h-5 bg-green-600 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
-            {businessUnreadCount > 99 ? '99+' : businessUnreadCount}
-          </span>
-        )}
-        {activeTab === 'business' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600" />}
       </button>
     </div>
   );
@@ -400,6 +395,7 @@ const MessagesModal = ({
 
                 {/* Body */}
                 <div className="p-5">{renderContent()}</div>
+                <Tooltip id="business-chat-tooltip" />
               </Dialog.Panel>
             </Transition.Child>
           </div>

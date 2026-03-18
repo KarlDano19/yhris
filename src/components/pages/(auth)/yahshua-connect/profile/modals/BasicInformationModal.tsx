@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import Modal from '../../components/Modal';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import ImageCropModal from '@/components/common/ImageCropModal';
 import LocationPermissionModal from '../../modals/LocationPermissionModal';
 
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -56,6 +57,10 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
 
   // Profile picture state
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(basicInfo.photoUrl || null);
+
+  // Crop modal state
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string>('');
 
   // Location permission modal state
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -182,7 +187,7 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
   };
 
 
-  // Handle profile picture upload
+  // Handle profile picture upload — opens crop modal
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -200,13 +205,26 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
       return;
     }
 
-    // Create preview
+    // Read file and open crop modal
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setIsCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+  };
+
+  // Handle cropped image from crop modal
+  const handleCropComplete = (croppedFile: File) => {
     const reader = new FileReader();
     reader.onload = () => {
       setProfileImagePreview(reader.result as string);
-      setValue('photo', file);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(croppedFile);
+    setValue('photo', croppedFile);
   };
 
   const footerContent = (
@@ -546,6 +564,14 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
         onLocationObtained={handleLocationObtained}
+      />
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={isCropModalOpen}
+        onClose={() => setIsCropModalOpen(false)}
+        imageSrc={cropImageSrc}
+        onCropComplete={handleCropComplete}
       />
     </Modal>
   );
