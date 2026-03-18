@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import { getCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
@@ -14,13 +15,14 @@ import TrashView from './TrashView';
 import CreateFolderModal from './modals/CreateFolderModal';
 import RenameFolderModal from './modals/RenameFolderModal';
 import DeleteFolderModal from './modals/DeleteFolderModal';
+import DownloadDocumentModal from './modals/DownloadDocumentModal';
 
 import useGetFolders from '../hooks/useGetFolders';
 import useGetDocuments from '../hooks/useGetDocuments';
 import { useDeleteDocument } from '../hooks/useDeleteDocument';
 
 import type { Employee } from '@/types/employee-201-records/employee';
-import type { T_EmployeeDocumentFolder } from '@/types/employee-201-records/document-repository';
+import type { T_EmployeeDocument, T_EmployeeDocumentFolder } from '@/types/employee-201-records/document-repository';
 
 import { TrashIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
@@ -37,6 +39,9 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
   const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
   const [isDeleteFolderModalOpen, setIsDeleteFolderModalOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<T_EmployeeDocumentFolder | null>(null);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<T_EmployeeDocument | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Fetch folders
   const { data: folders, isLoading: foldersLoading, refetch: refetchFolders } = useGetFolders(employeeId);
@@ -80,9 +85,43 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
     }
   };
 
-  const handleDownload = (document: any) => {
-    if (document.file) {
-      window.open(document.file, '_blank');
+  const handleDownload = (document: T_EmployeeDocument) => {
+    setSelectedDocument(document);
+    setIsDownloadModalOpen(true);
+  };
+
+  const handleConfirmDownload = async () => {
+    if (!selectedDocument?.file) return;
+
+    setIsDownloading(true);
+    try {
+      const token = getCookie('token');
+      const fileUrl = selectedDocument.file.startsWith('/')
+        ? `${process.env.NEXT_PUBLIC_API_URL}${selectedDocument.file}`
+        : selectedDocument.file;
+
+      const res = await fetch(fileUrl, {
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      if (!res.ok) throw new Error('Failed to download file.');
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = selectedDocument.file_name || 'download';
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      setIsDownloadModalOpen(false);
+      setSelectedDocument(null);
+    } catch {
+      toast.custom((t) => (
+        <CustomToast toast={toast} t={t} message="Failed to download file." type="error" />
+      ));
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -169,6 +208,17 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
       )}
 
       {/* Modals */}
+      <DownloadDocumentModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => {
+          setIsDownloadModalOpen(false);
+          setSelectedDocument(null);
+        }}
+        document={selectedDocument}
+        onConfirm={handleConfirmDownload}
+        isDownloading={isDownloading}
+      />
+
       <CreateFolderModal
         isOpen={isCreateFolderModalOpen}
         onClose={() => setIsCreateFolderModalOpen(false)}
