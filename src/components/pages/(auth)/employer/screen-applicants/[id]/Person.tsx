@@ -267,6 +267,18 @@ export default function Person({
             {!canViewDetails && (
               <span className="text-gray-400 text-xs ml-2">🔒</span>
             )}
+            {/* {isRejected && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )}
+            {isWithdrawn && (
+              <span>
+                <br />
+                {capitalizeFirstLetter(applicant.status)}
+              </span>
+            )} */}
           </p>
         </div>
         {canViewDetails && (
@@ -336,44 +348,70 @@ export default function Person({
                 return null; // Don't show action if user doesn't have permission
               }
 
-              // Skip Checklist and Move to Job for hired applicants
-              if (isPassedFinalInterview && (name === 'Checklist' || whichModal === 'MOVE_TO_JOB')) {
-                return null;
-              }
-
-              // Handle menu click
+              // Handle menu click for MESSAGE_APPLICANT
               const handleMenuClick = () => {
                 if (whichModal === 'MESSAGE_APPLICANT') {
                   setIsChatModalOpen(true);
                   setOpenMenuId(null); // Close the menu
                   return;
                 }
-
-                let lastElement = state[state.length - 1];
-                let isFinalStage = false;
-                if (lastElement.id == stage.id) {
-                  isFinalStage = true;
-                }
-                setActionState({
-                  ...initialActionState,
-                  email: applicant.email,
-                  applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
-                  stageId: stage.id,
-                  modal: { whichModal, isOpen: true, title: modalTitle },
-                  isFinalStage: isFinalStage,
-                });
               };
 
               return (
-                <li key={id}>
-                  <button
-                    onClick={handleMenuClick}
-                    className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
-                  >
-                    <span>{icon}</span>
-                    <p>{name}</p>
-                  </button>
-                </li>
+                <React.Fragment key={id}>
+                  {isPassedFinalInterview && name !== 'Checklist' && whichModal !== 'MOVE_TO_JOB' && (
+                    <li>
+                      <button
+                        onClick={() => {
+                          if (whichModal === 'MESSAGE_APPLICANT') {
+                            handleMenuClick();
+                            return;
+                          }
+                          setActionState({
+                            ...initialActionState,
+                            email: applicant.email,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
+                            stageId: stage.id,
+                            modal: { whichModal, isOpen: true, title: modalTitle },
+                          });
+                        }}
+                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
+                      >
+                        <span>{icon}</span>
+                        <p>{name}</p>
+                      </button>
+                    </li>
+                  )}
+                  {!isPassedFinalInterview && (
+                    <li>
+                      <button
+                        onClick={() => {
+                          if (whichModal === 'MESSAGE_APPLICANT') {
+                            handleMenuClick();
+                            return;
+                          }
+                          let lastElement = state[state.length - 1];
+                          let isFinalStage = false;
+                          if (lastElement.id == stage.id) {
+                            isFinalStage = true;
+                          }
+                          setActionState({
+                            ...initialActionState,
+                            email: applicant.email,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
+                            stageId: stage.id,
+                            modal: { whichModal, isOpen: true, title: modalTitle },
+                            isFinalStage: isFinalStage,
+                          });
+                        }}
+                        className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
+                      >
+                        <span>{icon}</span>
+                        <p>{name}</p>
+                      </button>
+                    </li>
+                  )}
+                </React.Fragment>
               );
             })}
             {permissions.can_update && (
