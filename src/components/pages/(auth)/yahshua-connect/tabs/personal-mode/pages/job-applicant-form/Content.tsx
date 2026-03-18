@@ -90,7 +90,7 @@ const Content = () => {
           toast.custom(() => <CustomToast message={err} type='error' />, {
             duration: 7000,
           });
-          if (err === 'Curriculum Vitae/Resume: Invalid file type') {
+          if (err === 'Curriculum Vitae/Resume: Invalid file type.') {
             setSuggestModal(true);
           }
         },

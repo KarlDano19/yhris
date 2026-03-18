@@ -134,7 +134,7 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
                   const file = e.target.files[0];
                   if (file && file.size > 5 * 1024 * 1024) {
                     toast.custom(
-                      () => <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB' type='error' />,
+                      () => <CustomToast message='Curriculum Vitae/Resume size should not exceed 5 MB.' type='error' />,
                       {
                         duration: 7000,
                       }

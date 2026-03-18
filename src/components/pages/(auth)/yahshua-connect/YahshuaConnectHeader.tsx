@@ -146,7 +146,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       {
         onSuccess: () => {
           toast.custom(
-            () => <CustomToast message="Location saved successfully!" type="success" />,
+            () => <CustomToast message="Location saved successfully." type="success" />,
             { duration: 3000 }
           );
         },

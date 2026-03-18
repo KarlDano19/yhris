@@ -239,7 +239,7 @@ const Content = () => {
       setIsJobAcceptedModalOpen(true);
       setIsJobDetailsModalOpen(false); // Close details modal after accepting job
       toast.custom(() => (
-        <CustomToast message="Application submitted successfully!" type="success" />
+        <CustomToast message="Application submitted successfully." type="success" />
       ), { duration: 2000 });
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to submit application';

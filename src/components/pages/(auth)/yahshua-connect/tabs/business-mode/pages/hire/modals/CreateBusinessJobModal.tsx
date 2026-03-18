@@ -79,7 +79,7 @@ const CreateBusinessJobModal = ({ refetch, isOpen, setIsOpen, formMethods }: Cre
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => <CustomToast message={data?.message || "Job posted successfully"} type="success" />,
+          () => <CustomToast message={data?.message || "Job posted successfully."} type="success" />,
           {
             duration: 5000,
           }

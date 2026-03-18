@@ -104,13 +104,13 @@ const JobCard = ({
       deleteSavedJobMutation.mutate(id, {
         onSuccess: () => {
           toast.custom(
-            () => <CustomToast message="Job removed from saved jobs" type="success" />,
+            () => <CustomToast message="Job removed from saved jobs." type="success" />,
             { duration: 3000 }
           );
         },
         onError: (error: any) => {
           setIsSaved(wasSaved); // Revert on error
-          const errorMessage = error?.message || error || 'Failed to remove job from saved jobs';
+          const errorMessage = error?.message || error || 'Failed to remove job from saved jobs.';
           toast.custom(
             () => <CustomToast message={errorMessage} type="error" />,
             { duration: 4000 }
@@ -125,13 +125,13 @@ const JobCard = ({
       addSavedJobMutation.mutate(id, {
         onSuccess: () => {
           toast.custom(
-            () => <CustomToast message="Job saved successfully" type="success" />,
+            () => <CustomToast message="Job saved successfully." type="success" />,
             { duration: 3000 }
           );
         },
         onError: (error: any) => {
           setIsSaved(wasSaved); // Revert on error
-          const errorMessage = error?.message || error || 'Failed to save job';
+          const errorMessage = error?.message || error || 'Failed to save job.';
           toast.custom(
             () => <CustomToast message={errorMessage} type="error" />,
             { duration: 4000 }

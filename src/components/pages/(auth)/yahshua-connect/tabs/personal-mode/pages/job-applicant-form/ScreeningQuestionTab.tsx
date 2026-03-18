@@ -60,7 +60,7 @@ function ScreeningQuestionTab({
       
       // Show toast only once if any question is unanswered
       if (hasError) {
-        toast.custom(() => <CustomToast message='Please answer all screening questions' type='error' />, {
+        toast.custom(() => <CustomToast message='Please answer all screening questions.' type='error' />, {
           duration: 7000,
         });
         return;

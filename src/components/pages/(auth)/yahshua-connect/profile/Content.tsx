@@ -470,7 +470,7 @@ const Content = () => {
             updateProfile(updateData,
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Profile updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Profile updated successfully.' type='success' />, { duration: 4000 });
                   setIsBasicInfoModalOpen(false);
                 },
                 onError: (error: any) => {
@@ -502,7 +502,7 @@ const Content = () => {
             updateProfile(updateData,
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Contact information updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Contact information updated successfully.' type='success' />, { duration: 4000 });
                   setIsContactInfoModalOpen(false);
                 },
                 onError: (error: any) => {
@@ -524,7 +524,7 @@ const Content = () => {
               files,
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Employment documents updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Employment documents updated successfully.' type='success' />, { duration: 4000 });
                   setIsEmploymentDocumentsModalOpen(false);
                 },
                 onError: (error: any) => {
@@ -584,7 +584,7 @@ const Content = () => {
               },
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Work experience updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Work experience updated successfully.' type='success' />, { duration: 4000 });
                   setIsWorkExperienceModalOpen(false);
                   // Sync the local state with the saved state
                   setWorkExperience(data);
@@ -661,7 +661,7 @@ const Content = () => {
               },
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Education updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Education updated successfully.' type='success' />, { duration: 4000 });
                   setIsEducationModalOpen(false);
                 },
                 onError: (error: any) => {
@@ -721,7 +721,7 @@ const Content = () => {
               },
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Skills and certifications updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Skills and certifications updated successfully.' type='success' />, { duration: 4000 });
                   setIsSkillsCertModalOpen(false);
                   // Sync the local state with the saved state
                   setSkills(skillsData);
@@ -819,7 +819,7 @@ const Content = () => {
               },
               {
                 onSuccess: () => {
-                  toast.custom(() => <CustomToast message='Portfolio updated successfully' type='success' />, { duration: 4000 });
+                  toast.custom(() => <CustomToast message='Portfolio updated successfully.' type='success' />, { duration: 4000 });
                   setIsPortfolioModalOpen(false);
                   // Sync the local state with the saved state
                   setPortfolio(data);

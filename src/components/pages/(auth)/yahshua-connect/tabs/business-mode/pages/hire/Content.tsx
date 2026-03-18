@@ -358,7 +358,7 @@ const Content = () => {
 
     deleteJobMutation.mutate(deleteJobId, {
       onSuccess: () => {
-        toast.custom(() => <CustomToast message="Job deleted successfully" type="success" />, { duration: 5000 });
+        toast.custom(() => <CustomToast message="Job deleted successfully." type="success" />, { duration: 5000 });
         setIsDeleteModalOpen(false);
         setDeleteJobId(null);
         refetchJobs();
@@ -374,11 +374,11 @@ const Content = () => {
   const handleSeedBusinessJobs = async (count: number, budgetType?: 'fixed_rate' | 'hourly_rate' | 'mix') => {
     try {
       const result = await seedBusinessJobsMutation.mutateAsync({ count, budget_type: budgetType || 'mix' });
-      const message = result?.data?.message || result?.message || `Successfully created ${count} job posting(s)`;
+      const message = result?.data?.message || result?.message || `Successfully created ${count} job posting(s).`;
       toast.custom(() => <CustomToast message={message} type="success" />, { duration: 5000 });
       refetchJobs();
     } catch (error: any) {
-      toast.custom(() => <CustomToast message={error || 'Failed to seed jobs'} type="error" />, { duration: 7000 });
+      toast.custom(() => <CustomToast message={error || 'Failed to seed jobs.'} type="error" />, { duration: 7000 });
     }
   };
 
@@ -386,18 +386,18 @@ const Content = () => {
   const handleUnseedBusinessJobs = async () => {
     try {
       const result = await unseedBusinessJobsMutation.mutateAsync();
-      const message = result?.data?.message || result?.message || 'Successfully deleted seeded job postings';
+      const message = result?.data?.message || result?.message || 'Successfully deleted seeded job postings.';
       toast.custom(() => <CustomToast message={message} type="success" />, { duration: 5000 });
       refetchJobs();
     } catch (error: any) {
-      toast.custom(() => <CustomToast message={error || 'Failed to unseed jobs'} type="error" />, { duration: 7000 });
+      toast.custom(() => <CustomToast message={error || 'Failed to unseed jobs.'} type="error" />, { duration: 7000 });
     }
   };
 
   // Handle toggle active/inactive
   const handleToggleStatus = (jobId: number, isActive: boolean) => {
     const newIsActive = !isActive;
-    const successMessage = newIsActive ? 'Job set as active' : 'Job set as inactive';
+    const successMessage = newIsActive ? 'Job set as active.' : 'Job set as inactive.';
 
     updateJobMutation.mutate(
       { jobId, is_active: newIsActive },
@@ -408,7 +408,7 @@ const Content = () => {
           refetchJobs();
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to update job status';
+          const message = err instanceof Error ? err.message : 'Failed to update job status.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -419,12 +419,12 @@ const Content = () => {
   const handleDuplicateJob = (jobId: number) => {
     duplicateJobMutation.mutate(jobId, {
       onSuccess: () => {
-        toast.custom(() => <CustomToast message="Job duplicated successfully" type="success" />, { duration: 5000 });
+        toast.custom(() => <CustomToast message="Job duplicated successfully." type="success" />, { duration: 5000 });
         setMoreMenuOpen({});
         refetchJobs();
       },
       onError: (err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Failed to duplicate job';
+        const message = err instanceof Error ? err.message : 'Failed to duplicate job.';
         toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
       },
     });
@@ -454,7 +454,7 @@ const Content = () => {
 
   const handleMessageApplicant = (applicationId: number) => {
     // TODO: Implement message functionality
-    console.log('Message applicant for application:', applicationId);
+    console.log('Message applicant for application:', applicationId); // TODO: Implement message functionality
   };
 
   const handleHireClick = (applicationId: number) => {
@@ -478,7 +478,7 @@ const Content = () => {
       { applicationId: selectedApplicationId, status: 'accepted' },
       {
         onSuccess: async () => {
-          toast.custom(() => <CustomToast message="Applicant hired successfully!" type="success" />, { duration: 5000 });
+          toast.custom(() => <CustomToast message="Applicant hired successfully." type="success" />, { duration: 5000 });
           setIsConfirmHireModalOpen(false);
           setSelectedApplicationId(null);
           // Refetch and then reopen the ViewApplicantsModal with updated data
@@ -486,7 +486,7 @@ const Content = () => {
           setIsViewApplicantsModalOpen(true);
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to hire applicant';
+          const message = err instanceof Error ? err.message : 'Failed to hire applicant.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -500,7 +500,7 @@ const Content = () => {
       { applicationId: selectedApplicationId, status: 'rejected' },
       {
         onSuccess: async () => {
-          toast.custom(() => <CustomToast message="Applicant rejected" type="success" />, { duration: 5000 });
+          toast.custom(() => <CustomToast message="Applicant rejected." type="success" />, { duration: 5000 });
           setIsConfirmRejectModalOpen(false);
           setSelectedApplicationId(null);
           // Refetch and then reopen the ViewApplicantsModal with updated data
@@ -508,7 +508,7 @@ const Content = () => {
           setIsViewApplicantsModalOpen(true);
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to reject applicant';
+          const message = err instanceof Error ? err.message : 'Failed to reject applicant.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -549,13 +549,13 @@ const Content = () => {
       },
       {
         onSuccess: () => {
-          toast.custom(() => <CustomToast message="Payment proof submitted successfully! Payment marked as paid." type="success" />, { duration: 5000 });
+          toast.custom(() => <CustomToast message="Payment proof submitted successfully. Payment marked as paid." type="success" />, { duration: 5000 });
           setSelectedHireForPayment(null);
           setIsSubmitPaymentProofModalOpen(false);
           refetchJobs();
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to submit payment proof';
+          const message = err instanceof Error ? err.message : 'Failed to submit payment proof.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -604,13 +604,13 @@ const Content = () => {
       },
       {
         onSuccess: () => {
-          toast.custom(() => <CustomToast message="Review submitted successfully! Thank you for your feedback." type="success" />, { duration: 5000 });
+          toast.custom(() => <CustomToast message="Review submitted successfully. Thank you for your feedback." type="success" />, { duration: 5000 });
           setSelectedHireForReview(null);
           setIsReviewApplicantModalOpen(false);
           refetchJobs();
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to submit review';
+          const message = err instanceof Error ? err.message : 'Failed to submit review.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }
@@ -634,11 +634,11 @@ const Content = () => {
       { progressId, status, client_feedback: feedback },
       {
         onSuccess: () => {
-          toast.custom(() => <CustomToast message={`Progress ${status} successfully!`} type="success" />, { duration: 5000 });
+          toast.custom(() => <CustomToast message={`Progress ${status} successfully.`} type="success" />, { duration: 5000 });
           refetchJobs();
         },
         onError: (err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to review progress';
+          const message = err instanceof Error ? err.message : 'Failed to review progress.';
           toast.custom(() => <CustomToast message={message} type="error" />, { duration: 7000 });
         },
       }

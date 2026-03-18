@@ -106,7 +106,7 @@ const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsMod
     deleteSavedJobMutation.mutate(jobPostingId, {
       onSuccess: () => {
         toast.custom(
-          () => <CustomToast message="Job removed from saved jobs" type="success" />,
+          () => <CustomToast message="Job removed from saved jobs." type="success" />,
           { duration: 3000 }
         );
         queryClient.invalidateQueries(['savedJobsCache']); // Invalidate cache to update the list

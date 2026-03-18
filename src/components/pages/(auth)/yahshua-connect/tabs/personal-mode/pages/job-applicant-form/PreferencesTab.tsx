@@ -131,7 +131,7 @@ function PreferencesTab({
         );
         if (missingCore) {
           toast.custom(
-            () => <CustomToast message="Please fill in all experience fields" type="error" />,
+            () => <CustomToast message="Please fill in all experience fields." type="error" />,
             { duration: 7000 }
           );
           hasError = true;
@@ -142,7 +142,7 @@ function PreferencesTab({
         if (!isCurr && !exp.dateTo) {
           toast.custom(
             () => (
-              <CustomToast message="Please enter an end date or select “Currently Employed.”" type="error" />
+              <CustomToast message="Please enter an end date or select “Currently Employed." type="error" />
             ),
             { duration: 7000 }
           );
@@ -156,7 +156,7 @@ function PreferencesTab({
           const to = exp.dateTo instanceof Date ? exp.dateTo : new Date(exp.dateTo);
           if (!isNaN(from.getTime()) && !isNaN(to.getTime()) && to < from) {
             toast.custom(
-              () => <CustomToast message="Date To must be on or after Date From" type="error" />,
+              () => <CustomToast message="Date To must be on or after Date From." type="error" />,
               { duration: 7000 }
             );
             hasError = true;

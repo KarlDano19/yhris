@@ -346,7 +346,7 @@ const Content = () => {
       {
         onSuccess: () => {
           toast.custom(
-            <CustomToast message="Job started successfully!" type="success" />
+            <CustomToast message="Job started successfully." type="success" />
           );
           setIsStartJobModalOpen(false);
           setSelectedJob(null);
@@ -354,7 +354,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to start job'}
+              message={error.message || 'Failed to start job.'}
               type="error"
             />
           );
@@ -382,7 +382,7 @@ const Content = () => {
         onSuccess: () => {
           toast.custom(
             <CustomToast
-              message="Daily progress submitted successfully!"
+              message="Daily progress submitted successfully."
               type="success"
             />
           );
@@ -391,7 +391,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to submit progress'}
+              message={error.message || 'Failed to submit progress.'}
               type="error"
             />
           );
@@ -419,7 +419,7 @@ const Content = () => {
         onSuccess: () => {
           toast.custom(
             <CustomToast
-              message="Proof of completion uploaded successfully! Job marked as completed."
+              message="Proof of completion uploaded successfully. Job marked as completed."
               type="success"
             />
           );
@@ -429,7 +429,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to upload proof'}
+              message={error.message || 'Failed to upload proof.'}
               type="error"
             />
           );
@@ -457,7 +457,7 @@ const Content = () => {
         onSuccess: () => {
           toast.custom(
             <CustomToast
-              message="Review submitted successfully! Thank you for your feedback."
+              message="Review submitted successfully. Thank you for your feedback."
               type="success"
             />
           );
@@ -467,7 +467,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to submit review'}
+              message={error.message || 'Failed to submit review.'}
               type="error"
             />
           );
@@ -487,7 +487,7 @@ const Content = () => {
     // Client-side validation before sending request
     const check = validateClockIn(selectedJob);
     if (!check.allowed) {
-      toast.custom(() => <CustomToast message={check.message || 'Too early to clock in'} type="error" />, { duration: 5000 });
+      toast.custom(() => <CustomToast message={check.message || 'Too early to clock in.'} type="error" />, { duration: 5000 });
       return;
     }
 
@@ -496,7 +496,7 @@ const Content = () => {
       {
         onSuccess: (response) => {
           toast.custom(
-            <CustomToast message={response.message || "Clocked in successfully!"} type="success" />
+            <CustomToast message={response.message || "Clocked in successfully."} type="success" />
           );
           setIsClockInModalOpen(false);
           setSelectedJob(null);
@@ -504,7 +504,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to clock in'}
+              message={error.message || 'Failed to clock in.'}
               type="error"
             />
           );
@@ -523,7 +523,7 @@ const Content = () => {
     // Client-side validation before sending request
     const check = validateClockOut(selectedJob);
     if (!check.allowed) {
-      toast.custom(() => <CustomToast message={check.message || 'Too late to clock out'} type="error" />, { duration: 5000 });
+      toast.custom(() => <CustomToast message={check.message || 'Too late to clock out.'} type="error" />, { duration: 5000 });
       return;
     }
 
@@ -532,7 +532,7 @@ const Content = () => {
       {
         onSuccess: (response) => {
           toast.custom(
-            <CustomToast message={response.message || "Clocked out successfully!"} type="success" />
+            <CustomToast message={response.message || "Clocked out successfully."} type="success" />
           );
           setIsClockOutModalOpen(false);
 
@@ -546,7 +546,7 @@ const Content = () => {
         onError: (error: any) => {
           toast.custom(
             <CustomToast
-              message={error.message || 'Failed to clock out'}
+              message={error.message || 'Failed to clock out.'}
               type="error"
             />
           );

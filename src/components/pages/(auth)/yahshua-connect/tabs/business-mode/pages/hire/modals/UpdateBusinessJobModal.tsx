@@ -134,7 +134,7 @@ const UpdateBusinessJobModal = ({ refetch, isOpen, setIsOpen, editingJobId }: Up
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
-          () => <CustomToast message={data?.message || "Job updated successfully"} type="success" />,
+          () => <CustomToast message={data?.message || "Job updated successfully."} type="success" />,
           {
             duration: 5000,
           }

@@ -78,7 +78,7 @@ function WorkExperienceTab({
         }
         
         if (requiredFields.some(field => !field)) {
-          toast.custom(() => <CustomToast message='Please fill in all experience fields' type='error' />, {
+          toast.custom(() => <CustomToast message='Please fill in all experience fields.' type='error' />, {
             duration: 7000,
           });
           hasError = true;
