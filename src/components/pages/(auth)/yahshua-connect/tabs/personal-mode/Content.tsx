@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
+import useGetApplicationByUser from '../../hooks/useGetApplicationByUser';
 import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
 import JobCard from './components/JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
@@ -22,13 +23,11 @@ const Content = ({ averageRating }: ContentProps) => {
   const router = useRouter();
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
-  // Get applications data from cache
-  const queryClient = useQueryClient();
-  const cachedApplications = queryClient.getQueryCache().find(['jobAppliedCache', {}]) as any;
-  const applicationsData = cachedApplications?.state?.data;
-  const isApplicationsLoading = !applicationsData;
+  // Get applications data reactively
+  const { data: applicationsData, isLoading: isApplicationsLoading } = useGetApplicationByUser({});
 
   // Get saved jobs data from cache
+  const queryClient = useQueryClient();
   const cachedSavedJobs = queryClient
     .getQueryCache()
     .find(['savedJobsCache']) as {
@@ -41,15 +40,11 @@ const Content = ({ averageRating }: ContentProps) => {
     limit: 10, // Show top 10 jobs with matching skills
   });
 
-  // Calculate counts - handle response structure (might be wrapped in 'data' field or array directly)
   const applicationsCount = useMemo(() => {
     if (!applicationsData) return 0;
-    
-    // Handle wrapped response structure
-    const applications = applicationsData.data || applicationsData;
-    
-    if (!Array.isArray(applications)) return 0;
-    return applications.length;
+    if (Array.isArray(applicationsData)) return applicationsData.length;
+    const arr = (applicationsData as any)?.data;
+    return Array.isArray(arr) ? arr.length : 0;
   }, [applicationsData]);
 
   // Trainings in progress count (placeholder - TODO: implement when API is available)
