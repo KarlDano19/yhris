@@ -1,0 +1,64 @@
+'use client';
+
+import Link from 'next/link';
+
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/hooks/useGetAcceptanceMemo';
+import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/AcceptanceMemoPreview';
+import { T_MemoFormData } from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/AcceptanceMemoPreview';
+
+const Content = () => {
+  const { data, isLoading } = useGetAcceptanceMemo();
+
+  const previewData: T_MemoFormData | null = data
+    ? {
+        companyName: data.company_name,
+        startDate: data.start_date,
+        endDate: data.end_date,
+        authorityName: data.authority_name,
+        authorityPosition: data.authority_position,
+        authorityDate: data.authority_date,
+        signature: data.signature ?? null,
+        checks: {
+          systemSetup: true,
+          employeeData: true,
+          systemConfig: true,
+          userTraining: true,
+          systemNavigation: true,
+        },
+      }
+    : null;
+
+  return (
+    <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8'>
+      <div className='flex p-4'>
+        <Link href='/settings' className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'>
+          <ArrowLeftIcon className='h-5 w-5' />
+          <h4>Settings</h4>
+        </Link>
+      </div>
+
+      <div className='px-2 md:px-8 lg:px-4 pb-8'>
+        <h2 className='text-xl font-bold text-indigo-dye mb-1'>Acceptance Form</h2>
+        <p className='text-sm text-gray-500 mb-6'>View your submitted acceptance memo.</p>
+
+        {isLoading ? (
+          <div className='flex justify-center py-12'>
+            <LoadingSpinner size='lg' color='yellow' />
+          </div>
+        ) : previewData ? (
+          <AcceptanceMemoPreview formData={previewData} />
+        ) : (
+          <div className='bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm'>
+            Acceptance Form not yet submitted.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Content;

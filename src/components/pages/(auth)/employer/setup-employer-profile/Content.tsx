@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ import { useLoopsSync } from '@/helpers/useLoopsSync';
 import { syncContactSimple, syncCompanyViaEvent } from '@/helpers/loopsSimple';
 import { getUserEmail } from '@/helpers/sessionUtils';
 import { LOOPS_CONFIG } from '@/lib/loopsConfig';
+import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
 import Details from './Details';
 import Settings from './Settings';
 import useSavedProfile from './hooks/useSavedProfile';
@@ -20,9 +21,40 @@ import { T_EmployerProfile } from '@/types/globals';
 
 const Content = () => {
   const [progressBar, setProgressBar] = useState(0);
-  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger, control } = useForm<T_EmployerProfile>();
+  const { register, setValue, watch, handleSubmit, formState: { errors }, clearErrors, trigger, control } = useForm<T_EmployerProfile>({
+    defaultValues: {
+      country: 'Philippines',
+      timeFormat: '12hr',
+    }
+  });
   const { mutate, isLoading } = useSavedProfile();
   const { updateContact } = useLoopsSync(); // Removed sendEvent
+  const { data: profileData } = useGetEmployerProfile();
+
+  useEffect(() => {
+    if (profileData) {
+      setValue('companyName', profileData.name || '');
+      setValue('companyDescription', profileData.description || '');
+      setValue('typeOfIndustry', profileData.type_of_industry || '');
+      setValue('workSetUp', profileData.work_set_up || '');
+      setValue('email', profileData.email || '');
+      setValue('mobileNumber', profileData.mobile_number || '');
+      setValue('landlineNumber', profileData.landline_number || '');
+      setValue('region', profileData.region || '');
+      setValue('province', profileData.province || '');
+      setValue('city', profileData.city || '');
+      setValue('locality', profileData.locality || '');
+      setValue('building', profileData.building || '');
+      setValue('street', profileData.street || '');
+      setValue('country', profileData.country || 'Philippines');
+      setValue('zipCode', profileData.zip_code || '');
+      setValue('language', profileData.language || '');
+      setValue('currency', profileData.currency || '');
+      setValue('timezone', profileData.timezone || '');
+      setValue('timeFormat', profileData.time_format || '12hr');
+      setValue('imagePath', profileData.logo || '');
+    }
+  }, [profileData, setValue]);
 
   const onSubmit = handleSubmit((data) => {
     const callbackReq = {
@@ -72,7 +104,7 @@ const Content = () => {
 
         // Small delay to ensure session is saved before redirect
         setTimeout(() => {
-          location.href = '/dashboard';
+          location.href = '/onboarding-checklist';
         }, 500);
       },
       onError: (err: any) => {

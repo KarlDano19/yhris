@@ -14,6 +14,7 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = session.isLoggedIn;
   const accountType = session.accountType;
   const hasProfile = session.hasProfile;
+  const hasCompletedOnboarding = session.hasCompletedOnboarding;
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
 
@@ -28,6 +29,7 @@ export async function middleware(request: NextRequest) {
     'screen-applicants',
     'screening-question-guideline',
     'onboarding',
+    'onboarding-checklist',
     'manage',
     'employee-separation',
     'employer-profile',
@@ -78,13 +80,19 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'talent-search' ||
           firstRoute === 'analytics' ||
           firstRoute === 'audit-logs' ||
-          firstRoute === 'notifications'
+          firstRoute === 'notifications' ||
+          firstRoute === 'onboarding-checklist'
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
-              return NextResponse.redirect(new URL('/dashboard', request.url));
-            }
-            if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
+              if (hasCompletedOnboarding) {
+                return NextResponse.redirect(new URL('/dashboard', request.url));
+              }
+              // Not yet completed onboarding — allow access so Back button from checklist works
+            } else if (!hasCompletedOnboarding && firstRoute !== 'onboarding-checklist') {
+              // Onboarding gate: block all employer routes until checklist is complete
+              return NextResponse.redirect(new URL('/onboarding-checklist', request.url));
+            } else if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
             }
           }

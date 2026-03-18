@@ -32,6 +32,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'screen-applicants',
     'screening-question-guideline',
     'onboarding',
+    'onboarding-checklist',
     'manage',
     'employee-separation',
     'employer-profile',

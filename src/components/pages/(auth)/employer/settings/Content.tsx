@@ -7,6 +7,7 @@ import Link from 'next/link';
 import MenuItem from '../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { DocumentCheckIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
@@ -28,6 +29,12 @@ const menus = [
     icon: <OrgStructureLogo />,
     text: <>Org Structure<br/>Settings</>,
     link: '/settings/org-structure',
+    isAvailable: true,
+  },
+  {
+    icon: <DocumentCheckIcon className='w-8 h-8' />,
+    text: 'Acceptance Form',
+    link: '/settings/acceptance-form',
     isAvailable: true,
   },
 ];

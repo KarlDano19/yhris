@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const expectedKeys = [
       'hasProfile',
+      'hasCompletedOnboarding',
+      'hasOnboarded',
       'hasPendingTransaction',
       'hasActiveSubscription',
       'token',

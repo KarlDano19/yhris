@@ -14,6 +14,8 @@ export interface SessionData {
   accountType: string;
   loginType: string;
   hasProfile: boolean;
+  hasCompletedOnboarding: boolean;
+  hasOnboarded: boolean;
   hasPendingTransaction: boolean;
   hasActiveSubscription: boolean;
   tokenExpiresAt?: number; // Unix timestamp when token expires
@@ -29,6 +31,8 @@ export const defaultSession: SessionData = {
   accountType: '',
   loginType: '',
   hasProfile: false,
+  hasCompletedOnboarding: false,
+  hasOnboarded: false,
   hasPendingTransaction: false,
   hasActiveSubscription: false,
 };
