@@ -224,9 +224,27 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
           }}
           className="flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 cursor-pointer bg-white"
         >
-          <div className={`w-10 h-10 rounded-lg ${getIconBgColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
-            {getIcon(notification.type)}
-          </div>
+          {notification.employer_logo ? (
+            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+              <img src={notification.employer_logo} alt={notification.employer || ''} className="w-full h-full object-cover" />
+            </div>
+          ) : notification.employer ? (
+            <div className="w-10 h-10 rounded-lg bg-savoy-blue flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+              {notification.employer.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+            </div>
+          ) : notification.sender_photo ? (
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
+              <img src={notification.sender_photo} alt={notification.sender_name || ''} className="w-full h-full object-cover" />
+            </div>
+          ) : notification.sender_name ? (
+            <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0 text-white font-semibold text-sm">
+              {notification.sender_name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+            </div>
+          ) : (
+            <div className={`w-10 h-10 rounded-lg ${getIconBgColor(notification.type)} flex items-center justify-center flex-shrink-0`}>
+              {getIcon(notification.type)}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <h4 className="font-semibold text-gray-900 mb-1 break-words">{notification.title}</h4>
