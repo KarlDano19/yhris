@@ -90,6 +90,9 @@ export type T_Application = {
   logo: string;
   appliedDate: string;
   status: string;
+  applied_job_status?: string;
+  applied_job_updated_at?: string;
+  applied_job_id?: number;
 };
 
 // Saved Job Types

@@ -20,6 +20,7 @@ interface ViewApplicantsModalProps {
   onViewProfile?: (applicantId: number) => void;
   onHire?: (applicantId: number) => void;
   onReject?: (applicantId: number) => void;
+  onViewDailyProgress?: (applicantId: number) => void;
 }
 
 // Helper to get initials from name
@@ -59,6 +60,7 @@ const ViewApplicantsModal = ({
   onViewProfile,
   onHire,
   onReject,
+  onViewDailyProgress,
 }: ViewApplicantsModalProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);

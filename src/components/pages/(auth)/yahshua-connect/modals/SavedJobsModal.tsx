@@ -1,8 +1,7 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import Modal from '../components/Modal';
@@ -18,11 +17,13 @@ import { T_SavedJob } from '@/types/personal-mode';
 interface SavedJobsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  highlightJobId?: number | null;
 }
 
-const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
+const SavedJobsModal = ({ isOpen, onClose, highlightJobId = null }: SavedJobsModalProps) => {
   // Get saved jobs data from cache
   const queryClient = useQueryClient();
+  const router = useRouter();
   const cachedSavedJobs = queryClient
     .getQueryCache()
     .find(['savedJobsCache']) as {
@@ -81,6 +82,26 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
     setTransformedSavedJobs(transformed);
   }, [savedJobsData]);
 
+  // Scroll to and highlight a job when highlightJobId is provided
+  useEffect(() => {
+    if (!highlightJobId || transformedSavedJobs.length === 0) return;
+    const idToFind = `saved-job-${highlightJobId}`;
+    setTimeout(() => {
+      try {
+        const el = document.getElementById(idToFind);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          setTimeout(() => {
+            el.classList.remove('ring-4', 'ring-yellow-300', 'ring-opacity-60');
+          }, 3000);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }, 200);
+  }, [highlightJobId, transformedSavedJobs]);
+
   const handleUnsave = (jobPostingId: number) => {
     deleteSavedJobMutation.mutate(jobPostingId, {
       onSuccess: () => {
@@ -117,11 +138,21 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
           <p className="text-sm text-gray-400 text-center mt-1">Start saving jobs to see them here</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        // Add an internal scroll container and responsive card layout
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           {transformedSavedJobs.map((job) => (
             <div
+              id={`saved-job-${job.id}`}
               key={job.id}
-              className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                try {
+                  router.push(`/personal-mode/jobs?job_id=${job.id}`);
+                  onClose();
+                } catch (err) {
+                  // ignore
+                }
+              }}
+              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
                 {job.logoUrl ? (
@@ -142,20 +173,25 @@ const SavedJobsModal = ({ isOpen, onClose }: SavedJobsModalProps) => {
                   <span>{job.logo}</span>
                 )}
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 mb-1">{job.title}</h4>
-                <p className="text-sm text-gray-600 mb-1">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 mb-1 break-words">{job.title}</h4>
+                <p className="text-sm text-gray-600 mb-1 break-words">
                   {job.company} • {job.location}
                 </p>
                 <p className="text-sm font-semibold text-savoy-blue mb-2">{job.salary}</p>
               </div>
-              <button
-                onClick={() => handleUnsave(job.id)}
-                className="text-savoy-blue hover:text-blue-700 transition-colors flex-shrink-0"
-                title="Remove from saved jobs"
-              >
-                <BookmarkIconSolid className="h-6 w-6" />
-              </button>
+              <div className="flex-shrink-0 mt-2 sm:mt-0 sm:ml-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUnsave(job.id);
+                  }}
+                  className="text-savoy-blue hover:text-blue-700 transition-colors"
+                  title="Remove from saved jobs"
+                >
+                  <BookmarkIconSolid className="h-6 w-6" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

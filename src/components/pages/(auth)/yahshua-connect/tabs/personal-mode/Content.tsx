@@ -138,17 +138,24 @@ const Content = ({ averageRating }: ContentProps) => {
         logoUrl: job.company_logo || undefined,
         saved: savedJobIds.has(job.id),
         match: job.match_percentage || 0,
-        applied: job.applied || false, // Applied status from backend
+        applied: job.applied || job.applied_flag || job.applied === true || false, // Applied status from backend (fallback keys)
+        // Provide status and timestamp so JobCard can render proper badge (rejected/hired/etc.)
+        applied_job_status:
+          job.applied_job_status ||
+          job.application_status ||
+          job.status ||
+          job.application?.status ||
+          '',
+        applied_job_updated_at:
+          job.applied_job_updated_at ||
+          job.application_updated_at ||
+          job.application?.updated_at ||
+          job.applied_updated_at ||
+          null,
       };
     });
   }, [highMatchJobsData, savedJobIds]);
 
-  const recommendedTraining = {
-    title: 'Mastering Design System',
-    duration: '3 hrs',
-    level: 'Intermediate',
-    price: 'FREE',
-  };
 
   const handleJobCardClick = (jobId: number) => {
     // Toggle: if same job is clicked, close it; otherwise, open the new one

@@ -21,6 +21,7 @@ import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useAp
 import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import useGetApplicantProfile from './hooks/useGetApplicantProfile';
 import useUpdateApplicantProfile from './profile/hooks/useUpdateApplicantProfile';
+import useGetApplicantNotifications from './hooks/useGetApplicantNotifications';
 
 import classNames from '@/helpers/classNames';
 
@@ -67,6 +68,18 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
 
   // Total unread count (personal + business)
   const totalUnreadCount = personalUnreadCount + businessUnreadCount;
+  // Applicant notifications (YAHSHUA Connect)
+  const { data: applicantNotificationsData } = useGetApplicantNotifications();
+  const applicantUnreadCount = (() => {
+    const pages = applicantNotificationsData?.pages || [];
+    for (const p of pages) {
+      if (p?.unread_count != null) return p.unread_count;
+      if (p?.data?.unread_count != null) return p.data.unread_count;
+      if (p?.data?.data?.unread_count != null) return p.data.data.unread_count;
+    }
+    return 0;
+  })();
+  const unreadCount = applicantUnreadCount;
   const [isExpiring, setIsExpiring] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
@@ -261,23 +274,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     mutate(void 0, callbackReq);
   };
 
-  // Dummy data for notifications
-  const notifications = [
-    {
-      id: 1,
-      type: 'job' as const,
-      title: 'New job match!',
-      description: 'Junior UX Designer matches 92%',
-      timeAgo: '2 min ago',
-    },
-    {
-      id: 2,
-      type: 'booking' as const,
-      title: 'Booking confirmed',
-      description: 'Maria Santos confirmed',
-      timeAgo: '1 hour ago',
-    },
-  ];
+  // removed dummy notifications - NotificationsModal now fetches backend data directly
 
   // Personal Mode: Applicant to Employer chats (job applications)
   const handleSelectPersonalMessage = (chat: { appliedJobId: number; jobTitle: string; employerName: string; employerLogo?: string | null; employerInitials: string }) => {
@@ -401,9 +398,11 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               )}
             >
               <NotificationsIcon fill="#6B7280" />
+              {unreadCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
-                1
+                  {unreadCount > 99 ? '99+' : unreadCount}
               </span>
+              )}
             </button>
 
             {/* Profile Dropdown */}
@@ -516,15 +515,17 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 disabled={disabled}
                 className={classNames(
                   "relative p-2.5 text-gray-600 rounded-xl transition-colors",
-                  disabled 
-                    ? "opacity-50 cursor-not-allowed" 
+                  disabled
+                    ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-100"
                 )}
               >
                 <NotificationsIcon fill="#6B7280" />
+                {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
-                  1
+                    {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
+                )}
               </button>
 
               {/* Profile Dropdown */}
@@ -661,7 +662,6 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       <NotificationsModal
         isOpen={showNotificationsModal}
         onClose={() => setShowNotificationsModal(false)}
-        notifications={notifications}
       />
 
       {selectedChat && (

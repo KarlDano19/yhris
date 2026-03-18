@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 import toast from 'react-hot-toast';
@@ -15,7 +16,7 @@ import ViewApplicantsModal from './modals/ViewApplicantsModal';
 import ApplicantProfileModal from './modals/ApplicantProfileModal';
 import ConfirmHireModal from './modals/ConfirmHireModal';
 import SubmitPaymentProofModal from './modals/SubmitPaymentProofModal';
-import ViewDailyProgressModal from '../my-jobs/modals/ViewDailyProgressModal';
+import ViewApplicantDailyProgress from './modals/ViewApplicantDailyProgressModal';
 import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import ViewPreviousHiresModal from './modals/ViewPreviousHiresModal';
@@ -860,6 +861,12 @@ const Content = () => {
           onViewProfile={handleViewProfile}
           onHire={handleHireClick}
           onReject={handleRejectClick}
+          onViewDailyProgress={(applicationId: number) => {
+            // open daily progress modal for this application
+            handleViewDailyProgress(selectedJob.id, applicationId);
+            // close applicants modal
+            setIsViewApplicantsModalOpen(false);
+          }}
         />
       )}
 
@@ -993,7 +1000,7 @@ const Content = () => {
       {isViewDailyProgressModalOpen && selectedJob && selectedApplicationId && (() => {
         const application = selectedJob.applications?.find((app: T_BusinessJobApplication) => app.id === selectedApplicationId);
         return application ? (
-          <ViewDailyProgressModal
+          <ViewApplicantDailyProgress
             isOpen={isViewDailyProgressModalOpen}
             onClose={() => {
               setIsViewDailyProgressModalOpen(false);
@@ -1051,3 +1058,4 @@ const Content = () => {
 };
 
 export default Content;
+
