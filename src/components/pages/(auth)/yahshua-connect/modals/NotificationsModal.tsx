@@ -21,6 +21,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
   const { data, isLoading, fetchNextPage, hasNextPage, refetch, isFetchingNextPage } = useGetApplicantNotifications();
 
   const [tab, setTab] = useState<'all' | 'unread'>('all');
+  const [showSwipeHint, setShowSwipeHint] = React.useState(false);
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
   const { mutate: deleteNotification } = useDeleteApplicantNotification();
@@ -127,8 +128,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
     const THRESHOLD = 80;
     const MAX_REVEAL = 120;
-    const FULL_SWIPE = 180;
-    const lastDxRef = React.useRef<number>(0);
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
       startXRef.current = e.clientX;
@@ -139,7 +138,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
       if (!swipingRef.current || startXRef.current === null) return;
       const dxRaw = e.clientX - startXRef.current;
-      lastDxRef.current = dxRaw;
       // visually clamp transform so we don't slide completely off-screen
       if (dxRaw < 0) {
         const clamped = Math.max(dxRaw, -MAX_REVEAL);
@@ -156,17 +154,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
       swipingRef.current = false;
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
 
-      // if user performed a full swipe past the full threshold, delete immediately
-      if (lastDxRef.current <= -FULL_SWIPE) {
-        handleDeleteNotification(notification.id);
-        // reset values
-        setTranslateX(0);
-        openRef.current = false;
-        startXRef.current = null;
-        lastDxRef.current = 0;
-        return;
-      }
-
       if (translateX <= -THRESHOLD) {
         // open to reveal actions
         setTranslateX(-MAX_REVEAL);
@@ -177,7 +164,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         openRef.current = false;
       }
       startXRef.current = null;
-      lastDxRef.current = 0;
     };
 
     const onClickItem = () => {
@@ -344,6 +330,14 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
         {/* Scrollable content area with infinite scroll */}
       <div
+        className="relative"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setShowSwipeHint(e.clientX > rect.right - 40);
+        }}
+        onMouseLeave={() => setShowSwipeHint(false)}
+      >
+      <div
         ref={listRef}
         onScroll={handleScroll}
         className="space-y-0 max-h-[70vh] overflow-y-auto pr-2"
@@ -364,6 +358,12 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
             )}
           </>
         )}
+      </div>
+      {showSwipeHint && (
+        <div className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
+          Hold and swipe left to reveal the delete button
+        </div>
+      )}
       </div>
 
       <div className="p-4 text-center">

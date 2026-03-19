@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import useFindJobs from './hooks/useFindJobs';
 import JobFiltersModal from '../../modals/JobFIltersModal';
-import JobCard from '../../components/JobCard';
+import JobCard from '../../JobCard';
 import JobDetailsModal from '../../modals/JobDetailsModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 

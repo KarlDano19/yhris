@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
-import FilterRequestsModal from './components/FilterRequestsModal';
+import FilterRequestsModal from './modals/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './pages/find-work/modals/ConfirmAcceptJobModal';
 import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';

@@ -10,7 +10,7 @@ import JobAcceptedModal from './modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './modals/ConfirmAcceptJobModal';
 import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
-import FilterRequestsModal from '../../components/FilterRequestsModal';
+import FilterRequestsModal from '../../modals/FilterRequestsModal';
 import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
 import useFindBusinessJobs from './hooks/useFindBusinessJobs';
 import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';

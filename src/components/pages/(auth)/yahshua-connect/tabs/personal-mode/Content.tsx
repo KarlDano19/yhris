@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import useGetApplicationByUser from '../../hooks/useGetApplicationByUser';
 import useGetSavedJobs from '../../hooks/useGetSavedJobs';
 import useGetHighMatchJobs from './hooks/useGetHighMatchJobs';
-import JobCard from './components/JobCard';
+import JobCard from './JobCard';
 import JobDetailsModal from './modals/JobDetailsModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 

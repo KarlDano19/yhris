@@ -5,8 +5,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import useAddSavedJobs from '../pages/jobs/hooks/useAddSavedJobs';
-import useUpdateSavedJobs from '../../../hooks/useUpdateSavedJobs';
+import useAddSavedJobs from './pages/jobs/hooks/useAddSavedJobs';
+import useUpdateSavedJobs from '../../hooks/useUpdateSavedJobs';
 
 import { T_JobCard } from '@/types/personal-mode';
 

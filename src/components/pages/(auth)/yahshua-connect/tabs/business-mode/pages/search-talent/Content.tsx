@@ -5,7 +5,7 @@ import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
 import type { Talent } from '@/types/business-mode';
 import useSearchTalent from './hooks/useSearchTalent';
-import FilterRequestsModal from '../../components/FilterRequestsModal';
+import FilterRequestsModal from '../../modals/FilterRequestsModal';
 import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
 import TalentDetailsModal from './modals/TalentDetailsModal';
 import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
