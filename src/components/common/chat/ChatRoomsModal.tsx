@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
-import { XMarkIcon, BriefcaseIcon, UserIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, BriefcaseIcon, UserIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/hooks/chat/yahshua-connect/useApplicantChatsList';
@@ -238,8 +238,11 @@ const ChatRoomsModal = ({
   onSelectBusinessMessage,
 }: MessagesModalProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [searchInput, setSearchInput] = useState('');
   const [employerSearch, setEmployerSearch] = useState('');
   const [removedChatIds, setRemovedChatIds] = useState<Set<number>>(new Set());
+
+  const handleSearch = () => setEmployerSearch(searchInput);
   const { mutate: deleteChat } = useDeleteEmployerApplicantChat();
 
   // Employer-Applicant chats (used by both roles)
@@ -255,6 +258,7 @@ const ChatRoomsModal = ({
   // Clear search and removed IDs when modal closes
   useEffect(() => {
     if (!isOpen) {
+      setSearchInput('');
       setEmployerSearch('');
       setRemovedChatIds(new Set());
     }
@@ -553,14 +557,21 @@ const ChatRoomsModal = ({
     if (role === 'employer') {
       return (
         <>
-          <div className="mb-3">
+          <div className="flex items-center gap-2 mb-3">
             <input
               type="text"
-              value={employerSearch}
-              onChange={(e) => setEmployerSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
               placeholder="Search by applicant name..."
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none"
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none"
             />
+            <button
+              onClick={handleSearch}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
+            </button>
           </div>
           <div className="space-y-0 max-h-[400px] overflow-y-auto">{renderEmployerChats()}</div>
         </>
