@@ -26,9 +26,8 @@ import useGetApplicantNotifications from './hooks/useGetApplicantNotifications';
 
 import classNames from '@/helpers/classNames';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, BellIcon } from '@heroicons/react/24/outline';
 import YahshuaConnectLogo from '@/svg/YahshuaConnectLogo';
-import NotificationsIcon from '@/svg/NotificationsIcon';
 import ProfileDropdownIcon from '@/svg/ProfileDropdownIcon';
 import ChatIcon from '@/svg/ChatIcon';
 import ExitIcon from '@/svg/ExitIcon';
@@ -354,7 +353,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                   : "hover:bg-gray-100"
               )}
             >
-              <ChatIcon fill="#6B7280" />
+              <ChatIcon fill="#1e40af" />
               {totalUnreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
                   {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -371,7 +370,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
               )}
             >
-              <NotificationsIcon fill="#6B7280" />
+              <BellIcon className="block h-6 w-6 text-blue-800" />
               {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -475,7 +474,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                     : "hover:bg-gray-100"
                 )}
               >
-                <ChatIcon fill="#6B7280" />
+                <ChatIcon fill="#1e40af" />
                 {totalUnreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
                     {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -492,7 +491,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                   disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
                 )}
               >
-                <NotificationsIcon fill="#6B7280" />
+                <BellIcon className="block h-6 w-6 text-blue-800" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
