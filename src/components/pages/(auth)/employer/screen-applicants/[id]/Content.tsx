@@ -350,6 +350,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           created_at: item.created_at,
           updated_at: item.updated_at,
           is_archived: item.is_archived || false,
+          has_account: item.has_account === true,
         };
         dispatch({ type: SET_APPLICANT, payload: { applicant: newData } });
       });

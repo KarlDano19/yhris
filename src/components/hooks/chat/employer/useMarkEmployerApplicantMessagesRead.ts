@@ -11,7 +11,7 @@ async function markMessagesRead(chatId: number) {
     },
   };
 
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/${chatId}/messages/mark-read/`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/${chatId}/`;
   const res = await fetch(url, config);
 
   if (!res.ok) {

@@ -4,6 +4,7 @@ import { getCookie } from 'cookies-next';
 export interface EmployerApplicantChatListItem {
   id: number;
   applied_job_id: number;
+  job_posting_id: number;
   job_title: string;
   other_participant_id: number;
   other_participant_name: string;
@@ -38,7 +39,7 @@ async function getChatsList(jobPostingId?: number): Promise<ChatListResponse> {
       },
     };
 
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chats/`;
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/`;
     if (jobPostingId) {
       url += `?job_posting_id=${jobPostingId}`;
     }

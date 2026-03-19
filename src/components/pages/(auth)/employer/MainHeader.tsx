@@ -68,6 +68,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedChat, setSelectedChat] = useState<{
     appliedJobId: number;
+    jobPostingId: number;
     jobTitle: string;
     applicantName: string;
     applicantPhoto?: string | null;
@@ -274,6 +275,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
 
   const handleSelectMessage = (chat: {
     appliedJobId: number;
+    jobPostingId: number;
     jobTitle: string;
     applicantName: string;
     applicantPhoto?: string | null;
@@ -589,6 +591,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
           }}
           chatType="employer-applicant"
           appliedJobId={selectedChat.appliedJobId}
+          jobPostingId={selectedChat.jobPostingId}
           subtitle={selectedChat.jobTitle}
           personName={selectedChat.applicantName}
           personPhoto={selectedChat.applicantPhoto}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
@@ -8,6 +8,8 @@ import { XMarkIcon, BriefcaseIcon, UserIcon } from '@heroicons/react/24/outline'
 
 import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/hooks/chat/yahshua-connect/useApplicantChatsList';
+import useDeleteEmployerApplicantChat from '@/components/hooks/chat/employer/useDeleteEmployerApplicantChat';
+import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 
 // ============================================================================
 // Helpers
@@ -58,6 +60,7 @@ type TabType = 'personal' | 'business';
 // Callback types for different chat selections
 interface EmployerChatSelection {
   appliedJobId: number;
+  jobPostingId: number;
   jobTitle: string;
   applicantName: string;
   applicantPhoto?: string | null;
@@ -96,6 +99,121 @@ interface MessagesModalProps {
 }
 
 // ============================================================================
+// SwipeableChatItem — swipe left to reveal delete button
+// ============================================================================
+
+interface SwipeableChatItemProps {
+  chatId: number;
+  onDelete: (chatId: number) => void;
+  children: React.ReactNode;
+}
+
+const SwipeableChatItem = ({ chatId, onDelete, children }: SwipeableChatItemProps) => {
+  const [translateX, setTranslateX] = useState(0);
+  const startXRef = useRef<number | null>(null);
+  const startYRef = useRef<number | null>(null);
+  const swipingRef = useRef(false);
+  const openRef = useRef(false);
+  const lastDxRef = useRef(0);
+
+  const THRESHOLD = 80;
+  const MAX_REVEAL = 120;
+  const FULL_SWIPE = 180;
+  const SWIPE_START_MIN = 6; // px of horizontal movement before we commit to a swipe
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    startXRef.current = e.clientX;
+    startYRef.current = e.clientY;
+    swipingRef.current = false; // only set true once horizontal intent is clear
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (startXRef.current === null || startYRef.current === null) return;
+    const dx = e.clientX - startXRef.current;
+    const dy = e.clientY - startYRef.current;
+
+    if (!swipingRef.current) {
+      // Commit to swipe only when horizontal movement clearly dominates
+      if (Math.abs(dx) < SWIPE_START_MIN) return;
+      if (Math.abs(dy) >= Math.abs(dx)) return; // vertical scroll intent — bail
+      swipingRef.current = true;
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    }
+
+    lastDxRef.current = dx;
+    if (dx < 0) {
+      setTranslateX(Math.max(dx, -MAX_REVEAL));
+    } else if (openRef.current) {
+      setTranslateX(Math.min(dx - MAX_REVEAL, 0));
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!swipingRef.current) {
+      // No swipe happened — reset start refs so a click can proceed normally
+      startXRef.current = null;
+      startYRef.current = null;
+      return;
+    }
+    swipingRef.current = false;
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+
+    if (lastDxRef.current <= -FULL_SWIPE) {
+      onDelete(chatId);
+      setTranslateX(0);
+      openRef.current = false;
+      startXRef.current = null;
+      startYRef.current = null;
+      lastDxRef.current = 0;
+      return;
+    }
+
+    if (translateX <= -THRESHOLD) {
+      setTranslateX(-MAX_REVEAL);
+      openRef.current = true;
+    } else {
+      setTranslateX(0);
+      openRef.current = false;
+    }
+    startXRef.current = null;
+    startYRef.current = null;
+    lastDxRef.current = 0;
+  };
+
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete button revealed on swipe */}
+      <div className="absolute right-2 top-2 bottom-2 w-20 flex items-center justify-end pr-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(chatId);
+          }}
+          className="h-10 px-3 flex items-center justify-center bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 active:bg-red-700 transition-colors"
+        >
+          <span className="h-5 w-5 inline-flex text-white"><DeleteIconNoBorder /></span>
+        </button>
+      </div>
+
+      {/* Swipeable content */}
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        style={{
+          transform: `translateX(${translateX}px)`,
+          transition: swipingRef.current ? 'none' : 'transform 180ms ease',
+        }}
+        className="bg-white"
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
@@ -121,6 +239,9 @@ const MessagesModal = ({
   onSelectBusinessMessage,
 }: MessagesModalProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('personal');
+  const [employerSearch, setEmployerSearch] = useState('');
+  const [removedChatIds, setRemovedChatIds] = useState<Set<number>>(new Set());
+  const { mutate: deleteChat } = useDeleteEmployerApplicantChat();
 
   // Employer-Applicant chats (used by both roles)
   const { data: employerApplicantData, isLoading: isEmployerApplicantLoading, error: employerApplicantError } =
@@ -131,6 +252,23 @@ const MessagesModal = ({
   const { data: applicantData, isLoading: isApplicantLoading, error: applicantError } =
     useApplicantChatsList(undefined, isOpen && role === 'applicant');
   const applicantChats = applicantData?.records || [];
+
+  // Clear search and removed IDs when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setEmployerSearch('');
+      setRemovedChatIds(new Set());
+    }
+  }, [isOpen]);
+
+  const handleDeleteChat = (chatId: number) => {
+    setRemovedChatIds(prev => {
+      const next = new Set(prev);
+      next.add(chatId);
+      return next;
+    });
+    deleteChat(chatId);
+  };
 
   // Calculate unread counts
   const personalUnreadCount = employerApplicantChats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0);
@@ -171,61 +309,79 @@ const MessagesModal = ({
     if (employerApplicantError) return renderErrorState();
     if (employerApplicantChats.length === 0) return renderEmptyState();
 
-    return employerApplicantChats.map((chat: EmployerApplicantChatListItem) => {
+    const filteredChats = employerApplicantChats
+      .filter((c) => !removedChatIds.has(c.id))
+      .filter((c) =>
+        employerSearch
+          ? c.other_participant_name.toLowerCase().includes(employerSearch.toLowerCase())
+          : true
+      );
+
+    if (filteredChats.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+          <p className="text-sm">{employerSearch ? 'No conversations found' : 'No messages yet'}</p>
+        </div>
+      );
+    }
+
+    return filteredChats.map((chat: EmployerApplicantChatListItem) => {
       const initials = getInitials(chat.other_participant_name);
       const preview = chat.last_message || 'Start the conversation';
 
       return (
-        <button
-          key={chat.id}
-          onClick={() => {
-            onSelectEmployerMessage?.({
-              appliedJobId: chat.applied_job_id,
-              jobTitle: chat.job_title,
-              applicantName: chat.other_participant_name,
-              applicantPhoto: chat.other_participant_photo || null,
-              applicantInitials: initials,
-            });
-            onClose();
-          }}
-          className="w-full flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 rounded-lg"
-        >
-          {chat.other_participant_photo && chat.other_participant_photo !== '/assets/no-user.png' ? (
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-              <img src={chat.other_participant_photo} alt={chat.other_participant_name} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-              {initials}
-            </div>
-          )}
-          <div className="flex-1 text-left min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="font-semibold text-gray-900 truncate">{chat.other_participant_name}</h4>
-              {chat.unread_count > 0 && (
-                <span className="ml-2 min-w-[24px] h-6 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-2 flex-shrink-0">
-                  {chat.unread_count}
-                </span>
-              )}
-            </div>
-            {chat.job_title && (
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-xs font-medium text-savoy-blue bg-savoy-blue/10 px-2 py-0.5 rounded">
-                  {chat.job_title}
-                </span>
+        <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat}>
+          <button
+            onClick={() => {
+              onSelectEmployerMessage?.({
+                appliedJobId: chat.applied_job_id,
+                jobPostingId: chat.job_posting_id,
+                jobTitle: chat.job_title,
+                applicantName: chat.other_participant_name,
+                applicantPhoto: chat.other_participant_photo || null,
+                applicantInitials: initials,
+              });
+              onClose();
+            }}
+            className="w-full flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+          >
+            {chat.other_participant_photo && chat.other_participant_photo !== '/assets/no-user.png' ? (
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                <img src={chat.other_participant_photo} alt={chat.other_participant_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                {initials}
               </div>
             )}
-            <p className="text-sm text-gray-600 truncate">{preview}</p>
-            {chat.last_message_at && (
-              <p
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-semibold text-gray-900 truncate">{chat.other_participant_name}</h4>
+                {chat.unread_count > 0 && (
+                  <span className="ml-2 min-w-[24px] h-6 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-2 flex-shrink-0">
+                    {chat.unread_count}
+                  </span>
+                )}
+              </div>
+              {chat.job_title && (
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-medium text-savoy-blue bg-savoy-blue/10 px-2 py-0.5 rounded">
+                    {chat.job_title}
+                  </span>
+                </div>
+              )}
+              <p className="text-sm text-gray-600 truncate">{preview}</p>
+              {chat.last_message_at && (
+                <p
                   className="text-xs text-gray-400 mt-1 cursor-default"
                   title={formatFullDateTime(chat.last_message_at)}
                 >
                   {formatRelativeTime(chat.last_message_at)}
                 </p>
-            )}
-          </div>
-        </button>
+              )}
+            </div>
+          </button>
+        </SwipeableChatItem>
       );
     });
   };
@@ -393,7 +549,20 @@ const MessagesModal = ({
   // Render content based on role
   const renderContent = () => {
     if (role === 'employer') {
-      return <div className="space-y-0 max-h-[400px] overflow-y-auto">{renderEmployerChats()}</div>;
+      return (
+        <>
+          <div className="mb-3">
+            <input
+              type="text"
+              value={employerSearch}
+              onChange={(e) => setEmployerSearch(e.target.value)}
+              placeholder="Search by applicant name..."
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none"
+            />
+          </div>
+          <div className="space-y-0 max-h-[400px] overflow-y-auto">{renderEmployerChats()}</div>
+        </>
+      );
     }
 
     // Applicant role with tabs

@@ -339,7 +339,7 @@ export default function Person({
                 if (whichModal === 'CHECKLIST') return permissions.can_update;
                 if (whichModal === 'SEND_EMAIL') return permissions.can_update;
                 if (whichModal === 'SCHEDULE_INTERVIEW') return permissions.can_update;
-                if (whichModal === 'MESSAGE_APPLICANT') return permissions.can_update;
+                if (whichModal === 'MESSAGE_APPLICANT') return permissions.can_update && applicant.has_account === true;
                 if (whichModal === 'MOVE_TO_JOB') return permissions.can_update;
                 return true;
               };
@@ -447,6 +447,7 @@ export default function Person({
         onClose={() => setIsChatModalOpen(false)}
         chatType="employer-applicant"
         appliedJobId={applicant.applicationId}
+        jobPostingId={Number(params.id)}
         personName={applicant.name || 'Applicant'}
         personInitials={
           applicant.name

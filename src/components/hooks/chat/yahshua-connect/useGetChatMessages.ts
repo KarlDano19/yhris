@@ -19,7 +19,7 @@ async function getChatMessages(chatId: number, jobPostingId?: number) {
     }
     
     const queryString = searchParams.toString();
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chat/${chatId}/messages/${queryString ? `?${queryString}` : ''}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chat/${chatId}/${queryString ? `?${queryString}` : ''}`;
     
     const res = await fetch(url, config);
     if (!res.ok) {

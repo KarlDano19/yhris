@@ -2,8 +2,9 @@
 
 import { Fragment, useState, useEffect, useRef } from 'react';
 
+import Link from 'next/link';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PaperAirplaneIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 import { useChat, ChatType } from '@/components/hooks/chat/useChat';
@@ -214,7 +215,7 @@ const ChatModal = ({
           return (
             <div
               key={message.id}
-              className={`group relative flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
+              className={`group relative flex items-end gap-1 ${isSentByMe ? 'justify-end' : 'justify-start'}`}
             >
               <div className="relative max-w-[70%]">
                 {/* Floating datetime tooltip — appears below on hover */}
@@ -296,7 +297,20 @@ const ChatModal = ({
                     )}
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{resolvedPersonName}</h3>
-                      {resolvedSubtitle && <p className="text-sm text-gray-600">{resolvedSubtitle}</p>}
+                      {resolvedSubtitle && (
+                        <div className="flex items-center gap-1">
+                          <p className="text-sm text-gray-600">{resolvedSubtitle}</p>
+                          {chatType === 'employer-applicant' && resolvedJobPostingId && (
+                            <Link
+                              href={`/screen-applicants/${resolvedJobPostingId}`}
+                              title="View applicants for this job"
+                              className="text-gray-400 hover:text-savoy-blue transition-colors"
+                            >
+                              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                            </Link>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <button

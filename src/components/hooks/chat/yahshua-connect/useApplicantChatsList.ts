@@ -41,7 +41,7 @@ async function fetchApplicantChatsList(jobPostingId?: number): Promise<Applicant
     },
   };
 
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chats/?${searchParams.toString()}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chat/?${searchParams.toString()}`;
 
   const res = await fetch(url, config);
   if (!res.ok) {

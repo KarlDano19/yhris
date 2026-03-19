@@ -15,7 +15,7 @@ async function getChatMessages(chatId?: number) {
     };
 
     if (token) {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/${chatId}/messages/`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/${chatId}/`;
       const res = await fetch(url, config);
 
       if (!res.ok) {

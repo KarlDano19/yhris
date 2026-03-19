@@ -17,7 +17,7 @@ async function sendMessage(data: { chatId: number; message: string; jobPostingId
       }),
     };
     
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chat/${data.chatId}/messages/`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/applicant-chat/${data.chatId}/`;
     
     const res = await fetch(url, config);
     if (!res.ok) {
