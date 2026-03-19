@@ -2,9 +2,10 @@
 
 import { Fragment, useState, useEffect, useRef } from 'react';
 
+
 import Link from 'next/link';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, PaperAirplaneIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PaperAirplaneIcon, ArrowTopRightOnSquareIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 import { useChat, ChatType } from '@/components/hooks/chat/useChat';
@@ -22,6 +23,21 @@ function formatRelativeTime(iso: string): string {
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
   if (diff < 2592000) return `${Math.floor(diff / 604800)}w ago`;
   return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileTypeInfo(filename: string): { label: string; className: string } {
+  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+  if (ext === 'pdf') return { label: 'PDF', className: 'bg-red-100 text-red-700' };
+  if (ext === 'doc' || ext === 'docx') return { label: 'DOC', className: 'bg-blue-100 text-blue-700' };
+  if (ext === 'xls' || ext === 'xlsx') return { label: 'XLS', className: 'bg-green-100 text-green-700' };
+  if (['png', 'jpg', 'jpeg'].includes(ext)) return { label: 'IMG', className: 'bg-purple-100 text-purple-700' };
+  return { label: ext.toUpperCase() || 'FILE', className: 'bg-gray-100 text-gray-600' };
 }
 
 function formatFullDateTime(iso: string): string {
@@ -51,11 +67,20 @@ function formatFullDateTime(iso: string): string {
 // Types
 // ============================================================================
 
+interface ChatAttachment {
+  id: number;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  url: string;
+}
+
 interface ChatMessage {
   id: number;
   message: string;
   is_sent_by_me: boolean;
   created_at: string;
+  attachments?: ChatAttachment[];
 }
 
 interface ChatModalProps {
@@ -110,7 +135,12 @@ const ChatMessagesModal = ({
   jobTitle,
 }: ChatModalProps) => {
   const [messageInput, setMessageInput] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const ACCEPTED_TYPES = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg';
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
   // Resolve props with backwards compatibility
   const resolvedPersonName = personName || recipientName || '';
@@ -132,14 +162,27 @@ const ChatMessagesModal = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter((f) => f.size <= MAX_FILE_SIZE);
+    const oversized = files.filter((f) => f.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+      toast.custom(() => <CustomToast message="Some files exceed 10 MB and were removed." type="error" />);
+    }
+    setPendingFiles((prev) => [...prev, ...valid]);
+    e.target.value = '';
+  };
+
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !chatId || isSending) return;
+    if ((!messageInput.trim() && pendingFiles.length === 0) || !chatId || isSending) return;
 
     const message = messageInput.trim();
+    const files = [...pendingFiles];
     setMessageInput('');
+    setPendingFiles([]);
 
     try {
-      await sendMessage(message);
+      await sendMessage(message, files.length > 0 ? files : undefined);
     } catch (error: any) {
       toast.custom(() => (
         <CustomToast message={error?.message || 'Failed to send message'} type='error' />
@@ -207,7 +250,8 @@ const ChatMessagesModal = ({
 
     return (
       <div className="space-y-4">
-        {messages.map((message: ChatMessage) => {
+        {messages.map((message: ChatMessage, index: number) => {
+          const isLast = index === messages.length - 1;
           const isSentByMe = message.is_sent_by_me;
           const relativeTime = message.created_at ? formatRelativeTime(message.created_at) : '';
           const fullDateTime = message.created_at ? formatFullDateTime(message.created_at) : '';
@@ -233,9 +277,39 @@ const ChatMessagesModal = ({
                   }`}
                 >
                   <p className="text-sm">{message.message}</p>
-                  <p className={`text-xs mt-1 ${isSentByMe ? 'text-white/70' : 'text-gray-500'}`}>
-                    {relativeTime}
-                  </p>
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {message.attachments.map((att) => {
+                        const { label, className: badgeClass } = getFileTypeInfo(att.file_name);
+                        return (
+                          <a
+                            key={att.id}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-2 rounded-md px-2 py-1.5 no-underline transition-colors ${
+                              isSentByMe
+                                ? 'bg-white/15 hover:bg-white/25'
+                                : 'bg-gray-200/70 hover:bg-gray-200'
+                            }`}
+                          >
+                            <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                              {label}
+                            </span>
+                            <span className={`text-xs font-medium truncate max-w-[160px] ${isSentByMe ? 'text-white' : 'text-gray-800'}`}>
+                              {att.file_name}
+                            </span>
+                            <PaperClipIcon className={`h-3 w-3 shrink-0 ml-auto ${isSentByMe ? 'text-white/70' : 'text-gray-400'}`} />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {isLast && (
+                    <p className={`text-xs mt-1 ${isSentByMe ? 'text-white/70' : 'text-gray-500'}`}>
+                      {relativeTime}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -328,7 +402,52 @@ const ChatMessagesModal = ({
 
                 {/* Input Area */}
                 <div className="border-t border-gray-200 p-5">
+                  {/* File chips */}
+                  {pendingFiles.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {pendingFiles.map((file, i) => {
+                        const { label, className: badgeClass } = getFileTypeInfo(file.name);
+                        return (
+                          <div
+                            key={i}
+                            className="group flex items-center gap-2 bg-white border border-gray-200 rounded-lg pl-2 pr-1.5 py-1.5 shadow-sm hover:border-gray-300 transition-colors max-w-[220px]"
+                          >
+                            <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                              {label}
+                            </span>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-medium text-gray-800 truncate leading-tight">{file.name}</span>
+                              <span className="text-[10px] text-gray-400 leading-tight">{formatFileSize(file.size)}</span>
+                            </div>
+                            <button
+                              onClick={() => setPendingFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                              className="shrink-0 ml-0.5 rounded-full p-0.5 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                              <XMarkIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_TYPES}
+                      multiple
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    {/* Paperclip button */}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2.5 text-gray-400 hover:text-savoy-blue transition-colors flex-shrink-0"
+                    >
+                      <PaperClipIcon className="h-5 w-5" />
+                    </button>
                     <input
                       type="text"
                       value={messageInput}
@@ -340,7 +459,7 @@ const ChatMessagesModal = ({
                     />
                     <button
                       onClick={handleSendMessage}
-                      disabled={!messageInput.trim() || isSending || !chatId}
+                      disabled={(!messageInput.trim() && pendingFiles.length === 0) || isSending || !chatId}
                       className="p-2.5 bg-savoy-blue text-white rounded-lg hover:bg-savoy-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSending ? (

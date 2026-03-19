@@ -4,21 +4,29 @@ import { getCookie } from 'cookies-next';
 interface SendMessageInput {
   chatId: number;
   message: string;
+  files?: File[];
 }
 
-async function sendChatMessage({ chatId, message }: SendMessageInput) {
+async function sendChatMessage({ chatId, message, files }: SendMessageInput) {
   const token = getCookie('token');
-  const config: RequestInit = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Token ${token}`,
-    },
-    body: JSON.stringify({ message }),
+  const headers: Record<string, string> = {
+    Authorization: `Token ${token}`,
   };
 
+  let body: string | FormData;
+
+  if (files && files.length > 0) {
+    const formData = new FormData();
+    formData.append('message', message);
+    files.forEach((file) => formData.append('files', file));
+    body = formData;
+  } else {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify({ message });
+  }
+
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api/employer-applicant-chat/${chatId}/`;
-  const res = await fetch(url, config);
+  const res = await fetch(url, { method: 'POST', headers, body });
 
   if (!res.ok) {
     const errorData = await res.json();
@@ -33,9 +41,7 @@ function useSendEmployerApplicantMessage() {
 
   return useMutation(sendChatMessage, {
     onSuccess: (data, variables) => {
-      // Invalidate messages cache to refetch messages
       queryClient.invalidateQueries(['employerApplicantChatMessagesCache', variables.chatId]);
-      // Invalidate chat list cache to update last message
       queryClient.invalidateQueries(['employerApplicantChatsListCache']);
     },
   });

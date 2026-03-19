@@ -28,7 +28,7 @@ interface UseChatReturn {
   messages: any[];
   isLoading: boolean;
   isSending: boolean;
-  sendMessage: (message: string) => Promise<void>;
+  sendMessage: (message: string, files?: File[]) => Promise<void>;
   markAsRead: () => void;
   conversationStarters: string[];
 }
@@ -116,19 +116,21 @@ export function useChat({
     }
   }, [enabled, chatId, chatType]);
 
-  const sendMessage = async (message: string) => {
-    if (!chatId || !message.trim()) return;
+  const sendMessage = async (message: string, files?: File[]) => {
+    if (!chatId || (!message.trim() && (!files || files.length === 0))) return;
 
     if (chatType === 'employer-applicant') {
       await sendEmployerApplicantMessage.mutateAsync({
         chatId,
         message: message.trim(),
+        files,
       });
     } else {
       await sendApplicantMessage.mutateAsync({
         chatId,
         message: message.trim(),
         jobPostingId: jobPostingId || applicantChat.data?.business_job_posting_id,
+        files,
       });
     }
   };
