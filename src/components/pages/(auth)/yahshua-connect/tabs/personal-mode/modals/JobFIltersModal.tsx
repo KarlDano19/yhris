@@ -54,7 +54,7 @@ const JobFiltersModal = ({
   const [isJobTitleFocused, setIsJobTitleFocused] = useState(false);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
 
-  // Reset pending filter when modal opens or filters prop changes
+  // Reset pending filter and autocomplete states when modal opens or filters prop changes
   useEffect(() => {
     if (isOpen) {
       setPendingFilter({
@@ -62,6 +62,12 @@ const JobFiltersModal = ({
         location: filters.location || [],
       });
       setLocationInput('');
+      setShowJobTitleAutocomplete(false);
+      setShouldShowJobTitleAutocomplete(false);
+      setShowLocationAutocomplete(false);
+      setShouldShowLocationAutocomplete(false);
+      setSelectedJobTitleIndex(-1);
+      setSelectedLocationIndex(-1);
     }
   }, [isOpen, filters]);
 
@@ -237,7 +243,7 @@ const JobFiltersModal = ({
             onSearchSubmit={handleSearch}
             onFocus={() => setIsJobTitleFocused(true)}
             onBlur={() => setIsJobTitleFocused(false)}
-            label="Job Title"
+            label="What"
             placeholder="Enter job title, company, or keywords"
             inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
           />
@@ -269,8 +275,8 @@ const JobFiltersModal = ({
             onSelectedValuesChange={(values) =>
               setPendingFilter((prev) => ({ ...prev, location: values }))
             }
-            label="Location"
-            placeholder="Enter locations, country"
+            label="Where"
+            placeholder="Locations, Country"
             inputClassName="flex-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm"
           />
         </div>

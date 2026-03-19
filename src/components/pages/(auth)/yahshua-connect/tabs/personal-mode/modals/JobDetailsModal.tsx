@@ -2,6 +2,8 @@ import { Fragment, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
+import { formatDateToLocal } from '@/helpers/date';
+
 import { Dialog, Transition } from '@headlessui/react';
 import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
 import ChatModal from '@/components/common/chat/ChatModal';
@@ -71,7 +73,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
         const expiresAt = new Date(updatedDate.getTime() + 15 * 24 * 60 * 60 * 1000);
         const now = new Date();
         if (now.getTime() <= expiresAt.getTime()) {
-          return expiresAt.toLocaleDateString();
+          return formatDateToLocal(expiresAt.toISOString(), true);
         }
       } catch (e) {
         return null;

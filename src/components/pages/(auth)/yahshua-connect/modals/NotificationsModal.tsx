@@ -293,11 +293,24 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
     }
   };
 
-  const formatTime = (iso?: string) => {
+  const formatTime = (iso?: string): string => {
     if (!iso) return '';
     try {
       const d = new Date(iso);
-      return d.toLocaleString();
+      const now = new Date();
+      const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      if (d.toDateString() === now.toDateString()) return time;
+
+      const startOfWeek = new Date(now);
+      const day = now.getDay();
+      startOfWeek.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+      startOfWeek.setHours(0, 0, 0, 0);
+      if (d >= startOfWeek) {
+        return `${d.toLocaleDateString('en-US', { weekday: 'long' })} ${time}`;
+      }
+
+      return `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}, ${time}`;
     } catch {
       return iso;
     }

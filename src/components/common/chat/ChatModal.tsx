@@ -10,6 +10,43 @@ import { useChat, ChatType } from '@/components/hooks/chat/useChat';
 import CustomToast from '@/components/CustomToast';
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+function formatRelativeTime(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 604800)}w ago`;
+  return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
+function formatFullDateTime(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  // Today
+  if (d.toDateString() === now.toDateString()) return time;
+
+  // This week (Monday → today)
+  const startOfWeek = new Date(now);
+  const day = now.getDay(); // 0=Sun
+  startOfWeek.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  startOfWeek.setHours(0, 0, 0, 0);
+  if (d >= startOfWeek) {
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+    return `${dayName} ${time}`;
+  }
+
+  // Older
+  const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `${dateStr}, ${time}`;
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -171,33 +208,34 @@ const ChatModal = ({
       <div className="space-y-4">
         {messages.map((message: ChatMessage) => {
           const isSentByMe = message.is_sent_by_me;
-          const timestamp = message.created_at
-            ? new Date(message.created_at).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-            : '';
+          const relativeTime = message.created_at ? formatRelativeTime(message.created_at) : '';
+          const fullDateTime = message.created_at ? formatFullDateTime(message.created_at) : '';
 
           return (
             <div
               key={message.id}
-              className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
+              className={`group relative flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  isSentByMe
-                    ? 'bg-savoy-blue text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}
-              >
-                <p className="text-sm">{message.message}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    isSentByMe ? 'text-white/70' : 'text-gray-500'
+              <div className="relative max-w-[70%]">
+                {/* Floating datetime tooltip — appears below on hover */}
+                <span
+                  className={`pointer-events-none absolute top-full mt-1 whitespace-nowrap text-xs text-gray-600 bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10 ${
+                    isSentByMe ? 'right-0' : 'left-0'
                   }`}
                 >
-                  {timestamp}
-                </p>
+                  {fullDateTime}
+                </span>
+
+                <div
+                  className={`rounded-lg p-3 ${
+                    isSentByMe ? 'bg-savoy-blue text-white' : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm">{message.message}</p>
+                  <p className={`text-xs mt-1 ${isSentByMe ? 'text-white/70' : 'text-gray-500'}`}>
+                    {relativeTime}
+                  </p>
+                </div>
               </div>
             </div>
           );

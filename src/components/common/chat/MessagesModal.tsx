@@ -10,6 +10,45 @@ import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } 
 import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/hooks/chat/yahshua-connect/useApplicantChatsList';
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+function formatRelativeTime(iso?: string): string {
+  if (!iso) return '';
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 604800)}w ago`;
+  return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
+function formatFullDateTime(iso?: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  // Today
+  if (d.toDateString() === now.toDateString()) return time;
+
+  // This week (Monday → today)
+  const startOfWeek = new Date(now);
+  const day = now.getDay();
+  startOfWeek.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  startOfWeek.setHours(0, 0, 0, 0);
+  if (d >= startOfWeek) {
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+    return `${dayName} ${time}`;
+  }
+
+  // Older
+  const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `${dateStr}, ${time}`;
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -178,7 +217,12 @@ const MessagesModal = ({
             )}
             <p className="text-sm text-gray-600 truncate">{preview}</p>
             {chat.last_message_at && (
-              <p className="text-xs text-gray-400 mt-1">{new Date(chat.last_message_at).toLocaleString()}</p>
+              <p
+                  className="text-xs text-gray-400 mt-1 cursor-default"
+                  title={formatFullDateTime(chat.last_message_at)}
+                >
+                  {formatRelativeTime(chat.last_message_at)}
+                </p>
             )}
           </div>
         </button>
@@ -236,7 +280,12 @@ const MessagesModal = ({
             </div>
             <p className="text-sm text-gray-600 truncate">{preview}</p>
             {chat.last_message_at && (
-              <p className="text-xs text-gray-400 mt-1">{new Date(chat.last_message_at).toLocaleString()}</p>
+              <p
+                  className="text-xs text-gray-400 mt-1 cursor-default"
+                  title={formatFullDateTime(chat.last_message_at)}
+                >
+                  {formatRelativeTime(chat.last_message_at)}
+                </p>
             )}
           </div>
         </button>
@@ -298,7 +347,12 @@ const MessagesModal = ({
             )}
             <p className="text-sm text-gray-600 truncate">{preview}</p>
             {chat.last_message_at && (
-              <p className="text-xs text-gray-400 mt-1">{new Date(chat.last_message_at).toLocaleString()}</p>
+              <p
+                  className="text-xs text-gray-400 mt-1 cursor-default"
+                  title={formatFullDateTime(chat.last_message_at)}
+                >
+                  {formatRelativeTime(chat.last_message_at)}
+                </p>
             )}
           </div>
         </button>

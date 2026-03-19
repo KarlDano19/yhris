@@ -181,7 +181,7 @@ const JobSearchAutocomplete = ({
     }
 
     // Results found
-    if (autocompleteResults?.records && autocompleteResults.records.length > 0) {
+    if (autocompleteResults?.records && autocompleteResults.records.length > 0 && uniqueSuggestions.length > 0) {
       return (
         <ul
           ref={autocompleteRef}
