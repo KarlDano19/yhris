@@ -9,7 +9,7 @@ import { XMarkIcon, BriefcaseIcon, UserIcon } from '@heroicons/react/24/outline'
 import { useGetEmployerApplicantChatsList, type EmployerApplicantChatListItem } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
 import { useApplicantChatsList, type ApplicantChatListItem } from '@/components/hooks/chat/yahshua-connect/useApplicantChatsList';
 import useDeleteEmployerApplicantChat from '@/components/hooks/chat/employer/useDeleteEmployerApplicantChat';
-import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 // ============================================================================
 // Helpers
@@ -189,9 +189,8 @@ const SwipeableChatItem = ({ chatId, onDelete, children }: SwipeableChatItemProp
             e.stopPropagation();
             onDelete(chatId);
           }}
-          className="h-10 px-3 flex items-center justify-center bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 active:bg-red-700 transition-colors"
         >
-          <span className="h-5 w-5 inline-flex text-white"><DeleteIconNoBorder /></span>
+          <DeleteIcon />
         </button>
       </div>
 
@@ -230,7 +229,7 @@ const getInitials = (name: string): string => {
 // Main Component
 // ============================================================================
 
-const MessagesModal = ({
+const ChatRoomsModal = ({
   isOpen,
   onClose,
   role,
@@ -392,61 +391,64 @@ const MessagesModal = ({
     if (employerApplicantError) return renderErrorState();
     if (employerApplicantChats.length === 0) return renderEmptyState();
 
-    return employerApplicantChats.map((chat: EmployerApplicantChatListItem) => {
-      const initials = getInitials(chat.other_participant_name);
-      const preview = chat.last_message || 'Start the conversation';
+    return employerApplicantChats
+      .filter((c) => !removedChatIds.has(c.id))
+      .map((chat: EmployerApplicantChatListItem) => {
+        const initials = getInitials(chat.other_participant_name);
+        const preview = chat.last_message || 'Start the conversation';
 
-      return (
-        <button
-          key={chat.id}
-          onClick={() => {
-            onSelectPersonalMessage?.({
-              appliedJobId: chat.applied_job_id,
-              jobTitle: chat.job_title,
-              employerName: chat.other_participant_name,
-              employerLogo: chat.other_participant_photo,
-              employerInitials: initials,
-            });
-            onClose();
-          }}
-          className="w-full flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-        >
-          {chat.other_participant_photo && chat.other_participant_photo !== '/assets/no-photo.png' ? (
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
-              <img src={chat.other_participant_photo} alt={chat.other_participant_name} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-              {initials}
-            </div>
-          )}
-          <div className="flex-1 text-left min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="font-semibold text-gray-900 truncate">{chat.other_participant_name}</h4>
-              {chat.unread_count > 0 && (
-                <span className="ml-2 min-w-[24px] h-6 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-2 flex-shrink-0">
-                  {chat.unread_count}
-                </span>
+        return (
+          <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat}>
+            <button
+              onClick={() => {
+                onSelectPersonalMessage?.({
+                  appliedJobId: chat.applied_job_id,
+                  jobTitle: chat.job_title,
+                  employerName: chat.other_participant_name,
+                  employerLogo: chat.other_participant_photo,
+                  employerInitials: initials,
+                });
+                onClose();
+              }}
+              className="w-full flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+            >
+              {chat.other_participant_photo && chat.other_participant_photo !== '/assets/no-photo.png' ? (
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                  <img src={chat.other_participant_photo} alt={chat.other_participant_name} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-savoy-blue flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                  {initials}
+                </div>
               )}
-            </div>
-            <div className="flex items-center gap-1 mb-1">
-              <span className="text-xs font-medium text-savoy-blue bg-savoy-blue/10 px-2 py-0.5 rounded">
-                {chat.job_title}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 truncate">{preview}</p>
-            {chat.last_message_at && (
-              <p
-                  className="text-xs text-gray-400 mt-1 cursor-default"
-                  title={formatFullDateTime(chat.last_message_at)}
-                >
-                  {formatRelativeTime(chat.last_message_at)}
-                </p>
-            )}
-          </div>
-        </button>
-      );
-    });
+              <div className="flex-1 text-left min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="font-semibold text-gray-900 truncate">{chat.other_participant_name}</h4>
+                  {chat.unread_count > 0 && (
+                    <span className="ml-2 min-w-[24px] h-6 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-2 flex-shrink-0">
+                      {chat.unread_count}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-medium text-savoy-blue bg-savoy-blue/10 px-2 py-0.5 rounded">
+                    {chat.job_title}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 truncate">{preview}</p>
+                {chat.last_message_at && (
+                  <p
+                    className="text-xs text-gray-400 mt-1 cursor-default"
+                    title={formatFullDateTime(chat.last_message_at)}
+                  >
+                    {formatRelativeTime(chat.last_message_at)}
+                  </p>
+                )}
+              </div>
+            </button>
+          </SwipeableChatItem>
+        );
+      });
   };
 
   // Render business chats (applicant-to-applicant)
@@ -628,4 +630,4 @@ const MessagesModal = ({
   );
 };
 
-export default MessagesModal;
+export default ChatRoomsModal;

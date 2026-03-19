@@ -6,7 +6,7 @@ import { formatDateToLocal } from '@/helpers/date';
 
 import { Dialog, Transition } from '@headlessui/react';
 import useGetYahshuaConnectJobDetails from '../pages/jobs/hooks/useGetJobDetails';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { XMarkIcon, CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon, CheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import JobDetailsLocation from '@/svg/JobDetailLocation';
@@ -413,7 +413,7 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
       
       {/* Employer Chat Modal */}
       {jobDetailData?.applied_job_id && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={showChatModal}
           onClose={() => setShowChatModal(false)}
           chatType="employer-applicant"

@@ -22,8 +22,8 @@ import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
 import useGetEmployerApplicantChatsList from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
-import MessagesModal from '@/components/common/chat/MessagesModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatRoomsModal from '@/components/common/chat/ChatRoomsModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
@@ -466,7 +466,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                     className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon />
+                    <ChatIcon fill="#1e40af" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -492,7 +492,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                     className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
                   >
                     <span className="sr-only">Open messages</span>
-                    <ChatIcon />
+                    <ChatIcon fill="#1e40af" />
                     {totalUnreadCount > 0 && (
                       <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
                         {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
@@ -570,7 +570,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
 
       {/* Chat Modals */}
-      <MessagesModal
+      <ChatRoomsModal
         isOpen={showMessagesModal}
         onClose={() => setShowMessagesModal(false)}
         role="employer"
@@ -578,7 +578,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       />
 
       {selectedChat && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={showChatModal}
           onClose={() => {
             setShowChatModal(false);

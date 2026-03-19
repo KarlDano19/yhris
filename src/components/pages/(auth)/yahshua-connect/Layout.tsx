@@ -23,7 +23,7 @@ import TrainingsInProgressModal from './modals/TrainingsInProgressModal';
 // Business mode imports
 import UpcomingBookingsModal from './modals/UpcomingBookingsModal';
 import MyHiresModal from './modals/MyHiresModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 interface YahshuaConnectLayoutProps {
   children: ReactNode;
@@ -440,7 +440,7 @@ const YahshuaConnectLayout = ({ children }: YahshuaConnectLayoutProps) => {
           )}
 
           {isChatModalOpen && selectedBookingForMessage && (
-            <ChatModal
+            <ChatMessagesModal
               isOpen={isChatModalOpen}
               onClose={() => {
                 setIsChatModalOpen(false);

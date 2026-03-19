@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import useGetMyAppliedJobs from './hooks/useGetMyAppliedJobs';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatDateToLocal } from '@/helpers/date';
@@ -1052,7 +1052,7 @@ const Content = () => {
       {/* Page-specific Modals */}
       {/* Chat Modal */}
       {selectedJobForMessage && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);

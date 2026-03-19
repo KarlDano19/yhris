@@ -14,9 +14,9 @@ import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
 import SessionExpirationModal from '@/components/SessionExpirationModal';
-import MessagesModal from '@/components/common/chat/MessagesModal';
+import ChatRoomsModal from '@/components/common/chat/ChatRoomsModal';
 import NotificationsModal from './modals/NotificationsModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import LocationPermissionModal from './modals/LocationPermissionModal';
 import { useApplicantChatsList } from '../../../hooks/chat/yahshua-connect/useApplicantChatsList';
 import { useGetEmployerApplicantChatsList } from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
@@ -354,7 +354,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                   : "hover:bg-gray-100"
               )}
             >
-              <ChatIcon />
+              <ChatIcon fill="#6B7280" />
               {totalUnreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
                   {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -475,7 +475,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                     : "hover:bg-gray-100"
                 )}
               >
-                <ChatIcon />
+                <ChatIcon fill="#6B7280" />
                 {totalUnreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
                     {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -597,7 +597,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       </div>
 
       {/* Modals */}
-      <MessagesModal
+      <ChatRoomsModal
         isOpen={showMessagesModal}
         onClose={() => setShowMessagesModal(false)}
         role="applicant"
@@ -611,7 +611,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       />
 
       {selectedChat && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={showChatModal}
           onClose={() => {
             setShowChatModal(false);
@@ -633,7 +633,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       )}
 
       {selectedEmployerChat && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={showEmployerChatModal}
           onClose={() => {
             setShowEmployerChatModal(false);

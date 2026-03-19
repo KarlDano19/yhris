@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import UpcomingBookingsModal from '../../../../modals/UpcomingBookingsModal';
 import MyHiresModal from '../../../../modals/MyHiresModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { T_SpendingTransaction, T_HiredApplicant } from '@/types/business-mode';
 
@@ -244,7 +244,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedBookingForMessage && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);

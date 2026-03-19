@@ -8,7 +8,7 @@ import CustomToast from '@/components/CustomToast';
 import BusinessJobCard from './components/BusinessJobCard';
 import JobAcceptedModal from './modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './modals/ConfirmAcceptJobModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
 import FilterRequestsModal from '../../components/FilterRequestsModal';
 import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
@@ -425,7 +425,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedJobFull && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);

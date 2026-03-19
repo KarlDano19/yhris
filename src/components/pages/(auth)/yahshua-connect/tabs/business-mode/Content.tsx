@@ -9,7 +9,7 @@ import BusinessJobCard from './pages/find-work/components/BusinessJobCard';
 import FilterRequestsModal from './components/FilterRequestsModal';
 import JobAcceptedModal from './pages/find-work/modals/JobAcceptedModal';
 import ConfirmAcceptJobModal from './pages/find-work/modals/ConfirmAcceptJobModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import BusinessJobDetailsModal from './pages/find-work/modals/BusinessJobDetailsModal';
 import CustomToast from '@/components/CustomToast';
 import useGetDashboardOverview from './hooks/useGetDashboardOverview';
@@ -446,7 +446,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {isChatModalOpen && selectedJobFull && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);

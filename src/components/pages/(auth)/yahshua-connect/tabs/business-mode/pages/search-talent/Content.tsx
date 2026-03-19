@@ -8,7 +8,7 @@ import useSearchTalent from './hooks/useSearchTalent';
 import FilterRequestsModal from '../../components/FilterRequestsModal';
 import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
 import TalentDetailsModal from './modals/TalentDetailsModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import BookNowModal from './modals/BookNowModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -319,7 +319,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {selectedTalent && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);

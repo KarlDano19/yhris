@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import Modal from '../../../../../components/Modal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { 
   StarIcon, 
@@ -335,7 +335,7 @@ const ApplicantProfileModal = ({
       </div>
 
       {/* Chat Modal */}
-      <ChatModal
+      <ChatMessagesModal
         isOpen={isChatModalOpen}
         onClose={() => setIsChatModalOpen(false)}
         recipientId={applicant.applicantId}

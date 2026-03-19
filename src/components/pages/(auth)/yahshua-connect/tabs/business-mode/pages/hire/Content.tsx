@@ -20,7 +20,7 @@ import ViewApplicantDailyProgress from './modals/ViewApplicantDailyProgressModal
 import ViewTimeLogsModal from './modals/ViewTimeLogsModal';
 import ReviewApplicantModal from './modals/ReviewApplicantModal';
 import ViewPreviousHiresModal from './modals/ViewPreviousHiresModal';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 import BusinessJobPostingCard from './components/BusinessJobPostingCard';
 import useSeedBusinessJobs from './hooks/useSeedBusinessJobs';
 import useUnseedBusinessJobs from './hooks/useUnseedBusinessJobs';
@@ -936,7 +936,7 @@ const Content = () => {
 
       {/* Chat Modal */}
       {isChatModalOpen && selectedBookingForMessage && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isChatModalOpen}
           onClose={() => {
             setIsChatModalOpen(false);
@@ -953,7 +953,7 @@ const Content = () => {
 
       {/* Hired Applicant Chat Modal */}
       {isHiredApplicantChatOpen && selectedHiredApplicantForChat && (
-        <ChatModal
+        <ChatMessagesModal
           isOpen={isHiredApplicantChatOpen}
           onClose={() => {
             setIsHiredApplicantChatOpen(false);

@@ -3,13 +3,14 @@ import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import Modal from '../components/Modal';
-import { BriefcaseIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
- 
+import { BriefcaseIcon, CalendarIcon } from '@heroicons/react/24/outline';
+
 import useGetApplicantNotifications from '../hooks/useGetApplicantNotifications';
 import useMarkApplicantNotificationRead from '../hooks/useMarkApplicantNotificationRead';
 import useDeleteApplicantNotification from '../hooks/useDeleteApplicantNotification';
 
-import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
+import EyePassword from '@/svg/EyePassword';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 interface NotificationsModalProps {
   isOpen: boolean;
@@ -194,9 +195,8 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
                 e.stopPropagation();
                 markAsRead(notification.id);
               }}
-              className="h-10 px-3 flex items-center justify-center bg-gray-50 text-gray-700 rounded-md shadow-sm"
             >
-              <EyeIcon className="h-5 w-5" />
+              <EyePassword visible />
             </button>
           )}
           <button
@@ -204,9 +204,8 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
               e.stopPropagation();
               handleDeleteNotification(notification.id);
             }}
-            className="h-10 px-3 flex items-center justify-center bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 active:bg-red-700 transition-colors"
           >
-            <span className="h-5 w-5 inline-flex text-white"><DeleteIconNoBorder/></span>
+            <DeleteIcon />
           </button>
         </div>
 

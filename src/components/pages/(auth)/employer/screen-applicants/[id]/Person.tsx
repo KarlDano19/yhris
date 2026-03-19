@@ -17,7 +17,7 @@ import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
 
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
-import ChatModal from '@/components/common/chat/ChatModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { ArrowRightStartOnRectangleIcon, CalendarIcon, ChatBubbleLeftRightIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
 
@@ -442,7 +442,7 @@ export default function Person({
       )}
 
       {/* Chat Modal */}
-      <ChatModal
+      <ChatMessagesModal
         isOpen={isChatModalOpen}
         onClose={() => setIsChatModalOpen(false)}
         chatType="employer-applicant"

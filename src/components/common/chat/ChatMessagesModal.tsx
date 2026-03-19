@@ -91,7 +91,7 @@ interface ChatModalProps {
 // Main Component
 // ============================================================================
 
-const ChatModal = ({
+const ChatMessagesModal = ({
   isOpen,
   onClose,
   onBack,
@@ -379,4 +379,4 @@ const ChatModal = ({
   );
 };
 
-export default ChatModal;
+export default ChatMessagesModal;
