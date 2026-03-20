@@ -104,7 +104,7 @@ const Content = () => {
 
         // Small delay to ensure session is saved before redirect
         setTimeout(() => {
-          location.href = '/onboarding-checklist';
+          location.href = '/setup-employer-profile/onboarding-checklist';
         }, 500);
       },
       onError: (err: any) => {

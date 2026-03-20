@@ -22,9 +22,9 @@ const Board = ({ onSelect }: BoardProps) => {
   const records: any[] = data || [];
 
   const total = records.length;
-  const completed = records.filter((r) => r.derived_status === 'COMPLETED').length;
-  const inProgress = records.filter((r) => r.derived_status === 'IN_PROGRESS').length;
-  const notStarted = records.filter((r) => r.derived_status === 'NOT_STARTED').length;
+  const completed = records.filter((r) => r.status === 'COMPLETED').length;
+  const inProgress = records.filter((r) => r.status === 'IN_PROGRESS').length;
+  const notStarted = records.filter((r) => r.status === 'NOT_STARTED').length;
 
   const statCards = [
     { label: 'Total Clients', count: total, color: 'bg-blue-50 text-blue-700' },

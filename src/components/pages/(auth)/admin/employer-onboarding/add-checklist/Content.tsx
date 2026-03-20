@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import Link from 'next/link';
-
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/solid';
 
@@ -12,7 +10,6 @@ import toast from 'react-hot-toast';
 
 import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
-import MoveIcon from '@/svg/MoveIcon';
 
 import CustomToast from '@/components/CustomToast';
 
@@ -21,49 +18,17 @@ import useGetPhases from './hooks/useGetPhases';
 import useCreatePhase from './hooks/useCreatePhase';
 import useUpdatePhase from './hooks/useUpdatePhase';
 import useDeletePhase from './hooks/useDeletePhase';
-import useReorderPhases from './hooks/useReorderPhases';
 
 const Content = () => {
   const { data: phasesData, isLoading } = useGetPhases();
-  const [phases, setPhases] = useState<T_ChecklistPhase[]>([]);
-
-  useEffect(() => {
-    if (phasesData) setPhases(phasesData);
-  }, [phasesData]);
 
   const createPhase = useCreatePhase();
   const updatePhase = useUpdatePhase();
   const deletePhase = useDeletePhase();
-  const reorderPhases = useReorderPhases();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState<T_ChecklistPhase | null>(null);
 
-  // -------------------------------------------------------------------------
-  // Drag handlers
-  // -------------------------------------------------------------------------
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const updated = [...phases];
-    const [moved] = updated.splice(result.source.index, 1);
-    updated.splice(result.destination.index, 0, moved);
-    const reordered = updated.map((p, i) => ({ ...p, order_position: i }));
-    setPhases(reordered);  // optimistic update — prevents visual jump on re-fetch
-    reorderPhases.mutate(
-      reordered.map((p) => ({ id: p.id, order_position: p.order_position })),
-      {
-        onSuccess: () => toast.custom(<CustomToast type='success' message='Phase order updated.' />),
-        onError: () => {
-          setPhases(phases);  // revert on failure
-          toast.custom(<CustomToast type='error' message='Failed to reorder phases.' />);
-        },
-      }
-    );
-  };
-
-  // -------------------------------------------------------------------------
-  // CRUD
-  // -------------------------------------------------------------------------
   const openAdd = () => {
     setEditingPhase(null);
     setIsModalOpen(true);
@@ -84,7 +49,7 @@ const Content = () => {
         onError: () => toast.custom(<CustomToast type='error' message='Failed to update phase.' />),
       });
     } else {
-      createPhase.mutate({ name: data.name, description: data.description, items: data.items }, {
+      createPhase.mutate({ name: data.name, description: data.description, checklists: data.checklists }, {
         onSuccess: () => {
           toast.custom(<CustomToast type='success' message='Phase added successfully.' />);
           setIsModalOpen(false);
@@ -101,7 +66,8 @@ const Content = () => {
     });
   };
 
-  const totalItems = phases.reduce((sum, p) => sum + p.items.length, 0);
+  const phases = phasesData || [];
+  const totalItems = phases.reduce((sum, p) => sum + p.checklists.length, 0);
 
   return (
     <>
@@ -122,7 +88,7 @@ const Content = () => {
             <div>
               <h1 className='text-xl font-bold text-indigo-dye'>Checklist Management</h1>
               <p className='text-sm text-gray-500 mt-1'>
-                Configure onboarding phases and checklist items. Drag rows to reorder phases.
+                Configure onboarding phases and checklist items.
               </p>
             </div>
             <button
@@ -155,7 +121,6 @@ const Content = () => {
                 <table className='min-w-full divide-y divide-gray-200 text-sm'>
                   <thead className='bg-gray-50'>
                     <tr>
-                      <th className='w-10 px-3 py-3'></th>
                       <th className='w-10 px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide'>
                         #
                       </th>
@@ -173,84 +138,55 @@ const Content = () => {
                       </th>
                     </tr>
                   </thead>
-                  <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable droppableId='phases'>
-                      {(provided) => (
-                        <tbody
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className='divide-y divide-gray-100'
-                        >
-                          {phases.map((phase, idx) => (
-                            <Draggable key={phase.id} draggableId={String(phase.id)} index={idx}>
-                              {(dragProvided) => (
-                                <tr
-                                  ref={dragProvided.innerRef}
-                                  {...dragProvided.draggableProps}
-                                  className='hover:bg-gray-50'
-                                >
-                                  {/* Drag handle */}
-                                  <td className='px-3 py-4 text-center'>
-                                    <span
-                                      {...dragProvided.dragHandleProps}
-                                      className='cursor-grab inline-flex'
-                                    >
-                                      <MoveIcon />
-                                    </span>
-                                  </td>
+                  <tbody className='divide-y divide-gray-100'>
+                    {phases.map((phase, idx) => (
+                      <tr key={phase.id} className='hover:bg-gray-50'>
+                        {/* Order */}
+                        <td className='px-3 py-4 text-center font-semibold text-gray-500'>
+                          {idx + 1}
+                        </td>
 
-                                  {/* Order */}
-                                  <td className='px-3 py-4 text-center font-semibold text-gray-500'>
-                                    {idx + 1}
-                                  </td>
+                        {/* Phase Name */}
+                        <td className='px-4 py-4'>
+                          <p className='font-semibold text-gray-800'>{phase.name}</p>
+                        </td>
 
-                                  {/* Phase Name */}
-                                  <td className='px-4 py-4'>
-                                    <p className='font-semibold text-gray-800'>{phase.name}</p>
-                                  </td>
+                        {/* Description */}
+                        <td className='px-4 py-4 text-gray-500 max-w-xs'>
+                          <p className='truncate'>{phase.description || '—'}</p>
+                        </td>
 
-                                  {/* Description */}
-                                  <td className='px-4 py-4 text-gray-500 max-w-xs'>
-                                    <p className='truncate'>{phase.description || '—'}</p>
-                                  </td>
+                        {/* Items count */}
+                        <td className='px-4 py-4'>
+                          <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700'>
+                            {phase.checklists.length} item{phase.checklists.length !== 1 ? 's' : ''}
+                          </span>
+                        </td>
 
-                                  {/* Items count */}
-                                  <td className='px-4 py-4'>
-                                    <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700'>
-                                      {phase.items.length} item{phase.items.length !== 1 ? 's' : ''}
-                                    </span>
-                                  </td>
-
-                                  {/* Actions */}
-                                  <td className='px-4 py-4'>
-                                    <div className='flex items-center justify-center gap-2'>
-                                      <button
-                                        type='button'
-                                        onClick={() => openEdit(phase)}
-                                        className='p-1.5 rounded-lg hover:bg-blue-50'
-                                        title='Edit phase'
-                                      >
-                                        <EditIcon />
-                                      </button>
-                                      <button
-                                        type='button'
-                                        onClick={() => handleDelete(phase.id)}
-                                        className='p-1.5 rounded-lg hover:bg-red-50'
-                                        title='Delete phase'
-                                      >
-                                        <DeleteIcon />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </tbody>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
+                        {/* Actions */}
+                        <td className='px-4 py-4'>
+                          <div className='flex items-center justify-center gap-2'>
+                            <button
+                              type='button'
+                              onClick={() => openEdit(phase)}
+                              className='p-1.5 rounded-lg hover:bg-blue-50'
+                              title='Edit phase'
+                            >
+                              <EditIcon />
+                            </button>
+                            <button
+                              type='button'
+                              onClick={() => handleDelete(phase.id)}
+                              className='p-1.5 rounded-lg hover:bg-red-50'
+                              title='Delete phase'
+                            >
+                              <DeleteIcon />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
               </div>
             )}

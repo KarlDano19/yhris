@@ -1,64 +1,53 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { ArrowLeftIcon, ChevronRightIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
-import toast from 'react-hot-toast';
-
-import updateSession from '@/helpers/updateSession';
-
-import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import { T_OnboardingItem } from '@/components/pages/(auth)/admin/employer-onboarding/onboarding-tracker/modal/dummyData';
+import { getCookie } from 'cookies-next';
+
+import updateSession from '@/helpers/updateSession';
 
 import ChecklistGroup from './ChecklistGroup';
 import TutorialVideoModal from './TutorialVideoModal';
 import useGetChecklist from './hooks/useGetChecklist';
-import useMarkItemComplete from './hooks/useMarkItemComplete';
+import useMarkChecklistItemComplete from './hooks/useMarkChecklistItemComplete';
+import { T_OnboardingChecklist } from './hooks/useGetChecklist';
 
 const ChecklistView = () => {
   const router = useRouter();
   const { data, isLoading } = useGetChecklist();
-  const markItem = useMarkItemComplete();
 
-  const [selectedItem, setSelectedItem] = useState<T_OnboardingItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<T_OnboardingChecklist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const openedAtMap = useRef<Record<number, number>>({});
-  const groupRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const ACCEPTANCE_MEMO_TITLE = 'Completion of the Acceptance Memo';
+  const { mutate: markComplete, isLoading: isMarking } = useMarkChecklistItemComplete();
 
-  const record = data || data;
-  const allItems: T_OnboardingItem[] = record?.groups?.flatMap((g: any) => g.items) ?? [];
-  const memoItem = allItems.find((i) => i.title === ACCEPTANCE_MEMO_TITLE) ?? null;
-  const nonMemoItems = allItems.filter((i) => i.title !== ACCEPTANCE_MEMO_TITLE);
-  const allNonMemoComplete = nonMemoItems.length > 0 && nonMemoItems.every((i) => i.is_completed);
+  const record = data;
 
-  useEffect(() => {
-    if (record?.progress_pct === 100) {
-      updateSession({ hasCompletedOnboarding: true }).then(() => {
-        router.push('/dashboard');
-      });
+  const lockedItemIds = useMemo(() => {
+    const locked = new Set<number>();
+    if (!record) return locked;
+    let foundFirstIncomplete = false;
+    for (const phase of record.phases) {
+      for (const item of phase.checklists) {
+        if (foundFirstIncomplete) {
+          locked.add(item.id);
+        } else if (!item.is_completed) {
+          foundFirstIncomplete = true;
+        }
+      }
     }
-  }, [record?.progress_pct]);
+    return locked;
+  }, [record]);
 
-  const handleItemClick = (item: T_OnboardingItem) => {
-    if (!openedAtMap.current[item.id]) {
-      openedAtMap.current[item.id] = Date.now();
-    }
+  const handleItemClick = (item: T_OnboardingChecklist) => {
     setSelectedItem(item);
     setIsModalOpen(true);
-  };
-
-  const handleNextPhase = (currentIndex: number) => {
-    const nextRef = groupRefs.current[currentIndex + 1];
-    if (nextRef) {
-      nextRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   };
 
   const handleCloseModal = () => {
@@ -66,24 +55,48 @@ const ChecklistView = () => {
     setTimeout(() => setSelectedItem(null), 300);
   };
 
-  const handleMarkComplete = (itemId: number, isCompleted: boolean) => {
-    markItem.mutate(
-      { itemId, is_completed: isCompleted },
-      {
-        onSuccess: () => {
-          toast.custom(
-            <CustomToast
-              type='success'
-              message={isCompleted ? 'Task marked as complete.' : 'Task marked as incomplete.'}
-            />
-          );
-          handleCloseModal();
-        },
-        onError: () => {
-          toast.custom(<CustomToast type='error' message='Failed to update task.' />);
-        },
+  const handleMarkComplete = (item: T_OnboardingChecklist) => {
+    markComplete(item.id, { onSuccess: handleCloseModal });
+  };
+
+  const handleProceedToAcceptanceMemo = async () => {
+    await updateSession({ hasCompletedOnboarding: true });
+    router.push('/setup-employer-profile/acceptance-memo');
+  };
+
+  const handleDevSkip = async () => {
+    // Collect all incomplete item IDs across all phases
+    const incompleteIds: number[] = [];
+    if (record) {
+      for (const phase of record.phases) {
+        for (const item of phase.checklists) {
+          if (!item.is_completed) {
+            incompleteIds.push(item.id);
+          }
+        }
       }
-    );
+    }
+
+    // Mark all incomplete items complete in parallel
+    if (incompleteIds.length > 0) {
+      const token = getCookie('token');
+      await Promise.all(
+        incompleteIds.map((id) =>
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Token ${token}`,
+              },
+            }
+          )
+        )
+      );
+    }
+
+    await handleProceedToAcceptanceMemo();
   };
 
   if (isLoading) {
@@ -99,13 +112,6 @@ const ChecklistView = () => {
       <div className='p-6 text-center text-gray-500 text-sm'>No onboarding checklist found.</div>
     );
   }
-
-  const progressPct = record.progress_pct ?? 0;
-  const totalItems = record.total_items ?? 0;
-  const completedItems = record.completed_items ?? 0;
-
-  const barColor =
-    progressPct === 100 ? 'bg-green-500' : progressPct > 0 ? 'bg-orange-400' : 'bg-gray-300';
 
   return (
     <>
@@ -128,79 +134,60 @@ const ChecklistView = () => {
             </p>
           </div>
 
-          {/* Overall progress card */}
-          <div className='bg-white rounded-xl border border-gray-200 p-6 mb-6'>
-            <h3 className='text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4'>
-              Overall Progress
-            </h3>
-            <div className='flex items-center justify-between mb-2'>
-              <span className='text-3xl font-bold text-gray-800'>{progressPct}%</span>
-              <span className='text-sm text-gray-500'>
-                {completedItems} / {totalItems} tasks completed
-              </span>
-            </div>
-            <div className='w-full bg-gray-100 rounded-full h-3'>
-              <div
-                className={`${barColor} h-3 rounded-full transition-all duration-300`}
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Checklist groups */}
+          {/* Checklist phases */}
           <div>
-            {record.groups && record.groups.length > 0 ? (
+            {record.phases && record.phases.length > 0 ? (
               <>
-                {record.groups.map((group: any, index: number) => {
-                  const filteredItems = group.items.filter((i: any) => i.title !== ACCEPTANCE_MEMO_TITLE);
-                  if (filteredItems.length === 0) return null;
-                  const filteredGroup = {
-                    ...group,
-                    items: filteredItems,
-                    total_items: filteredItems.length,
-                    completed_items: filteredItems.filter((i: any) => i.is_completed).length,
-                  };
-                  return (
-                    <div key={group.id} ref={el => { groupRefs.current[index] = el; }}>
-                      <ChecklistGroup
-                        group={filteredGroup}
-                        onItemClick={handleItemClick}
-                        isLast={index === record.groups.length - 1}
-                        onNextPhase={() => handleNextPhase(index)}
-                      />
-                    </div>
-                  );
-                })}
+                {/* Overall progress card */}
+                <div className='bg-white rounded-xl border border-gray-200 p-5 mb-6'>
+                  <div className='flex justify-between items-center mb-2'>
+                    <span className='text-sm font-medium text-gray-700'>Overall Progress</span>
+                    <span className='text-sm font-semibold text-gray-800'>
+                      {record.completed_items} of {record.total_items} steps completed
+                    </span>
+                  </div>
+                  <div className='w-full bg-gray-200 rounded-full h-2.5'>
+                    <div
+                      className='bg-orange-400 h-2.5 rounded-full transition-all'
+                      style={{ width: `${record.progress_pct}%` }}
+                    />
+                  </div>
+                  <p className='text-right text-xs text-gray-400 mt-1'>{record.progress_pct}%</p>
+                </div>
 
-                {/* Acceptance Memo — standalone final step */}
-                {memoItem && (
-                  memoItem.is_completed ? (
-                    <div className='bg-green-50 border-2 border-green-400 rounded-xl p-5 mb-4'>
-                      <div className='flex items-center gap-3'>
-                        <div className='w-9 h-9 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0'>
-                          <DocumentCheckIcon className='w-5 h-5 text-white' />
-                        </div>
-                        <div>
-                          <h3 className='font-semibold text-green-800'>Completion of the Acceptance Memo</h3>
-                          <p className='text-xs text-green-600 mt-0.5'>Completed — proceeding to dashboard</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className='flex justify-end mt-2 mb-4'>
-                      <button
-                        type='button'
-                        onClick={() => router.push(`/onboarding-checklist/acceptance-memo?itemId=${memoItem.id}`)}
-                        disabled={!allNonMemoComplete}
-                        title={!allNonMemoComplete ? 'Complete all prior steps to unlock the Acceptance Memo' : undefined}
-                        className='flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-[#355FD0] text-white hover:bg-blue-700'
-                      >
-                        Proceed to Acceptance Memo
-                        <ChevronRightIcon className='w-4 h-4' />
-                      </button>
-                    </div>
-                  )
+                {record.phases.map((phase) => (
+                  <ChecklistGroup
+                    key={phase.id}
+                    phase={phase}
+                    onItemClick={handleItemClick}
+                    lockedItemIds={lockedItemIds}
+                  />
+                ))}
+
+                {/* Acceptance Memo — only visible when all items are complete */}
+                {record.progress_pct === 100 && (
+                  <div className='flex justify-end mt-2 mb-4'>
+                    <button
+                      type='button'
+                      onClick={handleProceedToAcceptanceMemo}
+                      className='flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-colors bg-[#355FD0] text-white hover:bg-blue-700'
+                    >
+                      Proceed to Acceptance Memo
+                      <ChevronRightIcon className='w-4 h-4' />
+                    </button>
+                  </div>
                 )}
+
+                {/* TEMPORARY: Skip button for testing — remove before production */}
+                <div className='flex justify-end mt-1 mb-4'>
+                  <button
+                    type='button'
+                    onClick={handleDevSkip}
+                    className='text-xs text-gray-400 underline hover:text-gray-600'
+                  >
+                    [DEV] Skip to Acceptance Memo
+                  </button>
+                </div>
               </>
             ) : (
               <div className='text-center py-8 text-gray-500 text-sm'>
@@ -216,8 +203,7 @@ const ChecklistView = () => {
         onClose={handleCloseModal}
         item={selectedItem}
         onMarkComplete={handleMarkComplete}
-        isLoading={markItem.isLoading}
-        openedAt={selectedItem ? (openedAtMap.current[selectedItem.id] ?? null) : null}
+        isMarking={isMarking}
       />
     </>
   );

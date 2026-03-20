@@ -29,7 +29,6 @@ export async function middleware(request: NextRequest) {
     'screen-applicants',
     'screening-question-guideline',
     'onboarding',
-    'onboarding-checklist',
     'manage',
     'employee-separation',
     'employer-profile',
@@ -80,18 +79,17 @@ export async function middleware(request: NextRequest) {
           firstRoute === 'talent-search' ||
           firstRoute === 'analytics' ||
           firstRoute === 'audit-logs' ||
-          firstRoute === 'notifications' ||
-          firstRoute === 'onboarding-checklist'
+          firstRoute === 'notifications'
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
-              if (hasCompletedOnboarding) {
+              if (hasCompletedOnboarding && request.nextUrl.pathname === '/setup-employer-profile') {
                 return NextResponse.redirect(new URL('/dashboard', request.url));
               }
-              // Not yet completed onboarding — allow access so Back button from checklist works
-            } else if (!hasCompletedOnboarding && firstRoute !== 'onboarding-checklist') {
+              // Allow access to setup-employer-profile and its sub-routes (including onboarding-checklist)
+            } else if (!hasCompletedOnboarding) {
               // Onboarding gate: block all employer routes until checklist is complete
-              return NextResponse.redirect(new URL('/onboarding-checklist', request.url));
+              return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
             } else if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
             }

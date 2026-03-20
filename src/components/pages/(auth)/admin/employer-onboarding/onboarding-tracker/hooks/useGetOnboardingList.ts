@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_OnboardingRecord } from '../modal/dummyData';
+type T_OnboardingRecord = {
+  id: number;
+  employer_id: number;
+  employer_name: string;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  created_at: string;
+};
 
 async function getOnboardingList(search: string): Promise<T_OnboardingRecord[]> {
   try {

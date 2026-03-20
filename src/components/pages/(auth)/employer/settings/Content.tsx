@@ -7,8 +7,8 @@ import Link from 'next/link';
 import MenuItem from '../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import { DocumentCheckIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
+import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 
@@ -32,7 +32,7 @@ const menus = [
     isAvailable: true,
   },
   {
-    icon: <DocumentCheckIcon className='w-8 h-8' />,
+    icon: <CreateMemoLogo />,
     text: 'Acceptance Form',
     link: '/settings/acceptance-form',
     isAvailable: true,

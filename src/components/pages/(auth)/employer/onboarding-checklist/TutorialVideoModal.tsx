@@ -6,15 +6,16 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { T_OnboardingItem } from '@/components/pages/(auth)/admin/employer-onboarding/onboarding-tracker/modal/dummyData';
+import { T_OnboardingChecklist } from './hooks/useGetChecklist';
+
+const UNLOCK_SECONDS = 30;
 
 type TutorialVideoModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  item: T_OnboardingItem | null;
-  onMarkComplete: (itemId: number, isCompleted: boolean) => void;
-  isLoading?: boolean;
-  openedAt: number | null;
+  item: T_OnboardingChecklist | null;
+  onMarkComplete: (item: T_OnboardingChecklist) => void;
+  isMarking: boolean;
 };
 
 function getVideoEmbedUrl(url: string): string | null {
@@ -39,74 +40,58 @@ function getVideoEmbedUrl(url: string): string | null {
   }
 }
 
-const UNLOCK_MS = 30_000;
-
-const TutorialVideoModal = ({
-  isOpen,
-  onClose,
-  item,
-  onMarkComplete,
-  isLoading = false,
-  openedAt,
-}: TutorialVideoModalProps) => {
+const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }: TutorialVideoModalProps) => {
   const cancelButtonRef = useRef(null);
-  const [hasWatched, setHasWatched] = useState(item?.is_completed ?? false);
-  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
-  const [timerUnlocked, setTimerUnlocked] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [elapsed, setElapsed] = useState(0);
+  const [canComplete, setCanComplete] = useState(false);
 
   useEffect(() => {
-    setHasWatched(item?.is_completed ?? false);
-  }, [item?.id]);
+    if (!isOpen || !item) return;
 
-  useEffect(() => {
-    setTimerUnlocked(false);
-    setSecondsLeft(null);
-    if (!isOpen || !openedAt || item?.is_completed) return;
+    const storageKey = `onboarding_timer_start_${item.id}`;
 
-    const elapsed = Date.now() - openedAt;
-    if (elapsed >= UNLOCK_MS) {
-      setTimerUnlocked(true);
+    // Record when the timer first started for this item
+    let startTime = parseInt(localStorage.getItem(storageKey) || '0', 10);
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem(storageKey, String(startTime));
+    }
+
+    const computeElapsed = () =>
+      Math.min(Math.floor((Date.now() - startTime) / 1000), UNLOCK_SECONDS);
+
+    const current = computeElapsed();
+    setElapsed(current);
+
+    if (current >= UNLOCK_SECONDS) {
+      setCanComplete(true);
       return;
     }
 
-    const remaining = Math.ceil((UNLOCK_MS - elapsed) / 1000);
-    setSecondsLeft(remaining);
+    setCanComplete(false);
 
-    const interval = setInterval(() => {
-      const newElapsed = Date.now() - openedAt;
-      if (newElapsed >= UNLOCK_MS) {
-        setTimerUnlocked(true);
-        setSecondsLeft(null);
-        clearInterval(interval);
-      } else {
-        setSecondsLeft(Math.ceil((UNLOCK_MS - newElapsed) / 1000));
+    intervalRef.current = setInterval(() => {
+      const e = computeElapsed();
+      setElapsed(e);
+      if (e >= UNLOCK_SECONDS) {
+        clearInterval(intervalRef.current!);
+        setCanComplete(true);
       }
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [isOpen, openedAt, item?.id, item?.is_completed]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://www.youtube.com') return;
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === 'onStateChange' && data.info === 0) {
-          setHasWatched(true);
-        }
-      } catch {}
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [isOpen]);
+  }, [isOpen, item?.id]);
 
   if (!item) return null;
 
-  const embedUrl = item.tutorial_url ? getVideoEmbedUrl(item.tutorial_url) : null;
+  const embedUrl = item.video_url ? getVideoEmbedUrl(item.video_url) : null;
 
   const renderVideoContent = () => {
-    if (!item.tutorial_url || !embedUrl) {
+    if (!item.video_url || !embedUrl) {
       return (
         <div className='mt-6 text-center'>
           <div className='bg-gray-50 rounded-lg p-8 border border-gray-200'>
@@ -126,14 +111,14 @@ const TutorialVideoModal = ({
             </svg>
             <h4 className='text-gray-600 font-medium mb-2'>No Tutorial Video</h4>
             <p className='text-gray-500 text-sm'>
-              {!item.tutorial_url
+              {!item.video_url
                 ? 'No tutorial video is available for this task yet.'
                 : 'Unable to play video. The URL format may not be supported.'}
             </p>
-            {item.tutorial_url && !embedUrl && (
+            {item.video_url && !embedUrl && (
               <div className='mt-4'>
                 <a
-                  href={item.tutorial_url}
+                  href={item.video_url}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-blue-600 hover:underline text-sm'
@@ -156,14 +141,14 @@ const TutorialVideoModal = ({
               src={embedUrl}
               allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
               allowFullScreen
-              title={item.title}
+              title={item.name}
             />
           </div>
         </div>
-        {item.tutorial_url && (
+        {item.video_url && (
           <div className='mt-2 text-sm text-gray-600'>
             <a
-              href={item.tutorial_url}
+              href={item.video_url}
               target='_blank'
               rel='noopener noreferrer'
               className='text-blue-600 hover:underline'
@@ -175,6 +160,8 @@ const TutorialVideoModal = ({
       </div>
     );
   };
+
+  const markButtonDisabled = !canComplete || isMarking || item.is_completed;
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -208,50 +195,43 @@ const TutorialVideoModal = ({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-3xl'>
-                  {/* Modal Header */}
-                  <div className='flex bg-savoy-blue p-3 items-center'>
-                    <h3 className='flex-1 text-white font-semibold truncate'>{item.title}</h3>
-                    <XCircleIcon
-                      className='w-8 h-8 text-white cursor-pointer flex-shrink-0'
-                      onClick={onClose}
-                    />
-                  </div>
+                {/* Modal Header */}
+                <div className='flex bg-savoy-blue p-3 items-center'>
+                  <h3 className='flex-1 text-white font-semibold truncate'>{item.name}</h3>
+                  <XCircleIcon
+                    className='w-8 h-8 text-white cursor-pointer flex-shrink-0'
+                    onClick={onClose}
+                  />
+                </div>
 
                 {/* Modal Body */}
                 <div className='m-5'>
-                  {/* Task meta info */}
-                  {item.is_completed && (
-                    <div className='mb-2'>
-                      <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
-                        Completed
-                      </span>
-                    </div>
-                  )}
-
                   {item.description && (
                     <p className='text-sm text-gray-500 mb-3'>{item.description}</p>
                   )}
-
                   {renderVideoContent()}
                 </div>
 
                 {/* Modal Footer */}
                 <div className='flex items-center justify-end gap-3 p-4 border-t border-[#355FD0]'>
-                  {item.is_completed ? (
-                    <span className='rounded-lg py-2 px-6 text-sm font-semibold bg-green-100 text-green-700 border border-green-300 cursor-default'>
-                      ✓ Completed
-                    </span>
-                  ) : (
-                    <button
-                      type='button'
-                      onClick={() => onMarkComplete(item.id, true)}
-                      disabled={isLoading || (!hasWatched && !timerUnlocked)}
-                      title={!hasWatched && !timerUnlocked ? 'Watch the video or wait for the timer to enable this button' : undefined}
-                      className='rounded-lg py-2 px-6 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-[#355FD0] text-white hover:bg-blue-700'
-                    >
-                      {isLoading ? 'Saving...' : secondsLeft !== null ? `Available in ${secondsLeft}s` : 'Mark as Complete'}
-                    </button>
-                  )}
+                  <button
+                    type='button'
+                    disabled={markButtonDisabled}
+                    onClick={() => onMarkComplete(item)}
+                    className={`rounded-lg py-2 px-6 text-sm font-semibold transition-colors ${
+                      markButtonDisabled
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#355FD0] text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {item.is_completed
+                      ? 'Completed ✓'
+                      : canComplete
+                      ? isMarking
+                        ? 'Saving...'
+                        : 'Mark as Complete'
+                      : `Available in ${UNLOCK_SECONDS - elapsed}s`}
+                  </button>
                   <button
                     ref={cancelButtonRef}
                     type='button'
@@ -261,7 +241,7 @@ const TutorialVideoModal = ({
                     Close
                   </button>
                 </div>
-                </Dialog.Panel>
+              </Dialog.Panel>
             </Transition.Child>
           </div>
         </div>

@@ -1,7 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_EmployerChecklist } from '@/components/pages/(auth)/admin/employer-onboarding/onboarding-tracker/modal/dummyData';
+export type T_OnboardingChecklist = {
+  id: number;
+  name: string;
+  description: string;
+  video_url?: string;
+  is_completed: boolean;
+};
+
+export type T_OnboardingPhase = {
+  id: number;
+  name: string;
+  description: string;
+  checklists: T_OnboardingChecklist[];
+  total_items: number;
+  completed_items: number;
+};
+
+export type T_EmployerChecklist = {
+  id: number | null;
+  employer_id: number | null;
+  employer_name: string | null;
+  status: string;
+  phases: T_OnboardingPhase[];
+  created_at: string | null;
+  total_items: number;
+  completed_items: number;
+  progress_pct: number;
+};
 
 async function getChecklist(): Promise<T_EmployerChecklist> {
   const token = getCookie('token');

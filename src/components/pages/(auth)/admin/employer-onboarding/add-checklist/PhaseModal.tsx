@@ -12,31 +12,30 @@ import MoveIcon from '@/svg/MoveIcon';
 
 export type T_ChecklistItem = {
   id: number;
-  title: string;
+  name: string;
   description: string;
-  tutorial_url: string;
+  video_url: string;
 };
 
 export type T_ChecklistPhase = {
   id: number;
   name: string;
   description: string;
-  order_position: number;
-  items: T_ChecklistItem[];
+  checklists: T_ChecklistItem[];
 };
 
 type PhaseModalProps = {
   isOpen: boolean;
   onClose: () => void;
   phase: T_ChecklistPhase | null;
-  onSave: (phase: Omit<T_ChecklistPhase, 'id' | 'order_position'> & { id?: number; order_position?: number }) => void;
+  onSave: (phase: Omit<T_ChecklistPhase, 'id'> & { id?: number }) => void;
   isLoading?: boolean;
 };
 
 const BLANK_ITEM: Omit<T_ChecklistItem, 'id'> = {
-  title: '',
+  name: '',
   description: '',
-  tutorial_url: '',
+  video_url: '',
 };
 
 const TABS = [
@@ -57,7 +56,7 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
     if (phase) {
       setName(phase.name);
       setDescription(phase.description);
-      setItems(phase.items.map((i) => ({ ...i })));
+      setItems(phase.checklists.map((i) => ({ ...i })));
     } else {
       setName('');
       setDescription('');
@@ -89,10 +88,10 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
   const handleSave = () => {
     if (!name.trim()) return;
     onSave({
-      ...(phase ? { id: phase.id, order_position: phase.order_position } : {}),
+      ...(phase ? { id: phase.id } : {}),
       name: name.trim(),
       description: description.trim(),
-      items,
+      checklists: items,
     });
   };
 
@@ -264,15 +263,15 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
                                         </button>
                                       </div>
 
-                                      {/* Title */}
+                                      {/* Name */}
                                       <div>
                                         <label className='block text-sm font-medium text-gray-600 mb-1'>
-                                          Title <span className='text-red-500'>*</span>
+                                          Name <span className='text-red-500'>*</span>
                                         </label>
                                         <input
                                           type='text'
-                                          value={item.title}
-                                          onChange={(e) => updateItem(item.id, 'title', e.target.value)}
+                                          value={item.name}
+                                          onChange={(e) => updateItem(item.id, 'name', e.target.value)}
                                           placeholder='e.g. Accept Invitation & Create Admin Account'
                                           className='w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-savoy-blue'
                                         />
@@ -292,15 +291,15 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
                                         />
                                       </div>
 
-                                      {/* Tutorial Video URL */}
+                                      {/* Video URL */}
                                       <div>
                                         <label className='block text-sm font-medium text-gray-600 mb-1'>
-                                          Tutorial Video URL
+                                          Video URL
                                         </label>
                                         <input
                                           type='text'
-                                          value={item.tutorial_url}
-                                          onChange={(e) => updateItem(item.id, 'tutorial_url', e.target.value)}
+                                          value={item.video_url}
+                                          onChange={(e) => updateItem(item.id, 'video_url', e.target.value)}
                                           placeholder='https://youtube.com/...'
                                           className='w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-savoy-blue'
                                         />
@@ -351,7 +350,7 @@ const PhaseModal = ({ isOpen, onClose, phase, onSave, isLoading = false }: Phase
                                 <div className='flex items-start justify-between gap-2'>
                                   <div className='flex-1 min-w-0'>
                                     <p className='text-sm font-medium text-gray-800 truncate'>
-                                      {idx + 1}. {item.title || <span className='italic text-gray-400'>Untitled</span>}
+                                      {idx + 1}. {item.name || <span className='italic text-gray-400'>Untitled</span>}
                                     </p>
                                     {item.description && (
                                       <p className='text-xs text-gray-500 mt-0.5 break-words'>{item.description}</p>

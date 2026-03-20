@@ -1,7 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_OnboardingDetail } from '../modal/dummyData';
+type T_OnboardingChecklist = {
+  id: number;
+  name: string;
+  description: string;
+  video_url?: string;
+};
+
+type T_OnboardingPhase = {
+  id: number;
+  name: string;
+  description: string;
+  checklists: T_OnboardingChecklist[];
+};
+
+type T_OnboardingDetail = {
+  id: number;
+  employer_name: string;
+  status: string;
+  phases: T_OnboardingPhase[];
+};
 
 async function getOnboardingDetail(recordId: string): Promise<T_OnboardingDetail> {
   const token = getCookie('token');

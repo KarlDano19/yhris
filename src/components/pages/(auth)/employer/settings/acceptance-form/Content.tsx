@@ -6,9 +6,9 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/hooks/useGetAcceptanceMemo';
-import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/AcceptanceMemoPreview';
-import { T_MemoFormData } from '@/components/pages/(auth)/employer/onboarding-checklist/acceptance-memo/AcceptanceMemoPreview';
+import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
+import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
+import { T_MemoFormData } from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
 
 const Content = () => {
   const { data, isLoading } = useGetAcceptanceMemo();
