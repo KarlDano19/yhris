@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -34,8 +35,10 @@ export default function AcceptanceMemoDocGeneratorForm({
   isFormDisabled,
   isViewMode,
 }: FormProps) {
+  const router = useRouter();
   const formData = initialData as AcceptanceMemoFormData;
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (e.target.name === 'documentType') {
@@ -238,15 +241,17 @@ export default function AcceptanceMemoDocGeneratorForm({
             {isViewMode ? (
               <button
                 type='button'
-                onClick={onPrint}
+                onClick={() => setShowPdfModal(true)}
                 className='flex items-center justify-center gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-full sm:w-auto transition-colors duration-300'
               >
                 <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='sm:w-5 sm:h-5'>
-                  <path d='M6 9V2h12v7'/>
-                  <path d='M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2'/>
-                  <path d='M6 14h12v8H6z'/>
+                  <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/>
+                  <polyline points='14 2 14 8 20 8'/>
+                  <line x1='16' y1='13' x2='8' y2='13'/>
+                  <line x1='16' y1='17' x2='8' y2='17'/>
+                  <polyline points='10 9 9 9 8 9'/>
                 </svg>
-                Print
+                View PDF
               </button>
             ) : (
               <button
@@ -264,6 +269,31 @@ export default function AcceptanceMemoDocGeneratorForm({
           </div>
         </div>
       </div>
+
+      {showPdfModal && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+          <div className='bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4'>
+            <h3 className='text-lg font-bold text-gray-900 mb-2'>View Acceptance Form PDF</h3>
+            <p className='text-sm text-gray-600 mb-6'>Would you like to view your submitted acceptance form as a PDF?</p>
+            <div className='flex gap-3 justify-end'>
+              <button
+                type='button'
+                onClick={() => setShowPdfModal(false)}
+                className='px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 text-sm transition-colors duration-200'
+              >
+                Cancel
+              </button>
+              <button
+                type='button'
+                onClick={() => { router.push('/settings/acceptance-form'); setShowPdfModal(false); }}
+                className='px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm transition-colors duration-200'
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

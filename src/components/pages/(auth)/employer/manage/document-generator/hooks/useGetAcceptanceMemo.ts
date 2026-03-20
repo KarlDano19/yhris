@@ -9,6 +9,7 @@ export type T_ExistingMemo = {
   authority_position: string;
   authority_date: string;
   signature: string | null;
+  pdf_file: string | null;
   submitted_at: string | null;
 };
 
@@ -37,6 +38,7 @@ async function getAcceptanceMemo(): Promise<T_ExistingMemo | null> {
     authority_position: json.position,
     authority_date: json.date,
     signature: json.signature ?? null,
+    pdf_file: json.pdf_file ?? null,
     submitted_at: json.submitted_at ?? null,
   };
 }

@@ -8,7 +8,7 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import EmployerCard from './EmployerCard';
+import EmployerCard from './EmployerCardModal';
 import useGetOnboardingList from '../hooks/useGetOnboardingList';
 
 type BoardProps = {

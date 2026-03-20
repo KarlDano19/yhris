@@ -4,7 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import ChecklistGroup from './ChecklistGroup';
+import ChecklistGroup from './ChecklistGroupModal';
 import useGetOnboardingDetail from '../hooks/useGetOnboardingDetail';
 
 type EmployerDetailProps = {
@@ -27,7 +27,7 @@ const statusStyle: Record<string, string> = {
 const EmployerDetail = ({ recordId, onBack }: EmployerDetailProps) => {
   const { data, isLoading } = useGetOnboardingDetail(recordId);
 
-  const record = data?.data || data;
+  const record = data;
 
   if (isLoading) {
     return (

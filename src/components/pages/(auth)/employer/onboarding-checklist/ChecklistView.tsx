@@ -4,13 +4,12 @@ import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import { getCookie } from 'cookies-next';
 
-import updateSession from '@/helpers/updateSession';
 
 import ChecklistGroup from './ChecklistGroup';
 import TutorialVideoModal from './TutorialVideoModal';
@@ -60,7 +59,6 @@ const ChecklistView = () => {
   };
 
   const handleProceedToAcceptanceMemo = async () => {
-    await updateSession({ hasCompletedOnboarding: true });
     router.push('/setup-employer-profile/acceptance-memo');
   };
 
@@ -117,16 +115,6 @@ const ChecklistView = () => {
     <>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4 py-6'>
-          <div className='flex p-2 mb-2'>
-            <button
-              onClick={() => router.push('/setup-employer-profile')}
-              className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'
-            >
-              <ArrowLeftIcon className='h-5 w-5' />
-              <h4>Back</h4>
-            </button>
-          </div>
-
           <div className='mb-6'>
             <h2 className='text-xl font-bold text-indigo-dye'>Onboarding Checklist</h2>
             <p className='text-sm text-gray-500 mt-1'>

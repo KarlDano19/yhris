@@ -34,7 +34,7 @@ async function saveProfile(profile: T_EmployerProfile) {
       formData.append('logo', profile.companyLogo);
     }
     const config = {
-      method: 'PATCH',
+      method: 'POST',
       headers: {
         Authorization: `Token ${token}`,
       },

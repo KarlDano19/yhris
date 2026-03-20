@@ -16,6 +16,7 @@ import AcceptanceMemoDocGeneratorForm from '@/components/pages/(auth)/employer/m
 import SignatureModal from '@/components/pages/(auth)/employer/manage/document-generator/modals/SignatureModal';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import updateSession from '@/helpers/updateSession';
 
 import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
 import { T_MemoFormData } from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
@@ -116,7 +117,8 @@ export default function Content() {
         checks: formData.checks,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await updateSession({ hasCompletedOnboarding: true, hasOnboarded: true });
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully!' />
           );

@@ -83,10 +83,13 @@ export async function middleware(request: NextRequest) {
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
-              if (hasCompletedOnboarding && request.nextUrl.pathname === '/setup-employer-profile') {
-                return NextResponse.redirect(new URL('/dashboard', request.url));
+              if (request.nextUrl.pathname === '/setup-employer-profile') {
+                if (hasCompletedOnboarding) {
+                  return NextResponse.redirect(new URL('/dashboard', request.url));
+                }
+                return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
               }
-              // Allow access to setup-employer-profile and its sub-routes (including onboarding-checklist)
+              // Allow access to sub-routes (onboarding-checklist, acceptance-memo)
             } else if (!hasCompletedOnboarding) {
               // Onboarding gate: block all employer routes until checklist is complete
               return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));

@@ -145,44 +145,59 @@ const Details = ({
   
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Trigger validation only for non-address required fields; use return value (not stale errors)
-    const nonAddressValid = await trigger(['companyName', 'mobileNumber', 'street', 'typeOfIndustry', 'zipCode', 'country']);
-
-    if (!nonAddressValid) {
+    
+    // Manually trigger React Hook Form validation for all fields
+    await trigger();
+    
+    // Check if there are any validation errors other than address fields and zip code
+    const nonAddressErrors = Object.keys(errors).filter(key => 
+      !['region', 'province', 'city', 'locality'].includes(key)
+    );
+    
+    if (nonAddressErrors.length > 0) {
+      // If there are other validation errors, don't show toast - let the form errors show
       return;
     }
-
-    // Address fields are handled via custom dropdowns — validate manually
+    
+    // Check if all other required fields are filled
+    const formValues = watch();
+    const requiredFields = ['companyName', 'mobileNumber', 'street', 'typeOfIndustry', 'zipCode'];
+    const missingRequiredFields = requiredFields.filter(field => !formValues[field] || formValues[field].trim() === '');
+    
+    if (missingRequiredFields.length > 0) {
+      // If other required fields are missing, don't show toast - let the form errors show
+      return;
+    }
+    
+    // If all other required fields are filled and only address fields are missing, check address field order
     if (!selectedRegionCode) {
       toast.custom(() => <CustomToast message={'Please select a region first'} type='error' />, {
         duration: 3000,
       });
       return;
     }
-
+    
     if (!selectedProvince) {
       toast.custom(() => <CustomToast message={'Please select a province first'} type='error' />, {
         duration: 3000,
       });
       return;
     }
-
+    
     if (!selectedMunicipality) {
       toast.custom(() => <CustomToast message={'Please select a city/municipality first'} type='error' />, {
         duration: 3000,
       });
       return;
     }
-
-    const formValues = watch();
+    
     if (!formValues.locality) {
       toast.custom(() => <CustomToast message={'Please select a barangay'} type='error' />, {
         duration: 3000,
       });
       return;
     }
-
+    
     setProgressBar(1);
   };
 

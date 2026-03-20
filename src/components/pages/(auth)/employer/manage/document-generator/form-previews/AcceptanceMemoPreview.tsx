@@ -80,21 +80,38 @@ export default function AcceptanceMemoPreview({ formData }: { formData: T_MemoFo
 
       {/* Signature block */}
       <div className='mt-8 border-t border-gray-200 pt-6'>
-        <p className='text-xs text-gray-500 mb-4'>Authorized Representative:</p>
+        <p className='font-bold mb-4'>Authorized by:</p>
 
         {formData.signature ? (
           <img
             src={formData.signature}
             alt='Signature'
-            className='h-16 w-auto object-contain mb-2'
+            className='h-16 w-auto object-contain mb-1'
           />
         ) : (
-          <div className='h-16 border-b border-gray-400 mb-2 w-56' />
+          <div className='h-16 border-b border-gray-400 mb-1 w-56' />
         )}
 
-        <p className='font-semibold'>{formData.authorityName || '_______________'}</p>
-        <p className='text-gray-500'>{formData.authorityPosition || '_______________'}</p>
-        <p className='text-gray-400 text-xs mt-1'>{formatDate(formData.authorityDate)}</p>
+        <p className='font-semibold mb-3'>Signature</p>
+
+        <p className='mb-2'>Full Name of the Authority:&nbsp;
+          {formData.authorityName
+            ? <strong>{formData.authorityName}</strong>
+            : <span style={{ display: 'inline-block', borderBottom: '1px solid #9ca3af', width: '200px' }}>&nbsp;</span>
+          }
+        </p>
+        <p className='mb-2'>Position of the Authority:&nbsp;
+          {formData.authorityPosition
+            ? <strong>{formData.authorityPosition}</strong>
+            : <span style={{ display: 'inline-block', borderBottom: '1px solid #9ca3af', width: '200px' }}>&nbsp;</span>
+          }
+        </p>
+        <p>Date (MM/DD/YYYY):&nbsp;
+          {formData.authorityDate
+            ? <strong>{new Date(formData.authorityDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</strong>
+            : <span style={{ display: 'inline-block', borderBottom: '1px solid #9ca3af', width: '200px' }}>&nbsp;</span>
+          }
+        </p>
       </div>
     </div>
   );
