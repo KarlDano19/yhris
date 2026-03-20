@@ -1,43 +1,68 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
+type IncompleteCountResponse = {
+  count: number;
+};
+
+async function getIncompleteEmployeeCount(): Promise<IncompleteCountResponse> {
+  try {
+    const token = getCookie("token");
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    };
+
+    if (token) {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+      const res = await fetch(
+        `${baseUrl}/api/employee-201/employee-incomplete-count/`,
+        config
+      );
+      if (!res.ok) {
+        throw res.json();
+      }
+      return res.json();
+    }
+    return { count: 0 };
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch incomplete employee count.");
+  }
+}
 
 type Options = { enabled?: boolean };
 
 export function useIncompleteEmployeeCount(options?: Options) {
   const { enabled = true } = options ?? {};
-  const [count, setCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(enabled);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchCount = useCallback(async () => {
-    if (!enabled) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const token = getCookie("token") as string | undefined;
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-      const res = await fetch(`${baseUrl}/api/employee-201/employee-incomplete-count/`, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-        cache: "no-store",
-      });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-      const json = await res.json();
-      const c = Number(json?.count ?? 0);
-      setCount(Number.isFinite(c) ? c : 0);
-    } catch (e: any) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-      setCount(0);
-    } finally {
-      setIsLoading(false);
+  const query = useQuery(
+    ["incompleteEmployeeCountCache"],
+    () => getIncompleteEmployeeCount(),
+    {
+      refetchOnWindowFocus: false,
+      enabled,
     }
-  }, [enabled]);
+  );
 
-  useEffect(() => { fetchCount(); }, [fetchCount]);
-
-  return { count, isLoading, error, refetch: fetchCount };
+  return {
+    count: query.data?.count ?? 0,
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
 }

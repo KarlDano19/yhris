@@ -1,340 +1,97 @@
 import React from 'react';
 
-// Workforce Overview calculation imports
-import { calculateTotalActiveEmployees } from './cards/workforce-overview/calculations/totalActiveEmployeesCalc';
-import { calculateNewHires } from './cards/workforce-overview/calculations/newHiresCalc';
-import { calculateSeparatedEmployees } from './cards/workforce-overview/calculations/separatedEmployeesCalc';
-import { calculateAttritionRate } from './cards/workforce-overview/calculations/attritionRateCalc';
-import { calculateAverageTenure } from './cards/workforce-overview/calculations/averateTenureCalc';
-import { calculateOverallApplicantsSummary } from './tabs/components/workforce-overview-tab/applicant-vs-hired-tab/calculations/overallApplicantsSummaryCalc';
-import { calculateDemographicBreakdown } from './tabs/components/workforce-overview-tab/applicant-vs-hired-tab/calculations/demographicBreakdownCalc';
-import { processRolePipelineData } from './tabs/components/workforce-overview-tab/role-pipeline-tab/calculation/rolePipelineTableCalc';
-import { calculateAttritionRateData } from './tabs/components/workforce-overview-tab/attrition-rate-tab/calculations/attritionRateCalc';
-import { calculateExitReasonsData } from './tabs/components/workforce-overview-tab/attrition-rate-tab/calculations/exitReasons';
-
-// Employee Performance calculation imports
-import { calculateAveragePerformance } from './cards/employee-performance/calculations/averagePerformanceCalc';
-import { calculateResolvedVSOngoing } from './cards/employee-performance/calculations/resolvedVSOngoingCalc';
-import { calculateIssueTypeDistribution } from './tabs/components/employeee-performance-tab/employee-issue-rate-tab/calculations/issueTypeCalc';
-import { calculateMonthlyVolume } from './tabs/components/employeee-performance-tab/employee-issue-rate-tab/calculations/monthlyTypeVolumeCalc';
-import { calculateDepartmentPerformance } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceRateCalc';
-import { calculatePerformanceTrend } from './tabs/components/employeee-performance-tab/performance-rate-tab/calculations/performanceTrendCalc';
-
 import WorkforceOverviewDocument from './print/WorkforceOverviewDocument';
 import EmployeePerformanceDocument from './print/EmployeePerformanceDocument';
 
 export const createAnalyticsWorkforceOverviewDocumentComponent = (
-  employeeData: any[],
-  appliedApplicantsData: any[],
-  separationData: any[],
-  allJobPostData: any[],
   dateFilter: { from: string; to: string },
-  activeSubTab: number = 1,
-  pipelineData?: { [jobId: number]: { [stageTitle: string]: number } },
   rolePipelineData?: any[],
-  validRegions?: string[],
-  selectedJobFilter?: string,
   printOption?: string,
-  allJobPostsForPrint?: any[],
-  selectedRecords?: number[]
+  selectedRecords?: number[],
+  analyticsKPIs?: any,
+  analyticsApplicantVsHired?: any,
+  analyticsAttrition?: any
 ) => {
-  const allApplicants = Array.isArray(appliedApplicantsData) ? appliedApplicantsData : [];
-
-  const hasSelectedJobFilter = !!selectedJobFilter && selectedJobFilter !== 'All Jobs';
-  const selectedJobId =
-    hasSelectedJobFilter && typeof selectedJobFilter === 'string' && /^\d+$/.test(selectedJobFilter)
-      ? Number(selectedJobFilter)
-      : hasSelectedJobFilter && typeof selectedJobFilter === 'number'
-        ? selectedJobFilter
-        : null;
-  const selectedJobTitle =
-    hasSelectedJobFilter && selectedJobId === null && typeof selectedJobFilter === 'string'
-      ? selectedJobFilter
-      : null;
-
-  const shouldFilterBySelectedRecords =
-    printOption === 'selected' && Array.isArray(selectedRecords) && selectedRecords.length > 0;
-  const selectedRecordIdSet = shouldFilterBySelectedRecords
-    ? new Set(
-        selectedRecords
-          .map((record) => {
-            if (typeof record === 'number') {
-              return record;
-            }
-            if (typeof record === 'string' && /^\d+$/.test(record)) {
-              return Number(record);
-            }
-            return null;
-          })
-          .filter((id): id is number => id !== null)
-      )
-    : null;
-
-  const filteredApplicants = allApplicants.filter((applicant: any) => {
-    const jobPosting = applicant?.job_posting;
-    const jobId = jobPosting?.id;
-    const jobTitle = jobPosting?.job_title;
-
-    if (shouldFilterBySelectedRecords) {
-      if (jobId === null || jobId === undefined || !selectedRecordIdSet?.has(Number(jobId))) {
-        return false;
-      }
-    }
-
-    if (selectedJobId !== null) {
-      return jobId === selectedJobId;
-    }
-
-    if (selectedJobTitle) {
-      return jobTitle === selectedJobTitle || jobId === selectedJobTitle;
-    }
-
-    return true;
-  });
-
-  const applicantsDataForPrint =
-    hasSelectedJobFilter || shouldFilterBySelectedRecords ? filteredApplicants : allApplicants;
-
-  const includeJobBreakdown = hasSelectedJobFilter || shouldFilterBySelectedRecords;
-
-  const jobPostTitleMap = new Map<number, string>();
-  if (Array.isArray(allJobPostData)) {
-    allJobPostData.forEach((job: any) => {
-      if (job?.id != null) {
-        jobPostTitleMap.set(job.id, job.job_title || `Job ${job.id}`);
-      }
-    });
-  }
-
-  const jobApplicantGroups = new Map<string | number, any[]>();
-  const jobTitleLookup = new Map<string | number, string>();
-
-  const registerJobGroup = (key: string | number, titleFallback?: string) => {
-    if (!jobApplicantGroups.has(key)) {
-      jobApplicantGroups.set(key, []);
-    }
-    if (!jobTitleLookup.has(key)) {
-      const numericKey = typeof key === 'string' && /^\d+$/.test(key) ? Number(key) : key;
-      const mappedTitle =
-        typeof numericKey === 'number'
-          ? jobPostTitleMap.get(numericKey)
-          : undefined;
-      jobTitleLookup.set(
-        key,
-        mappedTitle ||
-          titleFallback ||
-          (typeof key === 'number' ? `Job ${key}` : key.toString())
-      );
-    }
+  const computeQ4Trend = (current: number, prevQ4: number | undefined, prevQ4Year: number | undefined): string => {
+    if (prevQ4 === undefined || prevQ4Year === undefined) return '';
+    const diff = current - prevQ4;
+    const pct = prevQ4 > 0 ? Math.abs(Math.round((diff / prevQ4) * 100)) : 0;
+    if (diff > 0) return `Increased by +${diff} from last Q4 of ${prevQ4Year} (${pct}%)`;
+    if (diff < 0) return `Decreased by ${diff} from last Q4 of ${prevQ4Year} (${pct}%)`;
+    return `No change from last Q4 of ${prevQ4Year} (0%)`;
   };
 
-  filteredApplicants.forEach((applicant) => {
-    const jobPosting = applicant?.job_posting;
-    const jobId = jobPosting?.id;
-    const jobTitle = jobPosting?.job_title;
-    const key = jobId ?? (jobTitle ?? 'Unknown Job');
-    registerJobGroup(key, jobTitle);
-    jobApplicantGroups.get(key)!.push(applicant);
-  });
-
-  if (shouldFilterBySelectedRecords && selectedRecordIdSet) {
-    selectedRecordIdSet.forEach((jobId) => {
-      registerJobGroup(jobId, jobPostTitleMap.get(jobId) ?? `Job ${jobId}`);
-    });
-  }
-
-  if (hasSelectedJobFilter && selectedJobId !== null) {
-    registerJobGroup(
-      selectedJobId,
-      jobPostTitleMap.get(selectedJobId) ?? `Job ${selectedJobId}`
-    );
-  } else if (hasSelectedJobFilter && selectedJobTitle) {
-    registerJobGroup(selectedJobTitle, selectedJobTitle);
-  }
-
-  const jobApplicantSummaries = includeJobBreakdown
-    ? Array.from(jobApplicantGroups.entries()).map(([key, applicants]) => {
-        const summary = calculateOverallApplicantsSummary(applicants);
-        return {
-          jobId: key,
-          jobTitle: jobTitleLookup.get(key) ?? (typeof key === 'number' ? `Job ${key}` : key.toString()),
-          applicantCount: applicants.length,
-          summary,
-        };
-      }).sort((a, b) => a.jobTitle.localeCompare(b.jobTitle))
-    : [];
-
-  // Calculate KPI data
-  const calculateKPIs = () => {
-    // Total Active Employees - Use shared utility function
-    const totalEmployeesData = calculateTotalActiveEmployees(employeeData);
-    const totalEmployeesTrend = totalEmployeesData.trend;
-
-    // New Hires - Use shared utility function
-    const newHiresData = calculateNewHires(appliedApplicantsData);
-    const newHiresTrend = newHiresData.trend;
-
-    // Separated Employees - Use shared utility function
-    const separatedEmployeesData = calculateSeparatedEmployees(separationData);
-    const separatedEmployeesTrend = separatedEmployeesData.trend;
-
-    // Attrition Rate - Use shared utility function
-    const attritionData = calculateAttritionRate(separationData, employeeData);
-    const attritionTrend = attritionData.trend;
-
-    // Average Tenure - Use shared utility function
-    const tenureData = calculateAverageTenure(employeeData, separationData);
-    const averageTenureTrend = tenureData.trend;
-
-    return {
-      totalEmployees: { value: totalEmployeesData.totalEmployees, trend: totalEmployeesTrend },
-      newHires: { value: newHiresData.newHires, trend: newHiresTrend },
-      separatedEmployees: { value: separatedEmployeesData.separatedEmployees, trend: separatedEmployeesTrend },
-      attritionRate: { value: attritionData.attritionRate.toFixed(1), trend: attritionTrend },
-      averageTenure: { value: tenureData.averageTenure.toFixed(1), trend: averageTenureTrend }
-    };
+  const computeTenureTrend = (years: number): string => {
+    if (years < 1) return 'Low tenure - consider retention strategies';
+    if (years < 3) return 'Building tenure - keep engagement high';
+    if (years < 5) return 'Stable tenure - continue growth opportunities';
+    return 'Strong tenure - experienced workforce';
   };
 
-  // Calculate applicant data for sub-tab 1 - Use shared utility function
-  const calculateApplicantData = () => {
-    return calculateOverallApplicantsSummary(applicantsDataForPrint);
+  const now = new Date();
+  const quarter = Math.ceil((now.getMonth() + 1) / 3);
+
+  const kpiData = {
+    totalEmployees: {
+      value: analyticsKPIs?.total_active_employees ?? 0,
+      trend: computeQ4Trend(analyticsKPIs?.total_active_employees ?? 0, analyticsKPIs?.total_active_prev_q4, analyticsKPIs?.prev_q4_year),
+    },
+    newHires: {
+      value: analyticsKPIs?.new_hires ?? 0,
+      trend: computeQ4Trend(analyticsKPIs?.new_hires ?? 0, analyticsKPIs?.new_hires_prev_q4, analyticsKPIs?.prev_q4_year),
+    },
+    separatedEmployees: {
+      value: analyticsKPIs?.separated_employees ?? 0,
+      trend: computeQ4Trend(analyticsKPIs?.separated_employees ?? 0, analyticsKPIs?.separated_prev_q4, analyticsKPIs?.prev_q4_year),
+    },
+    attritionRate: {
+      value: (analyticsKPIs?.attrition_rate ?? 0).toFixed(1),
+      trend: `New data in Q${quarter} ${now.getFullYear()}`,
+    },
+    averageTenure: {
+      value: (analyticsKPIs?.average_tenure_years ?? 0).toFixed(1),
+      trend: computeTenureTrend(analyticsKPIs?.average_tenure_years ?? 0),
+    },
   };
 
-  // Calculate demographic data for sub-tab 1 - Use shared utility function
-  const calculateDemographicData = () => {
-    return calculateDemographicBreakdown(
-      applicantsDataForPrint,
-      { records: allJobPostData },
-      validRegions,
-      selectedJobFilter
-    );
-  };
+  const summary = analyticsApplicantVsHired?.applicants_summary;
+  const applicantData: Array<{ status: string; count: string; percentage: string; label: string; color: string }> = summary ? [
+    { status: 'Applied', count: String(summary.total_applied), percentage: '100%', label: '(initial total applicants)', color: '#6366F1' },
+    { status: 'Ongoing', count: String(summary.ongoing.count), percentage: `${summary.ongoing.percentage}%`, label: 'of total applied', color: '#F59E0B' },
+    { status: 'Hired', count: String(summary.hired.count), percentage: `${summary.hired.percentage}%`, label: 'of total applied', color: '#10B981' },
+    { status: 'Rejected', count: String(summary.rejected.count), percentage: `${summary.rejected.percentage}%`, label: 'of total applied', color: '#EF4444' },
+    { status: 'Withdrawn', count: String(summary.withdrawn.count), percentage: `${summary.withdrawn.percentage}%`, label: 'of total applied', color: '#9CA3AF' },
+  ] : [];
 
-  // Transform all job posts data to role pipeline format
-  const transformAllJobPostsToRolePipeline = (allJobPosts: any[]) => {
-    if (!allJobPosts || !Array.isArray(allJobPosts)) {
-      return [];
-    }
+  const breakdown = analyticsApplicantVsHired?.demographic_breakdown;
+  const topRegion = breakdown?.regions?.[0];
+  const topAge = breakdown?.age_groups?.[0];
+  const demographicData = breakdown ? {
+    femalePercentage: `${breakdown.gender.female_percentage.toFixed(1)}% (${breakdown.gender.female_count})`,
+    malePercentage: `${breakdown.gender.male_percentage.toFixed(1)}% (${breakdown.gender.male_count})`,
+    mostCommonRegion: topRegion ? `${topRegion.label} (${topRegion.percentage.toFixed(1)}%)` : '—',
+    mostCommonAgeGroup: topAge ? `${topAge.label} (${topAge.percentage.toFixed(1)}%)` : '—',
+  } : undefined;
 
-    return allJobPosts.map((job: any) => {
-      // Calculate turnaround time (days since job opened)
-      const jobOpenedDate = new Date(job.created_at);
-      const jobClosedDate = new Date(job.updated_at);
-      const currentDate = new Date();
-      const turnaroundTime = Math.ceil((currentDate.getTime() - jobOpenedDate.getTime()) / (1000 * 60 * 60 * 24));
-
-      // Helper function to format dates
-      const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-      };
-
-      // Format dates
-      const formattedDateOpened = formatDate(jobOpenedDate);
-      const formattedDateClosed = formatDate(jobClosedDate);
-
-      // Determine status based on job data
-      const status = job.is_active ? 'Ongoing' : 'Closed';
-
-      // Generate pipeline information using applicant_applied_no
-      const currentPipeline = job.applicant_applied_no > 0 
-        ? `${job.applicant_applied_no} applicants` 
-        : 'No applicants yet';
-
-      // Only show job closed date if status is Closed
-      const dateJobClosed = status === 'Closed' ? formattedDateClosed : '—';
-
-      return {
-        role: job.job_title || 'Unknown Role',
-        numberOfApplicants: job.applicant_applied_no || 0,
-        status: status,
-        dateJobOpened: formattedDateOpened,
-        dateJobClosed: dateJobClosed,
-        turnaroundTime: turnaroundTime,
-        currentPipeline: currentPipeline,
-        jobId: job.id,
-      };
-    });
-  };
-
-  // Use paginated role pipeline data for sub-tab 2 - Use shared utility function
-  const getRolePipelineData = () => {
-    let dataToProcess = rolePipelineData;
-    
-    // Handle print options for role pipeline data
-    if (printOption && rolePipelineData) {
-      switch (printOption) {
-        case 'all':
-          // For all records, use the all job posts data
-          if (allJobPostsForPrint && allJobPostsForPrint.length > 0) {
-            dataToProcess = transformAllJobPostsToRolePipeline(allJobPostsForPrint);
-          } else {
-            // Fallback to current data if all job posts not available
-            dataToProcess = rolePipelineData;
-          }
-          break;
-        case 'selected':
-          // For selected records, filter by the selected IDs
-          if (selectedRecords && selectedRecords.length > 0 && allJobPostsForPrint) {
-            const selectedJobs = allJobPostsForPrint.filter(job => selectedRecords.includes(job.id));
-            dataToProcess = transformAllJobPostsToRolePipeline(selectedJobs);
-          } else {
-            // Fallback to current data if no selections
-            dataToProcess = rolePipelineData;
-          }
-          break;
-        default:
-          dataToProcess = rolePipelineData;
-      }
-    }
-    
-    return processRolePipelineData(dataToProcess, pipelineData);
-  };
-
-  // Calculate attrition data for sub-tab 3 - Use shared utility function
-  const calculateAttritionData = () => {
-    // Use the shared attrition rate calculation utility
-    const { dateRange, attritionData } = calculateAttritionRateData(separationData, dateFilter, employeeData?.length || 143);
-    
-    // Calculate overall attrition rate from the monthly data
-    const totalExits = attritionData.reduce((sum, item) => sum + item.totalExits, 0);
-    const totalEmployees = employeeData?.length || 143;
-    const overallAttritionRate = totalEmployees > 0 ? (totalExits / totalEmployees) * 100 : 0;
-
-    return {
-      attritionRate: overallAttritionRate.toFixed(1),
-      monthlyAttritionData: attritionData,
-      dateRange: dateRange
-    };
-  };
-
-  // Calculate exit reasons data for sub-tab 3 - Use shared utility function
-  const calculateExitReasonsForPrint = () => {
-    // Use the shared exit reasons calculation utility
-    const { exitReasonsData } = calculateExitReasonsData(separationData, 'All Positions');
-    
-    // Calculate total exits for percentage calculation
-    const totalExits = exitReasonsData.reduce((sum: number, item: any) => sum + item.count, 0);
-    
-    // Convert to the format expected by the print component
-    const exitReasonsArray = exitReasonsData.map((item: any) => ({
+  const exitReasonsRaw = analyticsAttrition?.exit_reasons || [];
+  const totalExitsForReasons = exitReasonsRaw.reduce((sum: number, item: any) => sum + item.count, 0);
+  const attritionData = {
+    attritionRate: analyticsKPIs?.attrition_rate?.toFixed(1) ?? '0.0',
+    dateRange: '',
+    exitReasons: exitReasonsRaw.map((item: any) => ({
       reason: item.reason,
       count: item.count,
-      percentage: totalExits > 0 ? ((item.count / totalExits) * 100).toFixed(1) : '0.0'
-    }));
-
-    return exitReasonsArray;
+      percentage: totalExitsForReasons > 0 ? ((item.count / totalExitsForReasons) * 100).toFixed(1) : '0.0',
+    })),
   };
 
-  const kpiData = calculateKPIs();
-  const applicantData = calculateApplicantData();
-  const demographicData = calculateDemographicData();
-  const rolePipelineDataForPrint = getRolePipelineData() || [];
-  const attritionData = calculateAttritionData();
-  const exitReasonsData = calculateExitReasonsForPrint();
+  const getRolePipelineData = () => {
+    const allFormatted = rolePipelineData || [];
+    if (printOption === 'selected' && Array.isArray(selectedRecords) && selectedRecords.length > 0) {
+      return allFormatted.filter((job: any) => selectedRecords.includes(job.jobId));
+    }
+    return allFormatted;
+  };
 
   return (
     <div className="bg-white">
@@ -344,245 +101,104 @@ export const createAnalyticsWorkforceOverviewDocumentComponent = (
           break-after: page;
         }
       `}</style>
-      <WorkforceOverviewDocument 
+      <WorkforceOverviewDocument
         kpiData={kpiData}
         applicantData={applicantData}
         demographicData={demographicData}
-        rolePipelineData={rolePipelineDataForPrint}
-        attritionData={{ ...attritionData, exitReasons: exitReasonsData }}
+        rolePipelineData={getRolePipelineData()}
+        attritionData={attritionData}
         dateFilter={dateFilter}
-        selectionMetadata={
-          includeJobBreakdown
-            ? {
-                totalApplicants: applicantsDataForPrint.length,
-                jobCount: jobApplicantSummaries.length,
-              }
-            : undefined
-        }
-        jobApplicantSummaries={includeJobBreakdown ? jobApplicantSummaries : undefined}
       />
     </div>
   );
 };
 
 export const createAnalyticsEmployeePerformanceDocumentComponent = (
-  evaluationData: any[],
-  employeeIssueData: any[],
   dateFilter: { from: string; to: string },
   activeSubTab: number = 1,
   employeePerformanceTableData?: any[],
   employeeIssuesTableData?: any[],
-  showAllDepartments: boolean = false,
-  showAllIssueTypes: boolean = false,
   printOption?: string,
   selectedDepartments?: string[],
   selectedEmployees?: string[],
-  allEvaluationData?: any[],
   selectedIssueTypes?: string[],
   selectedEmployeeIssues?: string[],
-  allEmployeeIssueData?: any[],
   departmentPrintOption?: string,
   employeePrintOption?: string,
   issueTypePrintOption?: string,
-  employeeIssuePrintOption?: string
+  employeeIssuePrintOption?: string,
+  analyticsKPIs?: any,
+  analyticsPerformanceTrend?: any[],
+  analyticsMonthlyIssueVolume?: any[],
+  departmentRecords?: Array<{ name: string; score: number; count: number; color: string }>,
+  issueTypeRecords?: Array<{ reason: string; count: number; percentage: string; color: string }>
 ) => {
-  // Calculate KPI data
-  const calculateKPIs = () => {
-    // Average Performance - Use shared utility function
-    const averagePerformanceData = calculateAveragePerformance(evaluationData);
-
-    // Resolved vs Ongoing Issues - Use shared utility function
-    const resolvedVSOngoingData = calculateResolvedVSOngoing(employeeIssueData);
-
-    return {
-      averagePerformance: {
-        value: averagePerformanceData.averageScore,
-        maxScore: averagePerformanceData.maxScore,
-        totalEmployees: averagePerformanceData.totalEmployees
-      },
-      resolvedVSOngoing: {
-        resolvedPercentage: resolvedVSOngoingData.resolvedPercentage,
-        ongoingPercentage: resolvedVSOngoingData.ongoingPercentage,
-        totalIssues: resolvedVSOngoingData.totalIssues,
-        resolvedIssues: resolvedVSOngoingData.resolvedIssues,
-        ongoingIssues: resolvedVSOngoingData.ongoingIssues
-      }
-    };
+  const kpiData = {
+    averagePerformance: {
+      value: (analyticsKPIs?.average_performance ?? 0).toFixed(1),
+      maxScore: 100,
+      totalEmployees: 0,
+    },
+    resolvedVSOngoing: {
+      resolvedPercentage: (analyticsKPIs?.resolved_percentage ?? 0).toFixed(1),
+      ongoingPercentage: (analyticsKPIs?.ongoing_percentage ?? 0).toFixed(1),
+      totalIssues: analyticsKPIs?.total_issues ?? 0,
+      resolvedIssues: analyticsKPIs?.resolved_issues ?? 0,
+      ongoingIssues: analyticsKPIs?.ongoing_issues ?? 0,
+    },
   };
 
-  // Calculate performance rate data by department using shared utility
   const calculatePerformanceRateData = () => {
-    // Always get all departments for printing, regardless of showAllDepartments state
-    const { departmentPerformanceData } = calculateDepartmentPerformance(evaluationData, true, []);
-    let filteredData = departmentPerformanceData;
-    
-    // Handle print options for performance rate data
+    let filteredDepartments = departmentRecords || [];
     const currentPrintOption = departmentPrintOption || printOption;
-    
-
-    
     if (currentPrintOption === 'selected' && selectedDepartments && selectedDepartments.length > 0) {
-      // Filter by selected departments only when option is 'selected' and we have selections
-      filteredData = departmentPerformanceData.filter(dept => 
-        selectedDepartments.includes(dept.name)
-      );
+      filteredDepartments = filteredDepartments.filter(d => selectedDepartments.includes(d.name));
     }
-    // If currentPrintOption is 'all' or undefined, use all departments (no filtering)
-    
-    return filteredData.map(dept => ({
-      name: dept.name,
-      score: dept.score,
-      count: dept.count,
-      color: dept.color
-    }));
+    return filteredDepartments;
   };
 
-  // Calculate performance trend data using shared utility
-  const calculatePerformanceTrendData = () => {
-    const { displayData } = calculatePerformanceTrend(evaluationData, dateFilter, 'All Departments');
-    return displayData;
-  };
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const performanceTrendData = (analyticsPerformanceTrend || []).map((item: any) => {
+    const mName = typeof item.month === 'number' ? monthNames[item.month - 1] || String(item.month) : item.month;
+    return { month: mName, score: item.score, count: item.count };
+  });
 
-  // Calculate issue type data with filtering
   const calculateIssueTypeData = () => {
-    // Always get all issue types for printing, regardless of showAllIssueTypes state
-    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(employeeIssueData, [], true);
-    let filteredData = labels.map((label, index) => ({
-      reason: label,
-      count: data[index],
-      percentage: percentages[index],
-      color: colors[index]
+    let filteredIssueTypes = (issueTypeRecords || []).map(i => ({
+      reason: i.reason,
+      count: i.count,
+      percentage: i.percentage,
+      color: i.color,
     }));
-    
-    // Handle print options for issue type data
-    const currentPrintOption = issueTypePrintOption || printOption;
-    if (currentPrintOption === 'selected' && selectedIssueTypes && selectedIssueTypes.length > 0) {
-      // Filter by selected issue types only when option is 'selected' and we have selections
-      filteredData = filteredData.filter(issueType => 
-        selectedIssueTypes.includes(issueType.reason)
-      );
+    const currentIssuePrintOption = issueTypePrintOption || printOption;
+    if (currentIssuePrintOption === 'selected' && selectedIssueTypes && selectedIssueTypes.length > 0) {
+      filteredIssueTypes = filteredIssueTypes.filter(i => selectedIssueTypes.includes(i.reason));
     }
-    // If currentPrintOption is 'all' or undefined, use all issue types (no filtering)
-    
-    return filteredData;
+    return filteredIssueTypes;
   };
 
-  // Calculate monthly issue volume data
-  const calculateMonthlyIssueVolumeData = () => {
-    const { labels, data } = calculateMonthlyVolume(employeeIssueData, dateFilter);
-    
-    return labels.map((label, index) => ({
-      month: label,
-      count: data[index]
-    }));
-  };
+  const monthlyIssueVolumeData = (analyticsMonthlyIssueVolume || []).map((item: any) => {
+    const mName = typeof item.month === 'number' ? monthNames[item.month - 1] || String(item.month) : item.month;
+    return { month: mName.substring(0, 3), count: item.count };
+  });
 
-  // Transform all evaluation data to table format
-  const transformAllEvaluationDataToTable = (data: any[]) => {
-    if (!data || !Array.isArray(data)) return [];
-    
-    return data.map((item: any) => ({
-      id: item.id?.toString() || `${item.employee_name}_${item.date_of_evaluation}_${item.score}`,
-      name: item.employee_name || 'N/A',
-      department: item.department || 'N/A',
-      score: item.score?.toString() || 'N/A',
-      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: item.status || 'N/A'
-    }));
-  };
-
-  // Calculate employee performance table data with filtering
   const calculateEmployeePerformanceTableData = () => {
     let filteredData = employeePerformanceTableData || [];
-    
-    // Handle print options for employee performance table data
     const currentPrintOption = employeePrintOption || printOption;
-    
-    // Always use all evaluation data if available for better selection
-    const allData = allEvaluationData && allEvaluationData.length > 0 
-      ? transformAllEvaluationDataToTable(allEvaluationData)
-      : (employeePerformanceTableData || []);
-    
     if (currentPrintOption === 'selected' && selectedEmployees && selectedEmployees.length > 0) {
-      // Filter by selected employees only when option is 'selected' and we have selections
-      filteredData = allData.filter(employee => 
-        selectedEmployees.includes(employee.id)
-      );
-    } else {
-      // If currentPrintOption is 'all' or undefined, use all employees (no filtering)
-      filteredData = allData;
+      filteredData = filteredData.filter((employee: any) => selectedEmployees.includes(employee.id));
     }
-    
     return filteredData;
   };
 
-  // Transform all employee issue data to table format
-  const transformAllEmployeeIssueDataToTable = (data: any[]) => {
-    if (!data || !Array.isArray(data)) return [];
-    
-    return data.map((item: any) => ({
-      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
-      name: item.name || 'N/A',
-      department: item.department || 'N/A',
-      issueType: item.issue_type || 'Not Specified',
-      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: getIssueStatus(item)
-    }));
-  };
-
-  // Helper function to determine issue status
-  const getIssueStatus = (item: any) => {
-    if (item.is_decision_sent && item.is_decision_received) {
-      return 'Resolved';
-    } else if (item.investigate && item.investigate && item.investigate.id) {
-      return 'Under Hearing';
-    } else if (item.is_nte_sent && item.is_nte_received) {
-      return 'NTE Issued';
-    } else {
-      return 'Pending';
-    }
-  };
-
-  // Calculate employee issues table data with filtering
   const calculateEmployeeIssuesTableData = () => {
     let filteredData = employeeIssuesTableData || [];
-    
-    // Handle print options for employee issues table data
     const currentPrintOption = employeeIssuePrintOption || printOption;
-    
-    // Always use all employee issue data if available for better selection
-    const allData = allEmployeeIssueData && allEmployeeIssueData.length > 0 
-      ? transformAllEmployeeIssueDataToTable(allEmployeeIssueData)
-      : (employeeIssuesTableData || []);
-    
     if (currentPrintOption === 'selected' && selectedEmployeeIssues && selectedEmployeeIssues.length > 0) {
-      // Filter by selected employee issues only when option is 'selected' and we have selections
-      filteredData = allData.filter(issue => 
-        selectedEmployeeIssues.includes(issue.id)
-      );
-    } else {
-      // If currentPrintOption is 'all' or undefined, use all employee issues (no filtering)
-      filteredData = allData;
+      filteredData = filteredData.filter((issue: any) => selectedEmployeeIssues.includes(issue.id));
     }
-    
     return filteredData;
   };
-
-  const kpiData = calculateKPIs();
-  const performanceRateData = calculatePerformanceRateData();
-  const performanceTrendData = calculatePerformanceTrendData();
-  const issueTypeData = calculateIssueTypeData();
-  const monthlyIssueVolumeData = calculateMonthlyIssueVolumeData();
-  const filteredEmployeePerformanceTableData = calculateEmployeePerformanceTableData();
-  const filteredEmployeeIssuesTableData = calculateEmployeeIssuesTableData();
 
   return (
     <div className="bg-white">
@@ -592,14 +208,14 @@ export const createAnalyticsEmployeePerformanceDocumentComponent = (
           break-after: page;
         }
       `}</style>
-      <EmployeePerformanceDocument 
+      <EmployeePerformanceDocument
         kpiData={kpiData}
-        performanceRateData={performanceRateData}
+        performanceRateData={calculatePerformanceRateData()}
         performanceTrendData={performanceTrendData}
-        employeePerformanceTableData={filteredEmployeePerformanceTableData}
-        issueTypeData={issueTypeData}
+        employeePerformanceTableData={calculateEmployeePerformanceTableData()}
+        issueTypeData={calculateIssueTypeData()}
         monthlyIssueVolumeData={monthlyIssueVolumeData}
-        employeeIssuesTableData={filteredEmployeeIssuesTableData}
+        employeeIssuesTableData={calculateEmployeeIssuesTableData()}
         dateFilter={dateFilter}
         activeSubTab={activeSubTab}
       />
@@ -617,91 +233,72 @@ export const handlePrintAnalytics = async (
   tabId: number,
   tabName: string,
   generatePDFLocally: (component: React.ReactElement, filename: string) => Promise<void>,
-  employeeData: any[],
-  appliedApplicantsData: any[],
-  separationData: any[],
-  allJobPostData: any[],
   dateFilter: { from: string; to: string },
   activeSubTab: number = 1,
-  pipelineData?: { [jobId: number]: { [stageTitle: string]: number } },
+  // Workforce Overview
   rolePipelineData?: any[],
-  validRegions?: string[],
-  selectedJobFilter?: string,
-  // Print options for Workforce Overview
   printOption?: string,
-  allJobPostsForPrint?: any[],
   selectedRecords?: number[],
-  // Employee Performance specific parameters
-  evaluationData?: any[],
-  employeeIssueData?: any[],
+  analyticsKPIs?: any,
+  analyticsApplicantVsHired?: any,
+  analyticsAttrition?: any,
+  // Employee Performance
   employeePerformanceTableData?: any[],
   employeeIssuesTableData?: any[],
-  showAllDepartments?: boolean,
-  showAllIssueTypes?: boolean,
   selectedDepartments?: string[],
   selectedEmployees?: string[],
-  allEvaluationData?: any[],
   selectedIssueTypes?: string[],
   selectedEmployeeIssues?: string[],
-  allEmployeeIssueData?: any[],
-  // New separate print options for each section
   departmentPrintOption?: string,
   employeePrintOption?: string,
   issueTypePrintOption?: string,
-  employeeIssuePrintOption?: string
+  employeeIssuePrintOption?: string,
+  analyticsKPIsPerformance?: any,
+  analyticsPerformanceTrend?: any[],
+  analyticsMonthlyIssueVolume?: any[],
+  departmentRecords?: Array<{ name: string; score: number; count: number; color: string }>,
+  issueTypeRecords?: Array<{ reason: string; count: number; percentage: string; color: string }>
 ) => {
-
-  // Create document component based on tab
   let documentComponent: React.ReactElement;
-  
+
   switch (tabId) {
     case 1: // Workforce Overview
-        documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
-        employeeData,
-        appliedApplicantsData,
-        separationData,
-        allJobPostData,
+      documentComponent = createAnalyticsWorkforceOverviewDocumentComponent(
         dateFilter,
-        activeSubTab,
-        pipelineData,
         rolePipelineData,
-        validRegions,
-        selectedJobFilter || 'All Jobs',
         printOption,
-        allJobPostsForPrint,
-        selectedRecords
+        selectedRecords,
+        analyticsKPIs,
+        analyticsApplicantVsHired,
+        analyticsAttrition
       );
       break;
     case 2: // Employee Performance
       documentComponent = createAnalyticsEmployeePerformanceDocumentComponent(
-        evaluationData || [],
-        employeeIssueData || [],
         dateFilter,
         activeSubTab,
         employeePerformanceTableData,
         employeeIssuesTableData,
-        showAllDepartments || false,
-        showAllIssueTypes || false,
-        printOption, // main printOption (fallback)
+        printOption,
         selectedDepartments,
         selectedEmployees,
-        allEvaluationData, // Pass the actual allEvaluationData
-        selectedIssueTypes, // Pass the selected issue types
-        selectedEmployeeIssues, // Pass the selected employee issues
-        allEmployeeIssueData, // Pass the actual allEmployeeIssueData
-        departmentPrintOption, // department-specific print option
-        employeePrintOption, // employee-specific print option
-        issueTypePrintOption, // issue type-specific print option
-        employeeIssuePrintOption // employee issue-specific print option
+        selectedIssueTypes,
+        selectedEmployeeIssues,
+        departmentPrintOption,
+        employeePrintOption,
+        issueTypePrintOption,
+        employeeIssuePrintOption,
+        analyticsKPIsPerformance,
+        analyticsPerformanceTrend,
+        analyticsMonthlyIssueVolume,
+        departmentRecords,
+        issueTypeRecords
       );
       break;
-    // Add other tabs here as they are implemented
     default:
       throw new Error(`Print functionality not implemented for tab ${tabId}`);
   }
-  
+
   const filename = generateAnalyticsFilename(tabName, dateFilter);
-  
-  // Generate PDF locally (opens print dialog)
   await generatePDFLocally(documentComponent, filename);
-}; 
+};

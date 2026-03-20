@@ -13,6 +13,7 @@ interface DOLEEmployeeData {
   action?: string;
 }
 
+
 interface DOLEComplianceTableProps {
   data?: DOLEEmployeeData[];
   isLoading?: boolean;
@@ -100,7 +101,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-red-500">Error loading data: {error}</div>
+            <div className="text-red-500">Error loading data: {error?.message || 'An error occurred'}</div>
           </div>
         </div>
       </div>
@@ -167,16 +168,7 @@ const DOLEComplianceTable: React.FC<DOLEComplianceTableProps> = ({
                       {(() => {
                         const isSafetyPolicy = item.doleRequirement.includes('Safety & Health Policy');
                         const isOshProgram = item.doleRequirement.includes('OSH Program');
-                        let displayAction = item.action;
-                        
-                        // Determine action based on requirement type if not provided
-                        if (!displayAction) {
-                        if (isSafetyPolicy || isOshProgram) {
-                          displayAction = 'View';
-                        } else {
-                          displayAction = 'View Report';
-                          }
-                        }
+                        const displayAction: string = item.action ?? (isSafetyPolicy || isOshProgram ? 'View' : 'View Report');
                         
                         return (
                           <button
