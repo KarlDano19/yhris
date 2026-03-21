@@ -70,6 +70,22 @@ const EmployerDetail = ({ recordId, onBack }: EmployerDetailProps) => {
           <p className='text-sm text-gray-500 mt-1'>
             Client Onboarding Detail &nbsp;·&nbsp; {totalPhases} phase{totalPhases !== 1 ? 's' : ''}
           </p>
+
+          <div className='bg-white rounded-xl border border-gray-200 p-5 mt-4'>
+            <div className='flex justify-between items-center mb-2'>
+              <span className='text-sm font-medium text-gray-700'>Overall Progress</span>
+              <span className='text-sm font-semibold text-gray-800'>
+                {record.completed_items} of {record.total_items} steps completed
+              </span>
+            </div>
+            <div className='w-full bg-gray-200 rounded-full h-2.5'>
+              <div
+                className='bg-orange-400 h-2.5 rounded-full transition-all'
+                style={{ width: `${record.progress_pct}%` }}
+              />
+            </div>
+            <p className='text-right text-xs text-gray-400 mt-1'>{record.progress_pct}%</p>
+          </div>
         </div>
 
         <div>

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_ChecklistPhase } from '../PhaseModal';
+import { T_ChecklistPhase } from '../../modal/PhaseModal';
 
 async function updatePhase(data: T_ChecklistPhase): Promise<T_ChecklistPhase> {
   const token = getCookie('token');

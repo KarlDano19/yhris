@@ -8,9 +8,6 @@ import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import { getCookie } from 'cookies-next';
-
-
 import ChecklistGroup from './ChecklistGroup';
 import TutorialVideoModal from './TutorialVideoModal';
 import useGetChecklist from './hooks/useGetChecklist';
@@ -23,6 +20,7 @@ const ChecklistView = () => {
 
   const [selectedItem, setSelectedItem] = useState<T_OnboardingChecklist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAutoChecking, setIsAutoChecking] = useState(false);
 
   const { mutate: markComplete, isLoading: isMarking } = useMarkChecklistItemComplete();
 
@@ -58,43 +56,23 @@ const ChecklistView = () => {
     markComplete(item.id, { onSuccess: handleCloseModal });
   };
 
-  const handleProceedToAcceptanceMemo = async () => {
-    router.push('/setup-employer-profile/acceptance-memo');
+  const handleAutoCheckAll = async () => {
+    if (!record) return;
+    setIsAutoChecking(true);
+    const allUncompleted = record.phases
+      .flatMap((phase) => phase.checklists)
+      .filter((item) => !item.is_completed)
+      .map((item) => item.id);
+    for (const id of allUncompleted) {
+      await new Promise<void>((resolve) => {
+        markComplete(id, { onSuccess: () => resolve(), onError: () => resolve() });
+      });
+    }
+    setIsAutoChecking(false);
   };
 
-  const handleDevSkip = async () => {
-    // Collect all incomplete item IDs across all phases
-    const incompleteIds: number[] = [];
-    if (record) {
-      for (const phase of record.phases) {
-        for (const item of phase.checklists) {
-          if (!item.is_completed) {
-            incompleteIds.push(item.id);
-          }
-        }
-      }
-    }
-
-    // Mark all incomplete items complete in parallel
-    if (incompleteIds.length > 0) {
-      const token = getCookie('token');
-      await Promise.all(
-        incompleteIds.map((id) =>
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Token ${token}`,
-              },
-            }
-          )
-        )
-      );
-    }
-
-    await handleProceedToAcceptanceMemo();
+  const handleProceedToAcceptanceMemo = async () => {
+    router.push('/setup-employer-profile/acceptance-memo');
   };
 
   if (isLoading) {
@@ -143,6 +121,18 @@ const ChecklistView = () => {
                   <p className='text-right text-xs text-gray-400 mt-1'>{record.progress_pct}%</p>
                 </div>
 
+                {/* [TESTING ONLY] Auto check all button */}
+                <div className='flex justify-end mb-4'>
+                  <button
+                    type='button'
+                    onClick={handleAutoCheckAll}
+                    disabled={isAutoChecking || record.progress_pct === 100}
+                    className='px-4 py-2 text-xs font-semibold rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                  >
+                    {isAutoChecking ? 'Checking...' : '[TEST] Auto Check All'}
+                  </button>
+                </div>
+
                 {record.phases.map((phase) => (
                   <ChecklistGroup
                     key={phase.id}
@@ -166,16 +156,6 @@ const ChecklistView = () => {
                   </div>
                 )}
 
-                {/* TEMPORARY: Skip button for testing — remove before production */}
-                <div className='flex justify-end mt-1 mb-4'>
-                  <button
-                    type='button'
-                    onClick={handleDevSkip}
-                    className='text-xs text-gray-400 underline hover:text-gray-600'
-                  >
-                    [DEV] Skip to Acceptance Memo
-                  </button>
-                </div>
               </>
             ) : (
               <div className='text-center py-8 text-gray-500 text-sm'>

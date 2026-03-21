@@ -34,8 +34,7 @@ const Content = () => {
       </div>
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Client Onboarding</h2>
-        <p className='text-sm text-gray-500 mt-1'>HRIS Onboarding Management</p>
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8'>
+        <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8'>
           {menus.map((menu, index) => (
             <Link
               href={menu.link}
@@ -43,7 +42,7 @@ const Content = () => {
               className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80'
             >
               {menu.icon}
-              <h3 className='text-indigo-dye font-semibold text-lg'>{menu.text}</h3>
+              <h3 className='text-indigo-dye font-semibold text-center'>{menu.text}</h3>
             </Link>
           ))}
         </div>

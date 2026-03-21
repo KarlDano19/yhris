@@ -35,7 +35,7 @@ const Content = () => {
   return (
     <div>
       {/* Header — constrained */}
-      <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
           <Link href='/settings' className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -44,12 +44,11 @@ const Content = () => {
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye mb-1'>Acceptance Form</h2>
-          <p className='text-sm text-gray-500 mb-6'>View your submitted acceptance memo.</p>
         </div>
       </div>
 
       {/* Content — max-w-7xl to match site header */}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8'>
+      <div className='mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-8'>
         {isLoading ? (
           <div className='flex justify-center py-12'>
             <LoadingSpinner size='lg' color='yellow' />

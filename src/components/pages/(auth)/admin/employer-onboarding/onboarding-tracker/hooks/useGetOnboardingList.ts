@@ -7,6 +7,9 @@ type T_OnboardingRecord = {
   employer_name: string;
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
   created_at: string;
+  total_items: number;
+  completed_items: number;
+  progress_pct: number;
 };
 
 async function getOnboardingList(search: string): Promise<T_OnboardingRecord[]> {

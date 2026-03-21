@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 
+import ViewPdfModal from '../modals/ViewPdfModal';
+
 import { DocumentTypeField, SignatureField } from '../form-fields/Common';
 import { DatePickerField } from '../form-fields/DatePickerField';
 
@@ -270,30 +272,11 @@ export default function AcceptanceMemoDocGeneratorForm({
         </div>
       </div>
 
-      {showPdfModal && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
-          <div className='bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4'>
-            <h3 className='text-lg font-bold text-gray-900 mb-2'>View Acceptance Form PDF</h3>
-            <p className='text-sm text-gray-600 mb-6'>Would you like to view your submitted acceptance form as a PDF?</p>
-            <div className='flex gap-3 justify-end'>
-              <button
-                type='button'
-                onClick={() => setShowPdfModal(false)}
-                className='px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 text-sm transition-colors duration-200'
-              >
-                Cancel
-              </button>
-              <button
-                type='button'
-                onClick={() => { router.push('/settings/acceptance-form'); setShowPdfModal(false); }}
-                className='px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm transition-colors duration-200'
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ViewPdfModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        onConfirm={() => router.push('/settings/acceptance-form')}
+      />
     </div>
   );
 }

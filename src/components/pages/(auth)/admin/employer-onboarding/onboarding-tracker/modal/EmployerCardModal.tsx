@@ -39,6 +39,19 @@ const EmployerCard = ({ record, onSelect }: EmployerCardProps) => {
         </span>
         <span className="text-xs text-gray-400">Added {addedDate}</span>
       </div>
+
+      <div className='mt-3'>
+        <div className='flex justify-between text-xs text-gray-400 mb-1'>
+          <span>{record.completed_items} of {record.total_items} steps</span>
+          <span>{record.progress_pct}%</span>
+        </div>
+        <div className='w-full bg-gray-200 rounded-full h-1.5'>
+          <div
+            className='bg-orange-400 h-1.5 rounded-full transition-all'
+            style={{ width: `${record.progress_pct}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

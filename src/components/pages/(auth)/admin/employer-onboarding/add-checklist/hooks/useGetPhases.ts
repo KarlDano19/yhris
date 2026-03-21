@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
-import { T_ChecklistPhase } from '../PhaseModal';
+import { T_ChecklistPhase } from '../../modal/PhaseModal';
 
 async function getPhases(): Promise<T_ChecklistPhase[]> {
   const token = getCookie('token');

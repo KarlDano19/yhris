@@ -6,12 +6,15 @@ type T_OnboardingChecklist = {
   name: string;
   description: string;
   video_url?: string;
+  is_completed: boolean;
 };
 
 type T_OnboardingPhase = {
   id: number;
   name: string;
   description: string;
+  total_items: number;
+  completed_items: number;
   checklists: T_OnboardingChecklist[];
 };
 
@@ -20,6 +23,9 @@ type T_OnboardingDetail = {
   employer_name: string;
   status: string;
   phases: T_OnboardingPhase[];
+  total_items: number;
+  completed_items: number;
+  progress_pct: number;
 };
 
 async function getOnboardingDetail(recordId: string): Promise<T_OnboardingDetail> {

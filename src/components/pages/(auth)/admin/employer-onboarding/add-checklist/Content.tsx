@@ -13,7 +13,7 @@ import EditIcon from '@/svg/EditIcon';
 
 import CustomToast from '@/components/CustomToast';
 
-import PhaseModal, { T_ChecklistPhase } from './PhaseModal';
+import PhaseModal, { T_ChecklistPhase } from '../modal/PhaseModal';
 import useGetPhases from './hooks/useGetPhases';
 import useCreatePhase from './hooks/useCreatePhase';
 import useUpdatePhase from './hooks/useUpdatePhase';
