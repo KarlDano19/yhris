@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -17,7 +17,14 @@ type BoardProps = {
 
 const Board = ({ onSelect }: BoardProps) => {
   const [search, setSearch] = useState('');
-  const { data, isLoading } = useGetOnboardingList(search);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data, isLoading } = useGetOnboardingList(debouncedSearch);
 
   const records: any[] = data || [];
 

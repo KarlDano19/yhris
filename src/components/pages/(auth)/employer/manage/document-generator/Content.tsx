@@ -9,8 +9,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { getCookie } from 'cookies-next';
-
 import Forms from "./Forms";
 import CustomToast from "@/components/CustomToast";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -36,7 +34,7 @@ import { print } from './print/print';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
-import updateSession from '@/helpers/updateSession';
+import { useUpdateUserViewType } from '@/components/hooks/useUpdateUserViewType';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -67,6 +65,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   // Fetch existing acceptance memo (always called; only used when documentType === 'acceptance-memo')
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { mutate: submitMemo } = useSubmitAcceptanceMemo();
+  const { mutateAsync: updateUserViewType } = useUpdateUserViewType();
   
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -413,13 +412,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         onSuccess: async () => {
           setIsLoading(false);
           toast.custom(() => <CustomToast type="success" message="Acceptance Memo submitted successfully!" />);
-          const token = getCookie('token');
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user-accounts/details/`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
-            body: JSON.stringify({ view_type: 'onboarding' }),
-          });
-          await updateSession({ hasCompletedOnboarding: true, hasOnboarded: true });
+          await updateUserViewType('onboarding');
           router.push('/dashboard');
         },
         onError: (err: any) => {

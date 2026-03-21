@@ -90,8 +90,9 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
               }
               // Allow access to sub-routes (onboarding-checklist, acceptance-memo)
-            } else if (!hasCompletedOnboarding) {
-              // Onboarding gate: block all employer routes until checklist is complete
+            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications') {
+              // Onboarding gate: block employer routes until checklist is complete.
+              // settings and notifications are exempt so users can't get trapped.
               return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
             } else if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));

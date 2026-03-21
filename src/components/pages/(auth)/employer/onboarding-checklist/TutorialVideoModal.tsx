@@ -52,7 +52,7 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
 
     const storageKey = `onboarding_timer_start_${item.id}`;
 
-    // Record when the timer first started for this item
+    // Record when the timer first started for this item — persists across modal closes
     let startTime = parseInt(localStorage.getItem(storageKey) || '0', 10);
     if (!startTime) {
       startTime = Date.now();

@@ -20,8 +20,6 @@ const ChecklistView = () => {
 
   const [selectedItem, setSelectedItem] = useState<T_OnboardingChecklist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAutoChecking, setIsAutoChecking] = useState(false);
-
   const { mutate: markComplete, isLoading: isMarking } = useMarkChecklistItemComplete();
 
   const record = data;
@@ -54,21 +52,6 @@ const ChecklistView = () => {
 
   const handleMarkComplete = (item: T_OnboardingChecklist) => {
     markComplete(item.id, { onSuccess: handleCloseModal });
-  };
-
-  const handleAutoCheckAll = async () => {
-    if (!record) return;
-    setIsAutoChecking(true);
-    const allUncompleted = record.phases
-      .flatMap((phase) => phase.checklists)
-      .filter((item) => !item.is_completed)
-      .map((item) => item.id);
-    for (const id of allUncompleted) {
-      await new Promise<void>((resolve) => {
-        markComplete(id, { onSuccess: () => resolve(), onError: () => resolve() });
-      });
-    }
-    setIsAutoChecking(false);
   };
 
   const handleProceedToAcceptanceMemo = async () => {
@@ -119,18 +102,6 @@ const ChecklistView = () => {
                     />
                   </div>
                   <p className='text-right text-xs text-gray-400 mt-1'>{record.progress_pct}%</p>
-                </div>
-
-                {/* [TESTING ONLY] Auto check all button */}
-                <div className='flex justify-end mb-4'>
-                  <button
-                    type='button'
-                    onClick={handleAutoCheckAll}
-                    disabled={isAutoChecking || record.progress_pct === 100}
-                    className='px-4 py-2 text-xs font-semibold rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                  >
-                    {isAutoChecking ? 'Checking...' : '[TEST] Auto Check All'}
-                  </button>
                 </div>
 
                 {record.phases.map((phase) => (

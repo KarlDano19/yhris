@@ -18,9 +18,10 @@ function getEmbedUrl(url: string): string {
       if (v) return `https://www.youtube.com/embed/${v}`;
     }
   } catch {
-    // not a valid URL — return as-is and let the browser handle it
+    // not a valid URL
   }
-  return url;
+  // Return a safe blank rather than the raw URL to prevent XSS / open redirects
+  return 'about:blank';
 }
 
 type PreviewPhaseModalProps = {
