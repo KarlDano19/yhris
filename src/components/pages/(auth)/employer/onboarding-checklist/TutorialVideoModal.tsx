@@ -47,6 +47,12 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
   const [elapsed, setElapsed] = useState(0);
   const [canComplete, setCanComplete] = useState(false);
 
+  // Reset display state immediately when switching to a different item
+  useEffect(() => {
+    setElapsed(0);
+    setCanComplete(false);
+  }, [item?.id]);
+
   useEffect(() => {
     if (!isOpen || !item) return;
 
