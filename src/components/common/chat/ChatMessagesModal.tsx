@@ -296,9 +296,14 @@ const ChatMessagesModal = ({
                             <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
                               {label}
                             </span>
-                            <span className={`text-xs font-medium truncate max-w-[160px] ${isSentByMe ? 'text-white' : 'text-gray-800'}`}>
-                              {att.file_name}
-                            </span>
+                            <div className="flex flex-col min-w-0">
+                              <span className={`text-xs font-medium truncate max-w-[160px] leading-tight ${isSentByMe ? 'text-white' : 'text-gray-800'}`}>
+                                {att.file_name}
+                              </span>
+                              <span className={`text-[10px] leading-tight ${isSentByMe ? 'text-white/60' : 'text-gray-400'}`}>
+                                {formatFileSize(att.file_size)}
+                              </span>
+                            </div>
                             <PaperClipIcon className={`h-3 w-3 shrink-0 ml-auto ${isSentByMe ? 'text-white/70' : 'text-gray-400'}`} />
                           </a>
                         );
