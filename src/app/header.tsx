@@ -60,7 +60,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
-          {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
+          {(type === 'admin' || type === 'superadmin') && adminRoutes.includes(firstRoute) && <AdminHeader />}
           {type === 'employer' && employerRoutes.includes(firstRoute) && (
             <MainHeader
               hasProfile={hasProfile}

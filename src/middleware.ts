@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (isLoggedIn) {
-    if (accountType === 'admin') {
+    if (accountType === 'admin' || accountType === 'superadmin') {
       if (!adminRoutes.includes(firstRoute)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
