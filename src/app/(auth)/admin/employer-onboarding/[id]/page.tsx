@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import EmployerDetail from '@/components/pages/(auth)/admin/employer-onboarding/onboarding-tracker/modal/EmployerDetailModal';
+import EmployerDetail from '@/components/pages/(auth)/admin/employer-onboarding/onboarding-tracker/EmployerDetail';
 
 const EmployerOnboardingDetailPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();

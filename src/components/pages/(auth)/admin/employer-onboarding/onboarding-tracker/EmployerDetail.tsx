@@ -4,8 +4,8 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import ChecklistGroup from './ChecklistGroupModal';
-import useGetOnboardingDetail from '../hooks/useGetOnboardingDetail';
+import ChecklistGroup from './ChecklistGroup';
+import useGetOnboardingDetail from './hooks/useGetOnboardingDetail';
 
 type EmployerDetailProps = {
   recordId: string;

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import Board from './modal/BoardModal';
-import EmployerDetail from './modal/EmployerDetailModal';
+import Board from './Board';
+import EmployerDetail from './EmployerDetail';
 
 const Content = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);

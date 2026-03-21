@@ -8,8 +8,8 @@ import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import EmployerCard from './EmployerCardModal';
-import useGetOnboardingList from '../hooks/useGetOnboardingList';
+import EmployerCard from './EmployerCard';
+import useGetOnboardingList from './hooks/useGetOnboardingList';
 
 type BoardProps = {
   onSelect: (id: string) => void;
