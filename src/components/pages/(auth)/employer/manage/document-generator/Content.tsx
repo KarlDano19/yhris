@@ -20,15 +20,21 @@ import useUploadEmployeeIssueAttachments from '../address-employee-issue/hooks/u
 import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
+import useGetAcceptanceMemo from './hooks/useGetAcceptanceMemo';
+import { useSubmitAcceptanceMemo } from './hooks/useSubmitAcceptanceMemo';
+import AcceptanceMemoPreview from './form-previews/AcceptanceMemoPreview';
 
 import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
 import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
 import { NoticeToExplainFormData } from '@/types/document-generator/documents';
+import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
 import { DocumentType } from '@/types/document-generator/form';
+import { T_MemoFormData } from './form-previews/AcceptanceMemoPreview';
 import { print } from './print/print';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
+import { useUpdateUserViewType } from '@/components/hooks/useUpdateUserViewType';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -43,16 +49,23 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   
   const urlDocType = searchParams.get('type') as DocumentType | null;
   const employeeId = searchParams.get('employee');
-  
+  const fromChecklist = searchParams.get('from') === 'checklist';
+  const itemId = searchParams.get('itemId');
+
   // Always default to employee certificate type, unless specified in URL
   const [documentType, setDocumentType] = useState<DocumentType>(
-    urlDocType && ['employee-certificate', 'employment-agreement', 'notice-to-explain'].includes(urlDocType) 
-      ? urlDocType 
+    urlDocType && ['employee-certificate', 'employment-agreement', 'notice-to-explain', 'acceptance-memo'].includes(urlDocType)
+      ? urlDocType
       : 'employee-certificate'
   );
 
   // Fetch employee issue details if employeeId is provided
   const { data: selectedEmployeeIssue, refetch: refetchEmployeeIssue } = useGetEmployeeIssueDetails(employeeId ? Number(employeeId) : null);
+
+  // Fetch existing acceptance memo (always called; only used when documentType === 'acceptance-memo')
+  const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
+  const { mutate: submitMemo } = useSubmitAcceptanceMemo();
+  const { mutateAsync: updateUserViewType } = useUpdateUserViewType();
   
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -88,6 +101,19 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     companyAddress: '',
     signature: null,
   });
+
+  const [acceptanceMemoData, setAcceptanceMemoData] = useState<AcceptanceMemoFormData>({
+    companyName: '',
+    startDate: '',
+    endDate: '',
+    authorityName: '',
+    authorityPosition: '',
+    authorityDate: new Date().toISOString().split('T')[0],
+    signature: null,
+    checks: { systemSetup: false, employeeData: false, systemConfig: false, userTraining: false, systemNavigation: false },
+  });
+
+  const [isViewMode, setIsViewMode] = useState(false);
 
   const [noticeToExplainData, setNoticeToExplainData] = useState<NoticeToExplainFormData>({
     employeeName: '',
@@ -247,6 +273,23 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   }, [documentType, employeeId, selectedEmployeeIssue, queryClient]);
   
+  // Populate acceptance memo form from existing submitted memo
+  useEffect(() => {
+    if (documentType === 'acceptance-memo' && existingMemo) {
+      setAcceptanceMemoData({
+        companyName: existingMemo.company_name,
+        startDate: existingMemo.start_date,
+        endDate: existingMemo.end_date,
+        authorityName: existingMemo.authority_name,
+        authorityPosition: existingMemo.authority_position,
+        authorityDate: existingMemo.authority_date,
+        signature: existingMemo.signature,
+        checks: { systemSetup: true, employeeData: true, systemConfig: true, userTraining: true, systemNavigation: true },
+      });
+      setIsViewMode(true);
+    }
+  }, [documentType, existingMemo, fromChecklist]);
+
   // Populate company name for all document types when switching between them
   useEffect(() => {
     const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
@@ -284,6 +327,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         return employmentAgreementData;
       case 'notice-to-explain':
         return noticeToExplainData;
+      case 'acceptance-memo':
+        return acceptanceMemoData;
       default:
         return employeeCertificateData;
     }
@@ -312,11 +357,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   };
   
   // Handle form changes
-  const handleFormChange = (data: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData) => {
+  const handleFormChange = (data: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData | AcceptanceMemoFormData) => {
     if (documentType === 'employee-certificate') {
       setEmployeeCertificateData(data as EmployeeCertificateFormData);
     } else if (documentType === 'employment-agreement') {
       setEmploymentAgreementData(data as EmploymentAgreementFormData);
+    } else if (documentType === 'acceptance-memo') {
+      setAcceptanceMemoData(data as AcceptanceMemoFormData);
     } else if (documentType === 'notice-to-explain') {
       const noticeData = data as NoticeToExplainFormData;
       
@@ -346,6 +393,36 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   };
   
+  // Handle acceptance memo submission
+  const handleAcceptanceMemoSubmit = () => {
+    setIsLoading(true);
+    submitMemo(
+      {
+        company_name: acceptanceMemoData.companyName,
+        start_date: acceptanceMemoData.startDate,
+        end_date: acceptanceMemoData.endDate,
+        authority_name: acceptanceMemoData.authorityName,
+        authority_position: acceptanceMemoData.authorityPosition,
+        authority_date: acceptanceMemoData.authorityDate,
+        signature: acceptanceMemoData.signature,
+        checklist_item_id: itemId ? Number(itemId) : null,
+        checks: acceptanceMemoData.checks,
+      },
+      {
+        onSuccess: async () => {
+          setIsLoading(false);
+          toast.custom(() => <CustomToast type="success" message="Acceptance Memo submitted successfully!" />);
+          await updateUserViewType('onboarding');
+          router.push('/dashboard');
+        },
+        onError: (err: any) => {
+          setIsLoading(false);
+          toast.custom(() => <CustomToast type="error" message={err?.message || 'Failed to submit memo.'} />);
+        },
+      }
+    );
+  };
+
   // Handle proceeding (marking as sent and returning to employee issues)
   const handleProceed = async () => {
     setIsLoading(true);
@@ -377,23 +454,26 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   // Handle print
   const handlePrint = async () => {
     try {
-      const options = {
-        elementId: documentType === 'employee-certificate' 
-          ? 'employee-certificate-preview' 
-          : documentType === 'employment-agreement'
-            ? 'agreement-preview'
-            : 'notice-to-explain-preview',
-        title: documentType === 'employee-certificate' 
-          ? 'Certificate of Employment' 
-          : documentType === 'employment-agreement'
-            ? 'Employment Agreement'
-            : 'Notice to Explain',
-        fileName: documentType === 'employee-certificate' 
-          ? 'certificate-of-employment' 
-          : documentType === 'employment-agreement'
-            ? 'employment-agreement'
-            : 'notice-to-explain'
+      let options = {
+        elementId: 'employee-certificate-preview',
+        title: 'Certificate of Employment',
+        fileName: 'certificate-of-employment',
       };
+
+      switch (documentType) {
+        case 'employee-certificate':
+          options = { elementId: 'employee-certificate-preview', title: 'Certificate of Employment', fileName: 'certificate-of-employment' };
+          break;
+        case 'employment-agreement':
+          options = { elementId: 'agreement-preview', title: 'Employment Agreement', fileName: 'employment-agreement' };
+          break;
+        case 'notice-to-explain':
+          options = { elementId: 'notice-to-explain-preview', title: 'Notice to Explain', fileName: 'notice-to-explain' };
+          break;
+        case 'acceptance-memo':
+          options = { elementId: 'acceptance-memo-preview', title: 'Acceptance Memo', fileName: 'acceptance-memo' };
+          break;
+      }
       
       // Determine document type for audit
       const docType = 'incidentDate' in currentData && 'incidentPlace' in currentData && 'briefBackground' in currentData
@@ -403,7 +483,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           : 'employee-certificate';
       
       // Proceed with printing (validation already happened in Form.tsx)
-      print(currentData, options)
+      print(currentData as EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData | AcceptanceMemoFormData, options)
         .then(() => {
           // Only log audit AFTER successful print
           logAudit({
@@ -442,8 +522,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         ...noticeToExplainData,
         signature: signatureData
       });
+    } else if (documentType === 'acceptance-memo') {
+      const sig = typeof signatureData === 'string'
+        ? signatureData
+        : signatureData ? URL.createObjectURL(signatureData) : null;
+      setAcceptanceMemoData({ ...acceptanceMemoData, signature: sig });
     }
-    
+
     setIsSignatureModalOpen(false);
   };
   
@@ -517,7 +602,8 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   };
 
   // Only allow "notice-to-explain" document type if coming from address-employee-issue page
-  const isDocumentTypeDisabled = !!employeeId;
+  // Also lock when coming from onboarding checklist (acceptance-memo is pre-selected)
+  const isDocumentTypeDisabled = !!employeeId || fromChecklist;
 
   // Custom function to determine if specific field should be disabled
   const isFieldDisabled = (fieldName: string): boolean => {
@@ -554,30 +640,36 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             </div>
           )}
           <div className="flex p-4">
-            <Link 
-              href={employeeId ? "/manage/address-employee-issue" : "/manage"} 
+            <Link
+              href={fromChecklist ? '/setup-employer-profile/onboarding-checklist' : (employeeId ? '/manage/address-employee-issue' : '/manage')}
               className="flex-none flex gap-3 items-center hover:bg-gray-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <h4>Manage</h4>
+              <h4>{fromChecklist ? 'Onboarding Checklist' : 'Manage'}</h4>
             </Link>
           </div>
           <div className="px-2 md:px-8 lg:px-4">
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>
             <div className={classNames("grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6", !hasActiveSubscription && 'opacity-50 pointer-events-none')}>
               <div className="transition-all duration-300">
-                <Forms 
+                <Forms
                   documentType={documentType}
                   onDocumentTypeChange={handleDocumentTypeChange}
-                  onFormChange={handleFormChange} 
-                  initialData={currentData} 
+                  onFormChange={handleFormChange}
+                  initialData={currentData}
                   onPrint={handlePrint}
                   onOpenSignatureModal={handleOpenSignatureModal}
                   onOpenLetterheadModal={handleOpenLetterheadModal}
                   onOpenLogoModal={handleOpenLogoModal}
-                  onProceed={employeeId && documentType === 'notice-to-explain' ? handleProceed : undefined}
+                  onProceed={
+                    documentType === 'acceptance-memo' && !isViewMode
+                      ? handleAcceptanceMemoSubmit
+                      : (employeeId && documentType === 'notice-to-explain' ? handleProceed : undefined)
+                  }
                   isDocumentTypeDisabled={isDocumentTypeDisabled}
+                  isFormDisabled={documentType === 'acceptance-memo' && isMemoLoading}
                   isFieldDisabled={isFieldDisabled}
+                  isViewMode={isViewMode}
                 />
               </div>
               <div className="transition-all duration-300">
@@ -588,6 +680,10 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                 ) : documentType === 'employment-agreement' ? (
                   <div id="agreement-preview">
                     <EmploymentAgreementPreview formData={employmentAgreementData} />
+                  </div>
+                ) : documentType === 'acceptance-memo' ? (
+                  <div id="acceptance-memo-preview">
+                    <AcceptanceMemoPreview formData={acceptanceMemoData as T_MemoFormData} />
                   </div>
                 ) : (
                   <div id="notice-to-explain-preview">
