@@ -22,6 +22,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
   const [tab, setTab] = useState<'all' | 'unread'>('all');
   const [showSwipeHint, setShowSwipeHint] = React.useState(false);
+  const [anyItemSwiped, setAnyItemSwiped] = React.useState(false);
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
   const { mutate: deleteNotification } = useDeleteApplicantNotification();
@@ -158,10 +159,13 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         // open to reveal actions
         setTranslateX(-MAX_REVEAL);
         openRef.current = true;
+        setShowSwipeHint(false);
+        setAnyItemSwiped(true);
       } else {
         // reset
         setTranslateX(0);
         openRef.current = false;
+        setAnyItemSwiped(false);
       }
       startXRef.current = null;
     };
@@ -333,7 +337,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         className="relative"
         onMouseMove={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
-          setShowSwipeHint(e.clientX > rect.right - 40);
+          setShowSwipeHint(e.clientX > rect.right - 40 && !anyItemSwiped);
         }}
         onMouseLeave={() => setShowSwipeHint(false)}
       >
@@ -359,7 +363,7 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
           </>
         )}
       </div>
-      {showSwipeHint && (
+      {showSwipeHint && !anyItemSwiped && (
         <div className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
           Hold and swipe left to reveal the delete button
         </div>

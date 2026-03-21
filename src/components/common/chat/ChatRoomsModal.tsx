@@ -105,10 +105,11 @@ interface MessagesModalProps {
 interface SwipeableChatItemProps {
   chatId: number;
   onDelete: (chatId: number) => void;
+  onSwipeChange?: (isOpen: boolean) => void;
   children: React.ReactNode;
 }
 
-const SwipeableChatItem = ({ chatId, onDelete, children }: SwipeableChatItemProps) => {
+const SwipeableChatItem = ({ chatId, onDelete, onSwipeChange, children }: SwipeableChatItemProps) => {
   const [translateX, setTranslateX] = useState(0);
   const startXRef = useRef<number | null>(null);
   const startYRef = useRef<number | null>(null);
@@ -157,9 +158,11 @@ const SwipeableChatItem = ({ chatId, onDelete, children }: SwipeableChatItemProp
     if (translateX <= -THRESHOLD) {
       setTranslateX(-MAX_REVEAL);
       openRef.current = true;
+      onSwipeChange?.(true);
     } else {
       setTranslateX(0);
       openRef.current = false;
+      onSwipeChange?.(false);
     }
     startXRef.current = null;
     startYRef.current = null;
@@ -227,6 +230,7 @@ const ChatRoomsModal = ({
   const [employerSearch, setEmployerSearch] = useState('');
   const [removedChatIds, setRemovedChatIds] = useState<Set<number>>(new Set());
   const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const [anyItemSwiped, setAnyItemSwiped] = useState(false);
 
   const handleSearch = () => setEmployerSearch(searchInput);
   const { mutate: deleteChat } = useDeleteEmployerApplicantChat();
@@ -319,7 +323,7 @@ const ChatRoomsModal = ({
       const preview = chat.last_message || 'Start the conversation';
 
       return (
-        <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat}>
+        <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat} onSwipeChange={setAnyItemSwiped}>
           <button
             onClick={() => {
               onSelectEmployerMessage?.({
@@ -388,7 +392,7 @@ const ChatRoomsModal = ({
         const preview = chat.last_message || 'Start the conversation';
 
         return (
-          <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat}>
+          <SwipeableChatItem key={chat.id} chatId={chat.id} onDelete={handleDeleteChat} onSwipeChange={setAnyItemSwiped}>
             <button
               onClick={() => {
                 onSelectPersonalMessage?.({
@@ -568,7 +572,7 @@ const ChatRoomsModal = ({
             onMouseLeave={() => setShowSwipeHint(false)}
           >
             <div className="space-y-0 max-h-[400px] overflow-y-auto">{renderEmployerChats()}</div>
-            {showSwipeHint && (
+            {showSwipeHint && !anyItemSwiped && (
               <div className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
                 Hold and swipe left to reveal the delete button
               </div>
@@ -586,14 +590,14 @@ const ChatRoomsModal = ({
           className="relative"
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
-            setShowSwipeHint(e.clientX > rect.right - 40);
+            setShowSwipeHint(e.clientX > rect.right - 40 && !anyItemSwiped);
           }}
           onMouseLeave={() => setShowSwipeHint(false)}
         >
           <div className="space-y-0 max-h-[400px] overflow-y-auto">
             {activeTab === 'personal' ? renderPersonalChats() : renderBusinessChats()}
           </div>
-          {showSwipeHint && (
+          {showSwipeHint && !anyItemSwiped && (
             <div className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
               Hold and swipe left to reveal the delete button
             </div>
