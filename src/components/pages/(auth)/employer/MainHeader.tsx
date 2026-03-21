@@ -107,7 +107,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     if (data) {
       setProfile(data);
     }
-    if (error && typeof error.detail === 'string' && error.detail.includes('Invalid token')) {
+    if (error && error.detail === 'string' && error.detail.includes('Invalid token')) {
       logout(true);
     }
   }, [data, error]);
