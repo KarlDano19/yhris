@@ -34,7 +34,6 @@ import { print } from './print/print';
 import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
-import { useUpdateUserViewType } from '@/components/hooks/useUpdateUserViewType';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -65,8 +64,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   // Fetch existing acceptance memo (always called; only used when documentType === 'acceptance-memo')
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { mutate: submitMemo } = useSubmitAcceptanceMemo();
-  const { mutateAsync: updateUserViewType } = useUpdateUserViewType();
-  
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
     employeeName: '',
@@ -412,7 +409,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         onSuccess: async () => {
           setIsLoading(false);
           toast.custom(() => <CustomToast type="success" message="Acceptance Memo submitted successfully!" />);
-          await updateUserViewType('onboarding');
+          await fetch('/api/refresh-onboarding-session', { method: 'POST' });
           router.push('/dashboard');
         },
         onError: (err: any) => {

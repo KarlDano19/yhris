@@ -16,7 +16,6 @@ import AcceptanceMemoDocGeneratorForm from '@/components/pages/(auth)/employer/m
 import SignatureModal from '@/components/pages/(auth)/employer/manage/document-generator/modals/SignatureModal';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { useUpdateUserViewType } from '@/components/hooks/useUpdateUserViewType';
 
 import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
 import { T_MemoFormData } from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
@@ -44,8 +43,6 @@ export default function Content() {
 
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { mutate: submitMemo, isLoading: isSubmitting } = useSubmitAcceptanceMemo();
-  const { mutateAsync: updateUserViewType } = useUpdateUserViewType();
-
   const [formData, setFormData] = useState<AcceptanceMemoFormData>(INITIAL_FORM_DATA);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
@@ -119,7 +116,7 @@ export default function Content() {
       },
       {
         onSuccess: async () => {
-          await updateUserViewType('onboarding');
+          await fetch('/api/refresh-onboarding-session', { method: 'POST' });
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully!' />
           );
