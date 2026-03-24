@@ -155,7 +155,7 @@ export default function Content() {
               className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'
             >
               <ArrowLeftIcon className='h-5 w-5' />
-              <h4>Onboarding Checklist</h4>
+              <h4>HRIS Implementation Checklist</h4>
             </Link>
           </div>
 

@@ -111,7 +111,7 @@ const ChecklistView = () => {
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4 py-6'>
           <div className='mb-6'>
-            <h2 className='text-xl font-bold text-indigo-dye'>Onboarding Checklist</h2>
+            <h2 className='text-xl font-bold text-indigo-dye'>HRIS Implementation Checklist</h2>
             <p className='text-sm text-gray-500 mt-1'>
               Complete these steps to finish your onboarding setup.
             </p>

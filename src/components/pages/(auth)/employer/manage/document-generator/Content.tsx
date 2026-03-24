@@ -645,7 +645,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
               className="flex-none flex gap-3 items-center hover:bg-gray-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <h4>{fromChecklist ? 'Onboarding Checklist' : 'Manage'}</h4>
+              <h4>{fromChecklist ? 'HRIS Implementation Checklist' : 'Manage'}</h4>
             </Link>
           </div>
           <div className="px-2 md:px-8 lg:px-4">
