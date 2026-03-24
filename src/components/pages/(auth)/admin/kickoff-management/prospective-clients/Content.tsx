@@ -119,7 +119,7 @@ const Content = () => {
       <tr>
         <td colSpan={7}>
           <h4 className="text-center text-gray-300 text-sm mt-4">{`There's no data yet.`}</h4>
-          <h4 className="text-center text-gray-300 text-sm mb-4">Please click CREATE to add a prospective client.</h4>
+          <h4 className="text-center text-gray-300 text-sm mb-4">Please click CREATE to add a prospect client.</h4>
           <div className="flex-1 flex justify-center mb-4">
             <button
               className="bg-white border-2 border-green-500 rounded-md py-2 px-8 text-green-500 text-sm font-semibold hover:shadow-md"
@@ -143,7 +143,7 @@ const Content = () => {
           </Link>
         </div>
         <div className="px-2 md:px-8 lg:px-4">
-          <h2 className="text-xl font-bold text-indigo-dye">Prospective Clients</h2>
+          <h2 className="text-xl font-bold text-indigo-dye">Prospect Clients</h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none lg:w-1/3">
               <input

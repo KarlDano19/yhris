@@ -14,7 +14,7 @@ const menus = [
   },
   {
     icon: <AccountBalanceLogo />,
-    text: 'Prospective Clients',
+    text: 'Prospect Clients',
     link: '/admin/kickoff-management/prospective-clients',
   },
 ];
