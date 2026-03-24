@@ -8,7 +8,8 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { T_OnboardingChecklist } from './hooks/useGetChecklist';
 
-const UNLOCK_SECONDS = 30;
+// [DEV] Timer commented out
+// const UNLOCK_SECONDS = 30;
 
 type TutorialVideoModalProps = {
   isOpen: boolean;
@@ -53,44 +54,28 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
     setCanComplete(false);
   }, [item?.id]);
 
-  useEffect(() => {
-    if (!isOpen || !item) return;
-
-    const storageKey = `onboarding_timer_start_${item.id}`;
-
-    // Record when the timer first started for this item — persists across modal closes
-    let startTime = parseInt(localStorage.getItem(storageKey) || '0', 10);
-    if (!startTime) {
-      startTime = Date.now();
-      localStorage.setItem(storageKey, String(startTime));
-    }
-
-    const computeElapsed = () =>
-      Math.min(Math.floor((Date.now() - startTime) / 1000), UNLOCK_SECONDS);
-
-    const current = computeElapsed();
-    setElapsed(current);
-
-    if (current >= UNLOCK_SECONDS) {
-      setCanComplete(true);
-      return;
-    }
-
-    setCanComplete(false);
-
-    intervalRef.current = setInterval(() => {
-      const e = computeElapsed();
-      setElapsed(e);
-      if (e >= UNLOCK_SECONDS) {
-        clearInterval(intervalRef.current!);
-        setCanComplete(true);
-      }
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isOpen, item?.id]);
+  // [DEV] Timer commented out — Mark as Complete is always available
+  // useEffect(() => {
+  //   if (!isOpen || !item) return;
+  //   const storageKey = `onboarding_timer_start_${item.id}`;
+  //   let startTime = parseInt(localStorage.getItem(storageKey) || '0', 10);
+  //   if (!startTime) {
+  //     startTime = Date.now();
+  //     localStorage.setItem(storageKey, String(startTime));
+  //   }
+  //   const computeElapsed = () =>
+  //     Math.min(Math.floor((Date.now() - startTime) / 1000), UNLOCK_SECONDS);
+  //   const current = computeElapsed();
+  //   setElapsed(current);
+  //   if (current >= UNLOCK_SECONDS) { setCanComplete(true); return; }
+  //   setCanComplete(false);
+  //   intervalRef.current = setInterval(() => {
+  //     const e = computeElapsed();
+  //     setElapsed(e);
+  //     if (e >= UNLOCK_SECONDS) { clearInterval(intervalRef.current!); setCanComplete(true); }
+  //   }, 1000);
+  //   return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  // }, [isOpen, item?.id]);
 
   if (!item) return null;
 
@@ -167,7 +152,9 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
     );
   };
 
-  const markButtonDisabled = !canComplete || isMarking || item.is_completed;
+  // [DEV] Timer disabled — button always available
+  // const markButtonDisabled = !canComplete || isMarking || item.is_completed;
+  const markButtonDisabled = isMarking || item.is_completed;
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -230,13 +217,7 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
                         : 'bg-[#355FD0] text-white hover:bg-blue-700'
                     }`}
                   >
-                    {item.is_completed
-                      ? 'Completed ✓'
-                      : canComplete
-                      ? isMarking
-                        ? 'Saving...'
-                        : 'Mark as Complete'
-                      : `Available in ${UNLOCK_SECONDS - elapsed}s`}
+                    {item.is_completed ? 'Completed ✓' : isMarking ? 'Saving...' : 'Mark as Complete'}
                   </button>
                   <button
                     ref={cancelButtonRef}

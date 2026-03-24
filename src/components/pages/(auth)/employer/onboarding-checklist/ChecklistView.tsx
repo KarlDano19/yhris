@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
+import { getCookie } from 'cookies-next';
+
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import ChecklistGroup from './ChecklistGroup';
@@ -56,6 +58,38 @@ const ChecklistView = () => {
 
   const handleProceedToAcceptanceMemo = async () => {
     router.push('/setup-employer-profile/acceptance-memo');
+  };
+
+  // [DEV] Auto-complete all incomplete items and navigate to acceptance memo
+  const handleDevSkip = async () => {
+    const incompleteIds: number[] = [];
+    if (record) {
+      for (const phase of record.phases) {
+        for (const item of phase.checklists) {
+          if (!item.is_completed) {
+            incompleteIds.push(item.id);
+          }
+        }
+      }
+    }
+    if (incompleteIds.length > 0) {
+      const token = getCookie('token');
+      await Promise.all(
+        incompleteIds.map((id) =>
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Token ${token}`,
+              },
+            }
+          )
+        )
+      );
+    }
+    await handleProceedToAcceptanceMemo();
   };
 
   if (isLoading) {
@@ -126,6 +160,17 @@ const ChecklistView = () => {
                     </button>
                   </div>
                 )}
+
+                {/* [DEV] Skip button for testing */}
+                <div className='flex justify-end mt-1 mb-4'>
+                  <button
+                    type='button'
+                    onClick={handleDevSkip}
+                    className='text-xs text-gray-400 underline hover:text-gray-600'
+                  >
+                    [DEV] Skip to Acceptance Memo
+                  </button>
+                </div>
 
               </>
             ) : (
