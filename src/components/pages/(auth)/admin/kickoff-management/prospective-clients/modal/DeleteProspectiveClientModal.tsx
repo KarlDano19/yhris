@@ -67,7 +67,7 @@ export default function DeleteProspectiveClientModal({
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">Delete Prospective Client</h3>
+                  <h3 className="flex-1 text-white ml-2 font-semibold">Delete Prospect Client</h3>
                   <XCircleIcon className="w-8 h-8 text-white cursor-pointer" onClick={() => setIsOpen(null)} />
                 </div>
                 <div className="px-4 pt-5 pb-4">

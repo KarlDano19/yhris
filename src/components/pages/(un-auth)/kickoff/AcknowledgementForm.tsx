@@ -9,6 +9,7 @@ import SignatureCanvas from 'react-signature-canvas';
 import CustomToast from '@/components/CustomToast';
 import { T_KickoffAcknowledgementPayload, T_KickoffAcknowledgementResponse, T_KickoffPortalData } from '@/types/kickoff';
 import { PlusIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import MainLogo from '@/svg/MainLogo';
 
 import { useSubmitKickoffAcknowledgement } from './hooks/useSubmitKickoffAcknowledgement';
 
@@ -118,13 +119,7 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 print:shadow-none print:border-none print:p-0">
       {/* Document Header */}
       <div className="flex justify-between items-start mb-8 print:mb-6">
-        <div className="text-sm text-gray-700 leading-relaxed">
-          <p className="font-semibold">{portalData.company_name}</p>
-        </div>
-        <div className="text-right">
-          <span className="text-2xl font-bold text-[#2c3f58] tracking-wide">YAHSHUA</span>
-          <p className="text-xs text-gray-500 mt-0.5">HRIS</p>
-        </div>
+        <MainLogo />
       </div>
 
       {/* Form Title */}
@@ -143,7 +138,7 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
         has received and further confirms that the Kick-Off video has been watched in full and
         that the project overview, terms and conditions, and most especially the responsibilities
         necessary for the successful implementation of the project are fully understood.{' '}
-        <span className="font-semibold">[{portalData.company_name.toUpperCase()}]</span> commits
+        <span className="text-[#2c3f58] font-semibold underline underline-offset-2">{portalData.company_name.toUpperCase()}</span> commits
         to fulfilling these responsibilities accordingly.
       </p>
 

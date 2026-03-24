@@ -70,7 +70,7 @@ export default function CreateProspectiveClientModal({
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div className="flex bg-savoy-blue p-2 items-center">
-                  <h3 className="flex-1 text-white ml-2 font-semibold">Add Prospective Client</h3>
+                  <h3 className="flex-1 text-white ml-2 font-semibold">Add Prospect Client</h3>
                   <XCircleIcon className="w-8 h-8 text-white cursor-pointer" onClick={() => setIsOpen(false)} />
                 </div>
                 <form onSubmit={onSubmit}>
@@ -106,7 +106,7 @@ export default function CreateProspectiveClientModal({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium leading-6 text-gray-900">Contact Phone</label>
+                      <label className="block text-sm font-medium leading-6 text-gray-900">Mobile Number</label>
                       <input
                         type="text"
                         {...register('contact_phone')}

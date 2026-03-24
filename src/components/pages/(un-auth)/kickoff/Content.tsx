@@ -18,7 +18,7 @@ export default function Content({ token }: ContentProps) {
   const { data, isLoading, isError } = useGetKickoffPortal(token);
 
   const youtubeVideoId = 'rHVN2IrpoC0';
-  const canvaEmbedUrl = 'https://www.canva.com/design/DAHC9n5k93s/6b0gbns2cTzuBzXMv_eoHw/view?embed';
+  const canvaEmbedUrl = 'https://www.canva.com/design/DAHERcgGQoY/cPgF3Q88ELNY2b02qGwA-Q/view?embed';
 
   if (isLoading) {
     return (
