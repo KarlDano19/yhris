@@ -6,7 +6,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { T_OnboardingChecklist } from './hooks/useGetChecklist';
+import { T_OnboardingChecklist } from '../hooks/useGetChecklist';
 
 // [DEV] Timer commented out
 // const UNLOCK_SECONDS = 30;

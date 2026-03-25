@@ -11,7 +11,7 @@ import { getCookie } from 'cookies-next';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import ChecklistGroup from './ChecklistGroup';
-import TutorialVideoModal from './TutorialVideoModal';
+import TutorialVideoModal from './modal/TutorialVideoModal';
 import useGetChecklist from './hooks/useGetChecklist';
 import useMarkChecklistItemComplete from './hooks/useMarkChecklistItemComplete';
 import { T_OnboardingChecklist } from './hooks/useGetChecklist';

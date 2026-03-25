@@ -7,10 +7,10 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import ChecklistGroup from './ChecklistGroup';
+import ChecklistGroup from '../ChecklistGroup';
 import TutorialVideoModal from './TutorialVideoModal';
-import useGetChecklist from './hooks/useGetChecklist';
-import { T_OnboardingChecklist } from './hooks/useGetChecklist';
+import useGetChecklist from '../hooks/useGetChecklist';
+import { T_OnboardingChecklist } from '../hooks/useGetChecklist';
 
 interface ChecklistViewModalProps {
   isOpen: boolean;

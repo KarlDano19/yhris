@@ -26,7 +26,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 import InfoIcon from '@/svg/InfoIcon';
-import ChecklistViewModal from './onboarding-checklist/ChecklistViewModal';
+import ChecklistViewModal from './onboarding-checklist/modal/ChecklistEmployerViewModal';
 
 interface ErrorDetail {
   detail: string;
