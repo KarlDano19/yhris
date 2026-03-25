@@ -134,14 +134,14 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
   }, [profileData, isProfileLoading, hasCheckedLocation, hasProfile, disabled]);
 
   // Handle location obtained from permission modal
-  const handleLocationObtained = (latitude: number, longitude: number) => {
+  const handleLocationObtained = (latitude: number, longitude: number, address: string) => {
     // Round to 6 decimal places to stay within backend's 9-digit total limit
     // 6 decimal places gives ~0.1 meter precision which is sufficient
     const roundedLatitude = Math.round(latitude * 1000000) / 1000000;
     const roundedLongitude = Math.round(longitude * 1000000) / 1000000;
 
     updateProfile(
-      { latitude: roundedLatitude, longitude: roundedLongitude },
+      { latitude: roundedLatitude, longitude: roundedLongitude, address },
       {
         onSuccess: () => {
           toast.custom(
@@ -243,13 +243,13 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
     });
   };
   
-  const handleModeChange = (mode: 'personal' | 'business') => {
-    if (disabled) return;
-    const targetPath = mode === 'personal' 
-      ? '/personal-mode' 
-      : '/business-mode';
-    router.push(targetPath);
-  };
+  // const handleModeChange = (mode: 'personal' | 'business') => {
+  //   if (disabled) return;
+  //   const targetPath = mode === 'personal' 
+  //     ? '/personal-mode' 
+  //     : '/business-mode';
+  //   router.push(targetPath);
+  // };
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -318,7 +318,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
           {/* Right Section */}
           <div className="flex items-center gap-3">
             {/* Mode Toggle */}
-            <div className={classNames("flex items-center bg-gray-100 rounded-xl p-1", disabled && "opacity-50")}>
+            {/* <div className={classNames("flex items-center bg-gray-100 rounded-xl p-1", disabled && "opacity-50")}>
               <button
                 onClick={() => handleModeChange('personal')}
                 disabled={disabled}
@@ -340,7 +340,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
               >
                 Business
               </button>
-            </div>
+            </div> */}
 
             {/* Messages Button */}
             <button
@@ -566,7 +566,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
           </div>
 
           {/* Middle Row - Mode Toggle Buttons */}
-          <div className="pb-2">
+          {/* <div className="pb-2">
             <div className={classNames("flex items-center justify-center gap-2 bg-gray-100 rounded-xl p-1", disabled && "opacity-50")}>
               <button
                 onClick={() => handleModeChange('personal')}
@@ -590,7 +590,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
                 Business
               </button>
             </div>
-          </div>
+          </div> */}
 
         </div>
       </div>

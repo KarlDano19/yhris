@@ -8,7 +8,7 @@ import LocationPickerMap, { LocationData } from '@/components/LocationPickerMap'
 interface LocationPermissionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLocationObtained: (latitude: number, longitude: number) => void;
+  onLocationObtained: (latitude: number, longitude: number, address: string) => void;
 }
 
 const LocationPermissionModal = ({
@@ -93,7 +93,7 @@ const LocationPermissionModal = ({
 
   const handleSaveLocation = () => {
     if (selectedLocation) {
-      onLocationObtained(selectedLocation.latitude, selectedLocation.longitude);
+      onLocationObtained(selectedLocation.latitude, selectedLocation.longitude, selectedLocation.address);
       onClose();
     }
   };

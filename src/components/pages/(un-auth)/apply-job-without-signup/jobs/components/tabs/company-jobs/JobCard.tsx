@@ -1,6 +1,7 @@
-import Link from 'next/link';
+import { useState } from 'react';
 
 import JobDetails from './JobDetails';
+import ApplyNowModal from '@/components/pages/(un-auth)/apply-job-without-signup/modals/ApplyNowModal';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import FileCaseIcon from '@/svg/FileCaseIcon';
@@ -29,8 +30,15 @@ const JobCard = ({
   onJobClick,
   onCloseDetails,
 }: JobCardProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div>
+      <ApplyNowModal
+        isOpen={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+        jobId={job.id}
+      />
       <div
         className={classNames(
           'card border rounded-md p-4 cursor-pointer',
@@ -54,11 +62,12 @@ const JobCard = ({
             <h5 className='text-lg lg:text-xl font-semibold text-indigo-dye'>{job.title}</h5>
             <h6 className='text-indigo-dye text-sm font-medium mt-1'>{job.company}</h6>
             <h6 className='text-indigo-dye text-sm'>{job.country}</h6>
-            <Link href={`/job-app-form/${job.id}`} onClick={(e) => e.stopPropagation()}>
-              <button className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'>
-                Apply Now!
-              </button>
-            </Link>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); }}
+              className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-full py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+            >
+              Apply Now!
+            </button>
           </div>
         </div>
       </div>
