@@ -581,7 +581,7 @@ const Content = () => {
         }
       `}</style>
       
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border-b-2 flex-shrink-0'>
         <Link href='/manage' className='flex items-center gap-3 hover:bg-gray-200 rounded-lg p-2 -m-2'>
@@ -650,7 +650,7 @@ const Content = () => {
       {/* Selection Mode Action Bar - Show at top when active, hide during export */}
       {isSelectionMode && !isExporting && (
         <div className="bg-green-50 border-b-2 border-green-200 shadow-sm">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+          <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               {/* Info */}
               <div className="flex items-center gap-3">

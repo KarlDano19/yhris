@@ -294,7 +294,7 @@ const JobFilter = ({
   };
 
   return (
-    <div className="max-w-7xl px-4 sm:px-6 mx-auto">
+    <div className="max-w-screen-2xl px-4 sm:px-6 mx-auto">
       <div className="px-4 lg:px-5">
         {/* Found Counter and Filter Button */}
         <div className="flex items-center justify-between mb-3">

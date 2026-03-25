@@ -223,7 +223,7 @@ export default function ImportModal({
               <Dialog.Panel
                 className={classNames(
                   'relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8',
-                  importJSON.length > 0 ? 'sm:w-full sm:max-w-7xl' : 'w-[500px]'
+                  importJSON.length > 0 ? 'sm:w-full sm:max-w-screen-2xl' : 'w-[500px]'
                 )}
               >
                 <div className='text-center px-8 pt-10 pb-7'>
