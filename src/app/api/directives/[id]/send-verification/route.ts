@@ -7,7 +7,6 @@ async function resolveEmail(directiveId: string, emailIndex: number): Promise<st
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '',
       },
       cache: 'no-store',
     }
