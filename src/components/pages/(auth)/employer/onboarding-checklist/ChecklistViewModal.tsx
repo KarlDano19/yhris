@@ -35,7 +35,7 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
   return (
     <>
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-[20]' onClose={onClose}>
+      <Dialog as='div' className='relative z-[20]' onClose={() => {}}>
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
@@ -52,15 +52,15 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
         {/* Side panel */}
         <div className='fixed inset-0 overflow-hidden'>
           <div className='absolute inset-0 overflow-hidden'>
-            <div className='pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10'>
+            <div className='pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10'>
               <Transition.Child
                 as={Fragment}
                 enter='transform transition ease-in-out duration-300'
-                enterFrom='translate-x-full'
+                enterFrom='-translate-x-full'
                 enterTo='translate-x-0'
                 leave='transform transition ease-in-out duration-300'
                 leaveFrom='translate-x-0'
-                leaveTo='translate-x-full'
+                leaveTo='-translate-x-full'
               >
                 <Dialog.Panel className='pointer-events-auto w-screen max-w-md'>
                   <div className='flex h-full flex-col bg-gray-50 shadow-xl overflow-y-auto'>
@@ -141,6 +141,7 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
       item={selectedItem}
       onMarkComplete={() => {}}
       isMarking={false}
+      viewOnly={true}
     />
     </>
   );

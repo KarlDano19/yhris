@@ -427,13 +427,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
             <div className='mx-auto max-w-7xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
-                  <div className='flex flex-shrink-0 items-center'>
-                    <Link 
-                      href='/dashboard' 
+                  <div className='flex flex-shrink-0 items-center gap-2'>
+                    <Link
+                      href='/dashboard'
                       className={firstRoute === 'employer-profile' ? 'pointer-events-none' : ''}
                     >
                       <MainLogo />
                     </Link>
+                    <InfoButton />
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
@@ -442,8 +443,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </div>
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden gap-2'>
-                  {/* Mobile Checklist Info */}
-                  <InfoButton />
                   {/* Mobile Notifications */}
                   <NotificationDropdown />
                   {/* Mobile menu button */}
@@ -459,8 +458,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
                   {/* Notifications */}
                   <NotificationDropdown />
-                  {/* Checklist Info */}
-                  <InfoButton />
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>

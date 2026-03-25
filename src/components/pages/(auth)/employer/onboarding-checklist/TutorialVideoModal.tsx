@@ -17,6 +17,7 @@ type TutorialVideoModalProps = {
   item: T_OnboardingChecklist | null;
   onMarkComplete: (item: T_OnboardingChecklist) => void;
   isMarking: boolean;
+  viewOnly?: boolean;
 };
 
 function getVideoEmbedUrl(url: string): string | null {
@@ -41,7 +42,7 @@ function getVideoEmbedUrl(url: string): string | null {
   }
 }
 
-const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }: TutorialVideoModalProps) => {
+const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking, viewOnly = false }: TutorialVideoModalProps) => {
   const cancelButtonRef = useRef(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -207,18 +208,20 @@ const TutorialVideoModal = ({ isOpen, onClose, item, onMarkComplete, isMarking }
 
                 {/* Modal Footer */}
                 <div className='flex items-center justify-end gap-3 p-4 border-t border-[#355FD0]'>
-                  <button
-                    type='button'
-                    disabled={markButtonDisabled}
-                    onClick={() => onMarkComplete(item)}
-                    className={`rounded-lg py-2 px-6 text-sm font-semibold transition-colors ${
-                      markButtonDisabled
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-[#355FD0] text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {item.is_completed ? 'Completed ✓' : isMarking ? 'Saving...' : 'Mark as Complete'}
-                  </button>
+                  {!viewOnly && (
+                    <button
+                      type='button'
+                      disabled={markButtonDisabled}
+                      onClick={() => onMarkComplete(item)}
+                      className={`rounded-lg py-2 px-6 text-sm font-semibold transition-colors ${
+                        markButtonDisabled
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          : 'bg-[#355FD0] text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {item.is_completed ? 'Completed ✓' : isMarking ? 'Saving...' : 'Mark as Complete'}
+                    </button>
+                  )}
                   <button
                     ref={cancelButtonRef}
                     type='button'
