@@ -25,6 +25,8 @@ import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
+import InfoIcon from '@/svg/InfoIcon';
+import ChecklistViewModal from './onboarding-checklist/ChecklistViewModal';
 
 interface ErrorDetail {
   detail: string;
@@ -57,6 +59,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const { data: notificationsData, isLoading: isNotificationsLoading } = useGetNotification({ page_size: 10 });
   const { mutate: markAsRead } = useMarkNotificationRead();
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const { mutate: refreshToken } = useRefreshToken();
 
   const logout = (isExpired: boolean) => {
@@ -309,6 +312,17 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     );
   };
 
+  const InfoButton = () => (
+    <button
+      onClick={() => setIsChecklistOpen(true)}
+      className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
+      title='View onboarding checklist'
+    >
+      <span className='sr-only'>View onboarding checklist</span>
+      <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+    </button>
+  );
+
   const NotificationDropdown = () => {
     const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
@@ -428,6 +442,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </div>
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden gap-2'>
+                  {/* Mobile Checklist Info */}
+                  <InfoButton />
                   {/* Mobile Notifications */}
                   <NotificationDropdown />
                   {/* Mobile menu button */}
@@ -443,6 +459,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
                   {/* Notifications */}
                   <NotificationDropdown />
+                  {/* Checklist Info */}
+                  <InfoButton />
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>
@@ -517,6 +535,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
         timeRemaining={timeRemaining}
         isRefreshing={isRefreshing}
         isLoggingOut={isLoggingOut}
+      />
+      <ChecklistViewModal
+        isOpen={isChecklistOpen}
+        onClose={() => setIsChecklistOpen(false)}
       />
     </>
   );

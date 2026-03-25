@@ -2,15 +2,18 @@
 
 import { CheckIcon, LockClosedIcon } from '@heroicons/react/24/solid';
 
+import EyePassword from '@/svg/EyePassword';
+
 import { T_OnboardingChecklist, T_OnboardingPhase } from './hooks/useGetChecklist';
 
 type ChecklistGroupProps = {
   phase: T_OnboardingPhase;
   onItemClick: (item: T_OnboardingChecklist) => void;
   lockedItemIds: Set<number>;
+  onItemView?: (item: T_OnboardingChecklist) => void;
 };
 
-const ChecklistGroup = ({ phase, onItemClick, lockedItemIds }: ChecklistGroupProps) => {
+const ChecklistGroup = ({ phase, onItemClick, lockedItemIds, onItemView }: ChecklistGroupProps) => {
   const allDone = phase.completed_items === phase.total_items && phase.total_items > 0;
   const inProgress = phase.completed_items > 0 && !allDone;
   const phasePct = phase.total_items > 0
@@ -67,6 +70,16 @@ const ChecklistGroup = ({ phase, onItemClick, lockedItemIds }: ChecklistGroupPro
                     <p className='text-xs text-gray-300 mt-0.5 break-words line-through'>{item.description}</p>
                   )}
                 </div>
+                {onItemView && (
+                  <button
+                    type='button'
+                    onClick={() => onItemView(item)}
+                    className='flex-shrink-0'
+                    title='View details'
+                  >
+                    <EyePassword visible={true} />
+                  </button>
+                )}
               </div>
             );
           }
@@ -84,6 +97,16 @@ const ChecklistGroup = ({ phase, onItemClick, lockedItemIds }: ChecklistGroupPro
                     <p className='text-xs text-gray-400 mt-0.5 break-words'>{item.description}</p>
                   )}
                 </div>
+                {onItemView && (
+                  <button
+                    type='button'
+                    onClick={() => onItemView(item)}
+                    className='flex-shrink-0'
+                    title='View details'
+                  >
+                    <EyePassword visible={true} />
+                  </button>
+                )}
               </div>
             );
           }
@@ -104,6 +127,16 @@ const ChecklistGroup = ({ phase, onItemClick, lockedItemIds }: ChecklistGroupPro
                   <span className='text-xs text-blue-500 mt-1 inline-block'>Watch Video →</span>
                 )}
               </div>
+              {onItemView && (
+                <button
+                  type='button'
+                  onClick={(e) => { e.stopPropagation(); onItemView(item); }}
+                  className='flex-shrink-0'
+                  title='View details'
+                >
+                  <EyePassword visible={true} />
+                </button>
+              )}
             </button>
           );
         })}
