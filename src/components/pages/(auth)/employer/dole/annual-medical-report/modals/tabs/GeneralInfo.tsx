@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import type { Control, UseFormRegister, UseFormHandleSubmit, UseFormSetValue, UseFormWatch, FieldErrors } from "react-hook-form";
+
 import useGetEmployeeCount from "@/components/hooks/useGetEmployeeCount";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -14,12 +16,13 @@ function GeneralInfo({
   setValue,
   watch,
 }: {
-  control: any;
-  register: any;
-  handleSubmit: any;
-  setSelectedTab: any;
-  setValue: any;
-  watch: any;
+  control: Control<any>;
+  register: UseFormRegister<any>;
+  handleSubmit: UseFormHandleSubmit<any>;
+  setSelectedTab: (tab: number) => void;
+  setValue: UseFormSetValue<any>;
+  watch: UseFormWatch<any>;
+  errors: FieldErrors<any>;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);

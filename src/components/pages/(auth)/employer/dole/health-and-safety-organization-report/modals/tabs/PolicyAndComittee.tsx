@@ -32,6 +32,7 @@ function PolicyAndComittee({
   const [committeeType, setCommitteeType] = useState<string>("A");
   const [fileSource, setFileSource] = useState<string>("");
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showFileError, setShowFileError] = useState(false);
   
   // Watch for existing file URL from form
   const existingFileUrl = watch("policy_and_program_file");
@@ -126,19 +127,8 @@ function PolicyAndComittee({
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof FileList && data.policy_and_program_file.length === 0) ||
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof File && !data.policy_and_program_file.name) ||
           (typeof data.policy_and_program_file === 'string' && data.policy_and_program_file.trim() === ''));
-      if (isFileMissing) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />);
-        return;
-      } else if (!data.chairman_name || data.chairman_name.trim() === "") {
-        const el = document.getElementById("chairman_name");
-        if (el) el.focus();
-        return;
-      } else if (!data.chairman_position || data.chairman_position.trim() === "") {
-        const el = document.getElementById("chairman_position");
-        if (el) el.focus();
-        return;
-      }
+      setShowFileError(false);
+      if (isFileMissing) { setShowFileError(true); return; }
       setSelectedTab(3);
     })}>
       <div className="px-4 pt-4 pb-6">
@@ -259,6 +249,7 @@ function PolicyAndComittee({
                 placeholder={`Chairman Name`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.chairman_name && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
           <div className="grid-item">
@@ -270,6 +261,7 @@ function PolicyAndComittee({
                 placeholder={`Chairman Position`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.chairman_position && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>
