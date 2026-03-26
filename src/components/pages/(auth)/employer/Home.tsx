@@ -185,7 +185,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
                 disabled={isResetting}
                 className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
               >
-                {isResetting ? 'Resetting...' : 'Reset Onboarding'}
+                {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
               </button>
             )}
           </div>
