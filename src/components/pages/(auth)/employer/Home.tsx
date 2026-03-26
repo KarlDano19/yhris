@@ -179,15 +179,14 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <div className='flex items-center gap-3'>
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
-            {process.env.NODE_ENV !== 'production' && (
-              <button
-                onClick={handleReset}
-                disabled={isResetting}
-                className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
-              >
-                {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
-              </button>
-            )}
+            {/* FOR TESTING ONLY */}
+            <button
+              onClick={handleReset}
+              disabled={isResetting}
+              className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
+            >
+              {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
+            </button>
           </div>
           <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6 relative'>
             {menus.map((menu, index) => {
