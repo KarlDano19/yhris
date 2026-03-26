@@ -1,4 +1,5 @@
 import Content from '@/components/pages/(auth)/employer/talent-search/Content'
+import SmartPagePermissionGuard from '@/components/SmartPermissions/SmartPagePermissionGuard'
 import React from 'react'
 
 export const metadata = {
@@ -7,7 +8,9 @@ export const metadata = {
 
 const TalentSearchPage = async () => {
     return (
-        <Content/>
+        <SmartPagePermissionGuard permission="view_talent_search_page">
+            <Content />
+        </SmartPagePermissionGuard>
     )
 }
 

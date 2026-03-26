@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 import Content from "@/components/pages/(auth)/employer/screen-applicants/Content"
+import SmartPagePermissionGuard from "@/components/SmartPermissions/SmartPagePermissionGuard"
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
@@ -18,7 +19,11 @@ async function getSession() {
 const ScreenApplicantsPage = async () => {
   const session = await getSession();
   const hasActiveSubscription = session.hasActiveSubscription;
-  return <Content hasActiveSubscription={hasActiveSubscription} />
+  return (
+    <SmartPagePermissionGuard permission="view_screen_applicant_page">
+      <Content hasActiveSubscription={hasActiveSubscription} />
+    </SmartPagePermissionGuard>
+  )
 }
 
 export default ScreenApplicantsPage;

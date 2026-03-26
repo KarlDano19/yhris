@@ -1,4 +1,5 @@
 import Content from '@/components/pages/(auth)/employer/manage/Content'
+import SmartPagePermissionGuard from '@/components/SmartPermissions/SmartPagePermissionGuard'
 import React from 'react'
 
 export const metadata = {
@@ -7,7 +8,9 @@ export const metadata = {
 
 const ManagePage = async () => {
     return (
-        <Content/>
+        <SmartPagePermissionGuard permission="view_manage_page">
+            <Content />
+        </SmartPagePermissionGuard>
     )
 }
 
