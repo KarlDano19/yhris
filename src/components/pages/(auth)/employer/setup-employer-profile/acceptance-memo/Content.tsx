@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
+import useGetChecklist from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
 import { useSubmitAcceptanceMemo } from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useSubmitAcceptanceMemo';
 import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
 import AcceptanceMemoDocGeneratorForm from '@/components/pages/(auth)/employer/manage/document-generator/forms/AcceptanceMemoDocGeneratorForm';
@@ -43,6 +44,7 @@ export default function Content() {
 
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { mutate: submitMemo, isLoading: isSubmitting } = useSubmitAcceptanceMemo();
+  const { data: checklistData } = useGetChecklist();
   const [formData, setFormData] = useState<AcceptanceMemoFormData>(INITIAL_FORM_DATA);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
@@ -72,9 +74,12 @@ export default function Content() {
         },
       });
     } else {
+      const today = new Date().toISOString().split('T')[0];
       setFormData((prev) => ({
         ...prev,
         companyName: companyName || prev.companyName,
+        startDate: checklistData?.completed_at || today,
+        endDate: today,
         checks: {
           systemSetup: true,
           employeeData: true,
@@ -84,7 +89,7 @@ export default function Content() {
         },
       }));
     }
-  }, [existingMemo, isMemoLoading]);
+  }, [existingMemo, isMemoLoading, checklistData]);
 
   const handleFormChange = (data: AcceptanceMemoFormData) => {
     setFormData(data as AcceptanceMemoFormData);

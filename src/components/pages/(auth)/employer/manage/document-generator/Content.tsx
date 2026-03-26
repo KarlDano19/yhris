@@ -21,6 +21,7 @@ import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
 import useGetAcceptanceMemo from './hooks/useGetAcceptanceMemo';
+import useGetChecklist from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
 import { useSubmitAcceptanceMemo } from './hooks/useSubmitAcceptanceMemo';
 import AcceptanceMemoPreview from './form-previews/AcceptanceMemoPreview';
 
@@ -63,6 +64,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
 
   // Fetch existing acceptance memo (always called; only used when documentType === 'acceptance-memo')
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
+  const { data: checklistData } = useGetChecklist();
   const { mutate: submitMemo } = useSubmitAcceptanceMemo();
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
@@ -270,22 +272,34 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     }
   }, [documentType, employeeId, selectedEmployeeIssue, queryClient]);
   
-  // Populate acceptance memo form from existing submitted memo
+  // Populate acceptance memo form from existing submitted memo or auto-fill dates
   useEffect(() => {
-    if (documentType === 'acceptance-memo' && existingMemo) {
-      setAcceptanceMemoData({
-        companyName: existingMemo.company_name,
-        startDate: existingMemo.start_date,
-        endDate: existingMemo.end_date,
-        authorityName: existingMemo.authority_name,
-        authorityPosition: existingMemo.authority_position,
-        authorityDate: existingMemo.authority_date,
-        signature: existingMemo.signature,
-        checks: { systemSetup: true, employeeData: true, systemConfig: true, userTraining: true, systemNavigation: true },
-      });
-      setIsViewMode(true);
+    if (documentType === 'acceptance-memo') {
+      if (existingMemo) {
+        setAcceptanceMemoData({
+          companyName: existingMemo.company_name,
+          startDate: existingMemo.start_date,
+          endDate: existingMemo.end_date,
+          authorityName: existingMemo.authority_name,
+          authorityPosition: existingMemo.authority_position,
+          authorityDate: existingMemo.authority_date,
+          signature: existingMemo.signature,
+          checks: { systemSetup: true, employeeData: true, systemConfig: true, userTraining: true, systemNavigation: true },
+        });
+        setIsViewMode(true);
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
+        const profileData = cachedProfile?.state?.data as { name?: string } | undefined;
+        setAcceptanceMemoData((prev) => ({
+          ...prev,
+          companyName: profileData?.name || prev.companyName,
+          startDate: checklistData?.completed_at || today,
+          endDate: today,
+        }));
+      }
     }
-  }, [documentType, existingMemo, fromChecklist]);
+  }, [documentType, existingMemo, fromChecklist, checklistData, queryClient]);
 
   // Populate company name for all document types when switching between them
   useEffect(() => {
