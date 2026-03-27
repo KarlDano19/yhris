@@ -38,8 +38,6 @@ import useUpdateStage from '../hooks/useUpdateStage';
 import useSendEmail from '../hooks/useSendEmail';
 import useUpdateStatus from '../hooks/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
-import useSeedApplicants from '../hooks/useSeedApplicants';
-import useUnseedApplicants from '../hooks/useUnseedApplicants';
 import SeederButton from '@/components/SeederButton';
 
 import { ArrowLeftIcon, EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -62,8 +60,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
-  const seedApplicantsMutation = useSeedApplicants(params.id as string);
-  const unseedApplicantsMutation = useUnseedApplicants(params.id as string);
+  const [emailInput, setEmailInput] = useState('');
   
   // Date range filter states - must be declared before hook calls
   // "pending" dates are what the user selects, "applied" dates are what's used in the query
@@ -626,40 +623,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     setIsBatchUploadOpen(false);
   };
 
-  const handleSeedApplicants = async (count: number) => {
-    try {
-      const result = await seedApplicantsMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      appliedApplicantRefetch();
-      archivedApplicantRefetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed applicants';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedApplicants = async () => {
-    try {
-      const result = await unseedApplicantsMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      appliedApplicantRefetch();
-      archivedApplicantRefetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed applicants';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   // Handle date range changes - only update local state, don't trigger fetch
   const handleDateFromChange = (date: any) => {
     setDateFrom(date);
@@ -712,12 +675,78 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   </h2>
                   <div className='self-start md:self-center'>
                     <SeederButton
-                      onSeed={handleSeedApplicants}
-                      onUnseed={handleUnseedApplicants}
-                      isLoading={seedApplicantsMutation.isLoading}
-                      isUnseeding={unseedApplicantsMutation.isLoading}
+                      viewType="screen_applicant"
+                      jobPostingId={Number(params.id)}
                       maxCount={1000}
                       defaultCount={5}
+                      onSeedSuccess={() => { appliedApplicantRefetch(); archivedApplicantRefetch(); }}
+                      onUnseedSuccess={() => { appliedApplicantRefetch(); archivedApplicantRefetch(); }}
+                      renderExtraFields={(extras, setExtras) => {
+                        const emails: string[] = extras.emails ?? [];
+                        const handleAddEmail = () => {
+                          const trimmed = emailInput.trim().toLowerCase();
+                          if (!trimmed || emails.includes(trimmed)) {
+                            setEmailInput('');
+                            return;
+                          }
+                          setExtras({ ...extras, emails: [...emails, trimmed] });
+                          setEmailInput('');
+                        };
+                        const handleRemoveEmail = (email: string) => {
+                          setExtras({ ...extras, emails: emails.filter((e) => e !== email) });
+                        };
+                        return (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 text-left mb-1">
+                              Applicant Emails <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mb-2 text-left">
+                              Add specific emails to seed. If left empty, emails will be randomly generated.
+                            </p>
+                            <div className="flex gap-2">
+                              <input
+                                type="email"
+                                value={emailInput}
+                                onChange={(e) => setEmailInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+                                    e.preventDefault();
+                                    handleAddEmail();
+                                  }
+                                }}
+                                placeholder="email@example.com"
+                                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddEmail}
+                                className="rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                              >
+                                Add
+                              </button>
+                            </div>
+                            {emails.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {emails.map((email) => (
+                                  <span
+                                    key={email}
+                                    className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200"
+                                  >
+                                    {email}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveEmail(email)}
+                                      className="text-purple-400 hover:text-purple-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }}
                     />
                   </div>
                 </div>
