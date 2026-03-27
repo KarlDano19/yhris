@@ -96,10 +96,17 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
     setIsDownloading(true);
     try {
       const token = getCookie('token');
-      const fileUrl = selectedDocument.file.startsWith('/')
-        ? `${process.env.NEXT_PUBLIC_API_URL}${selectedDocument.file}`
-        : selectedDocument.file;
+      const isLocalPath = selectedDocument.file.startsWith('/');
 
+      if (!isLocalPath) {
+        // S3/MinIO presigned URLs — open in new tab to avoid CORS
+        window.open(selectedDocument.file, '_blank');
+        setIsDownloadModalOpen(false);
+        setSelectedDocument(null);
+        return;
+      }
+
+      const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}${selectedDocument.file}`;
       const res = await fetch(fileUrl, {
         headers: { Authorization: `Token ${token}` },
       });
