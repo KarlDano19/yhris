@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, Fragment } from 'react';
 
 import { Dialog, Transition, Menu } from '@headlessui/react';
@@ -5,38 +7,40 @@ import toast from 'react-hot-toast';
 import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 import CustomToast from '@/components/CustomToast';
+import useSeeder, { SeederViewType, SeederParams } from '@/components/hooks/useSeeder';
+import useUnseeder, { UnseederParams } from '@/components/hooks/useUnseeder';
 
 interface SeederButtonProps {
-  onSeed: (count: number, extras?: any) => Promise<void>;
-  onUnseed?: () => Promise<void>;
-  isLoading?: boolean;
-  isUnseeding?: boolean;
-  disabled?: boolean;
+  viewType: SeederViewType;
+  jobPostingId?: number;
   maxCount?: number;
   defaultCount?: number;
+  disabled?: boolean;
   showSeeder?: boolean;
   renderExtraFields?: (extras: any, setExtras: (v: any) => void) => React.ReactNode;
+  onSeedSuccess?: () => void | Promise<void>;
+  onUnseedSuccess?: () => void | Promise<void>;
 }
 
 export default function SeederButton({
-  onSeed,
-  onUnseed,
-  renderExtraFields,
-  isLoading = false,
-  isUnseeding = false,
-  disabled = false,
+  viewType,
+  jobPostingId,
   maxCount = 1000,
   defaultCount = 5,
-
-  // showSeeder is used to hide the seeder button if it is not needed
+  disabled = false,
   showSeeder = true,
-  
+  renderExtraFields,
+  onSeedSuccess,
+  onUnseedSuccess,
 }: SeederButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUnseedModalOpen, setIsUnseedModalOpen] = useState(false);
   const [count, setCount] = useState(defaultCount);
   const [extras, setExtras] = useState<any>({});
   const [isSeeding, setIsSeeding] = useState(false);
+
+  const seedMutation = useSeeder();
+  const unseedMutation = useUnseeder();
 
   const handleSeed = async () => {
     if (count < 1 || count > maxCount) {
@@ -47,36 +51,66 @@ export default function SeederButton({
       return;
     }
 
+    const params: SeederParams = { view_type: viewType };
+    if (jobPostingId) params.job_posting_id = jobPostingId;
+
+    const emails: string[] = extras?.emails ?? [];
+    if (emails.length > 0) {
+      params.emails = emails;
+    } else {
+      params.count = count;
+    }
+
     setIsSeeding(true);
     try {
-      await onSeed(count, extras);
+      const result = await seedMutation.mutateAsync(params);
+      toast.custom(
+        () => <CustomToast message={result.message} type="success" />,
+        { duration: 3000 }
+      );
       setIsModalOpen(false);
       setCount(defaultCount);
       setExtras({});
-    } catch (error) {
-      // Error handling is done by the parent component
-      console.error('Seeding error:', error);
+      await onSeedSuccess?.();
+    } catch (error: any) {
+      const errorMessage =
+        typeof error === 'string' ? error
+        : error instanceof Error ? error.message
+        : 'Failed to seed data';
+      toast.custom(
+        () => <CustomToast message={errorMessage} type="error" />,
+        { duration: 5000 }
+      );
     } finally {
       setIsSeeding(false);
     }
   };
 
   const handleUnseed = async () => {
-    if (!onUnseed) return;
-    
+    const params: UnseederParams = { view_type: viewType };
+    if (jobPostingId) params.job_posting_id = jobPostingId;
+
     try {
-      await onUnseed();
+      const result = await unseedMutation.mutateAsync(params);
+      toast.custom(
+        () => <CustomToast message={result.message} type="success" />,
+        { duration: 3000 }
+      );
       setIsUnseedModalOpen(false);
-    } catch (error) {
-      // Error handling is done by the parent component
-      console.error('Unseeding error:', error);
+      await onUnseedSuccess?.();
+    } catch (error: any) {
+      const errorMessage =
+        typeof error === 'string' ? error
+        : error instanceof Error ? error.message
+        : 'Failed to unseed data';
+      toast.custom(
+        () => <CustomToast message={errorMessage} type="error" />,
+        { duration: 5000 }
+      );
     }
   };
 
-  // Don't render anything if showSeeder is false
-  if (!showSeeder) {
-    return null;
-  }
+  if (!showSeeder) return null;
 
   return (
     <>
@@ -104,40 +138,39 @@ export default function SeederButton({
                 {({ active }) => (
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    disabled={disabled || isLoading}
+                    disabled={disabled || seedMutation.isLoading}
                     className={`${
                       active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
                     } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <BeakerIcon className="mr-3 h-5 w-5 text-purple-500" aria-hidden="true" />
-                    {isLoading ? 'Seeding...' : 'Seed Data'}
+                    {seedMutation.isLoading ? 'Seeding...' : 'Seed Data'}
                   </button>
                 )}
               </Menu.Item>
-              
-              {onUnseed && (
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => setIsUnseedModalOpen(true)}
-                      disabled={disabled || isUnseeding}
-                      className={`${
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                      } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <svg className="mr-3 h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                      </svg>
-                      {isUnseeding ? 'Unseeding...' : 'Unseed All'}
-                    </button>
-                  )}
-                </Menu.Item>
-              )}
+
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => setIsUnseedModalOpen(true)}
+                    disabled={disabled || unseedMutation.isLoading}
+                    className={`${
+                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                    } group flex w-full items-center px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <svg className="mr-3 h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    {unseedMutation.isLoading ? 'Unseeding...' : 'Unseed All'}
+                  </button>
+                )}
+              </Menu.Item>
             </div>
           </Menu.Items>
         </Transition>
       </Menu>
 
+      {/* Seed Modal */}
       <Transition.Root show={isModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setIsModalOpen}>
           <Transition.Child
@@ -180,14 +213,11 @@ export default function SeederButton({
                     </div>
 
                     <div className="mt-6">
-                      {/* Extra Fields (optional, passed by parent) */}
                       {renderExtraFields && (
                         <div className="mb-4">
                           {renderExtraFields(extras, setExtras)}
                         </div>
                       )}
-
-                      {/* Count Input */}
                       <div>
                         <label htmlFor="count" className="block text-sm font-medium text-gray-700 text-left">
                           Number of Records
@@ -289,7 +319,7 @@ export default function SeederButton({
                       type="button"
                       className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
                       onClick={() => setIsUnseedModalOpen(false)}
-                      disabled={isUnseeding}
+                      disabled={unseedMutation.isLoading}
                     >
                       Cancel
                     </button>
@@ -297,9 +327,9 @@ export default function SeederButton({
                       type="button"
                       className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:col-start-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleUnseed}
-                      disabled={isUnseeding}
+                      disabled={unseedMutation.isLoading}
                     >
-                      {isUnseeding ? (
+                      {unseedMutation.isLoading ? (
                         <div className="flex items-center gap-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                           Deleting...
@@ -318,4 +348,3 @@ export default function SeederButton({
     </>
   );
 }
-
