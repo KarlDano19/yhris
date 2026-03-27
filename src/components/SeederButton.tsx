@@ -51,12 +51,12 @@ export default function SeederButton({
       return;
     }
 
-    const params: SeederParams = { view_type: viewType };
+    const { emails = [], ...otherExtras } = extras ?? {};
+    const params: SeederParams = { view_type: viewType, ...otherExtras };
     if (jobPostingId) params.job_posting_id = jobPostingId;
 
-    const emails: string[] = extras?.emails ?? [];
-    if (emails.length > 0) {
-      params.emails = emails;
+    if ((emails as string[]).length > 0) {
+      params.emails = emails as string[];
     } else {
       params.count = count;
     }

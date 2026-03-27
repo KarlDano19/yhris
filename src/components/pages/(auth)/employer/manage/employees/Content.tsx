@@ -912,55 +912,123 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
                   const handleRemoveEmail = (email: string) => {
                     setExtras({ ...extras, emails: emails.filter((e) => e !== email) });
                   };
+                  const selectClass = "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border";
                   return (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 text-left mb-1">
-                        Employee Emails <span className="text-gray-400 font-normal">(optional)</span>
-                      </label>
-                      <p className="text-xs text-gray-500 mb-2 text-left">
-                        Add specific emails to seed. If left empty, emails will be randomly generated.
-                      </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="email"
-                          value={emailInput}
-                          onChange={(e) => setEmailInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
-                              e.preventDefault();
-                              handleAddEmail();
-                            }
-                          }}
-                          placeholder="email@example.com"
-                          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddEmail}
-                          className="rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                    <div className="space-y-3">
+                      {/* Location */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Location <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.location ?? ''}
+                          onChange={(e) => setExtras({ ...extras, location: e.target.value || undefined })}
+                          className={selectClass}
                         >
-                          Add
-                        </button>
-                      </div>
-                      {emails.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {emails.map((email) => (
-                            <span
-                              key={email}
-                              className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200"
-                            >
-                              {email}
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveEmail(email)}
-                                className="text-purple-400 hover:text-purple-600"
-                              >
-                                ×
-                              </button>
-                            </span>
+                          <option value="">Random</option>
+                          {(locationItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.name}>{item.name}</option>
                           ))}
+                        </select>
+                      </div>
+                      {/* Position */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Position <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.position_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, position_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(positionItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Department */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Department <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.department_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, department_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(departmentItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Employment Status */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Employment Status <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.status_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, status_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(employeeStatusItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Emails */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left mb-1">
+                          Employee Emails <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2 text-left">
+                          Add specific emails to seed. If left empty, emails will be randomly generated.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+                                e.preventDefault();
+                                handleAddEmail();
+                              }
+                            }}
+                            placeholder="email@example.com"
+                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddEmail}
+                            className="rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                          >
+                            Add
+                          </button>
                         </div>
-                      )}
+                        {emails.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {emails.map((email) => (
+                              <span
+                                key={email}
+                                className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200"
+                              >
+                                {email}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveEmail(email)}
+                                  className="text-purple-400 hover:text-purple-600"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 }}

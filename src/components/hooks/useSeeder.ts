@@ -19,6 +19,10 @@ export interface SeederParams {
   job_posting_id?: number;
   emails?: string[];
   scheduler_id?: number;
+  position_id?: number;
+  department_id?: number;
+  status_id?: number;
+  location?: string;
 }
 
 const viewTypeInvalidations: Partial<Record<SeederViewType, string[]>> = {
