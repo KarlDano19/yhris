@@ -25,6 +25,7 @@ export type T_EmployerChecklist = {
   status: string;
   phases: T_OnboardingPhase[];
   created_at: string | null;
+  completed_at: string | null;
   total_items: number;
   completed_items: number;
   progress_pct: number;

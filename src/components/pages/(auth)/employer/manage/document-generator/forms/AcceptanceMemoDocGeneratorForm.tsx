@@ -121,8 +121,8 @@ export default function AcceptanceMemoDocGeneratorForm({
             value={formData.companyName}
             onChange={handleInputChange}
             placeholder='Enter company name'
-            className={inputClass(formData.companyName)}
-            disabled={isViewMode}
+            className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base bg-gray-100 cursor-not-allowed outline-none'
+            disabled={true}
           />
         </div>
 
@@ -135,7 +135,7 @@ export default function AcceptanceMemoDocGeneratorForm({
             value={formData.startDate}
             handleInputChange={handleInputChange as any}
             required
-            disabled={isViewMode}
+            disabled={true}
             isSubmitted={isSubmitted}
           />
           <DatePickerField
@@ -145,7 +145,7 @@ export default function AcceptanceMemoDocGeneratorForm({
             value={formData.endDate}
             handleInputChange={handleInputChange as any}
             required
-            disabled={isViewMode}
+            disabled={true}
             isSubmitted={isSubmitted}
           />
         </div>
