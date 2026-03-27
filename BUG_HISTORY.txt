@@ -109,6 +109,99 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-018
+DATE FILED: 2026-03-27
+DATE FIXED: 2026-03-27 (For Fix — pending verification)
+CLIENT/REPORTER: Internal
+
+ISSUE DESCRIPTION:
+Two related security vulnerabilities in route protection:
+
+1. Employer/unauthenticated users could access the admin dashboard by manually
+   typing an /admin/* URL in the browser.
+
+   - The middleware admin guard only matched `accountType === 'admin'`, but
+     `isAdmin` was never stored in the iron-session on login, so employers with
+     `is_admin=true` in the DB were not recognised as admins by the middleware.
+   - The unauthenticated route guard excluded `adminRoutes`, meaning users with
+     no session at all could visit /admin/* without being redirected to /login.
+   - `header.tsx` only rendered AdminHeader for `type === 'admin'`, missing
+     the `superadmin` account type.
+
+2. (Covered also in BE) The superadmin account created via the
+   `createsuperadmin` management command could not log in — see BE bug HRIS-2026-011.
+
+DESIRED OUTCOME:
+- Employers navigating to /admin/* are redirected to /dashboard.
+- Unauthenticated users navigating to /admin/* are redirected to /login.
+- Admin header renders correctly for both `admin` and `superadmin` account types.
+
+FILES CHANGED:
+Backend:
+- (None — FE-only for this entry; see BE bug HRIS-2026-011)
+
+Frontend:
+- src/middleware.ts
+- src/lib/session.ts
+- src/app/api/login/route.ts
+- src/app/api/login/otp/verify/route.ts
+- src/app/header.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes in FE entry)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual: employer cannot access /admin/* after fix)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (SessionData interface updated with isAdmin: boolean)
+
+Integration & E2E:
+☑ API integration tests completed (manual: verified session stores isAdmin correctly)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (employer → /admin/* redirects to /dashboard; no-session → /admin/* redirects to /login)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A - middleware-level fix)
+
+FIX EXPLANATION:
+Three separate gaps combined to allow unauthorised admin access:
+
+1. `src/lib/session.ts` — Added `isAdmin: boolean` to `SessionData` and `defaultSession`.
+
+2. `src/app/api/login/route.ts` and `src/app/api/login/otp/verify/route.ts` —
+   Added `session['isAdmin'] = data.is_admin === true` so the flag is persisted
+   in the encrypted iron-session cookie on every login path.
+
+3. `src/middleware.ts` — Three fixes:
+   a. Read `isAdmin` from session.
+   b. Changed admin guard from `accountType === 'admin'` to
+      `accountType === 'superadmin' || isAdmin` and added an explicit
+      `return NextResponse.next()` inside the admin branch so admin users are
+      not accidentally passed through to lower guards.
+   c. Added `adminRoutes` to the unauthenticated `sessionRoutes` array so
+      /admin/* redirects to /login when there is no session.
+
+4. `src/app/header.tsx` — Changed admin header condition from `type === 'admin'`
+   to `(type === 'superadmin' || type === 'admin')` for consistency.
+
+================================================================================
+
 BUG ID: HRIS-017
 DATE FILED: 2026-03-26
 DATE FIXED: 2026-03-26
