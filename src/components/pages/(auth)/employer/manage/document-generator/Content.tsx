@@ -109,7 +109,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     authorityPosition: '',
     authorityDate: new Date().toISOString().split('T')[0],
     signature: null,
-    checks: { systemSetup: false, employeeData: false, systemConfig: false, userTraining: false, systemNavigation: false },
   });
 
   const [isViewMode, setIsViewMode] = useState(false);
@@ -284,7 +283,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           authorityPosition: existingMemo.authority_position,
           authorityDate: existingMemo.authority_date,
           signature: existingMemo.signature,
-          checks: { systemSetup: true, employeeData: true, systemConfig: true, userTraining: true, systemNavigation: true },
         });
         setIsViewMode(true);
       } else {
@@ -417,7 +415,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         authority_date: acceptanceMemoData.authorityDate,
         signature: acceptanceMemoData.signature,
         checklist_item_id: itemId ? Number(itemId) : null,
-        checks: acceptanceMemoData.checks,
       },
       {
         onSuccess: async () => {
@@ -694,7 +691,12 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   </div>
                 ) : documentType === 'acceptance-memo' ? (
                   <div id="acceptance-memo-preview">
-                    <AcceptanceMemoPreview formData={acceptanceMemoData as T_MemoFormData} />
+                    <AcceptanceMemoPreview
+                      formData={{
+                        ...(acceptanceMemoData as T_MemoFormData),
+                        phases: checklistData?.phases,
+                      }}
+                    />
                   </div>
                 ) : (
                   <div id="notice-to-explain-preview">

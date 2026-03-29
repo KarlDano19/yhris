@@ -29,13 +29,6 @@ const INITIAL_FORM_DATA: AcceptanceMemoFormData = {
   authorityPosition: '',
   authorityDate: new Date().toISOString().split('T')[0],
   signature: null,
-  checks: {
-    systemSetup: true,
-    employeeData: true,
-    systemConfig: true,
-    userTraining: true,
-    systemNavigation: true,
-  },
 };
 
 export default function Content() {
@@ -65,13 +58,6 @@ export default function Content() {
         authorityPosition: existingMemo.authority_position,
         authorityDate: existingMemo.authority_date,
         signature: existingMemo.signature,
-        checks: {
-          systemSetup: true,
-          employeeData: true,
-          systemConfig: true,
-          userTraining: true,
-          systemNavigation: true,
-        },
       });
     } else {
       const today = new Date().toISOString().split('T')[0];
@@ -80,13 +66,6 @@ export default function Content() {
         companyName: companyName || prev.companyName,
         startDate: checklistData?.completed_at || today,
         endDate: today,
-        checks: {
-          systemSetup: true,
-          employeeData: true,
-          systemConfig: true,
-          userTraining: true,
-          systemNavigation: true,
-        },
       }));
     }
   }, [existingMemo, isMemoLoading, checklistData]);
@@ -117,11 +96,12 @@ export default function Content() {
         authority_date: formData.authorityDate,
         signature: formData.signature,
         checklist_item_id: null,
-        checks: formData.checks,
       },
       {
         onSuccess: async () => {
-          await fetch('/api/refresh-onboarding-session', { method: 'POST' });
+          const refreshSession = () => fetch('/api/refresh-onboarding-session', { method: 'POST' });
+          const res = await refreshSession();
+          if (!res.ok) await refreshSession();
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully!' />
           );
@@ -188,7 +168,12 @@ export default function Content() {
 
             <div className='w-full lg:w-1/2'>
               <div id='acceptance-memo-preview'>
-                <AcceptanceMemoPreview formData={formData as T_MemoFormData} />
+                <AcceptanceMemoPreview
+                  formData={{
+                    ...(formData as T_MemoFormData),
+                    phases: checklistData?.phases,
+                  }}
+                />
               </div>
             </div>
           </div>

@@ -10,13 +10,6 @@ type T_SubmitMemoPayload = {
   authority_date: string;
   signature: string | null;
   checklist_item_id: number | null;
-  checks: {
-    systemSetup: boolean;
-    employeeData: boolean;
-    systemConfig: boolean;
-    userTraining: boolean;
-    systemNavigation: boolean;
-  };
 };
 
 async function submitAcceptanceMemo(payload: T_SubmitMemoPayload): Promise<void> {
@@ -30,17 +23,6 @@ async function submitAcceptanceMemo(payload: T_SubmitMemoPayload): Promise<void>
   formData.append('position', payload.authority_position);
   formData.append('date', payload.authority_date);
 
-  // Serialize checks as ordered boolean array matching backend CHECK_LABELS order
-  const checklistArray = [
-    payload.checks.systemSetup,
-    payload.checks.employeeData,
-    payload.checks.systemConfig,
-    payload.checks.userTraining,
-    payload.checks.systemNavigation,
-  ];
-  formData.append('checklist', JSON.stringify(checklistArray));
-
-  // Convert base64 signature to file blob if present
   if (payload.signature && (payload.signature.startsWith('data:') || payload.signature.startsWith('blob:'))) {
     const res = await fetch(payload.signature);
     const blob = await res.blob();

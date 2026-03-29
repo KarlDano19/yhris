@@ -66,13 +66,6 @@ export interface AcceptanceMemoFormData {
   authorityPosition: string;
   authorityDate: string;
   signature: string | null;
-  checks: {
-    systemSetup: boolean;
-    employeeData: boolean;
-    systemConfig: boolean;
-    userTraining: boolean;
-    systemNavigation: boolean;
-  };
 }
 
 export interface PrintOptions {

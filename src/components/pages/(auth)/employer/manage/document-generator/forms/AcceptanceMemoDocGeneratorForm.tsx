@@ -11,29 +11,17 @@ import CustomToast from '@/components/CustomToast';
 
 import ViewPdfModal from '../modals/ViewPdfModal';
 
-import { DocumentTypeField, SignatureField } from '../form-fields/Common';
+import { SignatureField } from '../form-fields/Common';
 import { DatePickerField } from '../form-fields/DatePickerField';
 
 import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
-import { DocumentType, FormProps } from '@/types/document-generator/form';
-
-const CHECK_LABELS = [
-  { key: 'systemSetup' as const, label: 'System Setup Completed' },
-  { key: 'employeeData' as const, label: 'Employee Data Successfully Uploaded / Encoded' },
-  { key: 'systemConfig' as const, label: 'System Configuration Verified' },
-  { key: 'userTraining' as const, label: 'User Training and Orientation Completed' },
-  { key: 'systemNavigation' as const, label: 'System Navigation and Basic Workflows Tested' },
-];
+import { FormProps } from '@/types/document-generator/form';
 
 export default function AcceptanceMemoDocGeneratorForm({
-  documentType,
-  onDocumentTypeChange,
   onFormChange,
   initialData,
-  onPrint,
   onOpenSignatureModal,
   onProceed,
-  isDocumentTypeDisabled,
   isFormDisabled,
   isViewMode,
 }: FormProps) {
@@ -43,23 +31,10 @@ export default function AcceptanceMemoDocGeneratorForm({
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (e.target.name === 'documentType') {
-      onDocumentTypeChange(e.target.value as DocumentType);
-      return;
-    }
     onFormChange({ ...formData, [e.target.name]: e.target.value } as AcceptanceMemoFormData);
   };
 
-  const handleCheckChange = (key: keyof AcceptanceMemoFormData['checks']) => {
-    onFormChange({ ...formData, checks: { ...formData.checks, [key]: !formData.checks[key] } } as AcceptanceMemoFormData);
-  };
-
-  const allChecked = Object.values(formData.checks).every(Boolean);
   const canSubmit =
-    allChecked &&
-    formData.companyName.trim() &&
-    formData.startDate &&
-    formData.endDate &&
     formData.authorityName.trim() &&
     formData.authorityPosition.trim() &&
     formData.authorityDate;
@@ -68,7 +43,7 @@ export default function AcceptanceMemoDocGeneratorForm({
     setIsSubmitted(true);
     if (!canSubmit) {
       toast.custom(
-        <CustomToast type='error' message='Please fill in all required fields and confirm all items.' />
+        <CustomToast type='error' message='Please fill in all required fields.' />
       );
       return;
     }
@@ -77,14 +52,13 @@ export default function AcceptanceMemoDocGeneratorForm({
 
   const handleReset = () => {
     onFormChange({
-      companyName: '',
-      startDate: '',
-      endDate: '',
+      companyName: formData.companyName,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
       authorityName: '',
       authorityPosition: '',
       authorityDate: new Date().toISOString().split('T')[0],
       signature: null,
-      checks: { systemSetup: false, employeeData: false, systemConfig: false, userTraining: false, systemNavigation: false },
     } as AcceptanceMemoFormData);
     setIsSubmitted(false);
   };
@@ -100,56 +74,9 @@ export default function AcceptanceMemoDocGeneratorForm({
 
   return (
     <div className='bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 max-w-full mx-auto transition-all duration-300'>
-      <DocumentTypeField
-        documentType={documentType}
-        handleInputChange={handleInputChange}
-        formData={formData as any}
-        disabled={isDocumentTypeDisabled}
-      />
-
       <h2 className='text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-black'>Details</h2>
 
       <div className='space-y-5'>
-        {/* Company Name */}
-        <div>
-          <label className='block mb-2 text-black font-semibold'>
-            Company / Firm / Institution <span className='text-red-500'>*</span>
-          </label>
-          <input
-            type='text'
-            name='companyName'
-            value={formData.companyName}
-            onChange={handleInputChange}
-            placeholder='Enter company name'
-            className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base bg-gray-100 cursor-not-allowed outline-none'
-            disabled={true}
-          />
-        </div>
-
-        {/* Dates */}
-        <div className='grid grid-cols-2 gap-3'>
-          <DatePickerField
-            id='startDate'
-            label='Starting Date'
-            name='startDate'
-            value={formData.startDate}
-            handleInputChange={handleInputChange as any}
-            required
-            disabled={true}
-            isSubmitted={isSubmitted}
-          />
-          <DatePickerField
-            id='endDate'
-            label='Ending Date'
-            name='endDate'
-            value={formData.endDate}
-            handleInputChange={handleInputChange as any}
-            required
-            disabled={true}
-            isSubmitted={isSubmitted}
-          />
-        </div>
-
         {/* Authority Name */}
         <div>
           <label className='block mb-2 text-black font-semibold'>
@@ -202,27 +129,6 @@ export default function AcceptanceMemoDocGeneratorForm({
           disabled={isViewMode}
           isSubmitted={isSubmitted}
         />
-
-        {/* Confirmation checkboxes */}
-        <div>
-          <label className='block mb-2 text-black font-semibold'>
-            Confirm all of the following <span className='text-red-500'>*</span>
-          </label>
-          <div className='space-y-2 bg-gray-50 border border-gray-200 rounded-lg p-3'>
-            {CHECK_LABELS.map(({ key, label }) => (
-              <label key={key} className={`flex items-start gap-2 ${isViewMode ? 'cursor-default' : 'cursor-pointer'}`}>
-                <input
-                  type='checkbox'
-                  checked={formData.checks[key]}
-                  onChange={() => { if (!isViewMode) handleCheckChange(key); }}
-                  readOnly={isViewMode}
-                  className='mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                />
-                <span className='text-xs text-gray-700'>{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
 
         {/* Action buttons */}
         <div className='flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 justify-between mt-6 sm:mt-8'>
