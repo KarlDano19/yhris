@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
-import useGetChecklist from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
+import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
 import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
 import { T_MemoFormData } from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
 

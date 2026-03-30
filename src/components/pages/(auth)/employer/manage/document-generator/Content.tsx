@@ -21,7 +21,7 @@ import SignatureModal from "./modals/SignatureModal";
 import LetterheadModal from "./modals/LetterheadModal";
 import LogoModal from "./modals/LogoModal";
 import useGetAcceptanceMemo from './hooks/useGetAcceptanceMemo';
-import useGetChecklist from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
+import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
 import { useSubmitAcceptanceMemo } from './hooks/useSubmitAcceptanceMemo';
 import AcceptanceMemoPreview from './form-previews/AcceptanceMemoPreview';
 

@@ -1,4 +1,4 @@
-import ChecklistView from '@/components/pages/(auth)/employer/onboarding-checklist/ChecklistView';
+import ChecklistView from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/ChecklistView';
 
 const OnboardingChecklistPage = () => {
   return <ChecklistView />;

@@ -1,6 +1,6 @@
 'use client';
 
-import { T_OnboardingPhase } from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
+import { T_OnboardingPhase } from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
 
 export type T_MemoFormData = {
   companyName: string;

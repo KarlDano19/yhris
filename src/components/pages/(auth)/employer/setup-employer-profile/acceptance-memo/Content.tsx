@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 
-import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import Link from 'next/link';
@@ -10,7 +9,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
-import useGetChecklist from '@/components/pages/(auth)/employer/onboarding-checklist/hooks/useGetChecklist';
+import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
 import { useSubmitAcceptanceMemo } from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useSubmitAcceptanceMemo';
 import AcceptanceMemoPreview from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
 import AcceptanceMemoDocGeneratorForm from '@/components/pages/(auth)/employer/manage/document-generator/forms/AcceptanceMemoDocGeneratorForm';
@@ -32,7 +31,6 @@ const INITIAL_FORM_DATA: AcceptanceMemoFormData = {
 };
 
 export default function Content() {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
@@ -105,7 +103,7 @@ export default function Content() {
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully.' />
           );
-          router.push('/dashboard');
+          window.location.href = '/dashboard';
         },
         onError: (error: any) => {
           toast.custom(
