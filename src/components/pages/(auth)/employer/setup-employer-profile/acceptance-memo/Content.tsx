@@ -103,7 +103,7 @@ export default function Content() {
           const res = await refreshSession();
           if (!res.ok) await refreshSession();
           toast.custom(
-            <CustomToast type='success' message='Acceptance Memo submitted successfully!' />
+            <CustomToast type='success' message='Acceptance Memo submitted successfully.' />
           );
           router.push('/dashboard');
         },

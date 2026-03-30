@@ -419,7 +419,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       {
         onSuccess: async () => {
           setIsLoading(false);
-          toast.custom(() => <CustomToast type="success" message="Acceptance Memo submitted successfully!" />);
+          toast.custom(() => <CustomToast type="success" message="Acceptance Memo submitted successfully." />);
           await fetch('/api/refresh-onboarding-session', { method: 'POST' });
           router.push('/dashboard');
         },
