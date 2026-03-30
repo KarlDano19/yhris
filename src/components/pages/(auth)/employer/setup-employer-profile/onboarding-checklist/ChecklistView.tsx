@@ -139,14 +139,20 @@ const ChecklistView = () => {
                   <p className='text-right text-xs text-gray-400 mt-1'>{record.progress_pct}%</p>
                 </div>
 
-                {record.phases.map((phase) => (
-                  <ChecklistGroup
-                    key={phase.id}
-                    phase={phase}
-                    onItemClick={handleItemClick}
-                    lockedItemIds={lockedItemIds}
-                  />
-                ))}
+                {(() => {
+                  const currentPhaseId = record.phases.find(
+                    (p) => p.completed_items < p.total_items
+                  )?.id ?? null;
+                  return record.phases.map((phase) => (
+                    <ChecklistGroup
+                      key={phase.id}
+                      phase={phase}
+                      onItemClick={handleItemClick}
+                      lockedItemIds={lockedItemIds}
+                      isCurrent={phase.id === currentPhaseId}
+                    />
+                  ));
+                })()}
 
                 {/* Acceptance Memo — only visible when all items are complete */}
                 {record.progress_pct === 100 && (

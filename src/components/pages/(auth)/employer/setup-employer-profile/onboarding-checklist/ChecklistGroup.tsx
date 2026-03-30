@@ -11,9 +11,10 @@ type ChecklistGroupProps = {
   onItemClick: (item: T_OnboardingChecklist) => void;
   lockedItemIds: Set<number>;
   onItemView?: (item: T_OnboardingChecklist) => void;
+  isCurrent?: boolean;
 };
 
-const ChecklistGroup = ({ phase, onItemClick, lockedItemIds, onItemView }: ChecklistGroupProps) => {
+const ChecklistGroup = ({ phase, onItemClick, lockedItemIds, onItemView, isCurrent = false }: ChecklistGroupProps) => {
   const allDone = phase.completed_items === phase.total_items && phase.total_items > 0;
   const inProgress = phase.completed_items > 0 && !allDone;
   const phasePct = phase.total_items > 0
@@ -22,17 +23,17 @@ const ChecklistGroup = ({ phase, onItemClick, lockedItemIds, onItemView }: Check
 
   return (
     <div className='bg-white rounded-xl border border-gray-200 p-5 mb-4'>
-      <div className='mb-1 flex items-start gap-3'>
+      <div className='mb-1 flex items-center gap-3'>
         {/* Phase status badge */}
         <div
-          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5 ${
-            allDone ? 'bg-green-500' : inProgress ? 'bg-orange-400' : 'bg-gray-300'
+          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+            allDone ? 'bg-green-500' : isCurrent ? 'bg-blue-600' : inProgress ? 'bg-orange-400' : 'bg-gray-300'
           }`}
         >
           {allDone ? (
             <CheckIcon className='w-4 h-4' />
           ) : (
-            <span>{phase.completed_items}</span>
+            <span>{phase.phase_number ?? '—'}</span>
           )}
         </div>
         <div className='flex-1 min-w-0'>

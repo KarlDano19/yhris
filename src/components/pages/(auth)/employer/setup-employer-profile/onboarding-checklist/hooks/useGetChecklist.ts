@@ -16,6 +16,7 @@ export type T_OnboardingPhase = {
   checklists: T_OnboardingChecklist[];
   total_items: number;
   completed_items: number;
+  phase_number: number | null;
 };
 
 export type T_EmployerChecklist = {
