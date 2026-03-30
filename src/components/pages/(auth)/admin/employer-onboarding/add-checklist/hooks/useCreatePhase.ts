@@ -3,7 +3,7 @@ import { getCookie } from 'cookies-next';
 
 import { T_ChecklistPhase } from '../../modal/PhaseModal';
 
-type T_CreatePhaseData = Omit<T_ChecklistPhase, 'id'>;
+type T_CreatePhaseData = Pick<T_ChecklistPhase, 'name' | 'description' | 'checklists'>;
 
 async function createPhase(data: T_CreatePhaseData): Promise<T_ChecklistPhase> {
   const token = getCookie('token');

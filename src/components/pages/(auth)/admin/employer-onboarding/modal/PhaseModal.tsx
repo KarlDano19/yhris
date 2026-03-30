@@ -25,6 +25,9 @@ export type T_ChecklistPhase = {
   name: string;
   description: string;
   checklists: T_ChecklistItem[];
+  order: number;
+  is_visible: boolean;
+  phase_number: number | null;
 };
 
 type PhaseModalProps = {

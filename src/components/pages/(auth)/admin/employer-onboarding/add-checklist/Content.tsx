@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
-import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
+import EyePassword from '@/svg/EyePassword';
+import MoveIcon from '@/svg/MoveIcon';
 
 import CustomToast from '@/components/CustomToast';
 
@@ -18,6 +21,7 @@ import useGetPhases from './hooks/useGetPhases';
 import useCreatePhase from './hooks/useCreatePhase';
 import useUpdatePhase from './hooks/useUpdatePhase';
 import useDeletePhase from './hooks/useDeletePhase';
+import useReorderPhases from './hooks/useReorderPhases';
 
 const Content = () => {
   const { data: phasesData, isLoading } = useGetPhases();
@@ -25,9 +29,15 @@ const Content = () => {
   const createPhase = useCreatePhase();
   const updatePhase = useUpdatePhase();
   const deletePhase = useDeletePhase();
+  const reorderPhases = useReorderPhases();
 
+  const [phases, setPhases] = useState<T_ChecklistPhase[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState<T_ChecklistPhase | null>(null);
+
+  useEffect(() => {
+    if (phasesData) setPhases(phasesData);
+  }, [phasesData]);
 
   const openAdd = () => {
     setEditingPhase(null);
@@ -66,12 +76,51 @@ const Content = () => {
     });
   };
 
-  const phases = phasesData || [];
+  const handleToggleVisibility = (phase: T_ChecklistPhase) => {
+    updatePhase.mutate(
+      { ...phase, is_visible: !phase.is_visible },
+      {
+        onSuccess: () =>
+          toast.custom(
+            <CustomToast
+              type='success'
+              message={phase.is_visible ? 'Phase hidden.' : 'Phase is now visible.'}
+            />
+          ),
+        onError: () =>
+          toast.custom(<CustomToast type='error' message='Failed to update phase visibility.' />),
+      }
+    );
+  };
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+
+    const reordered = [...phases];
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+
+    // Assign sequential order values and optimistically update local state
+    const updated = reordered.map((p, idx) => ({ ...p, order: idx + 1 }));
+    setPhases(updated);
+
+    reorderPhases.mutate(
+      updated.map((p) => ({ id: p.id, order: p.order })),
+      {
+        onError: () => {
+          // Rollback on error
+          if (phasesData) setPhases(phasesData);
+          toast.custom(<CustomToast type='error' message='Failed to save new phase order.' />);
+        },
+      }
+    );
+  };
+
   const totalItems = phases.reduce((sum, p) => sum + p.checklists.length, 0);
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
           <Link
             href='/admin/employer-onboarding'
@@ -121,6 +170,7 @@ const Content = () => {
                 <table className='min-w-full divide-y divide-gray-200 text-sm'>
                   <thead className='bg-gray-50'>
                     <tr>
+                      <th className='w-8 px-3 py-3' />
                       <th className='w-10 px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide'>
                         #
                       </th>
@@ -138,55 +188,93 @@ const Content = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='divide-y divide-gray-100'>
-                    {phases.map((phase, idx) => (
-                      <tr key={phase.id} className='hover:bg-gray-50'>
-                        {/* Order */}
-                        <td className='px-3 py-4 text-center font-semibold text-gray-500'>
-                          {idx + 1}
-                        </td>
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId='phases'>
+                      {(provided) => (
+                        <tbody
+                          className='divide-y divide-gray-100'
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                        >
+                          {phases.map((phase, idx) => (
+                            <Draggable key={phase.id} draggableId={String(phase.id)} index={idx}>
+                              {(dragProvided) => (
+                                <tr
+                                  ref={dragProvided.innerRef}
+                                  {...dragProvided.draggableProps}
+                                  className={`hover:bg-gray-50 ${!phase.is_visible ? 'opacity-50' : ''}`}
+                                >
+                                  {/* Drag handle */}
+                                  <td className='px-3 py-4 text-center text-gray-400'>
+                                    <span
+                                      {...dragProvided.dragHandleProps}
+                                      className='cursor-grab hover:text-gray-600 flex justify-center'
+                                      title='Drag to reorder'
+                                    >
+                                      <MoveIcon />
+                                    </span>
+                                  </td>
 
-                        {/* Phase Name */}
-                        <td className='px-4 py-4'>
-                          <p className='font-semibold text-gray-800'>{phase.name}</p>
-                        </td>
+                                  {/* Phase number */}
+                                  <td className='px-3 py-4 text-center font-semibold text-gray-500'>
+                                    {phase.phase_number ?? '—'}
+                                  </td>
 
-                        {/* Description */}
-                        <td className='px-4 py-4 text-gray-500 max-w-xs'>
-                          <p className='truncate'>{phase.description || '—'}</p>
-                        </td>
+                                  {/* Phase Name */}
+                                  <td className='px-4 py-4'>
+                                    <p className='font-semibold text-gray-800'>{phase.name}</p>
+                                  </td>
 
-                        {/* Items count */}
-                        <td className='px-4 py-4'>
-                          <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700'>
-                            {phase.checklists.length} item{phase.checklists.length !== 1 ? 's' : ''}
-                          </span>
-                        </td>
+                                  {/* Description */}
+                                  <td className='px-4 py-4 text-gray-500 max-w-xs'>
+                                    <p className='truncate'>{phase.description || '—'}</p>
+                                  </td>
 
-                        {/* Actions */}
-                        <td className='px-4 py-4'>
-                          <div className='flex items-center justify-center gap-2'>
-                            <button
-                              type='button'
-                              onClick={() => openEdit(phase)}
-                              className='p-1.5 rounded-lg hover:bg-blue-50'
-                              title='Edit phase'
-                            >
-                              <EditIcon />
-                            </button>
-                            <button
-                              type='button'
-                              onClick={() => handleDelete(phase.id)}
-                              className='p-1.5 rounded-lg hover:bg-red-50'
-                              title='Delete phase'
-                            >
-                              <DeleteIcon />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                                  {/* Items count */}
+                                  <td className='px-4 py-4'>
+                                    <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700'>
+                                      {phase.checklists.length} item{phase.checklists.length !== 1 ? 's' : ''}
+                                    </span>
+                                  </td>
+
+                                  {/* Actions */}
+                                  <td className='px-4 py-4'>
+                                    <div className='flex items-center justify-center gap-2'>
+                                      <button
+                                        type='button'
+                                        onClick={() => handleToggleVisibility(phase)}
+                                        className='rounded-lg hover:opacity-80'
+                                        title={phase.is_visible ? 'Hide phase' : 'Show phase'}
+                                      >
+                                        <EyePassword visible={phase.is_visible} maskId={`eye-phase-${phase.id}`} />
+                                      </button>
+                                      <button
+                                        type='button'
+                                        onClick={() => openEdit(phase)}
+                                        className='rounded-lg hover:opacity-80'
+                                        title='Edit phase'
+                                      >
+                                        <EditIcon />
+                                      </button>
+                                      <button
+                                        type='button'
+                                        onClick={() => handleDelete(phase.id)}
+                                        className='rounded-lg hover:opacity-80'
+                                        title='Delete phase'
+                                      >
+                                        <DeleteIcon />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </tbody>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 </table>
               </div>
             )}
