@@ -19,7 +19,6 @@ async function fetchDirective(
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '',
       },
       cache: 'no-store',
     });

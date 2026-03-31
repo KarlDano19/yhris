@@ -12,6 +12,7 @@ export interface SessionData {
   refreshToken: string;
   email: string;
   accountType: string;
+  isAdmin: boolean;
   loginType: string;
   hasProfile: boolean;
   hasPendingTransaction: boolean;
@@ -27,6 +28,7 @@ export const defaultSession: SessionData = {
   refreshToken: '',
   email: '',
   accountType: '',
+  isAdmin: false,
   loginType: '',
   hasProfile: false,
   hasPendingTransaction: false,
