@@ -22,7 +22,8 @@ export default function SignatureModal({
   };
 
   const saveSignature = () => {
-    const dataUrl = signatureCanvasRef.current.toDataURL();
+    const trimmedCanvas = signatureCanvasRef.current.getTrimmedCanvas();
+    const dataUrl = trimmedCanvas.toDataURL('image/png');
     setSignatureUrl(dataUrl);
     setIsOpen(false);
   };
