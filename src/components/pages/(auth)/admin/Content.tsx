@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
 import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
+import OrientLogo from '@/svg/OrientLogo';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 const menus = [
@@ -21,6 +22,16 @@ const menus = [
     icon: <AccountBalanceLogo />,
     text: 'Management',
     link: '/admin/management',
+  },
+  {
+    icon: <AccountBalanceLogo />,
+    text: 'Kickoff Management',
+    link: '/admin/kickoff-management',
+  },
+  {
+    icon: <OrientLogo />,
+    text: 'Client Onboarding',
+    link: '/admin/employer-onboarding',
   },
 ];
 

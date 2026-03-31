@@ -8,6 +8,7 @@ import MenuItem from '../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
+import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 
@@ -28,6 +29,12 @@ const menus = [
     icon: <OrgStructureLogo />,
     text: <>Org Structure<br/>Settings</>,
     link: '/settings/org-structure',
+    isAvailable: true,
+  },
+  {
+    icon: <CreateMemoLogo />,
+    text: 'Acceptance Form',
+    link: '/settings/acceptance-form',
     isAvailable: true,
   },
 ];
