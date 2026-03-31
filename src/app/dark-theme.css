@@ -1,0 +1,705 @@
+/* =============================================================================
+   DARK THEME OVERRIDES
+   Applied when <html> has the .dark class.
+   Import this file in layout.tsx alongside globals.css.
+   ============================================================================= */
+
+/* -------------------------------------------------------------------------- */
+/* CSS variable overrides for dark palette                                     */
+/* -------------------------------------------------------------------------- */
+html.dark {
+  --primary: #5B8AFF;
+  --primary-yellow: #FFB800;
+  --success: #5FE07D;
+  --error: #FF8B6B;
+  --warning: #FFD666;
+  --bg: #0F1419;
+  --body-text: #E8EAED;
+  --card-bg: #1A1F26;
+  --subtle-bg: #1A1F26;
+  --muted: #9CA3AF;
+
+  /* Status card tints */
+  --status-yellow-bg: rgba(255,223,120,0.10);
+  --status-green-bg: rgba(101,199,137,0.07);
+  --status-red-bg: rgba(216,104,65,0.07);
+  --card-border-subtle: rgba(255,255,255,0.04);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Base — body & text inheritance                                              */
+/* -------------------------------------------------------------------------- */
+html.dark,
+html.dark body,
+body.dark {
+  background-color: var(--bg) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark [class*="text-"] {
+  color: var(--body-text) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Backgrounds                                                                 */
+/* -------------------------------------------------------------------------- */
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-gray-200,
+html.dark .bg-\[\\#EBF3FF\] {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark .bg-white\/70,
+html.dark .bg-white\/80,
+html.dark .bg-white\/90,
+html.dark .bg-white\/95 {
+  background-color: rgba(26, 31, 38, 0.85) !important;
+}
+
+html.dark .bg-white\/80.backdrop-blur {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark .card {
+  background-color: var(--card-bg) !important;
+  color: var(--body-text) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Borders                                                                     */
+/* -------------------------------------------------------------------------- */
+html.dark .border,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark .border-b,
+html.dark .border-b-\[\#ACB9CB\] {
+  border-color: rgba(255,255,255,0.03) !important;
+}
+
+html.dark .border-2 {
+  border-style: solid !important;
+  border-width: 2px !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Form controls                                                               */
+/* -------------------------------------------------------------------------- */
+html.dark input,
+html.dark textarea,
+html.dark select,
+html.dark .react-select__control,
+html.dark .ql-editor,
+html.dark .form-control,
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="search"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark .dropdown,
+html.dark .select {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+html.dark .react-select__placeholder {
+  color: var(--muted) !important;
+  opacity: 1;
+}
+
+html.dark select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Toggle / peer switches                                                      */
+/* -------------------------------------------------------------------------- */
+html.dark .peer + div {
+  background-color: var(--subtle-bg) !important;
+  border: 1px solid var(--body-text) !important;
+  box-shadow: none !important;
+}
+
+html.dark .peer:checked + div {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+html.dark .peer + div::after {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--body-text) !important;
+  box-shadow: none !important;
+}
+
+html.dark .peer:checked + div::after {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+html.dark .peer:focus + div,
+html.dark .peer:focus-visible + div {
+  box-shadow: 0 0 0 4px rgba(91,138,255,0.12) !important;
+  border-color: var(--primary) !important;
+}
+
+html.dark .toggle-ios-label {
+  background-color: var(--subtle-bg) !important;
+  border: 1px solid var(--body-text) !important;
+}
+
+html.dark .toggle-ios-label::after,
+html.dark .toggle-ios-handle {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--body-text) !important;
+}
+
+html.dark .toggle-ios-checkbox:checked + .toggle-ios-label {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Scrollbars                                                                  */
+/* -------------------------------------------------------------------------- */
+html.dark ::-webkit-scrollbar-track {
+  background: var(--subtle-bg);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #4B5563;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+html.dark * {
+  scrollbar-color: #4B5563 var(--subtle-bg);
+}
+
+html.dark .hide-scrollbar:hover {
+  scrollbar-color: #4B5563 var(--subtle-bg);
+}
+
+/* -------------------------------------------------------------------------- */
+/* ReactQuill editor                                                           */
+/* -------------------------------------------------------------------------- */
+html.dark .ql-container,
+html.dark .ql-toolbar {
+  background-color: var(--card-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark .ql-toolbar {
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+html.dark .ql-editor {
+  background-color: transparent !important;
+  color: var(--body-text) !important;
+  min-height: 220px;
+  caret-color: var(--body-text) !important;
+}
+
+html.dark .ql-editor p,
+html.dark .ql-editor h1,
+html.dark .ql-editor h2,
+html.dark .ql-editor h3,
+html.dark .ql-editor li {
+  color: var(--body-text) !important;
+}
+
+html.dark .ql-editor.ql-blank::before {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+html.dark .ql-editor ::selection {
+  background: rgba(91,138,255,0.12) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .ql-toolbar button,
+html.dark .ql-toolbar .ql-picker,
+html.dark .ql-toolbar .ql-formats {
+  color: var(--body-text) !important;
+}
+
+html.dark .ql-toolbar .ql-stroke,
+html.dark .ql-toolbar .ql-fill,
+html.dark .ql-toolbar svg {
+  stroke: var(--body-text) !important;
+  fill: var(--body-text) !important;
+}
+
+html.dark .ql-toolbar button {
+  background: transparent !important;
+  color: var(--body-text) !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+html.dark .ql-toolbar button:hover {
+  background-color: rgba(255,255,255,0.02) !important;
+  border-color: rgba(255,255,255,0.04) !important;
+}
+
+html.dark .ql-toolbar button.ql-active {
+  background-color: rgba(91,138,255,0.08) !important;
+  border-color: rgba(91,138,255,0.16) !important;
+}
+
+html.dark .ql-toolbar button .ql-stroke,
+html.dark .ql-toolbar button .ql-fill,
+html.dark .ql-toolbar button svg {
+  stroke: var(--body-text) !important;
+  fill: var(--body-text) !important;
+}
+
+html.dark .ql-picker {
+  color: var(--body-text) !important;
+}
+
+html.dark .ql-picker-label {
+  background: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border: 1px solid rgba(255,255,255,0.03) !important;
+}
+
+html.dark .ql-picker-options {
+  background: var(--card-bg) !important;
+  color: var(--body-text) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+}
+
+html.dark .ql-picker-item {
+  color: var(--body-text) !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  padding: 0.35rem 0.75rem !important;
+}
+
+html.dark .ql-picker-item:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+html.dark .ql-picker-item.ql-selected {
+  background: rgba(91,138,255,0.08) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .ql-picker .ql-picker-label::before,
+html.dark .ql-picker .ql-picker-item::before {
+  opacity: 1 !important;
+  font-size: 0.95rem !important;
+  color: var(--body-text) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* SVG icons                                                                   */
+/* -------------------------------------------------------------------------- */
+html.dark svg path[fill="#2C3F58"] {
+  fill: var(--body-text) !important;
+}
+
+html.dark svg rect[stroke="#ACB9CB"] {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* React Select                                                                */
+/* -------------------------------------------------------------------------- */
+html.dark .react-select__control,
+html.dark [class*="select__control"],
+html.dark [class*="select-control"],
+html.dark [class*="select_control"] {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+  box-shadow: none !important;
+}
+
+html.dark .react-select__control--is-focused {
+  box-shadow: 0 0 0 1px rgba(91,138,255,0.25) !important;
+  border-color: #5B8AFF !important;
+}
+
+html.dark .react-select__single-value,
+html.dark .react-select__value-container,
+html.dark .react-select__placeholder {
+  color: var(--body-text) !important;
+}
+
+html.dark .react-select__menu,
+html.dark .react-select__menu-list,
+html.dark [class*="select__menu"],
+html.dark [class*="select-menu"] {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .react-select__option {
+  color: var(--body-text) !important;
+  background: transparent !important;
+  padding: 0.5rem 1rem !important;
+  border-bottom: 1px solid rgba(255,255,255,0.02) !important;
+}
+
+html.dark .react-select__option--is-focused,
+html.dark [class*="select__option--is-focused"] {
+  background-color: rgba(255,255,255,0.06) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .react-select__option--is-selected,
+html.dark [class*="select__option--is-selected"] {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: var(--body-text) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 4px !important;
+  margin: 0.125rem 0 !important;
+}
+
+html.dark .react-select__indicator svg,
+html.dark [class*="select__indicator"] svg {
+  color: var(--body-text) !important;
+  fill: var(--body-text) !important;
+}
+
+html.dark .react-select__multi-value,
+html.dark [class*="select__multi-value"] {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+html.dark .react-select__multi-value__label,
+html.dark [class*="select__multi-value__label"] {
+  color: var(--body-text) !important;
+}
+
+html.dark .react-select__multi-value__remove,
+html.dark [class*="select__multi-value__remove"] {
+  color: var(--muted) !important;
+  background: transparent !important;
+}
+
+html.dark .react-select__menu-list,
+html.dark [class*="select__menu-list"] {
+  padding-right: 2.5rem !important;
+}
+
+html.dark select,
+html.dark select option,
+html.dark [class*="select"],
+html.dark [class*="select"] *,
+html.dark [class*="select__single"],
+html.dark [class*="select__single"] *,
+html.dark .react-select__single-value,
+html.dark .react-select__value-container,
+html.dark .select__single-value,
+html.dark .select-single-value,
+html.dark .select__value,
+html.dark .select-value {
+  color: var(--body-text) !important;
+  opacity: 1 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dropdowns                                                                   */
+/* -------------------------------------------------------------------------- */
+html.dark .dropdown-menu,
+html.dark .dropdown-content,
+html.dark .menu {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pagination                                                                  */
+/* -------------------------------------------------------------------------- */
+html.dark .pagination-wrapper {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  padding: 0.5rem 0 !important;
+  border-radius: 6px;
+}
+
+html.dark .pagination-wrapper .grid,
+html.dark .pagination-wrapper .grid * {
+  background-color: transparent !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .pagination-wrapper .grid li,
+html.dark .pagination-wrapper .grid a,
+html.dark .pagination-wrapper .grid button {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark .pagination-wrapper .grid .bg-gray-300,
+html.dark .pagination-wrapper .grid .active {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  box-shadow: none !important;
+}
+
+html.dark select#role-desktop,
+html.dark select#role-mobile,
+html.dark .pagination-wrapper select {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* React Datepicker                                                            */
+/* -------------------------------------------------------------------------- */
+html.dark .react-datepicker,
+html.dark .react-datepicker * {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+html.dark .react-datepicker__header,
+html.dark .react-datepicker__current-month,
+html.dark .react-datepicker__day-name,
+html.dark .react-datepicker__day {
+  color: var(--body-text) !important;
+  background-color: transparent !important;
+}
+
+html.dark .react-datepicker__day--selected,
+html.dark .react-datepicker__day--keyboard-selected {
+  background-color: rgba(91,138,255,0.12) !important;
+  color: var(--body-text) !important;
+}
+
+html.dark .react-datepicker__year-dropdown,
+html.dark .react-datepicker__month-dropdown,
+html.dark .react-datepicker__year-select,
+html.dark .react-datepicker__month-select {
+  background-color: var(--subtle-bg) !important;
+  color: var(--body-text) !important;
+  border-color: #374151 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Status / semantic colors                                                    */
+/* -------------------------------------------------------------------------- */
+html.dark .bg-success,
+html.dark .bg-error,
+html.dark .bg-warning,
+html.dark .text-success,
+html.dark .text-error,
+html.dark .text-warning,
+html.dark .border-success,
+html.dark .border-error,
+html.dark .border-warning {
+  background-color: unset !important;
+  color: unset !important;
+  border-color: unset !important;
+}
+
+html.dark .bg-yellow-100 {
+  background-color: #f7b500 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,223,120,0.12) !important;
+  box-shadow: none !important;
+}
+
+html.dark .bg-yellow-200 {
+  background-color: #FFD666 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,223,120,0.14) !important;
+  box-shadow: none !important;
+}
+
+html.dark .bg-green-100 {
+  background-color: #5FE07D !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(101,199,137,0.08) !important;
+  box-shadow: none !important;
+}
+
+html.dark .bg-red-100 {
+  background-color: #FF8B6B !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(216,104,65,0.08) !important;
+  box-shadow: none !important;
+}
+
+html.dark .bg-red-50 {
+  background-color: rgba(255,139,107,0.08) !important;
+  color: var(--error) !important;
+  border-color: rgba(255,139,107,0.12) !important;
+}
+
+html.dark .text-red-700 {
+  color: var(--error) !important;
+}
+
+html.dark .border-red-300 {
+  border-color: rgba(255,139,107,0.12) !important;
+}
+
+html.dark .text-red-500,
+html.dark .text-red-400 {
+  color: var(--error) !important;
+}
+
+html.dark .border-red-500,
+html.dark .bg-red-500 {
+  border-color: var(--error) !important;
+  background-color: rgba(255,139,107,0.06) !important;
+}
+
+/* Notification badge stays solid red regardless of dark mode */
+html.dark .notification-badge {
+  background-color: #ef4444 !important;
+}
+
+html.dark .text-sky-600,
+html.dark .border-sky-600,
+html.dark .bg-sky-600 {
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  background-color: rgba(91,138,255,0.06) !important;
+}
+
+html.dark .text-green-600,
+html.dark .border-green-600,
+html.dark .bg-green-600 {
+  color: var(--success) !important;
+  border-color: var(--success) !important;
+  background-color: rgba(95,224,125,0.06) !important;
+}
+
+html.dark .text-red-600,
+html.dark .border-red-600,
+html.dark .bg-red-600 {
+  color: var(--error) !important;
+  border-color: var(--error) !important;
+  background-color: rgba(255,139,107,0.06) !important;
+}
+
+html.dark .text-yellow-600,
+html.dark .border-yellow-600,
+html.dark .bg-yellow-600 {
+  color: var(--primary-yellow) !important;
+  border-color: var(--primary-yellow) !important;
+  background-color: rgba(255,184,0,0.06) !important;
+}
+
+html.dark .text-amber-600,
+html.dark .text-amber-500,
+html.dark .text-amber-400 {
+  color: var(--warning) !important;
+}
+
+html.dark .bg-blue-50 {
+  background-color: rgba(91,138,255,0.06) !important;
+}
+
+html.dark .border-blue-200 {
+  border-color: rgba(91,138,255,0.12) !important;
+}
+
+html.dark .text-blue-800 {
+  color: var(--primary) !important;
+}
+
+html.dark .bg-green-50 {
+  background-color: rgba(95, 224, 125, 0.08) !important;
+  color: var(--success) !important;
+  border-color: rgba(95, 224, 125, 0.12) !important;
+}
+
+html.dark .border-green-200 {
+  border-color: rgba(95, 224, 125, 0.12) !important;
+}
+
+html.dark .text-blue-600,
+html.dark .border-blue-600 {
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Active status tabs                                                          */
+/* -------------------------------------------------------------------------- */
+html.dark .bg-white.text-sky-600.border-2.border-sky-600,
+html.dark .text-sky-600.border-2.border-sky-600 {
+  border-color: var(--primary) !important;
+  background-color: rgba(91,138,255,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(91,138,255,0.12) inset !important;
+}
+
+html.dark .bg-white.text-green-600.border-2.border-green-600,
+html.dark .text-green-600.border-2.border-green-600 {
+  border-color: var(--success) !important;
+  background-color: rgba(95,224,125,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(95,224,125,0.08) inset !important;
+}
+
+html.dark .bg-white.text-red-600.border-2.border-red-600,
+html.dark .text-red-600.border-2.border-red-600 {
+  border-color: var(--error) !important;
+  background-color: rgba(255,139,107,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(255,139,107,0.08) inset !important;
+}
+
+html.dark .text-sky-600,
+html.dark .text-green-600,
+html.dark .text-red-600,
+html.dark .text-yellow-600 {
+  color: inherit !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compare / selected buttons                                                  */
+/* -------------------------------------------------------------------------- */
+html.dark .bg-white.text-red-600.border-red-600,
+html.dark .bg-white.text-red-600.border-red-600:hover {
+  background-color: var(--subtle-bg) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .text-red-600.border-red-600 {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  background-color: var(--subtle-bg) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hover states                                                                */
+/* -------------------------------------------------------------------------- */
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:bg-green-200:hover,
+html.dark .hover\:bg-red-200:hover,
+html.dark .hover\:bg-yellow-200:hover,
+html.dark .hover\:bg-savoy-blue\/\[\.025\]:hover {
+  background-color: rgba(255,255,255,0.06) !important;
+}

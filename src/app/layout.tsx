@@ -12,6 +12,7 @@ import Auth from '@/app/auth';
 
 import './quill-tooltips.css';
 import './globals.css';
+import './dark-theme.css';
   
 export const metadata = {
   title: 'Yahshua HRIS',
@@ -23,6 +24,13 @@ const golos_text = Golos_Text({ subsets: ['latin'], display: 'swap', adjustFontF
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else if(t==='system'){if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${golos_text.className}`}>  
         <PostHogProvider>
           <GlobalErrorHandler />

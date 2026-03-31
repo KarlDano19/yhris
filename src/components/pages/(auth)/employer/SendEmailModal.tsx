@@ -18,7 +18,7 @@ import 'react-quill/dist/quill.snow.css';
 import InfoIcon from '@/svg/InfoIcon';
 
 type FormValues = {
-  template: string;
+  template: string; 
   email: string;
   message: string;
   cc: string;

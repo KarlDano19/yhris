@@ -44,24 +44,6 @@ const menus = [
     link: '/settings/general-settings/employee-movement',
     isAvailable: true,
   },
-  {
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 3v2" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M12 19v2" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M4.22 4.22l1.42 1.42" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M18.36 18.36l1.42 1.42" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M1 12h2" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M21 12h2" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M4.22 19.78l1.42-1.42" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M18.36 5.64l1.42-1.42" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="12" cy="12" r="4" stroke="#355FD0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      </svg>
-    ),
-    text: 'Dark Mode',
-    link: '/settings/general-settings/dark-mode',
-    isAvailable: true,
-  },
 ];
 
 const Content = () => {

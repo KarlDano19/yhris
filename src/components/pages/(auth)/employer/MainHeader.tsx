@@ -5,7 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
+import { Dialog, Menu, Popover, Transition } from '@headlessui/react';
 import {getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
@@ -22,8 +22,8 @@ import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
 
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { AdjustmentsHorizontalIcon, Bars3Icon, BellIcon, MoonIcon, SunIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ComputerDesktopIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 
 interface ErrorDetail {
@@ -47,6 +47,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>('light');
   const {
     data,
     isLoading: isProfileLoading,
@@ -213,6 +215,29 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     });
   };
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
+      setThemeMode(saved === 'dark' || saved === 'system' ? saved : 'light');
+    } catch (e) {}
+  }, []);
+
+  const applyTheme = (mode: 'light' | 'dark' | 'system') => {
+    setThemeMode(mode);
+    localStorage.setItem('theme', mode);
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (mode === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  };
+
   const MenuItems = ({ item }: any) => {
     return (
       <>
@@ -318,7 +343,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
           <span className='sr-only'>Open notification menu</span>
           <BellIcon className='block h-6 w-6 text-blue-800' aria-hidden='true' />
           {unreadCount > 0 && (
-            <span className='absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
+            <span className='notification-badge absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center'>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -414,12 +439,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
                   <div className='flex flex-shrink-0 items-center'>
-                    <Link 
-                      href='/dashboard' 
+                    <Link
+                      href='/dashboard'
                       className={firstRoute === 'employer-profile' ? 'pointer-events-none' : ''}
                     >
                       <MainLogo />
                     </Link>
+                    <button
+                      onClick={() => setIsThemeOpen(true)}
+                      className='ml-2 p-1.5 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none'
+                      title='Theme settings'
+                    >
+                      <AdjustmentsHorizontalIcon className='h-5 w-5' />
+                    </button>
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
@@ -510,6 +542,60 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       </Popover>
       <FloatingHelpButton companyName={profile.name} />
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
+      <Transition.Root show={isThemeOpen} as={Fragment}>
+        <Dialog as='div' className='relative z-30' onClose={() => setIsThemeOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-black dark:bg-opacity-60 transition-opacity' />
+          </Transition.Child>
+          <div className='fixed inset-0 z-10 overflow-y-auto'>
+            <div className='flex min-h-full items-start justify-center p-4 pt-20'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white dark:bg-[var(--card-bg)] text-left shadow-xl transition-all w-auto'>
+                  <div className='flex bg-savoy-blue p-2 items-center gap-4'>
+                    <h3 className='flex-1 text-white ml-2 font-semibold'>Theme</h3>
+                    <XCircleIcon
+                      className='w-8 h-8 text-white cursor-pointer self-start'
+                      onClick={() => setIsThemeOpen(false)}
+                    />
+                  </div>
+                  <div className='p-6 flex gap-4'>
+                    {([
+                      { mode: 'light' as const, label: 'Light', icon: <SunIcon className='h-7 w-7' /> },
+                      { mode: 'dark' as const, label: 'Dark', icon: <MoonIcon className='h-7 w-7' /> },
+                      { mode: 'system' as const, label: 'System', icon: <ComputerDesktopIcon className='h-7 w-7' /> },
+                    ]).map(({ mode, label, icon }) => (
+                      <button
+                        key={mode}
+                        onClick={() => { applyTheme(mode); setIsThemeOpen(false); }}
+                        className={`flex flex-col items-center justify-center gap-2 w-24 h-24 rounded-lg border-2 transition-colors ${themeMode === mode ? 'border-savoy-blue' : 'border-gray-200 hover:border-gray-300'}`}
+                      >
+                        {icon}
+                        <span className='text-sm font-medium'>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
       <SessionExpirationModal
         isOpen={isExpiring}
         onRenew={handleRenewSession}
