@@ -2,12 +2,30 @@ import React from 'react';
 
 import Pagination from '@/components/Pagination';
 
-import { getStatusColor, EmployeeIssueData } from './calculations/employeeIssuesTableCalc';
+interface EmployeeIssueData {
+  id?: string;
+  name: string;
+  department: string;
+  issueType: string;
+  dateReported: string;
+  status: string;
+}
+
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'Resolved': return 'text-green-600 font-medium';
+    case 'Under Hearing': return 'text-orange-500 font-medium';
+    case 'NTE Issued': return 'text-red-500 font-medium';
+    case 'Pending': return 'text-yellow-500 font-medium';
+    default: return 'text-gray-500 font-medium';
+  }
+};
 
 interface PaginationData {
   totalRecords: number;
   totalPages: number;
 }
+
 
 interface EmployeeIssuesTableProps {
   data?: EmployeeIssueData[];
@@ -56,7 +74,7 @@ const EmployeeIssuesTable: React.FC<EmployeeIssuesTableProps> = ({
         </div>
         <div className="p-6">
           <div className="flex items-center justify-center h-32">
-            <div className="text-red-500">Error loading data: {error}</div>
+            <div className="text-red-500">Error loading data: {error?.message || 'An error occurred'}</div>
           </div>
         </div>
       </div>

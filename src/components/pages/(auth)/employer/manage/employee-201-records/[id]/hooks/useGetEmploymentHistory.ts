@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 export type EmploymentHistoryEntry = {
   id: number;
   company: string;
   position: string;
-  start_date: string; // ISO
-  end_date: string | null; // ISO or null
+  start_date: string;
+  end_date: string | null;
   description?: string;
 };
 
@@ -25,88 +26,119 @@ export type ObjectManagerMeta<T> = {
 type Options = {
   pageSize?: number;
   page?: number;
-  start?: string; // YYYY-MM-DD
-  end?: string;   // YYYY-MM-DD
+  start?: string;
+  end?: string;
 };
 
-type Result = {
+type EmploymentHistoryResponse = {
   entries: EmploymentHistoryEntry[];
-  isLoading: boolean;
-  error?: Error;
-  meta?: Omit<ObjectManagerMeta<EmploymentHistoryEntry>, "records"> & { count: number };
-  refetch: () => void;
+  meta?: Omit<ObjectManagerMeta<EmploymentHistoryEntry>, "records"> & {
+    count: number;
+  };
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
-
-export function useGetEmploymentHistory(employeeId?: number | string, opts: Options = {}): Result {
-  const [entries, setEntries] = useState<EmploymentHistoryEntry[]>([]);
-  const [meta, setMeta] = useState<Result["meta"] | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(!!employeeId);
-  const [error, setError] = useState<Error | undefined>();
-
-  const fetchAll = useCallback(async () => {
-    if (!employeeId) return;
-    setIsLoading(true);
-    setError(undefined);
-
-    const token = getCookie("token") as string | undefined;
+async function getEmploymentHistory(
+  employeeId: number | string,
+  opts: Options
+): Promise<EmploymentHistoryResponse> {
+  try {
+    const token = getCookie("token");
     const params = new URLSearchParams();
     if (opts.pageSize) params.set("page_size", String(opts.pageSize));
     if (opts.page) params.set("current_page", String(opts.page));
     if (opts.start) params.set("start", opts.start);
     if (opts.end) params.set("end", opts.end);
 
-    const url =
-      `${baseUrl}/api/employee-201/employees/${encodeURIComponent(String(employeeId))}/employment-history/` +
-      (params.toString() ? `?${params.toString()}` : "");
+    const config = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    };
 
-    try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-      });
+    if (token) {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+      const url =
+        `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+          String(employeeId)
+        )}/employment-history/` + (params.toString() ? `?${params.toString()}` : "");
 
+      const res = await fetch(url, config);
       if (!res.ok) {
-        const problem = await res.json().catch(() => ({}));
-        throw new Error(problem?.detail || problem?.message || `Request failed (${res.status})`);
+        throw res.json();
       }
 
       const payload = await res.json();
 
       if (payload?.records && Array.isArray(payload.records)) {
-        setEntries(payload.records);
-        setMeta({
-          total_records: Number(payload.total_records ?? payload.records.length),
-          total_pages: Number(payload.total_pages ?? 1),
-          current_page: Number(payload.current_page ?? 1),
-          page_size: Number(payload.page_size ?? payload.records.length),
-          starting: Number(payload.starting ?? 0),
-          ending: Number(payload.ending ?? payload.records.length),
-          count: payload.records.length,
-        });
+        return {
+          entries: payload.records,
+          meta: {
+            total_records: Number(
+              payload.total_records ?? payload.records.length
+            ),
+            total_pages: Number(payload.total_pages ?? 1),
+            current_page: Number(payload.current_page ?? 1),
+            page_size: Number(payload.page_size ?? payload.records.length),
+            starting: Number(payload.starting ?? 0),
+            ending: Number(payload.ending ?? payload.records.length),
+            count: payload.records.length,
+          },
+        };
       } else if (Array.isArray(payload)) {
-        setEntries(payload);
-        setMeta(undefined);
-      } else {
-        setEntries([]);
-        setMeta(undefined);
+        return { entries: payload };
       }
-    } catch (e: any) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-      setEntries([]);
-      setMeta(undefined);
-    } finally {
-      setIsLoading(false);
+
+      return { entries: [] };
     }
-  }, [employeeId, opts.pageSize, opts.page, opts.start, opts.end]);
+    return { entries: [] };
+  } catch (error: any) {
+    let errStringify = await error;
+    if (Object.hasOwn(errStringify, "response")) {
+      throw errStringify.response.data.detail;
+    }
+    if (Object.hasOwn(errStringify, "detail")) {
+      throw errStringify;
+    }
+    if (Object.hasOwn(errStringify, "message")) {
+      throw errStringify.message;
+    }
+    throw new Error("Failed to fetch employment history.");
+  }
+}
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+export function useGetEmploymentHistory(
+  employeeId?: number | string,
+  opts: Options = {}
+) {
+  const [options] = useState(opts);
 
-  return { entries, isLoading, error, meta, refetch: fetchAll };
+  const query = useQuery(
+    [
+      "employmentHistoryCache",
+      employeeId,
+      options.pageSize,
+      options.page,
+      options.start,
+      options.end,
+    ],
+    () => {
+      if (!employeeId) throw new Error("Missing employeeId");
+      return getEmploymentHistory(employeeId, options);
+    },
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      enabled: !!employeeId,
+    }
+  );
+
+  return {
+    entries: query.data?.entries ?? [],
+    isLoading: query.isLoading,
+    error: query.error as Error | undefined,
+    meta: query.data?.meta,
+    refetch: query.refetch,
+  };
 }

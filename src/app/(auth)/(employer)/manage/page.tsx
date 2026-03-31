@@ -6,9 +6,7 @@ export const metadata = {
 }
 
 const ManagePage = async () => {
-    return (
-        <Content/>
-    )
+    return <Content />
 }
 
 export default ManagePage

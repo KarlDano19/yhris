@@ -7,7 +7,7 @@ import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import CustomToast from '@/components/CustomToast';
 
 interface SeederButtonProps {
-  onSeed: (count: number) => Promise<void>;
+  onSeed: (count: number, extras?: any) => Promise<void>;
   onUnseed?: () => Promise<void>;
   isLoading?: boolean;
   isUnseeding?: boolean;
@@ -15,11 +15,13 @@ interface SeederButtonProps {
   maxCount?: number;
   defaultCount?: number;
   showSeeder?: boolean;
+  renderExtraFields?: (extras: any, setExtras: (v: any) => void) => React.ReactNode;
 }
 
 export default function SeederButton({
   onSeed,
   onUnseed,
+  renderExtraFields,
   isLoading = false,
   isUnseeding = false,
   disabled = false,
@@ -33,6 +35,7 @@ export default function SeederButton({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUnseedModalOpen, setIsUnseedModalOpen] = useState(false);
   const [count, setCount] = useState(defaultCount);
+  const [extras, setExtras] = useState<any>({});
   const [isSeeding, setIsSeeding] = useState(false);
 
   const handleSeed = async () => {
@@ -46,9 +49,10 @@ export default function SeederButton({
 
     setIsSeeding(true);
     try {
-      await onSeed(count);
+      await onSeed(count, extras);
       setIsModalOpen(false);
       setCount(defaultCount);
+      setExtras({});
     } catch (error) {
       // Error handling is done by the parent component
       console.error('Seeding error:', error);
@@ -176,6 +180,13 @@ export default function SeederButton({
                     </div>
 
                     <div className="mt-6">
+                      {/* Extra Fields (optional, passed by parent) */}
+                      {renderExtraFields && (
+                        <div className="mb-4">
+                          {renderExtraFields(extras, setExtras)}
+                        </div>
+                      )}
+
                       {/* Count Input */}
                       <div>
                         <label htmlFor="count" className="block text-sm font-medium text-gray-700 text-left">

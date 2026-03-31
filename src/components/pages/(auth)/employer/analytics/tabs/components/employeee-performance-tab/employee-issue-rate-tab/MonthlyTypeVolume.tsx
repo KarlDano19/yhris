@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   Chart as ChartJS,
@@ -14,7 +14,6 @@ import {
 import { Line } from 'react-chartjs-2';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { calculateMonthlyVolume } from './calculations/monthlyTypeVolumeCalc';
 import AverageLegendIcon from '@/svg/AverageLegendIcon';
 
 ChartJS.register(
@@ -28,15 +27,8 @@ ChartJS.register(
   Filler
 );
 
-interface EmployeeIssueData {
-  incident_date: string;
-  issue_type?: string;
-}
 
 interface MonthlyTypeVolumeProps {
-  employeeIssueData?: EmployeeIssueData[] | {
-    records?: EmployeeIssueData[];
-  };
   dateFilter?: {
     from: string;
     to: string;
@@ -44,12 +36,56 @@ interface MonthlyTypeVolumeProps {
   isLoading?: boolean;
   error?: any;
   showAllIssueTypes?: boolean;
+  precomputedVolume?: Array<{ month: string; year: number; count: number }>;
 }
 
-const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData, dateFilter, isLoading = false, error = null, showAllIssueTypes = false }) => {
-  // Calculate monthly issue volume using shared utility
-  const { labels, data: monthlyData } = calculateMonthlyVolume(employeeIssueData, dateFilter);
+const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({
+  dateFilter,
+  isLoading = false,
+  error = null,
+  showAllIssueTypes = false,
+  precomputedVolume,
+}) => {
+  const { labels, data: monthlyData } = useMemo(() => {
+    if (precomputedVolume) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const lbls = precomputedVolume.map(item => {
+        const mName = typeof item.month === 'number' ? monthNames[item.month - 1] || String(item.month) : item.month;
+        return mName.substring(0, 3);
+      });
+      const vals = precomputedVolume.map(item => item.count);
+      return { labels: lbls, data: vals };
+    }
+    return { labels: [], data: [] };
+  }, [precomputedVolume]);
   const maxValue = Math.max(...monthlyData, 1); // Ensure at least 1 for proper scaling
+
+  const getDateRangeLabel = () => {
+    if (dateFilter?.from && dateFilter?.to) {
+      const from = new Date(dateFilter.from);
+      const to = new Date(dateFilter.to);
+      const fromMonth = from.toLocaleDateString('en-US', { month: 'long' });
+      const toMonth = to.toLocaleDateString('en-US', { month: 'long' });
+      const fromYear = from.getFullYear();
+      const toYear = to.getFullYear();
+      if (fromMonth === toMonth && fromYear === toYear) return `${fromMonth} ${fromYear}`;
+      if (fromYear === toYear) return `${fromMonth} - ${toMonth} ${fromYear}`;
+      return `${fromMonth} ${fromYear} - ${toMonth} ${toYear}`;
+    }
+    if (!precomputedVolume || precomputedVolume.length === 0) return 'No Data';
+    const first = precomputedVolume[0];
+    const last = precomputedVolume[precomputedVolume.length - 1];
+    const firstMonth = typeof first.month === 'number'
+      ? ['January','February','March','April','May','June','July','August','September','October','November','December'][first.month - 1]
+      : first.month;
+    const lastMonth = typeof last.month === 'number'
+      ? ['January','February','March','April','May','June','July','August','September','October','November','December'][last.month - 1]
+      : last.month;
+    if (precomputedVolume.length === 1 || firstMonth === lastMonth) return `${firstMonth} ${first.year}`;
+    if (first.year !== last.year) return `${firstMonth} ${first.year} - ${lastMonth} ${last.year}`;
+    return `${firstMonth} - ${lastMonth} ${first.year}`;
+  };
 
   // Calculate dynamic height to match IssueType chart
   const getChartHeight = () => {
@@ -179,7 +215,7 @@ const MonthlyTypeVolume: React.FC<MonthlyTypeVolumeProps> = ({ employeeIssueData
     <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
       <div className="flex items-center justify-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
-          Monthly Issue Volume {dateFilter?.from && dateFilter?.to ? `(${new Date(dateFilter.from).toLocaleDateString('en-US', { month: 'short' })} - ${new Date(dateFilter.to).toLocaleDateString('en-US', { month: 'long' })} ${new Date(dateFilter.from).getFullYear()})` : `(${labels.length > 0 ? `${labels[0]} - ${labels[labels.length - 1]} ${new Date().getFullYear()}` : 'No Data'})`}
+          Monthly Issue Volume ({getDateRangeLabel()})
         </h3>
       </div>
       

@@ -7,26 +7,24 @@ interface PoliciesDueCardProps {
   policiesData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedCount?: number;
 }
 
 const PoliciesDueCard: React.FC<PoliciesDueCardProps> = ({
   policiesData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedCount,
 }) => {
-  // Calculate policies due for review with dummy data
+  // Calculate policies due for review
   const calculatePoliciesDue = useMemo(() => {
-    // Dummy data for visualization
-    const currentPoliciesDue = 3;
-    const previousPoliciesDue = 4;
-    const decrease = previousPoliciesDue - currentPoliciesDue;
-
+    const count = precomputedCount !== undefined ? precomputedCount : 3;
     return {
-      policiesDue: currentPoliciesDue,
-      trend: `Decreased by -${decrease} (last December 2024 had ${previousPoliciesDue} policies approaching review)`,
-      isPositive: true // Decrease in policies due is positive
+      policiesDue: count,
+      trend: `DOLE requirements pending submission or review`,
+      isPositive: count === 0
     };
-  }, [policiesData]);
+  }, [policiesData, precomputedCount]);
 
   if (isLoading) {
     return (

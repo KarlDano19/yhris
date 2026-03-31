@@ -125,6 +125,7 @@ const EmployeeStatus = ({ hasActiveSubscription }: { hasActiveSubscription: bool
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
   };

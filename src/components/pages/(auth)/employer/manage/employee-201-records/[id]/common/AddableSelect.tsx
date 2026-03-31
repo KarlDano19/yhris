@@ -1,6 +1,9 @@
 "use client";
 
+// 1. React imports
 import { useEffect, useState } from "react";
+
+// 7. SVG component imports
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {

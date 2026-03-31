@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { useGetDirectiveById } from './hooks/useGetDirectiveById';
 import { useSendVerification } from './hooks/useSendVerification';
 import useVerifyDirective from './hooks/useVerifyDirective';
 import EmailSelectionModal from './modals/EmailSelectionModal';
@@ -18,15 +17,28 @@ import FilePreviewModal from './modals/FilePreviewModal';
 import DropDownArrow from '@/svg/DropDownArrow';
 import { linkify } from '@/helpers/linkify';
 
+import { DirectiveData, MaskedEmail } from '@/types/directives';
+
 import 'react-quill/dist/quill.snow.css';
 
-const Content = () => {
+interface ContentProps {
+  initialDirective: Omit<DirectiveData, 'to'> | null;
+  initialError?: string;
+}
+
+const Content = ({ initialDirective, initialError }: ContentProps) => {
   const params = useParams();
   const directiveId = params.id as string;
+
+  const directive = initialDirective;
+
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [selectedEmail, setSelectedEmail] = useState('');
+  const [selectedEmailIndex, setSelectedEmailIndex] = useState<number | null>(null);
+  const [selectedMaskedEmail, setSelectedMaskedEmail] = useState('');
+  const [maskedEmails, setMaskedEmails] = useState<MaskedEmail[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState(false);
 
   // File preview states
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -42,22 +54,15 @@ const Content = () => {
         setIsDropdownOpen(false);
       }
     };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch directive data using our custom hook
-  const { 
-    data: directive, 
-    isLoading: isLoadingDirective, 
-    error: directiveError 
-  } = useGetDirectiveById(directiveId);
-
   // Send verification code mutation
-  const { 
+  const {
     mutate: sendVerification,
-    isLoading: isSendingVerification 
+    isLoading: isSendingVerification,
   } = useSendVerification(directiveId);
 
   const { mutate: verifyDirective, isLoading: isVerifying } = useVerifyDirective();
@@ -69,60 +74,37 @@ const Content = () => {
     return <span className='ql-editor !p-0' dangerouslySetInnerHTML={markup}></span>;
   };
 
-  // Get the list of recipient emails from directive data
-  const getRecipientEmails = (): string[] => {
-    if (!directive?.to) return [];
-    
-    // If to is already an array, return it
-    if (Array.isArray(directive.to)) {
-      return directive.to;
-    }
-    
-    // If to is a string, try to parse it as JSON
-    try {
-      const parsed = JSON.parse(directive.to);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-  
   // Handle file preview
   const handlePreviewFile = (fileType: 'qr_code' | 'attachments', attachmentIndex?: number) => {
     setIsDropdownOpen(false);
-    
+
     if (fileType === 'qr_code' && directive?.qr_code) {
       setFilePreviewUrl(directive.qr_code as string);
       setFilePreviewTitle('QR Code');
       setShowFilePreviewModal(true);
     } else if (fileType === 'attachments') {
-      // Handle multiple attachments (array) or single attachment (backward compatibility)
       const attachments = directive?.attachments;
-      
+
       if (Array.isArray(attachments) && attachments.length > 0) {
-        // Multiple attachments - use index if provided, otherwise use first
-        const attachment = attachmentIndex !== undefined 
-          ? attachments[attachmentIndex] 
+        const attachment = attachmentIndex !== undefined
+          ? attachments[attachmentIndex]
           : attachments[0];
-        
-        // Attachment can be an object with attachment/attachment_name or a string URL
-        const attachmentUrl = typeof attachment === 'object' 
-          ? attachment.attachment 
+
+        const attachmentUrl = typeof attachment === 'object'
+          ? attachment.attachment
           : attachment;
-        const attachmentName = typeof attachment === 'object' 
+        const attachmentName = typeof attachment === 'object'
           ? attachment.attachment_name || 'Attachment'
           : 'Attachment';
-        
+
         setFilePreviewUrl(attachmentUrl as string);
         setFilePreviewTitle(attachmentName);
         setShowFilePreviewModal(true);
       } else if (attachments && typeof attachments === 'string') {
-        // Backward compatibility: single attachment as string
         setFilePreviewUrl(attachments);
         setFilePreviewTitle('Attachment');
         setShowFilePreviewModal(true);
       } else if ((directive as any)?.attachment) {
-        // Fallback to backward compatibility field
         setFilePreviewUrl((directive as any).attachment as string);
         setFilePreviewTitle('Attachment');
         setShowFilePreviewModal(true);
@@ -130,63 +112,86 @@ const Content = () => {
     }
   };
 
-  const handleConfirm = () => {
-    // const availableEmails = getRecipientEmails();
-    // if (availableEmails.length === 0) {
-    //   toast.custom(
-    //     () => <CustomToast message="No available emails found for this directive." type='warning' />,
-    //     { duration: 5000 }
-    //   );
-    //   return;
-    // }
-    setShowEmailModal(true);
+  const handleConfirm = async () => {
+    setIsLoadingEmails(true);
+    try {
+      const res = await fetch(`/api/directives/${directiveId}/emails`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.custom(
+          () => <CustomToast message={data.error || 'Failed to load email list.'} type='error' />,
+          { duration: 5000 }
+        );
+        return;
+      }
+
+      setMaskedEmails(data.emails || []);
+      setShowEmailModal(true);
+    } catch {
+      toast.custom(
+        () => <CustomToast message="Failed to load email list." type='error' />,
+        { duration: 5000 }
+      );
+    } finally {
+      setIsLoadingEmails(false);
+    }
   };
 
-  const handleEmailSelection = async (email: string) => {
-    setSelectedEmail(email);
+  const handleEmailSelection = async (emailIndex: number) => {
+    const selected = maskedEmails.find((e) => e.index === emailIndex);
+    setSelectedEmailIndex(emailIndex);
+    setSelectedMaskedEmail(selected?.masked ?? '');
     setShowEmailModal(false);
-    
+
     // Show verification modal immediately with loading state
     setShowVerificationModal(true);
-    
+
     sendVerification(
-      { email },
+      { emailIndex },
       {
         onSuccess: () => {
-          toast.custom(() => <CustomToast message="Verification code sent to your email." type='success' />, { duration: 5000 });
-          // Modal is already open with initialLoading=true
+          toast.custom(
+            () => <CustomToast message="Verification code sent to your email." type='success' />,
+            { duration: 5000 }
+          );
         },
         onError: (error) => {
-          // Close the verification modal if there's an error
           setShowVerificationModal(false);
-          toast.custom(() => <CustomToast message={error.message || "Failed to send verification code."} type='error' />, { duration: 5000 });
-          // Reopen email modal if there was an error
+          toast.custom(
+            () => <CustomToast message={error.message || 'Failed to send verification code.'} type='error' />,
+            { duration: 5000 }
+          );
           setShowEmailModal(true);
-        }
+        },
       }
     );
   };
 
   const handleResendCode = async () => {
-    if (selectedEmail) {
+    if (selectedEmailIndex !== null) {
       return new Promise<void>((resolve, reject) => {
         sendVerification(
-          { email: selectedEmail },
+          { emailIndex: selectedEmailIndex },
           {
             onSuccess: () => {
-              toast.custom(() => <CustomToast message="Verification code resent to your email." type='success' />, { duration: 5000 });
+              toast.custom(
+                () => <CustomToast message="Verification code resent to your email." type='success' />,
+                { duration: 5000 }
+              );
               resolve();
             },
             onError: (error) => {
-              // Always reject with cooldown_remaining if available to trigger modal timer
               if (error.cooldown_remaining) {
                 reject({ cooldown_remaining: error.cooldown_remaining });
               } else {
-                toast.custom(() => <CustomToast message={error.message || "Failed to resend verification code."} type='error' />, { duration: 5000 });
-                // Reject with a default cooldown to prevent immediate retries
+                toast.custom(
+                  () => <CustomToast message={error.message || 'Failed to resend verification code.'} type='error' />,
+                  { duration: 5000 }
+                );
                 reject({ cooldown_remaining: 5 });
               }
-            }
+            },
           }
         );
       });
@@ -194,11 +199,13 @@ const Content = () => {
   };
 
   const handleVerificationSubmit = async (code: string) => {
+    if (selectedEmailIndex === null) return;
+
     verifyDirective(
-      { 
-        directiveId: Number(directiveId), 
-        email: selectedEmail, 
-        code 
+      {
+        directiveId: Number(directiveId),
+        emailIndex: selectedEmailIndex,
+        code,
       },
       {
         onSuccess: () => {
@@ -208,8 +215,7 @@ const Content = () => {
             () => <CustomToast message="Successfully verified and confirmed!" type='success' />,
             { duration: 5000 }
           );
-          
-          // Redirect to homepage after a short delay
+
           setTimeout(() => {
             window.location.href = '/';
           }, 2000);
@@ -219,39 +225,30 @@ const Content = () => {
             () => <CustomToast message="Invalid verification code." type='error' />,
             { duration: 5000 }
           );
-        }
+        },
       }
     );
   };
-  
+
   // Check if directive has viewable files
   const hasViewableFiles = directive && (
-    directive.qr_code || 
-    directive.signature || 
+    directive.qr_code ||
+    directive.signature ||
     (Array.isArray(directive.attachments) && directive.attachments.length > 0) ||
     (directive.attachments && typeof directive.attachments === 'string') ||
     (directive as any)?.attachment
   );
 
-  if (isLoadingDirective) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size="lg" color="yellow" />
-      </div>
-    );
-  }
+  if (initialError || !directive) {
+    const errorMessage = initialError || 'An error occurred while loading this memo/policy.';
 
-  if (directiveError || !directive) {
-    // Display error message from backend
-    const errorMessage = directiveError instanceof Error ? directiveError.message : 'An error occurred while loading this memo/policy.';
-    
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md">
           <p className="font-bold">Unable to Load Memo/Policy</p>
           <p className="text-sm mt-2">{errorMessage}</p>
           <div className="mt-4 flex gap-2">
-            <button 
+            <button
               onClick={() => window.location.href = '/'}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
@@ -288,7 +285,6 @@ const Content = () => {
               </div>
             ))}
 
-            {/* Provisions sections */}
             {directive.eligibility && (
               <div className="mb-6">
                 <h3 className="font-semibold text-lg">Eligibility</h3>
@@ -321,32 +317,29 @@ const Content = () => {
       } else {
         // For backward compatibility with existing policies
         const directiveAny = directive as any;
-        
-        // Check for any non-standard fields that might be custom policy fields
-        const standardFields = ['id', 'title', 'directive_type', 'to', 'is_active', 
-                               'attachments', 'eligibility', 'application', 'coverage', 'termination', 
-                               'body', 'name', 'position', 'signature', 'qr_code', 'created_at', 'updated_at',
-                               'employer', 'reads', 'read_count'];
-        
-        // Extract potential legacy policy fields from the directive object
+
+        const standardFields = ['id', 'title', 'directive_type', 'to', 'is_active',
+          'attachments', 'eligibility', 'application', 'coverage', 'termination',
+          'body', 'name', 'position', 'signature', 'qr_code', 'created_at', 'updated_at',
+          'employer', 'reads', 'read_count'];
+
         const legacyPolicyFields = Object.keys(directiveAny)
           .filter(key => !standardFields.includes(key) && directiveAny[key])
           .map(key => ({
             fieldName: key,
-            fieldValue: directiveAny[key]
+            fieldValue: directiveAny[key],
           }));
-        
+
         const hasLegacyFields = legacyPolicyFields.length > 0;
-        const hasProvisionFields = 
-          directive.eligibility || 
-          directive.application || 
-          directive.coverage || 
+        const hasProvisionFields =
+          directive.eligibility ||
+          directive.application ||
+          directive.coverage ||
           directive.termination;
-        
+
         if (hasLegacyFields || hasProvisionFields) {
           return (
             <div className="prose max-w-none text-gray-700 leading-relaxed">
-              {/* Render any legacy policy fields */}
               {legacyPolicyFields.map((field, index) => (
                 <div className="mb-6" key={index}>
                   <h3 className="font-semibold text-lg">{field.fieldName.charAt(0).toUpperCase() + field.fieldName.slice(1)}</h3>
@@ -354,7 +347,6 @@ const Content = () => {
                 </div>
               ))}
 
-              {/* Render provision fields */}
               {directive.eligibility && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-lg">Eligibility</h3>
@@ -385,7 +377,6 @@ const Content = () => {
             </div>
           );
         } else {
-          // If no specific policy fields, fall back to body
           return (
             <div className="prose max-w-none text-gray-700 leading-relaxed">
               <div>
@@ -401,10 +392,10 @@ const Content = () => {
   return (
     <div className="min-h-screen flex justify-center items-center p-4" style={{
       backgroundImage: "url('/assets/memo-policy_background.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      backgroundAttachment: "fixed"
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
     }}>
       <div className="relative w-full max-w-4xl mx-auto my-8">
         <div className="bg-white rounded-lg overflow-hidden border border-[#ACB9CB]">
@@ -412,10 +403,10 @@ const Content = () => {
             <h1 className="text-xl font-bold text-center text-blue-600 mb-10">
               {directiveType === 'memo' ? 'MEMO:' : 'POLICY:'} {directive.title}
             </h1>
-            
+
             <div className="mb-20">
               {renderDirectiveContent()}
-              
+
               {directiveType === 'memo' && (
                 <div className="mt-20">
                   {directive.signature && (
@@ -441,8 +432,8 @@ const Content = () => {
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className={`flex items-center justify-between w-full px-4 py-2.5 text-sm text-gray-900 shadow-sm ${
-                      isDropdownOpen 
-                        ? 'ring-2 ring-inset ring-black focus:ring-black' 
+                      isDropdownOpen
+                        ? 'ring-2 ring-inset ring-black focus:ring-black'
                         : 'ring-1 ring-inset ring-gray-300'
                     } rounded-md bg-white hover:bg-gray-50 transition-all`}
                   >
@@ -465,17 +456,16 @@ const Content = () => {
                           View QR Code
                         </button>
                       )}
-                      
-                      {/* Handle multiple attachments */}
+
                       {Array.isArray(directive.attachments) && directive.attachments.length > 0 && (
                         <>
                           {directive.attachments.map((attachment: any, index: number) => {
-                            const attachmentName = typeof attachment === 'object' 
+                            const attachmentName = typeof attachment === 'object'
                               ? attachment.attachment_name || `Attachment ${index + 1}`
                               : `Attachment ${index + 1}`;
-                            
+
                             const fullText = `View ${attachmentName}`;
-                            
+
                             return (
                               <button
                                 key={index}
@@ -489,8 +479,7 @@ const Content = () => {
                           })}
                         </>
                       )}
-                      
-                      {/* Backward compatibility: single attachment as string or attachment field */}
+
                       {!Array.isArray(directive.attachments) && (
                         (directive.attachments && typeof directive.attachments === 'string') || (directive as any)?.attachment
                       ) && (
@@ -511,15 +500,17 @@ const Content = () => {
             <div className="mt-20">
               <button
                 onClick={handleConfirm}
-                disabled={isConfirmed}
+                disabled={isConfirmed || isLoadingEmails}
                 className={`py-4 px-6 rounded-md text-white font-medium transition-all duration-300 w-full ${
-                  isConfirmed 
+                  isConfirmed
                     ? 'bg-green-500 cursor-not-allowed'
-                    : 'bg-[#355FD0] hover:bg-[#2347B2]'
+                    : 'bg-[#355FD0] hover:bg-[#2347B2] disabled:opacity-70'
                 }`}
               >
-                {isConfirmed 
+                {isConfirmed
                   ? 'Thank you for confirming!'
+                  : isLoadingEmails
+                  ? 'Loading...'
                   : 'I have read & understood the Memo/Policy'}
               </button>
             </div>
@@ -529,18 +520,18 @@ const Content = () => {
               isOpen={showEmailModal}
               onClose={() => setShowEmailModal(false)}
               onSubmit={handleEmailSelection}
-              emails={getRecipientEmails()}
+              emails={maskedEmails}
             />
 
             <VerificationCodeModal
               isOpen={showVerificationModal}
               onClose={() => setShowVerificationModal(false)}
               onSubmit={handleVerificationSubmit}
-              email={selectedEmail}
+              email={selectedMaskedEmail}
               onResendCode={handleResendCode}
               initialLoading={true}
             />
-            
+
             {/* File Preview Modal */}
             <FilePreviewModal
               isOpen={showFilePreviewModal}
@@ -555,4 +546,4 @@ const Content = () => {
   );
 };
 
-export default Content; 
+export default Content;

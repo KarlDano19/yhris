@@ -3,28 +3,35 @@ import React, { useState, useMemo } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ExitReasonsFilterModal from '../../../../modals/ExitReasonsFilterModal';
 
-import { calculateExitReasonsData } from './calculations/exitReasons';
-
 import FilterLogo from '@/svg/FilterLogo';
 
+
 interface ExitReasonsProps {
-  separationData?: any;
   isLoading?: boolean;
   error?: any;
+  precomputedReasons?: Array<{ reason: string; count: number }>;
 }
 
 const ExitReasons: React.FC<ExitReasonsProps> = ({
-  separationData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedReasons,
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedPositionFilter, setSelectedPositionFilter] = useState<string>('All Positions');
 
-  // Calculate exit reasons data using shared utility
   const { exitReasonsData, uniquePositions, titleText } = useMemo(() => {
-    return calculateExitReasonsData(separationData, selectedPositionFilter);
-  }, [separationData, selectedPositionFilter]);
+    if (precomputedReasons) {
+      const total = precomputedReasons.reduce((sum, item) => sum + item.count, 0);
+      const mapped = precomputedReasons.map(item => ({
+        reason: item.reason,
+        count: item.count,
+        percentage: total > 0 ? ((item.count / total) * 100).toFixed(1) : '0.0',
+      }));
+      return { exitReasonsData: mapped, uniquePositions: [], titleText: '' };
+    }
+    return { exitReasonsData: [], uniquePositions: [], titleText: '' };
+  }, [precomputedReasons]);
 
   if (isLoading) {
     return (
@@ -108,10 +115,9 @@ const ExitReasons: React.FC<ExitReasonsProps> = ({
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-32">
+          <div className="flex items-center justify-center h-96">
             <div className="text-center">
-              <div className="text-gray-400 text-lg mb-2">No exit reasons data available</div>
-              <div className="text-gray-500 text-sm">Separation records will appear here when available</div>
+              <div className="text-gray-500 font-semibold mb-2">No data available</div>
             </div>
           </div>
         )}

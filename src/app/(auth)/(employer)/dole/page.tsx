@@ -5,7 +5,6 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 
 import Content from "@/components/pages/(auth)/employer/dole/Content";
-
 export const metadata = {
   title: "DOLE - Yahshua HRIS",
 };
@@ -18,7 +17,7 @@ async function getSession() {
 const Dole = async () => {
   const session = await getSession()
   const hasActiveSubscription = session.hasActiveSubscription
-  return <Content hasActiveSubscription={hasActiveSubscription}/>;
+  return <Content hasActiveSubscription={hasActiveSubscription} />;
 };
 
 export default Dole;

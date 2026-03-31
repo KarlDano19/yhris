@@ -324,7 +324,7 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
 
   const renderEmployeeIssuesTable = () => (
     <div className="mb-4 ml-3">
-      <h3 className="text-xs font-semibold text-gray-900 mb-2">Employee Issues Details</h3>
+      <h3 className="text-xs font-semibold text-gray-900 mb-2" style={{ breakAfter: 'avoid', pageBreakAfter: 'avoid' }}>Employee Issues Details</h3>
       
       {employeeIssuesTableData.length > 0 ? (
         <table className="w-full border-collapse border border-gray-300">
@@ -385,9 +385,15 @@ const EmployeePerformanceDocument: React.FC<EmployeePerformanceDocumentProps> = 
         {/* Employee Issue Rate */}
         <div className="mb-4">
           <h2 className="text-sm font-bold text-gray-900 mb-2">Employee Issue Rate</h2>
-          {renderIssueType()}
-          {renderMonthlyIssueVolume()}
-          {renderEmployeeIssuesTable()}
+          <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            {renderIssueType()}
+          </div>
+          <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            {renderMonthlyIssueVolume()}
+          </div>
+          <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+            {renderEmployeeIssuesTable()}
+          </div>
         </div>
       </>
     );

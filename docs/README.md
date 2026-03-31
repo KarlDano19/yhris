@@ -22,6 +22,7 @@ This documentation is organized into the following modules:
 ### Business Logic
 - [User Management](./07-user-management.md) - Multi-role user system
 - [Job Management](./08-job-management.md) - Job posting and applicant screening
+- [Directive Email Privacy](./directive-email-privacy.md) - Server-side proxy architecture for hiding recipient emails
 - [Employee Management](./09-employee-management.md) - Employee lifecycle management
 - [Document Management](./10-document-management.md) - Document generation and handling
 

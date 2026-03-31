@@ -2,31 +2,53 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import { 
-  calculateAttritionRateData, 
-  getAttritionRateColor 
-} from './calculations/attritionRateCalc';
+export interface AttritionRateData {
+  month: string;
+  attritionRate: string;
+  totalExits: number;
+}
+
+const getAttritionRateColor = (rateString: string): string => {
+  const rate = parseFloat(rateString.replace('%', ''));
+
+  if (rate < 10) {
+    return 'text-green-600 font-semibold';
+  } else if (rate >= 11 && rate <= 15) {
+    return 'text-blue-600 font-semibold';
+  } else if (rate >= 16 && rate <= 20) {
+    return 'text-orange-600 font-semibold';
+  } else if (rate > 20) {
+    return 'text-red-600 font-semibold';
+  } else {
+    return 'text-gray-600 font-semibold';
+  }
+};
+
 
 interface AttritionRateProps {
-  separationData?: any;
   isLoading?: boolean;
   error?: any;
   dateFilter?: {
     from: string;
     to: string;
   };
+  precomputedTrend?: AttritionRateData[];
+  precomputedDateRange?: string;
 }
 
-const AttritionRate: React.FC<AttritionRateProps> = ({ 
-  separationData, 
-  isLoading = false, 
+const AttritionRate: React.FC<AttritionRateProps> = ({
+  isLoading = false,
   error = null,
-  dateFilter
+  dateFilter,
+  precomputedTrend,
+  precomputedDateRange,
 }) => {
-  // Calculate attrition rate data using shared utility
   const { dateRange, attritionData } = useMemo(() => {
-    return calculateAttritionRateData(separationData, dateFilter);
-  }, [separationData, dateFilter]);
+    if (precomputedTrend) {
+      return { dateRange: precomputedDateRange || '', attritionData: precomputedTrend };
+    }
+    return { dateRange: '', attritionData: [] };
+  }, [precomputedTrend, precomputedDateRange]);
 
   if (isLoading) {
     return (

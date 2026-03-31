@@ -24,6 +24,7 @@ ChartJS.register(
   Filler
 );
 
+
 interface OverallComplianceTrendProps {
   complianceData?: any;
   dateFilter?: {

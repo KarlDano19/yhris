@@ -1,80 +1,31 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
+import LoadingSpinner from '@/components/LoadingSpinner';
+
 import AveragePerformanceCard from '../cards/employee-performance/AveragePerformanceCard';
-import TrainingCompletionCard from '../cards/employee-performance/TrainingCompletionCard';
-import ImprovementPostTrainingCard from '../cards/employee-performance/ImprovementPostTrainingCard';
 import ResolvedVSOngoingCard from '../cards/employee-performance/ResolvedVSOngoingCard';
 import PerformanceRate from './components/employeee-performance-tab/performance-rate-tab/PerformanceRate';
 import PerformanceTrend from './components/employeee-performance-tab/performance-rate-tab/PerformanceTrend';
 import EmployeePerformanceTable from './components/employeee-performance-tab/performance-rate-tab/EmployeePerformanceTable';
-import ActionRecommendations from './components/employeee-performance-tab/performance-rate-tab/ActionRecommendations';
 import IssueType from './components/employeee-performance-tab/employee-issue-rate-tab/IssueType';
 import MonthlyTypeVolume from './components/employeee-performance-tab/employee-issue-rate-tab/MonthlyTypeVolume';
 import EmployeeIssuesTable from './components/employeee-performance-tab/employee-issue-rate-tab/EmployeeIssuesTable';
-import InterventionRecommendations from './components/employeee-performance-tab/employee-issue-rate-tab/InterventionRecommendations';
-import { transformEvaluationData } from './components/employeee-performance-tab/performance-rate-tab/calculations/employeePerformanceTableCalc';
 
-import useGetEvaluationHistoryItems from '../hooks/useGetEvaluationHistoryItems';
-import useGetAllEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
-import useGetEmployeeIssueItems from '../hooks/useGetEmployeeIssueItems';
+import useGetEmployeePerformanceKPIs from '../hooks/useGetEmployeePerformanceKPIs';
+import useGetPerformanceRate from '../hooks/useGetPerformanceRate';
+import useGetEmployeeIssueRate from '../hooks/useGetEmployeeIssueRate';
 import useGetAllEmployeeIssueItems from '@/components/hooks/useGetAllEmployeeIssueItems';
-
-interface EmployeePerformanceData {
-  averageScore: number;
-  trainingCompletion: number;
-  improvementRate: number;
-  issueResolution: number;
-  trends: {
-    averageScore: number;
-    trainingCompletion: number;
-    improvementRate: number;
-    issueResolution: number;
-  };
-}
+import useGetEvaluationHistoryItems from '@/components/hooks/useGetEvaluationHistoryItems';
 
 interface EmployeePerformanceProps {
-  data?: EmployeePerformanceData;
+  data?: any;
   dateFilter?: {
     from: string;
     to: string;
   };
-  onDataReady?: (data: {
-    activeSubTab: number;
-    evaluationData: any[];
-    employeeIssueData: any[];
-    employeePerformanceTableData: any[];
-    employeeIssuesTableData: any[];
-    showAllDepartments: boolean;
-    showAllIssueTypes: boolean;
-    departmentRecords?: Array<{
-      name: string;
-      score: number;
-      count: number;
-      color: string;
-    }>;
-    employeeRecords?: Array<{
-      name: string;
-      department: string;
-      score: string;
-      lastEvaluation: string;
-      status: string;
-    }>;
-    issueTypeRecords?: Array<{
-      reason: string;
-      count: number;
-      percentage: string;
-      color: string;
-    }>;
-    employeeIssueRecords?: Array<{
-      name: string;
-      department: string;
-      issueType: string;
-      dateReported: string;
-      status: string;
-    }>;
-  }) => void;
+  onDataReady?: (data: any) => void;
 }
 
 const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFilter, onDataReady }) => {
@@ -82,88 +33,230 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   const [showAllDepartments, setShowAllDepartments] = useState(false);
   const [showAllIssueTypes, setShowAllIssueTypes] = useState(false);
 
-  // Helper function to format date for API
+  // Department filter for performance trend (lifted from PerformanceTrend child)
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
+
+  // Pagination state for Employee Performance table
+  const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
+  const [employeePerformanceCurrentPage, setEmployeePerformanceCurrentPage] = useState(1);
+  const [performanceSearch, setPerformanceSearch] = useState('');
+
+  // Pagination state for Employee Issues table
+  const [employeeIssuePageSize, setEmployeeIssuePageSize] = useState(5);
+  const [employeeIssueCurrentPage, setEmployeeIssueCurrentPage] = useState(1);
+  const [issueSearch, setIssueSearch] = useState('');
+
   const formatDateForAPI = (dateString: string) => {
     if (!dateString) return '';
     try {
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
-    } catch (error) {
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch {
       return dateString;
     }
   };
 
-  // Pagination State for Employee Performance
-  const [employeePerformancePageSize, setEmployeePerformancePageSize] = useState(5);
-  const [employeePerformanceCurrentPage, setEmployeePerformanceCurrentPage] = useState(1);
-  
-  // Pagination State for Employee Issues
-  const [employeeIssuePageSize, setEmployeeIssuePageSize] = useState(5);
-  const [employeeIssueCurrentPage, setEmployeeIssueCurrentPage] = useState(1);
+  const fromDate = formatDateForAPI(dateFilter?.from || '');
+  const toDate = formatDateForAPI(dateFilter?.to || '');
 
-  // Filters for the evaluation history API
-  const employeePerformanceFilters = {
-    currentPage: employeePerformanceCurrentPage,
-    pageSize: employeePerformancePageSize,
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  // Use the hook to fetch evaluation history data (Performance Rate) - Paginated for table
+  // Analytics API hooks
   const {
-    data: evaluationData,
-    isLoading,
-    error,
-  } = useGetEvaluationHistoryItems(employeePerformanceFilters);
+    data: kpisData,
+    isLoading: kpisLoading,
+    error: kpisError,
+  } = useGetEmployeePerformanceKPIs({ from: fromDate, to: toDate });
 
-  // Use the global hook to fetch all evaluation history data for charts
   const {
-    data: allEvaluationData,
-    isLoading: allEvaluationLoading,
-    error: allEvaluationError,
-  } = useGetAllEvaluationHistoryItems({
-    from: formatDateForAPI(dateFilter?.from || ''),
-    to: formatDateForAPI(dateFilter?.to || '')
+    data: performanceRateData,
+    isLoading: performanceRateLoading,
+    error: performanceRateError,
+  } = useGetPerformanceRate({
+    from: fromDate,
+    to: toDate,
+    department: selectedDepartment !== 'All Departments' ? selectedDepartment : undefined,
+    current_page: employeePerformanceCurrentPage,
+    page_size: employeePerformancePageSize,
+    search: performanceSearch || undefined,
+    enabled: activeSubTab === 1,
   });
 
-  // Filters for the employee issues API
-  const employeeIssueFilters = {
-    currentPage: employeeIssueCurrentPage,
-    pageSize: employeeIssuePageSize,
-    search: '',
-    ...(dateFilter?.from && { from: dateFilter.from }),
-    ...(dateFilter?.to && { to: dateFilter.to }),
-  };
-
-  // Use the hook to fetch employee issues data (Employee Issue Rate) - Paginated for table
   const {
-    data: employeeIssueData,
-    isLoading: employeeIssueLoading,
-    error: employeeIssueError,
-  } = useGetEmployeeIssueItems(employeeIssueFilters);
-
-  // Use the global hook to fetch all employee issues data for charts
-  const {
-    data: allEmployeeIssueData,
-    isLoading: allEmployeeIssueLoading,
-    error: allEmployeeIssueError,
-  } = useGetAllEmployeeIssueItems({
-    from: formatDateForAPI(dateFilter?.from || ''),
-    to: formatDateForAPI(dateFilter?.to || '')
+    data: issueRateData,
+    isLoading: issueRateLoading,
+    error: issueRateError,
+  } = useGetEmployeeIssueRate({
+    from: fromDate,
+    to: toDate,
+    current_page: employeeIssueCurrentPage,
+    page_size: employeeIssuePageSize,
+    search: issueSearch || undefined,
+    enabled: activeSubTab === 3,
   });
+
+  // Always-enabled view_type=select hooks for print (not gated by sub-tab)
+  const { data: allIssueItemsForPrint } = useGetAllEmployeeIssueItems(
+    fromDate || toDate ? { from: fromDate || undefined, to: toDate || undefined } : undefined
+  );
+  const { data: allEvalItemsForPrint } = useGetEvaluationHistoryItems(
+    fromDate || toDate ? { from: fromDate || undefined, to: toDate || undefined } : undefined
+  );
+
+  // Transform performance table records for EmployeePerformanceTable
+  const performanceTableData = useMemo(() => {
+    if (!performanceRateData?.performance_table?.records) return [];
+    return performanceRateData.performance_table.records.map((record) => ({
+      id: record.id.toString(),
+      name: record.employee_name || 'N/A',
+      department: record.department || 'N/A',
+      score: (record.total_score != null && record.max_total_score != null)
+        ? `${record.total_score}/${record.max_total_score}`
+        : `${record.score_percentage.toFixed(1)}%`,
+      lastEvaluation: record.date_of_evaluation
+        ? new Date(record.date_of_evaluation).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'N/A',
+      status: record.status || 'N/A',
+    }));
+  }, [performanceRateData]);
+
+  // Transform issues table records for EmployeeIssuesTable
+  const issuesTableData = useMemo(() => {
+    if (!issueRateData?.issues_table?.records) return [];
+    return issueRateData.issues_table.records.map((record) => ({
+      id: record.id.toString(),
+      name: record.employee_name || 'N/A',
+      department: record.department || 'N/A',
+      issueType: record.issue_type || 'Not Specified',
+      dateReported: record.date_reported
+        ? new Date(record.date_reported).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'N/A',
+      status: record.status || 'Pending',
+    }));
+  }, [issueRateData]);
+
+  // Provide data to Content.tsx for print functionality
+  const defaultColors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316'];
+
+  // Build print data from view_type=select sources (always available)
+  const printIssueTypeRecords = useMemo(() => {
+    const issues: any[] = Array.isArray(allIssueItemsForPrint) ? allIssueItemsForPrint : [];
+    const typeCounts: Record<string, number> = {};
+    issues.forEach((issue) => {
+      const type = issue.issue_type || 'Not Specified';
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    const total = issues.length;
+    return Object.entries(typeCounts).map(([reason, count], idx) => ({
+      reason,
+      count,
+      percentage: total > 0 ? `${((count / total) * 100).toFixed(1)}%` : '0.0%',
+      color: defaultColors[idx % defaultColors.length],
+    }));
+  }, [allIssueItemsForPrint]);
+
+  const printEmployeeIssueRecords = useMemo(() => {
+    const issues: any[] = Array.isArray(allIssueItemsForPrint) ? allIssueItemsForPrint : [];
+    return issues.map((issue) => {
+      let status = 'Pending';
+      if (issue.is_decision_sent && issue.is_decision_received) status = 'Resolved';
+      else if (issue.investigate) status = 'Under Hearing';
+      else if (issue.is_nte_sent && issue.is_nte_received) status = 'NTE Issued';
+      return {
+        id: issue.id?.toString(),
+        name: issue.name || 'N/A',
+        department: issue.department || 'N/A',
+        issueType: issue.issue_type || 'Not Specified',
+        dateReported: issue.incident_date
+          ? new Date(issue.incident_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : 'N/A',
+        status,
+      };
+    });
+  }, [allIssueItemsForPrint]);
+
+  const printDepartmentRecords = useMemo(() => {
+    const evals: any[] = Array.isArray(allEvalItemsForPrint) ? allEvalItemsForPrint : [];
+    const deptMap: Record<string, { totalScore: number; maxScore: number; count: number }> = {};
+    evals.forEach((ev) => {
+      const dept = ev.department || 'Unknown';
+      if (!deptMap[dept]) deptMap[dept] = { totalScore: 0, maxScore: 0, count: 0 };
+      deptMap[dept].totalScore += ev.form_total_score || 0;
+      deptMap[dept].maxScore += ev.max_total_score || 0;
+      deptMap[dept].count++;
+    });
+    return Object.entries(deptMap).map(([name, d], idx) => ({
+      name,
+      score: d.maxScore > 0 ? (d.totalScore / d.maxScore) * 100 : 0,
+      count: d.count,
+      color: defaultColors[idx % defaultColors.length],
+    }));
+  }, [allEvalItemsForPrint]);
+
+  const printEmployeeRecords = useMemo(() => {
+    const evals: any[] = Array.isArray(allEvalItemsForPrint) ? allEvalItemsForPrint : [];
+    return evals.map((ev) => ({
+      id: ev.id?.toString(),
+      name: ev.employee_name || 'N/A',
+      department: ev.department || 'N/A',
+      score: (ev.form_total_score != null && ev.max_total_score != null)
+        ? `${ev.form_total_score}/${ev.max_total_score}`
+        : 'N/A',
+      lastEvaluation: ev.date_of_evaluation
+        ? new Date(ev.date_of_evaluation).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'N/A',
+      status: ev.status || 'N/A',
+    }));
+  }, [allEvalItemsForPrint]);
+
+  const printMonthlyIssueVolume = useMemo(() => {
+    const issues: any[] = Array.isArray(allIssueItemsForPrint) ? allIssueItemsForPrint : [];
+    const monthCounts: Record<string, { month: number; year: number; count: number }> = {};
+    issues.forEach((issue) => {
+      if (!issue.incident_date) return;
+      const d = new Date(issue.incident_date);
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const key = `${year}-${month}`;
+      if (!monthCounts[key]) monthCounts[key] = { month, year, count: 0 };
+      monthCounts[key].count++;
+    });
+    return Object.values(monthCounts).sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
+  }, [allIssueItemsForPrint]);
+
+  useEffect(() => {
+    if (!onDataReady) return;
+    onDataReady({
+      activeSubTab,
+      employeePerformanceTableData: performanceTableData,
+      employeeIssuesTableData: printEmployeeIssueRecords,
+      departmentRecords: printDepartmentRecords,
+      employeeRecords: printEmployeeRecords,
+      issueTypeRecords: printIssueTypeRecords,
+      employeeIssueRecords: printEmployeeIssueRecords,
+      // Pass analytics API data for print
+      analyticsKPIs: kpisData || null,
+      analyticsPerformanceTrend: performanceRateData?.performance_trend || [],
+      analyticsMonthlyIssueVolume: printMonthlyIssueVolume,
+    });
+  }, [activeSubTab, performanceRateData, performanceTableData, kpisData,
+      printDepartmentRecords, printEmployeeRecords, printIssueTypeRecords, printEmployeeIssueRecords,
+      printMonthlyIssueVolume, onDataReady]);
 
   // Sub Tab Navigation
   const subTabs = [
-    { id: 1, name: 'Performance Rate', isAvailable: true }, // Real Name: Performance Rate & Action Recommendations
+    { id: 1, name: 'Performance Rate', isAvailable: true },
     { id: 2, name: 'Training Analysis', isAvailable: false },
     { id: 3, name: 'Employee Issue Rate', isAvailable: true },
   ];
 
-  // Pagination Handlers for Employee Performance
   const paginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setEmployeePerformanceCurrentPage(newCurrentPage);
+    setEmployeePerformanceCurrentPage(event.selected + 1);
   };
 
   const pageSizeChange = (value: number) => {
@@ -171,10 +264,8 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     setEmployeePerformancePageSize(value);
   };
 
-  // Pagination Handlers for Employee Issues
   const employeeIssuePaginationChange = (event: any) => {
-    const newCurrentPage = event.selected + 1;
-    setEmployeeIssueCurrentPage(newCurrentPage);
+    setEmployeeIssueCurrentPage(event.selected + 1);
   };
 
   const employeeIssuePageSizeChange = (value: number) => {
@@ -182,172 +273,45 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
     setEmployeeIssuePageSize(value);
   };
 
-
-
-  // Transform employee issues API data to match table format (Employee Issue Rate)
-  const transformEmployeeIssueData = (apiData: any) => {
-    if (!apiData || !apiData.records) return [];
-    
-    return apiData.records.map((item: any) => ({
-      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
-      name: item.name || 'N/A',
-      department: item.department || 'N/A',
-      issueType: item.issue_type || 'Not Specified',
-      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: getIssueStatus(item)
-    }));
-  };
-
-  // Helper function to determine issue status (Employee Issue Rate)
-  const getIssueStatus = (item: any) => {
-    if (item.is_decision_sent && item.is_decision_received) {
-      return 'Resolved';
-    } else if (item.investigate && item.investigate && item.investigate.id) {
-      return 'Under Hearing';
-    } else if (item.is_nte_sent && item.is_nte_received) {
-      return 'NTE Issued';
-    } else {
-      return 'Pending';
-    }
-  };
-
-  // Calculate department records for print modal
-  const departmentRecords = useMemo(() => {
-    if (!allEvaluationData) return [];
-    
-    // Use the same calculation as PerformanceRate component but always show all departments for print
-    const { calculateDepartmentPerformance } = require('./components/employeee-performance-tab/performance-rate-tab/calculations/performanceRateCalc');
-    const { departmentPerformanceData } = calculateDepartmentPerformance(allEvaluationData, true, []); // Always pass true to show all departments
-    
-    return departmentPerformanceData.map((dept: any) => ({
-      name: dept.name,
-      score: dept.score,
-      count: dept.count,
-      color: dept.color
-    }));
-  }, [allEvaluationData]); // Remove showAllDepartments dependency since we always want all departments
-
-  // Transform all evaluation data for employee records (not paginated)
-  const transformAllEvaluationData = (apiData: any) => {
-    if (!apiData || !Array.isArray(apiData)) return [];
-    
-    return apiData.map((item: any) => ({
-      id: item.id?.toString() || `${item.employee_name}_${item.date_of_evaluation}_${item.score}`,
-      name: item.employee_name || 'N/A',
-      department: item.department || 'N/A',
-      score: item.score?.toString() || 'N/A',
-      lastEvaluation: item.date_of_evaluation ? new Date(item.date_of_evaluation).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: item.status || 'N/A'
-    }));
-  };
-
-  // Calculate issue type records for print modal
-  const issueTypeRecords = useMemo(() => {
-    if (!allEmployeeIssueData) return [];
-    
-    // Use the same calculation as IssueType component but always show all issue types for print
-    const { calculateIssueTypeDistribution } = require('./components/employeee-performance-tab/employee-issue-rate-tab/calculations/issueTypeCalc');
-    const { labels, data, percentages, colors } = calculateIssueTypeDistribution(allEmployeeIssueData, [], true); // Always pass true to show all issue types
-    
-    return labels.map((label: string, index: number) => ({
-      reason: label,
-      count: data[index],
-      percentage: percentages[index],
-      color: colors[index]
-    }));
-  }, [allEmployeeIssueData]);
-
-  // Transform all employee issue data for employee issue records (not paginated)
-  const transformAllEmployeeIssueData = (apiData: any) => {
-    if (!apiData || !Array.isArray(apiData)) return [];
-    
-    return apiData.map((item: any) => ({
-      id: item.id?.toString() || `${item.name}_${item.incident_date}_${item.issue_type}`,
-      name: item.name || 'N/A',
-      department: item.department || 'N/A',
-      issueType: item.issue_type || 'Not Specified',
-      dateReported: item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }) : 'N/A',
-      status: getIssueStatus(item)
-    }));
-  };
-
-  // Notify parent component when data is ready for printing
-  useEffect(() => {
-    if (onDataReady && allEvaluationData && allEmployeeIssueData) {
-      onDataReady({
-        activeSubTab,
-        evaluationData: allEvaluationData,
-        employeeIssueData: allEmployeeIssueData,
-        employeePerformanceTableData: transformEvaluationData(evaluationData),
-        employeeIssuesTableData: transformEmployeeIssueData(employeeIssueData),
-        showAllDepartments,
-        showAllIssueTypes,
-        departmentRecords,
-        employeeRecords: transformAllEvaluationData(allEvaluationData), // Use all evaluation data, not just paginated data
-        issueTypeRecords,
-        employeeIssueRecords: transformAllEmployeeIssueData(allEmployeeIssueData) // Use all employee issue data, not just paginated data
-      });
-    }
-  }, [activeSubTab, allEvaluationData, allEmployeeIssueData, evaluationData, employeeIssueData, showAllDepartments, showAllIssueTypes, departmentRecords, issueTypeRecords, onDataReady]);
-
-  // Render Tab Content
   const renderTabContent = () => {
     switch (activeSubTab) {
-      case 1: // Performance Rate & Action Recommendations
+      case 1:
         return (
           <>
-            {/* Charts Section */}
             <div className={`grid gap-6 ${showAllDepartments ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-              {/* Performance Rate by Department - Bar Chart */}
-              <PerformanceRate 
-                evaluationData={allEvaluationData} 
+              <PerformanceRate
                 onShowAllChange={setShowAllDepartments}
                 showAllDepartments={showAllDepartments}
+                precomputedDepartments={performanceRateData?.performance_by_department}
               />
-
-              {/* Performance Trend - Line Chart */}
-              <PerformanceTrend 
-                evaluationData={allEvaluationData} 
-                dateFilter={dateFilter} 
+              <PerformanceTrend
+                dateFilter={dateFilter}
                 showAllDepartments={showAllDepartments}
+                precomputedTrend={performanceRateData?.performance_trend}
+                externalSelectedDepartment={selectedDepartment}
+                onDepartmentChange={setSelectedDepartment}
               />
             </div>
 
-            {/* Employee Performance Table */}
             <EmployeePerformanceTable
-              data={transformEvaluationData(evaluationData)}
-              pagination={evaluationData ? {
-                totalRecords: evaluationData.total_records,
-                totalPages: evaluationData.total_pages
+              data={performanceTableData}
+              pagination={performanceRateData?.performance_table ? {
+                totalRecords: performanceRateData.performance_table.total_records,
+                totalPages: performanceRateData.performance_table.total_pages,
               } : undefined}
-              isLoading={isLoading}
-              error={error}
+              isLoading={performanceRateLoading}
+              error={performanceRateError}
               currentPage={employeePerformanceCurrentPage}
               pageSize={employeePerformancePageSize}
               onPageChange={paginationChange}
               onPageSizeChange={pageSizeChange}
             />
 
-            {/* Action Recommendations */}
-            <div className="pb-8">
-              {/* <ActionRecommendations /> */}
-            </div>
+            <div className="pb-8"></div>
           </>
         );
-      
-      case 2: // Training Analysis
+
+      case 2:
         return (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -356,53 +320,45 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
             </div>
           </div>
         );
-      
-      case 3: // Employee Issue Rate
+
+      case 3:
         return (
           <>
-            {/* Charts Section */}
             <div className={`grid gap-6 ${showAllIssueTypes ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-              {/* Issue Type - Pie Chart */}
-              <IssueType 
-                employeeIssueData={allEmployeeIssueData}
-                isLoading={allEmployeeIssueLoading}
-                error={allEmployeeIssueError}
+              <IssueType
+                isLoading={issueRateLoading}
+                error={issueRateError}
                 onShowAllChange={setShowAllIssueTypes}
                 showAllIssueTypes={showAllIssueTypes}
+                precomputedDistribution={issueRateData?.issue_type_distribution}
               />
-
-              {/* Monthly Issue Volume - Line Chart */}
-              <MonthlyTypeVolume 
-                employeeIssueData={allEmployeeIssueData} 
+              <MonthlyTypeVolume
                 dateFilter={dateFilter}
-                isLoading={allEmployeeIssueLoading}
-                error={allEmployeeIssueError}
+                isLoading={issueRateLoading}
+                error={issueRateError}
                 showAllIssueTypes={showAllIssueTypes}
+                precomputedVolume={issueRateData?.monthly_issue_volume}
               />
             </div>
 
-            {/* Employee Issues Table */}
             <EmployeeIssuesTable
-              data={transformEmployeeIssueData(employeeIssueData)}
-              pagination={employeeIssueData ? {
-                totalRecords: employeeIssueData.total_records,
-                totalPages: employeeIssueData.total_pages
+              data={issuesTableData}
+              pagination={issueRateData?.issues_table ? {
+                totalRecords: issueRateData.issues_table.total_records,
+                totalPages: issueRateData.issues_table.total_pages,
               } : undefined}
-              isLoading={employeeIssueLoading}
-              error={employeeIssueError}
+              isLoading={issueRateLoading}
+              error={issueRateError}
               currentPage={employeeIssueCurrentPage}
               pageSize={employeeIssuePageSize}
               onPageChange={employeeIssuePaginationChange}
               onPageSizeChange={employeeIssuePageSizeChange}
             />
 
-            {/* Intervention Recommendations */}
-            <div className="pb-8">
-              {/* <InterventionRecommendations /> */}
-            </div>
+            <div className="pb-8"></div>
           </>
         );
-      
+
       default:
         return null;
     }
@@ -411,44 +367,38 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
   return (
     <div className="space-y-8">
       {/* KPI Cards */}
-      <div  className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4">
-        <div className="flex gap-6 min-w-full w-max">
-          {/* Average Performance Card */}
-          <div className="flex-shrink-0">
-            <AveragePerformanceCard
-              evaluationData={allEvaluationData}
-              isLoading={allEvaluationLoading}
-              error={allEvaluationError}
-            />
+      <div className="overflow-x-auto overflow-y-visible pb-5 -mx-4 px-4">
+        {kpisLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <LoadingSpinner size="lg" color="yellow" />
           </div>
-        
-          {/* Training Completion Card */}
-          {/* <div className="flex-shrink-0">
-            <TrainingCompletionCard
-              employeeData={employeeData}
-              isLoading={employeeLoading}
-              error={employeeError}
-            />
-          </div> */}
-        
-          {/* Improvement Post Training Card */}
-          {/* <div className="flex-shrink-0">
-            <ImprovementPostTrainingCard
-              evaluationData={evaluationData}
-              isLoading={isLoading}
-              error={error}
-            />
-          </div> */}
-        
-          {/* Resolved vs Ongoing Issues Card */}
-          <div className="flex-shrink-0">
-            <ResolvedVSOngoingCard
-              employeeIssueData={allEmployeeIssueData}
-              isLoading={allEmployeeIssueLoading}
-              error={allEmployeeIssueError}
-            />
+        ) : kpisError ? (
+          <div className="flex items-center justify-center py-6 text-red-500 text-sm">Error loading KPI data</div>
+        ) : !kpisData || (!kpisData.evaluation_count && !kpisData.total_issues) ? (
+          <div className="text-center text-gray-500 py-4 text-sm font-medium">No Data Available</div>
+        ) : (
+          <div className="flex gap-6 min-w-full w-max">
+            {!!kpisData.evaluation_count && (
+              <div className="flex-shrink-0">
+                <AveragePerformanceCard
+                  isLoading={kpisLoading}
+                  error={kpisError}
+                  precomputedValue={kpisData.average_performance}
+                  evaluationCount={kpisData.evaluation_count}
+                />
+              </div>
+            )}
+            {!!kpisData.total_issues && (
+              <div className="flex-shrink-0">
+                <ResolvedVSOngoingCard
+                  isLoading={kpisLoading}
+                  error={kpisError}
+                  precomputedData={kpisData}
+                />
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Sub Tab Navigation */}
@@ -458,17 +408,17 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
           {subTabs.map((tab) => (
             <div key={tab.id} className="cursor-pointer">
               {tab.isAvailable ? (
-                <h1 
+                <h1
                   onClick={() => setActiveSubTab(tab.id)}
-                  className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-4 border-savoy-blue" : "text-gray-500"}`}
+                  className={`text-lg font-bold pb-2 text-center cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? 'text-savoy-blue border-b-4 border-savoy-blue' : 'text-gray-500'}`}
                 >
                   {tab.name}
                 </h1>
               ) : (
                 <div
-                  data-tooltip-id='subtab-tooltip'
-                  data-tooltip-content='Coming soon.'
-                  data-tooltip-place='bottom'
+                  data-tooltip-id="subtab-tooltip"
+                  data-tooltip-content="Coming soon."
+                  data-tooltip-place="bottom"
                   className="cursor-not-allowed"
                 >
                   <h1 className="text-lg font-bold pb-2 text-center text-gray-400 opacity-50">
@@ -480,28 +430,26 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
           ))}
         </div>
 
-        {/* Mobile tabs - horizontal scrollable */}
-        <div
-          className="md:hidden overflow-x-auto"
-        >
+        {/* Mobile tabs */}
+        <div className="md:hidden overflow-x-auto">
           <div className="flex space-x-4 min-w-max px-4">
             {subTabs.map((tab) => (
-              <div 
-                key={tab.id} 
-                className={tab.isAvailable ? "cursor-pointer flex-shrink-0" : "cursor-not-allowed flex-shrink-0"}
+              <div
+                key={tab.id}
+                className={tab.isAvailable ? 'cursor-pointer flex-shrink-0' : 'cursor-not-allowed flex-shrink-0'}
               >
                 {tab.isAvailable ? (
-                  <h1 
+                  <h1
                     onClick={() => setActiveSubTab(tab.id)}
-                    className={`text-sm font-bold pb-2 text-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? "text-savoy-blue border-b-2 border-savoy-blue" : "text-gray-500"}`}
+                    className={`text-sm font-bold pb-2 text-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:text-savoy-blue ${activeSubTab === tab.id ? 'text-savoy-blue border-b-2 border-savoy-blue' : 'text-gray-500'}`}
                   >
                     {tab.name}
                   </h1>
                 ) : (
                   <div
-                    data-tooltip-id='subtab-tooltip'
-                    data-tooltip-content='Coming soon.'
-                    data-tooltip-place='bottom'
+                    data-tooltip-id="subtab-tooltip"
+                    data-tooltip-content="Coming soon."
+                    data-tooltip-place="bottom"
                   >
                     <h1 className="text-sm font-bold pb-2 text-center whitespace-nowrap text-gray-400 opacity-50">
                       {tab.name}
@@ -512,7 +460,7 @@ const EmployeePerformance: React.FC<EmployeePerformanceProps> = ({ data, dateFil
             ))}
           </div>
         </div>
-        <Tooltip id='subtab-tooltip' />
+        <Tooltip id="subtab-tooltip" />
       </div>
 
       {/* Tab Content */}

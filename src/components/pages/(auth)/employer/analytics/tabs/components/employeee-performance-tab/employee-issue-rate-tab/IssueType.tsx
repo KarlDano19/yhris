@@ -10,34 +10,34 @@ import { Pie } from 'react-chartjs-2';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ColorPaletteModal from '../../../../modals/ColorPaletteModal';
-import { calculateIssueTypeDistribution } from './calculations/issueTypeCalc';
 
 import { Squares2X2Icon } from '@heroicons/react/24/solid';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface EmployeeIssueData {
-  issue_type?: string;
-}
 
 interface IssueTypeProps {
-  employeeIssueData?: EmployeeIssueData[] | {
-    records?: EmployeeIssueData[];
-  };
   isLoading?: boolean;
   error?: any;
   onShowAllChange?: (showAll: boolean) => void;
   showAllIssueTypes?: boolean;
+  precomputedDistribution?: Array<{ issue_type: string; count: number; percentage: number }>;
 }
 
-const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = false, error = null, onShowAllChange, showAllIssueTypes = false }) => {
+const IssueType: React.FC<IssueTypeProps> = ({
+  isLoading = false,
+  error = null,
+  onShowAllChange,
+  showAllIssueTypes = false,
+  precomputedDistribution,
+}) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [customColors, setCustomColors] = useState<string[]>([]);
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkScreenSize();
@@ -46,8 +46,38 @@ const IssueType: React.FC<IssueTypeProps> = ({ employeeIssueData, isLoading = fa
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Calculate issue type distribution using shared utility
-  const { labels, data, totalIssues, percentages, colors, totalIssueTypes } = calculateIssueTypeDistribution(employeeIssueData, customColors, showAllIssueTypes);
+  const { labels, data, totalIssues, percentages, colors, totalIssueTypes } = useMemo(() => {
+    if (precomputedDistribution) {
+      const defaultColors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316'];
+      let colorMapping: { [key: string]: string } = {};
+      try {
+        const saved = localStorage.getItem('issueTypeColorMapping');
+        if (saved) colorMapping = JSON.parse(saved);
+      } catch {}
+
+      const filtered = showAllIssueTypes ? precomputedDistribution : precomputedDistribution.slice(0, 10);
+      const lbls = filtered.map(i => i.issue_type || 'Unknown');
+      const vals = filtered.map(i => i.count);
+      const pcts = filtered.map(i => i.percentage.toFixed(1));
+      const clrs = filtered.map((i, idx) => customColors[idx] || colorMapping[i.issue_type] || defaultColors[idx % defaultColors.length]);
+      return {
+        labels: lbls,
+        data: vals,
+        totalIssues: filtered.reduce((s, i) => s + i.count, 0),
+        percentages: pcts,
+        colors: clrs,
+        totalIssueTypes: precomputedDistribution.length,
+      };
+    }
+    return {
+      labels: [],
+      data: [],
+      totalIssues: 0,
+      percentages: [],
+      colors: [],
+      totalIssueTypes: 0,
+    };
+  }, [customColors, showAllIssueTypes, precomputedDistribution]);
 
   // Handle color palette save
   const handleColorPaletteSave = (colors: string[]) => {

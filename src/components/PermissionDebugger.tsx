@@ -11,7 +11,7 @@ export const PermissionDebugger: React.FC = () => {
     'view_screen_applicant_page',
     'view_onboarding_page',
     'view_manage_page',
-    'view_train_page',
+    'view_evaluation_page',
     'view_employee_separation_page',
     'view_dole_page',
     'view_analytics_page',

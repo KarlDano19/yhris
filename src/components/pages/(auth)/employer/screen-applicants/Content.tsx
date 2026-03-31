@@ -59,7 +59,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
-        jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
+        jobPost['hiredApplicant'] = jobPost['hired_count'];
         jobPost['newApplicantsLast30Days'] = jobPost['new_applicants_last_30_days'] || 0;
       });
       setJobPostHistoryItems(dataJobPost.records);

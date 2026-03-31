@@ -1,5 +1,6 @@
 "use client";
 
+// 7. SVG component imports
 import SelectChevronDown from "@/svg/SelectChevronDown";
 
 type Props = {

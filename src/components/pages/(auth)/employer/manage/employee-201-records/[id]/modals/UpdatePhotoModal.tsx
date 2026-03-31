@@ -1,6 +1,9 @@
 "use client";
 
+// 1. React imports
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
+// 2. Icon imports
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export type UpdatePhotoModalProps = {

@@ -1,58 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
-
-const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 
 export type EmploymentHistoryEntry = {
   id: number;
   company: string;
   position: string;
-  start_date: string; 
-  end_date: string | null; 
+  start_date: string;
+  end_date: string | null;
   description?: string;
 };
 
-export function useAddEmploymentHistory(employeeId?: number | string) {
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
+type AddEmploymentHistoryData = Omit<
+  EmploymentHistoryEntry,
+  "id" | "employee_id"
+>;
 
-  const addEntry = async (
-    entry: Omit<EmploymentHistoryEntry, "id" | "employee_id">
-  ): Promise<{ ok: boolean; data?: EmploymentHistoryEntry; error?: Error }> => {
-    if (!employeeId) return { ok: false, error: new Error("No employee ID provided") };
-    setIsSaving(true);
-    setError(undefined);
+type AddEmploymentHistoryParams = {
+  employeeId: number | string;
+  entry: AddEmploymentHistoryData;
+};
 
-    const token = getCookie("token") as string | undefined;
-    const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(String(employeeId))}/employment-history/`;
+async function addEmploymentHistory(
+  params: AddEmploymentHistoryParams
+): Promise<EmploymentHistoryEntry> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    String(params.employeeId)
+  )}/employment-history/`;
 
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { Authorization: `Token ${token}` } : {}),
-        },
-        body: JSON.stringify(entry),
-      });
-
-      if (!res.ok) {
-        const problem = await res.json().catch(() => ({}));
-        throw new Error(problem?.detail || problem?.message || `Request failed (${res.status})`);
-      }
-
-      const data: EmploymentHistoryEntry = await res.json();
-      return { ok: true, data };
-    } catch (e: any) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-      return { ok: false, error: err };
-    } finally {
-      setIsSaving(false);
-    }
+  const config: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
+    },
+    body: JSON.stringify(params.entry),
   };
 
-  return { isSaving, error, addEntry };
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.detail || errorData?.message || "Failed to add employment history."
+    );
+  }
+
+  return res.json();
+}
+
+export function useAddEmploymentHistory(employeeId?: number | string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<EmploymentHistoryEntry, Error, AddEmploymentHistoryData>(
+    (entry: AddEmploymentHistoryData) => {
+      if (!employeeId) {
+        throw new Error("No employee ID provided");
+      }
+      return addEmploymentHistory({ employeeId, entry });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employmentHistoryCache", employeeId]);
+        queryClient.invalidateQueries(["employee", employeeId]);
+      },
+    }
+  );
 }

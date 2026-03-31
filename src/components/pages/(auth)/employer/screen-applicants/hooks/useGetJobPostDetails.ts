@@ -29,9 +29,10 @@ async function getJobPostDetails(jobId: any) {
 }
 
 function useGetJobPostDetails(jobId: any) {
-  const query = useQuery(['jobPostDetailsCache', {}], () => getJobPostDetails(jobId), {
+  const query = useQuery(['jobPostDetailsCache', jobId], () => getJobPostDetails(jobId), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    enabled: !!jobId,
   });
   return query;
 }

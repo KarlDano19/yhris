@@ -2,24 +2,25 @@ import { useMutation } from '@tanstack/react-query';
 
 import { VerifyDirectiveParams } from '@/types/directives';
 
-async function verifyDirectiveCode({ directiveId, email, code }: VerifyDirectiveParams) {
+async function verifyDirectiveCode({ directiveId, emailIndex, code }: VerifyDirectiveParams) {
   try {
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/directives/${directiveId}/verify-code/`;
-    
+    // Use Next.js API route — real email is resolved server-side only
+    const apiUrl = `/api/directives/${directiveId}/verify-code`;
+
     const config = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, code }),
+      body: JSON.stringify({ emailIndex, code }),
     };
-    
+
     const res = await fetch(apiUrl, config);
-    
+
     if (!res.ok) {
       throw res.json();
     }
-    
+
     return res.json();
   } catch (err: any) {
     let errStringify = await err;
@@ -31,12 +32,13 @@ async function verifyDirectiveCode({ directiveId, email, code }: VerifyDirective
 }
 
 /**
- * Hook for verifying verification code for directive
+ * Hook for verifying verification code for directive.
+ * Sends emailIndex to Next.js API route — real email is resolved server-side only.
  */
 const useVerifyDirective = () => {
   return useMutation({
-    mutationFn: (params: VerifyDirectiveParams) => verifyDirectiveCode(params)
+    mutationFn: (params: VerifyDirectiveParams) => verifyDirectiveCode(params),
   });
 };
 
-export default useVerifyDirective; 
+export default useVerifyDirective;

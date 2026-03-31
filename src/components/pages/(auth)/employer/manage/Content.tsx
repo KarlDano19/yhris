@@ -10,7 +10,6 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
-import EvaluationHistoryLogo from '@/svg/EvalHistoryLogo';
 import EmployeeMovementLogo from '@/svg/EmployeeMovementLogo';
 import DocumentGeneratorLogo from '@/svg/DocumentGeneratorLogo';
 import Employee201RecordsLogo from '@/svg/Employee201RecordsLogo';
@@ -38,11 +37,6 @@ const menus = [
     icon: <EmployeeLogo />,
     text: 'Employee List',
     link: '/manage/employees',
-  },
-  {
-    icon: <EvaluationHistoryLogo />,
-    text: 'Evaluation History',
-    link: '/manage/evaluation-history',
   },
   {
     icon: <EmployeeMovementLogo />,

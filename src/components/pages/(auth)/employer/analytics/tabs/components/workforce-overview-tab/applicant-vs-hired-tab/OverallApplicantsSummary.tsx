@@ -2,27 +2,34 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-import { calculateOverallApplicantsSummary } from './calculations/overallApplicantsSummaryCalc';
+export interface ApplicantSummaryItem {
+  status: string;
+  count: string;
+  percentage: string;
+  label: string;
+  color: string;
+}
+
 
 interface OverallApplicantsSummaryProps {
-  appliedApplicantsData?: any[];
   isLoading?: boolean;
   error?: any;
   selectedStatusFilter?: string;
   selectedJobFilter?: string;
+  precomputedItems?: ApplicantSummaryItem[];
 }
 
-const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({ 
-  appliedApplicantsData, 
-  isLoading = false, 
+const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
+  isLoading = false,
   error = null,
   selectedStatusFilter = 'All Statuses',
-  selectedJobFilter = 'All Jobs'
+  selectedJobFilter = 'All Jobs',
+  precomputedItems,
 }) => {
-  // Calculate applicant status summary using shared utility
   const applicantData = useMemo(() => {
-    return calculateOverallApplicantsSummary(appliedApplicantsData);
-  }, [appliedApplicantsData]);
+    if (precomputedItems) return precomputedItems;
+    return [];
+  }, [precomputedItems]);
 
   const filteredApplicantData = useMemo(() => {
     const shouldApplyStatusFilter = selectedStatusFilter !== 'All Statuses' && selectedJobFilter !== 'All Jobs';
@@ -61,8 +68,10 @@ const OverallApplicantsSummary: React.FC<OverallApplicantsSummaryProps> = ({
     return (
       <div className="bg-white p-6 rounded-lg border border-[#A8B5C7]">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Applicants Status Summary</h3>
-        <div className="flex items-center justify-center py-8">
-          <div className="text-gray-500">No applicant data available</div>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="text-gray-500 font-semibold mb-2">No data available</div>
+          </div>
         </div>
       </div>
     );

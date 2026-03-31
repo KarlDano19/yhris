@@ -7,26 +7,24 @@ interface OverduePoliciesCardProps {
   overdueData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedCount?: number;
 }
 
 const OverduePoliciesCard: React.FC<OverduePoliciesCardProps> = ({
   overdueData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedCount,
 }) => {
-  // Calculate overdue policies with dummy data
+  // Calculate overdue policies
   const calculateOverduePolicies = useMemo(() => {
-    // Dummy data for visualization
-    const currentOverdue = 1;
-    const previousOverdue = 0;
-    const increase = currentOverdue - previousOverdue;
-
+    const count = precomputedCount !== undefined ? precomputedCount : 1;
     return {
-      overduePolicies: currentOverdue,
-      trend: `Increased by +${increase} (last December 2024 had ${previousOverdue} overdue)`,
-      isPositive: false // Increase in overdue policies is negative
+      overduePolicies: count,
+      trend: `DOLE requirements past their due date`,
+      isPositive: count === 0
     };
-  }, [overdueData]);
+  }, [overdueData, precomputedCount]);
 
   if (isLoading) {
     return (

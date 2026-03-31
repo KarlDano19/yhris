@@ -31,13 +31,12 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'post-job',
     'screen-applicants',
     'screening-question-guideline',
-    'orient',
+    'onboarding',
     'manage',
     'employee-separation',
     'employer-profile',
     'setup-employer-profile',
-    'admin',
-    'train',
+    'evaluation',
     'settings',
     'dole',
     'analytics',
@@ -60,7 +59,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
-          {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
+          {(type === 'superadmin' || type === 'admin') && adminRoutes.includes(firstRoute) && <AdminHeader />}
           {type === 'employer' && employerRoutes.includes(firstRoute) && (
             <MainHeader
               hasProfile={hasProfile}

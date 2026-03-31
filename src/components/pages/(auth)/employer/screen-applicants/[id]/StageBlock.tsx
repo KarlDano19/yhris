@@ -21,14 +21,14 @@ interface EnhancedStageBlockProps extends PropTypes {
   isDisabled?: boolean;
 }
 
-export default function StageBlock({ 
-  stage, 
-  index, 
-  openMenuId, 
-  setOpenMenuId, 
+export default function StageBlock({
+  stage,
+  index,
+  openMenuId,
+  setOpenMenuId,
   filters,
   permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
-  isDisabled = false 
+  isDisabled = false,
 }: EnhancedStageBlockProps) {
   const { state, dispatch }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { applicants } = stage;

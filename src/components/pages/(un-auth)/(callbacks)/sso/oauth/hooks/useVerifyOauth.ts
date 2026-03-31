@@ -9,6 +9,11 @@ interface DataType {
 async function verifyOauth(data: DataType) {
   try {
     const token = getCookie('token');
+
+    console.log("OAuth verify token:", token);
+    console.log("Provider:", data.provider);
+    console.log("Code:", data.code);
+
     const newData = {
       code: data.code
     }

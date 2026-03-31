@@ -21,7 +21,7 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 import EyePassword from '@/svg/EyePassword';
 
-import { DirectiveData } from '@/types/directives';
+import { DirectiveData, MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
 import 'react-quill/dist/quill.snow.css';
@@ -54,7 +54,7 @@ export default function CreateMemoModal({
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const { tagsTo, setTagsTo, handleKeyDownTo, handleRemoveTagTo } = useTagTo(inputTo, setInputTo);
-  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<DirectiveData>();
+  const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
   const { mutate, isLoading } = useAddDirectivesItems();
   const queryClient = useQueryClient();
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);

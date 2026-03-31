@@ -335,6 +335,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };
@@ -625,10 +626,20 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
       
       return (
         <tr>
-          <td colSpan={totalColumns}>
-            <div className='py-4'>
-              <h4 className='text-center text-gray-300 text-sm'>There{`'`}s no data yet.</h4>
-              <h4 className='text-center text-gray-300 text-sm mt-2'>Please click create to add employee.</h4>
+          <td colSpan={100}>
+            <div className='flex flex-col justify-center items-center py-4'>
+              <p className='text-gray-300 text-sm'>There&apos;s no data found.</p>
+              <p className='text-gray-300 text-sm mt-2'>
+                Please click{' '}
+                <SmartButton
+                  id="create-employee-btn"
+                  onClick={() => setIsAddEmployeeModalOpen(true)}
+                  className='text-green-500 hover:underline font-semibold underline'
+                >
+                  create
+                </SmartButton>
+                {' '}to add employee.
+              </p>
             </div>
           </td>
         </tr>

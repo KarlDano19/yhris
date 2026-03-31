@@ -128,8 +128,13 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
           <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
             {!isLoading ? jobDetailData?.job_schedule : 'Loading schedule...'}
           </p>
-          {/* salary range */}
-          {jobDetailData?.is_show_salary && (
+          {/* salary range - only show if is_show_salary is true AND salary data exists */}
+          {jobDetailData?.is_show_salary && jobDetailData?.salary_range_type && (
+            (jobDetailData?.salary_range_type === 'Range'
+              ? (jobDetailData?.minimum_amount > 0 || jobDetailData?.maximum_amount > 0)
+              : jobDetailData?.exact_amount > 0
+            ) && jobDetailData?.rate
+          ) && (
             <>
               <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
                 <BanknotesIcon className='h-5 w-5 mr-1' />

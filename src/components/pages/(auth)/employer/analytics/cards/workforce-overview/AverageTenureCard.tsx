@@ -2,25 +2,39 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Card from '../../Card';
-import { calculateAverageTenure } from './calculations/averateTenureCalc';
 
 interface AverageTenureCardProps {
-  employeeData?: any[];
-  separationData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedValue?: number;
 }
 
 const AverageTenureCard: React.FC<AverageTenureCardProps> = ({
-  employeeData,
-  separationData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedValue,
 }) => {
-  // Calculate average tenure using shared utility
   const tenureData = useMemo(() => {
-    return calculateAverageTenure(employeeData, separationData);
-  }, [employeeData, separationData]);
+    const years = precomputedValue ?? 0;
+    let trend = '';
+    let isPositive = true;
+
+    if (years < 1) {
+      trend = 'Low tenure - consider retention strategies';
+      isPositive = false;
+    } else if (years < 3) {
+      trend = 'Building tenure - keep engagement high';
+      isPositive = true;
+    } else if (years < 5) {
+      trend = 'Stable tenure - continue growth opportunities';
+      isPositive = true;
+    } else {
+      trend = 'Strong tenure - experienced workforce';
+      isPositive = true;
+    }
+
+    return { averageTenure: years.toFixed(1), trend, isPositive };
+  }, [precomputedValue]);
 
   if (isLoading) {
     return (

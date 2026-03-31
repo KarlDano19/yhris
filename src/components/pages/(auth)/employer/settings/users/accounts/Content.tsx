@@ -147,6 +147,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [isSyncError, syncError, resetSync]);
 
   const handleSearch = () => {
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...itemsFilter });
     // No need to call refetch; useGetAccountsList will refetch on appliedFilter change

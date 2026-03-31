@@ -1,66 +1,74 @@
 "use client";
 
-import { useCallback, useState } from "react";
+// 1. React imports (none needed)
 
+// 2. Third-party library imports
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
+
+// 3. Internal imports
 import { toFormData } from "../utils/trainingRecordUtils";
 
-import type { CreateTrainingInput, TrainingRecord } from "../types/trainingRecords";
+// 4. Type imports
+import type {
+  CreateTrainingInput,
+  TrainingRecord,
+} from "../types/trainingRecords";
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+type CreateTrainingRecordParams = {
+  employeeId: number | string;
+  input: CreateTrainingInput;
+};
+
+async function createTrainingRecord(
+  params: CreateTrainingRecordParams
+): Promise<TrainingRecord> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    String(params.employeeId)
+  )}/training-records/`;
+
+  const fd = toFormData({
+    training_title: params.input.training_title,
+    date_completed: params.input.date_completed ?? "",
+    training_provider: params.input.training_provider ?? "",
+    ...(params.input.proof_of_completion
+      ? { proof_of_completion: params.input.proof_of_completion }
+      : {}),
+  });
+
+  const config: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${token}`,
+      // NO Content-Type for FormData
+    },
+    body: fd,
+  };
+
+  const res = await fetch(url, config);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData?.message || errorData?.detail || "Failed to create training record."
+    );
+  }
+
+  return res.json();
+}
 
 export function useCreateTrainingRecord() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const queryClient = useQueryClient();
 
-  const create = useCallback(
-    async (employeeId: number | string, input: CreateTrainingInput): Promise<TrainingRecord> => {
-      setIsLoading(true);
-      setError(undefined);
-      try {
-        const url = `${API_BASE}/api/employee-201/employees/${encodeURIComponent(
-          String(employeeId)
-        )}/training-records/`;
-
-        const fd = toFormData({
-          training_title: input.training_title,
-          date_completed: input.date_completed ?? "",
-          training_provider: input.training_provider ?? "",
-          ...(input.proof_of_completion ? { proof_of_completion: input.proof_of_completion } : {}),
-        });
-
-        const token = getCookie("token") as string | undefined;
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-          body: fd,
-        });
-
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const problem = await res.json();
-            msg =
-              typeof problem === "string"
-                ? problem
-                : problem?.message || problem?.detail || JSON.stringify(problem);
-          } catch {}
-          throw new Error(msg);
-        }
-
-        return (await res.json()) as TrainingRecord;
-      } catch (e: any) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-        throw e;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
+  return useMutation<TrainingRecord, Error, CreateTrainingRecordParams>(
+    (params: CreateTrainingRecordParams) => createTrainingRecord(params),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries(["trainingRecordsCache", variables.employeeId]);
+        queryClient.invalidateQueries(["employee", variables.employeeId]);
+      },
+    }
   );
-
-  return { create, isLoading, error } as const;
 }

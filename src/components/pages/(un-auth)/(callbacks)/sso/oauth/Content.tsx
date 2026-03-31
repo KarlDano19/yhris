@@ -43,10 +43,27 @@ function Content() {
             postMessageData.account_type = data.account_type;
             postMessageData.login_type = data.login_type;
           }
-          broadcastChannel.postMessage(postMessageData);
+          // Primary: window.opener.postMessage (works cross-origin, e.g. www vs non-www)
+          try {
+            window.opener?.postMessage(postMessageData, '*');
+          } catch (e) {
+            console.warn('window.opener.postMessage failed:', e);
+          }
+          // Secondary: BroadcastChannel (same-origin, modern browsers)
+          try {
+            broadcastChannel.postMessage(postMessageData);
+          } catch (e) {
+            console.warn('BroadcastChannel postMessage failed:', e);
+          }
+          // Fallback: localStorage storage event (older Safari, restricted browsers)
+          try {
+            localStorage.setItem('sso_result', JSON.stringify({ ...postMessageData, _ts: Date.now() }));
+          } catch (e) {
+            console.warn('localStorage SSO fallback failed:', e);
+          }
           setTimeout(() => {
             window.close();
-          }, 500);
+          }, 1500);
         },
         onError: (err: any) => {
           setErrorMessage(err);
