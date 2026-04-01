@@ -97,16 +97,19 @@ export default function DocumentRepositoryForm({ emp }: { emp?: Partial<Employee
     try {
       const token = getCookie('token');
       const isLocalPath = selectedDocument.file.startsWith('/');
-      const fileUrl = isLocalPath
-        ? `${process.env.NEXT_PUBLIC_API_URL}${selectedDocument.file}`
-        : selectedDocument.file;
 
-      // Only send Authorization header for local protected paths.
-      // S3/Minio pre-signed URLs already carry auth in query params — adding
-      // an Authorization header causes S3 to return 403.
-      const res = await fetch(fileUrl, isLocalPath ? {
+      if (!isLocalPath) {
+        // S3/MinIO presigned URLs — open in new tab to avoid CORS
+        window.open(selectedDocument.file, '_blank');
+        setIsDownloadModalOpen(false);
+        setSelectedDocument(null);
+        return;
+      }
+
+      const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}${selectedDocument.file}`;
+      const res = await fetch(fileUrl, {
         headers: { Authorization: `Token ${token}` },
-      } : {});
+      });
 
       if (!res.ok) throw new Error('Failed to download file.');
 

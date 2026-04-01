@@ -13,7 +13,9 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = session.isLoggedIn;
   const accountType = session.accountType;
+  const isAdmin = session.isAdmin === true;
   const hasProfile = session.hasProfile;
+  const hasCompletedOnboarding = session.hasCompletedOnboarding;
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
 
@@ -32,7 +34,6 @@ export async function middleware(request: NextRequest) {
     'employee-separation',
     'employer-profile',
     'setup-employer-profile',
-    'admin',
     'evaluation',
     'settings',
     'dole',
@@ -54,10 +55,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (isLoggedIn) {
-    if (accountType === 'admin') {
+    if (accountType === 'superadmin' || isAdmin) {
       if (!adminRoutes.includes(firstRoute)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
+      return NextResponse.next();
     }
     if (accountType === 'employer') {
       if (employerRoutes.includes(firstRoute)) {
@@ -82,9 +84,18 @@ export async function middleware(request: NextRequest) {
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
-              return NextResponse.redirect(new URL('/dashboard', request.url));
-            }
-            if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
+              if (request.nextUrl.pathname === '/setup-employer-profile') {
+                if (hasCompletedOnboarding) {
+                  return NextResponse.redirect(new URL('/dashboard', request.url));
+                }
+                return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
+              }
+              // Allow access to sub-routes (onboarding-checklist, acceptance-memo)
+            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications') {
+              // Onboarding gate: block employer routes until checklist is complete.
+              // settings and notifications are exempt so users can't get trapped.
+              return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
+            } else if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
             }
           }
@@ -124,7 +135,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } else {
-    const sessionRoutes = [...employerRoutes, ...applicantRoutes];
+    const sessionRoutes = [...adminRoutes, ...employerRoutes, ...applicantRoutes];
     if (sessionRoutes.includes(firstRoute)) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
