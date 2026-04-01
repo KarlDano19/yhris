@@ -25,10 +25,12 @@ import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-p
 import { useSubmitAcceptanceMemo } from './hooks/useSubmitAcceptanceMemo';
 import AcceptanceMemoPreview from './form-previews/AcceptanceMemoPreview';
 
-import { EmployeeCertificateFormData } from '@/types/document-generator/documents';
-import { EmploymentAgreementFormData } from '@/types/document-generator/documents';
-import { NoticeToExplainFormData } from '@/types/document-generator/documents';
-import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
+import {
+  EmployeeCertificateFormData,
+  EmploymentAgreementFormData,
+  NoticeToExplainFormData,
+  AcceptanceMemoFormData,
+} from '@/types/document-generator/documents';
 import { DocumentType } from '@/types/document-generator/form';
 import { T_MemoFormData } from './form-previews/AcceptanceMemoPreview';
 import { print } from './print/print';
