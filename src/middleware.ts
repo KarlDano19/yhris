@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = session.isLoggedIn;
   const accountType = session.accountType;
+  const isAdmin = session.isAdmin === true;
   const hasProfile = session.hasProfile;
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
@@ -32,7 +33,6 @@ export async function middleware(request: NextRequest) {
     'employee-separation',
     'employer-profile',
     'setup-employer-profile',
-    'admin',
     'evaluation',
     'settings',
     'dole',
@@ -54,10 +54,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (isLoggedIn) {
-    if (accountType === 'admin') {
+    if (accountType === 'superadmin' || isAdmin) {
       if (!adminRoutes.includes(firstRoute)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
+      return NextResponse.next();
     }
     if (accountType === 'employer') {
       if (employerRoutes.includes(firstRoute)) {
@@ -124,7 +125,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } else {
-    const sessionRoutes = [...employerRoutes, ...applicantRoutes];
+    const sessionRoutes = [...adminRoutes, ...employerRoutes, ...applicantRoutes];
     if (sessionRoutes.includes(firstRoute)) {
       return NextResponse.redirect(new URL('/login', request.url));
     }

@@ -7,6 +7,7 @@ import { getIronSession } from 'iron-session';
 import { SessionData, sessionOptions } from '@/lib/session';
 
 import Content from "@/components/pages/(auth)/employer/audit-logs/Content";
+import SmartPagePermissionGuard from "@/components/SmartPermissions/SmartPagePermissionGuard";
 
 export const metadata = {
   title: "Audit Logs - Yahshua HRIS",
@@ -20,7 +21,11 @@ async function getSession() {
 const AuditLogs = async () => {
     const session = await getSession()
     const hasActiveSubscription = session.hasActiveSubscription;
-    return <Content hasActiveSubscription={hasActiveSubscription}/>;
+    return (
+      <SmartPagePermissionGuard permission="view_audit_log_page">
+        <Content hasActiveSubscription={hasActiveSubscription} />
+      </SmartPagePermissionGuard>
+    );
 };
 
 export default AuditLogs;

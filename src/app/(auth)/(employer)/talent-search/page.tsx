@@ -6,9 +6,7 @@ export const metadata = {
 }
 
 const TalentSearchPage = async () => {
-    return (
-        <Content/>
-    )
+    return <Content />
 }
 
 export default TalentSearchPage
