@@ -65,7 +65,7 @@ export interface AcceptanceMemoFormData {
   authorityName: string;
   authorityPosition: string;
   authorityDate: string;
-  signature: string | null;
+  signature: string | File | null;
 }
 
 export interface PrintOptions {

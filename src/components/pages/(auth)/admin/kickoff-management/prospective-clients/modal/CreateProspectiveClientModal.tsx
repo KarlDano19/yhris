@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
+import SelectChevronDown from '@/svg/SelectChevronDown';
+
 import useCreateProspectiveClient from '../hooks/useCreateProspectiveClient';
 
 export default function CreateProspectiveClientModal({
@@ -115,18 +117,23 @@ export default function CreateProspectiveClientModal({
                     </div>
                     <div>
                       <label className="block text-sm font-medium leading-6 text-gray-900">Partner</label>
-                      <select
-                        defaultValue=""
-                        {...register('partner')}
-                        className="mt-1 block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
-                      >
-                        <option value="">None</option>
-                        {(partners || []).map((p: any) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative mt-1">
+                        <select
+                          defaultValue=""
+                          {...register('partner')}
+                          className="block w-full appearance-none rounded-md border-0 bg-white py-2 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-savoy-blue focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6 cursor-pointer"
+                        >
+                          <option value="">None</option>
+                          {(partners || []).map((p: any) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                          <SelectChevronDown />
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="px-4 pb-2">

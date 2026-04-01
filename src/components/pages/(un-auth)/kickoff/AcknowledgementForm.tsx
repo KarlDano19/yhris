@@ -8,7 +8,7 @@ import SignatureCanvas from 'react-signature-canvas';
 
 import CustomToast from '@/components/CustomToast';
 import { T_KickoffAcknowledgementPayload, T_KickoffAcknowledgementResponse, T_KickoffPortalData } from '@/types/kickoff';
-import { PlusIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
 
 import { useSubmitKickoffAcknowledgement } from './hooks/useSubmitKickoffAcknowledgement';
@@ -64,10 +64,6 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
 
   const handleRemoveSignatory = (id: number) => {
     setAdditionalSignatories(prev => prev.filter(s => s.id !== id));
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const onSubmit = handleSubmit(async (data) => {
@@ -248,16 +244,7 @@ export default function AcknowledgementForm({ token, portalData, onSuccess }: Ac
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex justify-between items-center print:hidden">
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <PrinterIcon className="w-4 h-4" />
-            Print Form
-          </button>
-
+        <div className="mt-6 flex justify-end print:hidden">
           <button
             type="submit"
             disabled={!agreedToTerms || submitMutation.isLoading}
