@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     session['refreshToken'] = data.refresh_token || '';
     session['tokenExpiresAt'] = expiresAt;
     session['accountType'] = data.account_type;
+    session['isAdmin'] = data.is_admin === true;
     session['hasPendingTransaction'] = data.has_pending_transaction;
     session['hasActiveSubscription'] = data.has_active_subscription;
     session['hasProfile'] = data.has_profile;

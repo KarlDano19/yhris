@@ -62,7 +62,7 @@ function Content() {
             window.location.href = returnTo;
           } else if (sessionData.accountType === 'applicant') {
             window.location.href = '/personal-mode';
-          } else if (sessionData.accountType === 'admin') {
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;
@@ -181,6 +181,8 @@ function Content() {
       } else {
         location.href = '/setup-employer-profile';
       }
+    } else if (data.account_type === 'admin' || data.account_type === 'superadmin') {
+      location.href = '/admin/dashboard';
     } else {
       if (data.has_profile) {
         location.href = '/personal-mode';

@@ -20,8 +20,7 @@ import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailE
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
 import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
-import useSeedEvaluationSchedulers from './hooks/useSeedEvaluationSchedulers';
-import useUnseedEvaluationSchedulers from './hooks/useUnseedEvaluationSchedulers';
+
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
@@ -82,8 +81,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
   const formMethods = useForm();
   const editFormMethods = useForm();
-  const seedEvaluationSchedulersMutation = useSeedEvaluationSchedulers();
-  const unseedEvaluationSchedulersMutation = useUnseedEvaluationSchedulers();
 
   // Helper component to display recipient avatar with fallback
   const RecipientAvatar = ({ recipient, size = 40 }: { recipient: any; size?: number }) => {
@@ -204,36 +201,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setIsDeleteEvaluationSchedulerModalOpen({ id: evaluationDetails.id, open: true });
     } else {
       setSelectedEvaluationSchedulerId(evaluationDetails.id);
-    }
-  };
-
-  const handleSeedEvaluationSchedulers = async (count: number) => {
-    try {
-      const result = await seedEvaluationSchedulersMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed evaluation schedulers';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEvaluationSchedulers = async () => {
-    try {
-      const result = await unseedEvaluationSchedulersMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed evaluation schedulers';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
     }
   };
 
@@ -470,10 +437,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap'>
               <SeederButton
-                onSeed={handleSeedEvaluationSchedulers}
-                onUnseed={handleUnseedEvaluationSchedulers}
-                isLoading={seedEvaluationSchedulersMutation.isLoading}
-                isUnseeding={unseedEvaluationSchedulersMutation.isLoading}
+                viewType="evaluation_scheduler"
                 disabled={!hasActiveSubscription}
                 maxCount={1000}
               />
