@@ -112,7 +112,7 @@ FIX EXPLANATION:
 BUG ID: HRIS-019
 DATE FILED: 2026-04-06
 DATE FIXED: 2026-04-06
-CLIENT/REPORTER: Internal
+CLIENT/REPORTER: Client - GALAM
 
 ISSUE DESCRIPTION:
 Clicking "Confirm" on the "Save changes?" modal in the Employment Details tab of
