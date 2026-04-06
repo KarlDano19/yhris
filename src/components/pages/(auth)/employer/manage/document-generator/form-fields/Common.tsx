@@ -43,6 +43,7 @@ export const DocumentTypeField = ({ documentType, handleInputChange, disabled }:
         <option value="employee-certificate">Certificate of Employment (No Compensation)</option>
         <option value="employment-agreement">Employment Agreement</option>
         <option value="notice-to-explain">Notice to Explain</option>
+        <option value="acceptance-memo">Acceptance Memo</option>
       </select>
       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
         <DropDownArrow />

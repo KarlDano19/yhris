@@ -297,7 +297,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-screen-2xl mx-auto px-6">
         {/* Desktop and Tablet Layout */}
         <div className="hidden md:flex items-center justify-between h-16 gap-4">
           {/* Logo */}

@@ -37,7 +37,6 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'employee-separation',
     'employer-profile',
     'setup-employer-profile',
-    'admin',
     'evaluation',
     'settings',
     'dole',
@@ -72,7 +71,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
-          {type === 'admin' && adminRoutes.includes(firstRoute) && <AdminHeader />}
+          {(type === 'superadmin' || type === 'admin') && adminRoutes.includes(firstRoute) && <AdminHeader />}
           {type === 'employer' && employerRoutes.includes(firstRoute) && (
             <MainHeader
               hasProfile={hasProfile}

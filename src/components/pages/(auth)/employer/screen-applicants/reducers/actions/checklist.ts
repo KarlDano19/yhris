@@ -7,7 +7,7 @@ export default function checklist(state: any, action: any) {
   const isApplicantPassed = formData.status === "passed" && isNotLastStage
 
   const moveToNextStage = () => {
-    let applicant: ApplicantType
+    let applicant: ApplicantType | undefined
     const removedApplicant = state.map((stage: StageType) => {
       if (stage.id === actionState.stageId) {
         applicant = stage.applicants.find(applicant => applicant.id === actionState.applicantId)!
@@ -18,18 +18,22 @@ export default function checklist(state: any, action: any) {
       }
     })
     
+    // Guard: applicant not found in current stage (already moved by a server refetch)
+    if (!applicant) return removedApplicant;
+    const foundApplicant = applicant;
+
     const addedApplicant = removedApplicant.map((stage: StageType, index: number) => {
       const isTheNextStage = index === stageIndex + 1
       if (isTheNextStage) {
-        
+
         // Preserve all applicant data including dates, reset status and update checklists
         const updatedApplicant = {
-          ...applicant,
+          ...foundApplicant,
           checklists: formData.checklists,
           status: null,
           // Preserve created_at and updated_at
-          created_at: applicant.created_at,
-          updated_at: applicant.updated_at,
+          created_at: foundApplicant.created_at,
+          updated_at: foundApplicant.updated_at,
         }
         return {...stage, applicants: [...stage.applicants, updatedApplicant]}
       } else {

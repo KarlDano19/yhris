@@ -77,7 +77,7 @@ const Content = () => {
             window.location.href = '/dashboard';
           } else if (sessionData.accountType === 'applicant') {
             window.location.href = '/personal-mode';
-          } else if (sessionData.accountType === 'admin') {
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;

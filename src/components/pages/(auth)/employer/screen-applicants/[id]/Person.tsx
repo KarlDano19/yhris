@@ -4,11 +4,10 @@ import { useParams } from 'next/navigation';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import ArchiveButton from '../ArchiveButton';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
-import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+import useSoftDeleteApplication from '../hooks/applicant/useSoftDeleteApplication';
 
 import StateContext from '../contexts/StateContext';
 import { initialActionState } from '../lib/initialActionState';
@@ -184,10 +183,7 @@ export default function Person({
   };
 
   const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
-  const isRejected = applicant.status === 'rejected';
-  const isWithdrawn = applicant.status === 'withdrawn';
   const isPooling = applicant.status === 'pooling';
-  const isArchived = applicant.is_archived === true;
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
   const isWithinTimerWindow = (dateString: string | undefined) => {

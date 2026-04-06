@@ -8,6 +8,7 @@ import MenuItem from '../../MenuItem';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
+import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 
@@ -30,11 +31,17 @@ const menus = [
     link: '/settings/org-structure',
     isAvailable: true,
   },
+  {
+    icon: <CreateMemoLogo />,
+    text: 'Acceptance Form',
+    link: '/settings/acceptance-form',
+    isAvailable: true,
+  },
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       <div className='flex p-4'>
         <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
           <ArrowLeftIcon className='h-5 w-5' />

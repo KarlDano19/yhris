@@ -29,6 +29,8 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import MainLogo from '@/svg/MainLogo';
 import ChatIcon from '@/svg/ChatIcon';
+import InfoIcon from '@/svg/InfoIcon';
+import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
 
 interface ErrorDetail {
   detail: string;
@@ -61,6 +63,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const { data: notificationsData, isLoading: isNotificationsLoading } = useGetNotification({ page_size: 10 });
   const { mutate: markAsRead } = useMarkNotificationRead();
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const { mutate: refreshToken } = useRefreshToken();
 
   // Chat state
@@ -341,6 +344,17 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     );
   };
 
+  const InfoButton = () => (
+    <button
+      onClick={() => setIsChecklistOpen(true)}
+      className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
+      title='View onboarding checklist'
+    >
+      <span className='sr-only'>View onboarding checklist</span>
+      <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+    </button>
+  );
+
   const NotificationDropdown = () => {
     const unreadCount = notifications.filter((n: any) => !n.is_read).length;
 
@@ -442,16 +456,17 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       >
         {({ open }) => (
           <>
-            <div className='mx-auto max-w-7xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
+            <div className='mx-auto max-w-screen-2xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
-                  <div className='flex flex-shrink-0 items-center'>
-                    <Link 
-                      href='/dashboard' 
+                  <div className='flex flex-shrink-0 items-center gap-2'>
+                    <Link
+                      href='/dashboard'
                       className={firstRoute === 'employer-profile' ? 'pointer-events-none' : ''}
                     >
                       <MainLogo />
                     </Link>
+                    <InfoButton />
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
@@ -606,6 +621,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
         timeRemaining={timeRemaining}
         isRefreshing={isRefreshing}
         isLoggingOut={isLoggingOut}
+      />
+      <ChecklistViewModal
+        isOpen={isChecklistOpen}
+        onClose={() => setIsChecklistOpen(false)}
       />
     </>
   );

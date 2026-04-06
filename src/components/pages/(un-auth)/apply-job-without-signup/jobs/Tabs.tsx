@@ -172,7 +172,7 @@ const Tabs = ({
   return (
     <>
       {/* Tab Navigation */}
-      <div className="max-w-7xl px-4 sm:px-6 mx-auto">
+      <div className="max-w-screen-2xl px-4 sm:px-6 mx-auto">
         <div className="px-4 lg:px-5">
           <div className="flex space-x-6 md:space-x-8">
             {tabs.map((tab) => {
@@ -236,7 +236,7 @@ const Tabs = ({
             renderEmptyState()
           ) : (
             <div className='mt-4'>
-              <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+              <div className='max-w-screen-2xl px-4 sm:px-6 mx-auto'>
                 <div className='px-4 lg:px-5'>
                   <div className='lg:flex lg:items-start lg:relative'>
                     <style dangerouslySetInnerHTML={{__html: `
@@ -349,7 +349,7 @@ const Tabs = ({
             renderEmptyState()
           ) : (
             <div className='mt-4'>
-              <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+              <div className='max-w-screen-2xl px-4 sm:px-6 mx-auto'>
                 <div className='px-4 lg:px-5'>
                   <div className='lg:flex lg:items-start lg:relative'>
                     <style dangerouslySetInnerHTML={{__html: `
@@ -439,7 +439,7 @@ const Tabs = ({
             renderEmptyState()
           ) : (
             <div className='mt-4'>
-              <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+              <div className='max-w-screen-2xl px-4 sm:px-6 mx-auto'>
                 <div className='px-4 lg:px-5'>
                   <div className='lg:flex lg:items-start lg:relative'>
                     <style dangerouslySetInnerHTML={{__html: `

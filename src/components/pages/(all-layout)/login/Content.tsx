@@ -63,7 +63,7 @@ function Content() {
           } else if (sessionData.accountType === 'applicant') {
             const returnTo = searchParams.get('redirect') || '/personal-mode';
             window.location.href = returnTo;
-          } else if (sessionData.accountType === 'admin') {
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;
@@ -182,6 +182,8 @@ function Content() {
       } else {
         location.href = '/setup-employer-profile';
       }
+    } else if (data.account_type === 'admin' || data.account_type === 'superadmin') {
+      location.href = '/admin/dashboard';
     } else {
       localStorage.removeItem('postAuthRedirect');
       if (data.has_profile) {
