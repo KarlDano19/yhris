@@ -72,6 +72,40 @@ export interface StageNoteType {
   created_at?: string;
 }
 
+export interface StageApprovalType {
+  id: number;
+  job_stage: number;
+  stage_title: string;
+  stage_order: number;
+  is_approved: boolean;
+  is_skipped: boolean;
+  approved_by_name: string | null;
+  approved_by_photo: string | null;
+  approval_remarks: string | null;
+  approval_date: string | null;
+  signature: string | null;
+  created_at: string;
+}
+
+export type T_ApproveStagePayload = {
+  stage_id: number;
+  signature: string | null;
+  approval_remarks: string | null;
+  approval_date: string | null;
+  is_skipped: boolean;
+};
+
+export type T_EAFData = {
+  id: number;
+  document_number: string;
+  applied_job: number;
+  created_by_name: string | null;
+  pdf_url: string | null;
+  finalized_at: string | null;
+  stage_approvals: StageApprovalType[];
+  created_at: string;
+};
+
 export type ApplicantType = {
   id: number;
   email: string | null;
@@ -83,6 +117,7 @@ export type ApplicantType = {
   status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | 'pooling' | null | undefined;
   stagePosition: number;
   stage_notes?: StageNoteType[];
+  stage_approvals?: StageApprovalType[];
   job_stages_title?: string;
   screeningFit?: 'good' | 'bad';
   screeningAnswers?: Array<{

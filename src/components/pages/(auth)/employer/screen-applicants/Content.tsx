@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Tooltip } from 'react-tooltip';
 
 import PostJobCard from './PostJobCard';
-import useGetJobPostItems from './hooks/useGetJobPostItems';
+import useGetJobPostItems from './hooks/job/useGetJobPostItems';
 import SkeletonGrid from '../../../../SkeletonGrid';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';

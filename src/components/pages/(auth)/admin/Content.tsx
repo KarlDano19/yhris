@@ -1,10 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 
-import PersonSearchLogo from '@/svg/PersonSearchLogo';
-import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
+import SendEmailModal from '@/components/SendEmailModal';
+import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
+import AdvisoryEmailLogo from '@/svg/AdvisoryEmailLogo';
+import PersonSearchLogo from '@/svg/PersonSearchLogo';
+import OrientLogo from '@/svg/OrientLogo';
+
+import useSendAdvisoryEmail from './hooks/useSendAdvisoryEmail';
 
 const menus = [
   {
@@ -22,9 +31,39 @@ const menus = [
     text: 'Management',
     link: '/admin/management',
   },
+  {
+    icon: <AccountBalanceLogo />,
+    text: 'Kickoff Management',
+    link: '/admin/kickoff-management',
+  },
+  {
+    icon: <OrientLogo />,
+    text: 'Client Onboarding',
+    link: '/admin/employer-onboarding',
+  },
 ];
 
 const Content = () => {
+  const [isAdvisoryModalOpen, setIsAdvisoryModalOpen] = useState(false);
+  const { mutate: sendAdvisory, isLoading: isSendingAdvisory } = useSendAdvisoryEmail();
+
+  const handleAdvisorySubmit = (data: any) => {
+    if (!isAdvisoryModalOpen) return;
+
+    const callbackReq = {
+      onSuccess: (data: any) => {
+        setIsAdvisoryModalOpen(false);
+        toast.custom(<CustomToast message={data?.message} type="success" />);
+      },
+      onError: (err: any) => {
+        const errorMessage = err?.message || err?.response?.data?.message || 'Failed to send advisory. Please try again.';
+        toast.custom(<CustomToast message={errorMessage} type="error" />);
+      },
+    };
+
+    sendAdvisory(data, callbackReq);
+  };
+
   return (
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative'>
@@ -43,10 +82,30 @@ const Content = () => {
                 </Link>
               );
             })}
+            <button
+              onClick={() => setIsAdvisoryModalOpen(true)}
+              className='bg-white shadow rounded-lg px-4 py-8 flex flex-col gap-2 items-center justify-center hover:shadow-md focus:shadow-none focus:opacity-80'
+            >
+              <AdvisoryEmailLogo />
+              <h3 className='text-indigo-dye font-semibold text-center'>Advisory</h3>
+            </button>
           </div>
-        </div>        
+        </div>
       </div>
       <FloatingHelpButton />
+      {isAdvisoryModalOpen && (
+        <SendEmailModal
+          title="Send Advisory"
+          isOpen={isAdvisoryModalOpen}
+          onClose={() => setIsAdvisoryModalOpen(false)}
+          onSubmit={handleAdvisorySubmit}
+          defaultRecipients={[]}
+          showEmailTemplate={false}
+          showAttachment={false}
+          submitButtonText="Send Advisory"
+          isLoading={isSendingAdvisory}
+        />
+      )}
     </>
   );
 };

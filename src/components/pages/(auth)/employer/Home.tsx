@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+
+import useResetOnboarding from '@/components/hooks/useResetOnboarding';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingProgress from '../../../FloatingProgress';
@@ -25,10 +28,19 @@ import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal'
 import QuickAccessPanel from './quick-access/QuickAccessPanel';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
+  const router = useRouter();
+  const { mutate: resetOnboarding, isLoading: isResetting } = useResetOnboarding();
+
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
   const [intendedRedirectLink, setIntendedRedirectLink] = useState<string | null>(null);
   const [restrictedFeatureName, setRestrictedFeatureName] = useState<string>('');
+
+  const handleReset = () => {
+    resetOnboarding(undefined, {
+      onSuccess: () => router.push('/setup-employer-profile/onboarding-checklist'),
+    });
+  };
 
   const handleGrayedOutClick = (link: string, reason: 'subscription' | 'permission', featureName?: string) => {
     setIntendedRedirectLink(link);
@@ -166,7 +178,17 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
       {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
-          <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
+          <div className='flex items-center gap-3'>
+            <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
+            {/* FOR TESTING ONLY */}
+            <button
+              onClick={handleReset}
+              disabled={isResetting}
+              className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
+            >
+              {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
+            </button>
+          </div>
           {/* Single responsive grid: mobile stacks QA on top; desktop places QA in col 5. */}
           <div className='grid md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_1.4fr] gap-6 mt-6'>
             <div className='col-span-1 md:col-span-2 lg:col-span-1 lg:col-start-5 lg:row-start-1 lg:row-span-3 self-start order-first lg:order-none'>
