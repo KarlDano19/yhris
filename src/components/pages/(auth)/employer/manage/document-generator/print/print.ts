@@ -14,7 +14,11 @@ import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
  * Main print function that routes to the appropriate print function based on document type
  */
 export const print = (
-  formData: EmployeeCertificateFormData | EmploymentAgreementFormData | NoticeToExplainFormData | AcceptanceMemoFormData,
+  formData:
+    | EmployeeCertificateFormData
+    | EmploymentAgreementFormData
+    | NoticeToExplainFormData
+    | AcceptanceMemoFormData,
   options: PrintOptions
 ): Promise<Blob | null> => {
   // Determine the document type based on the formData structure

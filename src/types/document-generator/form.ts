@@ -3,7 +3,11 @@ import { EmploymentAgreementFormData } from './documents';
 import { NoticeToExplainFormData } from './documents';
 import { AcceptanceMemoFormData } from './documents';
 
-export type DocumentType = 'employee-certificate' | 'employment-agreement' | 'notice-to-explain' | 'acceptance-memo';
+export type DocumentType =
+  | 'employee-certificate'
+  | 'employment-agreement'
+  | 'notice-to-explain'
+  | 'acceptance-memo';
 
 export interface FormProps {
   documentType: DocumentType;
