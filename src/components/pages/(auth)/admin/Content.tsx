@@ -9,10 +9,10 @@ import CustomToast from '@/components/CustomToast';
 import FloatingHelpButton from '@/components/FloatingHelpButton';
 import SendEmailModal from '@/components/SendEmailModal';
 
-import OrientLogo from '@/svg/OrientLogo';
 import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
 import AdvisoryEmailLogo from '@/svg/AdvisoryEmailLogo';
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
+import OrientLogo from '@/svg/OrientLogo';
 
 import useSendAdvisoryEmail from './hooks/useSendAdvisoryEmail';
 
