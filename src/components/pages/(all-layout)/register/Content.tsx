@@ -51,7 +51,7 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors }, clearErrors } = useForm<T_Register>({
+  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors }, clearErrors } = useForm<T_Register>({
     defaultValues: { client_source: "Direct Client" },
   });
   const { mutate, isLoading } = useRegisterAccount();
