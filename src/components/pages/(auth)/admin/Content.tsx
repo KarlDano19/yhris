@@ -12,7 +12,6 @@ import AccountBalanceLogo from '@/svg/AccountBalanceLogo';
 import AdvisoryEmailLogo from '@/svg/AdvisoryEmailLogo';
 import PersonSearchLogo from '@/svg/PersonSearchLogo';
 import OrientLogo from '@/svg/OrientLogo';
-import OrientLogo from '@/svg/OrientLogo';
 
 import useSendAdvisoryEmail from './hooks/useSendAdvisoryEmail';
 
