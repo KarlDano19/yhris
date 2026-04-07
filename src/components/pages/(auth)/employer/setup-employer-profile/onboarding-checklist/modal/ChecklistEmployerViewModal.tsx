@@ -70,9 +70,15 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
                         <Dialog.Title className='text-base font-semibold text-gray-900'>
                           HRIS Implementation Checklist
                         </Dialog.Title>
-                        <span className='inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700'>
-                          Completed — View Only
+                        {record && (
+                        <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          record.progress_pct === 100
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {record.progress_pct === 100 ? 'Completed — View Only' : `In Progress — ${record.progress_pct}% complete`}
                         </span>
+                      )}
                       </div>
                       <button
                         type='button'

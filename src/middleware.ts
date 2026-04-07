@@ -90,7 +90,13 @@ export async function middleware(request: NextRequest) {
                 }
                 return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
               }
-              // Allow access to sub-routes (onboarding-checklist, acceptance-memo)
+              if (
+                request.nextUrl.pathname === '/setup-employer-profile/acceptance-memo' &&
+                hasCompletedOnboarding
+              ) {
+                return NextResponse.redirect(new URL('/dashboard', request.url));
+              }
+              // Allow access to other sub-routes (onboarding-checklist, etc.)
             } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications') {
               // Onboarding gate: block employer routes until checklist is complete.
               // settings and notifications are exempt so users can't get trapped.

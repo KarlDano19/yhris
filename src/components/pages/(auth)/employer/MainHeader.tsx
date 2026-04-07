@@ -24,6 +24,7 @@ import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead'
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { Tooltip } from 'react-tooltip';
 import MainLogo from '@/svg/MainLogo';
 import InfoIcon from '@/svg/InfoIcon';
 import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
@@ -313,14 +314,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   };
 
   const InfoButton = () => (
-    <button
-      onClick={() => setIsChecklistOpen(true)}
-      className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
-      title='View onboarding checklist'
-    >
-      <span className='sr-only'>View onboarding checklist</span>
-      <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
-    </button>
+    <>
+      <button
+        onClick={() => setIsChecklistOpen(true)}
+        className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
+        data-tooltip-id='info-button-tooltip'
+        data-tooltip-content='View onboarding checklist'
+        data-tooltip-place='bottom'
+      >
+        <span className='sr-only'>View onboarding checklist</span>
+        <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+      </button>
+      <Tooltip id='info-button-tooltip' />
+    </>
   );
 
   const NotificationDropdown = () => {
@@ -434,7 +440,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                     >
                       <MainLogo />
                     </Link>
-                    <InfoButton />
+                    {pathname !== '/setup-employer-profile/onboarding-checklist' && <InfoButton />}
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
