@@ -21,7 +21,7 @@ const SuccessPopAlert = ({ message, open, onClose }: SuccessProps) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <div className="fixed md:right-7 lg:right-10 left-0 md:left-auto w-full top-9 z-20">
-          <div className="mx-auto h-24 max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <div className="mx-auto h-24 max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative">
             <div className="md:absolute right-0">
               <div className="rounded-md bg-[#65C979] p-4">
                 <div className="flex items-center">

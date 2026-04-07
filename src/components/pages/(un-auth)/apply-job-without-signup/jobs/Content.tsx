@@ -677,7 +677,7 @@ const Content = () => {
       {/* Search Section - Collapsible */}
       <div
         className={classNames(
-          'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out overflow-hidden',
+          'mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out overflow-hidden',
           isSearchSectionVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
@@ -764,7 +764,7 @@ const Content = () => {
           'transition-all duration-300',
           isSearchSectionVisible ? 'mt-4' : 'mt-2'
         )}>
-          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+          <div className='max-w-screen-2xl px-4 sm:px-6 mx-auto'>
             <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
               Jobs available: {!isGetJobsLoading ? totalRecords || jobsItems.length : '0'}
             </p>
@@ -787,7 +787,7 @@ const Content = () => {
               </button>
             </div>
           </div>
-          <div className='max-w-7xl px-4 sm:px-6 mx-auto'>
+          <div className='max-w-screen-2xl px-4 sm:px-6 mx-auto'>
             <div className='px-4 lg:px-5'>
               {/* Tabs Navigation (commented out - not needed yet) */}
               {/* <Tabs

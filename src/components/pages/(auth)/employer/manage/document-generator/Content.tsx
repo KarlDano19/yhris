@@ -639,7 +639,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         </div>
       )}
       {!isLoading && (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
           {toastMessage && (
             <div className="fixed top-4 right-4 z-50">
               <CustomToast 

@@ -720,7 +720,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       {!isGetJobPostDetailsLoading && (
         <StateContext.Provider value={{ state, dispatch, actionState, setActionState }}>
           <div className='min-h-screen mb-24 md:mb-0'>
-            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
+            <div className={`max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
               <div className='flex px-4 pt-4 pb-2'>
                 <Link href='/screen-applicants' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
                   <ArrowLeftIcon className='h-5 w-5' />

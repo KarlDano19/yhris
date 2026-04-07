@@ -25,6 +25,7 @@ import AuditLogsIcon from '@/svg/AuidtLogsIcon';
 import TalentSearchIcon from '@/svg/TalentSearchIcon';
 import GoPremiumModal from './modals/SubsriptionModals/GoPremiumModal';
 import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal';
+import QuickAccessPanel from './quick-access/QuickAccessPanel';
 
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
   const router = useRouter();
@@ -175,7 +176,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   return (
     <>
       {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingSyncButton />}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative'>
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <div className='flex items-center gap-3'>
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
@@ -188,17 +189,22 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
               {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
             </button>
           </div>
-          <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6 relative'>
-            {menus.map((menu, index) => {
-              return (
-                <SmartDashboardItem 
-                  key={index} 
-                  menu={menu} 
-                  onGrayedOutClick={handleGrayedOutClick}
-                  hasActiveSubscription={hasActiveSubscription}
-                />
-              );
-            })}
+          {/* Single responsive grid: mobile stacks QA on top; desktop places QA in col 5. */}
+          <div className='grid md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_1.4fr] gap-6 mt-6'>
+            <div className='col-span-1 md:col-span-2 lg:col-span-1 lg:col-start-5 lg:row-start-1 lg:row-span-3 self-start order-first lg:order-none'>
+              <QuickAccessPanel
+                hasActiveSubscription={hasActiveSubscription}
+                onGrayedOutClick={handleGrayedOutClick}
+              />
+            </div>
+            {menus.map((menu, index) => (
+              <SmartDashboardItem
+                key={index}
+                menu={menu}
+                onGrayedOutClick={handleGrayedOutClick}
+                hasActiveSubscription={hasActiveSubscription}
+              />
+            ))}
           </div>
         </div>
       </div>
