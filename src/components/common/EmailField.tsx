@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
 
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
+import useGetClientEmailSelect from '@/components/hooks/useGetClientEmailSelect';
 
 interface EmailFieldProps {
   tags: string[];
@@ -20,6 +21,7 @@ interface EmailFieldProps {
   disabled?: boolean;
   className?: string;
   isFocused?: boolean;
+  dataSource?: 'employees' | 'clients';
 }
 
 export default function EmailField({
@@ -37,6 +39,7 @@ export default function EmailField({
   disabled = false,
   className = "",
   isFocused = false,
+  dataSource = 'employees',
 }: EmailFieldProps) {
   // Internal state for suggestions and employee data
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -64,8 +67,11 @@ export default function EmailField({
     current_page: 1
   }), [debouncedSearch]);
 
-  // Fetch employee data
-  const { data: employeeData } = useGetEmployeePaginatedSelect(searchParams);
+  // Fetch data — conditionally use employees or clients source
+  const isClientsSource = dataSource === 'clients';
+  const { data: employeeData } = useGetEmployeePaginatedSelect(isClientsSource ? null : searchParams);
+  const { data: clientData } = useGetClientEmailSelect(searchParams, isClientsSource);
+  const resolvedData = isClientsSource ? clientData : employeeData;
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -235,12 +241,12 @@ export default function EmailField({
 
   // Filter employees based on input and employee data
   useEffect(() => {
-    filterEmployees(inputValue, tags, employeeData, employeeLimit);
+    filterEmployees(inputValue, tags, resolvedData, employeeLimit);
     // Hide suggestions when data changes unless user has focused
     if (!hasUserFocused) {
       setShowSuggestions(false);
     }
-  }, [inputValue, employeeData, tags, employeeLimit, filterEmployees, hasUserFocused]);
+  }, [inputValue, resolvedData, tags, employeeLimit, filterEmployees, hasUserFocused]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -276,7 +282,7 @@ export default function EmailField({
     if (employee.is_department_option) {
       if (employee.is_remove_option) {
         // Handle department removal - remove all employees from that department
-        const employeesInDepartment = employeeData?.records?.filter((emp: any) => 
+        const employeesInDepartment = resolvedData?.records?.filter((emp: any) =>
           emp.department === employee.department && emp.email
         ) || [];
         
@@ -287,7 +293,7 @@ export default function EmailField({
         onEmployeeSelect({ type: 'department_remove', emails: emailsToRemove, remainingTags });
       } else {
         // Handle department selection - add all employees from that department
-        const employeesInDepartment = employeeData?.records?.filter((emp: any) => 
+        const employeesInDepartment = resolvedData?.records?.filter((emp: any) =>
           emp.department === employee.department && emp.email
         ) || [];
         
@@ -313,7 +319,7 @@ export default function EmailField({
     // Ensure suggestions are prepared for next search by triggering a re-filter
     // This is important after manual email entry to ensure suggestions show on next focus
     setTimeout(() => {
-      filterEmployees('', tags, employeeData, employeeLimit);
+      filterEmployees('', tags, resolvedData, employeeLimit);
     }, 0);
   };
 
@@ -392,7 +398,7 @@ export default function EmailField({
         
         // Ensure suggestions are prepared for next search
         setTimeout(() => {
-          filterEmployees('', tags, employeeData, employeeLimit);
+          filterEmployees('', tags, resolvedData, employeeLimit);
         }, 100);
       }
     } else if (e.key === 'Escape') {
