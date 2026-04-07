@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
@@ -16,6 +16,8 @@ import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useLoopsSync } from '@/helpers/useLoopsSync';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -23,6 +25,13 @@ import MainIconOnly from '@/svg/MainIconOnly';
 import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
+
+async function getPublicPartners() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/partners/public/`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.data ?? [];
+}
 
 const getPasswordRequirements = (pass: string) => ({
   length: pass.length >= 12,
@@ -49,9 +58,12 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors }, clearErrors } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors }, clearErrors } = useForm<T_Register>({
+    defaultValues: { partner: "" },
+  });
   const { mutate, isLoading } = useRegisterAccount();
   const { syncToLoops } = useLoopsSync();
+  const { data: publicPartners = [] } = useQuery(['publicPartnersCache'], getPublicPartners, { refetchOnWindowFocus: false });
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
@@ -338,22 +350,44 @@ const Content = () => {
                         </div>
                       </>
                     ) : (
-                      <div className='mb-2'>
-                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          Name
-                         <span className='text-red-500'>*</span>
-                        </label>
-                        <input
-                          type='text'
-                          id='name'
-                          {...register('name', { required: "Please enter a name" })}
-                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                          tabIndex={2}
-                        />
-                        {errors.name && (
-                          <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
-                        )}
-                      </div>
+                      <>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            Name
+                           <span className='text-red-500'>*</span>
+                          </label>
+                          <input
+                            type='text'
+                            id='name'
+                            {...register('name', { required: "Please enter a name" })}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                          {errors.name && (
+                            <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+                          )}
+                        </div>
+                        <div className='mb-2'>
+                          <label className='text-sm leading-6 text-gray-900'>
+                            Partner
+                          </label>
+                          <Controller
+                            control={control}
+                            name="partner"
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6'
+                              >
+                                <option value="">Direct Client (No Partner)</option>
+                                {(publicPartners as any[]).map((p: any) => (
+                                  <option key={p.id} value={p.name}>{p.name}</option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </div>
+                      </>
                     )}
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>

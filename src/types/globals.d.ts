@@ -131,6 +131,8 @@ export type T_Register = {
   email: string;
   password: string;
   confirmPassword: string;
+  client_source?: string;
+  partner?: string;
   redirect_url?: string;
 };
 

@@ -2,12 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 
-import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
 import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 // import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader'; // Commented out for rollback - replaced with YahshuaConnectHeader
 import YahshuaConnectHeader from '@/components/pages/(auth)/yahshua-connect/YahshuaConnectHeader';
 import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
+import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
 
 interface HeaderProps {
   type: string;
@@ -24,7 +24,6 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
   const lastRoute = slicePaths[slicePaths.length - 1];
 
   const unAuthRoutes: string[] = ['', 'jobs', 'job-app-form', 'pricing'];
-  const adminRoutes: string[] = ['admin'];
   const employerRoutes: string[] = [
     'manage-subscriptions',
     'checkout',
@@ -71,7 +70,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
       {!noHeaderRoutes.includes(lastRoute) && (
         <>
           {unAuthRoutes.includes(firstRoute) && <Navigation />}
-          {(type === 'superadmin' || type === 'admin') && adminRoutes.includes(firstRoute) && <AdminHeader />}
+          {/* {(type === 'superadmin' || type === 'admin') && <AdminHeader />} */}
           {type === 'employer' && employerRoutes.includes(firstRoute) && (
             <MainHeader
               hasProfile={hasProfile}
