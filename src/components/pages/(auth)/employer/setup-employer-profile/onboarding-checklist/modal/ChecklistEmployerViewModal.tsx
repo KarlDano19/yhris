@@ -35,7 +35,7 @@ const ChecklistViewModal = ({ isOpen, onClose }: ChecklistViewModalProps) => {
   return (
     <>
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as='div' className='relative z-[20]' onClose={() => {}}>
+      <Dialog as='div' className='relative z-[20]' onClose={onClose}>
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
