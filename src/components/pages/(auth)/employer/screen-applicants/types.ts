@@ -111,6 +111,7 @@ export type ApplicantType = {
   email: string | null;
   applicationId: number;
   photo_url: string;
+  image?: string | null;
   name: string;
   checklists: string[];
   status: 'ongoing' | 'withdrawn' | 'rejected' | 'passed' | 'hired' | 'pooling' | null | undefined;
@@ -127,6 +128,7 @@ export type ApplicantType = {
     isMatch?: boolean;
   }>;
   is_archived?: boolean;
+  has_account?: boolean;
   created_at?: string;
   updated_at?: string;
 };

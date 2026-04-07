@@ -61,7 +61,7 @@ function Content() {
             const returnTo = searchParams.get('redirect') || '/dashboard';
             window.location.href = returnTo;
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
+            window.location.href = '/personal-mode';
           } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
@@ -185,7 +185,7 @@ function Content() {
       location.href = '/admin/dashboard';
     } else {
       if (data.has_profile) {
-        location.href = '/apply-for-a-job';
+        location.href = '/personal-mode';
       } else {
         location.href = '/setup-applicant-profile';
       }

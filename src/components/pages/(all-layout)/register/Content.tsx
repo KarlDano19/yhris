@@ -66,7 +66,7 @@ const Content = () => {
           if (sessionData.accountType === 'employer') {
             window.location.href = '/dashboard';
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
+            window.location.href = '/personal-mode';
           } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }

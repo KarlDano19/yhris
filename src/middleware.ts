@@ -43,12 +43,15 @@ export async function middleware(request: NextRequest) {
     'notifications',
   ];
   const applicantRoutes: any = [
-    'application-tracker',
-    'apply-for-a-job',
-    'edit-profile',
-    'notification',
+    'personal-mode',
+    'business-mode',
+    'profile',
     'setup-applicant-profile',
     'job-applicant-form',
+    // 'application-tracker',
+    // 'apply-for-a-job',
+    // 'edit-profile',
+    // 'notification',
   ];
 
   if (bypassRoutes.includes(firstRoute)) {
@@ -111,27 +114,52 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
-        if (
-          firstRoute === 'application-tracker' ||
-          firstRoute === 'apply-for-a-job' ||
-          firstRoute === 'edit-profile' ||
-          firstRoute === 'notification' ||
-          firstRoute === 'setup-applicant-profile' ||
-          firstRoute === 'job-applicant-form'
-        ) {
-          if (hasProfile) {
-            if (firstRoute === 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
-            }
-          }
-          if (!hasProfile) {
-            if (firstRoute !== 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
-            }
-          }
+        // Business mode is temporarily disabled — redirect to personal mode
+        if (firstRoute === 'business-mode') {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
         }
+        if (firstRoute === 'personal-mode') {
+          if (!hasProfile) {
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+          }
+          // Block coming soon sub-routes
+          const secondRoute = slicePaths[1];
+          const comingSoonRoutes = ['trainings', 'transactions'];
+          if (secondRoute && comingSoonRoutes.includes(secondRoute)) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          return NextResponse.next();
+        }
+        if (firstRoute === 'setup-applicant-profile') {
+          if (hasProfile) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          // Allow access to setup-applicant-profile if no profile exists
+          return NextResponse.next();
+        }
+        // Handle old applicant routes
+        // if (
+        //   firstRoute === 'application-tracker' ||
+        //   firstRoute === 'apply-for-a-job' ||
+        //   firstRoute === 'edit-profile' ||
+        //   firstRoute === 'notification' ||
+        //   firstRoute === 'job-applicant-form'
+        // ) {
+        //   if (hasProfile) {
+        //     // Redirect old applicant routes to personal-mode
+        //     return NextResponse.redirect(new URL('/personal-mode', request.url));
+        //   }
+        //   if (!hasProfile) {
+        //     return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        //   }
+        // }
       } else {
-        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+        // Route not in applicantRoutes - redirect based on profile status
+        if (hasProfile) {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        }
       }
     }
   } else {

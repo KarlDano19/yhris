@@ -57,6 +57,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       jobDescription: CREATEJOB_TEMPLATE[0],
       qualifications: QUALIFICATION_TEMPLATE[0],
       notesRemarks: '', // Initialize with empty string to prevent "undefined" string
+      skills: [], // Initialize skills as empty array
     },
   });
   const fifthForm = useForm();
