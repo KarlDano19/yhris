@@ -37,10 +37,11 @@ interface MainHeaderProps {
   hasProfile: boolean;
   hasActiveSubscription: boolean;
   firstRoute: string;
+  lastRoute: string;
   initialTokenExpiresAt?: number;
 }
 
-const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialTokenExpiresAt }: MainHeaderProps) => {
+const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, initialTokenExpiresAt }: MainHeaderProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<any>({});
@@ -128,6 +129,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       setUserDetails(usersData);
     }
   }, [usersData]);
+
+  const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
 
   // Initialize token expiration from prop
   useEffect(() => {
@@ -440,7 +443,7 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                     >
                       <MainLogo />
                     </Link>
-                    {pathname !== '/setup-employer-profile/onboarding-checklist' && <InfoButton />}
+                    {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && <InfoButton />}
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
@@ -539,10 +542,12 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
         isRefreshing={isRefreshing}
         isLoggingOut={isLoggingOut}
       />
-      <ChecklistViewModal
-        isOpen={isChecklistOpen}
-        onClose={() => setIsChecklistOpen(false)}
-      />
+      {isOnboardingEnabled && (
+        <ChecklistViewModal
+          isOpen={isChecklistOpen}
+          onClose={() => setIsChecklistOpen(false)}
+        />
+      )}
     </>
   );
 };

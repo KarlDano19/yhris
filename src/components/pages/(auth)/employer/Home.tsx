@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import useResetOnboarding from '@/components/hooks/useResetOnboarding';
+import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 
 import { SmartDashboardItem } from '@/components/SmartPermissions/SmartDashboardItem';
 import FloatingProgress from '../../../FloatingProgress';
@@ -29,6 +30,8 @@ import InsufficientPermissionsModal from './modals/InsufficientPermissionsModal'
 const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription?: boolean }) => {
   const router = useRouter();
   const { mutate: resetOnboarding, isLoading: isResetting } = useResetOnboarding();
+  const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
+  const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
@@ -180,13 +183,15 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
           <div className='flex items-center gap-3'>
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
             {/* FOR TESTING ONLY */}
-            <button
-              onClick={handleReset}
-              disabled={isResetting}
-              className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
-            >
-              {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
-            </button>
+            {isOnboardingEnabled && (
+              <button
+                onClick={handleReset}
+                disabled={isResetting}
+                className='text-xs px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50 disabled:opacity-50'
+              >
+                {isResetting ? 'Resetting...' : 'Reset Onboarding (TESTING)'}
+              </button>
+            )}
           </div>
           <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6 relative'>
             {menus.map((menu, index) => {
