@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
@@ -37,6 +37,8 @@ const getPasswordRequirements = (pass: string) => ({
 
 const Content = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasPreselected = useRef(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   // const accountType = [
   //   {
@@ -49,7 +51,7 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, control, formState: { errors }, clearErrors } = useForm<T_Register>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors }, clearErrors } = useForm<T_Register>({
     defaultValues: { client_source: "Direct Client" },
   });
   const { mutate, isLoading } = useRegisterAccount();
@@ -57,6 +59,14 @@ const Content = () => {
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
+
+  // Pre-select Applicant when coming from the job application flow
+  useEffect(() => {
+    if (!hasPreselected.current && searchParams.get('redirect')) {
+      setValue('accountType', 'Applicant');
+      hasPreselected.current = true;
+    }
+  }, [searchParams, setValue]);
 
   // Check if user is already logged in and redirect if so
   useEffect(() => {
@@ -70,8 +80,8 @@ const Content = () => {
           if (sessionData.accountType === 'employer') {
             window.location.href = '/dashboard';
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
-          } else if (sessionData.accountType === 'admin') {
+            window.location.href = '/personal-mode';
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;
@@ -111,7 +121,11 @@ const Content = () => {
             toast.custom(() => <CustomToast message={responseData.message} type='success' />, {
               duration: 7000,
             });
-            router.push('/login');
+            const redirectParam = searchParams.get('redirect');
+            if (redirectParam) {
+              localStorage.setItem('postAuthRedirect', redirectParam);
+            }
+            router.push(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : '/login');
           },
           onError: (err: any) => {
             if (typeof err === 'string' && err.toLowerCase().includes('password')) {
@@ -127,7 +141,8 @@ const Content = () => {
           },
         };
         if (agree) {
-          mutate(data, callBackReq);
+          const redirectParam = searchParams.get('redirect');
+          mutate({ ...data, ...(redirectParam ? { redirect_url: redirectParam } : {}) }, callBackReq);
         } else {
           toast.custom(() => <CustomToast message={'Please agree to the Terms of Service and Privacy Policy to proceed.'} type='error' />, {
             duration: 4000,
@@ -236,9 +251,10 @@ const Content = () => {
                       <select
                         id='role'
                         {...register('accountType', { required: "Please select an account type" })}
-                        className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                        className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:cursor-not-allowed'
                         defaultValue=''
                         placeholder='Select...'
+                        disabled={!!searchParams.get('redirect')}
                       >
                         <option value='' disabled className='text-gray-400'>
                           Select...
@@ -517,7 +533,10 @@ const Content = () => {
                         )}
                       </button>
                       <h6 className='text-center'>
-                        <Link href='/login' className='font-semibold text-blue-600 hover:underline'>
+                        <Link
+                          href={searchParams.get('redirect') ? `/login?redirect=${encodeURIComponent(searchParams.get('redirect')!)}` : '/login'}
+                          className='font-semibold text-blue-600 hover:underline'
+                        >
                           Back to Sign In
                         </Link>
                       </h6>

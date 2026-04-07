@@ -74,7 +74,7 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
       <main className='relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 pt-24'>
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
 
-        <div className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16'>
+        <div className='relative z-10 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16'>
           {/* Header Section */}
           <div className='text-center mb-16'>
             <h1 className='text-4xl md:text-6xl font-bold text-indigo-dye mb-6'>
@@ -87,7 +87,7 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
           </div>
 
           {/* Pricing Cards */}
-          <div className='max-w-7xl mx-auto grid lg:grid-cols-2 mb-16 justify-items-center'>
+          <div className='max-w-screen-2xl mx-auto grid lg:grid-cols-2 mb-16 justify-items-center'>
             {/* HRIS Only */}
             <div className='bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border-[#355FD0] border-2 overflow-hidden max-w-md w-full'>
               <div className='bg-[#355FD0] text-white text-center py-6'>

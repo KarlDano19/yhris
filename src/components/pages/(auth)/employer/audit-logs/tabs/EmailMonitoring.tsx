@@ -311,8 +311,8 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>  
             {item.model_name}
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-green-500'>
-            {item.applicant_talent_email_monitoring_record?.status ? item.applicant_talent_email_monitoring_record.status : 'Success'}
+          <td className={`whitespace-nowrap px-3 py-5 text-sm ${item.status ? 'text-green-500' : 'text-red-500'}`}>
+            {item.status ? 'Sent' : 'Not Sent'}
           </td>
         </tr>
       ));

@@ -132,6 +132,7 @@ export type T_Register = {
   password: string;
   confirmPassword: string;
   client_source?: string;
+  redirect_url?: string;
 };
 
 export type T_EmployerProfile = {
@@ -316,40 +317,40 @@ export type EmailTemplate = {
   }>;
 }
 
-export type T_ApplicantProfile = {
-  id: number;
-  userId: number;
-  firstname: string;
-  middlename: string;
-  lastname: string;
-  email: string;
-  about: string;
-  imagePath: string;
-  profilePicture: string;
-  birthDay: any;
-  age: number;
-  gender: string;
-  religion: string;
-  nationality: string;
-  civilStatus: string;
-  address: string;
-  mobile: string;
-  landLineNo: string;
-  contactPersonName: string;
-  contactPersonAddress: string;
-  contactPersonContactNo: string;
-  contactPersonRelationship: string;
-  contactPersonAge: number;
-  education?: string;
-  college?: string;
-  expected_salary?: number;
-  educationalAttainment?: string;
-  skills?: string[];
-  experiences?: {
-    position: string;
-    majorRole: string;
-    companyOrg: string;
-    dateFrom: string;
-    dateTo: string;
-  }[];
-}
+// export type T_ApplicantProfile = {
+//   id: number;
+//   userId: number;
+//   firstname: string;
+//   middlename: string;
+//   lastname: string;
+//   email: string;
+//   about: string;
+//   imagePath: string;
+//   profilePicture: string;
+//   birthDay: any;
+//   age: number;
+//   gender: string;
+//   religion: string;
+//   nationality: string;
+//   civilStatus: string;
+//   address: string;
+//   mobile: string;
+//   landLineNo: string;
+//   contactPersonName: string;
+//   contactPersonAddress: string;
+//   contactPersonContactNo: string;
+//   contactPersonRelationship: string;
+//   contactPersonAge: number;
+//   education?: string;
+//   college?: string;
+//   expected_salary?: number;
+//   educationalAttainment?: string;
+//   skills?: string[];
+//   experiences?: {
+//     position: string;
+//     majorRole: string;
+//     companyOrg: string;
+//     dateFrom: string;
+//     dateTo: string;
+//   }[];
+// }

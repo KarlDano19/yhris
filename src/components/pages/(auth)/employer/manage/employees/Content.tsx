@@ -37,8 +37,6 @@ import AddEmployeeModal from './modals/AddEmpoyeeModal';
 import ExportTemplateModal from './modals/ExportTemplateModal';
 import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusItems';
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
-import useSeedEmployees from './hooks/useSeedEmployees';
-import useUnseedEmployees from './hooks/useUnseedEmployees';
 import FloatingProgress from '@/components/FloatingProgress';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
@@ -171,8 +169,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   const { mutate: updateEmployerAgreeExport } = useUpdateEmployerAgreeExport();
   const { mutate: deleteEmployee, isLoading: isDeleteEmployeeLoading } = useDeleteEmployee();
   const bulkDeleteMutation = useBulkDeleteEmployees();
-  const seedEmployeesMutation = useSeedEmployees();
-  const unseedEmployeesMutation = useUnseedEmployees();
+  const [emailInput, setEmailInput] = useState('');
 
   // Combined refetch function to refresh both main list and autocomplete data
   const refetchAllEmployeeData = async () => {
@@ -335,6 +332,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
         { duration: 5000 }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({ ...pendingFilter });
   };
@@ -469,42 +467,6 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
 
   const handleBulkDeleteSuccess = () => {
     toast.custom(() => <CustomToast message={`${bulkDeleteCount} employee(s) deleted successfully.`} type="success" />, { duration: 3000 });
-  };
-
-  const handleSeedEmployees = async (count: number) => {
-    try {
-      const result = await seedEmployeesMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type="success" />, { duration: 3000 });
-      setSelectedEmployees(new Set());
-      setSelectAll(false);
-      await refetchAllEmployeeData();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed employees';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEmployees = async () => {
-    try {
-      const result = await unseedEmployeesMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      setSelectedEmployees(new Set());
-      setSelectAll(false);
-      await refetchAllEmployeeData();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed employees';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
   };
 
   // Update select all state when employees change
@@ -648,7 +610,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
   return (
     <>
       {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -931,12 +893,145 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
             </div>
             <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
               <SeederButton
-                onSeed={handleSeedEmployees}
-                onUnseed={handleUnseedEmployees}
-                isLoading={seedEmployeesMutation.isLoading}
-                isUnseeding={unseedEmployeesMutation.isLoading}
+                viewType="employee"
                 maxCount={1000}
                 defaultCount={5}
+                onSeedSuccess={async () => { setSelectedEmployees(new Set()); setSelectAll(false); await refetchAllEmployeeData(); }}
+                onUnseedSuccess={async () => { setSelectedEmployees(new Set()); setSelectAll(false); await refetchAllEmployeeData(); }}
+                renderExtraFields={(extras, setExtras) => {
+                  const emails: string[] = extras.emails ?? [];
+                  const handleAddEmail = () => {
+                    const trimmed = emailInput.trim().toLowerCase();
+                    if (!trimmed || emails.includes(trimmed)) {
+                      setEmailInput('');
+                      return;
+                    }
+                    setExtras({ ...extras, emails: [...emails, trimmed] });
+                    setEmailInput('');
+                  };
+                  const handleRemoveEmail = (email: string) => {
+                    setExtras({ ...extras, emails: emails.filter((e) => e !== email) });
+                  };
+                  const selectClass = "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border";
+                  return (
+                    <div className="space-y-3">
+                      {/* Location */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Location <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.location ?? ''}
+                          onChange={(e) => setExtras({ ...extras, location: e.target.value || undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(locationItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.name}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Position */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Position <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.position_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, position_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(positionItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Department */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Department <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.department_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, department_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(departmentItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Employment Status */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Employment Status <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <select
+                          value={extras.status_id ?? ''}
+                          onChange={(e) => setExtras({ ...extras, status_id: e.target.value ? Number(e.target.value) : undefined })}
+                          className={selectClass}
+                        >
+                          <option value="">Random</option>
+                          {(employeeStatusItems as any[] ?? []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Emails */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 text-left mb-1">
+                          Employee Emails <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <p className="text-xs text-gray-500 mb-2 text-left">
+                          Add specific emails to seed. If left empty, emails will be randomly generated.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+                                e.preventDefault();
+                                handleAddEmail();
+                              }
+                            }}
+                            placeholder="email@example.com"
+                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddEmail}
+                            className="rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {emails.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {emails.map((email) => (
+                              <span
+                                key={email}
+                                className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200"
+                              >
+                                {email}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveEmail(email)}
+                                  className="text-purple-400 hover:text-purple-600"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }}
               />
               <div className='flex'>
                 <SmartButton

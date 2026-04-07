@@ -11,7 +11,6 @@ export async function GET(
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'X-Internal-Secret': process.env.INTERNAL_API_SECRET ?? '',
         },
         cache: 'no-store',
       }

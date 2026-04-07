@@ -34,8 +34,6 @@ import SendNTE from './SendNTE';
 import Investigation from './Investigation';
 import InvestigationModal from './modals/InvestigationModal';
 import SendDecision from './SendDecision';
-import useSeedEmployeeIssues from './hooks/useSeedEmployeeIssues';
-import useUnseedEmployeeIssues from './hooks/useUnseedEmployeeIssues';
 
 import {
   T_SendNTEModal,
@@ -103,8 +101,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate, isLoading } = usePatchEmployeeIssueItems();
   const { mutate: deleteNTEAttachment, isLoading: isDeleting } = useDeleteNTEAttachment();
   const { mutate: regenerateNTE, isLoading: isRegenerating } = useRegenerateNTEPDF();
-  const seedEmployeeIssuesMutation = useSeedEmployeeIssues();
-  const unseedEmployeeIssuesMutation = useUnseedEmployeeIssues();
   const { data: employeeIssueDetails, isLoading: isLoadingNTEDetails } = useGetEmployeeIssueDetails(isSendNTEModalOpen?.id || null);
   const { data: decisionEmployeeIssueDetails, isLoading: isLoadingDecisionDetails } = useGetEmployeeIssueDetails(isSendDecisionModalOpen?.id || null);
   const {
@@ -340,6 +336,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         }
       );
     }
+    setCurrentPage(1);
     setIsSearching(true);
     setAppliedFilter({
       ...itemsFilter,
@@ -370,42 +367,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // Update the applied filter with the new sort order
     setAppliedFilter({ ...appliedFilter, status_sort: newSortOrder });
     setCurrentPage(1); // Reset to first page when sorting changes
-  };
-
-  const handleSeedEmployeeIssues = async (count: number) => {
-    try {
-      const result = await seedEmployeeIssuesMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      if (refetch) {
-        await refetch();
-      }
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed employee issues';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEmployeeIssues = async () => {
-    try {
-      const result = await unseedEmployeeIssuesMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      if (refetch) {
-        await refetch();
-      }
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed employee issues';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
   };
 
   useEffect(() => {
@@ -814,7 +775,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           <span className="text-yellow-600 font-semibold text-xl">Redirecting to document generator...</span>
         </div>
       )}
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -896,12 +857,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
               <SeederButton
-                onSeed={handleSeedEmployeeIssues}
-                onUnseed={handleUnseedEmployeeIssues}
-                isLoading={seedEmployeeIssuesMutation.isLoading}
-                isUnseeding={unseedEmployeeIssuesMutation.isLoading}
+                viewType="employee_issue"
                 maxCount={1000}
                 defaultCount={5}
+                onSeedSuccess={async () => { if (refetch) await refetch(); }}
+                onUnseedSuccess={async () => { if (refetch) await refetch(); }}
               />
               <SmartButton
                 id="create-employee-issue-btn"
