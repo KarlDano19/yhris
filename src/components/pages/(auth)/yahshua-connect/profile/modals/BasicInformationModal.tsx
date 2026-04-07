@@ -83,32 +83,15 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
   }, [nationalityValue]);
 
   // Handle location obtained from permission modal
-  const handleLocationObtained = async (latitude: number, longitude: number) => {
-    // Round latitude and longitude to 6 decimal places to match backend validation
+  const handleLocationObtained = (latitude: number, longitude: number, address: string) => {
     const roundedLatitude = Math.round(latitude * 1000000) / 1000000;
     const roundedLongitude = Math.round(longitude * 1000000) / 1000000;
-    
-    // Use reverse geocoding to get address from coordinates
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${roundedLatitude}&lon=${roundedLongitude}`
-      );
-      const data = await response.json();
-      const address = data.display_name || `${roundedLatitude}, ${roundedLongitude}`;
 
-      setValue('address', address);
-      setValue('latitude', roundedLatitude);
-      setValue('longitude', roundedLongitude);
+    setValue('address', address);
+    setValue('latitude', roundedLatitude);
+    setValue('longitude', roundedLongitude);
 
-      toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
-    } catch (error) {
-      // If reverse geocoding fails, just use coordinates
-      setValue('address', `${roundedLatitude}, ${roundedLongitude}`);
-      setValue('latitude', roundedLatitude);
-      setValue('longitude', roundedLongitude);
-
-      toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
-    }
+    toast.custom(() => <CustomToast message="Location updated. Click 'Save Changes' to apply." type='success' />, { duration: 3000 });
   };
 
   // Handle delete location

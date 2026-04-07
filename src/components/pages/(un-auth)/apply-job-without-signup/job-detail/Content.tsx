@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 
 import { useParams } from 'next/navigation';
 
+import ApplyNowModal from '@/components/pages/(un-auth)/apply-job-without-signup/modals/ApplyNowModal';
+
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
 
@@ -25,6 +27,7 @@ const Content = () => {
   const params = useParams();
   const { data, isLoading } = useGetJobDetails(Number(params.id));
   const [jobDetailData, setJobDetailData] = useState<any>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (data && Object.keys(data).length) {
@@ -49,6 +52,11 @@ const Content = () => {
 
   return (
     <>
+      <ApplyNowModal
+        isOpen={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+        jobId={params.id}
+      />
       {!!Object.keys(jobDetailData).length && (
         <div className='pt-[90px] pb-4 mx-4 md:pb-12'>
           <div className='md:w-[40em] mx-auto border border-gray-200 shadow-md rounded-[20px] py-2 px-3 sm:px-8 md:py-8 md:px-10'>
@@ -185,9 +193,7 @@ const Content = () => {
               <div className='mt-8 w-full text-center'>
                 <button
                   className='rounded-md bg-savoy-blue mt-5 mb-4 md:mb-0 lg:mb-4 w-1/3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                  onClick={() => {
-                    location.href = `/job-app-form/${params.id}`;
-                  }}
+                  onClick={() => setIsModalOpen(true)}
                 >
                   Apply Now!
                 </button>

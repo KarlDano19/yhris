@@ -34,6 +34,7 @@ export type ModalLayoutTypes = {
   isOpen: boolean;
   handleClose: any;
   nestedModals?: React.ReactNode;
+  maxWidth?: string;
 };
 
 export type StageRequirementsTypes = {

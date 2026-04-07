@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
+import { useSearchParams } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
@@ -21,6 +22,7 @@ import updateSession from '@/helpers/updateSession';
 import { T_BasicInfo, T_WorkExperience, T_Education, T_Certification, T_Portfolio, T_EmploymentDocument } from '@/types/personal-mode';
 
 const Content = () => {
+  const searchParams = useSearchParams();
   const [openSuccessAlert, setSuccessAlert] = useState(false);
   const [currentTab, setCurrentTab] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -214,7 +216,8 @@ const Content = () => {
           toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
           // Restore redirect after successful save
           setTimeout(() => {
-            location.href = '/personal-mode';
+            const redirectTo = searchParams.get('redirect') || '/personal-mode';
+            location.href = redirectTo;
           }, 2000);
         } finally {
           setIsSubmitting(false);
