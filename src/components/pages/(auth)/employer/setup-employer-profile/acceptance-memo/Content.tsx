@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
@@ -31,6 +32,7 @@ const INITIAL_FORM_DATA: AcceptanceMemoFormData = {
 };
 
 export default function Content() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
@@ -103,7 +105,7 @@ export default function Content() {
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully.' />
           );
-          window.location.href = '/dashboard';
+          router.push('/dashboard');
         },
         onError: (error: any) => {
           toast.custom(

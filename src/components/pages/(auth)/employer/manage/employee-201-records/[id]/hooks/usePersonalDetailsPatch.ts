@@ -67,7 +67,7 @@ async function patchPersonalDetails(
 export function usePersonalDetailsPatch(employeeId?: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<Partial<Employee>, Error, Partial<Employee>>(
+  const mutation = useMutation<Partial<Employee>, Error, Partial<Employee>>(
     (payload: Partial<Employee>) => {
       if (!employeeId) {
         throw new Error("Missing employeeId");
@@ -81,5 +81,18 @@ export function usePersonalDetailsPatch(employeeId?: string) {
       },
     }
   );
+
+  const save = async (
+    payload: Partial<Employee>
+  ): Promise<{ ok: boolean; error?: Error }> => {
+    try {
+      await mutation.mutateAsync(payload);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error as Error };
+    }
+  };
+
+  return { ...mutation, save };
 }
 
