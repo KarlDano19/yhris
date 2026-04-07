@@ -68,12 +68,6 @@ const Content = () => {
   return (
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
-        <div className='flex p-4'>
-          <Link href='/admin/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Dashboard</h4>
-          </Link>
-        </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-6 flex gap-16 space-x-20'>
             <div className='flex-none lg:w-1/2 space-y-14'>

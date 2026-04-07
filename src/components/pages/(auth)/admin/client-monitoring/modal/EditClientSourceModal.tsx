@@ -7,12 +7,9 @@ import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { useUpdateClientSource } from '../hooks/useUpdateClientSource';
+import useGetActivePartners from '../hooks/useGetActivePartners';
 
 const CLIENT_SOURCE_OPTIONS = ["Direct Client", "RCBC Partner", "GLOBE Partner"];
-const PARTNER_OPTIONS: Record<string, string[]> = {
-  "RCBC Partner": ["RCBC Bankard", "RCBC Savings Bank", "RCBC Capital"],
-  "GLOBE Partner": ["Globe Business", "Globe myBusiness", "TM"],
-};
 
 type Props = {
   isOpen: boolean;
@@ -27,6 +24,7 @@ type Props = {
 
 export default function EditClientSourceModal({ isOpen, onClose, employer }: Props) {
   const { mutate, isLoading } = useUpdateClientSource();
+  const { data: partners = [] } = useGetActivePartners();
   const { control, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: { client_source: '', partner: '' },
   });
@@ -105,23 +103,21 @@ export default function EditClientSourceModal({ isOpen, onClose, employer }: Pro
                   />
                 </div>
 
-                {PARTNER_OPTIONS[watchedClientSource] && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
-                    <Controller
-                      control={control}
-                      name="partner"
-                      render={({ field }) => (
-                        <select {...field} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                          <option value="">Select partner…</option>
-                          {PARTNER_OPTIONS[watchedClientSource].map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      )}
-                    />
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
+                  <Controller
+                    control={control}
+                    name="partner"
+                    render={({ field }) => (
+                      <select {...field} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                        <option value="">Direct Client (No Partner)</option>
+                        {partners.map((p: any) => (
+                          <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                </div>
 
                 <div className="flex justify-end gap-3 pt-2">
                   <button

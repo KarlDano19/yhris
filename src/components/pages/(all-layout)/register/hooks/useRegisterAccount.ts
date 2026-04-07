@@ -4,6 +4,7 @@ import { T_Register } from '@/types/globals';
 
 async function register(user: T_Register) {
   try {
+    const partner = user.partner || "";
     const data: Record<string, any> = {
       name: user.name ? user.name : `${user.firstname} ${user.lastname}`,
       firstname: user.firstname,
@@ -13,7 +14,8 @@ async function register(user: T_Register) {
       password: user.password,
       confirm_password: user.confirmPassword,
       account_type: user.accountType.toLowerCase(),
-      client_source: user.client_source || "",
+      client_source: partner ? "Partner" : "Direct Client",
+      partner,
     };
     if (user.redirect_url) {
       data.redirect_url = user.redirect_url;

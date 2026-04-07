@@ -16,6 +16,8 @@ import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useLoopsSync } from '@/helpers/useLoopsSync';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -24,7 +26,12 @@ import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
 
-const CLIENT_SOURCE_OPTIONS = ["Direct Client", "RCBC Partner", "GLOBE Partner"];
+async function getPublicPartners() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/partners/public/`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.data ?? [];
+}
 
 const getPasswordRequirements = (pass: string) => ({
   length: pass.length >= 12,
@@ -52,10 +59,11 @@ const Content = () => {
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
   const { register, handleSubmit, reset, watch, setValue, control, formState: { errors }, clearErrors } = useForm<T_Register>({
-    defaultValues: { client_source: "Direct Client" },
+    defaultValues: { partner: "" },
   });
   const { mutate, isLoading } = useRegisterAccount();
   const { syncToLoops } = useLoopsSync();
+  const { data: publicPartners = [] } = useQuery(['publicPartnersCache'], getPublicPartners, { refetchOnWindowFocus: false });
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
@@ -361,26 +369,23 @@ const Content = () => {
                         </div>
                         <div className='mb-2'>
                           <label className='text-sm leading-6 text-gray-900'>
-                            Client Source <span className='text-red-500'>*</span>
+                            Partner
                           </label>
                           <Controller
                             control={control}
-                            name="client_source"
-                            rules={{ required: "Client Source is required" }}
+                            name="partner"
                             render={({ field }) => (
                               <select
                                 {...field}
                                 className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6'
                               >
-                                {CLIENT_SOURCE_OPTIONS.map((opt) => (
-                                  <option key={opt} value={opt}>{opt}</option>
+                                <option value="">Direct Client (No Partner)</option>
+                                {(publicPartners as any[]).map((p: any) => (
+                                  <option key={p.id} value={p.name}>{p.name}</option>
                                 ))}
                               </select>
                             )}
                           />
-                          {errors.client_source && (
-                            <p className="text-red-600 text-xs mt-1">{errors.client_source.message}</p>
-                          )}
                         </div>
                       </>
                     )}

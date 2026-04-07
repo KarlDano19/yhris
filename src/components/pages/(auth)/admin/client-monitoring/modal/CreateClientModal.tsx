@@ -9,12 +9,9 @@ import toast from 'react-hot-toast';
 import { getCookie } from 'cookies-next';
 
 import { useCreateClient } from '../hooks/useCreateClient';
+import useGetActivePartners from '../hooks/useGetActivePartners';
 
 const CLIENT_SOURCE_OPTIONS = ['Direct Client', 'RCBC Partner', 'GLOBE Partner'];
-const PARTNER_OPTIONS: Record<string, string[]> = {
-  'RCBC Partner': ['RCBC Bankard', 'RCBC Savings Bank', 'RCBC Capital'],
-  'GLOBE Partner': ['Globe Business', 'Globe myBusiness', 'TM'],
-};
 
 type Props = {
   isOpen: boolean;
@@ -33,6 +30,7 @@ async function getPlans() {
 export default function CreateClientModal({ isOpen, onClose }: Props) {
   const { mutate, isLoading } = useCreateClient();
   const { data: plans } = useQuery(['plansCache'], getPlans, { refetchOnWindowFocus: false });
+  const { data: partners = [] } = useGetActivePartners();
 
   const { control, register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
     defaultValues: {
@@ -170,23 +168,21 @@ export default function CreateClientModal({ isOpen, onClose }: Props) {
                   />
                 </div>
 
-                {PARTNER_OPTIONS[watchedClientSource] && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
-                    <Controller
-                      control={control}
-                      name="partner"
-                      render={({ field }) => (
-                        <select {...field} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                          <option value="">Select partner…</option>
-                          {PARTNER_OPTIONS[watchedClientSource].map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      )}
-                    />
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Partner</label>
+                  <Controller
+                    control={control}
+                    name="partner"
+                    render={({ field }) => (
+                      <select {...field} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                        <option value="">Direct Client (No Partner)</option>
+                        {partners.map((p: any) => (
+                          <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Plan *</label>
