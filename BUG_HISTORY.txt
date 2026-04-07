@@ -109,6 +109,107 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-019
+DATE FILED: 2026-04-06
+DATE FIXED: 2026-04-06
+CLIENT/REPORTER: Client - GALAM
+
+ISSUE DESCRIPTION:
+Clicking "Confirm" on the "Save changes?" modal in the Employment Details tab of
+Employee 201 Records crashed with the error:
+
+  "saveEmployment is not a function"
+
+Position and Department (and all other Employment Details fields) could not be
+saved. The same latent bug existed for the Personal Information tab
+(savePersonal was also undefined) but had not yet been reported.
+
+ROOT CAUSE:
+`useEmploymentDetailsPatch` and `usePersonalDetailsPatch` both returned the raw
+`useMutation` result from React Query:
+
+  return useMutation<...>(...);
+
+`useMutation` returns { mutate, mutateAsync, isLoading, ... } — there is no
+`save` property. However, `Content.tsx` destructured both hooks expecting a
+`save` function:
+
+  const { save: savePersonal } = usePersonalDetailsPatch(params?.id);
+  const { save: saveEmployment } = useEmploymentDetailsPatch(params?.id);
+
+Because `save` was `undefined` on both, calling `saveEmployment(payload)` inside
+`saveEmploymentTab()` threw "saveEmployment is not a function". The two files
+fell out of sync — whoever wrote Content.tsx expected the hooks to wrap
+`mutateAsync` in a `save` helper, but the hooks were never updated to do so.
+
+DESIRED OUTCOME:
+- Saving Employment Details (position, department, date hired, etc.) works
+  without errors.
+- Saving Personal Information continues to work correctly.
+
+FILES CHANGED:
+Backend:
+- (None)
+
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/useEmploymentDetailsPatch.ts
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/hooks/usePersonalDetailsPatch.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A - no backend changes)
+☐ All backend tests passing (N/A)
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual: Employment Details save no longer throws)
+☑ Custom hooks tested (manual: save() returns { ok: true } on success)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors introduced)
+
+Integration & E2E:
+☑ API integration tests completed (manual: position and department saved to DB)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (API error path returns { ok: false, error } correctly)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A - logic-only fix)
+
+FIX EXPLANATION:
+Both hooks were updated to wrap `useMutation` in a local variable and expose a
+`save` async function that calls `mutation.mutateAsync(payload)` and returns
+`{ ok: true }` on success or `{ ok: false, error }` on failure — matching the
+contract expected by `savePersonalTab` and `saveEmploymentTab` in Content.tsx.
+
+useEmploymentDetailsPatch.ts (same pattern applied to usePersonalDetailsPatch.ts):
+
+  const mutation = useMutation<EmploymentPatch, Error, EmploymentPatch>(...);
+
+  const save = async (payload): Promise<{ ok: boolean; error?: Error }> => {
+    try {
+      await mutation.mutateAsync(payload);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error as Error };
+    }
+  };
+
+  return { ...mutation, save };
+
+================================================================================
+
 BUG ID: HRIS-018
 DATE FILED: 2026-03-27
 DATE FIXED: 2026-03-27 (For Fix — pending verification)
