@@ -2,16 +2,17 @@ import React, { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import { formatDateToLocal } from '@/helpers/date';
-import ModalLayout from '../../../../../ModalLayout';
-import ArchiveButton from '../ArchiveButton';
+import ModalLayout from '../../../../../../ModalLayout';
 import RestoreApplicationModal from './RestoreApplicationModal';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
-import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
-import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
-import useRestoreDeletedApplication from '../hooks/useRestoreDeletedApplication';
-import useGetDeletedApplicants from '../hooks/useGetDeletedApplicants';
-import usePurgeApplication from '../hooks/usePurgeApplication';
+import useBatchUnarchiveApplications from '../../hooks/applicant/useBatchUnarchiveApplications';
+import useUnarchiveApplication from '../../hooks/applicant/useUnarchiveApplication';
+import useSoftDeleteApplication from '../../hooks/applicant/useSoftDeleteApplication';
+import useRestoreDeletedApplication from '../../hooks/applicant/useRestoreDeletedApplication';
+import useGetDeletedApplicants from '../../hooks/applicant/useGetDeletedApplicants';
+import usePurgeApplication from '../../hooks/applicant/usePurgeApplication';
 
 import { ArchiveBoxIcon, MagnifyingGlassIcon, TrashIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
@@ -68,8 +69,10 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreApplicantModal, setRestoreApplicantModal] = useState<{ appliedJobId: number; applicantName: string } | null>(null);
   const queryClient = useQueryClient();
   const { mutate: unarchiveBatch, isLoading: isUnarchiving } = useBatchUnarchiveApplications();
+  const { mutate: unarchive, isLoading: isUnarchivingSingle } = useUnarchiveApplication();
   const { mutate: softDelete, isLoading: isSoftDeleting } = useSoftDeleteApplication();
   const { mutate: restoreDeleted, isLoading: isRestoringDeleted } = useRestoreDeletedApplication();
   const { data: deletedData, refetch: refetchDeleted } = useGetDeletedApplicants(jobPostingId);
@@ -167,6 +170,19 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
 
     unarchiveBatch({ appliedJobIds: selectedApplicants, fallbackStageId, progressCallback: callBackReq.onProgress }, callBackReq);
   }, [selectedApplicants, unarchiveBatch, handleUnarchive]);
+
+  const handleRestoreSingle = useCallback((fallbackStageId: number) => {
+    if (!restoreApplicantModal) return;
+    unarchive({ appliedJobId: restoreApplicantModal.appliedJobId, fallbackStageId }, {
+      onSuccess: () => {
+        setRestoreApplicantModal(null);
+        handleUnarchive();
+      },
+      onError: (err: any) => {
+        alert(`Error: ${err.message || 'Operation failed'}`);
+      },
+    });
+  }, [restoreApplicantModal, unarchive, handleUnarchive]);
 
   const handleSoftDelete = useCallback((appliedJobId: number) => {
     softDelete(appliedJobId, {
@@ -283,16 +299,18 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
           >
             <TrashIcon className="w-4 h-4" />
           </button>
-          <ArchiveButton
-            appliedJobId={applicant.id}
-            isArchived={true}
-            status={applicant.status}
-            onSuccess={() => {
-              handleUnarchive();
-            }}
-            applicantName={`${applicant.applicant?.firstname} ${applicant.applicant?.lastname}`}
-            jobPostingId={jobPostingId}
-          />
+          <SmartButton
+            id="archive-applicant-btn"
+            onClick={() => setRestoreApplicantModal({
+              appliedJobId: applicant.id,
+              applicantName: `${applicant.applicant?.firstname} ${applicant.applicant?.lastname}`,
+            })}
+            title="Restore application"
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1 p-1.5 rounded text-xs transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowUturnLeftIcon className="w-3 h-3" />
+            Restore
+          </SmartButton>
         </div>
       </div>
     </div>
@@ -648,6 +666,18 @@ const ArchivedApplicantsModal: React.FC<ArchivedApplicantsModalProps> = ({
           onConfirm={handleConfirmPurge}
           isLoading={isPurging}
           customText="this application permanently"
+        />
+      )}
+
+      {restoreApplicantModal && (
+        <RestoreApplicationModal
+          isOpen={!!restoreApplicantModal}
+          onClose={() => setRestoreApplicantModal(null)}
+          onConfirm={handleRestoreSingle}
+          applicantName={restoreApplicantModal.applicantName}
+          jobPostingId={jobPostingId}
+          isLoading={isUnarchivingSingle}
+          appliedJobId={restoreApplicantModal.appliedJobId}
         />
       )}
       </ModalLayout>

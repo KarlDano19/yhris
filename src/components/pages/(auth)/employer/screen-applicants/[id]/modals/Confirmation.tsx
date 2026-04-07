@@ -2,12 +2,12 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useRef } from 'react';
 import Warning from '@/svg/Warning';
-import { initialActionState } from '../lib/initialActionState';
-import StateContext from '../contexts/StateContext';
-import { ContextTypes } from '../types';
+import { initialActionState } from '../../lib/initialActionState';
+import StateContext from '../../contexts/StateContext';
+import { ContextTypes } from '../../types';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
-import useDeleteStage from '../hooks/useDeleteStage';
+import useDeleteStage from '../../hooks/stage/useDeleteStage';
 
 interface ConfirmationProps {
   onStageDeleted?: () => void;

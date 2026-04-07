@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import useAddApplicant from '../hooks/useAddApplicants';
+import useAddApplicant from '../../hooks/applicant/useAddApplicants';
 
 export default function AddApplicantModal({
   refetch,

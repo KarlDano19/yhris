@@ -21,6 +21,7 @@ const CustomDatePicker = ({
   pickerOnChange,
   inputOnChange,
   minDate,
+  maxDate,
   placeholder,
   disabled,
   className,
@@ -33,6 +34,7 @@ const CustomDatePicker = ({
   inputOnChange: any;
   selected?: any;
   minDate?: any;
+  maxDate?: any;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -107,6 +109,7 @@ const CustomDatePicker = ({
           }
         }}
         minDate={minDate}
+        maxDate={maxDate}
         customInput={<CustomInput />}
         popperModifiers={[
           {

@@ -12,7 +12,8 @@ async function getStageNotes(appliedJobId: number) {
     },
   });
   
-  return await res.json();
+  const json = await res.json();
+  return json.data || json;
 }
 
 function useGetStageNotes(appliedJobId: number, enabled: boolean = true) {

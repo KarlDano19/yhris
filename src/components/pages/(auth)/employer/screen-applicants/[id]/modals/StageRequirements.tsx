@@ -2,15 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 
 import { Tooltip } from 'react-tooltip';
 
-import { initialActionState } from '../lib/initialActionState';
-import ModalLayout from '../../../../../ModalLayout';
-import ModalFooterLayout from '../layouts/ModalFooterLayout';
-import useTagInput from '../hooks/useTagInput';
-import StateContext from '../contexts/StateContext';
+import { initialActionState } from '../../lib/initialActionState';
+import ModalLayout from '../../../../../../ModalLayout';
+import ModalFooterLayout from '../../layouts/ModalFooterLayout';
+import useTagInput from '../../hooks/ui/useTagInput';
+import StateContext from '../../contexts/StateContext';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-import { ContextTypes, StageRequirementsTypes as PropTypes } from '../types';
+import { ContextTypes, StageRequirementsTypes as PropTypes } from '../../types';
 import InfoIcon from '@/svg/InfoIcon';
 
 export default function StageRequirements({ title, requirements, handleFormSubmit }: PropTypes) {

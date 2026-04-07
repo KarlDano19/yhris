@@ -7,14 +7,14 @@ import { useForm } from 'react-hook-form';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
-import { ApplicantType, ContextTypes, ScheduleInterviewPropTypes as PropTypes } from '../types';
-import { initialActionState } from '../lib/initialActionState';
+import { ApplicantType, ContextTypes, ScheduleInterviewPropTypes as PropTypes } from '../../types';
+import { initialActionState } from '../../lib/initialActionState';
 import classNames from '@/helpers/classNames';
 import useGetThirdPartyIntegrationItems from '@/components/hooks/useGetThirdPartyIntegrationItems';
-import ModalFooterLayout from '../layouts/ModalFooterLayout';
-import useTagInput from '../hooks/useTagInput';
-import StateContext from '../contexts/StateContext';
-import ModalLayout from '../../../../../ModalLayout';
+import ModalFooterLayout from '../../layouts/ModalFooterLayout';
+import useTagInput from '../../hooks/ui/useTagInput';
+import StateContext from '../../contexts/StateContext';
+import ModalLayout from '../../../../../../ModalLayout';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { LocationIcon, WhiteLocationIcon } from '@/svg/LocationIcon';

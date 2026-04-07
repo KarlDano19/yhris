@@ -6,12 +6,12 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import StateContext from '../contexts/StateContext';
-import useGetAvailableUsers from '../hooks/useGetAvailableUsers';
-import useGetStageAssignments from '../hooks/useGetStageAssignments';
-import useUpdateStageAssignments from '../hooks/useUpdateStageAssignments';
+import StateContext from '../../contexts/StateContext';
+import useGetAvailableUsers from '../../hooks/checklist/useGetAvailableUsers';
+import useGetStageAssignments from '../../hooks/checklist/useGetStageAssignments';
+import useUpdateStageAssignments from '../../hooks/checklist/useUpdateStageAssignments';
 
-import { ContextTypes } from '../types';
+import { ContextTypes } from '../../types';
 
 interface StageAssignmentProps {
   title: string;

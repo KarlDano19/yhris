@@ -4,10 +4,10 @@ import React, { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { CloudArrowUpIcon, DocumentIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-import ModalLayout from '../../../../../ModalLayout';
+import ModalLayout from '../../../../../../ModalLayout';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import useBatchUploadResumes from '../hooks/useBatchUploadResumes';
+import useBatchUploadResumes from '../../hooks/applicant/useBatchUploadResumes';
 
 interface BatchUploadProps {
   isOpen: boolean;

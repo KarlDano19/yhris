@@ -10,41 +10,46 @@ import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
 import { ModalTypes, StageType } from '../types';
 import actionTypes from '../lib/actionTypes';
+import StateContext from '../contexts/StateContext';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-
 import CustomToast from '@/components/CustomToast';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import AddApplicantModal from '../modals/AddApplicantModal';
-import StageRequirements from '../modals/StageRequirements';
-import Checklist from '../modals/Checklist';
-import ScheduleInterview from '../modals/ScheduleInterview';
-import SendEmailModal from '@/components/SendEmailModal';
-import Confirmation from '../modals/Confirmation';
-import ApplicantForm from '../modals/ApplicantForm';
-import BatchResumeUpload from '../modals/BatchResumeUpload';
-import ArchivedApplicantsModal from '../modals/ArchivedApplicantsModal';
-import StageAssignment from '../modals/StageAssignment';
-import MoveToAnotherJobModal from './modals/MoveToAnotherJobModal';
-import NavigationModal from './modals/NavigationModal';
-import StateContext from '../contexts/StateContext';
-import AddStageBtn from './AddStageBtn';
-import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
-import DragAndDrop from './DragAndDrop';
-import useGetAppliedApplicants from '../hooks/useGetAppliedApplicants';
-import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
-import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
-import useUpdateStage from '../hooks/useUpdateStage';
-import useSendEmail from '../hooks/useSendEmail';
-import useUpdateStatus from '../hooks/useUpdateStatus';
-import useSendInterviewSchedule from '../hooks/useSendInterviewSchedule';
 import SeederButton from '@/components/SeederButton';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import SendEmailModal from '@/components/SendEmailModal';
+import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
+
+import AddApplicantModal from './modals/AddApplicantModal';
+import StageRequirements from './modals/StageRequirements';
+import Checklist from './modals/Checklist';
+import ScheduleInterview from './modals/ScheduleInterview';
+import Confirmation from './modals/Confirmation';
+import ApplicantForm from './modals/ApplicantForm';
+import BatchResumeUpload from './modals/BatchResumeUpload';
+import ArchivedApplicantsModal from './modals/ArchivedApplicantsModal';
+import StageAssignment from './modals/StageAssignment';
+import MoveToAnotherJobModal from './modals/MoveToAnotherJobModal';
+import FinalizeApprovalFormModal from './modals/FinalizeApprovalFormModal';
+import EAFModal from './modals/EAFModal';
+import NavigationModal from './modals/NavigationModal';
+import JobCapacityModal from './modals/JobCapacityModal';
+import AddStageBtn from './AddStageBtn';
+import DragAndDrop from './DragAndDrop';
+
+import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
+import useGetAppliedApplicants from '../hooks/applicant/useGetAppliedApplicants';
+import useGetJobPostDetails from '../hooks/job/useGetJobPostDetails';
+import useUpdateStage from '../hooks/stage/useUpdateStage';
+import useSendEmail from '../hooks/email/useSendEmail';
+import useUpdateStatus from '../hooks/applicant/useUpdateStatus';
+import useSendInterviewSchedule from '../hooks/email/useSendInterviewSchedule';
 
 import { ArrowLeftIcon, EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
 import PlusIconGreen from '@/svg/PlusIconGreen';
+
 import '../styles.css';
 
 type ModalSelectedTypes = {
@@ -111,7 +116,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     ADD_STAGE,
     SET_ONBOARDING,
     SET_APPLICANT,
-    ARCHIVED_APPLICANTS,
   } = actionTypes;
 
   // Calculate count of archived applicants in the last 30 days
@@ -142,8 +146,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { mutate: emailMutate } = useSendEmail();
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
   const [isArchivedApplicantsModalOpen, setIsArchivedApplicantsModalOpen] = useState(false);
+  const [finalizeApprovalData, setFinalizeApprovalData] = useState<{ applicationId: number; applicantName: string } | null>(null);
+  const [isFinalizeFormOpen, setIsFinalizeFormOpen] = useState(false);
+  const [isEAFModalOpen, setIsEAFModalOpen] = useState(false);
   const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false);
-  
+  const [isJobCapacityModalOpen, setIsJobCapacityModalOpen] = useState(false);
+  const [pendingCapacityData, setPendingCapacityData] = useState<any>(null);
+  const [isCapacityLoading, setIsCapacityLoading] = useState(false);
+
   // Define filter groups for the Filter component
   const filterGroups: FilterGroup[] = [
     {
@@ -184,6 +194,48 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
     // Only trigger if status is passed (hired) AND it's the final stage
     return status === 'passed' && actionState.isFinalStage;
   }, [actionState.isFinalStage]);
+
+  const handleJobCapacityNeeded = (pendingData: any) => {
+    setPendingCapacityData(pendingData);
+    setIsJobCapacityModalOpen(true);
+  };
+
+  const handleJobCapacitySetInactive = () => {
+    if (!pendingCapacityData) return;
+    setIsCapacityLoading(true);
+    const dataWithDeactivation = {
+      ...pendingCapacityData,
+      status: 'ongoing',
+      deactivate_job_posting: true,
+    };
+    setIsJobCapacityModalOpen(false);
+    setPendingCapacityData(null);
+    setTimeout(() => {
+      handleFormSubmit(dataWithDeactivation);
+      setTimeout(() => setIsCapacityLoading(false), 1000);
+    }, 400);
+  };
+
+  const handleJobCapacityIncreaseLimit = () => {
+    if (!pendingCapacityData) return;
+    setIsCapacityLoading(true);
+    const dataWithSlotIncrease = {
+      ...pendingCapacityData,
+      new_required_slot: (dataJobPostDetails?.required_slot || 0) + 1,
+      deactivate_job_posting: false,
+    };
+    setIsJobCapacityModalOpen(false);
+    setPendingCapacityData(null);
+    setTimeout(() => {
+      handleFormSubmit(dataWithSlotIncrease);
+      setTimeout(() => setIsCapacityLoading(false), 1000);
+    }, 400);
+  };
+
+  const handleJobCapacityKeepActive = () => {
+    setIsJobCapacityModalOpen(false);
+    setPendingCapacityData(null);
+  };
 
   useEffect(() => {
     if (dataJobPostDetails?.screening_questions && dataJobPostDetails.screening_questions !== null) {
@@ -298,9 +350,9 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       if (aIsNew && !bIsNew) return -1; // a comes first
       if (!aIsNew && bIsNew) return 1;  // b comes first
       
-      // If both are new or both are not new, sort by date (newest first)
-      const dateA = new Date(a.updated_at || a.created_at || new Date());
-      const dateB = new Date(b.updated_at || b.created_at || new Date());
+      // Sort by created_at (newest first) so status changes don't affect ordering
+      const dateA = new Date(a.created_at || new Date());
+      const dateB = new Date(b.created_at || new Date());
       
       return dateB.getTime() - dateA.getTime();
     });
@@ -342,6 +394,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           status: item.status,
           stagePosition: item.job_stages,
           stage_notes: item.stage_notes || [],
+          stage_approvals: item.stage_approvals || [],
           screeningFit: item.screeningFit,
           screeningAnswers: item.screeningAnswers || [],
           created_at: item.created_at,
@@ -447,10 +500,14 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             }
             
             // ============================================================================
-            // SHOW NAVIGATION MODAL ON SUCCESSFUL HIRING FROM FINAL STAGE
+            // SHOW FINALIZE APPROVAL FORM → EAF PREVIEW → NAVIGATION MODAL
             // ============================================================================
             if (shouldTriggerNavigationModal(data.status)) {
-              setIsNavigationModalOpen(true);
+              setFinalizeApprovalData({
+                applicationId: data.id,
+                applicantName: data.applicant_name || '',
+              });
+              setIsFinalizeFormOpen(true);
             }
             
             // Reset actionState after successful submission to allow modal to be reopened
@@ -521,6 +578,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           handleFormSubmit={handleFormSubmit}
           hasActiveSubscription={hasActiveSubscription}
           jobPostingDetails={dataJobPostDetails}
+          onJobCapacityNeeded={handleJobCapacityNeeded}
         />
       ),
       dispatch: {
@@ -673,7 +731,15 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   <h2 className='text-xl font-bold text-indigo-dye'>
                     Screen Applicants / {dataJobPostDetails?.job_title || ''} Applications
                   </h2>
-                  <div className='self-start md:self-center'>
+                  <div className='self-start md:self-center flex items-center gap-2'>
+                    <button
+                        onClick={() => setIsAddApplicantModalOpen(true)}
+                        className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
+                        title="Add Applicant"
+                      >
+                        <PlusIconGreen />
+                    </button>
+                    
                     <SeederButton
                       viewType="screen_applicant"
                       jobPostingId={Number(params.id)}
@@ -813,14 +879,6 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                         <UploadIcon />
                         Upload Resumes
                       </SmartButton>
-
-                      {/* <button
-                        onClick={() => setIsAddApplicantModalOpen(true)}
-                        className="rounded-lg bg-white hover:bg-gray-100 hover:border-[#4a9d5e] text-[#65C979] border-2 border-[#65C979] py-2 px-6 font-bold text-[16px] flex items-center gap-2 h-10 transition-colors"
-                        title="Add Applicant"
-                      >
-                        <PlusIconGreen />
-                      </button> */}
 
                       <div className='border-l-2 border-gray-300 h-10'></div>
 
@@ -1024,10 +1082,60 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
         />
       )}
 
+      {isJobCapacityModalOpen && (
+        <JobCapacityModal
+          isOpen={isJobCapacityModalOpen}
+          setIsOpen={setIsJobCapacityModalOpen}
+          jobTitle={dataJobPostDetails?.job_title || 'this position'}
+          hiredCount={dataJobPostDetails?.hired_count || 0}
+          requiredSlot={dataJobPostDetails?.required_slot || 0}
+          applicantName={''}
+          onSetInactive={handleJobCapacitySetInactive}
+          onIncreaseLimit={handleJobCapacityIncreaseLimit}
+          onKeepActive={handleJobCapacityKeepActive}
+          isLoading={isCapacityLoading}
+        />
+      )}
+
+      {finalizeApprovalData && (
+        <FinalizeApprovalFormModal
+          isOpen={isFinalizeFormOpen}
+          onClose={() => {
+            setIsFinalizeFormOpen(false);
+            setFinalizeApprovalData(null);
+          }}
+          onDone={() => {
+            setIsFinalizeFormOpen(false);
+            setIsEAFModalOpen(true);
+          }}
+          applicationId={finalizeApprovalData.applicationId}
+          applicantName={finalizeApprovalData.applicantName}
+          positionTitle={dataJobPostDetails?.job_title}
+        />
+      )}
+
+      {isEAFModalOpen && finalizeApprovalData && (
+        <EAFModal
+          isOpen={isEAFModalOpen}
+          onClose={() => {
+            setIsEAFModalOpen(false);
+            setIsNavigationModalOpen(true);
+          }}
+          appliedJobId={finalizeApprovalData.applicationId}
+          applicantName={finalizeApprovalData.applicantName}
+          positionTitle={dataJobPostDetails?.job_title}
+        />
+      )}
+
       {isNavigationModalOpen && (
         <NavigationModal
-        isOpen={isNavigationModalOpen}
-        setIsOpen={setIsNavigationModalOpen}
+          isOpen={isNavigationModalOpen}
+          setIsOpen={(open) => {
+            setIsNavigationModalOpen(open);
+            if (!open) {
+              setFinalizeApprovalData(null);
+            }
+          }}
           jobPostingId={params.id as string}
         />
       )}

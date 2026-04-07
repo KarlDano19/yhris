@@ -4,18 +4,20 @@ import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import EAFModal from './EAFModal';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
-import useGetApplicantDetails from '../hooks/useGetApplicantDetails';
-import useGenerateApplicantSummary from '../hooks/useGenerateApplicantSummary';
-import useDownloadScreeningAnswersPDF from '../hooks/useDownloadScreeningAnswersPDF';
-import StateContext from '../contexts/StateContext';
+import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
+import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
+import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
+import useGetEAF from '../../hooks/eaf/useGetEAF';
+import StateContext from '../../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
-import { initialActionState } from '../lib/initialActionState';
-import { ApplicantType, ContextTypes } from '../types';
+import { initialActionState } from '../../lib/initialActionState';
+import { ApplicantType, ContextTypes } from '../../types';
 import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
@@ -29,6 +31,7 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const [currentTab, setCurrentTab] = useState<Number>(1);
   const [viewCV, setViewCV] = useState<boolean>(false);
   const [showDocxDownloadModal, setShowDocxDownloadModal] = useState<boolean>(false);
+  const [showEAFModal, setShowEAFModal] = useState(false);
   const [applicantProfile, setApplicantProfile] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -42,6 +45,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     }
   });
   const { data, isLoading, error, isError } = useGetApplicantDetails(applicant?.applicationId);
+  const isHired = applicant?.status === 'hired';
+  const { data: eafData, isError: eafNotFound } = useGetEAF(applicant?.applicationId as number, isHired);
 
   useEffect(() => {
     if (data && !isLoading) {
@@ -790,6 +795,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                 </div>
                 {!viewCV && (
                   <div className='flex items-center gap-4 text-[15px] font-bold justify-end flex-wrap p-4 border-t-[1px] border-[#355FD0]'>
+                    {isHired && !eafNotFound && eafData?.pdf_url && (
+                      <button
+                        type='button'
+                        onClick={() => setShowEAFModal(true)}
+                        className='flex items-center gap-2 border border-blue-500 text-blue-600 hover:bg-blue-50 rounded-lg py-2 px-4 text-sm font-medium'
+                      >
+                        <DocumentTextIcon className='w-4 h-4' />
+                        View EAF
+                      </button>
+                    )}
                     <button
                       onClick={handleClose}
                       type='button'
@@ -814,6 +829,17 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
             </Transition.Child>
           </div>
         </div>
+        
+        {showEAFModal && applicant && (
+          <EAFModal
+            isOpen={showEAFModal}
+            onClose={() => setShowEAFModal(false)}
+            appliedJobId={applicant.applicationId}
+            applicantName={applicant.name}
+            applicantEmail={applicant.email || undefined}
+            positionTitle={JobTitle}
+          />
+        )}
       </Dialog>
     </Transition.Root>
     {renderDocxDownloadModal()}

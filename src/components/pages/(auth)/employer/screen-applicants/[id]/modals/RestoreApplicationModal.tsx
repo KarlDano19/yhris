@@ -2,10 +2,10 @@ import React, { useState, Fragment, useRef, useEffect } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 
-import useGetJobPostDetails from '../hooks/useGetJobPostDetails';
-import useGetValidStagesForRestoration, { ValidStage } from '../hooks/useGetValidStagesForRestoration';
-import useGetBatchValidStagesForRestoration from '../hooks/useGetBatchValidStagesForRestoration';
-import useBatchUnarchiveApplications from '../hooks/useBatchUnarchiveApplications';
+import useGetJobPostDetails from '../../hooks/job/useGetJobPostDetails';
+import useGetValidStagesForRestoration, { ValidStage } from '../../hooks/applicant/useGetValidStagesForRestoration';
+import useGetBatchValidStagesForRestoration from '../../hooks/applicant/useGetBatchValidStagesForRestoration';
+import useBatchUnarchiveApplications from '../../hooks/applicant/useBatchUnarchiveApplications';
 
 import classNames from '@/helpers/classNames';
 
