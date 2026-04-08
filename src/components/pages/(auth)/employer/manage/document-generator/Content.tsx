@@ -68,6 +68,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
   const { data: checklistData } = useGetChecklist();
   const { mutate: submitMemo } = useSubmitAcceptanceMemo();
+  const showAcceptanceMemo = isMemoLoading || !!existingMemo;
   // State for each document type
   const [employeeCertificateData, setEmployeeCertificateData] = useState<EmployeeCertificateFormData>({
     employeeName: '',
@@ -300,6 +301,13 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
       }
     }
   }, [documentType, existingMemo, fromChecklist, checklistData, queryClient]);
+
+  // If no memo exists (existing account), fall back to employee-certificate
+  useEffect(() => {
+    if (!isMemoLoading && !existingMemo && documentType === 'acceptance-memo') {
+      setDocumentType('employee-certificate');
+    }
+  }, [isMemoLoading, existingMemo, documentType]);
 
   // Populate company name for all document types when switching between them
   useEffect(() => {
@@ -680,6 +688,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
                   isFormDisabled={documentType === 'acceptance-memo' && isMemoLoading}
                   isFieldDisabled={isFieldDisabled}
                   isViewMode={isViewMode}
+                  showAcceptanceMemo={showAcceptanceMemo}
                 />
               </div>
               <div className="transition-all duration-300">

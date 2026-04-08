@@ -23,4 +23,5 @@ export interface FormProps {
   isFormDisabled?: boolean;
   isFieldDisabled?: (fieldName: string) => boolean;
   isViewMode?: boolean;
+  showAcceptanceMemo?: boolean;
 } 

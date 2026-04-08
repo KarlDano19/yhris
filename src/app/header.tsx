@@ -76,6 +76,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
               hasProfile={hasProfile}
               hasActiveSubscription={hasActiveSubscription}
               firstRoute={firstRoute}
+              lastRoute={lastRoute}
               initialTokenExpiresAt={tokenExpiresAt}
             />
           )}

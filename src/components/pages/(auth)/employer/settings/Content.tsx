@@ -5,6 +5,7 @@ import React from 'react';
 import Link from 'next/link';
 
 import MenuItem from '../../MenuItem';
+import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
 
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
@@ -40,6 +41,11 @@ const menus = [
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const { data: memoData } = useGetAcceptanceMemo();
+  const visibleMenus = memoData
+    ? menus
+    : menus.filter((m) => m.link !== '/settings/acceptance-form');
+
   return (
     <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       <div className='flex p-4'>
@@ -51,7 +57,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Settings</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
-          {menus.map((menu, index) => {
+          {visibleMenus.map((menu, index) => {
             return <MenuItem key={index} menu={menu} />;
           })}
         </div>

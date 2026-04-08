@@ -43,7 +43,8 @@ export default function EmploymentAgreementForm({
   onProceed,
   isDocumentTypeDisabled,
   isFormDisabled,
-  isFieldDisabled
+  isFieldDisabled,
+  showAcceptanceMemo,
 }: EmploymentAgreementFormProps) {
   const [formData, setFormData] = useState<EmploymentAgreementFormData>(initialData);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -142,11 +143,12 @@ export default function EmploymentAgreementForm({
       
       <div key={formKey}>
         {/* Document Type Selector */}
-        <DocumentTypeField 
-          documentType={documentType} 
+        <DocumentTypeField
+          documentType={documentType}
           formData={formData}
           handleInputChange={handleInputChange}
-          disabled={isDocumentTypeDisabled} 
+          disabled={isDocumentTypeDisabled}
+          showAcceptanceMemo={showAcceptanceMemo}
         />
         
         {/* Common Fields */}

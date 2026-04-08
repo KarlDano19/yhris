@@ -29,6 +29,7 @@ export default function Form({
   isFormDisabled,
   isFieldDisabled,
   isViewMode,
+  showAcceptanceMemo,
 }: FormProps) {
   // Render the appropriate form based on document type
   if (documentType === 'employee-certificate') {
@@ -45,6 +46,7 @@ export default function Form({
         isDocumentTypeDisabled={isDocumentTypeDisabled}
         isFormDisabled={isFormDisabled}
         isFieldDisabled={isFieldDisabled}
+        showAcceptanceMemo={showAcceptanceMemo}
       />
     );
   }
@@ -62,6 +64,7 @@ export default function Form({
         isDocumentTypeDisabled={isDocumentTypeDisabled}
         isFormDisabled={isFormDisabled}
         isFieldDisabled={isFieldDisabled}
+        showAcceptanceMemo={showAcceptanceMemo}
       />
     );
   }
@@ -88,17 +91,18 @@ export default function Form({
   // notice-to-explain
   return (
     <NoticeToExplainForm
-          documentType={documentType} 
+      documentType={documentType}
       onDocumentTypeChange={onDocumentTypeChange}
       onFormChange={onFormChange as (data: NoticeToExplainFormData) => void}
       initialData={initialData as NoticeToExplainFormData}
       onPrint={onPrint}
       onOpenSignatureModal={onOpenSignatureModal}
-            onOpenLogoModal={onOpenLogoModal}
+      onOpenLogoModal={onOpenLogoModal}
       onProceed={onProceed}
       isDocumentTypeDisabled={isDocumentTypeDisabled}
       isFormDisabled={isFormDisabled}
       isFieldDisabled={isFieldDisabled}
+      showAcceptanceMemo={showAcceptanceMemo}
     />
   );
 } 
