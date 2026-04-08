@@ -182,7 +182,9 @@ export default function Person({
     });
   };
 
-  const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
+  const isRejected = applicant.status === 'rejected';
+  const isWithdrawn = applicant.status === 'withdrawn';
+  const isButtonDisabled = isRejected || isWithdrawn;
   const isPooling = applicant.status === 'pooling';
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
@@ -293,22 +295,6 @@ export default function Person({
           </div>
         )}
       </div>
-
-      {/* Archive Button - show for rejected, withdrawn, or pooling applicants and if user has permissions */}
-      {(isRejected || isWithdrawn || isPooling) && canInteract && (
-        <div className='mr-2'>
-          <ArchiveButton
-            appliedJobId={applicant.applicationId}
-            isArchived={isArchived}
-            status={applicant.status || 'rejected'}
-            onSuccess={() => {
-              // Refresh will be handled by parent
-            }}
-            applicantName={name || 'Applicant'}
-            jobPostingId={params.id as string}
-          />
-        </div>
-      )}
 
       {/* Menu button - only show if user can interact */}
       <button
