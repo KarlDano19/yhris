@@ -1,6 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import Link from 'next/link';
 
@@ -57,12 +59,22 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       jobDescription: CREATEJOB_TEMPLATE[0],
       qualifications: QUALIFICATION_TEMPLATE[0],
       notesRemarks: '', // Initialize with empty string to prevent "undefined" string
+      skills: [], // Initialize skills as empty array
     },
   });
   const fifthForm = useForm();
   const sixthForm = useForm();
   const seventhForm = useForm();
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(searchParams.get('create') === 'true');
+
+  const handleCloseCreateJobModal = () => {
+    setIsCreateJobModalOpen(false);
+    if (searchParams.get('create') === 'true') {
+      router.replace('/post-job');
+    }
+  };
   const [socialType, setSocialType] = useState<string | null>(null);
   const [socialOgUrl, setOgUrl] = useState<string>('');
   const [isSocialShareModalOpen, setIsSocialShareModalOpen] = useState(false);
@@ -127,7 +139,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <div className='min-h-screen'>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
           <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -168,7 +180,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         {isCreateJobModalOpen && (
           <CreateJobModal
             isOpen={isCreateJobModalOpen}
-            setIsOpen={setIsCreateJobModalOpen}
+            setIsOpen={(open) => { if (!open) handleCloseCreateJobModal(); else setIsCreateJobModalOpen(true); }}
             openConfirmSocialShareModal={openConfirmSocialShareModal}
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}

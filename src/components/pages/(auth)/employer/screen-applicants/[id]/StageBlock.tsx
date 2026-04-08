@@ -67,9 +67,9 @@ export default function StageBlock({
       if (aIsNew && !bIsNew) return -1; // a comes first
       if (!aIsNew && bIsNew) return 1;  // b comes first
       
-      // If both are new or both are not new, sort by date (newest first)
-      const dateA = new Date(a.updated_at || a.created_at || new Date());
-      const dateB = new Date(b.updated_at || b.created_at || new Date());
+      // Sort by created_at (newest first) so status changes don't affect ordering
+      const dateA = new Date(a.created_at || new Date());
+      const dateB = new Date(b.created_at || new Date());
       
       return dateB.getTime() - dateA.getTime();
     });

@@ -106,7 +106,7 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
   };
 
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
       <div className='flex p-4'>
         <Link
           data-testid='back-link'

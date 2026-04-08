@@ -9,6 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getIronSession<any>(cookies() as any, sessionOptions);
     const data = await request.json();
+    // hasCompletedOnboarding and hasOnboarded are intentionally excluded here.
+    // Those flags must only be updated via /api/refresh-onboarding-session,
+    // which derives them from the backend rather than trusting client input.
     const expectedKeys = [
       'hasProfile',
       'hasPendingTransaction',

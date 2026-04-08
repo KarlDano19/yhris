@@ -61,8 +61,9 @@ function Content() {
             const returnTo = searchParams.get('redirect') || '/dashboard';
             window.location.href = returnTo;
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
-          } else if (sessionData.accountType === 'admin') {
+            const returnTo = searchParams.get('redirect') || '/personal-mode';
+            window.location.href = returnTo;
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;
@@ -181,11 +182,18 @@ function Content() {
       } else {
         location.href = '/setup-employer-profile';
       }
+    } else if (data.account_type === 'admin' || data.account_type === 'superadmin') {
+      location.href = '/admin/dashboard';
     } else {
+      localStorage.removeItem('postAuthRedirect');
       if (data.has_profile) {
-        location.href = '/apply-for-a-job';
+        const returnTo = searchParams.get('redirect') || '/personal-mode';
+        location.href = returnTo;
       } else {
-        location.href = '/setup-applicant-profile';
+        const redirectParam = searchParams.get('redirect');
+        location.href = redirectParam
+          ? `/setup-applicant-profile?redirect=${encodeURIComponent(redirectParam)}`
+          : '/setup-applicant-profile';
       }
     }
   };
@@ -278,6 +286,23 @@ function Content() {
       console.error('SSO localStorage poll error:', e);
     }
     return false;
+  };
+
+  const loginWithGoogle = () => {
+    localStorage.removeItem('sso_result');
+    const left = (window.innerWidth - 500) / 2;
+    const top = (window.innerHeight - 600) / 2;
+    const popup = window.open(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/sso/login/google-login/`,
+      'popup',
+      `width=500,height=600,left=${left},top=${top}`
+    );
+    const checkOAuthStatus = setInterval(function () {
+      if (popup?.closed) {
+        clearInterval(checkOAuthStatus);
+        setTimeout(() => consumeStoredSSOResult(), 300);
+      }
+    }, 500);
   };
 
   const loginWithYahshuaPayroll = () => {
@@ -474,7 +499,11 @@ function Content() {
                     
                     <p className='text-sm font-light text-gray-500 text-center mb-9'>
                       Don&apos;t have an account yet?{' '}
-                      <Link id='sign-up-link' href='/register' className='font-semibold text-blue-600 hover:underline'>
+                      <Link
+                        id='sign-up-link'
+                        href={searchParams.get('redirect') ? `/register?redirect=${encodeURIComponent(searchParams.get('redirect')!)}` : '/register'}
+                        className='font-semibold text-blue-600 hover:underline'
+                      >
                         Sign Up here
                       </Link>
                     </p>
@@ -485,11 +514,10 @@ function Content() {
                   <div className='mb-5 relative'>
                     <button
                       id='google-login-button'
-                      className='flex lg:w-full items-center justify-center text-indigo-dye mt-8 lg:mt-4 font-semibold bg-white border border-gray-400 w-full lg:px-12 py-2.5 rounded-md disabled:opacity-50'
-                      onClick={() => setCreateAccountModal(true)}
-                      disabled={true}
+                      className='flex lg:w-full items-center justify-center text-indigo-dye mt-8 lg:mt-4 font-semibold bg-white border border-gray-400 w-full lg:px-12 py-2.5 rounded-md hover:bg-gray-50 transition-colors'
+                      onClick={() => loginWithGoogle()}
                     >
-                      <GoogleIcon className='w-4 h-4 mr-2' /> Google
+                      <GoogleIcon className='w-4 h-4 mr-2' /> Sign in with Google
                     </button>
                     <button
                       id='facebook-login-button'

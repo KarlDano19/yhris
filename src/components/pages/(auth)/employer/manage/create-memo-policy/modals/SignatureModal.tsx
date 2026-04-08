@@ -31,7 +31,7 @@ export default function SignatureModal({
     <Transition.Root show={isOpen ? true : false} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-20"
+        className="relative z-50"
         initialFocus={cancelButtonRef}
         onClose={() => setIsOpen(false)}
       >

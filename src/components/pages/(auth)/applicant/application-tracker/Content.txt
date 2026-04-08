@@ -1,0 +1,214 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+
+import toast from 'react-hot-toast';
+
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomToast from '@/components/CustomToast';
+import useGetApplicationByUser from './hooks/useGetApplicationByUser';
+import { formatDateToLocal, formatDateTimeToLocal } from '@/helpers/date';
+
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
+interface Application {
+  id: number;
+  created_at: string;
+  job_title: string;
+  employer_name: string;
+  job_stages_title: string;
+  status: string;
+  updated_at: string;
+}
+
+const Content = () => {
+  const [itemsFilter, setItemsFilter] = useState<any>({
+    from: '',
+    to: '',
+    search: '',
+  });
+  const [applications, setApplications] = useState<any>([]);
+  const { data, isLoading, refetch } = useGetApplicationByUser(itemsFilter);
+
+  useEffect(() => {
+    if (data) {
+      setApplications(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  const checkIfDateIsValid = () => {
+    const dateFrom = Date.parse(itemsFilter.from);
+    const dateTo = Date.parse(itemsFilter.to);
+
+    if (dateFrom && !dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date to.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (!dateFrom && dateTo) {
+      return toast.custom(() => <CustomToast message='Invalid date from.' type='error' />, {
+        duration: 5000,
+      });
+    }
+    if (dateFrom > dateTo) {
+      return toast.custom(
+        () => <CustomToast message='You have entered an invalid date range. Please select again.' type='error' />,
+        {
+          duration: 5000,
+        }
+      );
+    }
+    refetch();
+  };
+
+  const renderRows = () => {
+    if (applications.length > 0) {
+      return (
+        <>
+          {!isLoading ? (
+            applications.map((application: Application, index: number) => (
+              <tr key={index}>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>
+                  {formatDateToLocal(application.created_at, true)}
+                </td>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.job_title}</td>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>{application.employer_name}</td>
+                <td className='whitespace-nowrap px-3 pt-5 pb-9 text-sm text-gray-500'>
+                  <h6
+                    className={`${
+                      application.status === 'Hired' ? 'bg-green-500' : 'bg-[#6F829B]'
+                    } text-white px-5 py-3 rounded-md`}
+                  >
+                    {application.job_stages_title}
+                  </h6>
+                  <span className='flex justify-center'>
+                    <p className='md:absolute mt-1 text-xs text-[#ACB9CB]'>
+                      Status as of {formatDateTimeToLocal(application.updated_at, true)}
+                    </p>
+                  </span>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <div className='text-center'>Loading...</div>
+          )}
+        </>
+      );
+    } else {
+      return (
+        <tr>
+          <td colSpan={7}>
+            <h4 className='text-center text-gray-300 text-sm mt-4'>{`There's no data yet.`}</h4>
+            <h4 className='text-center text-gray-300 text-sm mb-4'>Please click APPLY NOW! to apply for a job.</h4>
+          </td>
+        </tr>
+      );
+    }
+  };
+
+  return (
+    <>
+      <div className={`mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 `}>
+        <div className='px-2 md:px-8 lg:px-4 mt-4'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Application Tracker</h2>
+          <div className='mt-6 flex flex-col lg:flex-row items-center gap-4'>
+            <div className='flex-none flex flex-col lg:flex-row items-center gap-2'>
+              <div className='relative'>
+                <CustomDatePicker
+                  id='from-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.from}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, from: date });
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      from: value,
+                    });
+                  }}
+                />
+              </div>
+              <p>to</p>
+              <div className='relative'>
+                <CustomDatePicker
+                  id='to-datepicker'
+                  placeholder={'mm/dd/yyyy'}
+                  className={
+                    'appearance-none block w-44 rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-black sm:text-sm sm:leading-6'
+                  }
+                  selected={itemsFilter.to}
+                  pickerOnChange={(date: any) => {
+                    if (itemsFilter) setItemsFilter({ ...itemsFilter, to: date });
+                    if (!itemsFilter) setItemsFilter(date);
+                  }}
+                  inputOnChange={(value: any) => {
+                    setItemsFilter({
+                      ...itemsFilter,
+                      to: value,
+                    });
+                  }}
+                  minDate={itemsFilter.from}
+                />
+              </div>
+            </div>
+            <div className='flex-none lg:w-1/3'>
+              <div className='relative flex items-center'>
+                <input
+                  type='text'
+                  name='search'
+                  id='search'
+                  className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  placeholder='Search ...'
+                />
+              </div>
+            </div>
+            <button
+              className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
+              onClick={checkIfDateIsValid}
+            >
+              <MagnifyingGlassIcon className='h-5 w-5' />
+            </button>
+          </div>
+          <div className='mt-8 flow-root'>
+            <div className='-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <div className='min-w-full py-2 sm:px-6 lg:px-8'>
+                <table className='min-w-full divide-y divide-gray-300 text-center'>
+                  <thead>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-indigo-dye'>
+                        Application Date
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-indigo-dye'>
+                        Job Title
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-indigo-dye'>
+                        Company
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-indigo-dye'>
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+                </table>
+                <hr />
+                <p className='text-xs text-gray-500 mt-2'>Total record/s: {!isLoading ? applications.length : 0}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Content;

@@ -11,6 +11,7 @@ import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import SeederButton from '@/components/SeederButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
 import classNames from '@/helpers/classNames';
@@ -46,6 +47,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     search: '',
   });
   const [searchText, setSearchText] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   const [appliedFilter, setAppliedFilter] = useState<any>({
     from: '',
     to: '',
@@ -506,7 +508,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
           <Link href='/onboarding' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
             <ArrowLeftIcon className='h-5 w-5' />
@@ -514,8 +516,80 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </Link>
         </div>
         
-        <div className='px-2 md:px-8 lg:px-4'>
+        <div className='px-2 md:px-8 lg:px-4 flex items-center justify-between'>
           <h2 className='text-xl font-bold text-indigo-dye'>Onboarding</h2>
+          <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
+          <SeederButton
+            viewType="onboarding"
+            jobPostingId={Number(params.position)}
+            renderExtraFields={(extras, setExtras) => {
+              const emails: string[] = extras.emails ?? [];
+              const handleAddEmail = () => {
+                const trimmed = emailInput.trim().toLowerCase();
+                if (!trimmed || emails.includes(trimmed)) {
+                  setEmailInput('');
+                  return;
+                }
+                setExtras({ ...extras, emails: [...emails, trimmed] });
+                setEmailInput('');
+              };
+              const handleRemoveEmail = (email: string) => {
+                setExtras({ ...extras, emails: emails.filter((e) => e !== email) });
+              };
+              return (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 text-left mb-1">
+                    Applicant Emails <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2 text-left">
+                    Add specific emails to seed. If left empty, emails will be randomly generated.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+                          e.preventDefault();
+                          handleAddEmail();
+                        }
+                      }}
+                      placeholder="email@example.com"
+                      className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 border"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddEmail}
+                      className="rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {emails.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {emails.map((email) => (
+                        <span
+                          key={email}
+                          className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200"
+                        >
+                          {email}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEmail(email)}
+                            className="text-purple-400 hover:text-purple-600"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+          </div>
         </div>
 
         {/* Content Section with flex-1 */}

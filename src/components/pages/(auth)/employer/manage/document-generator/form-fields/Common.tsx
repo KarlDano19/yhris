@@ -20,9 +20,10 @@ export interface FieldProps {
 
 interface DocumentTypeFieldProps extends FieldProps {
   documentType: DocumentType;
+  showAcceptanceMemo?: boolean;
 }
 
-export const DocumentTypeField = ({ documentType, handleInputChange, disabled }: DocumentTypeFieldProps) => (
+export const DocumentTypeField = ({ documentType, handleInputChange, disabled, showAcceptanceMemo = true }: DocumentTypeFieldProps) => (
   <div className="mb-6">
     <label className="block mb-2 text-black font-semibold">
       Document Type <span className="text-red-500">*</span>
@@ -43,6 +44,7 @@ export const DocumentTypeField = ({ documentType, handleInputChange, disabled }:
         <option value="employee-certificate">Certificate of Employment (No Compensation)</option>
         <option value="employment-agreement">Employment Agreement</option>
         <option value="notice-to-explain">Notice to Explain</option>
+        {showAcceptanceMemo && <option value="acceptance-memo">Acceptance Memo</option>}
       </select>
       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
         <DropDownArrow />

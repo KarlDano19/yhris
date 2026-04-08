@@ -21,10 +21,17 @@ import SessionExpirationModal from '@/components/SessionExpirationModal';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
+import useGetEmployerApplicantChatsList from '@/components/hooks/chat/employer/useGetEmployerApplicantChatsList';
+import ChatRoomsModal from '@/components/common/chat/ChatRoomsModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
 
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { Tooltip } from 'react-tooltip';
 import MainLogo from '@/svg/MainLogo';
+import ChatIcon from '@/svg/ChatIcon';
+import InfoIcon from '@/svg/InfoIcon';
+import ChecklistViewModal from './setup-employer-profile/onboarding-checklist/modal/ChecklistEmployerViewModal';
 
 interface ErrorDetail {
   detail: string;
@@ -34,10 +41,11 @@ interface MainHeaderProps {
   hasProfile: boolean;
   hasActiveSubscription: boolean;
   firstRoute: string;
+  lastRoute: string;
   initialTokenExpiresAt?: number;
 }
 
-const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialTokenExpiresAt }: MainHeaderProps) => {
+const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, initialTokenExpiresAt }: MainHeaderProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<any>({});
@@ -57,7 +65,24 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
   const { data: notificationsData, isLoading: isNotificationsLoading } = useGetNotification({ page_size: 10 });
   const { mutate: markAsRead } = useMarkNotificationRead();
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const { mutate: refreshToken } = useRefreshToken();
+
+  // Chat state
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<{
+    appliedJobId: number;
+    jobPostingId: number;
+    jobTitle: string;
+    applicantName: string;
+    applicantPhoto?: string | null;
+    applicantInitials: string;
+  } | null>(null);
+
+  // Fetch chats to get unread count
+  const { data: chatsData } = useGetEmployerApplicantChatsList(undefined, true);
+  const totalUnreadCount = chatsData?.records?.reduce((sum: number, chat: { unread_count?: number }) => sum + (chat.unread_count || 0), 0) || 0;
 
   const logout = (isExpired: boolean) => {
     const callbackReq = {
@@ -124,6 +149,8 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       setUserDetails(usersData);
     }
   }, [usersData]);
+
+  const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
 
   // Initialize token expiration from prop
   useEffect(() => {
@@ -253,12 +280,24 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
     );
   };
 
+  const handleSelectMessage = (chat: {
+    appliedJobId: number;
+    jobPostingId: number;
+    jobTitle: string;
+    applicantName: string;
+    applicantPhoto?: string | null;
+    applicantInitials: string;
+  }) => {
+    setSelectedChat(chat);
+    setShowChatModal(true);
+  };
+
   const formatTimeAgo = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -308,6 +347,22 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       </Menu.Item>
     );
   };
+
+  const InfoButton = () => (
+    <>
+      <button
+        onClick={() => setIsChecklistOpen(true)}
+        className='relative flex items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2'
+        data-tooltip-id='info-button-tooltip'
+        data-tooltip-content='View onboarding checklist'
+        data-tooltip-place='bottom'
+      >
+        <span className='sr-only'>View onboarding checklist</span>
+        <InfoIcon className='h-6 w-6' fill='#1e3a8a' />
+      </button>
+      <Tooltip id='info-button-tooltip' />
+    </>
+  );
 
   const NotificationDropdown = () => {
     const unreadCount = notifications.filter((n: any) => !n.is_read).length;
@@ -410,16 +465,17 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       >
         {({ open }) => (
           <>
-            <div className='mx-auto max-w-7xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
+            <div className='mx-auto max-w-screen-2xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
-                  <div className='flex flex-shrink-0 items-center'>
-                    <Link 
-                      href='/dashboard' 
+                  <div className='flex flex-shrink-0 items-center gap-2'>
+                    <Link
+                      href='/dashboard'
                       className={firstRoute === 'employer-profile' ? 'pointer-events-none' : ''}
                     >
                       <MainLogo />
                     </Link>
+                    {isOnboardingEnabled && lastRoute !== 'onboarding-checklist' && <InfoButton />}
                   </div>
                   <div className={classNames('flex items-center gap-2 ml-4', !hasActiveSubscription ? '' : 'hidden')}>
                     <Link href='/landing-page/pricing' className='bg-blue-300 text-[#355FD0] px-8 py-2 rounded-md'>
@@ -428,6 +484,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </div>
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden gap-2'>
+                  {/* Mobile Messages Button */}
+                  <button
+                    onClick={() => setShowMessagesModal(true)}
+                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                  >
+                    <span className="sr-only">Open messages</span>
+                    <ChatIcon fill="#1e40af" />
+                    {totalUnreadCount > 0 && (
+                      <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Mobile Notifications */}
                   <NotificationDropdown />
                   {/* Mobile menu button */}
@@ -441,6 +510,19 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
                   </Popover.Button>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4 gap-2'>
+                  {/* Messages Button */}
+                  <button
+                    onClick={() => setShowMessagesModal(true)}
+                    className="relative flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 p-2"
+                  >
+                    <span className="sr-only">Open messages</span>
+                    <ChatIcon fill="#1e40af" />
+                    {totalUnreadCount > 0 && (
+                      <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Notifications */}
                   <NotificationDropdown />
                   {/* Profile dropdown */}
@@ -510,6 +592,37 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
       </Popover>
       <FloatingHelpButton companyName={profile.name} />
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
+
+      {/* Chat Modals */}
+      <ChatRoomsModal
+        isOpen={showMessagesModal}
+        onClose={() => setShowMessagesModal(false)}
+        role="employer"
+        onSelectEmployerMessage={handleSelectMessage}
+      />
+
+      {selectedChat && (
+        <ChatMessagesModal
+          isOpen={showChatModal}
+          onClose={() => {
+            setShowChatModal(false);
+            setSelectedChat(null);
+          }}
+          onBack={() => {
+            setShowChatModal(false);
+            setSelectedChat(null);
+            setShowMessagesModal(true);
+          }}
+          chatType="employer-applicant"
+          appliedJobId={selectedChat.appliedJobId}
+          jobPostingId={selectedChat.jobPostingId}
+          subtitle={selectedChat.jobTitle}
+          personName={selectedChat.applicantName}
+          personPhoto={selectedChat.applicantPhoto}
+          personInitials={selectedChat.applicantInitials}
+        />
+      )}
+
       <SessionExpirationModal
         isOpen={isExpiring}
         onRenew={handleRenewSession}
@@ -518,6 +631,12 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, initialToke
         isRefreshing={isRefreshing}
         isLoggingOut={isLoggingOut}
       />
+      {isOnboardingEnabled && (
+        <ChecklistViewModal
+          isOpen={isChecklistOpen}
+          onClose={() => setIsChecklistOpen(false)}
+        />
+      )}
     </>
   );
 };
