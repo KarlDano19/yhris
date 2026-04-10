@@ -46,7 +46,7 @@ function Content() {
   const [rateLimitCountdown, setRateLimitCountdown] = useState(0);
 
   const { mutate, isLoading } = useLogin();
-  const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
+const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_Login>();
 
   // Check if user is already logged in and redirect if so
   useEffect(() => {

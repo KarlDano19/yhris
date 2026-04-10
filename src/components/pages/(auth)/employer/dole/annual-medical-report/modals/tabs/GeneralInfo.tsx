@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 
-import type { Control, UseFormRegister, UseFormHandleSubmit, UseFormSetValue, UseFormWatch, FieldErrors } from "react-hook-form";
-
 import useGetEmployeeCount from "@/components/hooks/useGetEmployeeCount";
 
 
@@ -16,13 +14,13 @@ function GeneralInfo({
   watch,
   errors,
 }: {
-  control: Control<any>;
-  register: UseFormRegister<any>;
-  handleSubmit: UseFormHandleSubmit<any>;
-  setSelectedTab: (tab: number) => void;
-  setValue: UseFormSetValue<any>;
-  watch: UseFormWatch<any>;
-  errors: FieldErrors<any>;
+  control: any;
+  register: any;
+  handleSubmit: any;
+  setSelectedTab: any;
+  setValue: any;
+  watch: any;
+  errors: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);

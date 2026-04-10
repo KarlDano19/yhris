@@ -56,7 +56,7 @@ export default function DiscussionDetails({
           <div className="mt-2 h-72 mb-12">
             <textarea
               rows={4}
-              {...register("details_of_meeting", { required: true })}
+              {...register("details_of_meeting")}
               id="details_of_meeting"
               hidden
             />

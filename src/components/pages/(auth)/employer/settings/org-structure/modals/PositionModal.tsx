@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, useEffect, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -38,10 +39,10 @@ interface PositionModalProps {
 
 export default function PositionModal({ isOpen, onClose, onSave, editingPosition, orgData }: PositionModalProps) {
   const cancelButtonRef = useRef(null);
+  const { setError, clearErrors, formState: { errors } } = useForm();
   const [positionName, setPositionName] = useState(editingPosition?.position_name || '');
   const [selectedPosition, setSelectedPosition] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [positionError, setPositionError] = useState("");
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<{ id: number; open: boolean } | null>(null);
 
@@ -194,10 +195,10 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPosition) {
-      setPositionError('Position is required.');
+      setError('position', { message: 'Position is required.' });
       return;
     }
-    setPositionError('');
+    clearErrors('position');
     if (selectedPosition) {
       setIsLoading(true);
       try {
@@ -270,7 +271,7 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           classNamePrefix='select'
                           options={positionOptions}
                           value={selectedPosition}
-                          onChange={(val) => { setSelectedPosition(val); if (val) setPositionError(""); }}
+                          onChange={(val: any) => { setSelectedPosition(val); if (val) clearErrors('position'); }}
                           components={{
                             DropdownIndicator: () => (
                               <div className='pointer-events-none px-2'>
@@ -282,15 +283,15 @@ export default function PositionModal({ isOpen, onClose, onSave, editingPosition
                           isClearable={false}
                           noOptionsMessage={() => 'No positions available'}
                           placeholder='Select a position...'
-                          formatGroupLabel={(group) => (
+                          formatGroupLabel={(group: any) => (
                             <div className="text-xs font-semibold text-gray-500 py-1">
                               {group.label}
                             </div>
                           )}
                         />
                       </div>
-                      {positionError && (
-                        <p className="text-xs text-red-600 mt-1">{positionError}</p>
+                      {errors?.position && (
+                        <p className="text-xs text-red-600 mt-1">{errors.position.message as string}</p>
                       )}
                       
                       {/* Display Position Description */}

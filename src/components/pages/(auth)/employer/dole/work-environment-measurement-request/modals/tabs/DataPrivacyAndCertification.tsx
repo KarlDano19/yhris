@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
 import DrawSignatureModal from "../DrawSignatureModal";
 
 function DataPrivacyAndCertification({
@@ -128,8 +127,10 @@ function DataPrivacyAndCertification({
   }, [existingSignatureUrl, setValue]);
 
 
-  // Clear errors when signature is changed
+  // Clear errors when fields are changed
   const signatureValue = watch("signature");
+  const nameValue = watch("requesting_personnel_name");
+  const positionValue = watch("requesting_personnel_position");
 
   useEffect(() => {
     if (signatureValue && signatureValue !== "") {
@@ -138,39 +139,30 @@ function DataPrivacyAndCertification({
   }, [signatureValue, clearErrors]);
 
   useEffect(() => {
-    const nameValue = watch("requesting_personnel_name");
     if (nameValue) {
       clearErrors("requesting_personnel_name");
     }
-  }, [watch("requesting_personnel_name"), clearErrors]);
+  }, [nameValue, clearErrors]);
 
   useEffect(() => {
-    const positionValue = watch("requesting_personnel_position");
     if (positionValue) {
       clearErrors("requesting_personnel_position");
     }
-  }, [watch("requesting_personnel_position"), clearErrors]);
+  }, [positionValue, clearErrors]);
 
   // Handle form submission with validation (name, position, then signature)
-  const onValid = (data: any) => {
-    const nameValue = watch("requesting_personnel_name");
-    const positionValue = watch("requesting_personnel_position");
-    const signatureValue = watch("signature");
-
+  const onValid = () => {
     let hasError = false;
     if (!nameValue || nameValue === "") {
-      setError("requesting_personnel_name", { type: "manual", message: "Requesting Personnel Name is required." });
+      setError("requesting_personnel_name", { message: "Requesting Personnel Name is required." });
       hasError = true;
     }
     if (!positionValue || positionValue === "") {
-      setError("requesting_personnel_position", { type: "manual", message: "Requesting Personnel Position is required." });
+      setError("requesting_personnel_position", { message: "Requesting Personnel Position is required." });
       hasError = true;
     }
     if (!signatureValue || signatureValue === "") {
-      setError("signature", {
-        type: "manual",
-        message: "Signature is required (draw or upload)."
-      });
+      setError("signature", { message: "Signature is required (draw or upload)." });
       hasError = true;
     }
     if (hasError) return;
@@ -178,23 +170,8 @@ function DataPrivacyAndCertification({
   };
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onValid({}); }}>
+    <form onSubmit={e => { e.preventDefault(); onValid(); }}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="mt-4 pl-4 md:pl-6 pr-4 md:pr-6">
           <h1 className="text-lg font-semibold">
             Data Privacy and Certification
@@ -227,7 +204,7 @@ function DataPrivacyAndCertification({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("requesting_personnel_name", { required: true })}
+                {...register("requesting_personnel_name")}
                 id="requesting_personnel_name"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
@@ -247,7 +224,7 @@ function DataPrivacyAndCertification({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("requesting_personnel_position", { required: true })}
+                {...register("requesting_personnel_position")}
                 id="requesting_personnel_position"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />

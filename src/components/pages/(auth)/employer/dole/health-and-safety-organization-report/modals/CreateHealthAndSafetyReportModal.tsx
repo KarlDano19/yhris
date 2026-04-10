@@ -36,7 +36,7 @@ function CreateHealthAndSafetyReportModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddHealthAndSafetyReport,
@@ -190,6 +190,9 @@ function CreateHealthAndSafetyReportModal({
                     watch={watch}
                     isCreateModal={true}
                     isLoading={isLoadingAddHealthAndSafetyReport}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

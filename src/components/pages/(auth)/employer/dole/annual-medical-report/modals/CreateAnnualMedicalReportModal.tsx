@@ -1,7 +1,7 @@
 import { Dispatch, Fragment, useRef, useState, useEffect } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -141,7 +141,6 @@ function CreateAnnualMedicalReportModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all my-0 md:my-8 w-full md:max-w-5xl">
-                <FormProvider {...formMethods}>
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Create Work Accident/Illness Report
@@ -296,7 +295,6 @@ function CreateAnnualMedicalReportModal({
                     clearErrors={clearErrors}
                   />
                 )}
-                </FormProvider>
               </Dialog.Panel>
             </Transition.Child>
           </div>
