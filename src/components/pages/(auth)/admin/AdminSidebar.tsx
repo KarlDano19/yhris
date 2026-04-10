@@ -100,6 +100,7 @@ const AdminSidebar = () => {
           showAttachment={false}
           submitButtonText="Send Advisory"
           isLoading={isSendingAdvisory}
+          emailFieldDataSource="clients"
         />
       )}
     </>
