@@ -34,7 +34,7 @@ function EditHealthAndSafetyReportModal({
     refetch: refetchHealthAndSafetyReport,
     remove: removeHealthAndSafetyReport,
   } = useGetHealthAndSafetyReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors } } = formMethods;
   const {
     mutate: updateHealthAndSafetyReport,
     isLoading: isLoadingUpdateHealthAndSafetyReport,
@@ -213,6 +213,7 @@ function EditHealthAndSafetyReportModal({
                     setSelectedTab={setSelectedTab}
                     watch={watch}
                     isCreateModal={false}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 3 && (

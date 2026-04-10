@@ -327,13 +327,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Form validation and processing handler (Form layer)
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
-    // Validate required fields
-    if (!validateFormSubmission(data, selectedTab, setMissingFields, setValidationMessage)) {
-      // Throw an error to prevent submission and show error toast
-      throw new Error("Please fill out all required fields marked with *");
-    }
-
-    // Process form data
+    // Process form data (validation already done in submitCurrentTab)
     const processedData = processFormData(data, selectedTab, oshProgramDetails, watch);
 
     // Submit data to server
@@ -354,6 +348,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     // First clear any existing validation messages
     setValidationMessage("");
     setMissingFields([]);
+
+    // Validate required fields BEFORE attempting submission
+    const formValues = watch();
+    if (!validateFormSubmission(formValues, selectedTab, setMissingFields, setValidationMessage)) {
+      toast.custom(() => <CustomToast message="Please fill out all required fields marked with *" type="error" />);
+      return;
+    }
 
     // Set loading state
     setIsSaving(true);
