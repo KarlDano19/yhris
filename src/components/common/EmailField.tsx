@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
 
 import useGetEmployeePaginatedSelect from '@/components/hooks/useGetEmployeePaginatedSelect';
+import useGetClientEmailSelect from '@/components/hooks/useGetClientEmailSelect';
 
 interface EmailFieldProps {
   tags: string[];
@@ -20,6 +21,7 @@ interface EmailFieldProps {
   disabled?: boolean;
   className?: string;
   isFocused?: boolean;
+  dataSource?: 'employees' | 'clients';
 }
 
 export default function EmailField({
@@ -37,6 +39,7 @@ export default function EmailField({
   disabled = false,
   className = "",
   isFocused = false,
+  dataSource = 'employees',
 }: EmailFieldProps) {
   // Internal state for suggestions and employee data
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -64,8 +67,11 @@ export default function EmailField({
     current_page: 1
   }), [debouncedSearch]);
 
-  // Fetch employee data
-  const { data: employeeData } = useGetEmployeePaginatedSelect(searchParams);
+  // Fetch data — conditionally use employees or clients source
+  const isClientsSource = dataSource === 'clients';
+  const { data: employeeData } = useGetEmployeePaginatedSelect(isClientsSource ? null : searchParams);
+  const { data: clientData } = useGetClientEmailSelect(searchParams, isClientsSource);
+  const resolvedData = isClientsSource ? clientData : employeeData;
 
   // Function to scroll selected item into view
   const scrollToSelectedItem = (index: number) => {
@@ -81,72 +87,92 @@ export default function EmailField({
   };
 
   // Enhanced function to filter employees with show more functionality (but doesn't control visibility)
-  const filterEmployees = useCallback((inputValue: string, selectedTags: string[], employeeData: any, employeeLimit: number) => {
+  const filterEmployees = useCallback((inputValue: string, selectedTags: string[], employeeData: any, employeeLimit: number, source: string) => {
+    const isClients = source === 'clients';
+
     if (employeeData?.records) {
       if (inputValue.trim()) {
         const searchTerm = inputValue.toLowerCase();
-        
+
         // Filter employees (exclude already selected ones)
         const filtered = employeeData.records.filter((employee: any) => {
           const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
           const email = employee.email?.toLowerCase() || '';
           const department = employee.department?.toLowerCase() || '';
           const position = employee.position?.toLowerCase() || '';
-          
+
           const isAlreadySelected = selectedTags.includes(employee.email);
           const matchesSearch = (
-            fullName.includes(searchTerm) || 
-            email.includes(searchTerm) || 
-            department.includes(searchTerm) || 
+            fullName.includes(searchTerm) ||
+            email.includes(searchTerm) ||
+            department.includes(searchTerm) ||
             position.includes(searchTerm)
           );
-          
+
           return matchesSearch && !isAlreadySelected;
         });
 
-        // Get all unique departments from filtered results
-        const matchingDepartments = new Set();
-        filtered.forEach((employee: any) => {
-          if (employee.department) {
-            matchingDepartments.add(employee.department);
-          }
-        });
-        
-        // Create department options (only show if not all employees from that department are selected)
-        const departmentOptions = Array.from(matchingDepartments).map((deptName: any) => {
-          // Check if all employees from this department are already selected
-          const employeesInDepartment = employeeData.records.filter((emp: any) => 
-            emp.department === deptName && emp.email
-          );
-          const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-            selectedTags.includes(emp.email)
-          );
-          const availableEmployeesInDepartment = employeesInDepartment.filter((emp: any) => 
-            !selectedTags.includes(emp.email)
-          );
-          const allEmployeesSelected = employeesInDepartment.length > 0 && 
-            selectedEmployeesInDepartment.length === employeesInDepartment.length;
-          
-          return {
-            id: `dept:${deptName}`,
-            firstname: null,
-            lastname: null,
-            email: null,
-            department: deptName,
-            position: null,
-            is_department_option: true,
-            label: `${deptName} (All Employees)`,
-            allEmployeesSelected: allEmployeesSelected,
-            employeeCount: availableEmployeesInDepartment.length
-          };
-        }).filter((deptOption: any) => !deptOption.allEmployeesSelected && deptOption.employeeCount > 0);
-        
         // Apply employee limit to individual employees
         const limitedEmployees = filtered.slice(0, employeeLimit);
-        
-        // Combine department options with limited employees - departments first
-        let combinedOptions = [...departmentOptions, ...limitedEmployees];
-        
+
+        let prefixOptions: any[] = [];
+
+        if (isClients) {
+          // Add "Select All Clients" option if there are available clients
+          if (filtered.length > 0) {
+            prefixOptions.push({
+              id: 'select_all_clients',
+              firstname: null,
+              lastname: null,
+              email: null,
+              department: null,
+              position: null,
+              is_all_clients_option: true,
+              label: `All Clients (${filtered.length})`,
+              emails: filtered.map((c: any) => c.email).filter(Boolean),
+            });
+          }
+        } else {
+          // Get all unique departments from filtered results
+          const matchingDepartments = new Set();
+          filtered.forEach((employee: any) => {
+            if (employee.department) {
+              matchingDepartments.add(employee.department);
+            }
+          });
+
+          // Create department options (only show if not all employees from that department are selected)
+          prefixOptions = Array.from(matchingDepartments).map((deptName: any) => {
+            const employeesInDepartment = employeeData.records.filter((emp: any) =>
+              emp.department === deptName && emp.email
+            );
+            const selectedEmployeesInDepartment = employeesInDepartment.filter((emp: any) =>
+              selectedTags.includes(emp.email)
+            );
+            const availableEmployeesInDepartment = employeesInDepartment.filter((emp: any) =>
+              !selectedTags.includes(emp.email)
+            );
+            const allEmployeesSelected = employeesInDepartment.length > 0 &&
+              selectedEmployeesInDepartment.length === employeesInDepartment.length;
+
+            return {
+              id: `dept:${deptName}`,
+              firstname: null,
+              lastname: null,
+              email: null,
+              department: deptName,
+              position: null,
+              is_department_option: true,
+              label: `${deptName} (All Employees)`,
+              allEmployeesSelected: allEmployeesSelected,
+              employeeCount: availableEmployeesInDepartment.length
+            };
+          }).filter((deptOption: any) => !deptOption.allEmployeesSelected && deptOption.employeeCount > 0);
+        }
+
+        // Combine prefix options with limited employees
+        let combinedOptions = [...prefixOptions, ...limitedEmployees];
+
         // Add "show more" option if there are more employees to show
         if (filtered.length > employeeLimit) {
           combinedOptions.push({
@@ -161,7 +187,7 @@ export default function EmailField({
             remainingCount: filtered.length - employeeLimit
           });
         }
-        
+
         setFilteredEmployees(combinedOptions);
         // Don't automatically show suggestions - let focus handler control this
         setSelectedIndex(-1); // Reset selection when filtering
@@ -170,39 +196,57 @@ export default function EmailField({
         if (employeeData.records.length > 0) {
           const availableEmployees = employeeData.records
             .filter((employee: any) => employee.email && !selectedTags.includes(employee.email));
-          
+
           const limitedEmployees = availableEmployees.slice(0, employeeLimit);
-          
-          // Get all unique departments from available employees
-          const allDepartments = new Set();
-          availableEmployees.forEach((employee: any) => {
-            if (employee.department) {
-              allDepartments.add(employee.department);
+
+          let prefixOptions: any[] = [];
+
+          if (isClients) {
+            if (availableEmployees.length > 0) {
+              prefixOptions.push({
+                id: 'select_all_clients',
+                firstname: null,
+                lastname: null,
+                email: null,
+                department: null,
+                position: null,
+                is_all_clients_option: true,
+                label: `All Clients (${availableEmployees.length})`,
+                emails: availableEmployees.map((c: any) => c.email).filter(Boolean),
+              });
             }
-          });
-          
-          // Create department options
-          const departmentOptions = Array.from(allDepartments).map((deptName: any) => {
-            const employeesInDepartment = availableEmployees.filter((emp: any) => 
-              emp.department === deptName
-            );
-            
-            return {
-              id: `dept:${deptName}`,
-              firstname: null,
-              lastname: null,
-              email: null,
-              department: deptName,
-              position: null,
-              is_department_option: true,
-              label: `${deptName} (All Employees)`,
-              employeeCount: employeesInDepartment.length
-            };
-          }).filter((deptOption: any) => deptOption.employeeCount > 0);
-          
-          // Combine department options with limited employees
-          let combinedOptions = [...departmentOptions, ...limitedEmployees];
-          
+          } else {
+            // Get all unique departments from available employees
+            const allDepartments = new Set();
+            availableEmployees.forEach((employee: any) => {
+              if (employee.department) {
+                allDepartments.add(employee.department);
+              }
+            });
+
+            // Create department options
+            prefixOptions = Array.from(allDepartments).map((deptName: any) => {
+              const employeesInDepartment = availableEmployees.filter((emp: any) =>
+                emp.department === deptName
+              );
+
+              return {
+                id: `dept:${deptName}`,
+                firstname: null,
+                lastname: null,
+                email: null,
+                department: deptName,
+                position: null,
+                is_department_option: true,
+                label: `${deptName} (All Employees)`,
+                employeeCount: employeesInDepartment.length
+              };
+            }).filter((deptOption: any) => deptOption.employeeCount > 0);
+          }
+
+          // Combine prefix options with limited employees
+          let combinedOptions = [...prefixOptions, ...limitedEmployees];
+
           // Add "show more" option if there are more employees to show
           if (availableEmployees.length > employeeLimit) {
             combinedOptions.push({
@@ -217,7 +261,7 @@ export default function EmailField({
               remainingCount: availableEmployees.length - employeeLimit
             });
           }
-          
+
           setFilteredEmployees(combinedOptions);
           // Don't automatically show suggestions - let focus handler control this
         } else {
@@ -235,12 +279,12 @@ export default function EmailField({
 
   // Filter employees based on input and employee data
   useEffect(() => {
-    filterEmployees(inputValue, tags, employeeData, employeeLimit);
+    filterEmployees(inputValue, tags, resolvedData, employeeLimit, dataSource);
     // Hide suggestions when data changes unless user has focused
     if (!hasUserFocused) {
       setShowSuggestions(false);
     }
-  }, [inputValue, employeeData, tags, employeeLimit, filterEmployees, hasUserFocused]);
+  }, [inputValue, resolvedData, tags, employeeLimit, filterEmployees, hasUserFocused, dataSource]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -272,11 +316,24 @@ export default function EmailField({
       setSelectedIndex(-1);
       return;
     }
-    
+
+    // Handle "select all clients" option
+    if (employee.is_all_clients_option) {
+      const newEmails = (employee.emails as string[]).filter((email) => !tags.includes(email));
+      if (newEmails.length > 0) {
+        onEmployeeSelect({ type: 'department_select', emails: newEmails });
+      }
+      onInputChange('');
+      setSearchTerm('');
+      setSelectedIndex(-1);
+      setShowSuggestions(true);
+      return;
+    }
+
     if (employee.is_department_option) {
       if (employee.is_remove_option) {
         // Handle department removal - remove all employees from that department
-        const employeesInDepartment = employeeData?.records?.filter((emp: any) => 
+        const employeesInDepartment = resolvedData?.records?.filter((emp: any) =>
           emp.department === employee.department && emp.email
         ) || [];
         
@@ -287,7 +344,7 @@ export default function EmailField({
         onEmployeeSelect({ type: 'department_remove', emails: emailsToRemove, remainingTags });
       } else {
         // Handle department selection - add all employees from that department
-        const employeesInDepartment = employeeData?.records?.filter((emp: any) => 
+        const employeesInDepartment = resolvedData?.records?.filter((emp: any) =>
           emp.department === employee.department && emp.email
         ) || [];
         
@@ -313,7 +370,7 @@ export default function EmailField({
     // Ensure suggestions are prepared for next search by triggering a re-filter
     // This is important after manual email entry to ensure suggestions show on next focus
     setTimeout(() => {
-      filterEmployees('', tags, employeeData, employeeLimit);
+      filterEmployees('', tags, resolvedData, employeeLimit, dataSource);
     }, 0);
   };
 
@@ -392,7 +449,7 @@ export default function EmailField({
         
         // Ensure suggestions are prepared for next search
         setTimeout(() => {
-          filterEmployees('', tags, employeeData, employeeLimit);
+          filterEmployees('', tags, resolvedData, employeeLimit, dataSource);
         }, 100);
       }
     } else if (e.key === 'Escape') {
@@ -543,6 +600,15 @@ export default function EmailField({
                 >
                   <span className='text-sm text-gray-600'>{employee.label}</span>
                   <span className='text-sm text-gray-600 font-medium'>Click to load more</span>
+                </div>
+              ) : employee.is_all_clients_option ? (
+                <div className='flex flex-col'>
+                  <div className='text-sm font-medium text-gray-900'>
+                    {employee.label}
+                  </div>
+                  <div className='text-xs text-blue-600'>
+                    • Select all clients
+                  </div>
                 </div>
               ) : employee.is_department_option ? (
                 <div className='flex flex-col'>
