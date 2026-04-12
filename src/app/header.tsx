@@ -59,7 +59,7 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
     'job-applicant-form',
     'setup-applicant-profile',
   ];
-  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page'];
+  const noHeaderRoutes: string[] = ['generate-report', 'directives', 'landing-page', ''];
   
   // Check if current route is a yahshua-connect route
   const isYahshuaConnectRoute = yahshuaConnectRoutes.some(route => pathname?.includes(route));
