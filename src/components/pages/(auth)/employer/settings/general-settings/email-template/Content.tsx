@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-
+import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
@@ -19,7 +19,7 @@ import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
 import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
 import SeederButton from '@/components/SeederButton';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -33,6 +33,7 @@ type T_EmailTemplateModalData = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
@@ -340,10 +341,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>General Settings</h4>
-          </Link>
+          <BackButton label="General Settings" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

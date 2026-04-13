@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Link from 'next/link';
 import Image from 'next/image';
 
 import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
+import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
@@ -22,7 +22,7 @@ import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
 
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useForm, Controller } from 'react-hook-form';
@@ -394,10 +394,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Evaluation</h4>
-          </Link>
+          <BackButton label="Evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

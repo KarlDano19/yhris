@@ -4,13 +4,13 @@ import React, { useEffect, useState } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import Link from 'next/link';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import Pagination from '@/components/Pagination';
@@ -34,7 +34,7 @@ import LocationDepartment from './LocationDepartment';
 import LocationDepartmentModal from './modals/LocationDepartmentModal';
 import EnrollRedirectModal from './modals/EnrollRedirectModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const params = useParams();
@@ -510,10 +510,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/onboarding' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Positions</h4>
-          </Link>
+          <BackButton label="Positions" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4 flex items-center justify-between'>

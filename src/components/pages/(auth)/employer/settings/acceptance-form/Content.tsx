@@ -1,10 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-
 import LoadingSpinner from '@/components/LoadingSpinner';
+import BackButton from '@/components/BackButton';
 
 import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
 import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
@@ -33,10 +30,7 @@ const Content = () => {
       {/* Header — constrained */}
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/settings' className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Settings</h4>
-          </Link>
+          <BackButton label="Settings" />
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye mb-1'>Acceptance Form</h2>

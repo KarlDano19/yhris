@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Fragment, useRef, useMemo } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Menu, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,6 +20,7 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import ImportModal from './modals/ImportModal';
 import ExportProgressModal from './modals/ExportProgressModal';
@@ -39,7 +41,7 @@ import useGetEmployeeStatusItems from '@/components/hooks/useGetEmployeeStatusIt
 import useBulkDeleteEmployees from './hooks/useBulkDeleteEmployees';
 import FloatingProgress from '@/components/FloatingProgress';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useSmartMenuOptions } from '@/components/SmartPermissions/useSmartMenuOptions';
@@ -73,6 +75,7 @@ const columnDefinitions = [
 ];
 
 const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const [employeeItems, setEmployeeItems] = useState<any>([]);
@@ -612,10 +615,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
       {['yahshua-payroll', 'yg-payroll'].includes(loginType) && <FloatingProgress />}
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Manage</h4>
-          </Link>
+          <BackButton label="Manage" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

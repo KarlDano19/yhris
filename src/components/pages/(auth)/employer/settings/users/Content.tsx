@@ -2,11 +2,9 @@
 
 import React from 'react';
 
-import Link from 'next/link';
-
 import MenuItem from '../../../MenuItem';
+import BackButton from '@/components/BackButton';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import UserLogo from '@/svg/UserIcon';
 import AccountsIcon from '@/svg/AccountsIcon';
 
@@ -35,10 +33,7 @@ const Content = () => {
   return (
     <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       <div className='flex p-4'>
-        <Link href='/settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Settings</h4>
-        </Link>
+        <BackButton label="Settings" />
       </div>
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Users</h2>
