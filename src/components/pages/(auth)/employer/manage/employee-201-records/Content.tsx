@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { useEmployees } from './hooks/useEmployees';
 import SearchBar from './components/SearchBar';
@@ -10,14 +11,16 @@ import EmployeeGrid from './components/EmployeeGrid';
 import SkeletonGrid from './components/SkeletonGrid';
 import Pagination from '@/components/Pagination';
 import useBulkSyncToYP from './hooks/useBulkSyncToYP';
+import BackButton from '@/components/BackButton';
 
-import { ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import useGetEmployeeItems from '@/components/hooks/useGetEmployeeItems';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
 export default function Content({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) {
+  const router = useRouter();
   const [q, setQ] = useState('');
 
   // Stable initial options (no 'q' here; search is driven via setSearch)
@@ -108,14 +111,7 @@ export default function Content({ loginType, hasActiveSubscription }: { loginTyp
   return (
     <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
       <div className='flex p-4'>
-        <Link
-          data-testid='back-link'
-          href='/manage'
-          className='flex-none flex gap-3 items-center rounded-md px-2 py-1 hover:bg-gray-100'
-        >
-          <ArrowLeftIcon className='h-5 w-5 text-gray-700' />
-          <h4 className='text-gray-700'>Manage</h4>
-        </Link>
+        <BackButton label="Manage" />
       </div>
 
       <div className='px-2 md:px-8 lg:px-4'>

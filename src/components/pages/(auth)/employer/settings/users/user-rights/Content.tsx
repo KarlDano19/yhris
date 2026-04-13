@@ -1,9 +1,6 @@
 'use client';
-'use client';
 
 import React, { useEffect, useState, Fragment } from 'react';
-
-import Link from 'next/link';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
@@ -11,11 +8,10 @@ import { Menu, Transition } from '@headlessui/react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
+import BackButton from '@/components/BackButton';
 import useGetUserRightsList from './hooks/useGetUserRightsList';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import EditIcon from '@/svg/EditIcon';
+import { MagnifyingGlassIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 import JobUserRightsModal from './modals/JobUserRightsModal';
 import ScreenApplicantsRightsModal from './modals/ScreenApplicantsRightsModal';
 import OrientRightsModal from './modals/OrientRightsModal';
@@ -279,10 +275,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/users' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Users</h4>
-          </Link>
+          <BackButton label="Users" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

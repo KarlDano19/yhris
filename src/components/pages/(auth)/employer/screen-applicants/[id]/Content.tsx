@@ -3,8 +3,7 @@
 import React, { useReducer, useRef, useState, useEffect, useCallback, Fragment, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 
 import { INITIAL_STATE, stageReducer } from '../reducers/stageReducer';
 import { initialActionState } from '../lib/initialActionState';
@@ -14,6 +13,7 @@ import StateContext from '../contexts/StateContext';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import SendEmailModal from '@/components/SendEmailModal';
@@ -44,7 +44,7 @@ import useSendEmail from '../hooks/email/useSendEmail';
 import useUpdateStatus from '../hooks/applicant/useUpdateStatus';
 import useSendInterviewSchedule from '../hooks/email/useSendInterviewSchedule';
 
-import { ArrowLeftIcon, EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import UploadIcon from '@/svg/UploadIcon';
 import ArchiveIcon from '@/svg/ArchiveIcon';
@@ -62,6 +62,7 @@ type ModalSelectedTypes = {
 
 export default function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const params = useParams();
+  const router = useRouter();
   const { mutate: updateMutate } = useUpdateStage();
   const { mutate: updateStatusMutate } = useUpdateStatus();
   const { mutate: sendInterviewScheduleMutate, isLoading: isSendInterviewScheduleLoading } = useSendInterviewSchedule();
@@ -722,10 +723,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           <div className='min-h-screen mb-24 md:mb-0'>
             <div className={`max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
               <div className='flex px-4 pt-4 pb-2'>
-                <Link href='/screen-applicants' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-                  <ArrowLeftIcon className='h-5 w-5' />
-                  <h4>Screen Applicants</h4>
-                </Link>
+                <BackButton label="Screen Applicants" />
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
                 <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>

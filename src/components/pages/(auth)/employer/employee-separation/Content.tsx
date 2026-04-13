@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,7 +29,9 @@ import SeparationLetterAttachmentSection from './components/SeparationLetterAtta
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
 import { useFilterPersistence } from '@/components/hooks/useFilterPersistence';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+
+import BackButton from '@/components/BackButton';
 import DeleteIcon from '@/svg/DeleteIcon';
 
 import {
@@ -752,10 +752,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Dashboard</h4>
-          </Link>
+          <BackButton label="Dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

@@ -3,14 +3,13 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
+import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 import CustomToast from '@/components/CustomToast';
@@ -37,7 +36,7 @@ import useUpdateJobRolesStatus from './hooks/update/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/update/useUpdateJobRemarkStatus';
 import useUpdateJobBenefitStatus from './hooks/update/useUpdateJobBenefitStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
@@ -865,10 +864,7 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Post Job</h4>
-          </Link>
+          <BackButton label="Dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

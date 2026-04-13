@@ -3,15 +3,17 @@
 import React, { Fragment, useState, useEffect } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 import ManageOrgChart from './components/ManageOrgChart';
 import ZoomControls from './components/ZoomControls';
+import BackButton from '@/components/BackButton';
 import ExportOptionsModal from './modals/ExportOptionsModal';
 import ProgressModal from '@/components/ProgressModal';
 import Filter, { FilterGroup, FilterValues } from '@/components/common/Filter';
@@ -24,6 +26,7 @@ import useImageToBase64, { ConvertedImage } from './hooks/useImageToBase64';
 import { OrgStructure } from './types';
 
 const Content = () => {
+  const router = useRouter();
   const [isExporting, setIsExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showProgressModal, setShowProgressModal] = useState(false);
@@ -583,15 +586,17 @@ const Content = () => {
       
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
-      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border-b-2 flex-shrink-0'>
-        <Link href='/manage' className='flex items-center gap-3 hover:bg-gray-200 rounded-lg p-2 -m-2'>
-          <ArrowLeftIcon className='h-5 w-5 flex-shrink-0' />
-          <h4 className='text-sm sm:text-base truncate'>Manage | Organizational Structure</h4>
-        </Link>
-        
-        {/* Filter and Export Buttons - Hide when selection mode is active */}
-        {orgData && !isSelectionMode && (
-          <div className="flex items-center gap-2">
+      <div className='flex p-4 flex-shrink-0'>
+        <BackButton label="Manage" />
+      </div>
+
+      <div className='px-2 md:px-8 lg:px-4 pb-4 border-b-2 flex-shrink-0'>
+        <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+
+          {/* Filter and Export Buttons - Hide when selection mode is active */}
+          {orgData && !isSelectionMode && (
+            <div className="flex items-center gap-2">
             {/* Department Filter */}
             <Filter
               filterGroups={filterGroups}
@@ -643,8 +648,9 @@ const Content = () => {
             </Menu.Items>
           </Transition>
             </Menu>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Selection Mode Action Bar - Show at top when active, hide during export */}
