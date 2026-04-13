@@ -327,13 +327,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Form validation and processing handler (Form layer)
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
-    // Validate required fields
-    if (!validateFormSubmission(data, selectedTab, setMissingFields, setValidationMessage)) {
-      // Throw an error to prevent submission and show error toast
-      throw new Error("");
-    }
-
-    // Process form data
+    // Process form data (validation already done in submitCurrentTab)
     const processedData = processFormData(data, selectedTab, oshProgramDetails, watch);
 
     // Submit data to server
@@ -373,9 +367,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message="Successfully updated OSH Program Details." type="success" />);
       
     } catch (error: any) {
-      if (error.message) {
-        toast.custom(() => <CustomToast message={error.message} type="error" />);
-      }
+      toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
     } finally {
       // Reset loading state
       setIsSaving(false);
