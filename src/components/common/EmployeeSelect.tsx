@@ -356,6 +356,7 @@ export default function EmployeeSelect({
       address: item.address,
       gender: item.gender,
       email: item.email,
+      birthdate: item.birthdate,
     }));
 
     // Only add department options for multi-select (not for single select)

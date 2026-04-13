@@ -148,11 +148,25 @@ function PersonalInformation({
                   if (selectedOption && !selectedOption.isShowMore) {
                     setValue('address', selectedOption.address);
                     setValue('sex', selectedOption.gender);
+
+                    // Auto-calculate age from birthdate
+                    if (selectedOption.birthdate) {
+                      const birthDate = new Date(selectedOption.birthdate);
+                      const today = new Date();
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const monthDiff = today.getMonth() - birthDate.getMonth();
+                      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                      }
+                      setValue('age', age);
+                    }
+
                     setEmployeeSearch(selectedOption.label);
                     setEmployeeSelected(true);
                   } else {
                     setValue('address', '');
                     setValue('sex', '');
+                    setValue('age', '');
                     setEmployeeSearch('');
                     setEmployeeSelected(false);
                   }
