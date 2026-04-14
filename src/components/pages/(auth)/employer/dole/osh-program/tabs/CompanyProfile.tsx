@@ -238,9 +238,9 @@ export default function CompanyProfile({
                 {...register("company_name")}
                 id="company_name"
                 readOnly
-                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
-                  ${isMissingField('company_name') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('company_name') && <p className="text-red-500 text-xs mt-1">Company Name is required</p>}
             </div>
           </div>
           <div>
@@ -264,7 +264,7 @@ export default function CompanyProfile({
                       placeholder={"mm/dd/yyyy"}
                       className={
                         `block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset 
-                        ${isMissingField('date_established') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
+                        ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none`
                       }
                       selected={selectedDate}
                       pickerOnChange={(date: any) => {
@@ -293,6 +293,7 @@ export default function CompanyProfile({
                   );
                 }}
               />
+              {isMissingField('date_established') && <p className="text-red-500 text-xs mt-1">Date Established is required</p>}
             </div>
           </div>
           <div>
@@ -310,8 +311,9 @@ export default function CompanyProfile({
                 id="complete_address"
                 readOnly
                 className={`cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset 
-                  ${isMissingField('complete_address') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                  ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('complete_address') && <p className="text-red-500 text-xs mt-1">Complete Address is required</p>}
             </div>
           </div>
           <div>
@@ -362,8 +364,9 @@ export default function CompanyProfile({
                 type="text"
                 {...register("website_url")}
                 id="website_url"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('website_url') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('website_url') && <p className="text-red-500 text-xs mt-1">Website URL / Email Address is required</p>}
             </div>
           </div>
           <div>
@@ -397,8 +400,9 @@ export default function CompanyProfile({
                 type="number"
                 {...register("number_of_male_employees")}
                 id="number_of_male_employees"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('number_of_male_employees') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('number_of_male_employees') && <p className="text-red-500 text-xs mt-1">No. of Male Employees is required</p>}
             </div>
           </div>
           <div>
@@ -414,8 +418,9 @@ export default function CompanyProfile({
                 type="number"
                 {...register("number_of_female_employees")}
                 id="number_of_female_employees"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('number_of_female_employees') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('number_of_female_employees') && <p className="text-red-500 text-xs mt-1">No. of Female Employees is required</p>}
             </div>
           </div>
           <div>
@@ -667,8 +672,9 @@ export default function CompanyProfile({
               <textarea
                 {...register("product_description")}
                 id="product_description"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('product_description') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('product_description') && <p className="text-red-500 text-xs mt-1">Product Description is required</p>}
             </div>
           </div>
           <div>
@@ -683,8 +689,9 @@ export default function CompanyProfile({
               <textarea
                 {...register("services_description")}
                 id="services_description"
-                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${isMissingField('services_description') ? 'ring-red-500' : 'ring-gray-300'} placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
+                className={`rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6`}
               />
+              {isMissingField('services_description') && <p className="text-red-500 text-xs mt-1">Services Description is required</p>}
             </div>
           </div>
         </div>

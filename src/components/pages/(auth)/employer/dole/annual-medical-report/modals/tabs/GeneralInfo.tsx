@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 import useGetEmployeeCount from "@/components/hooks/useGetEmployeeCount";
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function GeneralInfo({
   control,
@@ -13,6 +12,7 @@ function GeneralInfo({
   setSelectedTab,
   setValue,
   watch,
+  errors,
 }: {
   control: any;
   register: any;
@@ -20,6 +20,7 @@ function GeneralInfo({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  errors: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -73,21 +74,6 @@ function GeneralInfo({
   return (
     <form onSubmit={onSubmit}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4 pb-6">
           <div>
             <label
@@ -106,6 +92,7 @@ function GeneralInfo({
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.name_of_establishment && <p className="text-red-500 text-xs mt-1">Name of Establishment is required</p>}
           </div>
           <div>
             <label
@@ -123,6 +110,7 @@ function GeneralInfo({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.name_of_owner_manager && <p className="text-red-500 text-xs mt-1">Name of Owner/Manager is required</p>}
           </div>
           <div>
             <label
@@ -141,6 +129,7 @@ function GeneralInfo({
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.address && <p className="text-red-500 text-xs mt-1">Address is required</p>}
           </div>
           <div>
             <label
@@ -159,6 +148,7 @@ function GeneralInfo({
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.type_of_industry && <p className="text-red-500 text-xs mt-1">Type of Industry is required</p>}
           </div>
           <div>
             <label
@@ -177,6 +167,7 @@ function GeneralInfo({
                 className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.total_number_of_employees && <p className="text-red-500 text-xs mt-1">Total Number of Employees is required</p>}
           </div>
           <div>
             <label
@@ -195,6 +186,7 @@ function GeneralInfo({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors.number_of_shifts && <p className="text-red-500 text-xs mt-1">Number of Shift is required</p>}
           </div>
         </div>
         <div className="gap-6 mt-4">

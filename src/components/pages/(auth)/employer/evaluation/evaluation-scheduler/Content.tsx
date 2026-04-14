@@ -79,8 +79,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: deleteEvaluationScheduler, isLoading: isDeleteEvaluationSchedulerLoading } = useDeleteEvaluationScheduler();
   const bulkDeleteMutation = useBulkDeleteEvaluationSchedulers();
   const [isSearching, setIsSearching] = useState(false);
-  const formMethods = useForm();
-  const editFormMethods = useForm();
+  const formMethods = useForm({ mode: 'onTouched' });
+  const editFormMethods = useForm({ mode: 'onTouched' });
 
   // Helper component to display recipient avatar with fallback
   const RecipientAvatar = ({ recipient, size = 40 }: { recipient: any; size?: number }) => {
@@ -534,6 +534,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           setIsOpen={setIsCreateEvaluationSchedulerOpen}
           {...formMethods}
           Controller={Controller}
+          errors={formMethods.formState.errors}
         />
       )}
       {isEditEvaluationSchedulerModalOpen && selectedEvaluationSchedulerId && (
@@ -544,6 +545,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
           {...editFormMethods}
           Controller={Controller}
+          errors={editFormMethods.formState.errors}
         />
       )}
       {isDeleteEvaluationSchedulerModalOpen && (

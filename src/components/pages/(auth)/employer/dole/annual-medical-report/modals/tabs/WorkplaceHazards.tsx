@@ -9,8 +9,6 @@ import { Controller } from "react-hook-form";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import DrawSignatureModal from "../DrawSignatureModal";
 import DrawNotedBySignatureModal from "../DrawNotedBySignature";
-import toast from "react-hot-toast";
-import CustomToast from "@/components/CustomToast";
 import ToggleSection from "./components/ToggleSection";
 import ChemicalHazards from "./components/workplace-hazards/ChemicalHazards";
 import PhysicalHazards from "./components/workplace-hazards/PhysicalHazards";
@@ -25,6 +23,9 @@ function WorkplaceSafetyCompliance({
   setValue,
   isLoading,
   watch,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -33,6 +34,9 @@ function WorkplaceSafetyCompliance({
   setValue: any;
   isLoading: boolean;
   watch: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
 
   const [isChemicalHazardsOpen, setIsChemicalHazardsOpen] = useState(false);
@@ -110,6 +114,7 @@ function WorkplaceSafetyCompliance({
       setValue("signature_source", "upload");
       setSignatureSource("upload");
       setSignatureUrl(URL.createObjectURL(file));
+      clearErrors("signature");
     }
   };
 
@@ -121,6 +126,7 @@ function WorkplaceSafetyCompliance({
       setValue("noted_signature_source", "upload");
       setNotedSignatureSource("upload");
       setNotedSignatureUrl(URL.createObjectURL(file));
+      clearErrors("noted_signature");
     }
   };
 
@@ -139,6 +145,7 @@ function WorkplaceSafetyCompliance({
         setValue("signature_source", "draw");
         setSignatureSource("draw");
         setSignatureUrl(drawnSignatureDataUrl);
+        clearErrors("signature");
       });
   };
 
@@ -157,6 +164,7 @@ function WorkplaceSafetyCompliance({
         setValue("noted_signature_source", "draw");
         setNotedSignatureSource("draw");
         setNotedSignatureUrl(drawnSignatureDataUrl);
+        clearErrors("noted_signature");
       });
   };
 
@@ -237,21 +245,34 @@ function WorkplaceSafetyCompliance({
     }
   }, [existingNotedSignatureUrl, setValue]);
 
+  // Clear text field errors as user types
+  const preparedByValue = watch("prepared_by");
+  const notedByValue = watch("noted_by");
+
+  useEffect(() => {
+    if (preparedByValue) clearErrors("prepared_by");
+  }, [preparedByValue, clearErrors]);
+
+  useEffect(() => {
+    if (notedByValue) clearErrors("noted_by");
+  }, [notedByValue, clearErrors]);
+
   const onSubmitHandler = (e: React.FormEvent) => {
     e.preventDefault();
 
+    clearErrors(["prepared_by", "noted_by", "signature", "noted_signature"]);
+    let hasFieldError = false;
+
     const preparedByValue = watch("prepared_by");
     if (!preparedByValue || preparedByValue === "") {
-      const el = document.getElementById("prepared_by");
-      if (el) el.focus();
-      return;
+      setError("prepared_by", { type: "manual", message: "Submitted By is required" });
+      hasFieldError = true;
     }
 
     const notedByValue = watch("noted_by");
     if (!notedByValue || notedByValue === "") {
-      const el = document.getElementById("noted_by");
-      if (el) el.focus();
-      return;
+      setError("noted_by", { type: "manual", message: "Noted By is required" });
+      hasFieldError = true;
     }
 
     // Signature validation (drawn, uploaded, or existing)
@@ -260,9 +281,8 @@ function WorkplaceSafetyCompliance({
       (signatureValue && typeof signatureValue === "string" && (signatureValue.startsWith("data:image/") || signatureValue.startsWith("http"))) ||
       (signatureValue && typeof signatureValue === "object" && signatureValue instanceof File);
     if (!hasSignature) {
-      toast.dismiss();
-      toast.custom(() => <CustomToast message="Submitted by signature is required (draw or upload)." type="error" />);
-      return;
+      setError("signature", { type: "manual", message: "Submitted by signature is required (draw or upload)." });
+      hasFieldError = true;
     }
     // Noted signature validation (drawn, uploaded, or existing)
     const notedSignatureValue = watch("noted_signature");
@@ -270,11 +290,12 @@ function WorkplaceSafetyCompliance({
       (notedSignatureValue && typeof notedSignatureValue === "string" && (notedSignatureValue.startsWith("data:image/") || notedSignatureValue.startsWith("http"))) ||
       (notedSignatureValue && typeof notedSignatureValue === "object" && notedSignatureValue instanceof File);
     if (!hasNotedSignature) {
-      toast.dismiss();
-      toast.custom(() => <CustomToast message="Noted signature is required (draw or upload)." type="error" />);
-      return;
+      setError("noted_signature", { type: "manual", message: "Noted signature is required (draw or upload)." });
+      hasFieldError = true;
     }
-    // ...rest of your submit logic (e.g., setSelectedTab or actual submit)
+
+    if (hasFieldError) return;
+
     if (typeof onSubmit === 'function') onSubmit(e);
   };
 
@@ -341,11 +362,12 @@ function WorkplaceSafetyCompliance({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("prepared_by", { required: true })}
+                  {...register("prepared_by")}
                   id="prepared_by"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.prepared_by && <p className="text-red-500 text-xs mt-1">Submitted By is required</p>}
             </div>
             <div>
               <label
@@ -384,6 +406,9 @@ function WorkplaceSafetyCompliance({
               </div>
             </div>
           </div>
+          {errors?.signature && (
+            <p className="text-red-500 text-xs mt-1 pl-6">Submitted by signature is required (draw or upload).</p>
+          )}
           {/* Mobile layout - hidden on desktop: Submitted By, Draw/Upload Signature */}
           <div className="block md:hidden px-4 mb-4">
             <div className="mb-4">
@@ -397,6 +422,7 @@ function WorkplaceSafetyCompliance({
                 onChange={e => setValue("prepared_by", e.target.value)}
                 className="mt-2 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm"
               />
+              {errors?.prepared_by && <p className="text-red-500 text-xs mt-1">Submitted By is required</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="draw_signature" className="block text-sm font-medium leading-6 text-gray-900">
@@ -422,6 +448,9 @@ function WorkplaceSafetyCompliance({
                 className="mt-2 block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
             </div>
+            {errors?.signature && (
+              <p className="text-red-500 text-xs mt-1">Submitted by signature is required (draw or upload).</p>
+            )}
           </div>
 
           {/* Signature Preview - responsive */}
@@ -459,11 +488,12 @@ function WorkplaceSafetyCompliance({
               <div className="relative mt-2">
                 <input
                   type="text"
-                  {...register("noted_by", { required: true })}
+                  {...register("noted_by")}
                   id="noted_by"
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.noted_by && <p className="text-red-500 text-xs mt-1">Noted By is required</p>}
             </div>
             <div>
               <label
@@ -502,6 +532,9 @@ function WorkplaceSafetyCompliance({
               </div>
             </div>
           </div>
+          {errors?.noted_signature && (
+            <p className="text-red-500 text-xs mt-1 pl-6">Noted signature is required (draw or upload).</p>
+          )}
           {/* Mobile layout - hidden on desktop: Noted By, Draw/Upload Signature */}
           <div className="block md:hidden px-4 mb-4">
             <div className="mb-4">
@@ -515,6 +548,7 @@ function WorkplaceSafetyCompliance({
                 onChange={e => setValue("noted_by", e.target.value)}
                 className="mt-2 rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm"
               />
+              {errors?.noted_by && <p className="text-red-500 text-xs mt-1">Noted By is required</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="draw_noted_signature" className="block text-sm font-medium leading-6 text-gray-900">
@@ -540,6 +574,9 @@ function WorkplaceSafetyCompliance({
                 className="mt-2 block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
             </div>
+            {errors?.noted_signature && (
+              <p className="text-red-500 text-xs mt-1">Noted signature is required (draw or upload).</p>
+            )}
           </div>
 
           {/* Noted Signature Preview - responsive */}

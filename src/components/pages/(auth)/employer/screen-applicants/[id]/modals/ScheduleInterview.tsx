@@ -104,7 +104,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const [integrationItems, setIntegrationItems] = useState<any>([]);
   const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
-  const { register, setValue, watch, handleSubmit, getValues } = useForm();
+  const { register, setValue, watch, handleSubmit, getValues, formState: { errors }, clearErrors } = useForm();
   const [isOpen, setIsOpen] = useState(false);
   const [selectionId, setSelectionId] = useState('video');
   const [input, setInput] = useState('');
@@ -205,6 +205,9 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   useEffect(() => {
     setIsOpen(true);
     refetchIntegrationItems();
+    register('date', { required: 'Date is required' });
+    register('startTime', { required: 'Start time is required' });
+    register('platform', { required: selectionId === 'video' ? 'Platform is required' : false });
   }, []);
 
   useEffect(() => {
@@ -399,12 +402,12 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   ref={dateRef}
                   type='date'
                   name='date'
-                  onChange={(e) => setValue('date', e.target.value)}
+                  onChange={(e) => setValue('date', e.target.value, { shouldValidate: true })}
                   className='w-full focus:none outline-none'
-                  required
                 />
                 <CalendarIcon className='w-6 h-6 absolute right-4 pointer-events-none' />
               </div>
+              {errors.date && <p className='text-red-600 text-sm mt-1'>{errors.date.message as string}</p>}
             </div>
             <div className='text-indigo-dye flex-grow'>
               <label htmlFor='startTime' className='block mb-2'>
@@ -417,11 +420,11 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   ref={timeRef}
                   type='time'
                   id='startTime'
-                  onChange={(e) => setValue('startTime', e.target.value)}
+                  onChange={(e) => setValue('startTime', e.target.value, { shouldValidate: true })}
                   className='focus:none outline-none'
-                  required
                 />
               </div>
+              {errors.startTime && <p className='text-red-600 text-sm mt-1'>{errors.startTime.message as string}</p>}
             </div>
             <div className='text-indigo-dye flex-grow'>
               <label htmlFor='duration' className='block mb-2'>
@@ -430,7 +433,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
 
               <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
                 <select
-                  {...register('duration')}
+                  {...register('duration', { required: 'Duration is required' })}
                   id='duration'
                   className='w-full py-2 px-4 focus:none outline-none rounded-md'
                   defaultValue=''
@@ -444,6 +447,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   <SelectChevronDown />
                 </div>
               </div>
+              {errors.duration && <p className='text-red-600 text-sm mt-1'>{errors.duration.message as string}</p>}
             </div>
           </div>
 
@@ -493,7 +497,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                           id={item.id}
                           name={item.name}
                           defaultValue={item.value}
-                          onChange={(e) => setValue('platform', e.target.value)}
+                          onChange={(e) => setValue('platform', e.target.value, { shouldValidate: true })}
                           disabled={item.disabled}
                         />
                         <label htmlFor={item.id}>{item.title}</label>
@@ -518,6 +522,9 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 );
               })}
             </div>
+          )}
+          {selectionId === 'video' && errors.platform && (
+            <p className='text-red-600 text-sm mb-6'>{errors.platform.message as string}</p>
           )}
 
           {selectionId === 'phone' && (
@@ -574,11 +581,10 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
 
               <div className='border border-[#ACB9CB] rounded-md flex items-center justify-between relative focus-within:outline focus-within:outline-1 focus-within:outline-[#355FD0]'>
                 <select
-                  {...register('integrated_id')}
+                  {...register('integrated_id', { required: 'Integrated account is required' })}
                   id='integrated_accounts'
                   className='w-full py-2 px-4 focus:none outline-none rounded-full'
                   defaultValue=''
-                  required
                 >
                   <option value='' disabled>Select...</option>
                   {integrationItems.map((item: any) => (
@@ -589,6 +595,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                   <SelectChevronDown />
                 </div>
               </div>
+              {errors.integrated_id && <p className='text-red-600 text-sm mt-1'>{errors.integrated_id.message as string}</p>}
             </div>
           )}
           <div className='mb-6'>
@@ -619,7 +626,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
             <div
               className={classNames(
                 'border border-[#ACB9CB] p-2 rounded-md flex items-center gap-3 flex-wrap',
-                noTags ? 'border-2 border-blue-700' : ''
+                noTags ? 'border-2 border-red-600' : ''
               )}
             >
               {tags.map((tag: string) => (
@@ -640,10 +647,11 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
                 type='text'
                 className={classNames('focus:none outline-none py-1 px-2 grow')}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => { setInput(e.target.value); if (noTags) setNoTags(false); }}
                 onKeyDown={handleKeyDown}
               />
             </div>
+            {noTags && <p className='text-red-600 text-sm mt-1'>At least one email is required</p>}
           </div>
         </div>
 

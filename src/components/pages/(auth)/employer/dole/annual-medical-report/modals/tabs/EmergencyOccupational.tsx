@@ -345,6 +345,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_physician_hours_per_day`)}
                     id={`occupational_health_physician_hours_per_day`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                   <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
@@ -356,6 +357,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_physician_shift`)}
                     id={`occupational_health_physician_shift`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -375,6 +377,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_dentist_hours_per_day`)}
                     id={`occupational_health_dentist_hours_per_day`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                   <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
@@ -386,6 +389,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_dentist_shift`)}
                     id={`occupational_health_dentist_shift`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -407,6 +411,7 @@ function EmergencyOccupational({
                       `occupational_health_practitioner_hours_per_day`
                     )}
                     id={`occupational_health_practitioner_hours_per_day`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                   <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
@@ -418,6 +423,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_practitioner_shift`)}
                     id={`occupational_health_practitioner_shift`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -437,6 +443,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_nurse_hours_per_day`)}
                     id={`occupational_health_nurse_hours_per_day`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                   <h1 className="text-sm font-medium ml-4">Hrs/day</h1>
@@ -448,6 +455,7 @@ function EmergencyOccupational({
                     type="number"
                     {...register(`occupational_health_nurse_shift`)}
                     id={`occupational_health_nurse_shift`}
+                    min={0}
                     className="rounded-md w-1/2 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -466,6 +474,7 @@ function EmergencyOccupational({
                     type="number"
                     value={physicianHours || ""}
                     onChange={(e) => setValue("occupational_health_physician_hours_per_day", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -475,6 +484,7 @@ function EmergencyOccupational({
                     type="number"
                     value={physicianShift || ""}
                     onChange={(e) => setValue("occupational_health_physician_shift", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -490,6 +500,7 @@ function EmergencyOccupational({
                     type="number"
                     value={dentistHours || ""}
                     onChange={(e) => setValue("occupational_health_dentist_hours_per_day", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -499,6 +510,7 @@ function EmergencyOccupational({
                     type="number"
                     value={dentistShift || ""}
                     onChange={(e) => setValue("occupational_health_dentist_shift", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -514,6 +526,7 @@ function EmergencyOccupational({
                     type="number"
                     value={practitionerHours || ""}
                     onChange={(e) => setValue("occupational_health_practitioner_hours_per_day", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -523,6 +536,7 @@ function EmergencyOccupational({
                     type="number"
                     value={practitionerShift || ""}
                     onChange={(e) => setValue("occupational_health_practitioner_shift", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -538,6 +552,7 @@ function EmergencyOccupational({
                     type="number"
                     value={nurseHours || ""}
                     onChange={(e) => setValue("occupational_health_nurse_hours_per_day", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -547,6 +562,7 @@ function EmergencyOccupational({
                     type="number"
                     value={nurseShift || ""}
                     onChange={(e) => setValue("occupational_health_nurse_shift", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>

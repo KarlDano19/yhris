@@ -176,6 +176,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_pre_placement_physical_exam`)}
                     id={`workers_pre_placement_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -186,6 +187,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_pre_placement_x_rays`)}
                     id={`workers_pre_placement_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -196,6 +198,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_pre_placement_urinalysis`)}
                     id={`workers_pre_placement_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -212,6 +215,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_pre_placement_physical_exam || ""}
                     onChange={(e) => setValue("workers_pre_placement_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -221,6 +225,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_pre_placement_x_rays || ""}
                     onChange={(e) => setValue("workers_pre_placement_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -230,6 +235,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_pre_placement_urinalysis || ""}
                     onChange={(e) => setValue("workers_pre_placement_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -251,6 +257,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_periodic_physical_exam`)}
                     id={`workers_periodic_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -261,6 +268,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_periodic_x_rays`)}
                     id={`workers_periodic_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -271,6 +279,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_periodic_urinalysis`)}
                     id={`workers_periodic_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -287,6 +296,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_periodic_physical_exam || ""}
                     onChange={(e) => setValue("workers_periodic_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -296,6 +306,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_periodic_x_rays || ""}
                     onChange={(e) => setValue("workers_periodic_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -305,6 +316,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_periodic_urinalysis || ""}
                     onChange={(e) => setValue("workers_periodic_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -326,6 +338,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_return_to_work_physical_exam`)}
                     id={`workers_return_to_work_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -336,6 +349,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_return_to_work_x_rays`)}
                     id={`workers_return_to_work_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -346,6 +360,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_return_to_work_urinalysis`)}
                     id={`workers_return_to_work_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -362,6 +377,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_return_to_work_physical_exam || ""}
                     onChange={(e) => setValue("workers_return_to_work_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -371,6 +387,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_return_to_work_x_rays || ""}
                     onChange={(e) => setValue("workers_return_to_work_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -380,6 +397,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_return_to_work_urinalysis || ""}
                     onChange={(e) => setValue("workers_return_to_work_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -401,6 +419,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_transfer_physical_exam`)}
                     id={`workers_transfer_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -411,6 +430,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_transfer_x_rays`)}
                     id={`workers_transfer_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -421,6 +441,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_transfer_urinalysis`)}
                     id={`workers_transfer_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -437,6 +458,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_transfer_physical_exam || ""}
                     onChange={(e) => setValue("workers_transfer_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -446,6 +468,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_transfer_x_rays || ""}
                     onChange={(e) => setValue("workers_transfer_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -455,6 +478,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_transfer_urinalysis || ""}
                     onChange={(e) => setValue("workers_transfer_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -476,6 +500,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_special_physical_exam`)}
                     id={`workers_special_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -486,6 +511,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_special_x_rays`)}
                     id={`workers_special_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -496,6 +522,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_special_urinalysis`)}
                     id={`workers_special_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -512,6 +539,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_special_physical_exam || ""}
                     onChange={(e) => setValue("workers_special_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -521,6 +549,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_special_x_rays || ""}
                     onChange={(e) => setValue("workers_special_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -530,6 +559,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_special_urinalysis || ""}
                     onChange={(e) => setValue("workers_special_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -551,6 +581,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_separation_physical_exam`)}
                     id={`workers_separation_physical_exam`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -561,6 +592,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_separation_x_rays`)}
                     id={`workers_separation_x_rays`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -571,6 +603,7 @@ function OccupationalHealthService({
                     type="number"
                     {...register(`workers_separation_urinalysis`)}
                     id={`workers_separation_urinalysis`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -587,6 +620,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_separation_physical_exam || ""}
                     onChange={(e) => setValue("workers_separation_physical_exam", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -596,6 +630,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_separation_x_rays || ""}
                     onChange={(e) => setValue("workers_separation_x_rays", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -605,6 +640,7 @@ function OccupationalHealthService({
                     type="number"
                     value={workers_separation_urinalysis || ""}
                     onChange={(e) => setValue("workers_separation_urinalysis", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -645,6 +681,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_pre_placement`
                     )}
                     id={`total_workers_examination_stool_exam_pre_placement`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -657,6 +694,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_pre_placement`
                     )}
                     id={`total_workers_examination_blood_test_pre_placement`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -669,6 +707,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_pre_placement`
                     )}
                     id={`total_workers_examination_ecg_pre_placement`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -681,6 +720,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_pre_placement`
                     )}
                     id={`total_workers_examination_others_pre_placement`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -697,6 +737,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_pre_placement || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_pre_placement", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -706,6 +747,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_pre_placement || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_pre_placement", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -715,6 +757,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_pre_placement || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_pre_placement", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -724,6 +767,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_pre_placement || ""}
                     onChange={(e) => setValue("total_workers_examination_others_pre_placement", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -747,6 +791,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_periodic`
                     )}
                     id={`total_workers_examination_stool_exam_periodic`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -759,6 +804,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_periodic`
                     )}
                     id={`total_workers_examination_blood_test_periodic`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -771,6 +817,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_periodic`
                     )}
                     id={`total_workers_examination_ecg_periodic`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -783,6 +830,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_periodic`
                     )}
                     id={`total_workers_examination_others_periodic`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -799,6 +847,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_periodic || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_periodic", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -808,6 +857,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_periodic || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_periodic", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -817,6 +867,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_periodic || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_periodic", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -826,6 +877,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_periodic || ""}
                     onChange={(e) => setValue("total_workers_examination_others_periodic", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -849,6 +901,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_return_to_work`
                     )}
                     id={`total_workers_examination_stool_exam_return_to_work`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -861,6 +914,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_return_to_work`
                     )}
                     id={`total_workers_examination_blood_test_return_to_work`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -873,6 +927,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_return_to_work`
                     )}
                     id={`total_workers_examination_ecg_return_to_work`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -885,6 +940,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_return_to_work`
                     )}
                     id={`total_workers_examination_others_return_to_work`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -901,6 +957,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_return_to_work || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_return_to_work", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -910,6 +967,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_return_to_work || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_return_to_work", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -919,6 +977,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_return_to_work || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_return_to_work", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -928,6 +987,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_return_to_work || ""}
                     onChange={(e) => setValue("total_workers_examination_others_return_to_work", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -951,6 +1011,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_transfer`
                     )}
                     id={`total_workers_examination_stool_exam_transfer`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -963,6 +1024,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_transfer`
                     )}
                     id={`total_workers_examination_blood_test_transfer`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -975,6 +1037,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_transfer`
                     )}
                     id={`total_workers_examination_ecg_transfer`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -987,6 +1050,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_transfer`
                     )}
                     id={`total_workers_examination_others_transfer`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1003,6 +1067,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_transfer || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_transfer", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1012,6 +1077,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_transfer || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_transfer", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1021,6 +1087,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_transfer || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_transfer", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1030,6 +1097,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_transfer || ""}
                     onChange={(e) => setValue("total_workers_examination_others_transfer", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1053,6 +1121,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_special`
                     )}
                     id={`total_workers_examination_stool_exam_special`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1065,6 +1134,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_special`
                     )}
                     id={`total_workers_examination_blood_test_special`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1077,6 +1147,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_special`
                     )}
                     id={`total_workers_examination_ecg_special`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1089,6 +1160,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_special`
                     )}
                     id={`total_workers_examination_others_special`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1105,6 +1177,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_special || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_special", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1114,6 +1187,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_special || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_special", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1123,6 +1197,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_special || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_special", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1132,6 +1207,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_special || ""}
                     onChange={(e) => setValue("total_workers_examination_others_special", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1155,6 +1231,7 @@ function OccupationalHealthService({
                       `total_workers_examination_stool_exam_separation`
                     )}
                     id={`total_workers_examination_stool_exam_separation`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1167,6 +1244,7 @@ function OccupationalHealthService({
                       `total_workers_examination_blood_test_separation`
                     )}
                     id={`total_workers_examination_blood_test_separation`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1179,6 +1257,7 @@ function OccupationalHealthService({
                       `total_workers_examination_ecg_separation`
                     )}
                     id={`total_workers_examination_ecg_separation`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1191,6 +1270,7 @@ function OccupationalHealthService({
                       `total_workers_examination_others_separation`
                     )}
                     id={`total_workers_examination_others_separation`}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -1207,6 +1287,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_stool_exam_separation || ""}
                     onChange={(e) => setValue("total_workers_examination_stool_exam_separation", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1216,6 +1297,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_blood_test_separation || ""}
                     onChange={(e) => setValue("total_workers_examination_blood_test_separation", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1225,6 +1307,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_ecg_separation || ""}
                     onChange={(e) => setValue("total_workers_examination_ecg_separation", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>
@@ -1234,6 +1317,7 @@ function OccupationalHealthService({
                     type="number"
                     value={total_workers_examination_others_separation || ""}
                     onChange={(e) => setValue("total_workers_examination_others_separation", e.target.value)}
+                    min={0}
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm"
                   />
                 </div>

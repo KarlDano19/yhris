@@ -200,6 +200,11 @@ export default function CreateJobPageJobDescription({
                 </a>
               </div>
             )}
+            {manualInputFocus.jobDescriptionFile && manualInputFocus.jobDescription && (
+              <p className='text-xs text-red-600 mt-1'>
+                Please provide a job description (upload a file or fill in the text below).
+              </p>
+            )}
             <div className='mt-2'>
               <input
                 id='jobDescriptionFile'

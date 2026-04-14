@@ -216,15 +216,14 @@ export function CommonFields({
           onChange={handleInputChange}
           className={`w-full px-3 py-2 border rounded-md ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } ${
-            showEmployeeNameValidation
-              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-          }`}
+          } border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
           placeholder="Enter employee name"
           required
           disabled={disabled}
         />
+        {showEmployeeNameValidation && (
+          <p className="text-red-500 text-xs mt-1">This field is required.</p>
+        )}
       </div>
       
       {(documentType === 'employee-certificate' || documentType === 'employment-agreement') && (
@@ -240,11 +239,7 @@ export function CommonFields({
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-md ${
               disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-            } ${
-              showCompanyNameValidation
-                ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-blue-500'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-            }`}
+            } border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
             placeholder="Enter company name"
             required
             disabled={disabled}
@@ -254,6 +249,9 @@ export function CommonFields({
               overflow: 'hidden'
             }}
           />
+          {showCompanyNameValidation && (
+            <p className="text-red-500 text-xs mt-1">This field is required.</p>
+          )}
         </div>
       )}
       
@@ -269,15 +267,14 @@ export function CommonFields({
           onChange={handleInputChange}
           className={`w-full px-3 py-2 border rounded-md ${
             disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-          } ${
-            showPositionValidation
-              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-          }`}
+          } border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
           placeholder="Enter position or title"
           required
           disabled={disabled}
         />
+        {showPositionValidation && (
+          <p className="text-red-500 text-xs mt-1">This field is required.</p>
+        )}
       </div>
       
       {(documentType === 'employee-certificate' || documentType === 'employment-agreement') && (
@@ -348,14 +345,13 @@ export const SignatoryNameField = ({ formData, handleInputChange, disabled, isSu
         value={formData.signatoryName ?? ''}
         onChange={handleInputChange}
         placeholder="Enter name of signatory"
-        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-            : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-        }`}
+        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
         required
         disabled={disabled}
       />
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
     </div>
   );
 };
@@ -380,14 +376,13 @@ export const SignatoryPositionField = ({ formData, handleInputChange, disabled, 
         value={formData.signatoryPosition ?? ''}
         onChange={handleInputChange}
         placeholder="Enter position of signatory"
-        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-            : 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
-        }`}
+        className={`w-full p-2 sm:p-3 border border-gray-300 rounded-md text-black text-sm sm:text-base ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
         required
         disabled={disabled}
       />
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
     </div>
   );
 };

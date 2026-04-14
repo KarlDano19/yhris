@@ -16,6 +16,7 @@ function InjurySummary({
   setValue,
   isLoading,
   watch,
+  errors,
   initialEmployeeHours = 0,
   initialDaysLost = 0,
 }: {
@@ -26,6 +27,7 @@ function InjurySummary({
   setValue: any;
   isLoading: boolean;
   watch: any;
+  errors?: any;
   initialEmployeeHours?: number;
   initialDaysLost?: number;
 }) {
@@ -294,6 +296,7 @@ function InjurySummary({
                 id="name_signature"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.name_signature && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
           <div>
