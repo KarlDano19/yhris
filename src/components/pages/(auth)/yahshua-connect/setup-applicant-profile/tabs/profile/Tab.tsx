@@ -329,6 +329,7 @@ function ProfileTab({
                       field.onChange(null);
                     }
                   }}
+                  maxDate={new Date()}
                   tabIndex={6}
                 />
               )}
@@ -383,7 +384,7 @@ function ProfileTab({
               onKeyDown={handleNationalityKeyDown}
               onBlur={handleNationalityBlur}
               onFocus={() => setShowNationalityDropdown(true)}
-              placeholder='Search for your nationality...'
+              placeholder='Search for your nationality or type custom...'
               className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
               tabIndex={10}
             />
