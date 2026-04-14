@@ -29,7 +29,7 @@ export default function AddSeparationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const queryClient = useQueryClient();
-  const { register, handleSubmit, control, reset, trigger, setValue, clearErrors, formState: { errors } } = useForm<T_Separation>({
+  const { register, handleSubmit, control, reset, trigger, setValue, formState: { errors } } = useForm<T_Separation>({
     defaultValues: {
       date: new Date().toISOString(),
     },
@@ -155,12 +155,10 @@ export default function AddSeparationModal({
                               // Auto-fill department from employee data
                               if (selectedOption.department) {
                                 setValue('department', selectedOption.department);
-                                clearErrors('department');
                               }
                               // Auto-fill position from employee data
                               if (selectedOption.position) {
                                 setValue('position', selectedOption.position);
-                                clearErrors('position');
                               }
                             } else {
                               setEmployeeSearch('');
@@ -196,7 +194,7 @@ export default function AddSeparationModal({
                         </div> */}
                         <input
                           id='position'
-                          {...register('position', { required: 'Position is required' })}
+                          {...register('position')}
                           type='text'
                           readOnly
                           data-tooltip-id="position-tooltip"
@@ -208,7 +206,6 @@ export default function AddSeparationModal({
                           place="bottom"
                           style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
-                        {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -235,7 +232,7 @@ export default function AddSeparationModal({
                         </div> */}
                         <input
                           id='department'
-                          {...register('department', { required: 'Department is required' })}
+                          {...register('department')}
                           type='text'
                           readOnly
                           data-tooltip-id="department-tooltip"
@@ -247,7 +244,6 @@ export default function AddSeparationModal({
                           place="bottom"
                           style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                         />
-                        {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-4'>
@@ -280,9 +276,7 @@ export default function AddSeparationModal({
                       onClick={async () => {
                         const reason = await trigger('reason');
                         const name = await trigger('name');
-                        const department = await trigger('department');
-                        const position = await trigger('position');
-                        const results = [reason, name, department, position];
+                        const results = [reason, name];
                         const incomplete = results.some((item: boolean) => !item);
                         if (incomplete) {
                           toast.custom(

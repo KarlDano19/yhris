@@ -23,6 +23,7 @@ interface CreateEvaluationSchedulerModalProps {
   setValue: any;
   Controller: any;
   errors: any;
+  clearErrors: any;
 }
 
 function CreateEvaluationSchedulerModal({
@@ -37,6 +38,7 @@ function CreateEvaluationSchedulerModal({
   setValue,
   Controller,
   errors,
+  clearErrors,
 }: CreateEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
@@ -120,16 +122,17 @@ function CreateEvaluationSchedulerModal({
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => setIsOpen(false)} />
                   </div>
                   {selectedTab === 1 && (
-                    <SchedulerInfoTab 
-                      register={register} 
-                      handleSubmit={handleSubmit} 
-                      setSelectedTab={setSelectedTab} 
+                    <SchedulerInfoTab
+                      register={register}
+                      handleSubmit={handleSubmit}
+                      setSelectedTab={setSelectedTab}
                       watch={watch}
                       setValue={setValue}
                       setIsCustomModalOpen={setIsCustomModalOpen}
                       control={control}
                       Controller={Controller}
                       errors={errors}
+                      clearErrors={clearErrors}
                     />
                   )}
                   {selectedTab === 2 && (

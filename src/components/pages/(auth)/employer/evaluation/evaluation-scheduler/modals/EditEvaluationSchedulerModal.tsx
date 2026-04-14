@@ -26,6 +26,7 @@ interface EditEvaluationSchedulerModalProps {
   reset: any;
   Controller: any;
   errors: any;
+  clearErrors: any;
 }
 
 function EditEvaluationSchedulerModal({
@@ -41,6 +42,7 @@ function EditEvaluationSchedulerModal({
   reset,
   Controller,
   errors,
+  clearErrors,
 }: EditEvaluationSchedulerModalProps) {
   const cancelButtonRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState(1);
@@ -255,16 +257,17 @@ function EditEvaluationSchedulerModal({
                   )}
                   
                   {isDataLoaded && selectedTab === 1 && (
-                    <SchedulerInfoTab 
-                      register={register} 
-                      handleSubmit={handleSubmit} 
-                      setSelectedTab={setSelectedTab} 
+                    <SchedulerInfoTab
+                      register={register}
+                      handleSubmit={handleSubmit}
+                      setSelectedTab={setSelectedTab}
                       watch={watch}
                       setValue={setValue}
                       setIsCustomModalOpen={setIsCustomModalOpen}
                       control={control}
                       Controller={Controller}
                       errors={errors}
+                      clearErrors={clearErrors}
                       key={refreshKey} // Add a key prop to force re-render when refreshKey changes
                     />
                   )}

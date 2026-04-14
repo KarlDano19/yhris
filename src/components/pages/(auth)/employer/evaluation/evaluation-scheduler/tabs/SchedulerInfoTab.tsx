@@ -18,6 +18,7 @@ function SchedulerInfoTab({
   control,
   Controller,
   errors,
+  clearErrors,
 }: {
   register: any;
   handleSubmit: any;
@@ -28,6 +29,7 @@ function SchedulerInfoTab({
   control: any;
   Controller: any;
   errors?: any;
+  clearErrors?: any;
 }) {
   const [evaluationItems, setEvaluationItems] = useState<any>([]);
   const {
@@ -37,6 +39,30 @@ function SchedulerInfoTab({
   const selectedFrequencyUnit = watch('frequency_unit');
   const selectedEvaluationTemplate = watch('evaluation_template');
   const selectedReminderSchedule = watch('reminder_schedule');
+  const selectedFrequencyValue = watch('frequency_value');
+  const schedulerName = watch('name');
+
+  // Clear errors when fields are filled
+  useEffect(() => {
+    if (selectedFrequencyUnit && clearErrors) clearErrors('frequency_unit');
+  }, [selectedFrequencyUnit, clearErrors]);
+
+  useEffect(() => {
+    if (selectedFrequencyValue && clearErrors) clearErrors('frequency_value');
+  }, [selectedFrequencyValue, clearErrors]);
+
+  useEffect(() => {
+    if (selectedEvaluationTemplate && clearErrors) clearErrors('evaluation_template');
+  }, [selectedEvaluationTemplate, clearErrors]);
+
+  useEffect(() => {
+    if (selectedReminderSchedule && clearErrors) clearErrors('reminder_schedule');
+  }, [selectedReminderSchedule, clearErrors]);
+
+  useEffect(() => {
+    if (schedulerName && clearErrors) clearErrors('name');
+  }, [schedulerName, clearErrors]);
+
   const [showTooltip, setShowTooltip] = useState(false);
   const [customScheduleDetails, setCustomScheduleDetails] = useState<{
     months: number[];
