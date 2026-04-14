@@ -114,6 +114,7 @@ function WorkplaceSafetyCompliance({
       setValue("signature_source", "upload");
       setSignatureSource("upload");
       setSignatureUrl(URL.createObjectURL(file));
+      clearErrors("signature");
     }
   };
 
@@ -125,6 +126,7 @@ function WorkplaceSafetyCompliance({
       setValue("noted_signature_source", "upload");
       setNotedSignatureSource("upload");
       setNotedSignatureUrl(URL.createObjectURL(file));
+      clearErrors("noted_signature");
     }
   };
 
@@ -143,6 +145,7 @@ function WorkplaceSafetyCompliance({
         setValue("signature_source", "draw");
         setSignatureSource("draw");
         setSignatureUrl(drawnSignatureDataUrl);
+        clearErrors("signature");
       });
   };
 
@@ -161,6 +164,7 @@ function WorkplaceSafetyCompliance({
         setValue("noted_signature_source", "draw");
         setNotedSignatureSource("draw");
         setNotedSignatureUrl(drawnSignatureDataUrl);
+        clearErrors("noted_signature");
       });
   };
 
@@ -240,6 +244,18 @@ function WorkplaceSafetyCompliance({
       setValue("previous_noted_signature", existingNotedSignatureUrl);
     }
   }, [existingNotedSignatureUrl, setValue]);
+
+  // Clear text field errors as user types
+  const preparedByValue = watch("prepared_by");
+  const notedByValue = watch("noted_by");
+
+  useEffect(() => {
+    if (preparedByValue) clearErrors("prepared_by");
+  }, [preparedByValue, clearErrors]);
+
+  useEffect(() => {
+    if (notedByValue) clearErrors("noted_by");
+  }, [notedByValue, clearErrors]);
 
   const onSubmitHandler = (e: React.FormEvent) => {
     e.preventDefault();

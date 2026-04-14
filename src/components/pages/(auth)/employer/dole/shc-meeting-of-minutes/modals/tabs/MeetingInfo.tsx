@@ -41,6 +41,9 @@ export default function MeetingInfo({
   // Watch the form values for attendees and absentees
   const attendeesValue = watch("attendees");
   const absenteesValue = watch("absentees");
+  const dateOfMeetingValue = watch("date_of_meeting");
+  const timeOfMeetingValue = watch("time_of_meeting");
+  const venueValue = watch("venue");
   const selectedAttendees = useMemo(() => attendeesValue || [], [attendeesValue]);
   const selectedAbsentees = useMemo(() => absenteesValue || [], [absenteesValue]);
 
@@ -56,6 +59,18 @@ export default function MeetingInfo({
       clearErrors("absentees");
     }
   }, [selectedAbsentees, clearErrors]);
+
+  useEffect(() => {
+    if (dateOfMeetingValue) clearErrors("date_of_meeting");
+  }, [dateOfMeetingValue, clearErrors]);
+
+  useEffect(() => {
+    if (timeOfMeetingValue) clearErrors("time_of_meeting");
+  }, [timeOfMeetingValue, clearErrors]);
+
+  useEffect(() => {
+    if (venueValue) clearErrors("venue");
+  }, [venueValue, clearErrors]);
 
 
   const onSubmit = (e: React.FormEvent) => {

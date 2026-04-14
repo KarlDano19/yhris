@@ -29,7 +29,7 @@ export default function AddSeparationModal({
 }) {
   const cancelButtonRef = useRef(null);
   const queryClient = useQueryClient();
-  const { register, handleSubmit, control, reset, trigger, setValue, formState: { errors } } = useForm<T_Separation>({
+  const { register, handleSubmit, control, reset, trigger, setValue, clearErrors, formState: { errors } } = useForm<T_Separation>({
     defaultValues: {
       date: new Date().toISOString(),
     },
@@ -155,10 +155,12 @@ export default function AddSeparationModal({
                               // Auto-fill department from employee data
                               if (selectedOption.department) {
                                 setValue('department', selectedOption.department);
+                                clearErrors('department');
                               }
                               // Auto-fill position from employee data
                               if (selectedOption.position) {
                                 setValue('position', selectedOption.position);
+                                clearErrors('position');
                               }
                             } else {
                               setEmployeeSearch('');
