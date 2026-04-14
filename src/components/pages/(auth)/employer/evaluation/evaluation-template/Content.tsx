@@ -2,13 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 
+import BackButton from '@/components/BackButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -25,7 +24,7 @@ import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTem
 import useDuplicateEvaluationTemplate from './hooks/useDuplicateEvaluationTemplate';
 import SeederButton from '@/components/SeederButton';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
@@ -415,10 +414,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Evaluation</h4>
-          </Link>
+          <BackButton label="Evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

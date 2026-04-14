@@ -2,14 +2,11 @@
 
 import React, { useState } from 'react';
 
-import Link from 'next/link';
-
 import classNames from '@/helpers/classNames';
 import IndividualEvaluations from './tabs/IndividualEvaluations';
 import TemplateResponses from './tabs/TemplateResponses';
+import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 type TabType = 'individual' | 'template-responses';
 
@@ -25,10 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh]'>
         <div className='flex p-4'>
-          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded-md'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Evaluation</h4>
-          </Link>
+          <BackButton label="Evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>

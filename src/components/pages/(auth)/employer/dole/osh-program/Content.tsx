@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -81,7 +81,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const queryClient = useQueryClient();
   const router = useRouter();
-  
+  const allowNavigationRef = React.useRef(false);
+
   // Get cached profile data for auto-filling company information
   const cachedProfile = queryClient
     .getQueryCache()
@@ -397,6 +398,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
 
     const handlePopState = (e: PopStateEvent) => {
+      if (allowNavigationRef.current) {
+        allowNavigationRef.current = false;
+        return;
+      }
       if (hasUnsavedChangesCallback()) {
         e.preventDefault();
         // Show browser's default warning by triggering beforeunload
@@ -467,6 +472,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle tab navigation
       const tabIndex = parseInt(pendingNavigation.replace('tab-', '')) as TabNumber;
       performTabChange(tabIndex);
+    } else if (pendingNavigation === '__back__') {
+      // Go back 2 steps to account for the extra pushState entry added by the popstate guard
+      allowNavigationRef.current = true;
+      window.history.go(-2);
     } else {
       // Handle route navigation
       router.push(pendingNavigation);
@@ -562,13 +571,18 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
-          <button 
-            onClick={() => handleNavigation('/dole')} 
-            className="flex-none flex gap-3 items-center hover:bg-gray-200"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-            <h4>DOLE</h4>
-          </button>
+          <BackButton
+            label="DOLE"
+            onClick={() => {
+              if (hasUnsavedChangesCallback()) {
+                setPendingNavigation('__back__');
+                setShowUnsavedChangesModal(true);
+              } else {
+                allowNavigationRef.current = true;
+                window.history.go(-2);
+              }
+            }}
+          />
         </div>
 
         <div className={`px-2 md:px-8 lg:px-4 sticky top-0 bg-white z-30 py-2 ${isScrolled ? 'border-b border-gray-200' : ''}`}>

@@ -12,6 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import Forms from "./Forms";
 import CustomToast from "@/components/CustomToast";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import BackButton from '@/components/BackButton';
 import EmployeeCertificatePreview from "./form-previews/EmployeeCertificatePreview";
 import EmploymentAgreementPreview from "./form-previews/EmploymentAgreementPreview";
 import NoticeToExplainPreview from "./form-previews/NoticeToExplainPreview";
@@ -38,7 +39,6 @@ import initColorPolyfill from '@/helpers/colorPolyfill';
 import { handleProceedUtil } from './integrated-modules/handleProceedGenerateNTE';
 import useAddDocumentGeneratorAudit from './hooks/useAddDocumentGeneratorAudit';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import classNames from '@/helpers/classNames';
 
@@ -658,13 +658,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             </div>
           )}
           <div className="flex p-4">
-            <Link
-              href={fromChecklist ? '/setup-employer-profile/onboarding-checklist' : (employeeId ? '/manage/address-employee-issue' : '/manage')}
-              className="flex-none flex gap-3 items-center hover:bg-gray-200"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-              <h4>{fromChecklist ? 'HRIS Implementation Checklist' : 'Manage'}</h4>
-            </Link>
+            <BackButton label={fromChecklist ? 'HRIS Implementation Checklist' : 'Manage'} />
           </div>
           <div className="px-2 md:px-8 lg:px-4">
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>

@@ -4,10 +4,7 @@ import { useState, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
 import useGetChecklist from '@/components/pages/(auth)/employer/setup-employer-profile/onboarding-checklist/hooks/useGetChecklist';
@@ -17,6 +14,7 @@ import AcceptanceMemoDocGeneratorForm from '@/components/pages/(auth)/employer/m
 import SignatureModal from '@/components/pages/(auth)/employer/manage/document-generator/modals/SignatureModal';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import BackButton from '@/components/BackButton';
 
 import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
 import { T_MemoFormData } from '@/components/pages/(auth)/employer/manage/document-generator/form-previews/AcceptanceMemoPreview';
@@ -32,7 +30,6 @@ const INITIAL_FORM_DATA: AcceptanceMemoFormData = {
 };
 
 export default function Content() {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: existingMemo, isLoading: isMemoLoading } = useGetAcceptanceMemo();
@@ -105,7 +102,7 @@ export default function Content() {
           toast.custom(
             <CustomToast type='success' message='Acceptance Memo submitted successfully.' />
           );
-          router.push('/dashboard');
+          window.location.href = '/dashboard';
         },
         onError: (error: any) => {
           toast.custom(
@@ -132,13 +129,7 @@ export default function Content() {
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4 py-6'>
           <div className='flex p-2 mb-2'>
-            <Link
-              href='/setup-employer-profile/onboarding-checklist'
-              className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'
-            >
-              <ArrowLeftIcon className='h-5 w-5' />
-              <h4>HRIS Implementation Checklist</h4>
-            </Link>
+            <BackButton label="HRIS Implementation Checklist" />
           </div>
 
           <div className='mb-6'>

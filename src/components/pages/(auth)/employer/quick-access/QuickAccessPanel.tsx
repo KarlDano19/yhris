@@ -65,6 +65,7 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
       onGrayedOutClick?.(url, grayReason, label);
       return;
     }
+    window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
     router.push(url);
   };
 

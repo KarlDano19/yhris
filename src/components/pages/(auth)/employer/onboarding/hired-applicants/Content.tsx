@@ -3,14 +3,15 @@
 import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Tooltip } from 'react-tooltip';
 
 import Pagination from '@/components/Pagination';
+import BackButton from '@/components/BackButton';
 import useGetHiredApplicants from './hooks/useGetHiredApplicants';
 import SkeletonGrid from '@/components/SkeletonGrid';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 
@@ -20,6 +21,7 @@ type PaginationProps = {
 };
 
 const Content = () => {
+  const router = useRouter();
   const [inputValue, setInputValue] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -78,10 +80,7 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Dashboard</h4>
-          </Link>
+          <BackButton label="Dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

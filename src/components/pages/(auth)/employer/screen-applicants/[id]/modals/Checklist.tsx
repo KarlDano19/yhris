@@ -405,6 +405,24 @@ export default function Checklist({
     // Fire pending approval API now (deferred from Submit Approval button)
     if (pendingApproval?.signature) {
       const wasSkipped = pendingApproval.is_skipped || false;
+
+      // Save checklist before approving — on skip the backend advances the stage immediately,
+      // so this must run first while the current stage is still active.
+      if (wasSkipped && applicant?.applicationId && requirements.length > 0) {
+        try {
+          const requirementStatuses: Record<string, boolean> = {};
+          requirements.forEach((req) => {
+            requirementStatuses[req] = checks.includes(req);
+          });
+          await updateStageRequirementsMutation.mutateAsync({
+            appliedJobId: applicant.applicationId,
+            requirementStatuses,
+          });
+        } catch {
+          // Non-blocking
+        }
+      }
+
       try {
         await approveStage.mutateAsync({
           stage_id: pendingApproval.job_stage as number,

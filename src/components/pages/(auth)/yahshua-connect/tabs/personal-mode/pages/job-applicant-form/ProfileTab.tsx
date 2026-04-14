@@ -109,15 +109,14 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
           </div>
           <div className='grid-item'>
             <label htmlFor='address' className='text-sm font-medium leading-6 text-gray-900'>
-              City Address (Please provide your current city address)<span className='text-red-500'>*</span>
+              City Address (Please provide your current city address)
             </label>
             <div className='mt-2'>
               <input
                 type='text'
-                {...register('address', { required: true })}
+                {...register('address')}
                 id='address'
                 className='rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
-                disabled
               />
             </div>
           </div>

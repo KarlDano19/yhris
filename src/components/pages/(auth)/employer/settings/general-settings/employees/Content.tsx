@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 import Location from './tabs/Location';
@@ -11,6 +11,7 @@ import Position from './tabs/Position';
 import EmployeeStatus from './tabs/EmployeeStatus';
 
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import useSyncLocation from './hooks/location/useSyncLocation';
@@ -22,10 +23,10 @@ import useSyncLocationFromYP from './hooks/location/useSyncLocationFromYP';
 import useSyncPositionFromYP from './hooks/position/useSyncPositionFromYP';
 import useSyncEmployeeStatusFromYP from './hooks/employee-status/useSyncEmployeeStatusFromYP';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import EmployeeId from './tabs/Employee-id';
 
 const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('location');
 
   // Bulk sync hooks - TO YP
@@ -217,10 +218,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>General Settings</h4>
-          </Link>
+          <BackButton label="General Settings" />
         </div>
         <div className='pl-4 md:pl-10 mb-5'>
           <div className='flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between'>
