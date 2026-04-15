@@ -512,35 +512,35 @@ const ChatRoomsModal = ({
     });
   };
 
-  // Render tabs for applicant role
-  const renderTabs = () => (
-    <div className="flex border-b border-gray-200 mb-4">
-      <button
-        onClick={() => setActiveTab('personal')}
-        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${
-          activeTab === 'personal' ? 'text-savoy-blue' : 'text-gray-500 hover:text-gray-700'
-        }`}
-      >
-        <UserIcon className="h-5 w-5" />
-        <span>Personal</span>
-        {personalUnreadCount > 0 && (
-          <span className="min-w-[20px] h-5 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
-            {personalUnreadCount > 99 ? '99+' : personalUnreadCount}
-          </span>
-        )}
-        {activeTab === 'personal' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-savoy-blue" />}
-      </button>
-      <button
-        disabled
-        data-tooltip-id="business-chat-tooltip"
-        data-tooltip-content="Coming Soon"
-        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 relative"
-      >
-        <BriefcaseIcon className="h-5 w-5" />
-        <span>Business</span>
-      </button>
-    </div>
-  );
+  // Render tabs for applicant role, commented for now since business mode is not yet available
+  // const renderTabs = () => (
+  //   <div className="flex border-b border-gray-200 mb-4">
+  //     <button
+  //       onClick={() => setActiveTab('personal')}
+  //       className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${
+  //         activeTab === 'personal' ? 'text-savoy-blue' : 'text-gray-500 hover:text-gray-700'
+  //       }`}
+  //     >
+  //       <UserIcon className="h-5 w-5" />
+  //       <span>Personal</span>
+  //       {personalUnreadCount > 0 && (
+  //         <span className="min-w-[20px] h-5 bg-savoy-blue text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5">
+  //           {personalUnreadCount > 99 ? '99+' : personalUnreadCount}
+  //         </span>
+  //       )}
+  //       {activeTab === 'personal' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-savoy-blue" />}
+  //     </button>
+  //     <button
+  //       disabled
+  //       data-tooltip-id="business-chat-tooltip"
+  //       data-tooltip-content="Coming Soon"
+  //       className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed opacity-50 relative"
+  //     >
+  //       <BriefcaseIcon className="h-5 w-5" />
+  //       <span>Business</span>
+  //     </button>
+  //   </div>
+  // );
 
   // Render content based on role
   const renderContent = () => {
@@ -585,7 +585,7 @@ const ChatRoomsModal = ({
     // Applicant role with tabs
     return (
       <>
-        {renderTabs()}
+        {/* {renderTabs()} */}
         <div
           className="relative"
           onMouseMove={(e) => {
