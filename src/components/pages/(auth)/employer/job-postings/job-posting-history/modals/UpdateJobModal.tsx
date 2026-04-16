@@ -707,6 +707,7 @@ export default function UpdateJobModal({
                       setValue={fourthForm.setValue}
                       getValues={fourthForm.getValues}
                       register={fourthForm.register}
+                      watch={fourthForm.watch}
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}

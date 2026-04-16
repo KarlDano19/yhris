@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCookie } from 'cookies-next';
 
 async function submitApplication(data: any) {
@@ -52,7 +52,12 @@ async function submitApplication(data: any) {
 }
 
 export default function useSubmitApplication() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: submitApplication,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['jobAppliedCache']);
+    },
   });
 }

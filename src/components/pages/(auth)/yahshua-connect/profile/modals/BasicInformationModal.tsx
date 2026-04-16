@@ -343,6 +343,7 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
                       selected={field.value}
                       pickerOnChange={(date: any) => field.onChange(date)}
                       inputOnChange={(value: any) => field.onChange(value ? new Date(value) : null)}
+                      maxDate={new Date()}
                     />
                   )}
                 />
@@ -403,7 +404,7 @@ const BasicInformationModal = ({ isOpen, onClose, basicInfo, onSave }: BasicInfo
                         onKeyDown={handleNationalityKeyDown}
                         onBlur={handleNationalityBlur}
                         onFocus={() => setShowNationalityDropdown(true)}
-                        placeholder="Search for your nationality..."
+                        placeholder="Search or type custom..."
                         className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-savoy-blue focus:border-transparent outline-none transition-all"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">

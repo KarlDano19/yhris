@@ -85,6 +85,7 @@ export type T_EmploymentDocument = {
 // Application Types
 export type T_Application = {
   id: number;
+  job_posting_id?: number;
   title: string;
   company: string;
   logo: string;

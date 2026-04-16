@@ -1,9 +1,11 @@
 import { ChangeEvent, ChangeEventHandler, FormEventHandler, Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 import { CheckBadgeIcon, ForwardIcon, ExclamationTriangleIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline';
 
 import UnsavedChangesModal from '@/components/UnsavedChangesModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import ModalLayout from '../../../../../../ModalLayout';
 import ModalFooterLayout from '../../layouts/ModalFooterLayout';
 import StateContext from '../../contexts/StateContext';
@@ -393,13 +395,10 @@ export default function Checklist({
       return;
     }
 
-    // Block "Passed" without a completed stage approval (signature required)
-    if (data.status === 'passed') {
-      const approval = getCurrentStageApproval();
-      if (!approval?.signature && !approval?.is_skipped) {
-        toast.custom(() => <CustomToast message='Stage approval is required before marking the applicant as Passed. Please approve or skip the stage first.' type='error' />, { duration: 6000 });
-        return;
-      }
+    // Block save without a completed stage approval (signature required)
+    const stageApproval = getCurrentStageApproval();
+    if (!stageApproval?.signature && !stageApproval?.is_skipped) {
+      return;
     }
 
     // Fire pending approval API now (deferred from Submit Approval button)
@@ -1148,13 +1147,29 @@ export default function Checklist({
             >
               Close
             </button>
-            <button
-              type='submit'
-              disabled={approveStage.isLoading || updateStageNotesMutation.isLoading}
-              className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-60 disabled:cursor-not-allowed'
-            >
-              {approveStage.isLoading || updateStageNotesMutation.isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
+            {(() => {
+              const isPassed = currentStatus === 'passed';
+              return (
+                <>
+                  <span
+                    data-tooltip-id="checklist-save-tooltip"
+                    data-tooltip-content={isPassed ? 'Cannot modify a passed applicant.' : undefined}
+                  >
+                    <button
+                      type='submit'
+                      disabled={approveStage.isLoading || updateStageNotesMutation.isLoading || isPassed}
+                      className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2'
+                    >
+                      {(approveStage.isLoading || updateStageNotesMutation.isLoading) && (
+                        <LoadingSpinner size='sm' color='blue' />
+                      )}
+                      {approveStage.isLoading || updateStageNotesMutation.isLoading ? null : 'Save Changes'}
+                    </button>
+                  </span>
+                  <Tooltip id="checklist-save-tooltip" />
+                </>
+              );
+            })()}
           </ModalFooterLayout>
         </form>
 

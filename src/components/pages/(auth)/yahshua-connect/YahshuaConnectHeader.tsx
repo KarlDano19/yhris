@@ -120,6 +120,15 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
       profileData?.longitude !== 0;
 
     if (!hasValidLocation) {
+      // Don't show if user previously chose to skip and checked "Remember my choice"
+      const skipKey = profileData?.email
+        ? `location_permission_skipped_${profileData.email}`
+        : 'location_permission_skipped';
+      if (localStorage.getItem(skipKey) === 'true') {
+        setHasCheckedLocation(true);
+        return;
+      }
+
       // Show location permission modal after a short delay to not overwhelm user
       const timer = setTimeout(() => {
         setShowLocationModal(true);
@@ -667,6 +676,7 @@ const YahshuaConnectHeader = ({ disabled = false, hasProfile, initialTokenExpire
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationObtained={handleLocationObtained}
+        userEmail={profileData?.email}
       />
 
       <Tooltip id="business-mode-tooltip" />

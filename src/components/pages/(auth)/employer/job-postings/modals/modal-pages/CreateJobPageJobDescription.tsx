@@ -10,6 +10,7 @@ export default function CreateJobPageJobDescription({
   setValue,
   getValues,
   register,
+  watch,
   setPageNumber,
   onSubmit,
   setFileProps,
@@ -25,6 +26,7 @@ export default function CreateJobPageJobDescription({
   register: any;
   setValue: any;
   getValues: any;
+  watch?: any;
   setPageNumber: Dispatch<number>;
   onSubmit: () => void;
   setFileProps: (fileProps: { fileName?: string; fileSize?: number; file?: File }) => void; // Update type definition
@@ -74,10 +76,11 @@ export default function CreateJobPageJobDescription({
       currentContent === CREATEJOB_TEMPLATE[0];
   };
 
-  // Sync skills from form to UI
+  // Sync skills from form to UI — depends on watched value so it re-runs when reset() is called
+  const watchedSkills = watch ? watch('skills') : getValues('skills');
   useEffect(() => {
-    const currentSkills = getValues('skills');
-    
+    const currentSkills = watchedSkills ?? getValues('skills');
+
     let skillsArray: string[] = [];
     if (Array.isArray(currentSkills)) {
       skillsArray = currentSkills;
@@ -87,9 +90,9 @@ export default function CreateJobPageJobDescription({
         .map((s: string) => s.trim())
         .filter((s: string) => s.length > 0);
     }
-    
+
     setTagsSkill(skillsArray);
-  }, [getValues, combinedFormData]);
+  }, [watchedSkills]);
 
   // Handle skills input key down
   const handleKeyDownSkill = (event: React.KeyboardEvent<HTMLInputElement>) => {

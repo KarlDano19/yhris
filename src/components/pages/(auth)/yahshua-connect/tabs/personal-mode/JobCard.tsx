@@ -234,13 +234,29 @@ const JobCard = ({
             const reapplyDate = computeReapplyDate();
 
             if (status === 'rejected') {
-              return (
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg">
-                    <span className="text-sm font-medium">Rejected</span>
+              // Cooldown still active — show Rejected badge with reapply date
+              if (reapplyDate) {
+                return (
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg">
+                      <span className="text-sm font-medium">Rejected</span>
+                    </div>
+                    <span className="text-xs text-gray-500 mt-1">Can re-apply on {reapplyDate}</span>
                   </div>
-                  {reapplyDate && <span className="text-xs text-gray-500 mt-1">Can re-apply on {reapplyDate}</span>}
-                </div>
+                );
+              }
+              // Cooldown passed — allow reapplication
+              return (
+                <Link
+                  href={`/job-applicant-form/${id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApply?.();
+                  }}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm inline-block text-center"
+                >
+                  Apply Now
+                </Link>
               );
             }
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import Modal from '../components/Modal';
+import JobDetailsModal from '../tabs/personal-mode/modals/JobDetailsModal';
 
 import { formatDateToLocal } from '@/helpers/date';
 
@@ -26,6 +27,7 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
   const applicationsData = cachedApplications?.state?.data;
   const isLoading = !applicationsData;
   const [transformedApplications, setTransformedApplications] = useState<T_Application[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
 
   // Transform API data to match the display format
   useEffect(() => {
@@ -56,7 +58,8 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
       };
 
       return {
-        id: application.id || application.job_posting_id, 
+        id: application.id,
+        job_posting_id: application.job_posting_id || application.job_posting,
         title: application.job_title || 'Untitled Job',
         company: application.employer_name || 'Unknown Company',
         logo: getCompanyInitials(application.employer_name || '?'),
@@ -127,8 +130,9 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
   };
 
   return (
+    <>
     <Modal
-      isOpen={isOpen}
+      isOpen={isOpen && selectedJobId === null}
       onClose={onClose}
       title="My Applications"
       size="2xl"
@@ -148,7 +152,8 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
           {transformedApplications.map((application) => (
             <div
               key={application.id}
-              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              onClick={() => setSelectedJobId(application.job_posting_id ?? null)}
+              className="flex sm:flex-row flex-col sm:items-start items-start gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <div className="w-12 h-12 rounded-lg bg-savoy-blue flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                 {application.logo}
@@ -190,6 +195,15 @@ const MyApplicationsModal = ({ isOpen, onClose }: MyApplicationsModalProps) => {
         </div>
       )}
     </Modal>
+
+    {selectedJobId !== null && (
+      <JobDetailsModal
+        isOpen={selectedJobId !== null}
+        onClose={() => setSelectedJobId(null)}
+        jobId={selectedJobId}
+      />
+    )}
+    </>
   );
 };
 
