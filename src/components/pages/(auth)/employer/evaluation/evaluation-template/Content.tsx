@@ -2,13 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 
+import BackButton from '@/components/BackButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -24,10 +23,8 @@ import useDeleteEvaluationTemplate from './hooks/useDeleteEvaluationTemplate';
 import useBulkDeleteEvaluationTemplates from './hooks/useBulkDeleteEvaluationTemplates';
 import useDuplicateEvaluationTemplate from './hooks/useDuplicateEvaluationTemplate';
 import SeederButton from '@/components/SeederButton';
-import useSeedEvaluationTemplates from './hooks/useSeedEvaluationTemplates';
-import useUnseedEvaluationTemplates from './hooks/useUnseedEvaluationTemplates';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import DuplicateIcon from '@/svg/DuplicateIcon';
@@ -92,8 +89,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const bulkDeleteMutation = useBulkDeleteEvaluationTemplates();
   const { mutate: duplicateEvaluationTemplate, isLoading: isDuplicateEvaluationTemplateLoading } = useDuplicateEvaluationTemplate();
   const [isSearching, setIsSearching] = useState(false);
-  const seedEvaluationTemplatesMutation = useSeedEvaluationTemplates();
-  const unseedEvaluationTemplatesMutation = useUnseedEvaluationTemplates();
 
   // Persisted form state for CreateEvaluationTemplateModal
   const formMethods = useForm({
@@ -415,44 +410,11 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     }
   };
 
-  const handleSeedEvaluationTemplates = async (count?: number) => {
-    try {
-      const result = await seedEvaluationTemplatesMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed evaluation templates';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEvaluationTemplates = async () => {
-    try {
-      const result = await unseedEvaluationTemplatesMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed evaluation templates';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Evaluation</h4>
-          </Link>
+          <BackButton label="Evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
@@ -460,10 +422,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <h2 className='text-xl font-bold text-indigo-dye'>Evaluation Template</h2>
             <div className='hidden lg:block -mb-4'>
               <SeederButton
-                onSeed={handleSeedEvaluationTemplates}
-                onUnseed={handleUnseedEvaluationTemplates}
-                isLoading={seedEvaluationTemplatesMutation.isLoading}
-                isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                viewType="evaluation_template"
                 disabled={!hasActiveSubscription}
               />
             </div>
@@ -541,10 +500,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
               <div className='lg:hidden'>
                 <SeederButton
-                  onSeed={handleSeedEvaluationTemplates}
-                  onUnseed={handleUnseedEvaluationTemplates}
-                  isLoading={seedEvaluationTemplatesMutation.isLoading}
-                  isUnseeding={unseedEvaluationTemplatesMutation.isLoading}
+                  viewType="evaluation_template"
                   disabled={!hasActiveSubscription}
                 />
               </div>

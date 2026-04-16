@@ -188,7 +188,7 @@ function Content() {
               <Confetti width={width} height={height} />
             </>
           ) : (
-            <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+            <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
               {currentTab === 0 && (
                 <>
                   <div className='border-2 rounded-lg mx-4 mt-4 mb-12'>

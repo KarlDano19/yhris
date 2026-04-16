@@ -152,31 +152,17 @@ const Details = ({
   
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Manually trigger React Hook Form validation for all fields
-    await trigger();
-    
-    // Check if there are any validation errors other than address fields and zip code
-    const nonAddressErrors = Object.keys(errors).filter(key => 
-      !['region', 'province', 'city', 'locality', 'zipCode'].includes(key)
-    );
-    
-    if (nonAddressErrors.length > 0) {
-      // If there are other validation errors, don't show toast - let the form errors show
-      return;
-    }
-    
-    // Check if all other required fields are filled
+
+    // Only validate Details step fields — avoids stale-closure issues with Settings fields
+    const isValid = await trigger([
+      'companyName', 'mobileNumber', 'street', 'typeOfIndustry',
+      'region', 'province', 'city', 'locality', 'country', 'zipCode',
+    ] as any);
+
+    if (!isValid) return;
+
     const formValues = watch();
-    const requiredFields = ['companyName', 'mobileNumber', 'street', 'typeOfIndustry'];
-    const missingRequiredFields = requiredFields.filter(field => !formValues[field] || formValues[field].trim() === '');
-    
-    if (missingRequiredFields.length > 0) {
-      // If other required fields are missing, don't show toast - let the form errors show
-      return;
-    }
-    
-    // If all other required fields are filled and only address fields are missing, check address field order
+
     if (!selectedRegionCode) {
       toast.custom(() => <CustomToast message={'Please select a region first'} type='error' />, {
         duration: 3000,

@@ -3,14 +3,13 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-import Link from 'next/link';
-
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
+import BackButton from '@/components/BackButton';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 import CustomToast from '@/components/CustomToast';
@@ -29,8 +28,6 @@ import useGetJobPostItems from './hooks/get/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
 import useBulkDeleteJobPostings from './hooks/delete/useBulkDeleteJobPostings';
 import useDeleteJobPost from './hooks/delete/useDeleteJobPost';
-import useSeedJobPostings from './hooks/seeder/useSeedJobPostings';
-import useUnseedJobPostings from './hooks/seeder/useUnseedJobPostings';
 import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
 import useUpdateJobPostStatus from './hooks/update/useUpdateJobPostStatus';
@@ -39,7 +36,7 @@ import useUpdateJobRolesStatus from './hooks/update/useUpdateJobRolesStatus';
 import useUpdateJobRemarkStatus from './hooks/update/useUpdateJobRemarkStatus';
 import useUpdateJobBenefitStatus from './hooks/update/useUpdateJobBenefitStatus';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
@@ -141,8 +138,6 @@ const Content = () => {
   const { mutate: mutateBenefit } = useUpdateJobBenefitStatus();
   const bulkDeleteMutation = useBulkDeleteJobPostings();
   const { mutate: deleteJobPost, isLoading: isDeleteLoading } = useDeleteJobPost();
-  const seedJobPostingsMutation = useSeedJobPostings();
-  const unseedJobPostingsMutation = useUnseedJobPostings();
   const { mutate: duplicateJobPosting, isLoading: isDuplicateJobPostingLoading } = useDuplicateJobPosting();
   
   const [showShareOptions, setShowShareOptions] = useState<{ [key: number]: boolean }>({});
@@ -543,44 +538,6 @@ const Content = () => {
     refetch();
   };
 
-  const handleSeedJobPostings = async (count: number) => {
-    try {
-      const result = await seedJobPostingsMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      setSelectedJobPostings(new Set());
-      setSelectAll(false);
-      setShowShareOptions({});
-      refetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed job postings';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedJobPostings = async () => {
-    try {
-      const result = await unseedJobPostingsMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-      setSelectedJobPostings(new Set());
-      setSelectAll(false);
-      setShowShareOptions({});
-      refetch();
-    } catch (error) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed job postings';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   // Handle duplicate job posting
   const openDuplicateModal = (jobPost: any) => {
     setDuplicateJobPostingId(jobPost.id);
@@ -718,8 +675,8 @@ const Content = () => {
           >
             {jobPost.assignments_count || 0} users
           </td>
-          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex justify-center items-center space-x-2'>
+          <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500' style={{ overflow: 'visible' }}>
+            <div className='flex justify-center items-center space-x-2 relative'>
                 <SmartButton 
                   id="edit-job-btn"
                   onClick={() => setIsEditModalOpen({ id: jobPost.id, open: true })}
@@ -905,12 +862,9 @@ const Content = () => {
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/post-job' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Post Job</h4>
-          </Link>
+          <BackButton label="Dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
@@ -918,12 +872,11 @@ const Content = () => {
             <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
             <div className='hidden lg:block -mb-4'>
               <SeederButton
-                onSeed={handleSeedJobPostings}
-                onUnseed={handleUnseedJobPostings}
-                isLoading={seedJobPostingsMutation.isLoading}
-                isUnseeding={unseedJobPostingsMutation.isLoading}
+                viewType="job_posting"
                 maxCount={1000}
                 defaultCount={5}
+                onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+                onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
               />
             </div>
           </div>
@@ -999,12 +952,11 @@ const Content = () => {
             <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
               <div className='lg:hidden'>
                 <SeederButton
-                  onSeed={handleSeedJobPostings}
-                  onUnseed={handleUnseedJobPostings}
-                  isLoading={seedJobPostingsMutation.isLoading}
-                  isUnseeding={unseedJobPostingsMutation.isLoading}
+                  viewType="job_posting"
                   maxCount={1000}
                   defaultCount={5}
+                  onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+                  onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
                 />
               </div>
             </div>

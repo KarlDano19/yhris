@@ -90,7 +90,7 @@ const Content = () => {
   };
 
   return (
-    <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 `}>
+    <div className={`mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 `}>
       <div className='px-4 pt-24'>
         <h4 className='text-lg md:text-2xl font-bold md:font-semibold'>
           Jobs - {jobDetailData?.job_title} | Application Form

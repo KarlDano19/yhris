@@ -2,18 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
+import BackButton from '@/components/BackButton';
 import CreateThirdPartyIntegrationModal from './modals/CreateThirdPartyIntegrationModal';
 import useGetThirdPartyIntegrationItems from './hooks/useGetThirdPartyIntegrationItems';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import classNames from '@/helpers/classNames';
 import { formatDateToLocal } from '@/helpers/date';
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+  const router = useRouter();
   const broadcastChannel = new BroadcastChannel('settings-integration-channel');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -145,12 +147,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>General Settings</h4>
-          </Link>
+          <BackButton label="General Settings" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

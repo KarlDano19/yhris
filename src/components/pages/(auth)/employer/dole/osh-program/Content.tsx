@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
@@ -81,7 +81,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   
   const queryClient = useQueryClient();
   const router = useRouter();
-  
+  const allowNavigationRef = React.useRef(false);
+
   // Get cached profile data for auto-filling company information
   const cachedProfile = queryClient
     .getQueryCache()
@@ -327,13 +328,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   // Form validation and processing handler (Form layer)
   const onSubmit = handleSubmit(async (data: ExtendedOshProgram) => {
-    // Validate required fields
-    if (!validateFormSubmission(data, selectedTab, setMissingFields, setValidationMessage)) {
-      // Throw an error to prevent submission and show error toast
-      throw new Error("Please fill out all required fields marked with *");
-    }
-
-    // Process form data
+    // Process form data (validation already done in submitCurrentTab)
     const processedData = processFormData(data, selectedTab, oshProgramDetails, watch);
 
     // Submit data to server
@@ -355,6 +350,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setValidationMessage("");
     setMissingFields([]);
 
+    // Validate required fields BEFORE attempting submission
+    const formValues = watch();
+    if (!validateFormSubmission(formValues, selectedTab, setMissingFields, setValidationMessage)) {
+      toast.custom(() => <CustomToast message="Please fill out all required fields marked with *" type="error" />);
+      return;
+    }
+
     // Set loading state
     setIsSaving(true);
 
@@ -366,7 +368,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       toast.custom(() => <CustomToast message="Successfully updated OSH Program Details." type="success" />);
       
     } catch (error: any) {
-      // Show error toast
       toast.custom(() => <CustomToast message={error.message || "Failed to update OSH Program Details"} type="error" />);
     } finally {
       // Reset loading state
@@ -397,6 +398,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     };
 
     const handlePopState = (e: PopStateEvent) => {
+      if (allowNavigationRef.current) {
+        allowNavigationRef.current = false;
+        return;
+      }
       if (hasUnsavedChangesCallback()) {
         e.preventDefault();
         // Show browser's default warning by triggering beforeunload
@@ -467,6 +472,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       // Handle tab navigation
       const tabIndex = parseInt(pendingNavigation.replace('tab-', '')) as TabNumber;
       performTabChange(tabIndex);
+    } else if (pendingNavigation === '__back__') {
+      // Go back 2 steps to account for the extra pushState entry added by the popstate guard
+      allowNavigationRef.current = true;
+      window.history.go(-2);
     } else {
       // Handle route navigation
       router.push(pendingNavigation);
@@ -560,15 +569,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="flex p-4">
-          <button 
-            onClick={() => handleNavigation('/dole')} 
-            className="flex-none flex gap-3 items-center hover:bg-gray-200"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-            <h4>DOLE</h4>
-          </button>
+          <BackButton
+            label="DOLE"
+            onClick={() => {
+              if (hasUnsavedChangesCallback()) {
+                setPendingNavigation('__back__');
+                setShowUnsavedChangesModal(true);
+              } else {
+                allowNavigationRef.current = true;
+                window.history.go(-2);
+              }
+            }}
+          />
         </div>
 
         <div className={`px-2 md:px-8 lg:px-4 sticky top-0 bg-white z-30 py-2 ${isScrolled ? 'border-b border-gray-200' : ''}`}>
@@ -642,21 +656,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </SmartButton>
           </div>
         </div>
-            
-        {/* Validation message */}
-        {validationMessage && (
-          <div className="mt-2 px-2 md:px-8 lg:px-4">
-            <div className="rounded-md bg-red-50 p-2">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    {validationMessage}
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
             
         {/* Version Limit Warning */}
         {versionHistoryData?.version_info && (

@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
       session['hasPendingTransaction'] = data.has_pending_transaction;
       session['hasActiveSubscription'] = data.has_active_subscription;
       session['hasProfile'] = data.has_profile;
-      
+      session['hasCompletedOnboarding'] = data.has_onboarded ?? false;
+
       await session.save();
       await sleep(250);
       

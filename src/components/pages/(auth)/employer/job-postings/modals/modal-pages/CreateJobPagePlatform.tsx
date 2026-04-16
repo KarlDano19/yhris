@@ -82,14 +82,14 @@ export default function CreateJobPagePlatform({
         {/* start */}
         <div className='sm:col-span-4 mt-4'>
           <label className='block text-sm font-medium leading-6 text-gray-900'>
-            Post in (you may select multiple platforms):
+            Post in (you may select multiple platforms): <span className='text-red-600'>*</span>
           </label>
           {isEdit && originalPlatforms.length > 0 && (
             <p className='text-sm text-gray-500 mt-1'>
               You can add new platforms, but cannot remove previously selected platforms.
             </p>
           )}
-          <div className={`flex flex-col space-y-2 ml-2 mt-2 ${manualInputFocus ? 'border-2 border-blue-700' : ''}`}>
+          <div className={`flex flex-col space-y-2 ml-2 mt-2 ${manualInputFocus ? 'border-2 border-red-600' : ''}`}>
             <label className={`inline-flex items-center mr-4 ${isEdit && originalPlatforms.includes('LinkedIn') ? 'opacity-60' : ''}`}>
               <input
                 id='linkedinCheckbox'
@@ -126,6 +126,9 @@ export default function CreateJobPagePlatform({
               </span>
             </label>
           </div>
+          {manualInputFocus && (
+            <p className='text-red-600 text-sm mt-1'>Please select at least one platform</p>
+          )}
           <div className='mt-3'>
             <label htmlFor='jobUrl' className='block text-sm font-medium leading-6 text-gray-900'>
               Add a link to your job post

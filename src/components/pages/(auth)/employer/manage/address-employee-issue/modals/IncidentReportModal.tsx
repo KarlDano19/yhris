@@ -33,7 +33,7 @@ export default function IncidentReportModal({
   refetch: any;
 }) {
   const { mutate, isLoading } = useAddEmployeeIssueItems();
-  const { register, handleSubmit, setValue, reset, control, trigger, watch } = useForm<T_IncidentReport>({
+  const { register, handleSubmit, setValue, reset, control, trigger, watch, formState: { errors } } = useForm<T_IncidentReport>({
     defaultValues: {
       name: '',
       incidentDate: new Date().toISOString(), 
@@ -188,6 +188,9 @@ export default function IncidentReportModal({
                             }}
                           />
                         </div>
+                        {errors.name && (
+                          <p className='text-xs text-red-600 mt-1'>Employee name is required.</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -209,6 +212,9 @@ export default function IncidentReportModal({
                             style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
+                        {errors.position && (
+                          <p className='text-xs text-red-600 mt-1'>Position is required. Please select an employee.</p>
+                        )}
                       </div>
                     </div>
                     <div className='grid grid-cols-2 gap-6 mt-4'>
@@ -232,6 +238,9 @@ export default function IncidentReportModal({
                             style={{ backgroundColor: '#374151', color: 'white', fontSize: '12px' }}
                           />
                         </div>
+                        {errors.department && (
+                          <p className='text-xs text-red-600 mt-1'>Department is required. Please select an employee.</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -242,6 +251,7 @@ export default function IncidentReportModal({
                           <Controller
                             control={control}
                             name='incidentDate'
+                            rules={{ required: true }}
                             render={({ field }) => (
                               <CustomDatePicker
                                 id='incident-report-datepicker'
@@ -257,6 +267,9 @@ export default function IncidentReportModal({
                             )}
                           />
                         </div>
+                        {errors.incidentDate && (
+                          <p className='text-xs text-red-600 mt-1'>Date of incident is required.</p>
+                        )}
                       </div>
                     </div>
                     <div className='grid grid-cols-2 gap-6 mt-4'>
@@ -273,6 +286,9 @@ export default function IncidentReportModal({
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
                         </div>
+                        {errors.incidentPlace && (
+                          <p className='text-xs text-red-600 mt-1'>Place of incident is required.</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor='issueType' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -365,6 +381,9 @@ export default function IncidentReportModal({
                             }}
                           />
                         </div>
+                        {errors.issueType && (
+                          <p className='text-xs text-red-600 mt-1'>{String(errors.issueType.message) || 'Issue type is required.'}</p>
+                        )}
                       </div>
                     </div>
 
@@ -385,6 +404,9 @@ export default function IncidentReportModal({
                           {briefBackgroundValue.length} characters
                         </div>
                       </div>
+                      {errors.briefBackground && (
+                        <p className='text-xs text-red-600 mt-1'>Brief background is required.</p>
+                      )}
                     </div>
                   </div>
                   <hr />
@@ -399,21 +421,6 @@ export default function IncidentReportModal({
                         const issueType = await trigger('issueType');
                         const briefBackground = await trigger('briefBackground');
                         const incidentDate = await trigger('incidentDate');
-                        const results = [name, position, department, incidentPlace, issueType, briefBackground, incidentDate];
-                        const incomplete = results.some((item: boolean) => !item);
-                        if (incomplete) {
-                          toast.custom(
-                            () => (
-                              <CustomToast
-                                message={'You cannot proceed due to incomplete fields. Please review.'}
-                                type='error'
-                              />
-                            ),
-                            {
-                              duration: 2000,
-                            }
-                          );
-                        }
                       }}
                       className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                       disabled={isLoading}

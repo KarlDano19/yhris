@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from 'react';
 
+import { LockClosedIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon } from '@heroicons/react/24/solid';
+
 import { useParams, useSearchParams } from 'next/navigation';
 
 import useVerifyOauth from './hooks/useVerifyOauth';
+import useGoogleLoginComplete from './hooks/useGoogleLoginComplete';
+import useGoogleLoginLink from './hooks/useGoogleLoginLink';
 
 function Content() {
   const broadcastChannel = new BroadcastChannel('integration-channel');
@@ -14,7 +19,36 @@ function Content() {
   const error = searchParams.get('error') || '';
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [hasError, setHasError] = useState<boolean>(false);
+  const [needsAccountType, setNeedsAccountType] = useState<boolean>(false);
+  const [emailConflict, setEmailConflict] = useState<boolean>(false);
+  const [googleAccessToken, setGoogleAccessToken] = useState<string>('');
+  const [selectedAccountType, setSelectedAccountType] = useState<string>('applicant');
+  const [linkPassword, setLinkPassword] = useState<string>('');
+  const [showLinkPassword, setShowLinkPassword] = useState<boolean>(false);
   const { mutate, isLoading, isError, isSuccess } = useVerifyOauth();
+  const { mutate: completeGoogleLogin, isLoading: isCompletingGoogle } = useGoogleLoginComplete();
+  const { mutate: linkGoogleAccount, isLoading: isLinking } = useGoogleLoginLink();
+
+  const postAndClose = (postMessageData: any) => {
+    try {
+      window.opener?.postMessage(postMessageData, '*');
+    } catch (e) {
+      console.warn('window.opener.postMessage failed:', e);
+    }
+    try {
+      broadcastChannel.postMessage(postMessageData);
+    } catch (e) {
+      console.warn('BroadcastChannel postMessage failed:', e);
+    }
+    try {
+      localStorage.setItem('sso_result', JSON.stringify({ ...postMessageData, _ts: Date.now() }));
+    } catch (e) {
+      console.warn('localStorage SSO fallback failed:', e);
+    }
+    setTimeout(() => {
+      window.close();
+    }, 1500);
+  };
 
   useEffect(() => {
     if (isError) {
@@ -30,11 +64,53 @@ function Content() {
       };
       const callbackRequest = {
         onSuccess: (data: any) => {
+          // Existing non-applicant account with same email — needs password to link
+          if (data.email_conflict) {
+            setGoogleAccessToken(data.google_access_token);
+            setEmailConflict(true);
+            return;
+          }
+
+          // New Google user — needs to choose account type before account is created
+          if (data.needs_account_type) {
+            const presetAccountType = localStorage.getItem('google_sso_account_type');
+            localStorage.removeItem('google_sso_account_type');
+            if (presetAccountType) {
+              // Context already known (e.g. job application flow) — skip the selection form
+              completeGoogleLogin(
+                { google_access_token: data.google_access_token, account_type: presetAccountType },
+                {
+                  onSuccess: (created: any) => {
+                    postAndClose({
+                      isGranted: created.is_granted,
+                      provider: params?.provider,
+                      token: created.token,
+                      email: created.email,
+                      has_pending_transaction: created.has_pending_transaction,
+                      has_active_subscription: created.has_active_subscription,
+                      has_profile: created.has_profile,
+                      account_type: created.account_type,
+                      login_type: created.login_type,
+                    });
+                  },
+                  onError: (err: any) => {
+                    setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
+                    setHasError(true);
+                  },
+                }
+              );
+              return;
+            }
+            setGoogleAccessToken(data.google_access_token);
+            setNeedsAccountType(true);
+            return;
+          }
+
           const postMessageData: any = {
             isGranted: data.is_granted,
             provider: params?.provider,
           };
-          if (['yahshua-payroll', 'yg-payroll'].includes(data.login_type)) {
+          if (['yahshua-payroll', 'yg-payroll', 'google'].includes(data.login_type)) {
             postMessageData.token = data.token;
             postMessageData.email = data.email;
             postMessageData.has_pending_transaction = data.has_pending_transaction;
@@ -43,27 +119,7 @@ function Content() {
             postMessageData.account_type = data.account_type;
             postMessageData.login_type = data.login_type;
           }
-          // Primary: window.opener.postMessage (works cross-origin, e.g. www vs non-www)
-          try {
-            window.opener?.postMessage(postMessageData, '*');
-          } catch (e) {
-            console.warn('window.opener.postMessage failed:', e);
-          }
-          // Secondary: BroadcastChannel (same-origin, modern browsers)
-          try {
-            broadcastChannel.postMessage(postMessageData);
-          } catch (e) {
-            console.warn('BroadcastChannel postMessage failed:', e);
-          }
-          // Fallback: localStorage storage event (older Safari, restricted browsers)
-          try {
-            localStorage.setItem('sso_result', JSON.stringify({ ...postMessageData, _ts: Date.now() }));
-          } catch (e) {
-            console.warn('localStorage SSO fallback failed:', e);
-          }
-          setTimeout(() => {
-            window.close();
-          }, 1500);
+          postAndClose(postMessageData);
         },
         onError: (err: any) => {
           setErrorMessage(err);
@@ -85,6 +141,170 @@ function Content() {
       }, 1000);
     }
   }, []);
+
+  const handleGoogleComplete = () => {
+    completeGoogleLogin(
+      { google_access_token: googleAccessToken, account_type: selectedAccountType },
+      {
+        onSuccess: (data: any) => {
+          const postMessageData: any = {
+            isGranted: data.is_granted,
+            provider: params?.provider,
+            token: data.token,
+            email: data.email,
+            has_pending_transaction: data.has_pending_transaction,
+            has_active_subscription: data.has_active_subscription,
+            has_profile: data.has_profile,
+            account_type: data.account_type,
+            login_type: data.login_type,
+          };
+          postAndClose(postMessageData);
+        },
+        onError: (err: any) => {
+          setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
+          setHasError(true);
+        },
+      }
+    );
+  };
+
+  const handleGoogleLink = () => {
+    linkGoogleAccount(
+      { google_access_token: googleAccessToken, password: linkPassword },
+      {
+        onSuccess: (data: any) => {
+          const postMessageData: any = {
+            isGranted: data.is_granted,
+            provider: params?.provider,
+            token: data.token,
+            email: data.email,
+            has_pending_transaction: data.has_pending_transaction,
+            has_active_subscription: data.has_active_subscription,
+            has_profile: data.has_profile,
+            account_type: data.account_type,
+            login_type: data.login_type,
+          };
+          postAndClose(postMessageData);
+        },
+        onError: (err: any) => {
+          setErrorMessage(typeof err === 'string' ? err : 'Something went wrong. Please try again.');
+          setHasError(true);
+        },
+      }
+    );
+  };
+
+  if (emailConflict) {
+    return (
+      <div className='w-screen h-screen flex justify-center items-center bg-gray-50'>
+        <div className='bg-white rounded-xl shadow-lg p-8 w-full max-w-sm mx-4'>
+          <h2 className='text-xl font-bold text-gray-900 mb-1 text-center'>Email already registered</h2>
+          <p className='text-sm text-gray-500 text-center mb-6'>
+            This email is linked to an existing account. Enter your HRIS password to sign in.
+          </p>
+          <div className='relative mb-3'>
+            <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+              <LockClosedIcon className='h-5 w-5 text-savoy-blue' aria-hidden='true' />
+            </div>
+            <input
+              type={showLinkPassword ? 'text' : 'password'}
+              placeholder='Password'
+              value={linkPassword}
+              onChange={(e) => setLinkPassword(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && linkPassword && !isLinking) handleGoogleLink(); }}
+              className='bg-gray-50 border border-gray-300 text-gray-900 pl-11 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+            />
+            <button
+              type='button'
+              className='absolute inset-y-0 right-0 flex items-center px-4 text-blue-400'
+              onClick={() => setShowLinkPassword(!showLinkPassword)}
+            >
+              {showLinkPassword ? (
+                <EyeIcon className='h-5 w-5 text-savoy-blue' />
+              ) : (
+                <EyeSlashIcon className='h-5 w-5 text-savoy-blue' />
+              )}
+            </button>
+          </div>
+          {hasError && (
+            <p className='text-red-500 text-xs text-center mb-3'>{errorMessage}</p>
+          )}
+          <button
+            onClick={handleGoogleLink}
+            disabled={isLinking || !linkPassword}
+            className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50'
+          >
+            {isLinking ? (
+              <span className='flex items-center justify-center gap-2'>
+                <span className='animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full' />
+                Signing in...
+              </span>
+            ) : (
+              'SIGN IN'
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsAccountType) {
+    return (
+      <div className='w-screen h-screen flex justify-center items-center bg-gray-50'>
+        <div className='bg-white rounded-xl shadow-lg p-8 w-full max-w-sm mx-4'>
+          <h2 className='text-xl font-bold text-gray-900 mb-1 text-center'>You&apos;re almost in!</h2>
+          <p className='text-sm text-gray-500 text-center mb-6'>How will you use YAHSHUA HRIS?</p>
+          <div className='space-y-3 mb-6'>
+            <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${selectedAccountType === 'applicant' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+              <input
+                type='radio'
+                name='accountType'
+                value='applicant'
+                checked={selectedAccountType === 'applicant'}
+                onChange={() => setSelectedAccountType('applicant')}
+                className='text-blue-600'
+              />
+              <div>
+                <p className='font-medium text-gray-900 text-sm'>Applicant</p>
+                <p className='text-xs text-gray-500'>I&apos;m looking for jobs</p>
+              </div>
+            </label>
+            <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${selectedAccountType === 'employer' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+              <input
+                type='radio'
+                name='accountType'
+                value='employer'
+                checked={selectedAccountType === 'employer'}
+                onChange={() => setSelectedAccountType('employer')}
+                className='text-blue-600'
+              />
+              <div>
+                <p className='font-medium text-gray-900 text-sm'>Employer</p>
+                <p className='text-xs text-gray-500'>I&apos;m hiring</p>
+              </div>
+            </label>
+          </div>
+          {hasError && (
+            <p className='text-red-500 text-xs text-center mb-3'>{errorMessage}</p>
+          )}
+          <button
+            onClick={handleGoogleComplete}
+            disabled={isCompletingGoogle}
+            className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50'
+          >
+            {isCompletingGoogle ? (
+              <span className='flex items-center justify-center gap-2'>
+                <span className='animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full' />
+                Creating account...
+              </span>
+            ) : (
+              'Continue'
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

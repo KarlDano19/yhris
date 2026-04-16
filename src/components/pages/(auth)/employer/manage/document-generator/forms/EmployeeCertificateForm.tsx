@@ -44,7 +44,8 @@ export default function EmployeeCertificateForm({
   onProceed,
   isDocumentTypeDisabled,
   isFormDisabled,
-  isFieldDisabled
+  isFieldDisabled,
+  showAcceptanceMemo,
 }: EmployeeCertificateFormProps) {
   const [formData, setFormData] = useState<EmployeeCertificateFormData>(initialData);
   
@@ -210,11 +211,12 @@ export default function EmployeeCertificateForm({
       
       <div key={formKey}>
         {/* Document Type Selector */}
-        <DocumentTypeField 
-          documentType={documentType} 
+        <DocumentTypeField
+          documentType={documentType}
           formData={formData}
           handleInputChange={handleInputChange}
-          disabled={isDocumentTypeDisabled} 
+          disabled={isDocumentTypeDisabled}
+          showAcceptanceMemo={showAcceptanceMemo}
         />
         
         {/* Letterhead Section */}

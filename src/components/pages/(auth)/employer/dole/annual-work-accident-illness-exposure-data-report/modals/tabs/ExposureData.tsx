@@ -15,12 +15,14 @@ function ExposureData({
   handleSubmit,
   setSelectedTab,
   setValue,
+  errors,
 }: {
   control: any;
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
   setValue: any;
+  errors?: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -64,6 +66,7 @@ function ExposureData({
               <Controller
                 control={control}
                 name="date_of_report"
+                rules={{ required: true }}
                 render={({ field }) => (
                   <CustomDatePicker
                     id="date_of_report"
@@ -79,6 +82,7 @@ function ExposureData({
                 )}
               />
             </div>
+            {errors?.date_of_report && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
           </div>
           <div>
             <label
@@ -154,6 +158,7 @@ function ExposureData({
                 id="year"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.year && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>
@@ -192,6 +197,7 @@ function ExposureData({
                 id="total_hours"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.total_hours_worked && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Dialog, Transition } from "@headlessui/react"
 import { XCircleIcon } from "@heroicons/react/24/solid"
 import { ModalLayoutTypes as PropTypes } from "./pages/(auth)/employer/screen-applicants/types"
 
-export default function ModalLayout({ children, title, isOpen, handleClose, nestedModals }: PropTypes) {
+export default function ModalLayout({ children, title, isOpen, handleClose, nestedModals, maxWidth = 'max-w-4xl' }: PropTypes) {
   const cancelButtonRef = useRef(null)
 
   return (
@@ -36,7 +36,7 @@ export default function ModalLayout({ children, title, isOpen, handleClose, nest
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl">
+              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full ${maxWidth}`}>
                 <div className="flex bg-savoy-blue p-2 items-center gap-4">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {title}
