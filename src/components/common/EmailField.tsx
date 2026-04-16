@@ -374,6 +374,25 @@ export default function EmailField({
     }, 0);
   };
 
+  // Handle paste — split pasted text by common separators and add each email as a tag
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData('text');
+    const parts = pasted.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
+
+    // If there are multiple parts or the single part looks like an email, process immediately
+    if (parts.length > 1 || (parts.length === 1 && parts[0].includes('@'))) {
+      e.preventDefault();
+      const newEmails = parts.filter((p) => p.includes('@') && !tags.includes(p));
+      if (newEmails.length > 0) {
+        onEmployeeSelect({ type: 'department_select', emails: newEmails });
+      }
+      onInputChange('');
+      setSearchTerm('');
+      setSelectedIndex(-1);
+    }
+    // Otherwise let the default paste behavior add text to the input
+  };
+
   // Handle input change
   const handleInputChange = (value: string) => {
     setSearchTerm(value);
@@ -504,8 +523,8 @@ export default function EmailField({
           key={tag}
           className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
         >
-          <button 
-            type='button' 
+          <button
+            type='button'
             onClick={() => onRemoveTag(tag)}
             onMouseDown={(e) => e.preventDefault()}
           >
@@ -532,6 +551,7 @@ export default function EmailField({
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={handleInputFocus}
         onBlur={handleInputBlur}
+        onPaste={handlePaste}
         className='focus:none outline-none py-1 flex-1 min-w-0'
         style={{ width: '100%' }}
         placeholder={placeholder}
