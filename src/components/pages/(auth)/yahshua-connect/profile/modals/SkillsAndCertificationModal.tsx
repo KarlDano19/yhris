@@ -71,7 +71,11 @@ const SkillsAndCertificationModal = ({
   };
 
   const handleSave = () => {
-    onSave(skills, certifications);
+    let finalSkills = skills;
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      finalSkills = [...skills, newSkill.trim()];
+    }
+    onSave(finalSkills, certifications);
     onClose();
   };
 

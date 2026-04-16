@@ -71,6 +71,7 @@ export type T_JobPostingEdit = {
   // Page 4 - Job Description
   is_show_roles: boolean;
   is_show_remarks: boolean;
+  skills: string | null;
   job_description: string | null;
   qualifications: string | null;
   job_remark: string | null;

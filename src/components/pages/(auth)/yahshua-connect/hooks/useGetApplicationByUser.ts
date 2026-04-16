@@ -35,7 +35,6 @@ async function getApplicationByUser(filters: any) {
 function useGetApplicationByUser(filters: any) {
   const query = useQuery(['jobAppliedCache', filters], () => getApplicationByUser(filters), {
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
     keepPreviousData: true,
   });
 

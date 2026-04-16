@@ -228,17 +228,17 @@ const Content = () => {
   }, [profileData]);
 
   // Helper function to parse Date object or date string to ISO format (YYYY-MM-DD)
-  const parseDateToISO = (date: Date | string | null): string => {
-    if (!date) return '';
+  const parseDateToISO = (date: Date | string | null): string | null => {
+    if (!date) return null;
     try {
       const dateObj = date instanceof Date ? date : new Date(date);
-      if (isNaN(dateObj.getTime())) return '';
+      if (isNaN(dateObj.getTime())) return null;
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     } catch {
-      return '';
+      return null;
     }
   };
 

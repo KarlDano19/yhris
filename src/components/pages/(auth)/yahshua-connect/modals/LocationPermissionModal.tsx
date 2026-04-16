@@ -9,17 +9,20 @@ interface LocationPermissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLocationObtained: (latitude: number, longitude: number, address: string) => void;
+  userEmail?: string;
 }
 
 const LocationPermissionModal = ({
   isOpen,
   onClose,
   onLocationObtained,
+  userEmail,
 }: LocationPermissionModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [rememberChoice, setRememberChoice] = useState(false);
 
   const handleAllowLocation = () => {
     setIsLoading(true);
@@ -99,6 +102,12 @@ const LocationPermissionModal = ({
   };
 
   const handleSkip = () => {
+    if (rememberChoice) {
+      const key = userEmail
+        ? `location_permission_skipped_${userEmail}`
+        : 'location_permission_skipped';
+      localStorage.setItem(key, 'true');
+    }
     onClose();
   };
 
@@ -202,6 +211,17 @@ const LocationPermissionModal = ({
               />
             </div>
           )}
+
+          {/* Remember my choice checkbox */}
+          <label className="flex items-center gap-2 w-full mb-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberChoice}
+              onChange={(e) => setRememberChoice(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-savoy-blue accent-savoy-blue"
+            />
+            <span className="text-sm text-gray-600">Remember my choice</span>
+          </label>
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full">

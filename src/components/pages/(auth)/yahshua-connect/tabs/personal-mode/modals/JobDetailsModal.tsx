@@ -120,64 +120,70 @@ const JobDetailsModal = ({ isOpen, onClose, jobId }: JobDetailsModalProps) => {
                     <div className="flex items-center gap-3">
                       {jobDetailData?.applied ? (
                         <>
-                          {/* Single badge: Applied -> Hired or Rejected (rejected shows for 15 days) */}
                           {(() => {
                             const status = jobDetailData?.applied_job_status;
-                            const updatedAt = jobDetailData?.applied_job_updated_at;
-                            // compute rejection expiry: 15 days from updatedAt
-                            if (status === 'rejected' && updatedAt) {
-                              try {
-                                const updatedDate = new Date(updatedAt);
-                                const expiresAt = new Date(updatedDate.getTime() + 15 * 24 * 60 * 60 * 1000);
-                                const now = new Date();
-                                if (now.getTime() <= expiresAt.getTime()) {
-                                  return (
+                            const reapplyDate = getReapplyDateStr();
+
+                            if (status === 'rejected') {
+                              if (reapplyDate) {
+                                // Cooldown still active — show Rejected badge + reapply date
+                                return (
+                                  <>
                                     <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg">
                                       <span className="text-sm font-medium">Rejected</span>
                                     </div>
-                                  );
-                                }
-                                // If rejection expired, fallthrough to show Applied
-                              } catch (e) {
-                                // parsing error -> show Applied
+                                    {jobDetailData?.applied_job_id && (
+                                      <button
+                                        onClick={() => setShowChatModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                                      >
+                                        <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                                        <span>Message Employer</span>
+                                      </button>
+                                    )}
+                                    <p className="text-xs text-gray-500 ml-3">Can re-apply after {reapplyDate}</p>
+                                  </>
+                                );
                               }
+                              // Cooldown passed — show Apply Now
+                              return (
+                                <Link
+                                  href={`/job-applicant-form/${jobId}`}
+                                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                                >
+                                  Apply Now
+                                </Link>
+                              );
                             }
 
-                            if (status === 'hired') {
+                            if (status === 'hired' || status === 'passed') {
                               return (
                                 <div className="flex items-center gap-2 px-4 py-2 bg-green-200 text-green-700 rounded-lg">
-                                  <CheckIcon className="h-5 w-5 " />
+                                  <CheckIcon className="h-5 w-5" />
                                   <span className="text-sm font-medium">Hired</span>
                                 </div>
                               );
                             }
 
-                            // default: Applied
+                            // ongoing or fallback -> Applied + Message Employer
                             return (
-                              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
-                                <CheckIcon className="h-5 w-5" />
-                                <span className="text-sm font-medium">Applied</span>
-                              </div>
+                              <>
+                                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
+                                  <CheckIcon className="h-5 w-5" />
+                                  <span className="text-sm font-medium">Applied</span>
+                                </div>
+                                {jobDetailData?.applied_job_id && (
+                                  <button
+                                    onClick={() => setShowChatModal(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                                  >
+                                    <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                                    <span>Message Employer</span>
+                                  </button>
+                                )}
+                              </>
                             );
                           })()}
-                          {jobDetailData?.applied_job_id && (
-                            <>
-                              <button
-                                onClick={() => setShowChatModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
-                              >
-                                <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                                <span>Message Employer</span>
-                              </button>
-                              {(() => {
-                                const reapplyDate = getReapplyDateStr();
-                                if (reapplyDate) {
-                                  return <p className="text-xs text-gray-500 ml-3">Can re-apply after {reapplyDate}</p>;
-                                }
-                                return null;
-                              })()}
-                            </>
-                          )}
                         </>
                       ) : (
                         <Link
