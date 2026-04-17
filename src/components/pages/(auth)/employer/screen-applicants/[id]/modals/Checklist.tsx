@@ -1149,15 +1149,24 @@ export default function Checklist({
             </button>
             {(() => {
               const isPassed = currentStatus === 'passed';
+              const serverApprovalSignature = !!applicant?.stage_approvals?.find((a) => a.job_stage === actionState.stageId)?.signature;
+              // Disabled when: passed + no pending approval staged yet, OR passed + already saved to server
+              const isSaveDisabled = isPassed && (!pendingApproval || serverApprovalSignature);
               return (
                 <>
                   <span
                     data-tooltip-id="checklist-save-tooltip"
-                    data-tooltip-content={isPassed ? 'Cannot modify a passed applicant.' : undefined}
+                    data-tooltip-content={
+                      isSaveDisabled
+                        ? serverApprovalSignature
+                          ? 'Cannot modify a passed applicant.'
+                          : 'Please complete stage approval before saving.'
+                        : undefined
+                    }
                   >
                     <button
                       type='submit'
-                      disabled={approveStage.isLoading || updateStageNotesMutation.isLoading || isPassed}
+                      disabled={approveStage.isLoading || updateStageNotesMutation.isLoading || isSaveDisabled}
                       className='rounded-lg py-2 px-6 bg-[#355FD0] text-white hover:bg-[#3156bd] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2'
                     >
                       {(approveStage.isLoading || updateStageNotesMutation.isLoading) && (
