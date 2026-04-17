@@ -169,7 +169,7 @@ const ChecklistView = () => {
                 )}
 
                 {/* [DEV] Skip button for testing */}
-                <div className='flex justify-end mt-1 mb-4'>
+                {/* <div className='flex justify-end mt-1 mb-4'>
                   <button
                     type='button'
                     onClick={handleDevSkip}
@@ -177,7 +177,7 @@ const ChecklistView = () => {
                   >
                     [DEV] Skip to Acceptance Memo
                   </button>
-                </div>
+                </div> */}
 
               </>
             ) : (
