@@ -109,6 +109,136 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+FEATURE ID: HRIS-022
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+CLIENT/REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+After the production S3 bug (HRIS-2026-012 / BE), some stage approvals were left in a
+state where `is_approved=True` but the signature was never surfaced in the UI — or the
+user received an error toast and assumed the approval did not save, when in reality the
+`AppliedJobStageApproval` record (including the signature) was already persisted to S3.
+
+In both cases the State 3 read-only block rendered in the Checklist modal with no way
+to re-submit. Users were stuck: the approval showed as saved but they could not correct
+or re-confirm it.
+
+DESIRED OUTCOME:
+When a stage approval is already saved to the server (State 3 — read-only block with
+signature), a "Redo" link should appear in the block header for users with `can_update`
+permission on that stage. Clicking it drops the UI back into the inline approval form
+so the user can re-draw or re-upload their signature and re-submit. The new submission
+overwrites the existing approval record (the backend `PATCH` endpoint already uses
+`get_or_create` and overwrites fields on each save).
+
+The Save Changes button must remain disabled while redo mode is active and no new
+`pendingApproval` has been staged, so the user cannot bypass the redo form.
+
+FILES CHANGED:
+Backend:
+- (none — the existing PATCH /api/jobs/applicants/stage-approve/<id>/ already
+  overwrites the approval record on every call; no backend change needed)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — Redo button appears in State 3; form opens; new approval overwrites server record)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — UI-only change; backend endpoint unchanged)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (redo → submit new sig → Save Changes enabled; redo → cancel → read-only restored; non-update-permission user → no Redo button; status change away from passed → isRedoMode reset)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only change)
+
+FIX EXPLANATION:
+Three state variables and one disabled-logic update in `Checklist.tsx`:
+
+**1. New `isRedoMode` state**
+
+  const [isRedoMode, setIsRedoMode] = useState(false);
+
+Tracks whether the user has clicked Redo on a saved approval. Reset in:
+- `resetFormData()` — called on modal close
+- The `currentStatus !== 'passed'` useEffect — so navigating away from Passed clears it
+
+**2. State 3 render gate changed**
+
+  // Before
+  if (approval?.signature) { ... read-only block ... }
+
+  // After
+  if (approval?.signature && !isRedoMode) { ... read-only block with Redo button ... }
+
+When `isRedoMode=true` the check is false, so execution falls through to the State 2
+block where `showInlineForm=true` causes the editable form to render.
+
+**3. Redo button added to the State 3 header**
+
+The read-only block header was refactored from a single flex row into a
+`justify-between` wrapper so the Redo button sits flush right:
+
+  <div className='flex items-center justify-between'>
+    <div className='flex items-center gap-2 text-xs font-semibold text-indigo-600 ...'>
+      <CheckBadgeIcon className='w-4 h-4' />
+      Stage Approval
+      {approval.is_skipped && <span ...>SKIPPED</span>}
+    </div>
+    {currentStage?.permissions?.can_update && (
+      <button
+        type='button'
+        onClick={() => {
+          setPendingApproval(null);
+          setIsSkipMode(false);
+          setShowInlineForm(true);
+          setIsRedoMode(true);
+        }}
+        className='text-xs text-gray-400 hover:text-indigo-600 underline'
+      >
+        Redo
+      </button>
+    )}
+  </div>
+
+**4. `isSaveDisabled` updated for redo mode**
+
+  // Before
+  const isSaveDisabled = isPassed && !pendingApproval && !serverHasApproval;
+
+  // After
+  const isSaveDisabled = isPassed && !pendingApproval && (!serverHasApproval || isRedoMode);
+
+Without this change, `serverHasApproval=true` would keep the button enabled during
+redo mode even though the user hasn't submitted a new signature yet. The added
+`|| isRedoMode` term forces the button disabled until `pendingApproval` is set by
+clicking "Submit Approval" in the inline form.
+
+================================================================================
+
 BUG ID: HRIS-021
 DATE FILED: 2026-04-17
 DATE FIXED: 2026-04-17
@@ -136,12 +266,16 @@ in both directions.
 DESIRED OUTCOME:
 The "Save Changes" button disabled state must follow these rules when status is "passed":
 
-| State                                        | Disabled? | Tooltip                                          |
+| State                                        | Disabled? | Tooltip                                         |
 |----------------------------------------------|-----------|--------------------------------------------------|
-| No action taken (Skip/Approve buttons shown) | Yes       | "Please complete stage approval before saving."  |
-| Inline form open, not yet submitted          | Yes       | "Please complete stage approval before saving."  |
-| "Submit Approval" clicked (pendingApproval)  | No        | —                                                |
-| Approval already saved to server (signature) | Yes       | "Cannot modify a passed applicant."              |
+| No action taken (Skip/Approve buttons shown) | Yes       | "Please complete stage approval before saving." |
+| Inline form open, not yet submitted          | Yes       | "Please complete stage approval before saving." |
+| "Submit Approval" clicked (pendingApproval)  | No        | —                                               |
+| Approval already saved to server (signature) | No        | —                                               |
+
+State 4 is ENABLED because the user may still need to save other fields (e.g., stage
+notes). The server-saved approval is already persisted; blocking Save in that state
+serves no purpose and strands users after a page refresh.
 
 For all other statuses (ongoing, withdrawn, rejected, pooling), Save Changes is
 always enabled (subject to loading state only).
@@ -194,25 +328,37 @@ The original condition `isPassed` (always disabled when passed) was replaced wit
 This allowed saving when status was "passed" and a pending approval had been staged.
 However it left the button enabled in State 1 (no action taken yet).
 
-**Iteration 2 (complete fix):**
+**Iteration 2 (partial fix):**
 The condition was rewritten to:
 
   const serverApprovalSignature = !!applicant?.stage_approvals
     ?.find((a) => a.job_stage === actionState.stageId)?.signature;
   const isSaveDisabled = isPassed && (!pendingApproval || serverApprovalSignature);
 
-Logic breakdown:
-- `isPassed && !pendingApproval` — covers State 1 (no action) and State 2 (form
-  open but not submitted): `pendingApproval` is null in both, so disabled.
-- `isPassed && serverApprovalSignature` — covers State 4 (already saved to server):
-  regardless of local pendingApproval state, disabled once server has a signature.
-- State 3 (`pendingApproval` set, no server signature yet): `!pendingApproval` is
-  false and `serverApprovalSignature` is false, so the whole expression is false →
-  button is enabled, allowing Save to fire the approval API.
+This correctly handled States 1–3 but incorrectly kept State 4 (server approval
+already present) disabled, even after a page refresh — stranding the user with a
+permanently blocked Save button despite the approval already being persisted.
 
-The tooltip was also made context-aware:
-- State 1/2: "Please complete stage approval before saving."
-- State 4: "Cannot modify a passed applicant."
+**Iteration 3 (final fix):**
+The root insight: `pendingApproval` is local component state (lost on refresh) while
+`applicant.stage_approvals` is server data (persists). State 4 should be ENABLED
+because the approval is already saved; there is nothing left to guard against.
+
+Final condition:
+
+  const serverHasApproval = !!applicant?.stage_approvals
+    ?.find((a) => a.job_stage === actionState.stageId)?.signature;
+  // Disabled only when passed + no approval at all (neither local nor server)
+  const isSaveDisabled = isPassed && !pendingApproval && !serverHasApproval;
+
+Logic breakdown:
+- State 1/2: `pendingApproval` is null AND `serverHasApproval` is false → disabled.
+- State 3: `pendingApproval` is set → `!pendingApproval` is false → enabled.
+- State 4: `serverHasApproval` is true → `!serverHasApproval` is false → enabled.
+  (Also covers page-refresh scenario where pendingApproval is null but server has data.)
+
+Single tooltip: "Please complete stage approval before saving." — shown only in
+States 1/2 when the button is disabled. No separate "Cannot modify" message needed.
 
 ================================================================================
 

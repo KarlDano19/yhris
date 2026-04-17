@@ -95,6 +95,8 @@ export default function Checklist({
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   // Locally staged approval — shown immediately, sent to server on Save Changes
   const [pendingApproval, setPendingApproval] = useState<Partial<StageApprovalType> | null>(null);
+  // Redo mode — allows re-submitting an already-saved stage approval
+  const [isRedoMode, setIsRedoMode] = useState(false);
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -225,6 +227,7 @@ export default function Checklist({
     setActiveTab(actionState.stageId);
     setPendingApproval(null);
     setShowInlineForm(false);
+    setIsRedoMode(false);
     resetInlineForm();
   };
 
@@ -333,6 +336,7 @@ export default function Checklist({
   useEffect(() => {
     if (currentStatus !== 'passed') {
       setShowInlineForm(false);
+      setIsRedoMode(false);
       resetInlineForm();
     }
   }, [currentStatus]);
@@ -715,15 +719,31 @@ export default function Checklist({
                           {currentStatus === 'passed' && (() => {
                             const approval = getCurrentStageApproval();
 
-                            // State 3: fully approved (has signature) → read-only
-                            if (approval?.signature) {
+                            // State 3: fully approved (has signature) → read-only (unless redo mode active)
+                            if (approval?.signature && !isRedoMode) {
                               return (
                                 <div className='mt-5 rounded-lg border border-gray-200 bg-white p-5 text-sm space-y-4'>
-                                  <div className='flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider'>
-                                    <CheckBadgeIcon className='w-4 h-4' />
-                                    Stage Approval
-                                    {approval.is_skipped && (
-                                      <span className='ml-2 bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium'>SKIPPED</span>
+                                  <div className='flex items-center justify-between'>
+                                    <div className='flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider'>
+                                      <CheckBadgeIcon className='w-4 h-4' />
+                                      Stage Approval
+                                      {approval.is_skipped && (
+                                        <span className='ml-2 bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium'>SKIPPED</span>
+                                      )}
+                                    </div>
+                                    {currentStage?.permissions?.can_update && (
+                                      <button
+                                        type='button'
+                                        onClick={() => {
+                                          setPendingApproval(null);
+                                          setIsSkipMode(false);
+                                          setShowInlineForm(true);
+                                          setIsRedoMode(true);
+                                        }}
+                                        className='text-xs text-gray-400 hover:text-indigo-600 underline'
+                                      >
+                                        Redo
+                                      </button>
                                     )}
                                   </div>
                                   <div className='grid grid-cols-2 gap-4'>
@@ -1150,8 +1170,8 @@ export default function Checklist({
             {(() => {
               const isPassed = currentStatus === 'passed';
               const serverHasApproval = !!applicant?.stage_approvals?.find((a) => a.job_stage === actionState.stageId)?.signature;
-              // Disabled only when passed + no approval yet (no local pending AND nothing on server)
-              const isSaveDisabled = isPassed && !pendingApproval && !serverHasApproval;
+              // Disabled when passed + no approval: no local pending AND (no server approval OR redo mode active without new submission)
+              const isSaveDisabled = isPassed && !pendingApproval && (!serverHasApproval || isRedoMode);
               return (
                 <>
                   <span
