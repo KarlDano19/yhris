@@ -61,36 +61,36 @@ const ChecklistView = () => {
   };
 
   // [DEV] Auto-complete all incomplete items and navigate to acceptance memo
-  const handleDevSkip = async () => {
-    const incompleteIds: number[] = [];
-    if (record) {
-      for (const phase of record.phases) {
-        for (const item of phase.checklists) {
-          if (!item.is_completed) {
-            incompleteIds.push(item.id);
-          }
-        }
-      }
-    }
-    if (incompleteIds.length > 0) {
-      const token = getCookie('token');
-      await Promise.all(
-        incompleteIds.map((id) =>
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Token ${token}`,
-              },
-            }
-          )
-        )
-      );
-    }
-    await handleProceedToAcceptanceMemo();
-  };
+  // const handleDevSkip = async () => {
+  //   const incompleteIds: number[] = [];
+  //   if (record) {
+  //     for (const phase of record.phases) {
+  //       for (const item of phase.checklists) {
+  //         if (!item.is_completed) {
+  //           incompleteIds.push(item.id);
+  //         }
+  //       }
+  //     }
+  //   }
+  //   if (incompleteIds.length > 0) {
+  //     const token = getCookie('token');
+  //     await Promise.all(
+  //       incompleteIds.map((id) =>
+  //         fetch(
+  //           `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
+  //           {
+  //             method: 'POST',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //               Authorization: `Token ${token}`,
+  //             },
+  //           }
+  //         )
+  //       )
+  //     );
+  //   }
+  //   await handleProceedToAcceptanceMemo();
+  // };
 
   if (isLoading) {
     return (
