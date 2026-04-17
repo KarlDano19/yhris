@@ -217,8 +217,8 @@ The tooltip was also made context-aware:
 ================================================================================
 
 BUG ID: HRIS-020
-DATE FILED: 2026-04-16
-DATE FIXED: 2026-04-16
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
 CLIENT/REPORTER: Internal - QA
 
 ISSUE DESCRIPTION:
