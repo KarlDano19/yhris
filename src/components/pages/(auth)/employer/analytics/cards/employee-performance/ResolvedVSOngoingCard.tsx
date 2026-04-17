@@ -2,23 +2,37 @@ import React, { useMemo } from 'react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Card from '../../Card';
-import { calculateResolvedVSOngoing } from './calculations/resolvedVSOngoingCalc';
+
+interface PrecomputedIssueData {
+  resolved_issues: number;
+  ongoing_issues: number;
+  total_issues: number;
+  resolved_percentage: number;
+  ongoing_percentage: number;
+}
 
 interface ResolvedVSOngoingCardProps {
-  employeeIssueData?: any[];
   isLoading?: boolean;
   error?: any;
+  precomputedData?: PrecomputedIssueData;
 }
 
 const ResolvedVSOngoingCard: React.FC<ResolvedVSOngoingCardProps> = ({
-  employeeIssueData,
   isLoading = false,
-  error = null
+  error = null,
+  precomputedData,
 }) => {
-  // Calculate resolved vs ongoing issues using shared utility
   const issueData = useMemo(() => {
-    return calculateResolvedVSOngoing(employeeIssueData);
-  }, [employeeIssueData]);
+    if (precomputedData) {
+      return {
+        resolvedIssues: precomputedData.resolved_issues,
+        ongoingIssues: precomputedData.ongoing_issues,
+        totalIssues: precomputedData.total_issues,
+        resolvedPercentage: precomputedData.resolved_percentage.toFixed(1),
+      };
+    }
+    return { resolvedIssues: 0, ongoingIssues: 0, totalIssues: 0, resolvedPercentage: '0.0' };
+  }, [precomputedData]);
 
   if (isLoading) {
     return (

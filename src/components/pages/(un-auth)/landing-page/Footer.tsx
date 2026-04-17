@@ -21,7 +21,7 @@ const Footer = () => {
   return (
     <footer id="contact" className="relative mt-20 mb-8">
       <div className="bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl mx-4 sm:mx-6 lg:mx-8 p-8 lg:p-12 shadow-lg">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-screen-2xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             <div className="lg:col-span-1">
               <h3 className="text-2xl font-bold text-indigo-dye mb-4">

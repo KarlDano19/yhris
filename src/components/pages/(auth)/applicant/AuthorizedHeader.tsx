@@ -69,7 +69,7 @@ const AuthorizedHeader = ({ hasProfile, initialTokenExpiresAt }: { hasProfile: b
   };
 
   useEffect(() => {
-    if (error && error.detail.includes('Invalid token')) {
+    if (error && error.detail === 'string' && error.detail.includes('Invalid token')) {
       logout(true);
     }
   }, [error]);
@@ -175,7 +175,7 @@ const AuthorizedHeader = ({ hasProfile, initialTokenExpiresAt }: { hasProfile: b
       >
         {({ open }) => (
           <>
-            <div className={`mx-auto max-w-7xl px-4 py-[0.6rem] sm:px-6 lg:px-8 `}>
+            <div className={`mx-auto max-w-screen-2xl px-4 py-[0.6rem] sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 items-center'>

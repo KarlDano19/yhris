@@ -1,0 +1,491 @@
+'use client';
+
+import { useState, useEffect, useRef, useMemo } from 'react';
+
+import Image from 'next/image';
+
+import classNames from '@/helpers/classNames';
+import SuccessPopAlert from '@/components/SuccessPopAlert';
+import CardProfile from './CardProfile';
+import CardRecentApp from './CardRecentApp';
+import JobDetails from './JobDetails';
+import JobDetailsModal from './modals/JobDetailsModal';
+import SavedModal from '../edit-profile/modals/SavedModal';
+import ConfirmModal from './modals/ConfirmModal';
+import useFindJobs, { useGetJobAutocomplete } from './hooks/useFindJobs';
+import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
+import JobSearchAutocomplete from './components/JobSearchAutocomplete';
+import LocationSearchAutocomplete from './components/LocationSearchAutocomplete';
+import JobCard from './components/JobCard';
+
+import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import jobIllustration from '@/assets/find-job-illustration.svg';
+
+const Content = () => {
+  const [hasJob, setJob] = useState(false);
+  const [isJobView, setIsJobView] = useState(false);
+  const [isJobModal, setJobModal] = useState(false);
+  const [isJobModalOpen, setIsJobModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModal] = useState(false);
+  const [openSuccessAlert, setSuccessAlert] = useState(false);
+  const [openSavedModal, setSavedModal] = useState(false);
+  // Pending filter (user input state)
+  const [pendingFilter, setPendingFilter] = useState<any>({
+    job_title: '',
+    location: '',
+    locations: [],
+  });
+  // Separate state for the actual search query (only updates on form submit)
+  const [searchQuery, setSearchQuery] = useState<any>({
+    job_title: '',
+    location: [],
+    page_size: 10,
+  });
+  // Debounced search states
+  const [debouncedJobTitle, setDebouncedJobTitle] = useState<string>('');
+  const [debouncedLocation, setDebouncedLocation] = useState<string>('');
+  const [isDebouncingJobTitle, setIsDebouncingJobTitle] = useState<boolean>(false);
+  const [isDebouncingLocation, setIsDebouncingLocation] = useState<boolean>(false);
+  // Autocomplete states
+  const [showJobTitleAutocomplete, setShowJobTitleAutocomplete] = useState(false);
+  const [showLocationAutocomplete, setShowLocationAutocomplete] = useState(false);
+  const [shouldShowJobTitleAutocomplete, setShouldShowJobTitleAutocomplete] = useState(false);
+  const [shouldShowLocationAutocomplete, setShouldShowLocationAutocomplete] = useState(false);
+  const [selectedJobTitleIndex, setSelectedJobTitleIndex] = useState(-1);
+  const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
+  const [jobTitleAutocompleteLimit, setJobTitleAutocompleteLimit] = useState(20);
+  const [locationAutocompleteLimit, setLocationAutocompleteLimit] = useState(20);
+  const [isSearching, setIsSearching] = useState(false);
+  // Track focus state to control when autocomplete API calls are made
+  const [isJobTitleFocused, setIsJobTitleFocused] = useState(false);
+  const [isLocationFocused, setIsLocationFocused] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<any>();
+  const [jobsItems, setJobsItems] = useState<any>([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const previousDataJobsRef = useRef<string>('');
+
+  const { data: applicantDetails, isLoading: isProfileLoading } = useGetApplicantProfile();
+  const { 
+    data: dataJobs, 
+    isLoading: isGetJobsLoading, 
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useFindJobs(searchQuery);
+  
+  // Check if profile exists to show toggle button
+  const hasProfile = !isProfileLoading && applicantDetails;
+
+  // Memoize search parameters for job title autocomplete - only when focused
+  const jobTitleSearchParams = useMemo(() => {
+    if (!isJobTitleFocused) return null;
+    if (shouldShowJobTitleAutocomplete && debouncedJobTitle && debouncedJobTitle.length >= 2) {
+      return {
+        search_type: 'job_title' as const,
+        search: debouncedJobTitle,
+        current_page: 1,
+      };
+    }
+    return {
+      search_type: 'job_title' as const,
+      search: '',
+      current_page: 1,
+    };
+  }, [debouncedJobTitle, shouldShowJobTitleAutocomplete, isJobTitleFocused]);
+  
+  // Memoize search parameters for location autocomplete - only when focused
+  const locationSearchParams = useMemo(() => {
+    if (!isLocationFocused) return null;
+    if (shouldShowLocationAutocomplete && debouncedLocation && debouncedLocation.length >= 2) {
+      return {
+        search_type: 'location' as const,
+        search: debouncedLocation,
+        current_page: 1,
+      };
+    }
+    return {
+      search_type: 'location' as const,
+      search: '',
+      current_page: 1,
+    };
+  }, [debouncedLocation, shouldShowLocationAutocomplete, isLocationFocused]);
+  
+  const { 
+    data: jobTitleAutocompleteResults, 
+    isLoading: isJobTitleAutocompleteLoading 
+  } = useGetJobAutocomplete(
+    jobTitleSearchParams ? {
+      ...jobTitleSearchParams,
+      view_type: 'jobs_select'
+    } : null
+  );
+  
+  const { 
+    data: locationAutocompleteResults, 
+    isLoading: isLocationAutocompleteLoading 
+  } = useGetJobAutocomplete(
+    locationSearchParams ? {
+      ...locationSearchParams,
+      view_type: 'location_select'
+    } : null
+  );
+
+  // Debounce job title search
+  useEffect(() => {
+    if (pendingFilter.job_title && pendingFilter.job_title.length >= 2) {
+      setIsDebouncingJobTitle(true);
+    } else {
+      setIsDebouncingJobTitle(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedJobTitle(pendingFilter.job_title);
+      setIsDebouncingJobTitle(false);
+    }, 2000); // 2 seconds delay
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pendingFilter.job_title]);
+
+  // Debounce location search
+  useEffect(() => {
+    if (pendingFilter.location && pendingFilter.location.length >= 2) {
+      setIsDebouncingLocation(true);
+    } else {
+      setIsDebouncingLocation(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedLocation(pendingFilter.location);
+      setIsDebouncingLocation(false);
+    }, 2000); // 2 seconds delay
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pendingFilter.location]);
+
+  // Reset selected job when search query changes (not filter changes)
+  useEffect(() => {
+    setSelectedJobId(null);
+    setIsJobView(false);
+    setJobModal(false);
+    // Reset the ref when search query changes so new data is processed
+    previousDataJobsRef.current = '';
+  }, [
+    searchQuery.job_title,
+    Array.isArray(searchQuery.location)
+      ? searchQuery.location.join('|')
+      : searchQuery.location,
+  ]);
+
+  useEffect(() => {
+    // Create a stable string representation of dataJobs to compare
+    const dataJobsString = JSON.stringify(dataJobs?.map((job: any) => job.id) || []);
+    
+    // Only update if dataJobs actually changed (by comparing job IDs)
+    if (previousDataJobsRef.current !== dataJobsString) {
+      previousDataJobsRef.current = dataJobsString;
+      
+      if (dataJobs && dataJobs.length !== 0) {
+        setJob(true);
+        setJobsItems(dataJobs);
+        // Only auto-select first job if no job is currently selected
+        if (!selectedJobId && dataJobs[0]) {
+          setSelectedJobId(dataJobs[0].id);
+          setIsJobView(true);
+          setJobModal(true);
+        }
+      } else {
+        setJob(false);
+        setJobsItems([]);
+        setIsJobView(false);
+        setJobModal(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataJobs]);
+
+  // Handle search submission
+  const handleSearch = () => {
+    const normalizedLocations = pendingFilter.locations.length
+      ? pendingFilter.locations
+      : pendingFilter.location
+        ? [pendingFilter.location]
+        : [];
+    setIsSearching(true);
+    setSearchQuery({
+      job_title: pendingFilter.job_title,
+      location: normalizedLocations,
+      page_size: 10,
+    });
+    setShowJobTitleAutocomplete(false);
+    setShowLocationAutocomplete(false);
+    setShouldShowJobTitleAutocomplete(false);
+    setShouldShowLocationAutocomplete(false);
+    setSelectedJobTitleIndex(-1);
+    setSelectedLocationIndex(-1);
+  };
+  
+  useEffect(() => {
+    if (!isGetJobsLoading && isSearching) {
+      setIsSearching(false);
+    }
+  }, [isGetJobsLoading, isSearching]);
+
+  const handleLoadMore = () => {
+    // Check if there are more jobs in the current fetched batch
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const openJobDetails = (jobId: any) => {
+    setSelectedJobId(jobId);
+    setIsJobView(true);
+    setIsJobModalOpen(true);
+    // setJobModal(true);
+  };
+
+  const closeJobDetails = () => {
+    setIsJobView(false);
+    setJobModal(false);
+    setIsJobModalOpen(false);
+  };
+
+  useEffect(() => {
+    const showSuccessAlert = sessionStorage.getItem('showSuccessOnLoad');
+    const showSavedModal = sessionStorage.getItem('showSavedModal');
+
+    if (showSuccessAlert) {
+      setSuccessAlert(true);
+      sessionStorage.removeItem('showSuccessOnLoad');
+    } else if (showSavedModal) {
+      setSavedModal(true);
+      sessionStorage.removeItem('showSavedModal');
+    }
+  }, []);
+
+  return (
+    <>
+      <div className={`mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 `}>
+        <div className='relative'>
+          {/* Sidebar Toggle Button - Only show when profile exists */}
+          {hasProfile && (
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={classNames(
+                'hidden lg:flex absolute top-8 z-20 items-center justify-center w-8 h-8 rounded-md bg-savoy-blue text-white shadow-lg hover:bg-indigo-600 transition-all duration-300',
+                isSidebarCollapsed ? 'left-4' : 'left-[calc(33.333%-1rem)] -ml-4'
+              )}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? (
+                <ChevronRightIcon className='h-5 w-5' strokeWidth={3} />
+              ) : (
+                <ChevronLeftIcon className='h-5 w-5' strokeWidth={3} />
+              )}
+            </button>
+          )}
+          <div className={classNames(
+            'grid grid-cols-1 md:grid-cols-8 lg:grid-cols-6 gap-x-6 lg:px-4 py-8 transition-all duration-300',
+            isSidebarCollapsed && 'lg:grid-cols-1'
+          )}>
+            <div className={classNames(
+              'md:col-span-3 lg:col-span-2 transition-all duration-300 overflow-hidden',
+              isSidebarCollapsed ? 'lg:w-0 lg:opacity-0 lg:max-h-0' : 'lg:w-auto lg:opacity-100'
+            )}>
+              <CardProfile />
+              <CardRecentApp />
+            </div>
+            <div className={classNames(
+              'bg-white border border-gray-300 h-auto rounded-md shadow pt-7 mt-8 md:mt-0 transition-all duration-300',
+              isSidebarCollapsed ? 'md:col-span-8 lg:col-span-6 lg:ml-12' : 'md:col-span-5 lg:col-span-4'
+            )}>
+            <form
+              className='px-5'
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch();
+              }}
+            >
+              <h4 className='text-lg md:text-2xl text-indigo-dye font-bold md:font-semibold'>
+                Find a job that&#39;s right for you!
+              </h4>
+              <div className='lg:flex lg:justify-between mt-5'>
+                {/* Job Title Search */}
+                <JobSearchAutocomplete
+                  value={pendingFilter.job_title}
+                  onChange={(value) => setPendingFilter({ ...pendingFilter, job_title: value })}
+                  debouncedValue={debouncedJobTitle}
+                  isDebouncing={isDebouncingJobTitle}
+                  autocompleteResults={jobTitleAutocompleteResults}
+                  isLoading={isJobTitleAutocompleteLoading}
+                  showAutocomplete={showJobTitleAutocomplete && shouldShowJobTitleAutocomplete}
+                  selectedIndex={selectedJobTitleIndex}
+                  limit={jobTitleAutocompleteLimit}
+                  onSelectedIndexChange={setSelectedJobTitleIndex}
+                  onLimitChange={setJobTitleAutocompleteLimit}
+                  onShowAutocompleteChange={(show) => {
+                    setShowJobTitleAutocomplete(show);
+                    setShouldShowJobTitleAutocomplete(show);
+                  }}
+                  onResetLimit={() => setJobTitleAutocompleteLimit(20)}
+                  onSearchSubmit={handleSearch}
+                  onFocus={() => setIsJobTitleFocused(true)}
+                  onBlur={() => setIsJobTitleFocused(false)}
+                />
+                
+                {/* Location Search */}
+                <LocationSearchAutocomplete
+                  value={pendingFilter.location}
+                  onChange={(value) => setPendingFilter({ ...pendingFilter, location: value })}
+                  debouncedValue={debouncedLocation}
+                  isDebouncing={isDebouncingLocation}
+                  autocompleteResults={locationAutocompleteResults}
+                  isLoading={isLocationAutocompleteLoading}
+                  showAutocomplete={showLocationAutocomplete && shouldShowLocationAutocomplete}
+                  selectedIndex={selectedLocationIndex}
+                  limit={locationAutocompleteLimit}
+                  onSelectedIndexChange={setSelectedLocationIndex}
+                  onLimitChange={setLocationAutocompleteLimit}
+                  onShowAutocompleteChange={(show) => {
+                    setShowLocationAutocomplete(show);
+                    setShouldShowLocationAutocomplete(show);
+                  }}
+                  onResetLimit={() => setLocationAutocompleteLimit(20)}
+                  onSearchSubmit={handleSearch}
+                  onFocus={() => setIsLocationFocused(true)}
+                  onBlur={() => setIsLocationFocused(false)}
+                  selectedValues={pendingFilter.locations}
+                  onSelectedValuesChange={(values) =>
+                    setPendingFilter((prev: any) => ({ ...prev, locations: values }))
+                  }
+                />
+              </div>
+              <div className='flex justify-center mt-4 lg:mt-6'>
+                <button
+                  type='submit'
+                  className='inline-flex items-center gap-2 rounded-md bg-savoy-blue px-24 lg:px-32 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                >
+                  <MagnifyingGlassIcon className='w-5 h-5' />
+                  Find Jobs
+                </button>
+              </div>
+            </form>
+            {hasJob ? (
+              <div className='mt-4'>
+                <div className='max-w-screen-2xl mx-auto'>
+                  <p className='text-[#6F829B] text-center lg:text-left text-sm pb-5 px-5 lg:px-10'>
+                    Jobs available: {!isGetJobsLoading ? totalRecords || jobsItems.length : '0'}
+                  </p>
+                </div>
+                <div className='border-t border-gray-300'></div>
+                <div className='max-w-screen-2xl mx-auto'>
+                  <div className='lg:flex lg:items-start'>
+                    <div className='hide-scrollbar lg:border-r lg:border-gray-300 lg:w-[36%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto'>
+                      <div className='px-2 py-2 grid md:grid-cols-2 lg:grid-cols-1 md:gap-x-4 lg:gap-x-4 gap-y-6'>
+                        <>
+                          {!isGetJobsLoading
+                            ? jobsItems.map((job: any) => (
+                                <JobCard
+                                  key={job.id}
+                                  job={job}
+                                  isSelected={selectedJobId === job.id}
+                                  isJobView={isJobView}
+                                  isJobModalOpen={isJobModalOpen}
+                                  onJobClick={openJobDetails}
+                                  onCloseDetails={closeJobDetails}
+                                />
+                              ))
+                            : 'Loading jobs...'}
+                        </>
+                        {/* Load More Button */}
+                        {hasNextPage && (
+                          <div className="flex justify-center py-6 col-span-full">
+                            <button
+                              onClick={handleLoadMore}
+                              disabled={isFetchingNextPage}
+                              className="rounded-md bg-savoy-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isFetchingNextPage ? (
+                                <span className="flex items-center">
+                                  <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                  </svg>
+                                  Loading...
+                                </span>
+                              ) : (
+                                'Load More Jobs'
+                              )}
+                            </button>
+                          </div>
+                        )}
+                        {/* End of results message */}
+                        {!hasNextPage && jobsItems.length > 0 && (
+                          <p className="text-center text-gray-500 text-sm py-4 col-span-full">
+                            No more jobs to load
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className='hide-scrollbar lg:border-l lg:border-gray-300 px-2 py-2 lg:w-[64%] lg:max-h-[calc(100vh-250px)] lg:overflow-y-auto hidden lg:block'>
+                        <div
+                          className={classNames(
+                            'card border border-savoy-blue rounded-md',
+                            isJobView ? '' : 'hidden'
+                          )}
+                        >
+                          <div className='flex justify-end px-3 mt-2'>
+                            <button onClick={closeJobDetails}>
+                              <XMarkIcon className='h-5 w-5 text-indigo-dye' />
+                            </button>
+                          </div>
+                          <JobDetails jobId={selectedJobId} />
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className='w-auto h-[220px] md:w-[600px] md:h-[400px] relative block mx-auto mt-8'>
+                <Image src={jobIllustration} fill alt='Find job illustration' />
+              </div>
+            )}
+            </div>
+          </div>
+        </div>
+        {/* <JobDetailsModal open={isJobModal} onClose={closeJobModal} jobId={selectedJobId} />
+        <ConfirmModal open={confirmModalOpen} onClose={() => setConfirmModal(false)} /> */}
+      </div>
+      <SuccessPopAlert
+        message='Successfully set-up profile.'
+        open={openSuccessAlert}
+        onClose={() => setSuccessAlert(false)}
+      />
+      <SavedModal open={openSavedModal} onClose={() => setSavedModal(false)} />
+    </>
+  );
+};
+
+export default Content;

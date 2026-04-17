@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import formatPrice from '@/helpers/currencyFormat';
 import useGetJobDetails from './hooks/useGetJobDetails';
 
-import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, BriefcaseIcon, ClockIcon, BanknotesIcon, ClipboardDocumentIcon, HomeIcon, StarIcon } from '@heroicons/react/24/outline';
 import BenefitsIcon from '@/svg/BenefitsIcon';
 import FileCaseIcon from '@/svg/FileCaseIcon';
 
@@ -93,6 +93,19 @@ const JobDetails = ({ jobId }: JobDetailsProp) => {
             {!isLoading ? jobDetailData.advertise_to : 'Loading location...'}
           </p>
           
+          {/* skills */}
+          {jobDetailData?.skills && (
+            <>
+              <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
+                <StarIcon className='h-5 w-5 mr-1' />
+                Skills
+              </h6>
+              <p className='text-[13px] text-indigo-dye mt-1 ml-6'>
+                {!isLoading ? jobDetailData.skills : 'Loading skills...'}
+              </p>
+            </>
+          )}
+
           {/* qualifications */}
           <h6 className='text-[15px] flex items-center text-savoy-blue font-medium mt-2'>
             <CheckCircleIcon className='h-5 w-5 mr-1' />

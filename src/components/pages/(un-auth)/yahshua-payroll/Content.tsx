@@ -76,7 +76,7 @@ const YahshuaPayrollContent = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link 
             href="/landing-page" 
             className="inline-flex items-center text-blue-700 hover:text-blue-800 font-medium"
@@ -94,7 +94,7 @@ const YahshuaPayrollContent = () => {
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-blue-300/30 to-transparent rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <div className="flex justify-center mb-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg">
@@ -138,7 +138,7 @@ const YahshuaPayrollContent = () => {
 
       {/* Features Section */}
       <section className="py-20 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-blue-800 mb-6">
               Powerful Payroll Features
@@ -182,7 +182,7 @@ const YahshuaPayrollContent = () => {
 
       {/* Integration Apps Section */}
       <section className="py-20 bg-gradient-to-br from-blue-800/5 to-blue-600/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-blue-800 mb-6">
               Integrated Mobile Apps
@@ -227,7 +227,7 @@ const YahshuaPayrollContent = () => {
 
       {/* HRIS Integration Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-blue-600 to-[#FFC107] rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Perfect Integration with YAHSHUA HRIS

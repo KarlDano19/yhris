@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 
 import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
@@ -16,6 +16,8 @@ import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useLoopsSync } from '@/helpers/useLoopsSync';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { EyeSlashIcon } from '@heroicons/react/24/outline';
 import DropDownArrow from '@/svg/DropDownArrow';
@@ -23,6 +25,13 @@ import MainIconOnly from '@/svg/MainIconOnly';
 import ChevronLeftIcon from '@/svg/ChevronLeft';
 
 import { T_Register } from '@/types/globals';
+
+async function getPublicPartners() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/partners/public/`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : data.data ?? [];
+}
 
 const getPasswordRequirements = (pass: string) => ({
   length: pass.length >= 12,
@@ -35,6 +44,8 @@ const getPasswordRequirements = (pass: string) => ({
 
 const Content = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasPreselected = useRef(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   // const accountType = [
   //   {
@@ -47,12 +58,23 @@ const Content = () => {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [conformPassword, setConfirmPassword] = useState('');
-  const { register, handleSubmit, reset, watch, formState: { errors }, clearErrors } = useForm<T_Register>();
+  const { register, handleSubmit, reset, watch, setValue, control, formState: { errors }, clearErrors } = useForm<T_Register>({
+    defaultValues: { partner: "" },
+  });
   const { mutate, isLoading } = useRegisterAccount();
   const { syncToLoops } = useLoopsSync();
+  const { data: publicPartners = [] } = useQuery(['publicPartnersCache'], getPublicPartners, { refetchOnWindowFocus: false });
   const [backendPasswordError, setBackendPasswordError] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState(getPasswordRequirements(''));
   const [backendEmailError, setBackendEmailError] = useState('');
+
+  // Pre-select Applicant when coming from the job application flow
+  useEffect(() => {
+    if (!hasPreselected.current && searchParams.get('redirect')) {
+      setValue('accountType', 'Applicant');
+      hasPreselected.current = true;
+    }
+  }, [searchParams, setValue]);
 
   // Check if user is already logged in and redirect if so
   useEffect(() => {
@@ -66,8 +88,8 @@ const Content = () => {
           if (sessionData.accountType === 'employer') {
             window.location.href = '/dashboard';
           } else if (sessionData.accountType === 'applicant') {
-            window.location.href = '/apply-for-a-job';
-          } else if (sessionData.accountType === 'admin') {
+            window.location.href = '/personal-mode';
+          } else if (sessionData.accountType === 'admin' || sessionData.accountType === 'superadmin') {
             window.location.href = '/admin/dashboard';
           }
           return;
@@ -107,7 +129,11 @@ const Content = () => {
             toast.custom(() => <CustomToast message={responseData.message} type='success' />, {
               duration: 7000,
             });
-            router.push('/login');
+            const redirectParam = searchParams.get('redirect');
+            if (redirectParam) {
+              localStorage.setItem('postAuthRedirect', redirectParam);
+            }
+            router.push(redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : '/login');
           },
           onError: (err: any) => {
             if (typeof err === 'string' && err.toLowerCase().includes('password')) {
@@ -123,7 +149,8 @@ const Content = () => {
           },
         };
         if (agree) {
-          mutate(data, callBackReq);
+          const redirectParam = searchParams.get('redirect');
+          mutate({ ...data, ...(redirectParam ? { redirect_url: redirectParam } : {}) }, callBackReq);
         } else {
           toast.custom(() => <CustomToast message={'Please agree to the Terms of Service and Privacy Policy to proceed.'} type='error' />, {
             duration: 4000,
@@ -232,9 +259,10 @@ const Content = () => {
                       <select
                         id='role'
                         {...register('accountType', { required: "Please select an account type" })}
-                        className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6'
+                        className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:cursor-not-allowed'
                         defaultValue=''
                         placeholder='Select...'
+                        disabled={!!searchParams.get('redirect')}
                       >
                         <option value='' disabled className='text-gray-400'>
                           Select...
@@ -322,22 +350,44 @@ const Content = () => {
                         </div>
                       </>
                     ) : (
-                      <div className='mb-2'>
-                        <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
-                          Name
-                         <span className='text-red-500'>*</span>
-                        </label>
-                        <input
-                          type='text'
-                          id='name'
-                          {...register('name', { required: "Please enter a name" })}
-                          className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
-                          tabIndex={2}
-                        />
-                        {errors.name && (
-                          <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
-                        )}
-                      </div>
+                      <>
+                        <div className='mb-2'>
+                          <label htmlFor='name' className='text-sm leading-6 text-gray-900'>
+                            Name
+                           <span className='text-red-500'>*</span>
+                          </label>
+                          <input
+                            type='text'
+                            id='name'
+                            {...register('name', { required: "Please enter a name" })}
+                            className='bg-gray-50 border mt-1 border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+                            tabIndex={2}
+                          />
+                          {errors.name && (
+                            <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+                          )}
+                        </div>
+                        <div className='mb-2'>
+                          <label className='text-sm leading-6 text-gray-900'>
+                            Partner
+                          </label>
+                          <Controller
+                            control={control}
+                            name="partner"
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className='rounded-md appearance-none mt-1 w-full border-0 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6'
+                              >
+                                <option value="">Direct Client (No Partner)</option>
+                                {(publicPartners as any[]).map((p: any) => (
+                                  <option key={p.id} value={p.name}>{p.name}</option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </div>
+                      </>
                     )}
                     <div className='mb-2'>
                       <label htmlFor='password' className='text-sm leading-6 text-gray-900'>
@@ -488,7 +538,10 @@ const Content = () => {
                         )}
                       </button>
                       <h6 className='text-center'>
-                        <Link href='/login' className='font-semibold text-blue-600 hover:underline'>
+                        <Link
+                          href={searchParams.get('redirect') ? `/login?redirect=${encodeURIComponent(searchParams.get('redirect')!)}` : '/login'}
+                          className='font-semibold text-blue-600 hover:underline'
+                        >
                           Back to Sign In
                         </Link>
                       </h6>

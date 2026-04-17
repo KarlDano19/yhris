@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 
 interface PlaceholderAvatarProps {
   width?: number;
@@ -19,7 +19,7 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
   const getInitials = () => {
     const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
     const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return firstInitial + lastInitial || 'U'; // Default to 'U' for User if no names
+    return firstInitial + lastInitial || '';
   };
 
   // Generate a consistent color based on the name
@@ -49,6 +49,47 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
   const bgColor = getAvatarColor();
   const fontSize = Math.max(width, height) * 0.45;
 
+  // Calculate border radius based on className
+  // Tailwind CSS uses rem units, we'll convert based on standard 16px base
+  const getBorderRadius = () => {
+    // Circular avatar
+    if (className.includes('rounded-full')) {
+      return Math.min(width, height) / 2; // Makes it a perfect circle
+    }
+    
+    // Square avatars with different rounded corner sizes
+    // Tailwind CSS rounded classes (in rem, converted to pixels at 16px base)
+    // We'll use a ratio that works well for most sizes
+    const baseSize = Math.min(width, height);
+    
+    if (className.includes('rounded-3xl')) {
+      return baseSize * (24 / 96); // 24px for 96px = 0.25 ratio
+    }
+    if (className.includes('rounded-2xl')) {
+      return baseSize * (16 / 96); // 16px for 96px = 0.167 ratio
+    }
+    if (className.includes('rounded-xl')) {
+      return baseSize * (12 / 96); // 12px for 96px = 0.125 ratio
+    }
+    if (className.includes('rounded-lg')) {
+      return baseSize * (8 / 96); // 8px for 96px = 0.0833 ratio (0.5rem)
+    }
+    if (className.includes('rounded-md')) {
+      return baseSize * (6 / 96); // 6px for 96px = 0.0625 ratio (0.375rem)
+    }
+    if (className.includes('rounded-sm')) {
+      return baseSize * (2 / 96); // 2px for 96px = 0.0208 ratio (0.125rem)
+    }
+    if (className.includes('rounded')) {
+      return baseSize * (4 / 96); // 4px for 96px = 0.0417 ratio (0.25rem)
+    }
+    
+    // Default: slight rounding for square avatars
+    return baseSize * 0.1;
+  };
+
+  const borderRadius = getBorderRadius();
+
   return (
     <svg
       width={width}
@@ -56,23 +97,24 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block', width: '100%', height: '100%' }}
     >
       {/* Background circle/rectangle */}
       <rect
         width={width}
         height={height}
-        rx={className.includes('rounded-full') ? width / 2 : width * 0.15}
+        rx={borderRadius}
+        ry={borderRadius}
         fill={bgColor}
       />
       
       {initials ? (
         // Show initials using SVG text (much more reliable for html2canvas)
         <text
-          x="50%"
-          y="50%"
-          dy="0.1em"
+          x={width / 2}
+          y={height / 2}
           textAnchor="middle"
-          dominantBaseline="middle"
+          dominantBaseline="central"
           fill="white"
           fontSize={fontSize}
           fontWeight="700"

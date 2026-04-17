@@ -213,6 +213,7 @@ function CreateAnnualMedicalReportModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -289,6 +290,9 @@ function CreateAnnualMedicalReportModal({
                     setValue={setValue}
                     isLoading={isLoadingAddAnnualMedicalReport}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

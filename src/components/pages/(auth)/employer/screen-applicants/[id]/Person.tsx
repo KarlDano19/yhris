@@ -1,18 +1,26 @@
-import { CalendarIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
-import ArchiveButton from '../ArchiveButton';
-import Image from 'next/image';
-import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
-import CheckListIcon from '@/svg/CheckListIcon';
-import { initialActionState } from '../lib/initialActionState';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import StateContext from '../contexts/StateContext';
-import classNames from '@/helpers/classNames';
-import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+
 import { useParams } from 'next/navigation';
-import { formatDateToLocal } from '@/helpers/date';
+
 import { useQueryClient } from '@tanstack/react-query';
-import useSoftDeleteApplication from '../hooks/useSoftDeleteApplication';
+
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
+
+import useSoftDeleteApplication from '../hooks/applicant/useSoftDeleteApplication';
+
+import StateContext from '../contexts/StateContext';
+import { initialActionState } from '../lib/initialActionState';
+
+import { ContextTypes, PersonPropTypes as PropTypes } from '../types';
+
+import classNames from '@/helpers/classNames';
+import { formatDateToLocal } from '@/helpers/date';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
+
+import { ArrowRightStartOnRectangleIcon, CalendarIcon, ChatBubbleLeftRightIcon, EllipsisVerticalIcon, EnvelopeIcon, IdentificationIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+import CheckListIcon from '@/svg/CheckListIcon';
 
 const menuList = [
   {
@@ -31,18 +39,31 @@ const menuList = [
   },
   {
     id: 3,
+    whichModal: 'MESSAGE_APPLICANT',
+    modalTitle: 'Message Applicant',
+    name: 'Message Applicant',
+    icon: <ChatBubbleLeftRightIcon className='w-4 h-4' />,
+  },
+  {
+    id: 4,
     whichModal: 'SEND_EMAIL',
     modalTitle: 'Send an Email to Applicant',
-
     name: 'Send Email',
     icon: <EnvelopeIcon className='w-4 h-4' />,
   },
   {
-    id: 4,
+    id: 5,
     whichModal: 'SCHEDULE_INTERVIEW',
     modalTitle: 'Schedule Interview',
     name: 'Schedule Interview',
     icon: <CalendarIcon className='w-4 h-4' />,
+  },
+  {
+    id: 6,
+    whichModal: 'MOVE_TO_JOB',
+    modalTitle: 'Transfer Applicant to Another Job',
+    name: 'Move to Another Job',
+    icon: <ArrowRightStartOnRectangleIcon className='w-4 h-4' />,
   },
 ];
 
@@ -51,11 +72,11 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
   const [imageError, setImageError] = useState(false);
 
   const hasValidImage =
-    applicant.image && 
-    typeof applicant.image === 'string' && 
-    applicant.image.trim() !== '' && 
-    applicant.image !== 'null' && 
-    !applicant.image.includes('no-photo.png') && 
+    applicant.image &&
+    typeof applicant.image === 'string' &&
+    applicant.image.trim() !== '' &&
+    applicant.image !== 'null' &&
+    !applicant.image.includes('no-photo.png') &&
     !imageError;
 
   if (!hasValidImage) {
@@ -82,13 +103,13 @@ const ApplicantAvatar = ({ applicant, size = 32 }: { applicant: any; size?: numb
   );
 };
 
-export default function Person({ 
-  applicant, 
-  isOpenMenu, 
-  setOpenMenuId, 
+export default function Person({
+  applicant,
+  isOpenMenu,
+  setOpenMenuId,
   stage,
   permissions = { can_view: true, can_move: true, can_update: true, is_visible: true },
-  isStageDisabled = false 
+  isStageDisabled = false,
 }: PropTypes & {
   permissions?: {
     can_view: boolean;
@@ -102,13 +123,16 @@ export default function Person({
   const menuRef = useRef<HTMLDivElement>(null);
   const { photo_url, name, id } = applicant;
   const params = useParams();
+
+  // Chat modal state
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { mutate: softDelete, isLoading: isSoftDeleting } = useSoftDeleteApplication();
   const [deleteModal, setDeleteModal] = useState<DeleteModalData | null>(null);
 
   // Check if applicant is hired - check both 'hired' and 'passed' in final stage
   const isPassedFinalInterview = applicant.status === 'hired';
-  
+
   // Determine if this applicant card should be interactive
   const canInteract = permissions.can_update && !isStageDisabled;
   const canViewDetails = permissions.can_view && !isStageDisabled;
@@ -158,11 +182,10 @@ export default function Person({
     });
   };
 
-  const isButtonDisabled = applicant.status === 'rejected' || applicant.status === 'withdrawn';
   const isRejected = applicant.status === 'rejected';
   const isWithdrawn = applicant.status === 'withdrawn';
+  const isButtonDisabled = isRejected || isWithdrawn;
   const isPooling = applicant.status === 'pooling';
-  const isArchived = applicant.is_archived === true;
 
   // Helper function to check if a date is within the timer window (12 hours = 720 minutes)
   const isWithinTimerWindow = (dateString: string | undefined) => {
@@ -200,17 +223,17 @@ export default function Person({
   if (isPooling) {
     backgroundColorClass = 'bg-green-100';
   }
- 
+
   return (
     <div
       className={classNames(
         'border-b border-b-[#ACB9CB] last:border-none flex items-center py-6 gap-2 relative rounded-lg mb-2',
         backgroundColorClass,
-        !isPassedFinalInterview 
-          ? (meetsMustHaveAnswers 
-              ? 'hover:bg-green-200' 
-              : doesNotMeetMustHaveAnswers 
-                ? 'hover:bg-red-200' 
+        !isPassedFinalInterview
+          ? (meetsMustHaveAnswers
+              ? 'hover:bg-green-200'
+              : doesNotMeetMustHaveAnswers
+                ? 'hover:bg-red-200'
                 : 'hover:bg-gray-100')
           : '',
         !canViewDetails || isStageDisabled
@@ -224,14 +247,14 @@ export default function Person({
           NEW
         </span>
       )}
-      
+
       {/* HIRED label - positioned absolutely in upper right corner */}
       {isPassedFinalInterview && (
         <span className={`absolute top-2 right-3 bg-yellow-200 text-xs font-bold px-2 py-0.5 rounded whitespace-nowrap z-0 ${isButtonDisabled ? 'text-gray-400' : 'text-indigo-dye'}`}>
           HIRED
         </span>
       )}
-      
+
       <div className='w-8 h-8 overflow-hidden rounded-full ml-2'>
         <ApplicantAvatar applicant={applicant} size={32} />
       </div>
@@ -259,7 +282,7 @@ export default function Person({
         {canViewDetails && (
           <div className='flex flex-col mt-1'>
             <span className='text-xs text-gray-400'>
-              {applicant.created_at 
+              {applicant.created_at
                 ? formatDateToLocal(applicant.created_at)
                 : 'Date not available'
               }
@@ -272,27 +295,11 @@ export default function Person({
           </div>
         )}
       </div>
-      
-      {/* Archive Button - show for rejected, withdrawn, or pooling applicants and if user has permissions */}
-      {(isRejected || isWithdrawn || isPooling) && canInteract && (
-        <div className='mr-2'>
-          <ArchiveButton
-            appliedJobId={applicant.applicationId}
-            isArchived={isArchived}
-            status={applicant.status || 'rejected'}
-            onSuccess={() => {
-              // Refresh will be handled by parent
-            }}
-            applicantName={name || 'Applicant'}
-            jobPostingId={params.id as string}
-          />
-        </div>
-      )}
-      
+
       {/* Menu button - only show if user can interact */}
-      <button 
-        onClick={handleOpenMenu} 
-        type='button' 
+      <button
+        onClick={handleOpenMenu}
+        type='button'
         className={`${canInteract ? 'text-indigo-dye hover:text-indigo-800' : 'text-gray-300 cursor-not-allowed'}`}
         disabled={!canInteract}
         data-testid="elipsis-btn"
@@ -314,6 +321,8 @@ export default function Person({
                 if (whichModal === 'CHECKLIST') return permissions.can_update;
                 if (whichModal === 'SEND_EMAIL') return permissions.can_update;
                 if (whichModal === 'SCHEDULE_INTERVIEW') return permissions.can_update;
+                if (whichModal === 'MESSAGE_APPLICANT') return permissions.can_update && applicant.has_account === true;
+                if (whichModal === 'MOVE_TO_JOB') return permissions.can_update;
                 return true;
               };
 
@@ -321,20 +330,33 @@ export default function Person({
                 return null; // Don't show action if user doesn't have permission
               }
 
+              // Handle menu click for MESSAGE_APPLICANT
+              const handleMenuClick = () => {
+                if (whichModal === 'MESSAGE_APPLICANT') {
+                  setIsChatModalOpen(true);
+                  setOpenMenuId(null); // Close the menu
+                  return;
+                }
+              };
+
               return (
                 <React.Fragment key={id}>
-                  {isPassedFinalInterview && name !== 'Checklist' && (
+                  {isPassedFinalInterview && name !== 'Checklist' && whichModal !== 'MOVE_TO_JOB' && (
                     <li>
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          if (whichModal === 'MESSAGE_APPLICANT') {
+                            handleMenuClick();
+                            return;
+                          }
                           setActionState({
                             ...initialActionState,
                             email: applicant.email,
-                            applicantId: applicant.id,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
                             stageId: stage.id,
                             modal: { whichModal, isOpen: true, title: modalTitle },
-                          })
-                        }
+                          });
+                        }}
                         className='flex items-center gap-3 w-full hover:bg-gray-100 p-1 rounded'
                       >
                         <span>{icon}</span>
@@ -346,6 +368,10 @@ export default function Person({
                     <li>
                       <button
                         onClick={() => {
+                          if (whichModal === 'MESSAGE_APPLICANT') {
+                            handleMenuClick();
+                            return;
+                          }
                           let lastElement = state[state.length - 1];
                           let isFinalStage = false;
                           if (lastElement.id == stage.id) {
@@ -354,7 +380,7 @@ export default function Person({
                           setActionState({
                             ...initialActionState,
                             email: applicant.email,
-                            applicantId: applicant.id,
+                            applicantId: whichModal === 'MOVE_TO_JOB' ? applicant.applicationId : applicant.id,
                             stageId: stage.id,
                             modal: { whichModal, isOpen: true, title: modalTitle },
                             isFinalStage: isFinalStage,
@@ -396,6 +422,27 @@ export default function Person({
           </div>
         </div>
       )}
+
+      {/* Chat Modal */}
+      <ChatMessagesModal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        chatType="employer-applicant"
+        appliedJobId={applicant.applicationId}
+        jobPostingId={Number(params.id)}
+        personName={applicant.name || 'Applicant'}
+        personInitials={
+          applicant.name
+            ? applicant.name
+                .split(' ')
+                .map((n: string) => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase()
+            : 'NA'
+        }
+        personPhoto={applicant.image || null}
+      />
 
       {deleteModal && (
         <DeleteModal

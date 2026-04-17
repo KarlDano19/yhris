@@ -13,7 +13,7 @@ const NewHeroSection = () => {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-orange-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-indigo-400/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           {/* <div className="inline-flex items-center bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-indigo-200">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>

@@ -55,6 +55,7 @@ export interface SendEmailModalProps {
   showDragDropAttachment?: boolean;
   allowMultipleAttachments?: boolean;  // Enable multiple file attachments (default: false for single attachment)
   disableCCBCC?: boolean;  // Disable CC and BCC buttons (default: false)
+  emailFieldDataSource?: 'employees' | 'clients';
   // Pre-populated data props
   prePopulatedData?: {
     subject?: string;
@@ -84,6 +85,7 @@ export default function SendEmailModal({
   showDragDropAttachment = false,
   allowMultipleAttachments = false,  // Default to single attachment mode
   disableCCBCC = false,  // Default to enabled
+  emailFieldDataSource = 'employees',
   prePopulatedData
 }: SendEmailModalProps) {
   const ReactQuill = useMemo(
@@ -715,7 +717,7 @@ export default function SendEmailModal({
                         classNamePrefix="select"
                         options={emailTemplateOptions}
                         value={emailTemplateOptions.flatMap(group => group.options).find((item: any) => item.value === value)}
-                        onChange={(val) => {
+                        onChange={(val: any) => {
                           onChange(val?.value || '');
                           if (val?.template) {
                             const template = val.template;
@@ -813,15 +815,15 @@ export default function SendEmailModal({
                         isClearable={true}
                         noOptionsMessage={() => 'No email templates available'}
                         placeholder="Select an email template..."
-                        formatGroupLabel={(group) => (
+                        formatGroupLabel={(group: any) => (
                           <div className="text-xs font-semibold text-gray-500 py-1">
                             {group.label}
                           </div>
                         )}
                         menuPortalTarget={document.body}
                         styles={{
-                          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                          menu: (base) => ({ ...base, zIndex: 9999 }),
+                          menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
+                          menu: (base: any) => ({ ...base, zIndex: 9999 }),
                         }}
                       />
                     )}
@@ -914,6 +916,7 @@ export default function SendEmailModal({
                     showTooltip={showTooltip}
                     tooltipId="to-section-tooltip"
                     isFocused={isToFocused}
+                    dataSource={emailFieldDataSource}
                   />
                 </div>
                 <button
@@ -985,6 +988,7 @@ export default function SendEmailModal({
                     showTooltip={showTooltip}
                     tooltipId="cc-section-tooltip"
                     isFocused={isCcFocused}
+                    dataSource={emailFieldDataSource}
                   />
                 </div>
               </div>
@@ -1032,6 +1036,7 @@ export default function SendEmailModal({
                     showTooltip={showTooltip}
                     tooltipId="bcc-section-tooltip"
                     isFocused={isBccFocused}
+                    dataSource={emailFieldDataSource}
                   />
                 </div>
               </div>

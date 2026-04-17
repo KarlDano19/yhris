@@ -26,48 +26,56 @@ function MonitoringAndHazardInfo({
   setError: any;
 }) {
   const onValid = (data: any) => {
+    const hazardsPurposeArray = Array.isArray(data.hazards_purpose_of_wem_request) ? data.hazards_purpose_of_wem_request : (data.hazards_purpose_of_wem_request ? [data.hazards_purpose_of_wem_request] : []);
+    const chemicalHazardsArray = Array.isArray(data.chemical_hazards) ? data.chemical_hazards : (data.chemical_hazards ? [data.chemical_hazards] : []);
+    const ventilationArray = Array.isArray(data.ventilation) ? data.ventilation : (data.ventilation ? [data.ventilation] : []);
+
+    let hasError = false;
     if (!data.conducting_internal_wem) {
       setError("conducting_internal_wem", {
         type: "manual",
         message: "Please select Conducting Internal WEM."
       });
-      return;
+      hasError = true;
     }
-    
-    // Ensure arrays are properly handled for validation
-    const hazardsPurposeArray = Array.isArray(data.hazards_purpose_of_wem_request) ? data.hazards_purpose_of_wem_request : (data.hazards_purpose_of_wem_request ? [data.hazards_purpose_of_wem_request] : []);
-    const chemicalHazardsArray = Array.isArray(data.chemical_hazards) ? data.chemical_hazards : (data.chemical_hazards ? [data.chemical_hazards] : []);
-    const ventilationArray = Array.isArray(data.ventilation) ? data.ventilation : (data.ventilation ? [data.ventilation] : []);
-    
     if (!hazardsPurposeArray || hazardsPurposeArray.length === 0) {
       setError("hazards_purpose_of_wem_request", {
         type: "manual",
         message: "Please select at least one Purpose of WEM Request (Hazards)."
       });
-      return;
+      hasError = true;
     }
     if (!chemicalHazardsArray || chemicalHazardsArray.length === 0) {
       setError("chemical_hazards", {
         type: "manual",
         message: "Please select at least one Chemical Hazard."
       });
-      return;
+      hasError = true;
     }
     if (!ventilationArray || ventilationArray.length === 0) {
       setError("ventilation", {
         type: "manual",
         message: "Please select at least one Ventilation."
       });
-      return;
+      hasError = true;
     }
+    if (hasError) return;
     setSelectedTab(4);
+  };
+
+  const onInvalid = () => {
+    const ventilationValue = watch("ventilation");
+    const ventilationArr = Array.isArray(ventilationValue) ? ventilationValue : (ventilationValue ? [ventilationValue] : []);
+    if (!ventilationArr.length) {
+      setError("ventilation", { type: "manual", message: "Please select at least one Ventilation." });
+    }
   };
 
   // Watch chemical hazards for conditional rendering
   const chemicalHazards = watch("chemical_hazards");
 
   return (
-    <form onSubmit={handleSubmit(onValid)}>
+    <form onSubmit={handleSubmit(onValid, onInvalid)}>
       <div className="px-4 pt-4 pb-6">
         <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
           <div className="flex">
@@ -105,6 +113,9 @@ function MonitoringAndHazardInfo({
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.wem_internal_monitoring_capability && (
+                <p className="text-xs text-red-600 mt-1">WEM Internal Monitoring Capability is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -122,6 +133,9 @@ function MonitoringAndHazardInfo({
                   className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.wem_equipment_owned_by_company && (
+                <p className="text-xs text-red-600 mt-1">WEM Equipment Owned by Company is required.</p>
+              )}
             </div>
             <div>
               <label

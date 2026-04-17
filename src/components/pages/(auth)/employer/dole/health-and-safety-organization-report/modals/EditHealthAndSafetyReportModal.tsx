@@ -34,7 +34,7 @@ function EditHealthAndSafetyReportModal({
     refetch: refetchHealthAndSafetyReport,
     remove: removeHealthAndSafetyReport,
   } = useGetHealthAndSafetyReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, getValues, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, getValues, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: updateHealthAndSafetyReport,
     isLoading: isLoadingUpdateHealthAndSafetyReport,
@@ -202,6 +202,7 @@ function EditHealthAndSafetyReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -213,6 +214,7 @@ function EditHealthAndSafetyReportModal({
                     setSelectedTab={setSelectedTab}
                     watch={watch}
                     isCreateModal={false}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -225,6 +227,9 @@ function EditHealthAndSafetyReportModal({
                     watch={watch}
                     isCreateModal={false}
                     isLoading={isLoadingUpdateHealthAndSafetyReport}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

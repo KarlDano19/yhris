@@ -1,95 +1,98 @@
-import { useCallback, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 
 import type { Employee } from "@/types/employee-201-records/employee";
 
-export type PatchResult<T = unknown> =
-  | { ok: true; data: T; status: number }
-  | { ok: false; error: Error; status?: number };
+type PatchPersonalDetailsParams = {
+  employeeId: string;
+  payload: Partial<Employee>;
+};
 
-export function usePersonalDetailsPatch(employeeId?: string) {
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+async function patchPersonalDetails(
+  params: PatchPersonalDetailsParams
+): Promise<Partial<Employee>> {
+  const token = getCookie("token");
+  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
+    params.employeeId
+  )}/personal-info/`;
 
-  const save = useCallback(
-    async (payload: Partial<Employee>): Promise<PatchResult<Partial<Employee>>> => {
-      try {
-        if (!employeeId) throw new Error("Missing employeeId");
+  const config: RequestInit = {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`,
+    },
+    body: JSON.stringify(params.payload),
+  };
 
-        setIsSaving(true);
-        setError(null);
+  const res = await fetch(url, config);
 
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
-        if (!baseUrl) throw new Error("Missing NEXT_PUBLIC_API_URL");
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
 
-        const url = `${baseUrl}/api/employee-201/employees/${encodeURIComponent(
-          employeeId
-        )}/personal-info/`;
+    // Handle Django serializer validation errors
+    if (
+      typeof errorData === "object" &&
+      errorData !== null &&
+      !Array.isArray(errorData)
+    ) {
+      const errors: string[] = [];
 
-        const token = getCookie("token") as string | undefined;
-
-        const res = await fetch(url, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Token ${token}` } : {}),
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) {
-          let msg: string;
-          try {
-            const problem = await res.json();
-            
-            // Handle Django serializer validation errors (object with field keys)
-            if (typeof problem === "object" && problem !== null && !Array.isArray(problem)) {
-              const errors: string[] = [];
-              
-              // Extract specific field validation errors
-              for (const [field, fieldErrors] of Object.entries(problem)) {
-                if (field === 'detail' || field === 'message') {
-                  // Skip detail/message fields if they exist alongside field errors
-                  continue;
-                }
-                
-                if (Array.isArray(fieldErrors)) {
-                  errors.push(...fieldErrors);
-                } else if (typeof fieldErrors === 'string') {
-                  errors.push(fieldErrors);
-                }
-              }
-              
-              // If we found field errors, use them. Otherwise fall back to detail/message
-              if (errors.length > 0) {
-                msg = errors.join(' ');
-              } else {
-                msg = problem?.detail || problem?.message || JSON.stringify(problem);
-              }
-            } else if (typeof problem === "string") {
-              msg = problem;
-            } else {
-              msg = problem?.detail || problem?.message || JSON.stringify(problem);
-            }
-          } catch {
-            msg = res.statusText || `HTTP ${res.status}`;
-          }
-          throw new Error(msg);
+      for (const [field, fieldErrors] of Object.entries(errorData)) {
+        if (field === "detail" || field === "message") {
+          continue;
         }
 
-        const data = (await res.json().catch(() => ({}))) as Partial<Employee>;
-        setIsSaving(false);
-        return { ok: true, data, status: res.status };
-      } catch (e: any) {
-        const err = e instanceof Error ? e : new Error(String(e));
-        setError(err);
-        setIsSaving(false);
-        return { ok: false, error: err };
+        if (Array.isArray(fieldErrors)) {
+          errors.push(...(fieldErrors as string[]));
+        } else if (typeof fieldErrors === "string") {
+          errors.push(fieldErrors);
+        }
       }
+
+      if (errors.length > 0) {
+        throw new Error(errors.join(" "));
+      }
+    }
+
+    throw new Error(
+      errorData?.detail || errorData?.message || "Failed to update personal details."
+    );
+  }
+
+  return res.json().catch(() => ({}));
+}
+
+export function usePersonalDetailsPatch(employeeId?: string) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<Partial<Employee>, Error, Partial<Employee>>(
+    (payload: Partial<Employee>) => {
+      if (!employeeId) {
+        throw new Error("Missing employeeId");
+      }
+      return patchPersonalDetails({ employeeId, payload });
     },
-    [employeeId]
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employee", employeeId]);
+        queryClient.invalidateQueries(["employeesCache"]);
+      },
+    }
   );
 
-  return { isSaving, error, save } as const;
+  const save = async (
+    payload: Partial<Employee>
+  ): Promise<{ ok: boolean; error?: Error }> => {
+    try {
+      await mutation.mutateAsync(payload);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error as Error };
+    }
+  };
+
+  return { ...mutation, save };
 }
 

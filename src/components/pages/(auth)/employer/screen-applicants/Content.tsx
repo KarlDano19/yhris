@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Tooltip } from 'react-tooltip';
 
 import PostJobCard from './PostJobCard';
-import useGetJobPostItems from './hooks/useGetJobPostItems';
+import useGetJobPostItems from './hooks/job/useGetJobPostItems';
 import SkeletonGrid from '../../../../SkeletonGrid';
-
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import BackButton from '@/components/BackButton';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import Pagination from '@/components/Pagination';
 
 type PaginationProps = {
@@ -19,6 +20,7 @@ type PaginationProps = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const [inputValue, setInputValue] = useState('');
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
@@ -59,7 +61,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         jobPost['schedule'] = jobPost['job_schedule'];
         jobPost['hireCount'] = jobPost['required_slot'];
         jobPost['postIn'] = jobPost['shared_to'].split(',');
-        jobPost['hiredApplicant'] = jobPost['hired_applicant_applied_no'];
+        jobPost['hiredApplicant'] = jobPost['hired_count'];
         jobPost['newApplicantsLast30Days'] = jobPost['new_applicants_last_30_days'] || 0;
       });
       setJobPostHistoryItems(dataJobPost.records);
@@ -78,12 +80,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <div className='min-h-screen mb-24 md:mb-0'>
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
+      <div className={`max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
         <div className='flex px-4 pt-4 pb-2'>
-          <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Dashboard</h4>
-          </Link>
+          <BackButton label="Dashboard" />
         </div>
         <div className='p-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Screen Applicants</h2>

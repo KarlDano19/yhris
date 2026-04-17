@@ -15,7 +15,7 @@ export const UI_PERMISSIONS: UIPermissionConfig[] = [
   { elementId: 'screen-applicant-page', permission: 'view_screen_applicant_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'onboarding-page', permission: 'view_onboarding_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'manage-page', permission: 'view_manage_page', type: 'section', fallbackBehavior: 'hide' },
-  { elementId: 'train-page', permission: 'view_train_page', type: 'section', fallbackBehavior: 'hide' },
+  { elementId: 'evaluation-page', permission: 'view_evaluation_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'employee-separation-page', permission: 'view_employee_separation_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'dole-page', permission: 'view_dole_page', type: 'section', fallbackBehavior: 'hide' },
   { elementId: 'analytics-page', permission: 'view_analytics_page', type: 'section', fallbackBehavior: 'hide' },

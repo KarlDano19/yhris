@@ -62,7 +62,7 @@ const HRISUserSection = () => {
       <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
       <div className="absolute bottom-10 right-10 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-indigo-200/30 rounded-full blur-3xl"></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <div className="inline-flex items-center bg-white/80 backdrop-blur-sm text-indigo-600 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-indigo-200/50">
             <ShieldCheckIcon className="w-4 h-4 mr-2" />

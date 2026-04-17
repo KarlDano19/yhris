@@ -26,70 +26,58 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
   }, []);
 
   useEffect(() => {
-    // Tawk.to chat widget script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://embed.tawk.to/68872e04ec9db219126f8445/1j180nhfm';
-    script.charset = 'UTF-8';
-    script.setAttribute('crossorigin', '*');
-    
-    // Add the script to the document head
-    document.head.appendChild(script);
-    
-    // Initialize Tawk_API
-    (window as any).Tawk_API = (window as any).Tawk_API || {};
-    (window as any).Tawk_LoadStart = new Date();
+    const CONVEX_URL = 'https://dapper-bear-214.convex.cloud';
+    const PRODUCT_NAME = 'YAHSHUA HRIS Subscription - Main';
+    const SESSION_TOKEN = "abba_7fa92d99-a329-4cb9-a123-47e1e81308e1";
+    const SCRIPT_SRC = 'https://abba-test-widget.pages.dev/abba-widget.umd.js';
 
-    // Set up callback to capture user attributes when widget is ready
-    (window as any).Tawk_API.onLoad = function() {
-      // Set user attributes including email and company name
-      if (userEmail || companyName) {
-        (window as any).Tawk_API.setAttributes({
-          'email': userEmail,
-          'company': companyName || 'Unknown'
-        }, function(error: any) {
-          if (error) {
-            console.error('Failed to set tawk.to attributes:', error);
-          }
-        });
+    const initWidget = () => {
+      console.log(`[${PRODUCT_NAME}] Initializing ABBA Chat widget...`);
+      try {
+        const company = companyName || 'Unknown';
+        const userId = userEmail
+          ? 'user-' + userEmail.replace(/[^a-zA-Z0-9]/g, '-')
+          : 'user-' + company.replace(/\s+/g, '-').toLowerCase();
+
+        (window as any).AbbaChat.init({
+          clientId: company,
+          userId: userId,
+          userName: userEmail || 'Guest User',
+          sessionToken: SESSION_TOKEN,
+          productId: PRODUCT_NAME,
+          convexUrl: CONVEX_URL,
+        })
+          .then(() => console.log(`[${PRODUCT_NAME}] Widget initialized successfully!`))
+          .catch((error: any) => console.error(`[${PRODUCT_NAME}] Widget initialization failed:`, error));
+      } catch (error) {
+        console.error(`[${PRODUCT_NAME}] Widget initialization error:`, error);
       }
     };
 
-    // Function to toggle Tawk.to widget based on modal state
-    const toggleWidget = (hide: boolean) => { 
-      const tawkAPI = (window as any).Tawk_API;
-      const tawkWidget = document.getElementById('tawkchat-container');
-      
-      if (hide) {
-        tawkAPI?.hideWidget?.();
-        if (tawkWidget) (tawkWidget as HTMLElement).style.display = 'none';
-      } else {
-        tawkAPI?.showWidget?.();
-        if (tawkWidget) (tawkWidget as HTMLElement).style.display = '';
-      }
-    };
+    // Load script only if not already present
+    let script = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_SRC}"]`);
+    let injected = false;
+    if (!script) {
+      script = document.createElement('script');
+      script.src = SCRIPT_SRC;
+      script.async = true;
+      script.onload = initWidget;
+      document.head.appendChild(script);
+      injected = true;
+    } else if ((window as any).AbbaChat) {
+      initWidget();
+    } else {
+      script.addEventListener('load', initWidget);
+    }
 
-    const checkModals = () => {
-      const hasModal = document.querySelector('[role="dialog"][aria-modal="true"], .fixed.inset-0.bg-gray-500, .fixed.inset-0.bg-black');
-      toggleWidget(!!hasModal);
-    };
-
-    const observer = new MutationObserver(checkModals);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'role', 'aria-modal'] });
-    const intervalId = setInterval(checkModals, 500);
-    
-    // Cleanup function to remove script and observers when component unmounts
     return () => {
-      observer.disconnect();
-      clearInterval(intervalId);
-      const existingScript = document.querySelector('script[src="https://embed.tawk.to/68872e04ec9db219126f8445/1j180nhfm"]');
-      if (existingScript) {
-        document.head.removeChild(existingScript);
+      if (injected && script) {
+        document.head.removeChild(script);
       }
     };
   }, [userEmail, companyName]);
 
-  // Return null since Tawk.to will render its own widget
+  // Return null since ABBA Chat will render its own widget
   return null;
 
   /* Commented out old chat widget UI
