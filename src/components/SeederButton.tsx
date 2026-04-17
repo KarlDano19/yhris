@@ -29,7 +29,10 @@ export default function SeederButton({
   maxCount = 1000,
   defaultCount = 5,
   disabled = false,
-  showSeeder = true,
+
+  // Show or Hide Seeder Button
+  showSeeder = false,
+  
   showBudgetType = false,
   renderExtraFields,
   onSeedSuccess,
