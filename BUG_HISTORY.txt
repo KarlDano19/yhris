@@ -112,7 +112,7 @@ FIX EXPLANATION:
 BUG ID: HRIS-021
 DATE FILED: 2026-04-17
 DATE FIXED: 2026-04-17
-CLIENT/REPORTER: Internal - Dev
+CLIENT/REPORTER: Internal - HR
 
 ISSUE DESCRIPTION:
 In the Screen Applicants Checklist modal, the "Save Changes" button had incorrect
