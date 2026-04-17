@@ -132,9 +132,9 @@ const ApplyNowModal = ({ isOpen, handleClose, jobId }: ApplyNowModalProps) => {
     router.push(`/register?redirect=${encodeURIComponent(redirectUrl)}`);
   };
 
-  // const handleContinueAsGuest = () => {
-  //   router.push(`/job-app-form/${jobId}`);
-  // };
+  const handleContinueAsGuest = () => {
+    router.push(`/job-app-form/${jobId}`);
+  };
 
   const handleLogin = () => {
     router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
@@ -166,12 +166,12 @@ const ApplyNowModal = ({ isOpen, handleClose, jobId }: ApplyNowModalProps) => {
           >
             Login to Existing Account
           </button>
-          {/* <button
+          <button
             onClick={handleContinueAsGuest}
-            className='w-full rounded-md border border-gray-300 bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50'
+            className='w-full rounded-md border border-[#FFC107] bg-[#FFC107] py-3 text-sm font-semibold text-black shadow-sm hover:bg-amber-500'
           >
             Continue as Guest
-          </button> */}
+          </button>
         </div>
       </div>
     </ModalLayout>
