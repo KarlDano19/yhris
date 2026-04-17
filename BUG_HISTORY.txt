@@ -109,6 +109,48 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-013
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+REPORTER: Internal (YP/YG account login testing)
+SEVERITY: High — users permanently locked out of the app after login
+
+ISSUE DESCRIPTION:
+  Users logging in with login_type "yahshua-payroll" or "yg-payroll" were
+  getting stuck on the /setup-employer-profile/onboarding-checklist page
+  and could not navigate anywhere else. The middleware's onboarding gate
+  blocked all employer routes until hasCompletedOnboarding was true, but
+  YP/YG accounts had hasCompletedOnboarding = false because the login API
+  response never set has_onboarded = true for these account types.
+  Additionally, loginType was defined in SessionData but was never populated
+  from the backend response, so there was no way to identify these accounts
+  in the middleware.
+
+DESIRED OUTCOME:
+  YP and YG payroll accounts should bypass the onboarding gate entirely and
+  land on the dashboard after login, just like fully onboarded employer accounts.
+
+FILES CHANGED:
+  - src/app/api/login/route.ts
+  - src/middleware.ts
+
+FIX EXPLANATION:
+  1. login/route.ts: Now reads login_type from the backend response and stores
+     it in the iron session as loginType.
+  2. middleware.ts: Reads loginType from the session and adds a guard so that
+     accounts with loginType "yahshua-payroll" or "yg-payroll" are excluded
+     from the onboarding redirect, covering users who already have an old
+     session where hasCompletedOnboarding is false.
+
+UNIT TESTING CHECKLIST:
+  [ ] Manual: Log in as a YP account and verify redirect goes to /dashboard
+  [ ] Manual: Log in as a YG account and verify redirect goes to /dashboard
+  [ ] Manual: Log in as a regular employer with incomplete onboarding and verify
+      they are still redirected to /onboarding-checklist
+  [ ] Regression: Existing employer onboarding flow unaffected
+
+================================================================================
+
 FEATURE ID: HRIS-022
 DATE FILED: 2026-04-17
 DATE FIXED: 2026-04-17
