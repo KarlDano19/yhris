@@ -109,6 +109,129 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-014
+DATE FILED: 2026-04-18
+DATE FIXED: 2026-04-18
+REPORTER: Internal (Developer)
+
+ISSUE DESCRIPTION:
+  The Quick Access panel's counter display had multiple bugs:
+
+  1. All 4 counter APIs were always fetched on dashboard load regardless of whether
+     the user had any shortcuts pinned. A user with no shortcuts still triggered 4
+     unnecessary API calls on every dashboard visit.
+
+  2. When only a single shortcut with a counter was pinned (e.g. "Job Posting
+     History"), all 4 counter APIs still fired. Root cause: getQuickAccessCounters()
+     always called all 4 endpoints via Promise.allSettled regardless of which items
+     were active.
+
+  3. Counter values were not displaying for Job Posting History, Address Employee
+     Issue, and Create Memo/Policy. Root cause: extract functions checked data?.total
+     but the API responses use total_records. Only "Employee List" worked (used data?.count).
+
+  4. Counter values were stale after navigating away and back. Root cause: staleTime:
+     60_000 prevented refetching within 1 minute. Cache key used a raw array reference
+     causing unstable cache behaviour.
+
+  5. Job Posting History counter showed ALL jobs (active + inactive) instead of only
+     active ones, because the reused pagination endpoint had no is_active filter.
+
+  6. Create Memo/Policy counter showed total directives instead of memos not yet sent.
+
+  7. Zero-value counters were rendered visibly (e.g. "0 not sent"), which is noisy
+     and unhelpful.
+
+  8. The useState for localItems was declared after useGetQuickAccessCounters, causing
+     a "Cannot access 'localItems' before initialization" ReferenceError on load.
+
+DESIRED OUTCOME:
+  - No counter API calls fire when the user has no relevant shortcuts pinned.
+  - Only a single API call is made to a dedicated counts endpoint, passing only
+    the pinned item IDs that have counters.
+  - Counts are accurate: active jobs only, pending issues only, unsent memos only,
+    active employees only.
+  - Counters with a value of 0 are hidden.
+  - Counters always reflect fresh data on every dashboard mount.
+
+FILES CHANGED:
+Backend:
+- app/views/user.py
+- app/urls.py
+
+Frontend:
+- src/components/pages/(auth)/employer/quick-access/hooks/useGetQuickAccessCounters.ts
+- src/components/pages/(auth)/employer/quick-access/QuickAccessPanel.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (tests not yet implemented)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☑ Views/API endpoints tested (manual — GET /api/quick-access/counts/?items=post-job-history,manage-employees returns correct counts)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A — no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — no shortcuts → 0 API calls; 1 shortcut → 1 call with correct count; all 4 → 1 call with all counts; zero count hidden)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — pending)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (no shortcuts → no calls; deactivate job → count updates on next mount; 0 count → hidden; unsent memos only counted)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+
+**Backend — New dedicated counts endpoint (QuickAccessCountsAPIView)**
+
+Created GET /api/quick-access/counts/?items=<comma-separated-ids> in app/views/user.py.
+The view accepts only the item IDs that the user has pinned, intersects them against a
+SUPPORTED_ITEMS set, and runs a direct .count() DB query for each — no pagination,
+no records fetched, no serializer overhead.
+
+Count logic per item:
+  post-job-history    → JobPosting.filter(is_active=True, is_deleted=False).count()
+  manage-address-issue → EmployeeIssue.filter(status="pending").count()
+  manage-memo-policy  → Directive.filter(is_active=True, is_sent=False).count()
+  manage-employees    → Employee.filter(is_active=True).count()
+
+Registered at app/urls.py: path("quick-access/counts/", QuickAccessCountsAPIView.as_view())
+
+**Frontend — useGetQuickAccessCounters.ts rewritten**
+
+Replaced the 4-separate-fetch COUNTER_CONFIG approach with a single fetch to the new
+dedicated endpoint, passing only the relevant item IDs as a query param:
+
+  GET /api/quick-access/counts/?items=post-job-history,manage-employees
+
+The hook:
+  - Filters activeItems to only those in COUNTER_ITEM_IDS before enabling the query
+  - Is completely disabled (enabled: false) when no relevant items are pinned
+  - Uses refetchOnMount: 'always' to always fetch fresh data on dashboard mount
+  - Uses a stable sorted string cache key: ['quickAccessCountersCache', 'item-a,item-b']
+
+**Frontend — QuickAccessPanel.tsx**
+
+  - useState declarations hoisted above hook calls to fix ReferenceError
+  - Counter display now gated on counter.count > 0 to hide zero values
+
+================================================================================
+
 BUG ID: HRIS-2026-013
 DATE FILED: 2026-04-17
 DATE FIXED: 2026-04-17
