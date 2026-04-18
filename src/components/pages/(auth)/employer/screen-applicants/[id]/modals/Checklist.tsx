@@ -95,8 +95,8 @@ export default function Checklist({
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   // Locally staged approval — shown immediately, sent to server on Save Changes
   const [pendingApproval, setPendingApproval] = useState<Partial<StageApprovalType> | null>(null);
-  // Redo mode — allows re-submitting an already-saved stage approval
-  const [isRedoMode, setIsRedoMode] = useState(false);
+  // Edit mode — allows re-submitting an already-saved stage approval
+    const [isEditMode, setIsEditMode] = useState(false);
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -227,7 +227,7 @@ export default function Checklist({
     setActiveTab(actionState.stageId);
     setPendingApproval(null);
     setShowInlineForm(false);
-    setIsRedoMode(false);
+    setIsEditMode(false);
     resetInlineForm();
   };
 
@@ -291,9 +291,9 @@ export default function Checklist({
       approval_date: new Date().toISOString(),
       job_stage: actionState.stageId!,
       approved_by_name: currentUserData?.name || null,
-      approved_by_photo: null,
     });
     setShowInlineForm(false);
+    setIsEditMode(false);
     resetInlineForm();
   };
 
@@ -336,10 +336,21 @@ export default function Checklist({
   useEffect(() => {
     if (currentStatus !== 'passed') {
       setShowInlineForm(false);
-      setIsRedoMode(false);
+      setIsEditMode(false);
       resetInlineForm();
     }
   }, [currentStatus]);
+
+  // Pre-fill inline form from existing approval data whenever edit mode is entered
+  useEffect(() => {
+    if (isEditMode) {
+      const approval = getCurrentStageApproval();
+      if (approval) {
+        setInlineSigUrl(approval.signature || '');
+        setInlineRemarks(approval.approval_remarks || '');
+      }
+    }
+  }, [isEditMode]);
 
   useEffect(() => {
     setIsOpen(true);
@@ -720,7 +731,7 @@ export default function Checklist({
                             const approval = getCurrentStageApproval();
 
                             // State 3: fully approved (has signature) → read-only (unless redo mode active)
-                            if (approval?.signature && !isRedoMode) {
+                            if (approval?.signature && !isEditMode) {
                               return (
                                 <div className='mt-5 rounded-lg border border-gray-200 bg-white p-5 text-sm space-y-4'>
                                   <div className='flex items-center justify-between'>
@@ -738,11 +749,11 @@ export default function Checklist({
                                           setPendingApproval(null);
                                           setIsSkipMode(false);
                                           setShowInlineForm(true);
-                                          setIsRedoMode(true);
+                                          setIsEditMode(true);
                                         }}
                                         className='text-xs text-gray-400 hover:text-indigo-600 underline'
                                       >
-                                        Redo
+                                        Edit
                                       </button>
                                     )}
                                   </div>
@@ -766,7 +777,7 @@ export default function Checklist({
                                     <div>
                                       <p className='text-xs text-gray-400 uppercase tracking-wide mb-2'>Signature</p>
                                       <div className='border border-gray-200 rounded-lg p-2 bg-white min-h-[56px] flex items-center'>
-                                        <img src={approval.signature} alt='Signature' className='h-10 max-w-full object-contain' />
+                                        <img src={approval.signature} alt='Signature' className='w-1/2 h-10 object-contain mx-auto block' />
                                       </div>
                                       <p className='text-xs text-green-600 font-semibold mt-1'>Digital Signature Verified</p>
                                     </div>
@@ -806,38 +817,8 @@ export default function Checklist({
                                     {isSkip ? <ForwardIcon className='w-4 h-4' /> : <CheckBadgeIcon className='w-4 h-4' />}
                                     {isSkip ? 'Skip Stage' : 'Stage Approval'}
                                   </div>
-                                  {/* Approver name — only shown when server has an approval record */}
-                                  {approval?.is_approved && (
-                                    <div>
-                                      <p className='text-xs text-gray-400 uppercase tracking-wide mb-2'>Approver Name</p>
-                                      <div className='border border-gray-200 rounded-lg px-3 py-2 flex items-center gap-3'>
-                                        {approval.approved_by_photo ? (
-                                          <img src={approval.approved_by_photo} alt={approval.approved_by_name || ''} className='w-8 h-8 rounded-full object-cover flex-shrink-0' />
-                                        ) : (
-                                          <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm flex-shrink-0'>
-                                            {approval.approved_by_name?.[0]?.toUpperCase() || '?'}
-                                          </div>
-                                        )}
-                                        <div>
-                                          <p className='font-semibold text-gray-800 text-sm leading-tight'>{approval.approved_by_name || '—'}</p>
-                                          <p className='text-xs text-gray-400'>Stage Approver</p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
                                   {/* Expand button or editable form */}
-                                  {!showInlineForm ? (
-                                    <button
-                                      type='button'
-                                      onClick={() => setShowInlineForm(true)}
-                                      className='w-full flex items-center justify-center gap-2 border border-savoy-blue text-savoy-blue hover:bg-savoy-blue/10 font-semibold text-sm rounded-md px-5 py-2'
-                                    >
-                                      <CheckBadgeIcon className='w-4 h-4' />
-                                      Fill Up Approval Details
-                                    </button>
-                                  ) : (
-                                    <>
+                                  <>
                                       {/* Signature row */}
                                       <div>
                                         <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>
@@ -876,7 +857,7 @@ export default function Checklist({
                                         </div>
                                         {activeSig && (
                                           <div className='mt-2'>
-                                            <img src={activeSig} alt='Signature preview' className='h-12 border border-gray-200 rounded object-contain' />
+                                            <img src={activeSig} alt='Signature preview' className='w-1/2 h-16 border border-gray-200 rounded object-contain mx-auto block' />
                                             <button
                                               type='button'
                                               className='text-xs underline text-savoy-blue mt-1'
@@ -912,7 +893,7 @@ export default function Checklist({
                                       <div className='flex justify-end gap-2'>
                                         <button
                                           type='button'
-                                          onClick={() => { setShowInlineForm(false); setInlineSigUrl(''); setInlineUploadedSig(null); setInlineRemarks(''); }}
+                                          onClick={() => { setShowInlineForm(false); setInlineSigUrl(''); setInlineUploadedSig(null); setInlineRemarks(''); setIsEditMode(false); }}
                                           className='border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium text-sm rounded-md px-4 py-2'
                                         >
                                           Cancel
@@ -927,8 +908,7 @@ export default function Checklist({
                                           {approveStage.isLoading ? 'Saving...' : 'Submit Approval'}
                                         </button>
                                       </div>
-                                    </>
-                                  )}
+                                  </>
                                 </div>
                               );
                             }
@@ -970,7 +950,6 @@ export default function Checklist({
                             }
                             return null;
                           })()}
-
 
 
                         </div>
@@ -1029,7 +1008,7 @@ export default function Checklist({
                                     <p className='text-xs text-gray-400 uppercase tracking-wide mb-2'>Signature</p>
                                     <div className='border border-gray-200 rounded-lg p-2 bg-white min-h-[56px] flex items-center'>
                                       {approval.signature ? (
-                                        <img src={approval.signature} alt='Signature' className='h-10 max-w-full object-contain' />
+                                        <img src={approval.signature} alt='Signature' className='w-1/2 h-10 object-contain mx-auto block' />
                                       ) : (
                                         <span className='text-xs text-gray-400 italic'>No signature</span>
                                       )}
@@ -1171,7 +1150,7 @@ export default function Checklist({
               const isPassed = currentStatus === 'passed';
               const serverHasApproval = !!applicant?.stage_approvals?.find((a) => a.job_stage === actionState.stageId)?.signature;
               // Disabled when passed + no approval: no local pending AND (no server approval OR redo mode active without new submission)
-              const isSaveDisabled = isPassed && !pendingApproval && (!serverHasApproval || isRedoMode);
+              const isSaveDisabled = isPassed && !pendingApproval && (!serverHasApproval || isEditMode);
               return (
                 <>
                   <span

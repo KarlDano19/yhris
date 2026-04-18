@@ -109,7 +109,7 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
-BUG ID: HRIS-2026-014
+BUG ID: HRIS-2026-015
 DATE FILED: 2026-04-18
 DATE FIXED: 2026-04-18
 REPORTER: Internal (Developer)
@@ -229,6 +229,88 @@ The hook:
 
   - useState declarations hoisted above hook calls to fix ReferenceError
   - Counter display now gated on counter.count > 0 to hide zero values
+
+================================================================================
+
+BUG ID: HRIS-2026-014
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+REPORTER: Internal (Stage Approval UX issues in Screen Applicants)
+SEVERITY: Medium — approval edit flow broken, data lost on re-edit
+
+ISSUE DESCRIPTION:
+  Multiple related issues in the Stage Approval section of the Checklist modal
+  (screen-applicants/[id]/modals/Checklist.tsx):
+
+  1. "Redo" button (now "Edit") showed "Fill Up Approval Details" button instead of
+     the form directly when clicked — due to showInlineForm timing and isRedoMode
+     not being respected in the gate condition.
+
+  2. After clicking Submit Approval in Edit mode, the form showed empty on the
+     next Edit click — isRedoMode remained true after submit, causing State 3
+     (read-only) to be skipped and State 2 showed an empty form.
+
+  3. The approver photo disappeared after submitting in Edit mode because
+     handleInlineApproveSubmit set approved_by_photo: null in pendingApproval,
+     overriding the server's photo value in the merged approval object.
+
+  4. Pre-fill of signature and remarks on Edit click was unreliable due to React
+     state batching timing — values set in onClick were not always available at
+     render time.
+
+  5. The "Fill Up Approval Details" intermediate button was redundant — clicking
+     Edit should go directly to the form.
+
+  6. State variable was named isRedoMode/setIsRedoMode but functionality is "Edit".
+
+DESIRED OUTCOME:
+  - Clicking "Edit" on a saved stage approval opens the inline form immediately,
+    pre-filled with the existing signature and remarks.
+  - Approver photo persists through edit/submit cycles.
+  - After clicking "Submit Approval", the read-only State 3 view is restored.
+  - Cancelling from Edit mode returns to read-only State 3 view.
+  - State variable named isEditMode throughout.
+  - No intermediate "Fill Up Approval Details" button.
+
+FILES CHANGED:
+  - src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+FIX EXPLANATION:
+  1. Renamed isRedoMode/setIsRedoMode → isEditMode/setIsEditMode throughout.
+
+  2. Renamed "Redo" button label to "Edit".
+
+  3. Removed the "Fill Up Approval Details" button entirely. State 2 now always
+     renders the signature/remarks form directly without any intermediate click.
+
+  4. Added useEffect on isEditMode to reliably pre-fill inlineSigUrl and
+     inlineRemarks from getCurrentStageApproval() whenever edit mode is entered:
+       useEffect(() => {
+         if (isEditMode) {
+           const approval = getCurrentStageApproval();
+           if (approval) {
+             setInlineSigUrl(approval.signature || '');
+             setInlineRemarks(approval.approval_remarks || '');
+           }
+         }
+       }, [isEditMode]);
+
+  5. Removed approved_by_photo: null from handleInlineApproveSubmit so the server
+     approval's photo persists through the {...serverApproval, ...pendingApproval} merge.
+
+  6. Added setIsEditMode(false) to handleInlineApproveSubmit so State 3 (read-only)
+     is restored after clicking Submit Approval.
+
+  7. Added setIsEditMode(false) to the Cancel button handler in the inline form
+     so cancelling from Edit mode also restores State 3 read-only view.
+
+UNIT TESTING CHECKLIST:
+  [ ] Manual: Click Edit on saved approval — form opens pre-filled with signature and remarks
+  [ ] Manual: Edit and Submit — read-only view restored with updated data
+  [ ] Manual: Edit and Cancel — read-only view restored with original data
+  [ ] Manual: Photo persists after multiple Edit/Submit cycles
+  [ ] Regression: First-time Approve Stage flow (State 1 → form) unaffected
+  [ ] Regression: Skip Stage flow unaffected
 
 ================================================================================
 
