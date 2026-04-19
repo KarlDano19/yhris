@@ -493,9 +493,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
             <div className='mx-auto max-w-screen-2xl px-4 py-[0.4rem] sm:px-6 lg:px-8'>
               <div className='relative flex justify-between lg:gap-8 xl:grid xl:grid-cols-12 p-2 md:p-8 lg:p-4'>
                 <div className='flex md:absolute md:inset-y-0 md:left-0 lg:static xl:col-span-8'>
-                  <div className='flex flex-shrink-0 items-center gap-2'>
-                    <Link
-                      href='/dashboard'
                   <div className='flex flex-shrink-0 items-center'>
                     <Link
                       href='/dashboard'
