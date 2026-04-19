@@ -1,0 +1,305 @@
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+
+import useFindJobs from './hooks/useFindJobs';
+import JobFiltersModal from '../../modals/JobFIltersModal';
+import JobCard from '../../JobCard';
+import JobDetailsModal from '../../modals/JobDetailsModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+
+import formatPrice from '@/helpers/currencyFormat';
+
+
+interface JobFilters {
+  job_title?: string;
+  location?: string[];
+}
+
+const Content = () => {
+  const router = useRouter();
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [highlightedJobId, setHighlightedJobId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<JobFilters>({});
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Fetch jobs with filters and match percentage using applicant_personal view type
+  const {
+    data: jobsData,
+    isLoading: isGetJobsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useFindJobs({
+    ...filters,
+    useApplicantPersonal: true, // Use applicant_personal view type for match percentage
+  });
+
+  // Get saved jobs data from cache
+  const queryClient = useQueryClient();
+  const cachedSavedJobs = queryClient
+    .getQueryCache()
+    .find(['savedJobsCache']) as {
+    state: { data: any[] } | undefined;
+  };
+  const savedJobsData = cachedSavedJobs?.state?.data;
+  
+  // Create a Set of saved job IDs for quick lookup
+  const savedJobIds = useMemo(() => {
+    if (!savedJobsData || !Array.isArray(savedJobsData)) return new Set<number>();
+    return new Set(
+      savedJobsData
+        .map((savedJob: any) => {
+          // Handle both response formats: job_posting object or job_posting_id
+          return savedJob.job_posting?.id || savedJob.job_posting_id || savedJob.job_posting;
+        })
+        .filter((id: any) => id != null && id !== undefined)
+    );
+  }, [savedJobsData]);
+
+
+  // Transform API jobs data to JobCard format
+  const transformedJobs = useMemo(() => {
+    if (!jobsData || jobsData.length === 0) return [];
+
+    return jobsData.map((job: any) => {
+      // Get company initials for logo
+      const getCompanyInitials = (companyName: string) => {
+        if (!companyName) return '?';
+        const words = companyName.trim().split(/\s+/);
+        if (words.length >= 2) {
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return companyName.substring(0, 2).toUpperCase();
+      };
+
+      // Format salary
+      const formatSalary = () => {
+        if (!job.salary_range_type) return 'Salary not disclosed';
+        
+        if (job.salary_range_type === 'Range' && job.minimum_amount && job.maximum_amount) {
+          return `₱ ${formatPrice(job.minimum_amount)} - ₱ ${formatPrice(job.maximum_amount)}`;
+        } else if (job.exact_amount) {
+          return `₱ ${formatPrice(job.exact_amount)}`;
+        }
+        return 'Salary not disclosed';
+      };
+
+      // Format job type
+      const formatJobType = () => {
+        if (!job.job_type) return 'Full-time';
+        if (typeof job.job_type === 'string') {
+          return job.job_type.split(',')[0].trim();
+        }
+        return 'Full-time';
+      };
+
+      // Get skills as tags
+      const getTags = () => {
+        if (!job.skills) return [];
+        if (Array.isArray(job.skills)) {
+          return job.skills.slice(0, 3); // Show max 3 skills
+        }
+        if (typeof job.skills === 'string') {
+          try {
+            const parsed = JSON.parse(job.skills);
+            return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
+          } catch {
+            return job.skills.split(',').slice(0, 3).map((s: string) => s.trim());
+          }
+        }
+        return [];
+      };
+
+      return {
+        id: job.id,
+        title: job.title || job.job_title || 'Untitled Job',
+        company: job.company || 'Unknown Company',
+        location: job.location || job.advertise_to || 'Location not specified',
+        type: formatJobType(),
+        salary: formatSalary(),
+        tags: getTags(),
+        logo: getCompanyInitials(job.company || '?'),
+        logoUrl: job.company_logo || undefined,
+        saved: savedJobIds.has(job.id), // Check if job is saved
+        match: job.match_percentage || 0,
+        applied: job.applied || false, // Applied status from backend
+        applied_job_status: job.applied_job_status,
+        applied_job_updated_at: job.applied_job_updated_at,
+      };
+    });
+  }, [jobsData, savedJobIds]);
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const handleJobCardClick = (jobId: number) => {
+    // Toggle: if same job is clicked, close it; otherwise, open the new one
+    setSelectedJobId(selectedJobId === jobId ? null : jobId);
+  };
+
+  // Open job details when URL contains job_id (used by notifications)
+  useEffect(() => {
+    try {
+      const jobIdParam = searchParams?.get?.('job_id');
+      if (!jobIdParam) return;
+      const parsedJobId = Number(jobIdParam);
+      if (Number.isNaN(parsedJobId)) return;
+
+      setSelectedJobId(parsedJobId);
+      setHighlightedJobId(parsedJobId);
+      // scroll & highlight, then fade after 3 seconds
+      setTimeout(() => {
+        try {
+          const el = document.getElementById(`job-${parsedJobId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } catch (err) {
+          // ignore
+        }
+      }, 200);
+      // Clear highlight state after 3 seconds
+      setTimeout(() => {
+        setHighlightedJobId(null);
+      }, 3000);
+
+      try {
+        router.replace('/personal-mode/jobs');
+      } catch (err) {}
+    } catch (e) {
+      // ignore
+    }
+  }, [searchParams?.toString(), router]);
+
+  const handleCloseJobDetails = () => {
+    setSelectedJobId(null);
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
+      {/* Browse Jobs Header */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Browse Jobs</h2>
+          </div>
+          <button
+            onClick={() => setIsFiltersModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <FunnelIcon className="h-5 w-5" />
+            Filters
+          </button>
+        </div>
+
+        {/* Jobs List - Single Column */}
+        {isGetJobsLoading ? (
+          <LoadingSpinner size="lg" showText text="Loading jobs..." className="py-12" />
+        ) : transformedJobs.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No jobs available at the moment.</div>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {transformedJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  {...job}
+                  isSelected={selectedJobId === job.id}
+                  isHighlighted={highlightedJobId === job.id}
+                  onCardClick={() => handleJobCardClick(job.id)}
+                  onApply={() => router.push(`/personal-mode/job-applicant-form/${job.id}`)}
+                />
+              ))}
+            </div>
+            {/* Load More Button */}
+            {hasNextPage && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+                </button>
+              </div>
+            )}
+            {totalRecords > 0 && (
+              <div className="text-sm text-gray-600 text-center mt-4">
+                Showing {jobsData?.length || 0} of {totalRecords} jobs
+              </div>
+            )}
+          </>
+        )}
+        </div>
+
+      {/* Job Filters Modal */}
+      {isFiltersModalOpen && (
+        <JobFiltersModal
+          isOpen={isFiltersModalOpen}
+          onClose={() => setIsFiltersModalOpen(false)}
+          filters={filters}
+          onApplyFilters={(newFilters) => {
+            setFilters(newFilters);
+            setSelectedJobId(null); // Reset selected job when filters change
+          }}
+        />
+      )}
+
+      {/* Job Details Modal */}
+      {selectedJobId !== null && (
+        <JobDetailsModal
+          isOpen={selectedJobId !== null}
+          onClose={handleCloseJobDetails}
+          jobId={selectedJobId}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Content;

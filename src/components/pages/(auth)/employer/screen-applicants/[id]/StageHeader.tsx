@@ -9,8 +9,8 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 
 import StateContext from '../contexts/StateContext';
 import CustomToast from '@/components/CustomToast';
-import useAddStage from '../hooks/useAddStage';
-import useUpdateStage from '../hooks/useUpdateStage';
+import useAddStage from '../hooks/stage/useAddStage';
+import useUpdateStage from '../hooks/stage/useUpdateStage';
 
 import { PencilIcon } from '@heroicons/react/24/outline';
 import SelectChevronDown from '@/svg/SelectChevronDown';

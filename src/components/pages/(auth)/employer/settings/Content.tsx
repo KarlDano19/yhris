@@ -2,12 +2,11 @@
 
 import React from 'react';
 
-import Link from 'next/link';
-
 import MenuItem from '../../MenuItem';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import useGetAcceptanceMemo from '@/components/pages/(auth)/employer/manage/document-generator/hooks/useGetAcceptanceMemo';
+import BackButton from '@/components/BackButton';
 import UserLogo from '@/svg/UserIcon';
+import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import GeneralSettingsLogo from '@/svg/GeneralSettingIcon';
 import OrgStructureLogo from '@/svg/OrgStructureLogo';
 
@@ -30,21 +29,29 @@ const menus = [
     link: '/settings/org-structure',
     isAvailable: true,
   },
+  {
+    icon: <CreateMemoLogo />,
+    text: 'Acceptance Form',
+    link: '/settings/acceptance-form',
+    isAvailable: true,
+  },
 ];
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const { data: memoData } = useGetAcceptanceMemo();
+  const visibleMenus = memoData
+    ? menus
+    : menus.filter((m) => m.link !== '/settings/acceptance-form');
+
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       <div className='flex p-4'>
-        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Dashboard</h4>
-        </Link>
+        <BackButton label="Dashboard" />
       </div>
       <div className='px-2 md:px-8 lg:px-4'>
         <h2 className='text-xl font-bold text-indigo-dye'>Settings</h2>
         <div className='grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6'>
-          {menus.map((menu, index) => {
+          {visibleMenus.map((menu, index) => {
             return <MenuItem key={index} menu={menu} />;
           })}
         </div>

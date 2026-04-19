@@ -28,7 +28,7 @@ const UnauthorizedHeader = () => {
       >
         {({ open }) => (
           <>
-            <div className={`mx-auto max-w-7xl px-4 py-1 sm:px-6 lg:px-8 `}>
+            <div className={`mx-auto max-w-screen-2xl px-4 py-1 sm:px-6 lg:px-8 `}>
               <div className='flex justify-between lg:gap-8 p-2 lg:p-4'>
                 <div className='flex lg:static'>
                   <div className='flex flex-shrink-0 space-x-2'>

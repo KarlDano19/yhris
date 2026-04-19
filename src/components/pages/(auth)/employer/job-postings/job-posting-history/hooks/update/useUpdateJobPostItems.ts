@@ -7,12 +7,25 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     const formData = new FormData();
     
     // Basic job details
+    // Basic job details - safely append only when data exists
     if (jobPost.country) formData.append('country', jobPost.country);
     if (jobPost.language) formData.append('language', jobPost.language);
     if (jobPost.jobTitle) formData.append('job_title', jobPost.jobTitle);
-    if (jobPost.position) formData.append('position', jobPost.position);
+
+    // Prefer position_id if available, otherwise fallback to position
+    if (jobPost.position_id) {
+      formData.append('position', jobPost.position_id);
+    } else if (jobPost.position) {
+      formData.append('position', jobPost.position);
+    }
+
     if (jobPost.placeAdvertise) {
-      formData.append('advertise_to', Array.isArray(jobPost.placeAdvertise) ? jobPost.placeAdvertise.join() : jobPost.placeAdvertise);
+      formData.append(
+        'advertise_to',
+        Array.isArray(jobPost.placeAdvertise)
+          ? jobPost.placeAdvertise.join()
+          : jobPost.placeAdvertise
+      );
     }
     if (jobPost.jobType && Array.isArray(jobPost.jobType)) {
       formData.append('job_type', jobPost.jobType.join());
@@ -23,7 +36,7 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     if (jobPost.schedule && Array.isArray(jobPost.schedule)) {
       formData.append('job_schedule', jobPost.schedule.join());
     }
-    if (jobPost.hireCount) {
+    if (jobPost.hireCount !== undefined && jobPost.hireCount !== null) {
       formData.append('required_slot', jobPost.hireCount.toString());
     }
     if (jobPost.hireDate) {
@@ -31,14 +44,23 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     }
     if (jobPost.jobDescription) formData.append('job_description', jobPost.jobDescription);
     if (jobPost.qualifications) formData.append('qualifications', jobPost.qualifications);
-    if (jobPost.notesRemarks) formData.append('job_remark', jobPost.notesRemarks);
+
+    // Add skills field - convert array to comma-separated string or empty string
+    if (jobPost.skills && Array.isArray(jobPost.skills)) {
+      formData.append('skills', jobPost.skills.length > 0 ? jobPost.skills.join(', ') : '');
+    } else {
+      formData.append('skills', '');
+    }
+
+    // Ensure notesRemarks is never undefined - use empty string if not provided
+    formData.append('job_remark', jobPost.notesRemarks || '');
 
     // Always include job_url for updates (even if empty) to allow clearing
     if (jobPost.jobUrl !== undefined && jobPost.jobUrl !== null) {
       formData.append('job_url', jobPost.jobUrl);
     }
 
-    // Always send poster_type (similar to CREATE flow)
+    // Always send poster_type
     if (jobPost.postAs) formData.append('poster_type', jobPost.postAs);
 
     // Open Graph metadata (similar to CREATE flow)
@@ -46,11 +68,13 @@ async function updateJobPost(jobPost: any, job_post_id: string) {
     formData.append('og_type', 'article');
     if (jobPost.jobTitle) {
       formData.append('og_title', jobPost.jobTitle);
-      formData.append('og_description', `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`);
+      formData.append(
+        'og_description',
+        `We are urgently seeking a talented ${jobPost.jobTitle}. Don't miss this opportunity, click here to apply now!`
+      );
     }
     formData.append('og_image_width', '300');
     formData.append('og_image_height', '300');
-
     // Show/hide flags
     formData.append('is_show_roles', jobPost.isShowRoles === true ? 'true' : 'false');
     formData.append('is_show_remarks', jobPost.isShowRemarks === true ? 'true' : 'false');

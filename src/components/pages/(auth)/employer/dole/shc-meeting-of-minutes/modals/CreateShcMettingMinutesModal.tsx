@@ -115,10 +115,12 @@ function CreateShcMettingMinutesModal({
                   <DiscussionDetails
                     control={control}
                     register={register}
-                    handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
                 {selectedTab === 3 && (

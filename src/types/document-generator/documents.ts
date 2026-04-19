@@ -58,6 +58,16 @@ export interface NoticeToExplainFormData {
     referenceNumber?: string;
 } 
 
+export interface AcceptanceMemoFormData {
+  companyName: string;
+  startDate: string;
+  endDate: string;
+  authorityName: string;
+  authorityPosition: string;
+  authorityDate: string;
+  signature: string | null;
+}
+
 export interface PrintOptions {
     elementId: string;
     title: string;

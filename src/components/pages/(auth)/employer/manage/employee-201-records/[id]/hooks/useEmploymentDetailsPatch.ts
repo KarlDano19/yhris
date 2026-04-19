@@ -55,7 +55,7 @@ async function patchEmploymentDetails(
 export function useEmploymentDetailsPatch(employeeId?: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<EmploymentPatch, Error, EmploymentPatch>(
+  const mutation = useMutation<EmploymentPatch, Error, EmploymentPatch>(
     (payload: EmploymentPatch) => {
       if (!employeeId) {
         throw new Error("Missing employeeId");
@@ -69,4 +69,17 @@ export function useEmploymentDetailsPatch(employeeId?: string) {
       },
     }
   );
+
+  const save = async (
+    payload: EmploymentPatch
+  ): Promise<{ ok: boolean; error?: Error }> => {
+    try {
+      await mutation.mutateAsync(payload);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error as Error };
+    }
+  };
+
+  return { ...mutation, save };
 }

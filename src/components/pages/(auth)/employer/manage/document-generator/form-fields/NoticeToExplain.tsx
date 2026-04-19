@@ -121,13 +121,12 @@ export const IncidentPlaceField = ({ formData, handleInputChange, disabled, isSu
         onChange={handleInputChange}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-        } ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500'
-            : 'border-gray-300 focus:border-blue-500'
-        }`}
+        } border-gray-300 focus:border-blue-500`}
         disabled={disabled}
       />
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
     </div>
   );
 };
@@ -171,13 +170,12 @@ export const BriefBackgroundField = ({ formData, handleInputChange, disabled, is
         rows={Math.max(4, Math.min(10, (formData.briefBackground || '').split('\n').length + 1))}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors resize-y ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-        } ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500'
-            : 'border-gray-300 focus:border-blue-500'
-        }`}
+        } border-gray-300 focus:border-blue-500`}
         disabled={disabled}
       />
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
       <div className="text-xs text-gray-500 text-right mt-1">
         {(formData.briefBackground || '').length} characters
       </div>
@@ -246,11 +244,7 @@ export const CompanyNameField = ({ formData, handleInputChange, disabled, isSubm
         onChange={handleInputChange}
         className={`w-full px-3 py-2 rounded-md border focus:outline-none transition-colors ${
           disabled ? 'bg-gray-100 text-gray-700' : 'bg-white'
-        } ${
-          showValidation
-            ? 'border-red-500 focus:border-red-500'
-            : 'border-gray-300 focus:border-blue-500'
-        }`}
+        } border-gray-300 focus:border-blue-500`}
         required
         disabled={disabled}
         style={{
@@ -259,6 +253,9 @@ export const CompanyNameField = ({ formData, handleInputChange, disabled, isSubm
           overflow: 'hidden'
         }}
       />
+      {showValidation && (
+        <p className="text-red-500 text-xs mt-1">This field is required.</p>
+      )}
     </div>
   );
 }; 

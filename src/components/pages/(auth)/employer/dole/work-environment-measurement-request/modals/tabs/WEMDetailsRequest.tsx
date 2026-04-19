@@ -2,9 +2,6 @@
 
 import { Controller } from "react-hook-form";
 import { useEffect } from "react";
-import toast from "react-hot-toast";
-
-import CustomToast from "@/components/CustomToast";
 import CustomDatePicker from "@/components/CustomDatePicker";
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -52,31 +49,32 @@ function WEMDetailsRequest({
   }, [purposeOfWemRequest, wemConductedBy, lastWemDate, clearErrors]);
 
   const onValid = (data: any) => {
-    // Ensure arrays are properly handled for validation
     const purposeArray = Array.isArray(data.purpose_of_wem_request) ? data.purpose_of_wem_request : (data.purpose_of_wem_request ? [data.purpose_of_wem_request] : []);
     const wemConductedArray = Array.isArray(data.wem_conducted_by) ? data.wem_conducted_by : (data.wem_conducted_by ? [data.wem_conducted_by] : []);
-    
+
+    let hasError = false;
     if (!purposeArray || purposeArray.length === 0) {
       setError("purpose_of_wem_request", {
         type: "manual",
         message: "Please select at least one Purpose of WEM Request."
       });
-      return;
+      hasError = true;
     }
     if (!wemConductedArray || wemConductedArray.length === 0) {
       setError("wem_conducted_by", {
         type: "manual",
         message: "Please select at least one WEM Conducted By option."
       });
-      return;
+      hasError = true;
     }
     if (!data.last_wem_date || data.last_wem_date === "") {
       setError("last_wem_date", {
         type: "manual",
         message: "Please select the Last WEM Date."
       });
-      return;
+      hasError = true;
     }
+    if (hasError) return;
     setSelectedTab(3);
   };
 

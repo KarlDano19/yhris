@@ -1,9 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import toast from 'react-hot-toast';
-
-import CustomToast from '@/components/CustomToast';
 import useGetWorkAccidentIllnessReportDetails from '../hooks/useGetWorkAccidentIllnessReportDetails';
 import useUpdateWorkAccidentIllnessReport from '../hooks/useUpdateWorkAccidentIlnessReport';
 import PersonalInformation from './tabs/PersonalInformation';
@@ -43,7 +40,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
         refetch: refetchWorkAccidentIllnessReport,
         remove: removeWorkAccidentIllnessReport,
   } = useGetWorkAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateWorkAccidentIllnessReport } = useUpdateWorkAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -109,16 +106,8 @@ export default function UpdateWorkAccidentIllnessReportModal({
     data.disabling_injury = data.disabling_injury === 'yes';
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, {
-          duration: 5000,
-        });
         customCloseModal();
         refetch();
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
       },
     };
     mutate({ work_accident_illness_report_id: isOpen.id, data: data }, callbackReq);
@@ -177,6 +166,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     employeeSelected={employeeSelected}
                     setEmployeeSelected={setEmployeeSelected}
                     employeeName={workAccidentIllnessReportData?.employee_name}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -184,6 +174,7 @@ export default function UpdateWorkAccidentIllnessReportModal({
                     register={register}
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 3 && (

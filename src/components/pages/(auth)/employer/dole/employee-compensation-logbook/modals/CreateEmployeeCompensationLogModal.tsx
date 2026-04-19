@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, useRef, useEffect, useState } from 'react';
+import { Dispatch, Fragment, useRef, useState } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { Controller } from 'react-hook-form';
@@ -23,7 +23,7 @@ export default function CreateEmployeeCompensationLogModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = formMethods;
   const { mutate: addEmployeeCompensationLogbook, isLoading: isLoadingAddEmployeeCompensationLogbook } = useAddEmployeeCompensationLogbook();
   
   // Internal employee search state
@@ -104,6 +104,7 @@ export default function CreateEmployeeCompensationLogModal({
                           <Controller
                             control={control}
                             name='date_of_entry'
+                            rules={{ required: true }}
                             render={({ field }) => (
                               <CustomDatePicker
                                 id='employee-compensation-logbook-datepicker'
@@ -119,6 +120,7 @@ export default function CreateEmployeeCompensationLogModal({
                             )}
                           />
                         </div>
+                        {errors?.date_of_entry && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                       </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -129,6 +131,7 @@ export default function CreateEmployeeCompensationLogModal({
                           <Controller
                             control={control}
                             name='date_of_notification'
+                            rules={{ required: true }}
                             render={({ field }) => (
                               <CustomDatePicker
                                 id='employee-compensation-logbook-datepicker'
@@ -144,8 +147,10 @@ export default function CreateEmployeeCompensationLogModal({
                             )}
                           />
                         </div>
+                        {errors?.date_of_notification && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                       </div>
                     </div>
+                    
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
                       <div>
                         <label htmlFor='position' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -163,6 +168,7 @@ export default function CreateEmployeeCompensationLogModal({
                           setEmployeeSearch={setEmployeeSearch}
                           className="mt-2"
                         />
+                        {errors?.employee && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                       </div>
                       <div>
                         <label htmlFor='email' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -173,6 +179,7 @@ export default function CreateEmployeeCompensationLogModal({
                           <Controller
                             control={control}
                             name='date_of_contingency'
+                            rules={{ required: true }}
                             render={({ field }) => (
                               <CustomDatePicker
                                 id='employee-compensation-logbook-datepicker'
@@ -188,6 +195,7 @@ export default function CreateEmployeeCompensationLogModal({
                             )}
                           />
                         </div>
+                        {errors?.date_of_contingency && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                       </div>
                     </div>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4'>
@@ -203,6 +211,7 @@ export default function CreateEmployeeCompensationLogModal({
                             type='text'
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
+                          {errors?.place_of_contingency && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                         </div>
                       </div>
                       <div>
@@ -217,6 +226,7 @@ export default function CreateEmployeeCompensationLogModal({
                             type='text'
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
+                          {errors?.nature_of_contingency && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                         </div>
                       </div>
                     </div>
@@ -233,6 +243,7 @@ export default function CreateEmployeeCompensationLogModal({
                             type='number'
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
+                          {errors?.days_of_employee_absence && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                         </div>
                       </div>
                     </div>
@@ -247,6 +258,7 @@ export default function CreateEmployeeCompensationLogModal({
                           id='remarks'
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                         />
+                        {errors?.remarks && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
                       </div>
                     </div>
                   </div>
@@ -294,7 +306,7 @@ export default function CreateEmployeeCompensationLogModal({
             </Transition.Child>
           </div>
         </div>
-      </Dialog>
+      </Dialog> 
     </Transition.Root>
   );
 }

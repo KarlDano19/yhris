@@ -8,10 +8,12 @@ function EmploymentDetails({
   register,
   handleSubmit,
   setSelectedTab,
+  errors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  errors?: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(3);
@@ -54,6 +56,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.occupation && (
+              <p className="text-xs text-red-600 mt-1">Occupation is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -70,6 +75,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.employment_status && (
+              <p className="text-xs text-red-600 mt-1">Employment Status is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -86,6 +94,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.average_weekly_earnings && (
+              <p className="text-xs text-red-600 mt-1">Average Weekly Wage is required.</p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
@@ -104,6 +115,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.length_of_service && (
+              <p className="text-xs text-red-600 mt-1">Length of Service is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -120,6 +134,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.years_of_experience && (
+              <p className="text-xs text-red-600 mt-1">Years of Experience is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -136,6 +153,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.hours_worked_per_day && (
+              <p className="text-xs text-red-600 mt-1">Hours of Work per Day is required.</p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
@@ -154,6 +174,9 @@ function EmploymentDetails({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.hours_worked_per_week && (
+              <p className="text-xs text-red-600 mt-1">Hours of Work per Week is required.</p>
+            )}
           </div>
         </div>
       </div>

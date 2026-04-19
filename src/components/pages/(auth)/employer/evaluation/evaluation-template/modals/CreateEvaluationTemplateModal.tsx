@@ -32,7 +32,7 @@ export default function CreateEvaluationModal({
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPreview, setIsPreview] = useState(false);
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, setValue, getValues, watch, control, reset } = formMethods;
+  const { register, handleSubmit, setValue, getValues, watch, control, reset, formState: { errors } } = formMethods;
   const { mutate, isLoading } = useAddEvaluationTemplate();
 
   const onSubmit = handleSubmit((data) => {
@@ -188,6 +188,7 @@ export default function CreateEvaluationModal({
                       register,
                       handleSubmit,
                       setSelectedTab,
+                      errors,
                     }}
                   />
                 )}
@@ -199,6 +200,7 @@ export default function CreateEvaluationModal({
                       setValue,
                       handleSubmit,
                       setSelectedTab,
+                      errors,
                     }}
                   />
                 )}

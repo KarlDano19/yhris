@@ -1,0 +1,7 @@
+import Content from "@/components/pages/(auth)/yahshua-connect/setup-applicant-profile/Content";
+
+const SetUpApplicantProfile = () => {
+  return <Content />;
+};
+
+export default SetUpApplicantProfile;

@@ -28,7 +28,7 @@ export default function InvestigationModal({
   setIsOpen: Dispatch<T_InvestigationModal | null>;
 }) {
   const { mutate, isLoading } = useAddInvestigationReportItems();
-  const { register, handleSubmit, reset, control, setValue, watch } = useForm<T_Investigation>();
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<T_Investigation>();
   const InvestigationDateInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [toAddData, setToAddData] = useState<any>(null);
@@ -258,6 +258,7 @@ export default function InvestigationModal({
                           <Controller
                             control={control}
                             name='date'
+                            rules={{ required: true }}
                             render={({ field }) => (
                               <CustomDatePicker
                                 id='investigation-report-datepicker'
@@ -273,6 +274,9 @@ export default function InvestigationModal({
                             )}
                           />
                         </div>
+                        {errors.date && (
+                          <p className='text-xs text-red-600 mt-1'>Date of investigation is required.</p>
+                        )}
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='witness' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -286,6 +290,9 @@ export default function InvestigationModal({
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
                         </div>
+                        {errors.witness && (
+                          <p className='text-xs text-red-600 mt-1'>Witness is required.</p>
+                        )}
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='presider' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -299,6 +306,9 @@ export default function InvestigationModal({
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
                         </div>
+                        {errors.presider && (
+                          <p className='text-xs text-red-600 mt-1'>Presider is required.</p>
+                        )}
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='isAttendHearing' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -319,6 +329,9 @@ export default function InvestigationModal({
                             <SelectChevronDown />
                           </div>
                         </div>
+                        {errors.isAttendHearing && (
+                          <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+                        )}
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label
@@ -338,6 +351,9 @@ export default function InvestigationModal({
                             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                           />
                         </div>
+                        {errors.resultOfInvestigation && (
+                          <p className='text-xs text-red-600 mt-1'>Result of investigation is required.</p>
+                        )}
                       </div>
                       <div className='sm:col-span-4 mt-4'>
                         <label htmlFor='decision' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -362,6 +378,9 @@ export default function InvestigationModal({
                             <SelectChevronDown />
                           </div>
                         </div>
+                        {errors.decision && (
+                          <p className='text-xs text-red-600 mt-1'>Decision is required.</p>
+                        )}
                       </div>
                       {selectedDecision === 'Other...' && (
                         <div className='sm:col-span-4 mt-4'>
@@ -377,6 +396,9 @@ export default function InvestigationModal({
                               className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                             />
                           </div>
+                          {errors.other && (
+                            <p className='text-xs text-red-600 mt-1'>Please specify the decision.</p>
+                          )}
                         </div>
                       )}
                       <div className='sm:col-span-4 mt-4'>

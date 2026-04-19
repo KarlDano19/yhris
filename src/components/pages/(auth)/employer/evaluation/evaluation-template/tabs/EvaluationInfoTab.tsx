@@ -6,10 +6,12 @@ function EvaluationInfoTab({
   register,
   handleSubmit,
   setSelectedTab,
+  errors,
 }: {
   register: any;
   handleSubmit: any;
   setSelectedTab: any;
+  errors: any;
 }) {
   const onSubmit = handleSubmit(() => {
     setSelectedTab(2);
@@ -28,6 +30,7 @@ function EvaluationInfoTab({
             {...register('name', { required: true })}
             className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
           />
+          {errors.name && <p className='text-xs text-red-600 mt-1'>Evaluation Name is required.</p>}
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -51,6 +54,7 @@ function EvaluationInfoTab({
               <SelectChevronDown />
             </div>
           </div>
+          {errors.evaluation_type && <p className='text-xs text-red-600 mt-1'>Evaluation Type is required.</p>}
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -77,6 +81,7 @@ function EvaluationInfoTab({
               <SelectChevronDown />
             </div>
           </div>
+          {errors.frequency && <p className='text-xs text-red-600 mt-1'>Frequency is required.</p>}
         </div>
         <div className='sm:col-span-4 mt-2 w-full'>
           <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -99,6 +104,7 @@ function EvaluationInfoTab({
               <SelectChevronDown />
             </div>
           </div>
+          {errors.evaluation_format && <p className='text-xs text-red-600 mt-1'>Format is required.</p>}
         </div>
       </div>
       <hr />

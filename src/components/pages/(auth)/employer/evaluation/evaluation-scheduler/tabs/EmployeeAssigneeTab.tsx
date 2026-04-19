@@ -21,6 +21,7 @@ function EmployeeAssigneeTab({
   recipientEmails,
   employeeEmails,
   setValue,
+  errors,
 }: {
   control: any;
   Controller: any;
@@ -33,6 +34,7 @@ function EmployeeAssigneeTab({
   recipientEmails?: string[];
   employeeEmails?: string[];
   setValue?: any;
+  errors?: any;
 }) {
   const [employeeSearch, setEmployeeSearch] = useState<string>('');
   
@@ -96,6 +98,7 @@ function EmployeeAssigneeTab({
             className=""
             showEmail={true}
           />
+          {errors?.recipient && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
           <div className="flex items-center justify-between">
@@ -135,6 +138,7 @@ function EmployeeAssigneeTab({
             className=""
             showEmail={true}
           />
+          {errors?.employees && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
         </div>
         <div className="sm:col-span-4 mt-2 w-full">
           <label

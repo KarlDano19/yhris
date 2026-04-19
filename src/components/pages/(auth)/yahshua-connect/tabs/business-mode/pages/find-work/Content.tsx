@@ -1,0 +1,447 @@
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
+
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
+import BusinessJobCard from './components/BusinessJobCard';
+import JobAcceptedModal from './modals/JobAcceptedModal';
+import ConfirmAcceptJobModal from './modals/ConfirmAcceptJobModal';
+import ChatMessagesModal from '@/components/common/chat/ChatMessagesModal';
+import BusinessJobDetailsModal from './modals/BusinessJobDetailsModal';
+import FilterRequestsModal from '../../modals/FilterRequestsModal';
+import useBusinessModeFilters from '../../../../hooks/useBusinessModeFilters';
+import useFindBusinessJobs from './hooks/useFindBusinessJobs';
+import useApplyToBusinessJob from './hooks/useApplyToBusinessJob';
+import { useQueryClient } from '@tanstack/react-query';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { formatDateToLocal } from '@/helpers/date';
+
+import { FunnelIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import formatPrice from '@/helpers/currencyFormat';
+import { T_BusinessJobFilters } from '@/types/business-mode';
+
+const Content = () => {
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] = useState(false);
+  const [isJobAcceptedModalOpen, setIsJobAcceptedModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [pendingAcceptJobId, setPendingAcceptJobId] = useState<number | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const { filters, applyFromModal } = useBusinessModeFilters();
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  // Get applicant profile from cache for location coordinates (distance calculation)
+  const queryClient = useQueryClient();
+  const cachedProfile = queryClient
+    .getQueryCache()
+    .find(['applicantProfileCache']) as {
+    state: { data: { data?: { latitude?: number; longitude?: number }; latitude?: number; longitude?: number } } | undefined;
+  };
+  const profileData = cachedProfile?.state?.data?.data || cachedProfile?.state?.data;
+  const applicantLatitude = profileData?.latitude;
+  const applicantLongitude = profileData?.longitude;
+
+  // Apply to business job mutation
+  const applyToBusinessJobMutation = useApplyToBusinessJob();
+
+  // Merge applicant location with filters for distance calculation
+  const filtersWithLocation = useMemo(() => ({
+    ...filters,
+    ...(applicantLatitude && applicantLongitude ? {
+      latitude: applicantLatitude,
+      longitude: applicantLongitude,
+    } : {}),
+  }), [filters, applicantLatitude, applicantLongitude]);
+
+  // Fetch business jobs with filters (including location for distance calculation)
+  const {
+    data: jobsData,
+    isLoading: isGetJobsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    totalRecords
+  } = useFindBusinessJobs(filtersWithLocation);
+
+  // Transform API business jobs data to BusinessJobCard format
+  const transformedJobs = useMemo(() => {
+    if (!jobsData || jobsData.length === 0) return [];
+
+    return jobsData.map((job: any) => {
+      // Get client initials from created_by_name
+      const getClientInitials = (clientName: string) => {
+        if (!clientName) return '?';
+        const words = clientName.trim().split(/\s+/);
+        if (words.length >= 2) {
+          return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return clientName.substring(0, 2).toUpperCase();
+      };
+
+      // Format price range
+      const formatPriceRange = () => {
+        if (job.budget_type === 'Range' && job.min_amount && job.max_amount) {
+          return `₱ ${formatPrice(job.min_amount)} - ₱ ${formatPrice(job.max_amount)}`;
+        } else if (job.hourly_rate) {
+          return `₱ ${formatPrice(job.hourly_rate)}/hour`;
+        } else if (job.min_amount) {
+          return `₱ ${formatPrice(job.min_amount)}`;
+        } else if (job.max_amount) {
+          return `₱ ${formatPrice(job.max_amount)}`;
+        }
+        return 'Price not specified';
+      };
+
+      // Format date and time
+      const formatTime = () => {
+        // Use contract_start_date (backend field name) instead of date
+        const dateField = job.contract_start_date || job.date;
+        if (!dateField) return 'Date not specified';
+
+        const dateFormatted = formatDateToLocal(dateField, true);
+
+        if (job.time_from && job.time_to) {
+          return `${dateFormatted}, ${job.time_from} - ${job.time_to}`;
+        } else if (job.time_from) {
+          return `${dateFormatted}, ${job.time_from}`;
+        }
+        return dateFormatted;
+      };
+
+      // Format distance
+      const formatDistance = () => {
+        if (job.distance_km !== null && job.distance_km !== undefined) {
+          return `${job.distance_km} km away`;
+        }
+        return '';
+      };
+
+      // Get category as tags
+      const getTags = () => {
+        const tags = [];
+        if (job.category) {
+          tags.push(job.category);
+        }
+        return tags;
+      };
+
+      // Determine status - check if user has applied
+      const getStatus = () => {
+        if (job.has_applied) {
+          return 'accepted' as const; // Show as accepted to display Message button
+        }
+        return 'pending' as const;
+      };
+
+      return {
+        id: job.id,
+        title: job.job_title || 'Untitled Job',
+        clientName: job.created_by_name || 'Unknown Client',
+        clientId: job.created_by, // Include client ID
+        clientInitials: getClientInitials(job.created_by_name || ''),
+        clientPhoto: job.created_by_photo || null,
+        clientLocation: job.location || 'Location not specified',
+        distance: formatDistance(),
+        rating: job.created_by_rating || 0,
+        hiresCount: job.created_by_reviews_count || 0,
+        jobRating: job.average_rating || null,
+        jobReviewsCount: job.reviews_count || 0,
+        description: job.description || 'No description provided',
+        time: formatTime(),
+        priceRange: formatPriceRange(),
+        tags: getTags(),
+        urgent: job.is_urgent || false,
+        status: getStatus(),
+        hasApplied: job.has_applied || false,
+      };
+    });
+  }, [jobsData]);
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleApplyFilters = (newFilters: {
+    location?: string;
+    skills?: string[];
+    urgentOnly?: boolean;
+    category?: string;
+    min_budget?: number;
+    max_budget?: number;
+    date_from?: string;
+    date_to?: string;
+  }) => {
+    applyFromModal(newFilters);
+    setSelectedJobId(null); // Reset selected job when filters change
+  };
+
+  const handleAcceptJob = (jobId: number) => {
+    // Check if already applied
+    const job = jobsData?.find((j: any) => j.id === jobId);
+    if (job?.has_applied) {
+      // If already applied, just open the chat modal
+      setSelectedJobId(jobId);
+      if (job?.created_by) {
+        setSelectedClientId(job.created_by);
+      }
+      setIsChatModalOpen(true);
+      setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+      return;
+    }
+
+    // Show confirmation modal before accepting
+    setPendingAcceptJobId(jobId);
+    setIsConfirmAcceptModalOpen(true);
+  };
+
+  const handleConfirmAcceptJob = async () => {
+    if (!pendingAcceptJobId) return;
+
+    try {
+      setSelectedJobId(pendingAcceptJobId);
+
+      const job = jobsData?.find((j: any) => j.id === pendingAcceptJobId);
+
+      await applyToBusinessJobMutation.mutateAsync(pendingAcceptJobId);
+
+      // Get client ID from job data
+      if (job?.created_by) {
+        setSelectedClientId(job.created_by);
+      }
+
+      setIsConfirmAcceptModalOpen(false);
+      setPendingAcceptJobId(null);
+      setIsJobAcceptedModalOpen(true);
+      setIsJobDetailsModalOpen(false); // Close details modal after accepting job
+      toast.custom(() => (
+        <CustomToast message="Application submitted successfully." type="success" />
+      ), { duration: 2000 });
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to submit application';
+
+      // If already applied, open chat instead of showing error
+      if (errorMessage.includes('already applied')) {
+        const job = jobsData?.find((j: any) => j.id === pendingAcceptJobId);
+        if (job?.created_by) {
+          setSelectedClientId(job.created_by);
+        }
+        setIsConfirmAcceptModalOpen(false);
+        setPendingAcceptJobId(null);
+        setIsChatModalOpen(true);
+        setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+        // Refetch jobs to update has_applied status
+        // This will be handled by the query invalidation in the mutation
+      } else {
+        setIsConfirmAcceptModalOpen(false);
+        setPendingAcceptJobId(null);
+        toast.custom(() => (
+          <CustomToast message={errorMessage} type="error" />
+        ), { duration: 3000 });
+      }
+    }
+  };
+
+  const handleMessage = (jobId: number) => {
+    setSelectedJobId(jobId);
+    // Get client ID from job data
+    const job = jobsData?.find((j: any) => j.id === jobId);
+    if (job?.created_by) {
+      setSelectedClientId(job.created_by);
+    }
+    setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+  };
+
+  const handleViewDetails = (jobId: number) => {
+    setSelectedJobId(jobId);
+    setIsJobDetailsModalOpen(true);
+    setIsChatModalOpen(false); // Ensure chat modal is closed
+  };
+
+  const handleMessageClient = () => {
+    setIsJobAcceptedModalOpen(false);
+    setIsChatModalOpen(true);
+    setIsJobDetailsModalOpen(false); // Ensure details modal is closed
+  };
+
+
+  const selectedJobFull = selectedJobId
+    ? transformedJobs.find((job) => job.id === selectedJobId)
+    : null;
+
+  return (
+    <div className="space-y-6">
+      {/* Scroll to Top Button */}
+      {showScrollToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-8 z-50 bg-savoy-blue text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <ArrowUpIcon className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      )}
+
+      {/* Find Work Header */}
+      <div className="bg-white rounded-lg shadow-sm p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Find Work</h2>
+            <p className="text-sm text-gray-600">Browse available job requests near you</p>
+          </div>
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FunnelIcon className="h-5 w-5 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">Filters</span>
+          </button>
+        </div>
+
+        {/* Job Requests List */}
+        {isGetJobsLoading ? (
+          <LoadingSpinner size="lg" showText text="Loading jobs..." className="py-12" />
+        ) : transformedJobs.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No jobs available at the moment.</div>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {transformedJobs.map((job) => (
+                <BusinessJobCard
+                  key={job.id}
+                  {...job}
+                  onAcceptJob={handleAcceptJob}
+                  onMessage={handleMessage}
+                  onViewDetails={handleViewDetails}
+                />
+              ))}
+            </div>
+            {/* Load More Button */}
+            {hasNextPage && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  className="px-6 py-2 bg-savoy-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetchingNextPage ? 'Loading...' : 'Load More Jobs'}
+                </button>
+              </div>
+            )}
+            {totalRecords > 0 && (
+              <div className="text-sm text-gray-600 text-center mt-4">
+                Showing {jobsData?.length || 0} of {totalRecords} jobs
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Page-specific Modals */}
+      <FilterRequestsModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        initialUrgentOnly={!!filters?.is_urgent}
+        showSkills={false}
+      />
+
+      {/* Confirm Accept Job Modal */}
+      {pendingAcceptJobId && (() => {
+        const pendingJob = transformedJobs.find((job) => job.id === pendingAcceptJobId);
+        return pendingJob ? (
+          <ConfirmAcceptJobModal
+            isOpen={isConfirmAcceptModalOpen}
+            onClose={() => {
+              setIsConfirmAcceptModalOpen(false);
+              setPendingAcceptJobId(null);
+            }}
+            onConfirm={handleConfirmAcceptJob}
+            jobTitle={pendingJob.title}
+            clientName={pendingJob.clientName}
+            isLoading={applyToBusinessJobMutation.isLoading}
+          />
+        ) : null;
+      })()}
+
+      {/* Job Accepted Modal */}
+      {selectedJobFull && selectedJobId && (
+        <JobAcceptedModal
+          isOpen={isJobAcceptedModalOpen}
+          onClose={() => {
+            setIsJobAcceptedModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobDetails={{
+            title: selectedJobFull.title,
+            clientName: selectedJobFull.clientName,
+            time: selectedJobFull.time,
+            priceRange: selectedJobFull.priceRange,
+          }}
+          onMessageClient={handleMessageClient}
+        />
+      )}
+
+      {/* Business Job Details Modal */}
+      {selectedJobId && (
+        <BusinessJobDetailsModal
+          isOpen={isJobDetailsModalOpen}
+          onClose={() => {
+            setIsJobDetailsModalOpen(false);
+            setSelectedJobId(null);
+          }}
+          jobId={selectedJobId}
+          onAcceptJob={handleAcceptJob}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {selectedJobFull && (
+        <ChatMessagesModal
+          isOpen={isChatModalOpen}
+          onClose={() => {
+            setIsChatModalOpen(false);
+            setSelectedJobId(null);
+            setSelectedClientId(null);
+          }}
+          recipientId={selectedClientId || selectedJobFull.clientId}
+          recipientName={selectedJobFull.clientName}
+          recipientInitials={selectedJobFull.clientInitials || ''}
+          recipientPhoto={selectedJobFull.clientPhoto || null}
+          jobTitle={selectedJobFull.title}
+          jobId={selectedJobId || undefined}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Content;

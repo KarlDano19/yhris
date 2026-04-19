@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import toast from "react-hot-toast";
 import { Tooltip } from 'react-tooltip';
 
-import CustomToast from "@/components/CustomToast";
 import InfoIcon from '@/svg/InfoIcon';
 
 import { XCircleIcon } from "@heroicons/react/24/solid";
@@ -18,6 +16,7 @@ function PolicyAndComittee({
   setValue,
   watch,
   isCreateModal,
+  errors,
 }: {
   control: any;
   register: any;
@@ -26,12 +25,14 @@ function PolicyAndComittee({
   setValue: any;
   watch: any;
   isCreateModal: boolean;
+  errors: any;
 }) {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [attachmentExist, setAttachmentExist] = useState(false);
   const [committeeType, setCommitteeType] = useState<string>("A");
   const [fileSource, setFileSource] = useState<string>("");
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showFileError, setShowFileError] = useState(false);
   
   // Watch for existing file URL from form
   const existingFileUrl = watch("policy_and_program_file");
@@ -58,6 +59,7 @@ function PolicyAndComittee({
       setFileSource("upload");
       setFileUrl(URL.createObjectURL(file));
       setAttachmentExist(true);
+      setShowFileError(false);
     }
   };
 
@@ -126,37 +128,28 @@ function PolicyAndComittee({
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof FileList && data.policy_and_program_file.length === 0) ||
           (typeof data.policy_and_program_file === 'object' && data.policy_and_program_file instanceof File && !data.policy_and_program_file.name) ||
           (typeof data.policy_and_program_file === 'string' && data.policy_and_program_file.trim() === ''));
-      if (isFileMissing) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Policy and Program file is required." type="error" />);
-        return;
-      } else if (!data.chairman_name || data.chairman_name.trim() === "") {
-        const el = document.getElementById("chairman_name");
-        if (el) el.focus();
-        return;
-      } else if (!data.chairman_position || data.chairman_position.trim() === "") {
-        const el = document.getElementById("chairman_position");
-        if (el) el.focus();
-        return;
-      }
+      setShowFileError(false);
+      if (isFileMissing) { setShowFileError(true); return; }
       setSelectedTab(3);
     })}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
+        {showFileError && (
+          <div className="rounded-md bg-red-50 p-4 mb-3">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <XCircleIcon
+                  className="h-5 w-5 text-red-400"
+                  aria-hidden="true"
+                />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  Please upload a Policy and Program on Safety and Health file before proceeding.
+                </h3>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div className="flex-1">
             <label
@@ -193,6 +186,7 @@ function PolicyAndComittee({
                 onChange={handleFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              {showFileError && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
               {attachmentExist ? (
                 <div className="mt-2">
                   {existingFileUrl && typeof existingFileUrl === 'string' && existingFileUrl.startsWith('http') ? (
@@ -254,22 +248,24 @@ function PolicyAndComittee({
             <div className="mt-2">
               <input
                 type="text"
-                {...register(`chairman_name`)}
+                {...register(`chairman_name`, { required: true })}
                 id={`chairman_name`}
                 placeholder={`Chairman Name`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.chairman_name && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
           <div className="grid-item">
             <div className="mt-2">
               <input
                 type="text"
-                {...register(`chairman_position`)}
+                {...register(`chairman_position`, { required: true })}
                 id={`chairman_position`}
                 placeholder={`Chairman Position`}
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.chairman_position && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>

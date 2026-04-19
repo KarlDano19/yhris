@@ -2,78 +2,33 @@
 
 import React, { useState } from 'react';
 
-import Link from 'next/link';
-
 import classNames from '@/helpers/classNames';
 import IndividualEvaluations from './tabs/IndividualEvaluations';
 import TemplateResponses from './tabs/TemplateResponses';
+import BackButton from '@/components/BackButton';
 import SeederButton from '@/components/SeederButton';
-import toast from 'react-hot-toast';
-import CustomToast from '@/components/CustomToast';
-import useSeedEvaluations from './hooks/useSeedEvaluations';
-import useUnseedEvaluations from './hooks/useUnseedEvaluations';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 type TabType = 'individual' | 'template-responses';
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
   const [activeTab, setActiveTab] = useState<TabType>('individual');
-  const seedEvaluationsMutation = useSeedEvaluations();
-  const unseedEvaluationsMutation = useUnseedEvaluations();
 
   const tabs = [
     { id: 'individual' as TabType, name: 'Individual Evaluations' },
     { id: 'template-responses' as TabType, name: 'Template Responses' },
   ];
 
-  const handleSeedEvaluations = async (count: number) => {
-    try {
-      const result = await seedEvaluationsMutation.mutateAsync({ count });
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to seed evaluations';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
-  const handleUnseedEvaluations = async () => {
-    try {
-      const result = await unseedEvaluationsMutation.mutateAsync();
-      toast.custom(() => <CustomToast message={result.message} type='success' />, { duration: 3000 });
-    } catch (error: any) {
-      const errorMessage = typeof error === 'string'
-        ? error
-        : error instanceof Error
-          ? error.message
-          : 'Failed to unseed evaluations';
-      toast.custom(() => <CustomToast message={errorMessage} type='error' />, { duration: 5000 });
-      throw error;
-    }
-  };
-
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh]'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh]'>
         <div className='flex p-4'>
-          <Link href='/evaluation' className='flex-none flex gap-3 items-center hover:bg-gray-200 p-2 rounded-md'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Evaluation</h4>
-          </Link>
+          <BackButton label="Evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
           <h2 className='text-2xl font-bold text-indigo-dye'>Evaluation History</h2>
           <SeederButton
-            onSeed={handleSeedEvaluations}
-            onUnseed={handleUnseedEvaluations}
-            isLoading={seedEvaluationsMutation.isLoading}
-            isUnseeding={unseedEvaluationsMutation.isLoading}
+            viewType="evaluation_history"
             disabled={!hasActiveSubscription}
           />
         </div>

@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 import emailVerification from './hooks/useEmailVerification';
 
 const Content = () => {
   const router = useRouter();
   const { auth, token, code } = useParams();
+  const searchParams = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(true);
   const [isEmailConfirmed, setIsEmailConfirmed] = useState(false);
   const { mutate } = emailVerification();
@@ -36,7 +37,13 @@ const Content = () => {
   }, []);
 
   const handleGoBack = () => {
-    router.push('/login');
+    const urlRedirect = searchParams.get('redirect');
+    const pendingRedirect = urlRedirect || localStorage.getItem('postAuthRedirect');
+    if (pendingRedirect) {
+      router.push(`/login?redirect=${encodeURIComponent(pendingRedirect)}`);
+    } else {
+      router.push('/login');
+    }
   };
 
   return (

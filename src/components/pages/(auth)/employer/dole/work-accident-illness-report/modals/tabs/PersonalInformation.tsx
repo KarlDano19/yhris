@@ -22,6 +22,7 @@ function PersonalInformation({
   employeeSelected,
   setEmployeeSelected,
   employeeName,
+  errors,
 }: {
   control: any;
   register: any;
@@ -33,6 +34,7 @@ function PersonalInformation({
   employeeSelected: boolean;
   setEmployeeSelected: (value: boolean) => void;
   employeeName?: string;
+  errors?: any;
 }) {
 
   const onSubmit = handleSubmit(() => {
@@ -112,6 +114,9 @@ function PersonalInformation({
                 <ClockIcon className="h-6 w-6 text-savoy-blue hover:text-indigo-300" />
               </div>
             </div>
+            {errors?.time_of_incident && (
+              <p className="text-xs text-red-600 mt-1">Time of Accident is required.</p>
+            )}
           </div>
         </div>
         <div className="mt-4">
@@ -143,17 +148,34 @@ function PersonalInformation({
                   if (selectedOption && !selectedOption.isShowMore) {
                     setValue('address', selectedOption.address);
                     setValue('sex', selectedOption.gender);
+
+                    // Auto-calculate age from birthdate
+                    if (selectedOption.birthdate) {
+                      const birthDate = new Date(selectedOption.birthdate);
+                      const today = new Date();
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const monthDiff = today.getMonth() - birthDate.getMonth();
+                      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                      }
+                      setValue('age', age);
+                    }
+
                     setEmployeeSearch(selectedOption.label);
                     setEmployeeSelected(true);
                   } else {
                     setValue('address', '');
                     setValue('sex', '');
+                    setValue('age', '');
                     setEmployeeSearch('');
                     setEmployeeSelected(false);
                   }
                 }}
               />
             </div>
+            {errors?.employee && (
+              <p className="text-xs text-red-600 mt-1">Name of Injured Worker is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -171,6 +193,9 @@ function PersonalInformation({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.age && (
+              <p className="text-xs text-red-600 mt-1">Age is required.</p>
+            )}
           </div>
           <div>
             <label
@@ -197,6 +222,9 @@ function PersonalInformation({
                 <SelectChevronDown />
               </div>
             </div>
+            {errors?.civil_status && (
+              <p className="text-xs text-red-600 mt-1">Civil Status is required.</p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-4">
@@ -242,6 +270,9 @@ function PersonalInformation({
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
             </div>
+            {errors?.no_of_dependents && (
+              <p className="text-xs text-red-600 mt-1">Number of Dependents is required.</p>
+            )}
           </div>
           <div>
             <label

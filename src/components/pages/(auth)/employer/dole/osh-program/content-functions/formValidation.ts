@@ -92,14 +92,16 @@ export const autoClearValidation = (
 ): void => {
   if (validationMessage && missingFields.length > 0) {
     const formValues = watch();
-    const allRequiredFieldsFilled = missingFields.every(field => {
+    const stillMissing = missingFields.filter(field => {
       const value = formValues[field];
-      return value !== undefined && value !== null && value !== '';
+      return value === undefined || value === null || value === '';
     });
-    
-    if (allRequiredFieldsFilled) {
+
+    if (stillMissing.length === 0) {
       setValidationMessage("");
       setMissingFields([]);
+    } else if (stillMissing.length < missingFields.length) {
+      setMissingFields(stillMissing);
     }
   }
 };

@@ -19,12 +19,14 @@ function EvaluationFormTab({
   setValue,
   handleSubmit,
   setSelectedTab,
+  errors,
 }: {
   register: any;
   watch: any;
   setValue: any;
   handleSubmit: any;
   setSelectedTab: any;
+  errors: any;
 }) {
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const [remarks, setRemarks] = useState<boolean | null>(watch('is_show_remarks'));
@@ -72,6 +74,7 @@ function EvaluationFormTab({
                       />
                     </div>
                     <Tooltip id='description-tooltip' style={{ fontSize: '10px' }} />
+                    {errors.description && <p className='text-xs text-red-600 mt-1'>Description is required.</p>}
                   </div>
                   {/* <div
                     className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'
@@ -150,6 +153,7 @@ function EvaluationFormTab({
                             <PlusIcon />
                           </div>
                         </div>
+                        {errors.total_score && <p className='text-xs text-red-600 mt-1'>{errors.total_score.message}</p>}
                       </div>
                     </div>
                     <div className='sm:col-span-4 mt-2 w-full border rounded-xl border-[#ACB9CB] py-6 px-4'>
@@ -212,6 +216,7 @@ function EvaluationFormTab({
                             <PlusIcon />
                           </div>
                         </div>
+                        {errors.passing_score && <p className='text-xs text-red-600 mt-1'>{errors.passing_score.message}</p>}
                       </div>
                     </div>
                   </div>

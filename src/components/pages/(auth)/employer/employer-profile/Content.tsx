@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import Details from './Details';
 import Settings from './Settings';
 import useUpdateProfile from './hooks/useUpdateProfile';
@@ -17,11 +18,10 @@ import classNames from '@/helpers/classNames';
 import ConfirmEditEmployerProfileModal from '../employer-profile/modal/ConfirmEditEmployerProfileModal'
 import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-
 import { T_EmployerProfile } from '@/types/globals';
 
 function Content() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const cachedProfile = queryClient.getQueryCache().find(['employerProfileCache']);
   const { data: profileData, isLoading: isProfileLoading } = useGetEmployerProfile();
@@ -62,18 +62,18 @@ function Content() {
   };
 
   // Function to handle dashboard link click
-  const handleDashboardClick = async (e: React.MouseEvent) => {
+  const handleDashboardClick = async () => {
     if (!areRequiredFieldsFilled()) {
-      e.preventDefault();
-      
       // Trigger form validation to show field-specific error messages
       await trigger();
-      
+
       // Show a toast message to guide the user
       toast.custom(() => <CustomToast message={'Please complete all required fields before proceeding to dashboard'} type='error' />, {
         duration: 4000,
       });
+      return;
     }
+    router.back();
   };
 
   // Watch form values to update dashboard link state in real-time
@@ -136,12 +136,9 @@ function Content() {
   };
 
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
       <div className='flex p-4'>
-        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200' onClick={handleDashboardClick}>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Dashboard</h4>
-        </Link>
+        <BackButton label="Dashboard" />
       </div>
       <div className='px-2 md:px-8 lg:px-4 pb-8'>
         <h2 className='text-xl font-bold text-indigo-dye mb-6'>My Profile</h2>

@@ -782,6 +782,7 @@ function EditAnnualMedicalReportModal({
                     setSelectedTab={setSelectedTab}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -858,6 +859,9 @@ function EditAnnualMedicalReportModal({
                     isLoading={isLoadingUpdateAnnualMedicalReport}
                     setValue={setValue}
                     watch={watch}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>

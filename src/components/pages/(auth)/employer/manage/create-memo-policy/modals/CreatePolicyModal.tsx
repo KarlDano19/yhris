@@ -464,6 +464,7 @@ export default function CreatePolicyModal({
                                 >
                                   <PencilIcon className='h-3 text-gray-500 ml-2' />
                                 </button>
+                                <span className='text-red-600'>*</span>
                               </div>
                               <button
                                 type='button'

@@ -225,18 +225,6 @@ export default function CreateEditRoleModal({
                   <div className='md:mx-6 my-4'>
                     <form onSubmit={onSubmit}>
                       <div className='px-4 pt-4 pb-6'>
-                        <div className={`${Object.keys(errors).length > 0 ? 'block' : 'hidden'} rounded-md bg-red-50 p-4 mb-3`}>
-                          <div className='flex'>
-                            <div className='flex-shrink-0'>
-                              <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-                            </div>
-                            <div className='ml-3'>
-                              <h3 className='text-sm font-medium text-red-800'>
-                                You cannot proceed due to incomplete fields. Please review.
-                              </h3>
-                            </div>
-                          </div>
-                        </div>
 
                         {/* Basic Role Information */}
                         <div className='mb-8'>
@@ -260,6 +248,7 @@ export default function CreateEditRoleModal({
                                   className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                   placeholder='e.g. hr_admin'
                                 />
+                                {errors.name && <p className='text-xs text-red-600 mt-1'>{errors.name.message as string}</p>}
                                 <p className='text-xs text-gray-500 mt-1'>
                                   Use lowercase with underscores (e.g., hr_admin)
                                 </p>
@@ -282,6 +271,7 @@ export default function CreateEditRoleModal({
                                   className='block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-savoy-blue sm:text-sm sm:leading-6'
                                   placeholder='e.g. HR Administrator'
                                 />
+                                {errors.display_name && <p className='text-xs text-red-600 mt-1'>{errors.display_name.message as string}</p>}
                                 <p className='text-xs text-gray-500 mt-1'>
                                   Human-readable name for this role
                                 </p>
@@ -310,6 +300,7 @@ export default function CreateEditRoleModal({
                                   <SelectChevronDown />
                                 </div>
                               </div>
+                              {errors.role_type && <p className='text-xs text-red-600 mt-1'>{errors.role_type.message as string}</p>}
                               <div className='mt-2 space-y-1'>
                                 <div className='flex items-start space-x-2 text-xs text-gray-600'>
                                   <div className='w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0'></div>

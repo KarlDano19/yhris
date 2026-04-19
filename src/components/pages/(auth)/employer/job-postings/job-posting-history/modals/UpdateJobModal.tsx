@@ -121,12 +121,26 @@ export default function UpdateJobModal({
           otherBenefits: jobPostDataDetails.other_benefits,
         });
       }
+      // Parse skills from comma-separated string to array
+      let skillsArray: string[] = [];
+      if (jobPostDataDetails.skills) {
+        if (Array.isArray(jobPostDataDetails.skills)) {
+          skillsArray = jobPostDataDetails.skills;
+        } else if (typeof jobPostDataDetails.skills === 'string') {
+          skillsArray = jobPostDataDetails.skills
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter((s: string) => s.length > 0);
+        }
+      }
+
       fourthForm.reset({
         isShowRoles: jobPostDataDetails.is_show_roles,
         isShowRemarks: jobPostDataDetails.is_show_remarks,
         jobDescription: jobPostDataDetails.job_description,
         qualifications: jobPostDataDetails.qualifications,
         notesRemarks: jobPostDataDetails.job_remark,
+        skills: skillsArray,
       });
       // Normalize screening questions for the Job Settings page
       if (jobPostDataDetails.screening_questions && jobPostDataDetails.screening_questions !== null) {
@@ -693,6 +707,7 @@ export default function UpdateJobModal({
                       setValue={fourthForm.setValue}
                       getValues={fourthForm.getValues}
                       register={fourthForm.register}
+                      watch={fourthForm.watch}
                       setPageNumber={setPageNumber}
                       onSubmit={fourthFormSubmit}
                       setFileProps={setFileProps}

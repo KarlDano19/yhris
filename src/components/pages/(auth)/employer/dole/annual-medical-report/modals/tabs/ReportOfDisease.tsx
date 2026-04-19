@@ -322,6 +322,7 @@ function ReportOfDisease({
                       {...register(`physical_environment_total_male`)}
                       id={`physical_environment_total_male`}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
                     />
                   </div>
@@ -333,6 +334,7 @@ function ReportOfDisease({
                       {...register(`physical_environment_total_female`)}
                       id={`physical_environment_total_female`}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
                     />
                   </div>
@@ -344,6 +346,7 @@ function ReportOfDisease({
                       {...register(`physical_environment_total`)}
                       id={`physical_environment_total`}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 font-bold"
                     />
                   </div>
@@ -359,6 +362,7 @@ function ReportOfDisease({
                       type="number"
                       value={watch("physical_environment_total_male") || ""}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
                     />
                   </div>
@@ -368,6 +372,7 @@ function ReportOfDisease({
                       type="number"
                       value={watch("physical_environment_total_female") || ""}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
                     />
                   </div>
@@ -377,6 +382,7 @@ function ReportOfDisease({
                       type="number"
                       value={watch("physical_environment_total") || ""}
                       readOnly
+                      min={0}
                       className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-2 ring-inset ring-black sm:text-sm font-bold"
                     />
                   </div>

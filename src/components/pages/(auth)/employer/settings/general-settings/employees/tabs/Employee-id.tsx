@@ -25,7 +25,7 @@ const EmployeeId = () => {
   const [previewId, setPreviewId] = useState<string>('');
   const [previewDate, setPreviewDate] = useState<string>('');
 
-  const { register, handleSubmit, reset, control, setValue, watch, getValues } = useForm();
+  const { register, handleSubmit, reset, control, setValue, watch, getValues, formState: { errors } } = useForm();
 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
@@ -203,6 +203,7 @@ const EmployeeId = () => {
                     <SelectChevronDown />
                   </div>
                 </div>
+                {errors['employee-id-series-format'] && <p className='text-xs text-red-600 mt-1'>Series Format is required.</p>}
               </div>
 
               <div className='w-1/3'>
@@ -218,6 +219,7 @@ const EmployeeId = () => {
                   {...register('employee-id-start-of-series', { required: true })}
                   placeholder='Enter Start of Series (e.g., 1 or 1001)'
                 />
+                {errors['employee-id-start-of-series'] && <p className='text-xs text-red-600 mt-1'>Start of Series is required.</p>}
               </div>
 
               <div className='w-1/3'>
@@ -239,6 +241,7 @@ const EmployeeId = () => {
                     <SelectChevronDown />
                   </div>
                 </div>
+                {errors['employee-id-year-format'] && <p className='text-xs text-red-600 mt-1'>Year Format is required.</p>}
               </div>
             </div>
 

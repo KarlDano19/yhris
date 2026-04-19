@@ -2,24 +2,25 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import CreateThirdPartyIntegrationModal from '../third-party-platform/modals/CreateThirdPartyIntegrationModal';
-import useGetThirdPartyIntegrationItems from '../third-party-platform/hooks/useGetThirdPartyIntegrationItems';
+import toast from 'react-hot-toast';
+import { useForm } from 'react-hook-form';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
-import useGetApprovalItems from './hooks/useGetApprovalItems';
-import useAddApproval from './hooks/useAddApproval';
+import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal from '@/components/DeleteModal';
-import toast from 'react-hot-toast';
-import { useForm, Controller } from 'react-hook-form';
+import BackButton from '@/components/BackButton';
 import useGetUsers from '@/components/hooks/useGetUsers';
+import useGetApprovalItems from './hooks/useGetApprovalItems';
+import useAddApproval from './hooks/useAddApproval';
 import useDeleteApproval from './hooks/useDeleteApproval';
 import useGetApprovalDetails from './hooks/useGetApprovalDetails';
 import useEditApproval from './hooks/useEditApproval';
+
 import classNames from '@/helpers/classNames';
-import { SmartButton } from '@/components/SmartPermissions/SmartButton';
+
+import { XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 interface User {
   id: number;
@@ -39,6 +40,7 @@ type T_ModalData = {
 };
 
 function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
+  const router = useRouter();
   const broadcastChannel = new BroadcastChannel('settings-integration-channel');
   const [approverTags, setApproverTags] = useState<ApproverTag[]>([]);
   const [inputApprover, setInputApprover] = useState('');
@@ -165,12 +167,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>General Settings</h4>
-          </Link>
+          <BackButton label="General Settings" />
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Movement Settings</h2>

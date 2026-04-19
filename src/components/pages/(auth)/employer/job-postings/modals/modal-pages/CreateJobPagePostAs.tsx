@@ -166,6 +166,9 @@ export default function CreateJobPagePostAs({
               />
             </div>
           </div>
+          {manualInputFocus && (
+            <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+          )}
         </div>
       </div>
       <hr />

@@ -45,7 +45,8 @@ export default function NoticeToExplainForm({
   onProceed,
   isDocumentTypeDisabled,
   isFormDisabled,
-  isFieldDisabled
+  isFieldDisabled,
+  showAcceptanceMemo,
 }: NoticeToExplainFormProps) {
   const [formData, setFormData] = useState<NoticeToExplainFormData>(initialData);
   
@@ -204,11 +205,12 @@ export default function NoticeToExplainForm({
       
       <div key={formKey}>
         {/* Document Type Selector */}
-        <DocumentTypeField 
-          documentType={documentType} 
+        <DocumentTypeField
+          documentType={documentType}
           formData={formData}
           handleInputChange={handleInputChange}
-          disabled={isDocumentTypeDisabled} 
+          disabled={isDocumentTypeDisabled}
+          showAcceptanceMemo={showAcceptanceMemo}
         />
         
         {/* Logo Section */}

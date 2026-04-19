@@ -12,9 +12,6 @@ import EmployeeSelect from '@/components/common/EmployeeSelect';
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
 
-import { XCircleIcon } from '@heroicons/react/24/solid';
-
-
 function EmployeeProfile({
   control,
   register,
@@ -112,20 +109,7 @@ function EmployeeProfile({
   return (
     <form onSubmit={!isEdit ? handleSubmit(onSubmit) : onSubmit}>
       <div className='px-4 pt-4 pb-6'>
-        {Object.keys(errors).length > 0 && (
-          <div className='rounded-md bg-red-50 p-4 mb-3'>
-            <div className='flex'>
-              <div className='flex-shrink-0'>
-                <XCircleIcon className='h-5 w-5 text-red-400' aria-hidden='true' />
-              </div>
-              <div className='ml-3'>
-                <h3 className='text-sm font-medium text-red-800'>
-                  You cannot proceed due to incomplete fields. Please review.
-                </h3>
-              </div>
-            </div>
-          </div>
-        )}
+
         <div className='grid grid-cols-3 gap-6 mt-4 pb-6'>
           {isEdit && (
             <>
@@ -204,6 +188,9 @@ function EmployeeProfile({
                 }}
               />
             </div>
+            {errors?.employee && (
+              <p className='text-red-600 text-sm mt-1'>Employee name is required</p>
+            )}
           </div>
           <div>
             <label htmlFor='current_position' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -272,6 +259,9 @@ function EmployeeProfile({
                 <SelectChevronDown />
               </div>
             </div>
+            {errors?.new_position && (
+              <p className='text-red-600 text-sm mt-1'>New position is required</p>
+            )}
           </div>
           <div>
             <label htmlFor='current_employment_status' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -340,6 +330,9 @@ function EmployeeProfile({
                 <SelectChevronDown />
               </div>
             </div>
+            {errors?.new_employment_status && (
+              <p className='text-red-600 text-sm mt-1'>New employment status is required</p>
+            )}
           </div>
           <div>
             <label htmlFor='start_date' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -350,6 +343,7 @@ function EmployeeProfile({
                 <Controller
                   control={control}
                   name="start_date"
+                  rules={{ required: true }}
                   render={({ field }) => (
                     <CustomDatePicker
                       id="start_date"
@@ -366,6 +360,9 @@ function EmployeeProfile({
                   )}
                 />
               </div>
+            {errors?.start_date && (
+              <p className='text-red-600 text-sm mt-1'>Start date is required</p>
+            )}
           </div>
           <div>
             <label htmlFor='reason' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -412,6 +409,9 @@ function EmployeeProfile({
                 </div>
               </div>
             </div>
+            {errors?.reason && (
+              <p className='text-red-600 text-sm mt-1'>Reason for movement is required</p>
+            )}
           </div>
           <div>
             <label htmlFor='proposed_rate' className='block text-sm font-medium leading-6 text-gray-900'>
@@ -444,6 +444,9 @@ function EmployeeProfile({
                     Apply % Increase
                   </label>
                 </div>
+                {errors?.proposed_rate && (
+                  <p className='text-red-600 text-sm mt-1'>Proposed rate is required</p>
+                )}
                 <div className='ml-6 mt-2'>
                   <input
                     type='number'
@@ -458,6 +461,9 @@ function EmployeeProfile({
                   />
                   <span className='ml-2 text-sm text-gray-500'>%</span>
                 </div>
+                {errors?.percentage_increase && (
+                  <p className='text-red-600 text-sm mt-1'>Percentage increase is required</p>
+                )}
               </div>
             </div>
           </div>

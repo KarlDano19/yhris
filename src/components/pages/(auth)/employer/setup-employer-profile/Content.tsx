@@ -72,7 +72,7 @@ const Content = () => {
 
         // Small delay to ensure session is saved before redirect
         setTimeout(() => {
-          location.href = '/dashboard';
+          location.href = '/setup-employer-profile/onboarding-checklist';
         }, 500);
       },
       onError: (err: any) => {
@@ -84,7 +84,7 @@ const Content = () => {
 
   return (
     <>
-      <div className='container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-8'>
+      <div className='container mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 my-8'>
         <h3 className='text-2xl text-indigo-dye font-semibold'>Tell us more about you!</h3>
         <div className='px-5 sm:px-7 lg:px-9'>
           <div className='mt-5'>

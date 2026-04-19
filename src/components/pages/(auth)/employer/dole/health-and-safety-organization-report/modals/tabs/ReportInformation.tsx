@@ -20,6 +20,7 @@ function ReportInformation({
   setSelectedTab,
   setValue,
   watch,
+  errors,
 }: {
   control: any;
   register: any;
@@ -27,6 +28,7 @@ function ReportInformation({
   setSelectedTab: any;
   setValue: any;
   watch: any;
+  errors?: any;
 }) {
   const onSubmit = handleSubmit((data: any) => {
     // Calculate number_of_employees as the sum of total_employees_male and total_employees_female
@@ -191,6 +193,7 @@ function ReportInformation({
               <Controller
                 control={control}
                 name="date_of_report"
+                rules={{ required: true }}
                 render={({ field }) => (
                   <CustomDatePicker
                     id="date_of_report"
@@ -206,6 +209,7 @@ function ReportInformation({
                 )}
               />
             </div>
+            {errors?.date_of_report && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
           </div>
           <div>
             <label

@@ -37,7 +37,8 @@ export default function CreateJobPageSalary({
   const [selectedOtherBenefit, setSelectedOtherBenefit] = useState<string[]>([]);
   const [manualInputFocus, setManualInputFocus] = useState({
     benefits: false,
-    range: false,
+    rangeMin: false,
+    rangeMax: false,
     amount: false,
     salaryType: false,
     rate: false,
@@ -105,7 +106,7 @@ export default function CreateJobPageSalary({
   };
 
   return (
-    <div onClick={() => setManualInputFocus({ benefits: false, range: false, amount: false, salaryType: false, rate: false })}>
+    <div onClick={() => setManualInputFocus({ benefits: false, rangeMin: false, rangeMax: false, amount: false, salaryType: false, rate: false })}>
       <div className='px-4 pb-6'>
         {/* start */}
         <div className='sm:col-span-4 mt-4'>
@@ -123,7 +124,7 @@ export default function CreateJobPageSalary({
               onClick={() =>
                 setManualInputFocus({
                   benefits: false,
-                  range: false,
+                  rangeMin: false, rangeMax: false,
                   amount: false,
                   salaryType: false,
                   rate: false,
@@ -140,6 +141,9 @@ export default function CreateJobPageSalary({
               <SelectChevronDown />
             </div>
           </div>
+          {manualInputFocus.salaryType && (
+            <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+          )}
         </div>
         {/* start */}
 
@@ -159,12 +163,12 @@ export default function CreateJobPageSalary({
                     })}
                     type='number'
                     className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6 ${
-                      manualInputFocus.range ? 'border-2 border-blue-700' : ''
+                      manualInputFocus.rangeMin ? 'border-2 border-blue-700' : ''
                     }`}
                     onClick={() =>
                       setManualInputFocus({
                         benefits: false,
-                        range: false,
+                        rangeMin: false, rangeMax: false,
                         amount: false,
                         salaryType: false,
                         rate: false,
@@ -175,6 +179,9 @@ export default function CreateJobPageSalary({
                     <p>PHP</p>
                   </div>
                 </div>
+                {manualInputFocus.rangeMin && (
+                  <p className='text-xs text-red-600 mt-1'>Minimum salary is required.</p>
+                )}
               </div>
               <p className='flex-none text-center mt-7'>to</p>
               <div className='relative w-3/4'>
@@ -190,12 +197,12 @@ export default function CreateJobPageSalary({
                     })}
                     type='number'
                     className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full text-right rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 ${
-                      manualInputFocus.range ? 'border-2 border-blue-700' : ''
+                      manualInputFocus.rangeMax ? 'border-2 border-blue-700' : ''
                     }`}
                     onClick={() =>
                       setManualInputFocus({
                         benefits: false,
-                        range: false,
+                        rangeMin: false, rangeMax: false,
                         amount: false,
                         salaryType: false,
                         rate: false,
@@ -206,6 +213,9 @@ export default function CreateJobPageSalary({
                     <p>PHP</p>
                   </div>
                 </div>
+                {manualInputFocus.rangeMax && (
+                  <p className='text-xs text-red-600 mt-1'>Maximum salary is required.</p>
+                )}
               </div>
             </>
           ) : SalarTypeValue && SalarTypeValue !== '' ? (
@@ -227,7 +237,7 @@ export default function CreateJobPageSalary({
                   onClick={() =>
                     setManualInputFocus({
                       benefits: false,
-                      range: false,
+                      rangeMin: false, rangeMax: false,
                       amount: false,
                       salaryType: false,
                       rate: false,
@@ -238,6 +248,9 @@ export default function CreateJobPageSalary({
                   <p>PHP</p>
                 </div>
               </div>
+              {manualInputFocus.amount && (
+                <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+              )}
             </div>
           ) : null}
 
@@ -257,7 +270,7 @@ export default function CreateJobPageSalary({
                 onClick={() =>
                   setManualInputFocus({
                     benefits: false,
-                    range: false,
+                    rangeMin: false, rangeMax: false,
                     amount: false,
                     salaryType: false,
                     rate: false,
@@ -275,6 +288,9 @@ export default function CreateJobPageSalary({
                 <SelectChevronDown />
               </div>
             </div>
+            {manualInputFocus.rate && (
+              <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+            )}
           </div>
         </div>
         <div className='relative mt-2 flex gap-2'>
@@ -308,7 +324,7 @@ export default function CreateJobPageSalary({
                   onClick={() => {
                     setManualInputFocus({
                       benefits: false,
-                      range: false,
+                      rangeMin: false, rangeMax: false,
                       amount: false,
                       salaryType: false,
                       rate: false,
@@ -339,7 +355,7 @@ export default function CreateJobPageSalary({
                 setIsOtherBenefitOpen(!isOtherBenefitOpen);
                 setManualInputFocus({
                   benefits: false,
-                  range: false,
+                  rangeMin: false, rangeMax: false,
                   amount: false,
                   salaryType: false,
                   rate: false,
@@ -349,6 +365,9 @@ export default function CreateJobPageSalary({
               {isOtherBenefitOpen ? '✓ ' : '+ '} Other
             </button>
           </div>
+          {manualInputFocus.benefits && (
+            <p className='text-xs text-red-600 mt-1'>Please select at least one benefit.</p>
+          )}
         </div>
 
         {isOtherBenefitOpen && (
@@ -415,7 +434,8 @@ export default function CreateJobPageSalary({
               const salaryValueValue = getValues('salary.salaryValue');
               setManualInputFocus({
                 benefits: !!!benefits && !isOtherBenefitOpen,
-                range: salaryTypeValue === 'Range' && !salaryRangeMinValue && !salaryRangeMaxValue ? true : false,
+                rangeMin: salaryTypeValue === 'Range' && !salaryRangeMinValue,
+                rangeMax: salaryTypeValue === 'Range' && !salaryRangeMaxValue,
                 amount:
                   salaryTypeValue !== 'Range' && ((typeof salaryValueValue !== 'number' && salaryValueValue.trim() === '-') || !salaryValueValue) ? true : false,
                 salaryType: !salaryType,

@@ -45,6 +45,7 @@ export default function CreateJobPageJobType({
     workSetup: false,
     schedule: false,
     hireDate: false,
+    hireCount: false,
   });
 
   // Subscribe to form values so buttons re-render when form is reset
@@ -90,11 +91,13 @@ export default function CreateJobPageJobType({
       schedule = getValues('schedule') || [];
       schedule = schedule.concat(otherScheduleData);
     }
+    const hireCountValid = !isNaN(hireCount) && hireCount >= 1;
     let manualInputFocusData = {
       hireDate: !!!hireDate,
       jobType: !!!jobType,
       workSetup: !!!workSetup,
       schedule: !!!schedule,
+      hireCount: !hireCountValid,
     };
     setManualInputFocus(manualInputFocusData);
     if (hireCount > 1000) {
@@ -111,7 +114,7 @@ export default function CreateJobPageJobType({
       });
       return;
     }
-    const results = [!!hireDate, !!jobType, !!workSetup, !!schedule];
+    const results = [!!hireDate, !!jobType, !!workSetup, !!schedule, hireCountValid];
     const incomplete = results.some((item: boolean) => !item);
     if (!incomplete) {
       // Check if salary data already exists in the third form
@@ -168,6 +171,7 @@ export default function CreateJobPageJobType({
                       workSetup: false,
                       schedule: false,
                       hireDate: false,
+                      hireCount: false,
                     });
                   }}
                 >
@@ -192,6 +196,7 @@ export default function CreateJobPageJobType({
                   workSetup: false,
                   schedule: false,
                   hireDate: false,
+                  hireCount: false,
                 });
               }}
             >
@@ -199,6 +204,9 @@ export default function CreateJobPageJobType({
               Other
             </button>
           </div>
+          {manualInputFocus.jobType && (
+            <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+          )}
         </div>
         {otherJobType && (
           <div className='sm:col-span-4 mt-4'>
@@ -250,6 +258,7 @@ export default function CreateJobPageJobType({
                       workSetup: false,
                       schedule: false,
                       hireDate: false,
+                      hireCount: false,
                     });
                   }}
                 >
@@ -281,6 +290,9 @@ export default function CreateJobPageJobType({
               Other
             </button> */}
           </div>
+          {manualInputFocus.workSetup && (
+            <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+          )}
         </div>
         {otherWorkSetup && (
           <div className='sm:col-span-4 mt-4'>
@@ -332,6 +344,7 @@ export default function CreateJobPageJobType({
                       workSetup: false,
                       schedule: false,
                       hireDate: false,
+                      hireCount: false,
                     });
                   }}
                 >
@@ -353,6 +366,7 @@ export default function CreateJobPageJobType({
                   workSetup: false,
                   schedule: false,
                   hireDate: false,
+                  hireCount: false,
                 });
               }}
             >
@@ -360,6 +374,9 @@ export default function CreateJobPageJobType({
               Other
             </button>
           </div>
+          {manualInputFocus.schedule && (
+            <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+          )}
         </div>
         {otherSchedule && (
           <div className='sm:col-span-4 mt-4'>
@@ -398,7 +415,7 @@ export default function CreateJobPageJobType({
                 onChange={e => {
                   const value = parseInt(e.target.value);
                   const minValue = Math.max(1, hiredCount);
-                  if (value < minValue) {
+                  if (isNaN(value) || value < minValue) {
                     setValue('hireCount', minValue);
                   } else {
                     setValue('hireCount', value);
@@ -410,6 +427,9 @@ export default function CreateJobPageJobType({
                 className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
               />
             </div>
+            {manualInputFocus.hireCount && (
+              <p className='text-xs text-red-600 mt-1'>Minimum 1 person required.</p>
+            )}
           </div>
         </div>
         <div className='sm:col-span-4 mt-4'>
@@ -439,6 +459,9 @@ export default function CreateJobPageJobType({
                 )}
               />
             </div>
+            {manualInputFocus.hireDate && (
+              <p className='text-xs text-red-600 mt-1'>This field is required.</p>
+            )}
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import React from 'react';
 
 function ScreeningQuestionGuidelines() {
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-14'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 my-14'>
       <h2 className='text-center text-2xl font-bold text-gray-900 pt-8'>Custom Question Guidelines for Applicant Screening</h2>
       <h2 className='text-lg text-gray-700'></h2>
       <h2 className='text-lg font-bold text-gray-900 pt-8'>Purpose of Custom Questions</h2>

@@ -15,8 +15,10 @@ export async function middleware(request: NextRequest) {
   const accountType = session.accountType;
   const isAdmin = session.isAdmin === true;
   const hasProfile = session.hasProfile;
+  const hasCompletedOnboarding = session.hasCompletedOnboarding;
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
+  const loginType = session.loginType;
 
   const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
@@ -42,12 +44,15 @@ export async function middleware(request: NextRequest) {
     'notifications',
   ];
   const applicantRoutes: any = [
-    'application-tracker',
-    'apply-for-a-job',
-    'edit-profile',
-    'notification',
+    'personal-mode',
+    'business-mode',
+    'profile',
     'setup-applicant-profile',
     'job-applicant-form',
+    // 'application-tracker',
+    // 'apply-for-a-job',
+    // 'edit-profile',
+    // 'notification',
   ];
 
   if (bypassRoutes.includes(firstRoute)) {
@@ -83,9 +88,24 @@ export async function middleware(request: NextRequest) {
         ) {
           if (hasProfile) {
             if (firstRoute === 'setup-employer-profile') {
-              return NextResponse.redirect(new URL('/dashboard', request.url));
-            }
-            if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
+              if (request.nextUrl.pathname === '/setup-employer-profile') {
+                if (hasCompletedOnboarding) {
+                  return NextResponse.redirect(new URL('/dashboard', request.url));
+                }
+                return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
+              }
+              if (
+                request.nextUrl.pathname === '/setup-employer-profile/acceptance-memo' &&
+                hasCompletedOnboarding
+              ) {
+                return NextResponse.redirect(new URL('/dashboard', request.url));
+              }
+              // Allow access to other sub-routes (onboarding-checklist, etc.)
+            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications' && loginType !== 'yahshua-payroll' && loginType !== 'yg-payroll') {
+              // Onboarding gate: block employer routes until checklist is complete.
+              // settings and notifications are exempt so users can't get trapped.
+              return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));
+            } else if (firstRoute === 'checkout' && (hasPendingTransaction || hasActiveSubscription)) {
               return NextResponse.redirect(new URL('/manage-subscriptions', request.url));
             }
           }
@@ -101,27 +121,52 @@ export async function middleware(request: NextRequest) {
     }
     if (accountType === 'applicant') {
       if (applicantRoutes.includes(firstRoute)) {
-        if (
-          firstRoute === 'application-tracker' ||
-          firstRoute === 'apply-for-a-job' ||
-          firstRoute === 'edit-profile' ||
-          firstRoute === 'notification' ||
-          firstRoute === 'setup-applicant-profile' ||
-          firstRoute === 'job-applicant-form'
-        ) {
-          if (hasProfile) {
-            if (firstRoute === 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
-            }
-          }
-          if (!hasProfile) {
-            if (firstRoute !== 'setup-applicant-profile') {
-              return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
-            }
-          }
+        // Business mode is temporarily disabled — redirect to personal mode
+        if (firstRoute === 'business-mode') {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
         }
+        if (firstRoute === 'personal-mode') {
+          if (!hasProfile) {
+            return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+          }
+          // Block coming soon sub-routes
+          const secondRoute = slicePaths[1];
+          const comingSoonRoutes = ['trainings', 'transactions'];
+          if (secondRoute && comingSoonRoutes.includes(secondRoute)) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          return NextResponse.next();
+        }
+        if (firstRoute === 'setup-applicant-profile') {
+          if (hasProfile) {
+            return NextResponse.redirect(new URL('/personal-mode', request.url));
+          }
+          // Allow access to setup-applicant-profile if no profile exists
+          return NextResponse.next();
+        }
+        // Handle old applicant routes
+        // if (
+        //   firstRoute === 'application-tracker' ||
+        //   firstRoute === 'apply-for-a-job' ||
+        //   firstRoute === 'edit-profile' ||
+        //   firstRoute === 'notification' ||
+        //   firstRoute === 'job-applicant-form'
+        // ) {
+        //   if (hasProfile) {
+        //     // Redirect old applicant routes to personal-mode
+        //     return NextResponse.redirect(new URL('/personal-mode', request.url));
+        //   }
+        //   if (!hasProfile) {
+        //     return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        //   }
+        // }
       } else {
-        return NextResponse.redirect(new URL('/apply-for-a-job', request.url));
+        // Route not in applicantRoutes - redirect based on profile status
+        if (hasProfile) {
+          return NextResponse.redirect(new URL('/personal-mode', request.url));
+        } else {
+          return NextResponse.redirect(new URL('/setup-applicant-profile', request.url));
+        }
       }
     }
   } else {

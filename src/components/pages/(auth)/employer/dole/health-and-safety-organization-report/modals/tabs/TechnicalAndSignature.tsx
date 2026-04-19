@@ -4,13 +4,10 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { Tooltip } from 'react-tooltip';
-import toast from "react-hot-toast";
 
-import CustomToast from "@/components/CustomToast";
 import DrawSignatureModal from "../DrawSignatureModals";
 import InfoIcon from '@/svg/InfoIcon';
 
-import { XCircleIcon } from "@heroicons/react/24/solid";
 
 function TechnicalAndSignature({
   control,
@@ -21,6 +18,9 @@ function TechnicalAndSignature({
   watch,
   isCreateModal,
   isLoading,
+  errors,
+  setError,
+  clearErrors,
 }: {
   control: any;
   register: any;
@@ -30,6 +30,9 @@ function TechnicalAndSignature({
   watch: any;
   isCreateModal: boolean;
   isLoading: any;
+  errors: any;
+  setError: any;
+  clearErrors: any;
 }) {
 
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);
@@ -85,6 +88,7 @@ function TechnicalAndSignature({
       setTechnicalFileSource("upload");
       setTechnicalFileUrl(URL.createObjectURL(file));
       setAttachmentTechnicalExist(true);
+      clearErrors('technical_information_file');
     }
   };
 
@@ -97,6 +101,7 @@ function TechnicalAndSignature({
       setSignatureSource("upload");
       setSignatureUrl(URL.createObjectURL(file));
       setAttachmentExist(true);
+      clearErrors('signature');
     }
   };
 
@@ -118,6 +123,7 @@ function TechnicalAndSignature({
         setValue("signature_source", "draw");
         setSignatureSource("draw");
         setSignatureUrl(drawnSignatureDataUrl);
+        clearErrors('signature');
       });
   };
 
@@ -219,46 +225,18 @@ function TechnicalAndSignature({
             ? existingSignatureUrl
             : null;
 
-      // Show toast for each missing required field
-      if (isTechFileMissing) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Technical Information file is required." type="error" />);
-        return;
-      }
-      if (!submittedByValue) {
-        const el = document.getElementById("submitted_by");
-        if (el) el.focus();
-        return;
-      }
-      if (!positionValue) {
-        const el = document.getElementById("position");
-        if (el) el.focus();
-        return;
-      }
-      if (!signatureValue) {
-        toast.dismiss();
-        toast.custom(() => <CustomToast message="Signature is required (draw or upload)." type="error" />);
-        return;
-      }
+      // Validate required fields
+      clearErrors(['technical_information_file', 'submitted_by', 'position', 'signature']);
+      let hasError = false;
+      if (isTechFileMissing) { setError('technical_information_file', { message: 'This field is required.' }); hasError = true; }
+      if (!submittedByValue) { setError('submitted_by', { message: 'This field is required.' }); hasError = true; }
+      if (!positionValue) { setError('position', { message: 'This field is required.' }); hasError = true; }
+      if (!signatureValue) { setError('signature', { message: 'This field is required.' }); hasError = true; }
+      if (hasError) return;
       // Call the original onSubmit
       if (typeof onSubmit === 'function') onSubmit(e);
     }}>
       <div className="px-4 pt-4 pb-6">
-        <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon
-                className="h-5 w-5 text-red-400"
-                aria-hidden="true"
-              />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                You cannot proceed due to incomplete fields. Please review.
-              </h3>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 px-2 md:px-6">
           <div className="flex-1">
             <label
@@ -295,6 +273,7 @@ function TechnicalAndSignature({
                 onChange={handleTechnicalFileUpload}
                 className="block w-full rounded-md border-0 py-1 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6  file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semiboldfile:bg-violet-50 file:text-savoy-blue hover:file:bg-violet-100"
               />
+              {errors?.technical_information_file && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
               {attachmentTechnicalExist ? (
                 <div className="mt-2">
                   {existingTechnicalFileUrl && typeof existingTechnicalFileUrl === 'string' && existingTechnicalFileUrl.startsWith('http') ? (
@@ -326,10 +305,11 @@ function TechnicalAndSignature({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("submitted_by", { required: true })}
+                {...register("submitted_by")}
                 id="submitted_by"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.submitted_by && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
           <div>
@@ -343,10 +323,11 @@ function TechnicalAndSignature({
             <div className="relative mt-2">
               <input
                 type="text"
-                {...register("position", { required: true })}
+                {...register("position")}
                 id="position"
                 className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
               />
+              {errors?.position && <p className="text-red-500 text-xs mt-1">This field is required.</p>}
             </div>
           </div>
         </div>
@@ -413,6 +394,7 @@ function TechnicalAndSignature({
           </div>
         </div>
       </div>
+      {errors?.signature && <p className="text-red-500 text-xs mt-1 px-8">This field is required.</p>}
       
       {/* Only show this if there's a signatureUrl (drawn, uploaded, or existing) */}
       {signatureUrl && (

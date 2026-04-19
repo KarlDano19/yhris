@@ -1,6 +1,6 @@
 function TermsOfService() {
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-14'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 my-14'>
       <h2 className='text-center text-2xl font-bold text-gray-900 pt-8'>YAHSHUA-ABBA Terms of Service</h2>
       <h2 className='text-center text-2xl font-bold'>for Web App</h2>
       <h2 className='text-lg text-gray-700'></h2>

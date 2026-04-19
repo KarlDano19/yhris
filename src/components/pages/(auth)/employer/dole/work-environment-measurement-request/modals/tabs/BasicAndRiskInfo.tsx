@@ -126,6 +126,7 @@ function BasicAndRiskInfo({
                 <Controller
                   control={control}
                   name="date_of_application"
+                  rules={{ required: true }}
                   render={({ field }) => (
                     <CustomDatePicker 
                       id="date_of_application"
@@ -141,6 +142,9 @@ function BasicAndRiskInfo({
                   )}
                 />
               </div>
+              {errors?.date_of_application && (
+                <p className="text-xs text-red-600 mt-1">Date of Application is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -158,6 +162,9 @@ function BasicAndRiskInfo({
                   className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.company_name && (
+                <p className="text-xs text-red-600 mt-1">Company Name is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -175,6 +182,9 @@ function BasicAndRiskInfo({
                   className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.type_of_industry && (
+                <p className="text-xs text-red-600 mt-1">Type of Industry is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -192,6 +202,9 @@ function BasicAndRiskInfo({
                   className="truncate cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.address && (
+                <p className="text-xs text-red-600 mt-1">Address is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -209,6 +222,9 @@ function BasicAndRiskInfo({
                   className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.region && (
+                <p className="text-xs text-red-600 mt-1">Region is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -226,6 +242,9 @@ function BasicAndRiskInfo({
                   className="cursor-not-allowed rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                 />
               </div>
+              {errors?.email_address && (
+                <p className="text-xs text-red-600 mt-1">Email Address is required.</p>
+              )}
             </div>
             <div>
               <label
@@ -266,6 +285,9 @@ function BasicAndRiskInfo({
                     id="number_of_workers_male"
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
+                  {errors?.number_of_workers_male && (
+                    <p className="text-xs text-red-600 mt-1">Number of Male Workers is required.</p>
+                  )}
                 </div>
                 <div className="flex-1">
                   <label
@@ -281,6 +303,9 @@ function BasicAndRiskInfo({
                     id="number_of_workers_female"
                     className="rounded-md w-full border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6"
                   />
+                  {errors?.number_of_workers_female && (
+                    <p className="text-xs text-red-600 mt-1">Number of Female Workers is required.</p>
+                  )}
                 </div>
               </div>
               <div className="relative mt-2">

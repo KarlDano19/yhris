@@ -8,7 +8,7 @@ import StateContext from "../contexts/StateContext"
 import { ContextTypes, StageType } from "../types"
 import toast from "react-hot-toast";
 import CustomToast from "@/components/CustomToast";
-import useDragStage from '../hooks/useDragStage';
+import useDragStage from '../hooks/stage/useDragStage';
 import { FilterValues } from "@/components/common/Filter";
 
 type PropTypes = {

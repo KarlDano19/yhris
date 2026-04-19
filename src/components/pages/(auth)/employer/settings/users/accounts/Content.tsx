@@ -4,14 +4,13 @@
 import React, { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import Link from 'next/link';
-
 import { useForm } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 
 import classNames from '@/helpers/classNames';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -24,7 +23,7 @@ import ResetPasswordModal from './modals/ResetPasswordModal';
 import DeleteModal from '@/components/DeleteModal';
 import useDeleteAccount from './hooks/useDeleteAccount';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ArrowPathIcon, CloudArrowDownIcon } from "@heroicons/react/24/outline";
 import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
@@ -223,12 +222,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/users' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Users</h4>
-          </Link>
+          <BackButton label="Users" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

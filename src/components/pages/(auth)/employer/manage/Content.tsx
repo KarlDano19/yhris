@@ -1,12 +1,13 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
-import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
 
+import Link from 'next/link';
+
+import BackButton from '@/components/BackButton';
 import { useIncompleteEmployeeCount } from "./employee-201-records/hooks/useIncompleteEmployeeCount";
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import AddressEmployeeIssueLogo from '@/svg/AddressEmployeeIssueLogo';
 import CreateMemoLogo from '@/svg/CreateMemoLogo';
 import BenefitsLogo from '@/svg/BenefitsLogo';
 import EmployeeLogo from '@/svg/EmployeeLogo';
@@ -64,12 +65,9 @@ const Content = () => {
   const { count, isLoading } = useIncompleteEmployeeCount();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
       <div className="flex p-4">
-        <Link href="/dashboard" className="flex-none flex gap-3 items-center hover:bg-gray-200">
-          <ArrowLeftIcon className="h-5 w-5" />
-          <h4>Dashboard</h4>
-        </Link>
+        <BackButton label="Dashboard" />
       </div>
       <div className="px-2 md:px-8 lg:px-4">
         <h2 className="text-xl font-bold text-indigo-dye">Manage</h2>

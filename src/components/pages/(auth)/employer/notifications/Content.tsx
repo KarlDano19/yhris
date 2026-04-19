@@ -2,17 +2,17 @@
 
 import React, { useState, useMemo } from 'react';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import { TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
-
 import LoadingSpinner from '@/components/LoadingSpinner';
-import classNames from '@/helpers/classNames';
+import BackButton from '@/components/BackButton';
 import useGetNotification from '@/components/hooks/useGetNotification';
 import useMarkNotificationRead from '@/components/hooks/useMarkNotificationRead';
 import { useDeleteNotification, useDeleteAllReadNotifications } from '@/components/hooks/useDeleteNotification';
+
+import classNames from '@/helpers/classNames';
+
+import { TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 type TabType = 'all' | 'unread';
 
@@ -219,13 +219,10 @@ const Content = () => {
   };
 
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
       {/* Back Navigation */}
       <div className='flex p-4'>
-        <Link href='/dashboard' className='flex-none flex gap-3 items-center hover:bg-gray-200 px-2 py-1 rounded'>
-          <ArrowLeftIcon className='h-5 w-5' />
-          <h4>Dashboard</h4>
-        </Link>
+        <BackButton label="Dashboard" />
       </div>
 
       {/* Header */}

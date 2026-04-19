@@ -2,10 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 
-import Link from 'next/link';
-
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-
+import BackButton from '@/components/BackButton';
 import SettingsOrgChart from './components/SettingsOrgChart';
 import ZoomControls from './components/ZoomControls';
 import useGetOrgStructureSettings from './hooks/useGetOrgStructureSettings';
@@ -63,35 +60,37 @@ const Content = () => {
   };
 
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
+    <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
-      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border-b-2 flex-shrink-0'>
-        <div className='flex items-center gap-3'>
-          <Link href='/settings' className='flex items-center gap-3 hover:bg-gray-200 rounded-lg p-2 -m-2'>
-            <ArrowLeftIcon className='h-5 w-5 flex-shrink-0' />
-            <h4 className='text-sm sm:text-base truncate'>Settings | Organizational Structure</h4>
-          </Link>
+      <div className='flex p-4 flex-shrink-0'>
+        <BackButton label='Settings' />
+      </div>
+
+      <div className='px-2 md:px-8 lg:px-4 pb-4 border-b-2 flex-shrink-0'>
+        <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3'>
+          <h2 className='text-xl font-bold text-indigo-dye'>Organizational Structure</h2>
+
+          {/* Only show View/Edit button when there's org structure data and not in fullscreen */}
+          {hasOrgData && !isLoading && !isFullscreen && (
+            <div className='self-end sm:self-auto'>
+              {!isEditMode ? (
+                <button
+                  onClick={handleEditMode}
+                  className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base"
+                >
+                  Edit
+                </button>
+              ) : (
+                <button
+                  onClick={handleCancel}
+                  className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
+                >
+                  View
+                </button>
+              )}
+            </div>
+          )}
         </div>
-        {/* Only show View/Edit button when there's org structure data and not in fullscreen */}
-        {hasOrgData && !isLoading && !isFullscreen && (
-          <div className='self-end sm:self-auto'>
-            {!isEditMode ? (
-              <button
-                onClick={handleEditMode}
-                className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base"
-              >
-                Edit
-              </button>
-            ) : (
-              <button
-                onClick={handleCancel}
-                className="px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
-              >
-                View
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Main Content */}

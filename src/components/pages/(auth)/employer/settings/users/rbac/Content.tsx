@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 
-import Link from 'next/link';
-
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-
+import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 
@@ -37,7 +35,6 @@ import {
   ShieldCheckIcon,
   DocumentDuplicateIcon
 } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import classNames from '@/helpers/classNames';
@@ -617,12 +614,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/users' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Users</h4>
-          </Link>
+          <BackButton label="Users" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 import { SmartButton } from '@/components/SmartPermissions/SmartButton';
-
+import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
@@ -17,11 +17,9 @@ import CustomToast from '@/components/CustomToast';
 import useGetEmailTemplateItems from './hooks/useGetEmailTemplateItems';
 import useDeleteEmailTemplate from './hooks/useDeleteEmailTemplate';
 import useBulkDeleteEmailTemplates from './hooks/useBulkDeleteEmailTemplates';
-import useSeedEmailTemplates from './hooks/useSeedEmailTemplates';
-import useUnseedEmailTemplates from './hooks/useUnseedEmailTemplates';
 import CreateEditEmailTemplateModal from './modal/CreateEditEmailTemplateModal';
 import SeederButton from '@/components/SeederButton';
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -35,6 +33,7 @@ type T_EmailTemplateModalData = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const [itemsFilter, setItemsFilter] = useState<any>({
     search: '',
   });
@@ -76,8 +75,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   const { mutate: deleteEmailTemplate, isLoading: isDeleteEmailTemplateLoading } = useDeleteEmailTemplate();
   const bulkDeleteMutation = useBulkDeleteEmailTemplates();
-  const seedMutation = useSeedEmailTemplates();
-  const unseedMutation = useUnseedEmailTemplates();
 
   const handleCreateTemplateSuccess = () => {
     setSelectedEmailTemplateId(null);
@@ -259,52 +256,6 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchEmailTemplate();
   };
 
-  // Handle seeding email templates
-  const handleSeedEmailTemplates = async (count: number) => {
-    try {
-      const result = await seedMutation.mutateAsync({ count });
-      toast.custom(
-        () => <CustomToast message={result.message} type="success" />,
-        { duration: 3000 }
-      );
-      // Clear any selected template and action type to prevent modal from opening
-      setSelectedEmailTemplateId(null);
-      setActionType('');
-      refetchEmailTemplate();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to seed email templates';
-      toast.custom(
-        () => <CustomToast message={errorMessage} type="error" />,
-        { duration: 5000 }
-      );
-      throw error;
-    }
-  };
-
-  // Handle unseeding email templates
-  const handleUnseedEmailTemplates = async () => {
-    try {
-      const result = await unseedMutation.mutateAsync();
-      toast.custom(
-        () => <CustomToast message={result.message} type="success" />,
-        { duration: 3000 }
-      );
-      // Clear all selection states
-      setSelectedEmailTemplates(new Set());
-      setSelectAll(false);
-      setSelectedEmailTemplateId(null);
-      setActionType('');
-      refetchEmailTemplate();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to unseed email templates';
-      toast.custom(
-        () => <CustomToast message={errorMessage} type="error" />,
-        { duration: 5000 }
-      );
-      throw error;
-    }
-  };
-
   const renderRows = () => {
     if (isGetEmailTemplateLoading) {
       return (
@@ -388,12 +339,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/settings/general-settings' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>General Settings</h4>
-          </Link>
+          <BackButton label="General Settings" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
@@ -401,10 +349,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <h2 className='text-xl font-bold text-indigo-dye'>Email Template</h2>
             <div className='hidden lg:block -mb-4'>
               <SeederButton
-                onSeed={handleSeedEmailTemplates}
-                onUnseed={handleUnseedEmailTemplates}
-                isLoading={seedMutation.isLoading}
-                isUnseeding={unseedMutation.isLoading}
+                viewType="email_template"
+                onSeedSuccess={async () => { setSelectedEmailTemplateId(null); setActionType(''); refetchEmailTemplate(); }}
+                onUnseedSuccess={async () => { setSelectedEmailTemplates(new Set()); setSelectAll(false); setSelectedEmailTemplateId(null); setActionType(''); refetchEmailTemplate(); }}
               />
             </div>
           </div>
@@ -444,10 +391,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
               <div className='lg:hidden'>
                 <SeederButton
-                  onSeed={handleSeedEmailTemplates}
-                  onUnseed={handleUnseedEmailTemplates}
-                  isLoading={seedMutation.isLoading}
-                  isUnseeding={unseedMutation.isLoading}
+                  viewType="email_template"
+                  onSeedSuccess={async () => { setSelectedEmailTemplateId(null); setActionType(''); refetchEmailTemplate(); }}
+                  onUnseedSuccess={async () => { setSelectedEmailTemplates(new Set()); setSelectAll(false); setSelectedEmailTemplateId(null); setActionType(''); refetchEmailTemplate(); }}
                 />
               </div>
               <SmartButton

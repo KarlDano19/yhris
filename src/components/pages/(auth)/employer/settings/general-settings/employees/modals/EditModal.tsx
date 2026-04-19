@@ -1,12 +1,10 @@
 import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
 import { Dialog, Transition } from '@headlessui/react';
-import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import dynamic from 'next/dynamic';
 
-import CustomToast from '@/components/CustomToast';
 import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
 import useGetLocationDetails from '../hooks/location/useGetLocationDetails';
 import useEditDepartmentDetails from '../hooks/department/useEditDepartmentDetails';
@@ -36,7 +34,7 @@ export default function EditModal({
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
   const [description, setDescription] = useState('');
   const {
     data: locationDetailsData,
@@ -110,17 +108,9 @@ export default function EditModal({
     
     const callbackReq = {
       onSuccess: (data: any) => {
-        toast.custom(() => <CustomToast message={data.message} type='success' />, {
-          duration: 5000,
-        });
         customCloseModal();
         refetch();
-      },
-      onError: (err: any) => {
-        toast.custom(() => <CustomToast message={err} type='error' />, {
-          duration: 7000,
-        });
-      },
+      }
     };
     if (module === 'location') {
       editLocation({ location_id: isOpen.id, data: submitData }, callbackReq);
@@ -185,6 +175,9 @@ export default function EditModal({
                       {...register('name', { required: true })}
                       className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
                     />
+                    {errors?.name && (
+                      <p className='text-xs text-red-600 mt-1'>Name is required.</p>
+                    )}
                   </div>
                   {module === 'position' && (
                     <div className='px-4 pb-6'>

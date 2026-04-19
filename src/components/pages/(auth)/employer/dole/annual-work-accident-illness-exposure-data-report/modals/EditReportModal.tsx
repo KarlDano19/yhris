@@ -33,7 +33,7 @@ export default function EditReportModal({
     refetch: refetchAnnualAccidentIllnessReport,
     remove: removeAnnualAccidentIllnessReport,
   } = useGetAnnualAccidentIllnessReportDetails(isOpen.id);
-  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = formMethods;
   const { mutate, isLoading: isLoadingUpdateAnnualAccidentIllnessReport } = useUpdateAnnualAccidentIllnessReport();
   const [selectedTab, setSelectedTab] = useState(1);
 
@@ -157,6 +157,7 @@ export default function EditReportModal({
                     setValue={setValue}
                     register={register}
                     handleSubmit={handleSubmit}
+                    errors={errors}
                     setSelectedTab={setSelectedTab}
                   />
                 )}
@@ -171,6 +172,7 @@ export default function EditReportModal({
                     watch={watch}
                     initialEmployeeHours={annualAccidentIllnessReportData?.total_hours_worked || 0}
                     initialDaysLost={annualAccidentIllnessReportData?.days_lost || 0}
+                    errors={errors}
                   />
                 )}
               </Dialog.Panel>

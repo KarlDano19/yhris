@@ -54,7 +54,7 @@ const Navigation = () => {
 
   return (
     <nav className="fixed top-4 left-4 right-4 z-[9999] mb-8">
-      <div className="bg-white/70 backdrop-blur-xl rounded-full shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
+      <div className="bg-white/70 backdrop-blur-xl rounded-full shadow-lg shadow-black/5 border border-white/30 max-w-screen-2xl mx-auto">
         <div className="flex justify-between items-center h-16 px-4 lg:px-6">
           <div className="flex-shrink-0">
             <Link href="/landing-page" className="flex items-center space-x-2">
@@ -179,7 +179,7 @@ const Navigation = () => {
       {/* Mobile Menu - Separate pill-shaped container */}
       {isMenuOpen && (
         <div className="xl:hidden mt-2">
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-7xl mx-auto">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-screen-2xl mx-auto">
             <div className="px-4 py-4 space-y-1">
               <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
                 Features

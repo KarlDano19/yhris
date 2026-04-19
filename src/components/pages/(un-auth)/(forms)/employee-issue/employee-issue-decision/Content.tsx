@@ -206,7 +206,7 @@ function Content() {
       ) : (
         <div className="min-h-screen bg-gray-50">
           {/* Main Content - Side by Side Layout */}
-          <div className="mx-auto max-w-7xl h-screen flex justify-center items-center">
+          <div className="mx-auto max-w-screen-2xl h-screen flex justify-center items-center">
             <div className="flex h-[calc(100vh-3rem)] w-full">
               {/* Left Side - PDF Viewer */}
               <div className="flex-1 bg-white border-2 rounded-lg border-gray-200 mr-4">

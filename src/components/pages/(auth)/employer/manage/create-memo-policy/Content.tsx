@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Menu, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ import { Tooltip } from 'react-tooltip';
 import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DeleteModal, { DeleteModalData } from '@/components/DeleteModal';
 import ProgressModal from '@/components/ProgressModal';
@@ -24,7 +26,7 @@ import EditMemoModal from './modals/EditMemoModal';
 import EditPolicyModal from './modals/EditPolicyModal';
 import ConfirmModal from '@/components/ConfirmModal';
 
-import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import ClipIcon from '@/svg/ClipIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import EditIcon from '@/svg/EditIcon';
@@ -41,6 +43,7 @@ type PaginationProps = {
 };
 
 const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) => {
+  const router = useRouter();
   const { mutate, isLoading } = useDeleteDirectivesItem();
   const bulkDeleteMutation = useBulkDeleteDirectives();
   const [itemsFilter, setItemsFilter] = useState<any>({
@@ -373,12 +376,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   return (
     <>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
+      <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <Link href='/manage' className='flex-none flex gap-3 items-center hover:bg-gray-200'>
-            <ArrowLeftIcon className='h-5 w-5' />
-            <h4>Manage</h4>
-          </Link>
+          <BackButton label="Manage" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>

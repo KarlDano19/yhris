@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState, useEffect, useRef } from 'react';
 
 import DatePicker from 'react-datepicker';
 import DateCalendar from '@/svg/DateCalendar';
@@ -21,6 +21,8 @@ const CustomDatePicker = ({
   pickerOnChange,
   inputOnChange,
   minDate,
+  maxDate,
+  excludeDates,
   placeholder,
   disabled,
   className,
@@ -33,6 +35,8 @@ const CustomDatePicker = ({
   inputOnChange: any;
   selected?: any;
   minDate?: any;
+  maxDate?: any;
+  excludeDates?: Date[];
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -83,6 +87,11 @@ const CustomDatePicker = ({
           type='button'
           className='cursor-pointer absolute inset-y-0 right-0 flex items-center pr-3 disabled:pointer-events-none disabled:opacity-50'
           onClick={onClick}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick(e);
+          }}
           disabled={disabled}
           tabIndex={-1}
         >
@@ -97,7 +106,7 @@ const CustomDatePicker = ({
       <style>{customStyles}</style>
       {/* @ts-ignore */}
       <DatePicker
-        wrapperClassName='w-full'
+        wrapperClassName='w-full relative'
         popperClassName='!z-[9999]'
         selected={selected}
         onChange={date => {
@@ -107,6 +116,8 @@ const CustomDatePicker = ({
           }
         }}
         minDate={minDate}
+        maxDate={maxDate}
+        excludeDates={excludeDates}
         customInput={<CustomInput />}
         popperModifiers={[
           {

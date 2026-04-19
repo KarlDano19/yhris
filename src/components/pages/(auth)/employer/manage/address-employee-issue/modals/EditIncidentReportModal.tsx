@@ -515,21 +515,6 @@ export default function EditIncidentReportModal({
                             const issueType = await trigger('issueType');
                             const briefBackground = await trigger('briefBackground');
                             const incidentDate = await trigger('incidentDate');
-                            const results = [name, position, department, incidentPlace, issueType, briefBackground, incidentDate];
-                            const incomplete = results.some((item: boolean) => !item);
-                            if (incomplete) {
-                              toast.custom(
-                                () => (
-                                  <CustomToast
-                                    message={'You cannot proceed due to incomplete fields. Please review.'}
-                                    type='error'
-                                  />
-                                ),
-                                {
-                                  duration: 2000,
-                                }
-                              );
-                            }
                           }}
                           className='inline-flex w-full justify-center rounded-md bg-savoy-blue px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto'
                           disabled={isLoading}

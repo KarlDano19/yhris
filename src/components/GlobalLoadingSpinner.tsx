@@ -11,9 +11,21 @@ import YahshuaLoadingLogo from './YahshuaLoadingLogo';
 // This eliminates recursive wrapper chains and cleanup-order races.
 
 const PATCHED = Symbol('yahshua_nav_spinner_patched');
+const NAV_START_EVENT = 'yahshua:navigation-start';
+const RECENT_NAV_WINDOW_MS = 2000;
+const HIDE_DELAY_MS = 120;
 
 type NavHandler = (url: string | URL | null | undefined) => void;
 const navHandlers = new Set<NavHandler>();
+
+const toPathname = (url: string | URL | null | undefined): string | null => {
+  if (!url) return null;
+  try {
+    return new URL(String(url), location.href).pathname;
+  } catch {
+    return null;
+  }
+};
 
 if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
   const origPush = history.pushState.bind(history);
@@ -46,28 +58,45 @@ const GlobalLoadingSpinner = () => {
   const suppressNextNavRef = useRef(false);
   const prevSettledPathnameRef = useRef<string | null>(null);
 
+  const hideSpinner = () => {
+    setVisible(false);
+    lastNavClickRef.current = null;
+  };
+
+  const startSpinner = () => {
+    suppressNextNavRef.current = false;
+    setVisible(true);
+    lastNavClickRef.current = Date.now();
+  };
+
+  const shouldSuppressForPath = (pathnameToCheck: string) => {
+    return pathnameToCheck === prevSettledPathnameRef.current;
+  };
+
+  const handleUpcomingNavigation = (pathnameToCheck: string) => {
+    if (pathnameToCheck === location.pathname) return;
+
+    if (suppressNextNavRef.current) {
+      // Consumed — next navigation may show spinner normally.
+      suppressNextNavRef.current = false;
+      return;
+    }
+
+    if (shouldSuppressForPath(pathnameToCheck)) {
+      suppressNextNavRef.current = true;
+      hideSpinner();
+      return;
+    }
+
+    startSpinner();
+  };
+
   // Register with module-level singleton — no history patching here
   useEffect(() => {
     const handler: NavHandler = (url) => {
-      if (!url) return;
-      try {
-        const parsed = new URL(String(url), location.href);
-        if (parsed.pathname === location.pathname) return;
-        if (suppressNextNavRef.current) {
-          suppressNextNavRef.current = false; // consumed — next pushState is new navigation
-          return;
-        }
-        if (parsed.pathname === prevSettledPathnameRef.current) {
-          suppressNextNavRef.current = true;
-          lastNavClickRef.current = null;
-          setVisible(false);
-          return;
-        }
-        setVisible(true);
-        lastNavClickRef.current = Date.now();
-      } catch {
-        // ignore malformed urls
-      }
+      const pathnameToCheck = toPathname(url);
+      if (!pathnameToCheck) return;
+      handleUpcomingNavigation(pathnameToCheck);
     };
     navHandlers.add(handler);
     return () => { navHandlers.delete(handler); };
@@ -89,17 +118,7 @@ const GlobalLoadingSpinner = () => {
         if (href.startsWith('#') || href.startsWith('javascript:')) return;
         const url = new URL(href, location.href);
         if (url.origin !== location.origin) return;
-        if (url.pathname !== location.pathname) {
-          suppressNextNavRef.current = false;
-          if (url.pathname === prevSettledPathnameRef.current) {
-            suppressNextNavRef.current = true;
-            lastNavClickRef.current = null;
-            setVisible(false);
-            return;
-          }
-          setVisible(true);
-          lastNavClickRef.current = Date.now();
-        }
+        handleUpcomingNavigation(url.pathname);
       } catch {
         // ignore malformed urls
       }
@@ -108,12 +127,31 @@ const GlobalLoadingSpinner = () => {
     return () => window.removeEventListener('click', onClick, true);
   }, []);
 
+  // Show when components trigger programmatic navigation event
+  useEffect(() => {
+    const onNavigationStart = (e: Event) => {
+      const event = e as CustomEvent<{ url?: string }>;
+      const pathnameToCheck = toPathname(event.detail?.url);
+
+      if (pathnameToCheck) {
+        handleUpcomingNavigation(pathnameToCheck);
+        return;
+      }
+
+      startSpinner();
+    };
+
+    window.addEventListener(NAV_START_EVENT, onNavigationStart as EventListener);
+    return () => {
+      window.removeEventListener(NAV_START_EVENT, onNavigationStart as EventListener);
+    };
+  }, []);
+
   // Suppress spinner for browser back/forward navigation (popstate)
   useEffect(() => {
     const onPopstate = () => {
       suppressNextNavRef.current = true;
-      lastNavClickRef.current = null;
-      setVisible(false);
+      hideSpinner();
     };
     window.addEventListener('popstate', onPopstate);
     return () => {
@@ -136,7 +174,7 @@ const GlobalLoadingSpinner = () => {
     }
 
     if (isFetching) {
-      const recentNavClick = lastNavClickRef.current !== null && now - lastNavClickRef.current < 2000;
+      const recentNavClick = lastNavClickRef.current !== null && now - lastNavClickRef.current < RECENT_NAV_WINDOW_MS;
       if (recentNavClick || pathnameChanged) {
         setVisible(true);
         return;
@@ -148,7 +186,7 @@ const GlobalLoadingSpinner = () => {
       prevSettledPathnameRef.current = prevPathRef.current;
     }
     prevPathRef.current = pathname;
-    const t = setTimeout(() => setVisible(false), 120);
+    const t = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
     return () => clearTimeout(t);
   }, [isFetching, pathname]);
 

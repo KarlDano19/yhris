@@ -30,8 +30,8 @@ async function getClientItems(filters: any) {
   }
 }
 
-function useClientItems(filters: any) {
-  const query = useQuery(['clientItemsCache'], () => getClientItems(filters), {
+function useClientItems(filters: { search?: string; client_source?: string; status?: string } = {}) {
+  const query = useQuery(['clientItemsCache', filters], () => getClientItems(filters), {
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

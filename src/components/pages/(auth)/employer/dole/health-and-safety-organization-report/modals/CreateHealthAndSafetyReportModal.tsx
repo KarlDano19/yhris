@@ -36,7 +36,7 @@ function CreateHealthAndSafetyReportModal({
   formMethods: any;
 }) {
   const cancelButtonRef = useRef(null);
-  const { register, handleSubmit, reset, control, setValue, watch } = formMethods;
+  const { register, handleSubmit, reset, control, setValue, watch, formState: { errors }, setError, clearErrors } = formMethods;
   const {
     mutate: addWorkEnvironmentRequest,
     isLoading: isLoadingAddHealthAndSafetyReport,
@@ -165,6 +165,7 @@ function CreateHealthAndSafetyReportModal({
                     handleSubmit={handleSubmit}
                     setSelectedTab={setSelectedTab}
                     watch={watch}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 2 && (
@@ -176,6 +177,7 @@ function CreateHealthAndSafetyReportModal({
                     setSelectedTab={setSelectedTab}
                     watch={watch}
                     isCreateModal={true}
+                    errors={errors}
                   />
                 )}
                 {selectedTab === 3 && (
@@ -188,6 +190,9 @@ function CreateHealthAndSafetyReportModal({
                     watch={watch}
                     isCreateModal={true}
                     isLoading={isLoadingAddHealthAndSafetyReport}
+                    errors={errors}
+                    setError={setError}
+                    clearErrors={clearErrors}
                   />
                 )}
               </Dialog.Panel>
