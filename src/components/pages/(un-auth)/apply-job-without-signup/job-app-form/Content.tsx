@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
@@ -92,7 +93,8 @@ const Content = () => {
   return (
     <div className={`mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 `}>
       <div className='px-4 pt-24'>
-        <h4 className='text-lg md:text-2xl font-bold md:font-semibold'>
+        <BackButton label='Back' />
+        <h4 className='text-lg md:text-2xl font-bold md:font-semibold mt-2'>
           Jobs - {jobDetailData?.job_title} | Application Form
         </h4>
         <div className='md:mx-5 mt-7'>

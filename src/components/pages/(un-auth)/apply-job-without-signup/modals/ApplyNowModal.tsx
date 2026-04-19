@@ -141,37 +141,61 @@ const ApplyNowModal = ({ isOpen, handleClose, jobId }: ApplyNowModalProps) => {
   };
 
   return (
-    <ModalLayout isOpen={isOpen} handleClose={handleClose} title='How would you like to apply?' maxWidth='max-w-sm'>
+    <ModalLayout isOpen={isOpen} handleClose={handleClose} title='How would you like to apply?' maxWidth='max-w-xl'>
       <div className='px-6 py-5'>
-        <p className='text-sm text-gray-600 mb-6'>
-          Applying with an account lets you chat with the employer and track your application status.
-        </p>
-        <div className='flex flex-col gap-3'>
-          <button
-            onClick={handleSignInWithGoogle}
-            className='w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50'
-          >
-            <GoogleIcon className='w-4 h-4' />
-            Sign in with Google
-          </button>
-          <button
-            onClick={handleApplyWithAccount}
-            className='w-full rounded-md bg-savoy-blue py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-          >
-            Register with Account
-          </button>
-          <button
-            onClick={handleLogin}
-            className='w-full rounded-md border border-gray-300 bg-white py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50'
-          >
-            Login to Existing Account
-          </button>
-          <button
-            onClick={handleContinueAsGuest}
-            className='w-full rounded-md border border-[#FFC107] bg-[#FFC107] py-3 text-sm font-semibold text-black shadow-sm hover:bg-amber-500'
-          >
-            Continue as Guest
-          </button>
+        <div className='flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-4 sm:items-center'>
+          {/* Left: all 3 sign-in options + benefits */}
+          <div className='flex flex-col gap-3'>
+            <button
+              onClick={handleSignInWithGoogle}
+              className='w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50'
+            >
+              <GoogleIcon className='w-4 h-4' />
+              Sign in with Google
+            </button>
+            <button
+              onClick={handleApplyWithAccount}
+              className='w-full rounded-md bg-savoy-blue py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400'
+            >
+              Create an Account
+            </button>
+            <button
+              onClick={handleLogin}
+              className='w-full rounded-md border border-gray-300 bg-white py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50'
+            >
+              Login to Existing Account
+            </button>
+            <ul className='mt-1 flex flex-col gap-1.5'>
+              {[
+                'Track your application status.',
+                'Chat directly with employers.',
+                'Save jobs for later.',
+                'Receive notifications.',
+              ].map((benefit) => (
+                <li key={benefit} className='flex items-start gap-1.5 text-xs text-gray-500'>
+                  <span className='mt-0.5 text-savoy-blue'>✓</span>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Divider — horizontal on mobile, vertical on sm+ */}
+          <div className='flex sm:flex-col items-center sm:self-stretch'>
+            <div className='flex-1 h-px sm:h-auto sm:w-px bg-gray-200' />
+            <span className='text-xs text-gray-400 font-medium px-3 sm:px-0 sm:py-2'>or</span>
+            <div className='flex-1 h-px sm:h-auto sm:w-px bg-gray-200' />
+          </div>
+
+          {/* Right: guest */}
+          <div className='flex flex-col items-center justify-center gap-3'>
+            <button
+              onClick={handleContinueAsGuest}
+              className='w-full rounded-md border border-[#FFC107] bg-[#FFC107] py-2.5 text-sm font-semibold text-black shadow-sm hover:bg-amber-500'
+            >
+              Continue without Account
+            </button>
+          </div>
         </div>
       </div>
     </ModalLayout>

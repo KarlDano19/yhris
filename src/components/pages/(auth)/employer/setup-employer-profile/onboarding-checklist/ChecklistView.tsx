@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
 
@@ -18,7 +19,10 @@ import { T_OnboardingChecklist } from './hooks/useGetChecklist';
 
 const ChecklistView = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data, isLoading } = useGetChecklist();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const isDeveloper = cachedUserDetails?.state?.data?.is_developer === true;
 
   const [selectedItem, setSelectedItem] = useState<T_OnboardingChecklist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,37 +64,36 @@ const ChecklistView = () => {
     router.push('/setup-employer-profile/acceptance-memo');
   };
 
-  // [DEV] Auto-complete all incomplete items and navigate to acceptance memo
-  // const handleDevSkip = async () => {
-  //   const incompleteIds: number[] = [];
-  //   if (record) {
-  //     for (const phase of record.phases) {
-  //       for (const item of phase.checklists) {
-  //         if (!item.is_completed) {
-  //           incompleteIds.push(item.id);
-  //         }
-  //       }
-  //     }
-  //   }
-  //   if (incompleteIds.length > 0) {
-  //     const token = getCookie('token');
-  //     await Promise.all(
-  //       incompleteIds.map((id) =>
-  //         fetch(
-  //           `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
-  //           {
-  //             method: 'POST',
-  //             headers: {
-  //               'Content-Type': 'application/json',
-  //               Authorization: `Token ${token}`,
-  //             },
-  //           }
-  //         )
-  //       )
-  //     );
-  //   }
-  //   await handleProceedToAcceptanceMemo();
-  // };
+  const handleDevSkip = async () => {
+    const incompleteIds: number[] = [];
+    if (record) {
+      for (const phase of record.phases) {
+        for (const item of phase.checklists) {
+          if (!item.is_completed) {
+            incompleteIds.push(item.id);
+          }
+        }
+      }
+    }
+    if (incompleteIds.length > 0) {
+      const token = getCookie('token');
+      await Promise.all(
+        incompleteIds.map((id) =>
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/employer-onboarding/checklist/${id}/complete/`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Token ${token}`,
+              },
+            }
+          )
+        )
+      );
+    }
+    await handleProceedToAcceptanceMemo();
+  };
 
   if (isLoading) {
     return (
@@ -168,16 +171,17 @@ const ChecklistView = () => {
                   </div>
                 )}
 
-                {/* [DEV] Skip button for testing */}
-                {/* <div className='flex justify-end mt-1 mb-4'>
-                  <button
-                    type='button'
-                    onClick={handleDevSkip}
-                    className='text-xs text-gray-400 underline hover:text-gray-600'
-                  >
-                    [DEV] Skip to Acceptance Memo
-                  </button>
-                </div> */}
+                {isDeveloper && (
+                  <div className='flex justify-end mt-1 mb-4'>
+                    <button
+                      type='button'
+                      onClick={handleDevSkip}
+                      className='text-xs text-gray-400 underline hover:text-gray-600'
+                    >
+                      [DEV] Skip to Acceptance Memo
+                    </button>
+                  </div>
+                )}
 
               </>
             ) : (
