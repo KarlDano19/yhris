@@ -6,58 +6,58 @@ export type QuickAccessCounter = {
   label: string;
 };
 
-async function fetchCount(url: string): Promise<number> {
+const COUNTER_LABELS: Record<string, string> = {
+  'post-job-history': 'active',
+  'manage-address-issue': 'pending',
+  'manage-memo-policy': 'not sent',
+  'manage-employees': 'employees',
+};
+
+const COUNTER_ITEM_IDS = new Set(Object.keys(COUNTER_LABELS));
+
+async function getQuickAccessCounts(activeItems: string[]): Promise<Record<string, QuickAccessCounter>> {
+  const relevantItems = activeItems.filter((id) => COUNTER_ITEM_IDS.has(id));
+  if (relevantItems.length === 0) return {};
+
   const token = getCookie('token');
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-    method: 'GET',
-    headers: {
-      'content-type': 'application/json',
-      Authorization: `Token ${token}`,
-    },
-  });
-  if (!res.ok) return 0;
-  return res.json();
-}
+  const params = relevantItems.join(',');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/quick-access/counts/?items=${params}`,
+    {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Token ${token}`,
+      },
+    }
+  );
 
-async function getQuickAccessCounters(): Promise<Record<string, QuickAccessCounter>> {
-  const [jobHistory, employeeIssues, directives, employees] = await Promise.allSettled([
-    fetchCount('/api/jobs/?view_type=job-posting-history&pageSize=1&currentPage=1'),
-    fetchCount('/api/employee-issues/?status=pending&pageSize=1&currentPage=1'),
-    fetchCount('/api/directives/?pageSize=1&currentPage=1'),
-    fetchCount('/api/employees/?view_type=count'),
-  ]);
+  if (!res.ok) return {};
 
-  const resolve = (result: PromiseSettledResult<any>) =>
-    result.status === 'fulfilled' ? result.value : null;
-
-  const jobData = resolve(jobHistory);
-  const issueData = resolve(employeeIssues);
-  const directiveData = resolve(directives);
-  const employeeData = resolve(employees);
-
+  const data = await res.json();
   const counters: Record<string, QuickAccessCounter> = {};
 
-  if (jobData?.total != null) {
-    counters['post-job-history'] = { count: jobData.total, label: 'active' };
-  }
-  if (issueData?.total != null) {
-    counters['manage-address-issue'] = { count: issueData.total, label: 'pending' };
-  }
-  if (directiveData?.total != null) {
-    counters['manage-memo-policy'] = { count: directiveData.total, label: 'total' };
-  }
-  if (employeeData?.count != null) {
-    counters['manage-employees'] = { count: employeeData.count, label: 'employees' };
+  for (const itemId of relevantItems) {
+    const count = data[itemId];
+    if (count != null) {
+      counters[itemId] = { count, label: COUNTER_LABELS[itemId] };
+    }
   }
 
   return counters;
 }
 
-function useGetQuickAccessCounters() {
-  return useQuery(['quickAccessCountersCache'], () => getQuickAccessCounters(), {
-    refetchOnWindowFocus: false,
-    staleTime: 60_000, // reuse cached counts for 1 minute
-  });
+function useGetQuickAccessCounters(activeItems: string[]) {
+  const relevantItems = activeItems.filter((id) => COUNTER_ITEM_IDS.has(id));
+  return useQuery(
+    ['quickAccessCountersCache', [...relevantItems].sort().join(',')],
+    () => getQuickAccessCounts(activeItems),
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: 'always',
+      enabled: relevantItems.length > 0,
+    }
+  );
 }
 
 export default useGetQuickAccessCounters;

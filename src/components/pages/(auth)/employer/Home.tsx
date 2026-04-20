@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-
 import useResetOnboarding from '@/components/hooks/useResetOnboarding';
 import useGetUserDetails from '@/components/hooks/useGetUserDetails';
 
@@ -33,6 +31,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
   const { mutate: resetOnboarding, isLoading: isResetting } = useResetOnboarding();
   const { data: usersData, isLoading: isUsersLoading } = useGetUserDetails() as { data: any; isLoading: boolean };
   const isOnboardingEnabled = isUsersLoading ? false : (usersData?.is_onboarding_enabled ?? true);
+  const isDeveloper = usersData?.is_developer === true;
 
   const [isGoPremiumModalOpen, setIsGoPremiumModalOpen] = useState(false);
   const [isInsufficientPermissionsModalOpen, setIsInsufficientPermissionsModalOpen] = useState(false);
@@ -183,8 +182,7 @@ const Home = ({ loginType, hasActiveSubscription }: { loginType: string, hasActi
         <div className='p-2 md:p-8 lg:p-4 relative'>
           <div className='flex items-center gap-3'>
             <h2 className='text-xl font-bold text-indigo-dye'>Dashboard</h2>
-            {/* FOR TESTING ONLY */}
-            {isOnboardingEnabled && (
+            {isDeveloper && isOnboardingEnabled && (
               <button
                 onClick={handleReset}
                 disabled={isResetting}

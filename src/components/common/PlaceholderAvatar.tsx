@@ -97,7 +97,7 @@ const PlaceholderAvatar: React.FC<PlaceholderAvatarProps> = ({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: 'block', width: '100%', height: '100%' }}
+      style={{ display: 'block', flexShrink: 0 }}
     >
       {/* Background circle/rectangle */}
       <rect
