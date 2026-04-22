@@ -109,6 +109,122 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-016
+DATE FILED: 2026-04-22
+DATE FIXED: 2026-04-22
+REPORTER: Internal (Developer)
+
+ISSUE DESCRIPTION:
+  Sub-accounts created under an employer account were incorrectly redirected to the
+  HRIS Implementation Checklist (/setup-employer-profile/onboarding-checklist) on
+  first login, even though the main employer account had already completed onboarding.
+
+  Three separate bugs combined to cause this:
+
+  1. The frontend registration payload (useAddAccounts.ts) did not include
+     `has_onboarded: true`, so there was no signal to the backend that the new
+     sub-account should skip onboarding.
+
+  2. The backend's create_user() method in ObjectManager did not pass `has_onboarded`
+     from the request payload to User.objects.create(). Even after the frontend fix,
+     the field was silently dropped and the user record was always created with
+     has_onboarded = False (the model default).
+
+  3. The backend OTP verify endpoint (/api/auth/login/otp/verify/ →
+     LoginOTPVerifyAPIView) did not include `has_onboarded` or `login_type` in its
+     response payload. The direct-login endpoint did include both fields. Because
+     sub-accounts triggered OTP on first login, the frontend iron-session never
+     received has_onboarded, so session.hasCompletedOnboarding was set to undefined,
+     which evaluated as falsy in the middleware's onboarding gate.
+
+DESIRED OUTCOME:
+  Sub-accounts created via the employer settings Users page should have
+  has_onboarded = True persisted in the database. On login (including OTP-based
+  login), the session should reflect hasCompletedOnboarding = true, and the
+  Next.js middleware should allow sub-accounts to proceed directly to the dashboard
+  without redirecting through the onboarding checklist.
+
+FILES CHANGED:
+Backend:
+- app/mixins/object_manager.py
+- app/views/otp.py
+
+Frontend:
+- src/components/pages/(auth)/employer/settings/users/accounts/hooks/useAddAccounts.ts
+- src/app/api/login/otp/verify/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (tests not yet implemented)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A — no schema changes)
+☐ Serializers tested (N/A)
+☑ Views/API endpoints tested (manual — new sub-account created, has_onboarded=True confirmed in DB, login OTP verify response includes has_onboarded: true)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A — no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (N/A)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — pending)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (sub-account login via OTP → skips onboarding; main account login unaffected; has_onboarded persisted in DB)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+
+**Fix 1 — Frontend: useAddAccounts.ts**
+
+Added `has_onboarded: true` as a constant to the registration data payload sent to
+POST /api/register/. Sub-accounts created from the employer settings page should
+always start with onboarding already complete, since the main account owns the
+onboarding checklist.
+
+**Fix 2 — Backend: app/mixins/object_manager.py (create_user)**
+
+Added `has_onboarded=data.get("has_onboarded", False)` to the User.objects.create()
+call inside the create_user() method. Previously, has_onboarded was a recognised
+model field with default=False but was never read from the incoming request payload,
+so the frontend value was silently discarded.
+
+**Fix 3 — Backend: app/views/otp.py (LoginOTPVerifyAPIView)**
+
+Added `has_onboarded` and `login_type` to the OTP verify response payload for
+employer accounts, matching the same logic used in the direct-login endpoint
+(UserLoginWithOTPAPIView.handle_direct_login):
+
+  response["has_onboarded"] = (
+      True if not get_onboarding_enabled() or user.login_type in ("yahshua-payroll", "yg-payroll")
+      else bool(user.has_onboarded)
+  )
+  response["login_type"] = user.login_type
+
+Also added the import: from utils.employer_onboarding import get_onboarding_enabled
+
+**Fix 4 — Frontend: src/app/api/login/otp/verify/route.ts**
+
+Added `session['hasCompletedOnboarding'] = data.has_onboarded` and
+`session['loginType'] = data.login_type || 'password'` to the iron-session save
+block inside the OTP verify API route. These two fields were already set by the
+direct-login route but were missing from the OTP path, causing the middleware to
+always see hasCompletedOnboarding as undefined (falsy) for OTP-based logins.
+
+================================================================================
+
 BUG ID: HRIS-2026-015
 DATE FILED: 2026-04-18
 DATE FIXED: 2026-04-18
