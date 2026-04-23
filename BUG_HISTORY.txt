@@ -109,6 +109,53 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-016
+DATE FILED: 2026-04-23
+DATE FIXED: 2026-04-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  In the Evaluation History modal, the "Questions & Responses" tab displayed raw
+  HTML tags as plain text instead of rendering them as formatted HTML. Question
+  titles stored in the database contain rich-text HTML (e.g.
+  "<p><br></p><p>5 - Outstanding...</p>") produced by a rich-text editor. Because
+  the title was interpolated directly into JSX as `{criterion.title}`, React
+  escaped the markup and showed it literally on screen.
+
+DESIRED OUTCOME:
+  Question titles containing HTML markup should render as formatted HTML so that
+  line breaks, paragraphs, and any inline styling appear correctly to the user.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ No backend changes required
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Manual regression testing completed — HTML renders correctly, plain-text titles unaffected
+☑ Cross-browser testing completed (if UI changes)
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (plain-text titles, empty titles, mixed content)
+
+FIX EXPLANATION:
+  Replaced the plain JSX text interpolation of `criterion.title` with
+  `dangerouslySetInnerHTML={{ __html: criterion.title }}` inside a wrapping
+  `<span>`. This tells React to parse and render the stored HTML string rather
+  than escaping it. The chevron icon's alignment classes were also updated from
+  `items-center` to `items-start` with `shrink-0 mt-0.5` so the icon stays
+  top-aligned when multi-line HTML content causes the title to wrap.
+
+================================================================================
+
 BUG ID: HRIS-2026-015
 DATE FILED: 2026-04-18
 DATE FIXED: 2026-04-18
