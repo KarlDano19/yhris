@@ -1,212 +1,174 @@
-"use client"
+"use client";
 import Link from "next/link";
-import { 
-  ChartBarIcon, 
-  StarIcon, 
-  TrophyIcon, 
-  CheckCircleIcon,
-  UserGroupIcon,
-  ClipboardDocumentCheckIcon,
-  CalendarDaysIcon,
-  AcademicCapIcon
-} from "@heroicons/react/24/outline";
+import { BarChart3, Users, ClipboardList, GraduationCap, CalendarDays, ArrowRight } from "lucide-react";
+import Navigation from "@/components/pages/(un-auth)/landing-page/Navigation";
+import LpFooter from "@/components/pages/(un-auth)/landing-page/LpFooter";
+import ScrollFadeIn from "@/components/pages/(un-auth)/landing-page/ScrollFadeIn";
+
+const features = [
+  { icon: CalendarDays, title: "Scheduled Check-Ins", body: "Empower managers to set and track regular performance conversations ahead of time, ensuring consistency and meaningful engagement." },
+  { icon: Users, title: "Employee Self-Evaluations", body: "Give employees a space to reflect on their own progress, encouraging ownership and alignment with team goals." },
+  { icon: ClipboardList, title: "Centralized Evaluation Records", body: "Keep all evaluations organized and accessible in one place, eliminating the risks of paper trails and scattered files." },
+  { icon: GraduationCap, title: "Development-Focused Reviews", body: "Turn performance reviews into opportunities for growth by focusing on clear feedback and future-focused conversations." },
+];
+
+const reviewCycle = [
+  { step: "01", phase: "Setup Evaluation Template", description: "Customize evaluation forms to align with your company's roles, values, and performance criteria.", duration: "Initial Setup" },
+  { step: "02", phase: "Schedule Evaluations", description: "Automate evaluation schedules to ensure consistent and timely performance reviews.", duration: "Recurring" },
+  { step: "03", phase: "Conduct Evaluations", description: "Easily complete employee evaluations with structured forms and built-in rating systems.", duration: "As Scheduled" },
+  { step: "04", phase: "View Evaluation History", description: "Track employee performance trends through a centralized evaluation record system.", duration: "Ongoing" },
+];
+
+const results = [
+  "Managers hold timely, meaningful check-ins scheduled in advance",
+  "Employees actively self-evaluate and stay engaged",
+  "HR gains full visibility over current and past evaluations",
+  "Performance discussions shift from chores to growth opportunities",
+];
 
 const PerformanceManagementContent = () => {
-  const features = [
-    {
-      icon: CalendarDaysIcon,
-      title: "Scheduled Check-Ins",
-      description: "Empower managers to set and track regular performance conversations ahead of time—ensuring consistency and meaningful engagement."
-    },
-    {
-      icon: UserGroupIcon,
-      title: "Employee Self-Evaluations",
-      description: "Give employees a space to reflect on their own progress, encouraging ownership and alignment with team goals."
-    },
-    {
-      icon: ClipboardDocumentCheckIcon,
-      title: "Centralized Evaluation Records",
-      description: "Keep all evaluations organized and accessible in one place—eliminating the risks of paper trails and scattered files."
-    },
-    {
-      icon: AcademicCapIcon,
-      title: "Development-Focused Reviews",
-      description: "Turn performance reviews into opportunities for growth by focusing on clear feedback and future-focused conversations."
-    }
-  ];
-
-  const reviewCycle = [
-    {
-      phase: "Setup Evaluation Template",
-      description: "Customize evaluation forms to align with your company's roles, values, and performance criteria.",
-      duration: "Initial Setup"
-    },
-    {
-      phase: "Schedule Evaluations",
-      description: "Automate evaluation schedules to ensure consistent and timely performance reviews.",
-      duration: "Recurring"
-    },
-    {
-      phase: "Conduct Evaluations",
-      description: "Easily complete employee evaluations with structured forms and built-in rating systems.",
-      duration: "As Scheduled"
-    },
-    {
-      phase: "View Evaluation History",
-      description: "Track employee performance trends through a centralized evaluation record system.",
-      duration: "Ongoing"
-    }
-  ];
-
-  const businessStory = {
-    title: "Transforming Performance Reviews from Burden to Breakthrough",
-    subtitle: "How Companies Transform Employee Development",
-    challenge: "Companies relying on paper evaluations face outdated, hard-to-manage processes—often leading to delays, lost records, and low engagement. With limited budgets, they're stuck using inefficient methods or skipping performance reviews altogether.",
-    solution: "YAHSHUA HRIS simplifies everything: a single intuitive platform to create, customize, manage, and store evaluations—no paperwork, no hassle.",
-    results: [
-      "Managers now hold timely, meaningful check‑ins scheduled in advance",
-      "Employees actively self-evaluate and stay engaged",
-      "HR gains full visibility over current and past evaluations",
-      "Performance discussions shift from chores to growth opportunities"
-    ]
-  };
-
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      {/* Header Section */}
-      <div className="text-center mb-16">
-        <div className="flex justify-center mb-6">
-          <div className="bg-savoy-blue/10 p-4 rounded-2xl">
-            <ChartBarIcon className="h-12 w-12 text-savoy-blue" />
-          </div>
-        </div>
-        <h1 className="text-4xl md:text-6xl font-bold text-indigo-dye mb-6">
-          Performance Management
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Elevate your team's performance with comprehensive evaluation tools, 
-          continuous feedback systems, and data-driven insights for growth.
-        </p>
-      </div>
+    <>
+      <Navigation />
+      <div style={{ background: "hsl(var(--lp-page))" }}>
+        <main className="min-h-screen pt-16">
 
-      {/* Business Story Section */}
-      <div className="bg-gradient-to-br from-savoy-blue/5 to-indigo-50 rounded-2xl p-8 md:p-12 mb-20">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-indigo-dye mb-4">
-            {businessStory.title}
-          </h2>
-          <p className="text-lg text-savoy-blue font-medium mb-2">
-            {businessStory.subtitle}
-          </p>
-          <p className="text-xs text-gray-500 italic">
-            *This is a fictional story for illustration purposes. Any resemblance to actual companies or persons is purely coincidental.
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Challenge</h3>
-            <p className="text-gray-600 mb-6">{businessStory.challenge}</p>
-            
-            <h3 className="text-lg font-semibold text-indigo-dye mb-3">The Solution</h3>
-            <p className="text-gray-600">{businessStory.solution}</p>
-          </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-indigo-dye mb-4">The Results</h3>
-            <ul className="space-y-3">
-              {businessStory.results.map((result, index) => (
-                <li key={index} className="flex items-start">
-                  <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-600">{result}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+          {/* Hero */}
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
+            <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }} />
+            <div className="lp-section-container relative z-10 text-center">
+              <ScrollFadeIn>
+                <span className="lp-section-label justify-center mb-5">USE CASE</span>
+                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-white mb-5 tracking-tight">
+                  Performance Management.<br className="hidden md:inline" />
+                  <span className="text-primary"> Elevate every review.</span>
+                </h1>
+                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed mb-10">
+                  Comprehensive evaluation tools, continuous feedback systems, and data-driven insights to grow your team.
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">
+                    Start for Free <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link href="/use-cases" className="lp-btn-ghost gap-2">
+                    View All Use Cases
+                  </Link>
+                </div>
+              </ScrollFadeIn>
+            </div>
+          </section>
 
-      {/* Features Section */}
-      <div className="mb-20">
-        <h2 className="text-3xl font-bold text-indigo-dye text-center mb-12">
-          Comprehensive Performance Tools
-        </h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-                <div className="flex items-start">
-                  <div className="bg-savoy-blue/10 p-3 rounded-lg mr-4 flex-shrink-0">
-                    <IconComponent className="h-6 w-6 text-savoy-blue" />
+          {/* Business Story */}
+          <section className="py-20 md:py-28" style={{ background: "hsl(var(--lp-surface))" }}>
+            <div className="lp-section-container">
+              <ScrollFadeIn>
+                <div className="text-center mb-12">
+                  <span className="lp-section-label justify-center mb-4">CUSTOMER STORY</span>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Transforming Performance Reviews from Burden to Breakthrough</h2>
+                  <p className="text-primary font-medium text-sm mb-1">How Companies Transform Employee Development</p>
+                  <p className="text-white/25 text-xs italic">This is a fictional story for illustration purposes only.</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-2">The Challenge</p>
+                      <p className="text-sm text-white/55 leading-relaxed">Companies relying on paper evaluations face outdated, hard-to-manage processes, often leading to delays, lost records, and low engagement. With limited budgets, they are stuck using inefficient methods or skipping performance reviews altogether.</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-2">The Solution</p>
+                      <p className="text-sm text-white/55 leading-relaxed">YAHSHUA HRIS simplifies everything: a single intuitive platform to create, customize, manage, and store evaluations. No paperwork, no hassle.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-indigo-dye mb-3">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {feature.description}
-                    </p>
+                  <div className="lp-dark-card p-7">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">The Results</p>
+                    <ul className="space-y-3">
+                      {results.map((r) => (
+                        <li key={r} className="flex items-start gap-3 text-sm">
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.12)", border: "1px solid rgba(255,193,7,0.2)" }}>
+                            <svg className="w-2.5 h-2.5 text-primary" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6l3 3 5-5" /></svg>
+                          </span>
+                          <span className="text-white/60">{r}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              </ScrollFadeIn>
+            </div>
+          </section>
 
-      {/* Review Cycle Section */}
-      <div className="mb-20">
-        <h2 className="text-3xl font-bold text-indigo-dye text-center mb-12">
-          Performance Review Cycle
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {reviewCycle.map((phase, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center relative">
-              <div className="bg-savoy-blue text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg mx-auto mb-4">
-                {index + 1}
-              </div>
-              <h3 className="text-lg font-semibold text-indigo-dye mb-3">
-                {phase.phase}
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                {phase.description}
-              </p>
-              <div className="inline-block bg-savoy-blue/10 text-savoy-blue px-3 py-1 rounded-full text-xs font-medium">
-                {phase.duration}
+          {/* Features */}
+          <section className="py-20 md:py-28">
+            <div className="lp-section-container">
+              <ScrollFadeIn>
+                <div className="text-center mb-14">
+                  <span className="lp-section-label justify-center mb-4">KEY FEATURES</span>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Comprehensive performance tools.</h2>
+                </div>
+              </ScrollFadeIn>
+              <div className="grid md:grid-cols-2 gap-6">
+                {features.map((f, i) => {
+                  const Icon = f.icon;
+                  return (
+                    <ScrollFadeIn key={f.title} delay={i * 60}>
+                      <div className="lp-dark-card p-7 flex gap-5">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+                          <Icon className="w-5 h-5 text-white/40" strokeWidth={1.5} />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white/80 mb-2">{f.title}</h3>
+                          <p className="text-sm text-white/45 leading-relaxed">{f.body}</p>
+                        </div>
+                      </div>
+                    </ScrollFadeIn>
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </section>
 
+          {/* Review Cycle */}
+          <section className="py-20 md:py-28" style={{ background: "hsl(var(--lp-surface))" }}>
+            <div className="lp-section-container">
+              <ScrollFadeIn>
+                <div className="text-center mb-14">
+                  <span className="lp-section-label justify-center mb-4">PROCESS</span>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Performance review cycle in 4 steps.</h2>
+                </div>
+              </ScrollFadeIn>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {reviewCycle.map((s, i) => (
+                  <ScrollFadeIn key={s.step} delay={i * 60}>
+                    <div className="lp-dark-card p-6">
+                      <span className="text-xs font-mono text-white/20 mb-4 block">{s.step}</span>
+                      <h3 className="text-sm font-bold text-white/80 mb-2">{s.phase}</h3>
+                      <p className="text-sm text-white/40 leading-relaxed mb-4">{s.description}</p>
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: "rgba(255,193,7,0.1)", color: "rgba(255,193,7,0.7)", border: "1px solid rgba(255,193,7,0.15)" }}>{s.duration}</span>
+                    </div>
+                  </ScrollFadeIn>
+                ))}
+              </div>
+            </div>
+          </section>
 
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-savoy-blue to-indigo-600 rounded-2xl p-12 text-white">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Transform Your Performance Management
-          </h2>
-          <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Unlock your team's potential with our comprehensive performance management platform.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
-              className="bg-[#FFC107] hover:bg-amber-600 text-black px-8 py-3 rounded-lg font-medium transition-colors"
-            >
-              Start 30 Day Free Trial
-            </Link>
-            <Link
-              href="/use-cases"
-              className="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-lg font-medium transition-colors border border-white/30"
-            >
-              View All Use Cases
-            </Link>
-          </div>
-        </div>
+          {/* CTA */}
+          <section className="py-20 md:py-28">
+            <div className="lp-section-container text-center">
+              <ScrollFadeIn>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">Ready to transform performance management?</h2>
+                <p className="text-white/50 text-base mb-8 max-w-sm mx-auto">Start free or book a demo. No credit card required.</p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">Start for Free <ArrowRight className="w-4 h-4" /></Link>
+                  <Link href="/use-cases" className="lp-btn-ghost gap-2">View All Use Cases</Link>
+                </div>
+              </ScrollFadeIn>
+            </div>
+          </section>
+
+        </main>
+        <LpFooter />
       </div>
-    </div>
+    </>
   );
 };
 

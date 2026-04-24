@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 
 import { getIronSession } from 'iron-session';
 
-import Content from '@/components/pages/(un-auth)/plan/Content';
+import Content from '@/components/pages/(un-auth)/pricing/LpPricingContent';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
