@@ -126,7 +126,7 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
                 </p>
                 
                 <p className="text-xs sm:text-sm" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
-                  This certificate is issued for {formData.purpose || '___________'} purposes.
+                  This certificate is issued for {formData.purpose || '___________'}
                 </p>
                 
                 <p className="text-xs sm:text-sm">
