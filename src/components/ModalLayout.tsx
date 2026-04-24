@@ -36,8 +36,8 @@ export default function ModalLayout({ children, title, isOpen, handleClose, nest
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full ${maxWidth}`}>
-                <div className="flex bg-savoy-blue p-2 items-center gap-4">
+              <Dialog.Panel className={`relative transform rounded-lg bg-white text-left shadow-xl transition-all w-full ${maxWidth}`}>
+                <div className="flex bg-savoy-blue p-2 items-center gap-4 rounded-t-lg overflow-hidden">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     {title}
                   </h3>
