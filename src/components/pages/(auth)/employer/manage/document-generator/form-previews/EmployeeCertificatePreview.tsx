@@ -73,24 +73,24 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
             {/* Letterhead background image - custom uploaded */}
             {formData.letterheadImage && (
               <div className="absolute inset-0 letterhead-image-container">
-                <Image 
+                <Image
                   src={URL.createObjectURL(formData.letterheadImage)}
                   alt="Letterhead Background"
                   fill
-                  style={{ objectFit: 'contain', opacity: 1, position: 'absolute', zIndex: 0 }}
+                  style={{ objectFit: 'fill', opacity: 1, position: 'absolute', zIndex: 0 }}
                   priority
                 />
               </div>
             )}
-            
+
             {/* Letterhead background image - sample */}
             {!formData.letterheadImage && formData.sampleLetterheadPath && (
               <div className="absolute inset-0 letterhead-image-container">
-                <Image 
+                <Image
                   src={formData.sampleLetterheadPath}
                   alt="Sample Letterhead Background"
                   fill
-                  style={{ objectFit: 'contain', opacity: 1, position: 'absolute', zIndex: 0 }}
+                  style={{ objectFit: 'fill', opacity: 1, position: 'absolute', zIndex: 0 }}
                   priority
                 />
               </div>
@@ -125,8 +125,8 @@ export default function EmployeeCertificatePreview({ formData }: EmployeeCertifi
                   </span>.
                 </p>
                 
-                <p className="text-xs sm:text-sm" style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
-                  This certificate is issued for {formData.purpose || '___________'}
+                <p className="text-xs sm:text-sm" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
+                  This certificate is issued for {formData.purpose || '___________'}.
                 </p>
                 
                 <p className="text-xs sm:text-sm">
