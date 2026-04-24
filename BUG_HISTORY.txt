@@ -109,6 +109,75 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-017
+DATE FILED: 2026-04-23
+DATE FIXED: 2026-04-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  Three related display bugs in the Evaluation History module, all stemming from
+  rich-text HTML stored in the database being rendered as raw escaped text in the UI:
+
+  1. In the "Questions & Responses" tab of the Evaluation History modal, question
+     titles (criterion.title) showed raw HTML tags (e.g. "<p><br></p><p>5 - Outstanding
+     ...</p>") instead of formatted content. The title was interpolated directly into
+     JSX as `{criterion.title}`, causing React to escape the markup.
+
+  2. In the "Evaluation Details" modal (EvaluationDetailsModal), the section title,
+     section description, and criterion title fields all stored rich-text HTML but were
+     likewise interpolated as plain JSX text, showing raw tags throughout the form view.
+
+  3. In the same "Evaluation Details" modal, a "Comment:" label and empty value was
+     rendered for every criterion regardless of whether the evaluator left a comment.
+     Criteria with no comment still showed the bold "Comment:" heading with nothing
+     beneath it, creating visual noise.
+
+DESIRED OUTCOME:
+  - All rich-text fields (question titles, section titles, section descriptions,
+    criterion titles) render as formatted HTML so paragraphs, line breaks, and inline
+    styles appear correctly.
+  - The "Comment" block is hidden entirely when criterionItem.comment is blank/null.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ No backend changes required
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Manual regression testing completed — HTML renders correctly, plain-text values unaffected
+☑ Cross-browser testing completed
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (plain-text titles, empty comments, mixed HTML/plain content)
+
+FIX EXPLANATION:
+
+  Fix 1 — QuestionsTab.tsx (criterion.title):
+  Replaced `{criterion.title}` with `<span dangerouslySetInnerHTML={{ __html: criterion.title }} />`.
+  The chevron icon alignment was also updated from `items-center` to `items-start` with
+  `shrink-0 mt-0.5` so it stays top-aligned when multi-line HTML causes the title to wrap.
+
+  Fix 2 — EvaluationDetails.tsx (section_title, section_description, criterionItem.title):
+  Applied `dangerouslySetInnerHTML` to all three rich-text fields:
+  - section_title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />` inside the heading.
+  - section_description: replaced `<p>{...}</p>` with `<p dangerouslySetInnerHTML={{ __html: ... }} />`.
+  - criterionItem.title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />`.
+
+  Fix 3 — EvaluationDetails.tsx (blank comment):
+  Wrapped the entire Comment block in `{criterionItem.comment && (...)}` so the label and
+  value only render when the comment field has a truthy value.
+
+================================================================================
+
 BUG ID: HRIS-2026-016
 DATE FILED: 2026-04-22
 DATE FIXED: 2026-04-22
