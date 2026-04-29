@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@fileforge/client": "^0.1.18",
     "@fileforge/react-print": "^0.1.150",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
@@ -82,6 +83,7 @@
     "@types/react-beautiful-dnd": "^13.1.4",
     "@types/react-datepicker": "^4.19.3",
     "@types/react-signature-canvas": "^1.0.2",
-    "@types/uuid": "^9.0.8"
+    "@types/uuid": "^9.0.8",
+    "eslint-plugin-simple-import-sort": "^13.0.0"
   }
 }
