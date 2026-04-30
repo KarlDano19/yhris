@@ -38,7 +38,7 @@ const AnimatedCheckmark = ({ delay = 0, children }: AnimatedCheckmarkProps) => {
           <path d="M2 6l3 3 5-5" />
         </svg>
       </span>
-      <span className="text-white/70">{children}</span>
+      <span className="text-gray-600">{children}</span>
     </li>
   );
 };

@@ -21,38 +21,38 @@ const LpComparisonTable = () => {
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">HOW WE COMPARE</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-gray-900 tracking-tight">
             Why settle for less when you can get it all?
           </h2>
         </ScrollFadeIn>
 
         <ScrollFadeIn delay={150} className="max-w-[900px] mx-auto">
           {/* Desktop table */}
-          <div className="hidden md:block rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: 'hsl(var(--lp-surface-2))' }}>
-                  <th className="text-left px-5 py-4 font-semibold text-white/60 text-xs uppercase tracking-widest">Feature</th>
-                  <th className="text-left px-5 py-4 font-semibold text-white/40 text-xs uppercase tracking-widest">Others</th>
+                  <th className="text-left px-5 py-4 font-semibold text-gray-500 text-xs uppercase tracking-widest">Feature</th>
+                  <th className="text-left px-5 py-4 font-semibold text-gray-400 text-xs uppercase tracking-widest">Others</th>
                   <th className="text-left px-5 py-4 font-bold text-xs uppercase tracking-widest">
-                    <span className="text-primary">YAHSHUA</span> <span className="text-white/60">HRIS</span>
+                    <span className="text-primary">YAHSHUA</span> <span className="text-gray-500">HRIS</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, i) => (
                   <tr key={i} style={{
-                    background: i % 2 === 0 ? 'hsl(var(--lp-surface))' : 'rgba(255,255,255,0.02)',
-                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                    background: i % 2 === 0 ? 'hsl(var(--lp-surface))' : 'transparent',
+                    borderTop: '1px solid rgba(0,0,0,0.06)',
                   }}>
-                    <td className="px-5 py-4 font-medium text-white/80">{row.feature}</td>
-                    <td className="px-5 py-4 text-white/35">
+                    <td className="px-5 py-4 font-medium text-gray-700">{row.feature}</td>
+                    <td className="px-5 py-4 text-gray-400">
                       <span className="inline-flex items-center gap-2">
                         <OtherIcon type={row.others.icon} />
                         {row.others.text}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-white/80">
+                    <td className="px-5 py-4 text-gray-700">
                       <span className="inline-flex items-center gap-2">
                         <Check className="w-4 h-4 text-primary shrink-0" strokeWidth={2.5} />
                         {row.yahshua}
@@ -67,16 +67,16 @@ const LpComparisonTable = () => {
           {/* Mobile card layout */}
           <div className="md:hidden space-y-3">
             {rows.map((row, i) => (
-              <div key={i} className="rounded-xl p-5" style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <p className="text-sm font-semibold text-white mb-3">{row.feature}</p>
+              <div key={i} className="rounded-xl p-5" style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(0,0,0,0.07)' }}>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{row.feature}</p>
                 <div className="flex flex-col gap-2.5">
                   <div className="flex items-start gap-2">
                     <OtherIcon type={row.others.icon} />
-                    <span className="text-xs text-white/35">{row.others.text}</span>
+                    <span className="text-xs text-gray-400">{row.others.text}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
-                    <span className="text-xs text-white/70">{row.yahshua}</span>
+                    <span className="text-xs text-gray-600">{row.yahshua}</span>
                   </div>
                 </div>
               </div>

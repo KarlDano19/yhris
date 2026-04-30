@@ -11,16 +11,13 @@ const badges = [
 const LpComplianceTrust = () => {
   return (
     <section className="py-28 md:py-36 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'rgba(255,255,255,0.015)' }} />
-
       <div className="lp-section-container relative z-10">
         <ScrollFadeIn className="text-center mb-20">
           <span className="lp-section-label justify-center mb-5">SECURITY &amp; COMPLIANCE</span>
-          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-white tracking-tight">
+          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
             Auditors and labor inspectors won&apos;t catch you off guard.
           </AnimatedHeadline>
-          <p className="text-white/45 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+          <p className="text-gray-500 text-base md:text-lg max-w-md mx-auto leading-relaxed">
             YAHSHUA HRIS is built around Philippine labor law and international data security standards, so compliance is never an afterthought.
           </p>
         </ScrollFadeIn>
@@ -31,7 +28,7 @@ const LpComplianceTrust = () => {
               <div
                 key={b.name}
                 className="opacity-80 hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-center justify-center px-3 py-2"
-                style={{ background: '#ffffff', boxShadow: '0 0 24px 6px rgba(255,255,255,0.25), 0 0 60px 10px rgba(255,255,255,0.1)' }}
+                style={{ background: '#ffffff', boxShadow: '0 2px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05)' }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

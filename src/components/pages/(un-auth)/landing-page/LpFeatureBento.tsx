@@ -37,10 +37,10 @@ const LpFeatureBento = () => {
       <div className="pt-28 md:pt-36 pb-20">
         <ScrollFadeIn className="lp-section-container text-center">
           <span className="lp-section-label justify-center mb-5">FEATURES</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
             Everything your HR team needs,<br className="hidden md:inline" /> in one place.
           </h2>
-          <p className="text-white/45 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+          <p className="text-gray-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
             From hiring to payroll sync, YAHSHUA HRIS handles every part of the employee lifecycle.
           </p>
         </ScrollFadeIn>
@@ -51,7 +51,7 @@ const LpFeatureBento = () => {
         const isEven = i % 2 === 0; // even = video left, text right | odd = text left, video right
 
         return (
-          <div key={label} className="pb-28 md:pb-40" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div key={label} className="pb-28 md:pb-40" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
             <div className="lp-section-container pt-20 md:pt-28">
               <ScrollFadeIn>
                 <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
@@ -65,17 +65,17 @@ const LpFeatureBento = () => {
                       muted
                       playsInline
                       className="w-full rounded-2xl"
-                      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                      style={{ border: '1px solid rgba(0,0,0,0.08)' }}
                     />
                   </div>
 
                   {/* Text Side */}
                   <div className="flex-1 lg:text-left">
                     <span className="lp-section-label mb-4">{label}</span>
-                    <h3 className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-white tracking-tight mb-5 leading-tight">
+                    <h3 className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-gray-900 tracking-tight mb-5 leading-tight">
                       {headline}
                     </h3>
-                    <p className="text-white/45 text-base leading-relaxed">
+                    <p className="text-gray-500 text-base leading-relaxed">
                       {description}
                     </p>
                   </div>

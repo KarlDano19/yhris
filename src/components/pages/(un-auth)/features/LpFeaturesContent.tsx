@@ -79,7 +79,7 @@ const LpFeaturesContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* ── Hero ── */}
-          <section className="relative pt-28 pb-20 lp-dot-grid lp-hero-glow overflow-hidden">
+          <section className="relative pt-28 pb-20 lp-dot-grid-light lp-hero-glow overflow-hidden">
             <div
               className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
               style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }}
@@ -87,11 +87,11 @@ const LpFeaturesContent = () => {
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">FEATURES</span>
-                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-white mb-5 tracking-tight">
+                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                   Every HR workflow your team needs.<br className="hidden md:inline" />
                   <span className="text-primary"> All in one system.</span>
                 </h1>
-                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed mb-10">
+                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
                   From the first job posting to an employee's last day, with built-in DOLE compliance and payroll sync.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -126,9 +126,9 @@ const LpFeaturesContent = () => {
                           border: '1px solid rgba(255,193,7,0.25)',
                           color: 'hsl(var(--lp-primary))',
                         } : {
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid rgba(255,255,255,0.07)',
-                          color: 'rgba(255,255,255,0.45)',
+                          background: 'rgba(0,0,0,0.04)',
+                          border: '1px solid rgba(0,0,0,0.08)',
+                          color: 'rgba(0,0,0,0.45)',
                         }}
                       >
                         <TabIcon className="w-4 h-4" strokeWidth={1.5} />
@@ -146,17 +146,17 @@ const LpFeaturesContent = () => {
                 <div className="grid lg:grid-cols-2 gap-10 xl:gap-16 items-start">
                   <div>
                     <div className="flex items-center gap-3 mb-5">
-                      <span className="text-xs font-mono text-white/20 select-none">{cat.number}</span>
-                      <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.12)' }} />
+                      <span className="text-xs font-mono text-gray-400 select-none">{cat.number}</span>
+                      <div className="w-px h-4" style={{ background: 'rgba(0,0,0,0.12)' }} />
                       <div className="flex items-center gap-2">
                         <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
                         <span className="text-xs font-semibold uppercase tracking-widest text-primary">{cat.label}</span>
                       </div>
                     </div>
-                    <h2 className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-white leading-tight mb-4 tracking-tight">
+                    <h2 className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-gray-900 leading-tight mb-4 tracking-tight">
                       {cat.headline}
                     </h2>
-                    <p className="text-white/50 leading-relaxed">{cat.description}</p>
+                    <p className="text-gray-500 leading-relaxed">{cat.description}</p>
                   </div>
 
                   <ul className="space-y-4">
@@ -171,8 +171,8 @@ const LpFeaturesContent = () => {
                           </svg>
                         </span>
                         <div>
-                          <p className="text-sm font-semibold text-white/85 mb-0.5">{f.title}</p>
-                          <p className="text-sm text-white/40 leading-relaxed">{f.body}</p>
+                          <p className="text-sm font-semibold text-gray-900 mb-0.5">{f.title}</p>
+                          <p className="text-sm text-gray-500 leading-relaxed">{f.body}</p>
                         </div>
                       </li>
                     ))}
@@ -188,7 +188,7 @@ const LpFeaturesContent = () => {
                   muted
                   playsInline
                   className="w-full rounded-2xl"
-                  style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                  style={{ border: '1px solid rgba(0,0,0,0.08)' }}
                 />
 
               </div>
@@ -201,7 +201,7 @@ const LpFeaturesContent = () => {
               <ScrollFadeIn>
                 <div
                   className="relative rounded-2xl text-center px-8 py-16 md:py-20 overflow-hidden"
-                  style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(255,255,255,0.08)' }}
+                  style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(0,0,0,0.08)' }}
                 >
                   <div className="absolute inset-0 pointer-events-none"
                     style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255,193,7,0.07), transparent 70%)' }} />
@@ -209,10 +209,10 @@ const LpFeaturesContent = () => {
                     style={{ background: 'linear-gradient(to right, transparent, rgba(255,193,7,0.4), transparent)' }} />
 
                   <div className="relative z-10">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-3 tracking-tight">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
                       Ready to see it in action?
                     </h2>
-                    <p className="text-white/45 text-base max-w-sm mx-auto mb-10">
+                    <p className="text-gray-500 text-base max-w-sm mx-auto mb-10">
                       Book a free demo or start with the free plan. No credit card required.
                     </p>
                     <div className="flex flex-wrap gap-3 justify-center">

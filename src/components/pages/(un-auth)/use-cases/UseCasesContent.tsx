@@ -46,7 +46,7 @@ const UseCasesContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
             <div
               className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
               style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }}
@@ -54,11 +54,11 @@ const UseCasesContent = () => {
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">USE CASES</span>
-                <h1 className="text-4xl md:text-5xl font-bold leading-[1.1] text-white mb-5 tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                   See YAHSHUA HRIS in action.<br className="hidden md:inline" />
                   <span className="text-primary"> Real workflows. Real results.</span>
                 </h1>
-                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
+                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
                   Explore how YAHSHUA HRIS handles your most critical HR scenarios, from onboarding to performance management.
                 </p>
               </ScrollFadeIn>
@@ -82,10 +82,10 @@ const UseCasesContent = () => {
                             >
                               <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
                             </div>
-                            <h2 className="text-lg font-bold text-white">{uc.label}</h2>
+                            <h2 className="text-lg font-bold text-gray-900">{uc.label}</h2>
                           </div>
 
-                          <p className="text-sm text-white/50 leading-relaxed mb-6">{uc.description}</p>
+                          <p className="text-sm text-gray-500 leading-relaxed mb-6">{uc.description}</p>
 
                           <ul className="space-y-3 mb-8 flex-1">
                             {uc.benefits.map((b) => (
@@ -98,7 +98,7 @@ const UseCasesContent = () => {
                                     <path d="M2 6l3 3 5-5" />
                                   </svg>
                                 </span>
-                                <span className="text-white/60">{b}</span>
+                                <span className="text-gray-600">{b}</span>
                               </li>
                             ))}
                           </ul>
@@ -119,10 +119,10 @@ const UseCasesContent = () => {
           <section className="py-20 md:py-28" style={{ background: "hsl(var(--lp-surface))" }}>
             <div className="lp-section-container text-center">
               <ScrollFadeIn>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 tracking-tight">
                   Ready to transform your HR processes?
                 </h2>
-                <p className="text-white/50 text-base mb-8 max-w-sm mx-auto">
+                <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
                   Start free or book a demo. No credit card required.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">

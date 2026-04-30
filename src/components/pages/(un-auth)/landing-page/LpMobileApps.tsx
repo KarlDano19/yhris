@@ -30,15 +30,15 @@ const apps = [
 
 const LpMobileApps = () => {
   return (
-    <section className="py-28 md:py-36" style={{ background: 'hsl(var(--lp-surface))', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+    <section className="py-28 md:py-36" style={{ background: 'hsl(var(--lp-surface))', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
       <div className="lp-section-container">
 
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">MOBILE-FIRST APPS</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
             Purpose-built apps for every role.
           </h2>
-          <p className="text-white/45 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+          <p className="text-gray-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
             Your workforce isn't desk-bound. These apps aren't either.
           </p>
         </ScrollFadeIn>
@@ -47,8 +47,8 @@ const LpMobileApps = () => {
           {apps.map((app, i) => (
             <ScrollFadeIn key={app.name} delay={i * 100}>
               <div className="h-full rounded-2xl p-7 flex flex-col gap-5 transition-all duration-300 cursor-default"
-                style={{ background: 'hsl(var(--lp-surface-2))', border: '1px solid rgba(255,255,255,0.07)' }}
-                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,193,7,0.2), 0 16px 48px rgba(0,0,0,0.4)')}
+                style={{ background: 'hsl(var(--lp-surface-2))', border: '1px solid rgba(0,0,0,0.07)' }}
+                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,193,7,0.2), 0 16px 48px rgba(0,0,0,0.08)')}
                 onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}>
 
                 {/* Icon + tag */}
@@ -65,14 +65,14 @@ const LpMobileApps = () => {
 
                 {/* Text */}
                 <div>
-                  <h3 className="text-base font-bold text-white mb-2">{app.name}</h3>
-                  <p className="text-white/45 text-sm leading-relaxed">{app.description}</p>
+                  <h3 className="text-base font-bold text-gray-900 mb-2">{app.name}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{app.description}</p>
                 </div>
 
                 {/* Highlights */}
                 <div className="flex flex-col gap-2 mt-auto">
                   {app.highlights.map((h) => (
-                    <div key={h} className="flex items-center gap-2 text-[12px] text-white/50">
+                    <div key={h} className="flex items-center gap-2 text-[12px] text-gray-500">
                       <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
                         style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.2)' }}>
                         <svg width="8" height="8" viewBox="0 0 8 8" fill="none">

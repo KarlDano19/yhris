@@ -16,9 +16,9 @@ const doubled = [...testimonials, ...testimonials];
 const TestimonialCard = ({ t }: { t: typeof testimonials[0] }) => (
   <div
     className="min-w-[300px] max-w-[340px] shrink-0 rounded-xl p-7"
-    style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(255,255,255,0.07)' }}
+    style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)' }}
   >
-    <p className="text-sm text-white/50 leading-relaxed mb-6">
+    <p className="text-sm text-gray-500 leading-relaxed mb-6">
       &ldquo;{t.quote}&rdquo;
     </p>
     <div className="flex items-center gap-3">
@@ -27,8 +27,8 @@ const TestimonialCard = ({ t }: { t: typeof testimonials[0] }) => (
         {t.author.charAt(0)}
       </div>
       <div>
-        <p className="text-sm font-semibold text-white">{t.author}</p>
-        <p className="text-xs text-white/35">{t.role}</p>
+        <p className="text-sm font-semibold text-gray-900">{t.author}</p>
+        <p className="text-xs text-gray-400">{t.role}</p>
       </div>
     </div>
   </div>
@@ -40,7 +40,7 @@ const LpTestimonials = () => {
       <ScrollFadeIn className="lp-section-container mb-12">
         <div className="text-center">
           <span className="lp-section-label justify-center mb-5">WHAT PEOPLE SAY</span>
-          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-white tracking-tight">
+          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-gray-900 tracking-tight">
             HR teams across the Philippines switched. They haven&apos;t looked back since.
           </AnimatedHeadline>
         </div>

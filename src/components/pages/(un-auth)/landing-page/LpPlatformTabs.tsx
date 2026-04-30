@@ -138,10 +138,10 @@ const LpPlatformTabs = () => {
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">THE FEATURES</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
             Every HR workflow your team actually uses,<br className="hidden lg:inline" /> in one place.
           </h2>
-          <p className="text-white/45 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
             No add-ons. No integrations to maintain. No per-feature upgrades.
           </p>
         </ScrollFadeIn>
@@ -162,9 +162,9 @@ const LpPlatformTabs = () => {
                       border: '1px solid rgba(255,193,7,0.25)',
                       color: 'hsl(var(--lp-primary))',
                     } : {
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                      color: 'rgba(255,255,255,0.45)',
+                      background: 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      color: 'rgba(0,0,0,0.45)',
                     }}
                   >
                     <Icon className="w-4 h-4" strokeWidth={1.5} />
@@ -182,8 +182,8 @@ const LpPlatformTabs = () => {
 
             {/* Left copy */}
             <div>
-              <h3 className="text-xl md:text-2xl font-bold mb-4 leading-tight text-white">{tab.headline}</h3>
-              <p className="text-white/45 leading-relaxed mb-8 text-sm md:text-base">{tab.body}</p>
+              <h3 className="text-xl md:text-2xl font-bold mb-4 leading-tight text-gray-900">{tab.headline}</h3>
+              <p className="text-gray-500 leading-relaxed mb-8 text-sm md:text-base">{tab.body}</p>
               <ul className="space-y-3.5">
                 {tab.features.map((f, i) => (
                   <AnimatedCheckmark key={`${fadeKey}-${f}`} delay={i * 80}>
@@ -194,12 +194,12 @@ const LpPlatformTabs = () => {
             </div>
 
             {/* Right preview */}
-            <div className="rounded-xl overflow-hidden" style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 60px rgba(0,0,0,0.4)' }}>
+            <div className="rounded-xl overflow-hidden" style={{ background: 'hsl(var(--lp-surface-2))', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
               {/* Stats bar */}
-              <div className="flex gap-2 p-4 md:p-5 overflow-x-auto" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+              <div className="flex gap-2 p-4 md:p-5 overflow-x-auto" style={{ borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'rgba(0,0,0,0.02)' }}>
                 {tab.preview.stats.map((s) => (
-                  <span key={s} className="text-[11px] font-semibold text-white/60 rounded-md px-3 py-1.5 whitespace-nowrap"
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span key={s} className="text-[11px] font-semibold text-gray-600 rounded-md px-3 py-1.5 whitespace-nowrap"
+                    style={{ background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }}>
                     {s}
                   </span>
                 ))}
@@ -208,10 +208,10 @@ const LpPlatformTabs = () => {
               <div>
                 {tab.preview.rows.map((r, i) => (
                   <div key={r.name} className="flex items-center justify-between px-5 py-4 md:py-5"
-                    style={{ borderBottom: i < tab.preview.rows.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                    style={{ borderBottom: i < tab.preview.rows.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
                     <div className="min-w-0 mr-3">
-                      <p className="text-sm font-semibold text-white truncate">{r.name}</p>
-                      <p className="text-xs text-white/40 truncate mt-0.5">{r.position}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{r.name}</p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{r.position}</p>
                     </div>
                     <span className={`text-[11px] font-semibold px-3 py-1 rounded-full text-white shrink-0 ${r.statusColor}`}>
                       {r.status}
