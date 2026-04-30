@@ -109,6 +109,90 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-018
+DATE FILED: 2026-04-30
+DATE FIXED: 2026-04-30
+REPORTER: Internal - Internal - Dev
+
+ISSUE DESCRIPTION:
+  On the Employee 201 Records detail page, the back button (← Manage | Employee
+  201 Records | <Name>) was completely unresponsive — no click reaction, no
+  navigation — but ONLY when the active tab was "Personal Information" and the
+  employee had one or more missing required Government ID fields (TIN, SSS,
+  PAG-IBIG, PhilHealth). Switching to another tab (e.g., Employment Details)
+  where all required fields had values made the back button work normally.
+
+  Root cause: PersonalInfoForm calls `trigger()` on mount to surface required-
+  field validation errors in view mode. This caused `hasErrors` to update, which
+  fired the `onErrorsChange` callback via a `useEffect`. Because `onErrorsChange`
+  was an inline function prop (new reference on every render) AND was listed in
+  the effect's dependency array, the effect re-ran every render cycle. Each run
+  called `setSections(...)` in Content.tsx, which created a new object reference
+  and scheduled another render — creating an infinite re-render loop. React's
+  main thread was saturated, making the entire page unresponsive and the back
+  button unclickable.
+
+  EmploymentDetailsForm had the same `onErrorsChange` pattern but correctly
+  omitted it from the `useEffect` deps (`[hasErrors]` only), so it did not
+  exhibit the loop.
+
+DESIRED OUTCOME:
+  The back button should always be clickable in view mode regardless of whether
+  required fields have values. Clicking it should navigate to
+  /manage/employee-201-records immediately (no leave-confirmation modal) when
+  the user has not entered Edit mode and has not made any changes.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/PersonalInfoForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Components tested (rendering, props, state changes) — manual verification
+☑ Form validation tested (React Hook Form rules, error states)
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified back button navigates correctly on Personal tab with missing fields
+  - Verified back button still works on Employment Details tab
+  - Verified Edit mode still marks section dirty on user input
+  - Verified Leave Confirmation modal still appears when user edits and tries to leave
+☑ Edge cases tested:
+  - Employee with all fields filled: back button works ✓
+  - Employee with missing Government IDs: back button works ✓
+  - User enters Edit mode, makes changes, clicks back: modal appears ✓
+  - User enters Edit mode, no changes, clicks back: modal appears ✓
+☐ Cypress/Playwright e2e tests updated (if applicable)
+
+FIX EXPLANATION:
+  Two changes were made:
+
+  1. PersonalInfoForm.tsx — Removed `onErrorsChange` from `useEffect` deps:
+     The effect that calls `onErrorsChange(hasErrors)` previously had
+     `[hasErrors, onErrorsChange]` as its dependency array. Since `onErrorsChange`
+     is an inline function in Content.tsx it gets a new reference on every render,
+     causing the effect to re-run on every render → infinite loop. Changing the
+     deps to `[hasErrors]` (matching EmploymentDetailsForm's correct pattern)
+     ensures the callback only fires when the actual error state changes.
+
+  2. Content.tsx — Added edit-mode guard to `onPatchChange` callbacks:
+     Both the Personal and Employment `onPatchChange` inline handlers now return
+     early if the respective `editMode` flag is false. This is a defensive guard
+     ensuring that any unexpected RHF internal event (e.g., from `trigger()` or
+     subscription re-creation) cannot set `dirty = true` when the user has not
+     consciously entered Edit mode, which would have caused the LeaveConfirmModal
+     to appear unnecessarily on back-button click.
+
+================================================================================
+
 BUG ID: HRIS-2026-017
 DATE FILED: 2026-04-23
 DATE FIXED: 2026-04-23
