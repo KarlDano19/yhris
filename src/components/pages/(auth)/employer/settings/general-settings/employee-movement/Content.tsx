@@ -51,7 +51,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [usersFetchEnabled, setUsersFetchEnabled] = useState(false);
   const approverDropdownRef = useRef<HTMLDivElement>(null);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
   const [approvalItems, setApprovalItems] = useState<any>([]);
   const [isDeleteApprovalModalOpen, setIsDeleteApprovalModalOpen] = useState<T_ModalData | null>(null);
   const {
@@ -262,25 +262,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <div className='w-full h-full'>
                     <div className='px-4 py-2'>
                       <label htmlFor='stage_name' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Create New Stage
+                        Create New Stage <span className='text-red-500'>*</span>
                       </label>
                       <input
-                        {...register('stage_name')}
+                        {...register('stage_name', { required: 'Stage name is required.' })}
                         id='stage_name'
                         type='text'
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       />
+                      {errors.stage_name && (
+                        <p className='mt-1 text-sm text-red-500'>{errors.stage_name.message as string}</p>
+                      )}
                     </div>
                     <div className='px-4 py-2'>
                       <label htmlFor='sequence' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Stage Order
+                        Stage Order <span className='text-red-500'>*</span>
                       </label>
                       <input
-                        {...register('sequence')}
+                        {...register('sequence', { required: 'Stage order is required.' })}
                         id='sequence'
                         type='number'
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       />
+                      {errors.sequence && (
+                        <p className='mt-1 text-sm text-red-500'>{errors.sequence.message as string}</p>
+                      )}
                     </div>
                     <label htmlFor='approvers' className='block text-sm font-medium leading-6 text-gray-900 px-4 py-2'>
                       Approvers
