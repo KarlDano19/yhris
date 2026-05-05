@@ -176,16 +176,17 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataApprovalItems && Array.isArray(dataApprovalItems)) {
-      // Add Array check
       const formattedItems = dataApprovalItems.map((item: any) => ({
         ...item,
         created_at: Intl.DateTimeFormat('en-US').format(new Date(item.created_at)),
       }));
       setApprovalItems(formattedItems);
-      
-      // Auto-fill the sequence field with the next number
+
       const nextSequence = getNextSequenceNumber();
       setValue('sequence', nextSequence);
+
+      const hasApprovers = dataApprovalItems.some((item: any) => item.approvers?.length > 0);
+      if (hasApprovers) setUsersFetchEnabled(true);
     }
   }, [dataApprovalItems, setValue]);
 
