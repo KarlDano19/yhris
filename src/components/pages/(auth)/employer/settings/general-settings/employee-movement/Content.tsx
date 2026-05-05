@@ -2,9 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
-import { getCookie } from 'cookies-next';
-
 import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
@@ -17,8 +14,7 @@ import BackButton from '@/components/BackButton';
 import useGetApprovalItems from './hooks/useGetApprovalItems';
 import useAddApproval from './hooks/useAddApproval';
 import useDeleteApproval from './hooks/useDeleteApproval';
-import useGetApprovalDetails from './hooks/useGetApprovalDetails';
-import useEditApproval from './hooks/useEditApproval';
+import useGetUsers from '@/components/hooks/useGetUsers';
 
 import classNames from '@/helpers/classNames';
 
@@ -49,9 +45,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [inputApprover, setInputApprover] = useState('');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [usersFetchEnabled, setUsersFetchEnabled] = useState(false);
   const approverDropdownRef = useRef<HTMLDivElement>(null);
-  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const [approvalItems, setApprovalItems] = useState<any>([]);
   const [isDeleteApprovalModalOpen, setIsDeleteApprovalModalOpen] = useState<T_ModalData | null>(null);
   const {
@@ -61,21 +56,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetApprovalItems();
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
   const { mutate: deleteApproval, isLoading: isDeleteApprovalLoading } = useDeleteApproval();
-  const { data: dataUsers = [] } = useQuery(
-    ['usersCache'],
-    async () => {
-      const token = getCookie('token');
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/user-accounts/?view_type=select`,
-        { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } }
-      );
-      if (!res.ok) throw new Error('Failed to fetch users');
-      return res.json();
-    },
-    { enabled: usersFetchEnabled, refetchOnWindowFocus: false, keepPreviousData: true }
-  );
-  const { data: dataApprovalDetails, isLoading: isGetApprovalDetailsLoading } = useGetApprovalDetails(isDeleteApprovalModalOpen?.id || null);
-  const { mutate: editApproval, isLoading: isEditApprovalLoading } = useEditApproval();
+  const { data: dataUsers = [] } = useGetUsers();
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputApprover(value);
@@ -90,7 +71,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   };
 
   const handleApproverFocus = () => {
-    setUsersFetchEnabled(true);
     if (!inputApprover.trim()) {
       setFilteredUsers(dataUsers);
     }
@@ -185,8 +165,6 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const nextSequence = getNextSequenceNumber();
       setValue('sequence', nextSequence);
 
-      const hasApprovers = dataApprovalItems.some((item: any) => item.approvers?.length > 0);
-      if (hasApprovers) setUsersFetchEnabled(true);
     }
   }, [dataApprovalItems, setValue]);
 
@@ -226,10 +204,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                   <div className='px-4 py-2'>
                     {approvalItems.map((item: any) => {
-                      const approverNames = (item.approvers || []).map((id: number) => {
-                        const user = (dataUsers as User[]).find((u) => u.id === id);
-                        return user ? user.name : null;
-                      }).filter(Boolean);
+                      const approverNames = (item.approver_details || []).map((a: any) => a.name).filter(Boolean);
 
                       return (
                         <div key={item.id} className='flex justify-between items-start mb-2 border-b border-gray-300 pb-3'>
@@ -292,9 +267,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     <label htmlFor='approvers' className='block text-sm font-medium leading-6 text-gray-900 px-4 py-2'>
                       Approvers
                     </label>
-                    <div className='flex flex-row px-4 space-x-2 pb-4'>
-                      <div className='relative w-[80%]' ref={approverDropdownRef}>
-                        <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                    <div className='flex flex-row items-stretch px-4 space-x-2 pb-4'>
+                      <div className='relative flex-1' ref={approverDropdownRef}>
+                        <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full h-full min-h-[38px] text-sm'>
                           {approverTags.map((tag) => (
                             <div
                               key={tag.id}
@@ -334,7 +309,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </div>
                       <button
                         type='button'
-                        className='bg-white border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-100'
+                        className='bg-white border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-100 whitespace-nowrap flex-shrink-0'
                         onClick={() => {
                           setApproverTags([]);
                           setInputApprover('');
@@ -370,6 +345,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </div>
         </div>
       </div>
+
       {isDeleteApprovalModalOpen && (
         <DeleteModal
           isOpen={isDeleteApprovalModalOpen}
@@ -390,6 +366,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isLoading={isDeleteApprovalLoading}
         />
       )}
+
     </>
   );
 }
