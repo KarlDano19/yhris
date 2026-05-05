@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrashIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { Tooltip } from 'react-tooltip';
 import ClipIcon from '@/svg/ClipIcon';
 
 interface SeparationLetterAttachmentSectionProps {
@@ -50,7 +51,9 @@ export default function SeparationLetterAttachmentSection({
                 type="button"
                 onClick={() => onViewAttachment(pdfAttachment)}
                 className="p-1 text-savoy-blue hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors ml-2"
-                title="View attachment"
+                data-tooltip-id='view-attachment-tooltip'
+                data-tooltip-content='View attachment'
+                data-tooltip-place='bottom'
               >
                 <ArrowTopRightOnSquareIcon className="h-5 w-5" />
               </button>
@@ -100,6 +103,7 @@ export default function SeparationLetterAttachmentSection({
           </div>
         </div>
       )}
+    <Tooltip id='view-attachment-tooltip' />
     </div>
   );
 }

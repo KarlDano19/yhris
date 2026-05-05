@@ -95,6 +95,7 @@ export const handleEmailSending = (
     // Letters are handled by handleLetterSending function
     throw new Error('Letters should be handled by handleLetterSending function');
   } else if (emailType === 'sign documents') {
+    if (!separationItemCopy.signDocuments) separationItemCopy.signDocuments = {};
     separationItemCopy.signDocuments.template = data.template || '';
     separationItemCopy.signDocuments.subject = data.subject;
     separationItemCopy.signDocuments.to = data.email;
@@ -114,6 +115,7 @@ export const handleEmailSending = (
     }
     separationItemCopy.isDocumentsSent = true;
   } else if (emailType === 'last pay') {
+    if (!separationItemCopy.lastPay) separationItemCopy.lastPay = {};
     separationItemCopy.lastPay.template = data.template || '';
     separationItemCopy.lastPay.subject = data.subject;
     separationItemCopy.lastPay.to = data.email;
@@ -132,6 +134,7 @@ export const handleEmailSending = (
     }
     separationItemCopy.isLastPayReleased = true;
   } else if (emailType === 'quit claim') {
+    if (!separationItemCopy.quitClaim) separationItemCopy.quitClaim = {};
     separationItemCopy.quitClaim.template = data.template || '';
     separationItemCopy.quitClaim.subject = data.subject;
     separationItemCopy.quitClaim.to = data.email;
@@ -192,6 +195,11 @@ export const handleLetterSending = (
 ): T_SeparationEmail => {
   const itemIndex = separationItems.findIndex((item: any) => item.id === selectedSeparationId);
   const separationItemCopy = JSON.parse(JSON.stringify(separationItems[itemIndex])); // Deep copy to ensure immutability
+
+  // Initialize separationLetter if not present (API response may not include it)
+  if (!separationItemCopy.separationLetter) {
+    separationItemCopy.separationLetter = {};
+  }
 
   // Update letter-specific fields
   separationItemCopy.separationLetter.subject = data.subject;
