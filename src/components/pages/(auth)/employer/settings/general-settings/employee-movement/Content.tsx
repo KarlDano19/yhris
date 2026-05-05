@@ -320,25 +320,20 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </div>
                   </div>
                 </div>
-                <div className='flex pl-4 space-x-4 pb-2'>
-                  <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
-                    <button
-                      type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-gray-300 px-10 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      // onClick={() => setIsOpen(false)}
-                    >
-                      Cancel
-                    </button>
-                  </span>
-                  <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
-                    <SmartButton
-                      id="create-movement-settings-btn"
-                      type='submit'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                    >
-                      Save
-                    </SmartButton>
-                  </span>
+                <div className='flex flex-wrap gap-3 px-4 pb-2'>
+                  <button
+                    type='button'
+                    className='flex-1 sm:flex-none inline-flex justify-center drop-shadow-xl rounded-md border border-gray-300 px-10 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                  >
+                    Cancel
+                  </button>
+                  <SmartButton
+                    id="create-movement-settings-btn"
+                    type='submit'
+                    className='flex-1 sm:flex-none inline-flex justify-center drop-shadow-xl rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                  >
+                    Save
+                  </SmartButton>
                 </div>
               </form>
             </div>
