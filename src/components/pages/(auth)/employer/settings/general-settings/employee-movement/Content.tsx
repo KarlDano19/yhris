@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { useQuery } from '@tanstack/react-query';
+import { getCookie } from 'cookies-next';
 
 import { useRouter } from 'next/navigation';
 
@@ -11,7 +14,6 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal from '@/components/DeleteModal';
 import BackButton from '@/components/BackButton';
-import useGetUsers from '@/components/hooks/useGetUsers';
 import useGetApprovalItems from './hooks/useGetApprovalItems';
 import useAddApproval from './hooks/useAddApproval';
 import useDeleteApproval from './hooks/useDeleteApproval';
@@ -20,7 +22,8 @@ import useEditApproval from './hooks/useEditApproval';
 
 import classNames from '@/helpers/classNames';
 
-import { XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 interface User {
   id: number;
@@ -46,6 +49,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [inputApprover, setInputApprover] = useState('');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [usersFetchEnabled, setUsersFetchEnabled] = useState(false);
+  const approverDropdownRef = useRef<HTMLDivElement>(null);
   const { register, handleSubmit, reset, control, setValue } = useForm();
   const [approvalItems, setApprovalItems] = useState<any>([]);
   const [isDeleteApprovalModalOpen, setIsDeleteApprovalModalOpen] = useState<T_ModalData | null>(null);
@@ -56,7 +61,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetApprovalItems();
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
   const { mutate: deleteApproval, isLoading: isDeleteApprovalLoading } = useDeleteApproval();
-  const { data: dataUsers = [], isLoading: isGetUsersLoading } = useGetUsers();
+  const { data: dataUsers = [] } = useQuery(
+    ['usersCache'],
+    async () => {
+      const token = getCookie('token');
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user-accounts/?view_type=select`,
+        { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } }
+      );
+      if (!res.ok) throw new Error('Failed to fetch users');
+      return res.json();
+    },
+    { enabled: usersFetchEnabled, refetchOnWindowFocus: false, keepPreviousData: true }
+  );
   const { data: dataApprovalDetails, isLoading: isGetApprovalDetailsLoading } = useGetApprovalDetails(isDeleteApprovalModalOpen?.id || null);
   const { mutate: editApproval, isLoading: isEditApprovalLoading } = useEditApproval();
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,8 +85,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const filtered = dataUsers.filter((user: User) => user.name.toLowerCase().includes(value.toLowerCase()));
       setFilteredUsers(filtered);
     } else {
-      setFilteredUsers([]);
+      setFilteredUsers(dataUsers);
     }
+  };
+
+  const handleApproverFocus = () => {
+    setUsersFetchEnabled(true);
+    if (!inputApprover.trim()) {
+      setFilteredUsers(dataUsers);
+    }
+    setShowSuggestions(true);
   };
 
   const handleSelectUser = (user: User) => {
@@ -131,6 +156,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchApprovalItems();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (approverDropdownRef.current && !approverDropdownRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Set initial sequence number when component mounts
   useEffect(() => {
     if (approvalItems.length > 0) {
@@ -153,6 +188,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       setValue('sequence', nextSequence);
     }
   }, [dataApprovalItems, setValue]);
+
+  useEffect(() => {
+    if (showSuggestions && !inputApprover.trim()) {
+      setFilteredUsers(dataUsers);
+    }
+  }, [dataUsers]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
@@ -183,19 +224,34 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </div>
                   </div>
                   <div className='px-4 py-2'>
-                    {approvalItems.map((item: any) => (
-                      <div key={item.id} className='flex justify-between mb-2 border-b border-gray-300 pb-2'>
-                        <div className='flex gap-2 items-center justify-between w-full'>
-                          <h1 className='text-sm font-semibold text-gray-500 pl-4'>{item.stage_name}</h1>
-                          <hr className='border-b-[0px] border-[#2C3F58] border-1 mt-2' />
+                    {approvalItems.map((item: any) => {
+                      const approverNames = (item.approvers || []).map((id: number) => {
+                        const user = (dataUsers as User[]).find((u) => u.id === id);
+                        return user ? user.name : null;
+                      }).filter(Boolean);
+
+                      return (
+                        <div key={item.id} className='flex justify-between items-start mb-2 border-b border-gray-300 pb-3'>
+                          <div className='flex flex-col gap-1 pl-4'>
+                            <h1 className='text-sm font-semibold text-gray-700'>{item.stage_name}</h1>
+                            {approverNames.length > 0 ? (
+                              <div className='flex flex-wrap gap-1'>
+                                {approverNames.map((name: string) => (
+                                  <span key={name} className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700'>
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className='text-xs text-gray-400 italic'>No approvers assigned</span>
+                            )}
+                          </div>
+                          <button type='button' onClick={() => setIsDeleteApprovalModalOpen({ id: item.id, open: true })} className='flex-shrink-0 mt-0.5'>
+                            <DeleteIcon />
+                          </button>
                         </div>
-                        <div className='flex gap-2 justify-end w-full'>
-                        <button type='button' onClick={() => setIsDeleteApprovalModalOpen({ id: item.id, open: true })}>
-                          <TrashIcon className='w-5 h-5 text-red-500' />
-                        </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -230,7 +286,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       Approvers
                     </label>
                     <div className='flex flex-row px-4 space-x-2 pb-4'>
-                      <div className='relative w-[80%]'>
+                      <div className='relative w-[80%]' ref={approverDropdownRef}>
                         <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
                           {approverTags.map((tag) => (
                             <div
@@ -247,7 +303,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             type='text'
                             value={inputApprover}
                             onChange={handleInputChange}
-                            onFocus={() => setShowSuggestions(true)}
+                            onFocus={handleApproverFocus}
                             className='focus:none outline-none px-2 py-1 grow rounded-md'
                             placeholder='Type to search users'
                           />
