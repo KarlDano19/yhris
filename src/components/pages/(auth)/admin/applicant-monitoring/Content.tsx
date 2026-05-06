@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
 import useApplicantItems from './hooks/useGetApplicantItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -19,6 +20,8 @@ const Content = () => {
     search: '',
   });
   const [isApplicantGoalModalOpen, setIsApplicantGoalModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(itemsFilter);
 
   useEffect(() => {
@@ -27,8 +30,13 @@ const Content = () => {
         item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
       });
       setClientItems(dataApplicant);
+      setCurrentPage(1);
     }
   }, [dataApplicant]);
+
+  const totalRecords = clientItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isGetApplicantLoading) {
@@ -42,8 +50,8 @@ const Content = () => {
         </tr>
       );
     }
-    if (clientItems && clientItems.length > 0) {
-      return clientItems.map((item: any) => (
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -137,7 +145,13 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {clientItems.length}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>

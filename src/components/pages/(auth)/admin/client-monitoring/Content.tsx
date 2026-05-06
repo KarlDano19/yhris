@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
 import ClientGoalModal from './modal/ClientGoalModal';
 import EditClientSourceModal from './modal/EditClientSourceModal';
 import CreateClientModal from './modal/CreateClientModal';
@@ -37,6 +38,8 @@ const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
   const [search, setSearch] = useState('');
   const [clientSourceFilter, setClientSourceFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isClientGoalModalOpen, setIsClientGoalModalOpen] = useState(false);
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string } | null>(null);
@@ -50,8 +53,13 @@ const Content = () => {
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
       setClientItems(dataClient);
+      setCurrentPage(1);
     }
   }, [dataClient]);
+
+  const totalRecords = clientItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isGetClientLoading) {
@@ -65,12 +73,12 @@ const Content = () => {
         </tr>
       );
     }
-    if (clientItems && clientItems.length > 0) {
-      return clientItems.map((item: any, index: number) => {
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any, index: number) => {
         const sub = item.subscription;
         return (
           <tr key={item.id}>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{index + 1}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{(currentPage - 1) * pageSize + index + 1}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-800 font-medium'>{item.name}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.partner || 'Direct Client'}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{sub?.plan_name || '—'}</td>
@@ -197,7 +205,13 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {clientItems.length}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>
