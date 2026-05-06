@@ -47,7 +47,8 @@ html.dark .bg-white,
 html.dark .bg-gray-50,
 html.dark .bg-gray-100,
 html.dark .bg-gray-200,
-html.dark .bg-\[\\#EBF3FF\] {
+html.dark .bg-\[\#EBF3FF\],
+html.dark .bg-blue-50 {
   background-color: var(--subtle-bg) !important;
   color: var(--body-text) !important;
   border-color: #374151 !important;

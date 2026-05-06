@@ -356,11 +356,11 @@ export default function EmailProfileModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
                   {/* Tab Bar */}
-                  <div className='flex items-center bg-blue-50 rounded-lg p-3 mb-4 gap-2'>
+                  <div className='flex items-center bg-savoy-blue rounded-t-lg p-3 mb-4 gap-2'>
                     {/* Main Email Tab */}
                     <button
                       className={`px-4 py-2 rounded font-semibold ${
-                        activeTab === 0 ? 'bg-white text-blue-700 shadow' : 'text-blue-400'
+                        activeTab === 0 ? 'bg-white/20 text-white font-bold' : 'text-white/60 font-semibold'
                       }`}
                       onClick={() => setActiveTab(0)}
                     >
@@ -371,7 +371,7 @@ export default function EmailProfileModal({
                       <div key={idx + 1} className='flex items-center'>
                         <button
                           className={`px-4 py-2 rounded font-semibold ${
-                            activeTab === idx + 1 ? 'bg-white text-blue-700 shadow' : 'text-blue-400'
+                            activeTab === idx + 1 ? 'bg-white/20 text-white font-bold' : 'text-white/60 font-semibold'
                           }`}
                           onClick={() => setActiveTab(idx + 1)}
                         >
@@ -381,7 +381,7 @@ export default function EmailProfileModal({
                           </span>
                         </button>
                         <button
-                          className='ml-1 text-gray-400 hover:text-red-500 text-lg'
+                          className='ml-1 text-white hover:text-red-300 hover:bg-white/10 rounded px-1 text-lg transition-colors'
                           onClick={() => handleRemoveFollowUp(idx + 1)}
                           title='Remove follow up'
                         >
@@ -392,7 +392,7 @@ export default function EmailProfileModal({
                     {/* Add Follow Up */}
                     {followUps.length - 1 < MAX_FOLLOW_UPS && !addingFollowUp && (
                       <button
-                        className='ml-auto text-blue-700 hover:underline text-sm font-semibold'
+                        className='ml-auto text-white underline hover:bg-white/10 rounded px-2 py-0.5 -mx-2 text-sm font-semibold transition-colors'
                         onClick={handleAddFollowUp}
                       >
                         Add Follow Up
@@ -420,7 +420,7 @@ export default function EmailProfileModal({
                           </button>
                         </div>
                         <button
-                          className='text-gray-400 hover:text-red-500 text-lg ml-2'
+                          className='text-gray-400 hover:text-red-500 hover:bg-red-50 rounded px-1 text-lg ml-2 transition-colors'
                           onClick={() => setAddingFollowUp(false)}
                         >
                           ×
