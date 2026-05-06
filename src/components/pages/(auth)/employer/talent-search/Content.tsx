@@ -445,7 +445,7 @@ const Content = () => {
       removeFavoriteMutation.mutate(applicantId, {
         onSuccess: () => {
           refetchFavorites();
-          toast.custom((t) => <CustomToast message='Removed from favorites.' type='error' />, { duration: 4000 });
+          toast.custom((t) => <CustomToast message='Removed from favorites.' type='success' />, { duration: 4000 });
         },
         onError: (error: any) => {
           toast.custom(
@@ -942,13 +942,13 @@ const Content = () => {
                                 selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
                               }`}
                             >
-                              {/* Bookmark Icon - Top Left Corner */}
+                              {/* Bookmark Icon - Top Right Corner */}
                               <div>
                                 <button
                                   onClick={() => handleToggleBookmark(applicant.id)}
-                                  className='absolute top-3 left-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
+                                  className='absolute top-3 right-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
                                   data-tooltip-id={`bookmark-tooltip-${applicant.id}`}
-                                  data-tooltip-place='right'
+                                  data-tooltip-place='left'
                                 >
                                   {isApplicantFavorited(applicant.id) ? (
                                     <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />

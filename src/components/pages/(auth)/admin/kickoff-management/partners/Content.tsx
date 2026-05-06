@@ -123,7 +123,7 @@ const Content = () => {
         <div className="px-2 md:px-8 lg:px-4 mt-6">
           <h2 className="text-xl font-bold text-indigo-dye">Partners</h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
-            <div className="flex-none lg:w-1/3">
+            <div className="flex-none w-full lg:w-1/3">
               <div className="relative flex items-center">
                 <input
                   type="text"
