@@ -14,14 +14,17 @@ import Pagination from '@/components/Pagination';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import BackButton from '@/components/BackButton';
+import DeleteModal from '@/components/DeleteModal';
 import useGetPersonelMovementList from './hooks/useGetPersonelMovementList';
+import useDeletePersonnelMovement from './hooks/useDeletePersonnelMovement';
 import CreatePersonelMovementModal from './modals/CreatePersonelMovementModal';
 import EditPersonelMovementModal from './modals/EditPersonelMovementModal';
 import PrintModal from './modals/PrintModal';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import PrintIcon from '@/svg/PrintIcon';
-import EditIcon from '@/svg/EditIcon';
+import EyePassword from '@/svg/EyePassword';
+import DeleteIcon from '@/svg/DeleteIcon';
 import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 
@@ -45,6 +48,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isOpenCreatePersonelMovementModal, setIsOpenCreatePersonelMovementModal] = useState(false);
   const [isOpenEditPersonelMovementModal, setIsOpenEditPersonelMovementModal] = useState<T_ModalData | null>(null);
   const [isOpenPrintPersonelMovementModal, setIsOpenPrintPersonelMovementModal] = useState<T_ModalData | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
   const [personelMovementList, setPersonelMovementList] = useState<any>([]);
   const [pageSize, setPageSize] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,6 +69,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isSearching, setIsSearching] = useState(false);
 
   const cachedData: any = cachedProfile?.state?.data;
+  const { mutate: deletePersonnelMovement, isLoading: isLoadingDelete } = useDeletePersonnelMovement();
   const {
     data: personelMovementListData,
     isLoading: isLoadingPersonelMovementList,
@@ -162,27 +167,36 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-center'>
             <div className='flex space-x-2 justify-center'>
-              <button 
-                onClick={() => {
-                  setIsOpenEditPersonelMovementModal({
-                    id: item.id,
-                    open: true,
-                  });
-                }}
+              <button
+                onClick={() => setIsOpenEditPersonelMovementModal({ id: item.id, open: true })}
+                data-tooltip-id={`view-tooltip-${item.id}`}
+                data-tooltip-content='View PMF'
+                data-tooltip-place='bottom'
               >
-                <EditIcon />
+                <EyePassword visible />
               </button>
-              <button 
-                onClick={() => {
-                  setIsOpenPrintPersonelMovementModal({
-                    id: item.id,
-                    open: true,
-                  });
-                }}
+              <button
+                onClick={() => setIsOpenPrintPersonelMovementModal({ id: item.id, open: true })}
+                data-tooltip-id={`print-tooltip-${item.id}`}
+                data-tooltip-content='Print'
+                data-tooltip-place='bottom'
               >
                 <PrintIcon />
               </button>
+              {item.status !== 'approved' && (
+                <button
+                  onClick={() => setIsDeleteModalOpen({ id: item.id, open: true })}
+                  data-tooltip-id={`delete-tooltip-${item.id}`}
+                  data-tooltip-content='Delete'
+                  data-tooltip-place='bottom'
+                >
+                  <DeleteIcon />
+                </button>
+              )}
             </div>
+            <Tooltip id={`view-tooltip-${item.id}`} />
+            <Tooltip id={`print-tooltip-${item.id}`} />
+            <Tooltip id={`delete-tooltip-${item.id}`} />
           </td>
         </tr>
       ));
@@ -204,7 +218,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <BackButton label="Manage" />
+          <BackButton label="Manage" href="/manage" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
@@ -351,6 +365,26 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           refetch={personelMovementListRefetch}
           isOpen={isOpenPrintPersonelMovementModal}
           setIsOpen={setIsOpenPrintPersonelMovementModal}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+          onConfirm={() => {
+            deletePersonnelMovement(isDeleteModalOpen.id, {
+              onSuccess: (data: any) => {
+                toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
+                setIsDeleteModalOpen(null);
+                personelMovementListRefetch();
+              },
+              onError: (err: any) => {
+                toast.custom(() => <CustomToast message={err.message || 'Failed to delete.'} type='error' />, { duration: 4000 });
+              },
+            });
+          }}
+          isLoading={isLoadingDelete}
         />
       )}
 

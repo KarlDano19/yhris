@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -11,16 +11,15 @@ import { SmartButton } from '@/components/SmartPermissions/SmartButton';
 import CustomToast from '@/components/CustomToast';
 import DeleteModal from '@/components/DeleteModal';
 import BackButton from '@/components/BackButton';
-import useGetUsers from '@/components/hooks/useGetUsers';
 import useGetApprovalItems from './hooks/useGetApprovalItems';
 import useAddApproval from './hooks/useAddApproval';
 import useDeleteApproval from './hooks/useDeleteApproval';
-import useGetApprovalDetails from './hooks/useGetApprovalDetails';
-import useEditApproval from './hooks/useEditApproval';
+import useGetUsers from '@/components/hooks/useGetUsers';
 
 import classNames from '@/helpers/classNames';
 
-import { XMarkIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/solid';
+import DeleteIcon from '@/svg/DeleteIcon';
 
 interface User {
   id: number;
@@ -46,7 +45,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [inputApprover, setInputApprover] = useState('');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { register, handleSubmit, reset, control, setValue } = useForm();
+  const approverDropdownRef = useRef<HTMLDivElement>(null);
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const [approvalItems, setApprovalItems] = useState<any>([]);
   const [isDeleteApprovalModalOpen, setIsDeleteApprovalModalOpen] = useState<T_ModalData | null>(null);
   const {
@@ -56,9 +56,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   } = useGetApprovalItems();
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
   const { mutate: deleteApproval, isLoading: isDeleteApprovalLoading } = useDeleteApproval();
-  const { data: dataUsers = [], isLoading: isGetUsersLoading } = useGetUsers();
-  const { data: dataApprovalDetails, isLoading: isGetApprovalDetailsLoading } = useGetApprovalDetails(isDeleteApprovalModalOpen?.id || null);
-  const { mutate: editApproval, isLoading: isEditApprovalLoading } = useEditApproval();
+  const { data: dataUsers = [] } = useGetUsers();
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputApprover(value);
@@ -68,8 +66,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       const filtered = dataUsers.filter((user: User) => user.name.toLowerCase().includes(value.toLowerCase()));
       setFilteredUsers(filtered);
     } else {
-      setFilteredUsers([]);
+      setFilteredUsers(dataUsers);
     }
+  };
+
+  const handleApproverFocus = () => {
+    if (!inputApprover.trim()) {
+      setFilteredUsers(dataUsers);
+    }
+    setShowSuggestions(true);
   };
 
   const handleSelectUser = (user: User) => {
@@ -131,6 +136,16 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     refetchApprovalItems();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (approverDropdownRef.current && !approverDropdownRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Set initial sequence number when component mounts
   useEffect(() => {
     if (approvalItems.length > 0) {
@@ -141,18 +156,23 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (dataApprovalItems && Array.isArray(dataApprovalItems)) {
-      // Add Array check
       const formattedItems = dataApprovalItems.map((item: any) => ({
         ...item,
         created_at: Intl.DateTimeFormat('en-US').format(new Date(item.created_at)),
       }));
       setApprovalItems(formattedItems);
-      
-      // Auto-fill the sequence field with the next number
+
       const nextSequence = getNextSequenceNumber();
       setValue('sequence', nextSequence);
+
     }
   }, [dataApprovalItems, setValue]);
+
+  useEffect(() => {
+    if (showSuggestions && !inputApprover.trim()) {
+      setFilteredUsers(dataUsers);
+    }
+  }, [dataUsers]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
@@ -169,7 +189,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <BackButton label="General Settings" />
+          <BackButton label="General Settings" href="/settings/general-settings" />
         </div>
         <div className='px-2 md:px-8 lg:px-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Employee Movement Settings</h2>
@@ -183,19 +203,31 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </div>
                   </div>
                   <div className='px-4 py-2'>
-                    {approvalItems.map((item: any) => (
-                      <div key={item.id} className='flex justify-between mb-2 border-b border-gray-300 pb-2'>
-                        <div className='flex gap-2 items-center justify-between w-full'>
-                          <h1 className='text-sm font-semibold text-gray-500 pl-4'>{item.stage_name}</h1>
-                          <hr className='border-b-[0px] border-[#2C3F58] border-1 mt-2' />
+                    {approvalItems.map((item: any) => {
+                      const approverNames = (item.approver_details || []).map((a: any) => a.name).filter(Boolean);
+
+                      return (
+                        <div key={item.id} className='flex justify-between items-start mb-2 border-b border-gray-300 pb-3'>
+                          <div className='flex flex-col gap-1 pl-4'>
+                            <h1 className='text-sm font-semibold text-gray-700'>{item.stage_name}</h1>
+                            {approverNames.length > 0 ? (
+                              <div className='flex flex-wrap gap-1'>
+                                {approverNames.map((name: string) => (
+                                  <span key={name} className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700'>
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className='text-xs text-gray-400 italic'>No approvers assigned</span>
+                            )}
+                          </div>
+                          <button type='button' onClick={() => setIsDeleteApprovalModalOpen({ id: item.id, open: true })} className='flex-shrink-0 mt-0.5'>
+                            <DeleteIcon />
+                          </button>
                         </div>
-                        <div className='flex gap-2 justify-end w-full'>
-                        <button type='button' onClick={() => setIsDeleteApprovalModalOpen({ id: item.id, open: true })}>
-                          <TrashIcon className='w-5 h-5 text-red-500' />
-                        </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -206,32 +238,38 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   <div className='w-full h-full'>
                     <div className='px-4 py-2'>
                       <label htmlFor='stage_name' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Create New Stage
+                        Create New Stage <span className='text-red-500'>*</span>
                       </label>
                       <input
-                        {...register('stage_name')}
+                        {...register('stage_name', { required: 'Stage name is required.' })}
                         id='stage_name'
                         type='text'
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       />
+                      {errors.stage_name && (
+                        <p className='mt-1 text-sm text-red-500'>{errors.stage_name.message as string}</p>
+                      )}
                     </div>
                     <div className='px-4 py-2'>
                       <label htmlFor='sequence' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Stage Order
+                        Stage Order <span className='text-red-500'>*</span>
                       </label>
                       <input
-                        {...register('sequence')}
+                        {...register('sequence', { required: 'Stage order is required.' })}
                         id='sequence'
                         type='number'
-                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400  sm:text-sm sm:leading-6'
+                        className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       />
+                      {errors.sequence && (
+                        <p className='mt-1 text-sm text-red-500'>{errors.sequence.message as string}</p>
+                      )}
                     </div>
                     <label htmlFor='approvers' className='block text-sm font-medium leading-6 text-gray-900 px-4 py-2'>
                       Approvers
                     </label>
-                    <div className='flex flex-row px-4 space-x-2 pb-4'>
-                      <div className='relative w-[80%]'>
-                        <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full text-sm'>
+                    <div className='flex flex-row items-stretch px-4 space-x-2 pb-4'>
+                      <div className='relative flex-1' ref={approverDropdownRef}>
+                        <div className='relative border border-gray-300 pl-2 rounded-md flex items-center gap-3 flex-wrap w-full h-full min-h-[38px] text-sm'>
                           {approverTags.map((tag) => (
                             <div
                               key={tag.id}
@@ -247,7 +285,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                             type='text'
                             value={inputApprover}
                             onChange={handleInputChange}
-                            onFocus={() => setShowSuggestions(true)}
+                            onFocus={handleApproverFocus}
                             className='focus:none outline-none px-2 py-1 grow rounded-md'
                             placeholder='Type to search users'
                           />
@@ -271,7 +309,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                       </div>
                       <button
                         type='button'
-                        className='bg-white border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-100'
+                        className='bg-white border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-100 whitespace-nowrap flex-shrink-0'
                         onClick={() => {
                           setApproverTags([]);
                           setInputApprover('');
@@ -282,31 +320,27 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                     </div>
                   </div>
                 </div>
-                <div className='flex pl-4 space-x-4 pb-2'>
-                  <span className='mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto'>
-                    <button
-                      type='button'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-gray-300 px-10 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                      // onClick={() => setIsOpen(false)}
-                    >
-                      Cancel
-                    </button>
-                  </span>
-                  <span className='flex w-full rounded-md shadow-sm sm:w-auto'>
-                    <SmartButton
-                      id="create-movement-settings-btn"
-                      type='submit'
-                      className='inline-flex justify-center drop-shadow-xl w-full rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
-                    >
-                      Save
-                    </SmartButton>
-                  </span>
+                <div className='flex flex-wrap gap-3 px-4 pb-2'>
+                  <button
+                    type='button'
+                    className='flex-1 sm:flex-none inline-flex justify-center drop-shadow-xl rounded-md border border-gray-300 px-10 py-2 bg-white text-base leading-6 font-bold text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                  >
+                    Cancel
+                  </button>
+                  <SmartButton
+                    id="create-movement-settings-btn"
+                    type='submit'
+                    className='flex-1 sm:flex-none inline-flex justify-center drop-shadow-xl rounded-md border border-transparent px-12 py-2 bg-blue-600 text-base leading-6 font-bold text-white shadow-sm hover:bg-gray-500 focus:outline-none focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5'
+                  >
+                    Save
+                  </SmartButton>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+
       {isDeleteApprovalModalOpen && (
         <DeleteModal
           isOpen={isDeleteApprovalModalOpen}
@@ -327,6 +361,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           isLoading={isDeleteApprovalLoading}
         />
       )}
+
     </>
   );
 }

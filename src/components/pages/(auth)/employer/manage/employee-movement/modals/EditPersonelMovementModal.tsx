@@ -42,6 +42,8 @@ function PrintPersonelMovementModal({
   const { approvals, currentUserApproval, refetch: refetchApprovals } = useGetPersonnelMovementApprovals(isOpen.id);
   const { mutate: submitApproval, isLoading: isLoadingSubmitApproval } = useSubmitApproval();
 
+  const isEditable = !approvals.some((a: any) => a.status === 'approved' || a.status === 'rejected') && !currentUserApproval;
+
   useEffect(() => {
     if (isOpen) {
       refetchPersonelMovement();
@@ -87,7 +89,7 @@ function PrintPersonelMovementModal({
     setIsOpen(null);
   };
 
-  const onSubmit = handleSubmit((data) => {
+const onSubmit = handleSubmit((data) => {
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(
@@ -148,10 +150,12 @@ function PrintPersonelMovementModal({
         );
       }
     } else {
-      // Otherwise, update the PMF details
+      const percentageIncrease = data.proposed_rate === 'Apply Increase'
+        ? (data.percentage_increase !== '' ? parseInt(data.percentage_increase, 10) : null)
+        : null;
       editPersonelMovement(
-        { 
-          personel_movement_id: isOpen.id, 
+        {
+          personel_movement_id: isOpen.id,
           data: {
             employee: data.employee,
             current_position: data.current_position,
@@ -160,9 +164,10 @@ function PrintPersonelMovementModal({
             new_employment_status: data.new_employment_status,
             reason: data.reason,
             start_date: data.start_date,
-            proposed_rate: data.proposed_rate
+            proposed_rate: data.proposed_rate,
+            percentage_increase: percentageIncrease,
           }
-        }, 
+        },
         callbackReq
       );
     }
@@ -202,7 +207,7 @@ function PrintPersonelMovementModal({
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
                 <div className="flex bg-savoy-blue p-2 items-center">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
-                    Update Personal Movement Form (PMF)
+                    {isEditable ? 'Edit Personnel Movement Form (PMF)' : 'View Personnel Movement Form (PMF)'}
                   </h3>
                   <XCircleIcon
                     className="w-8 h-8 text-white cursor-pointer"
@@ -220,6 +225,7 @@ function PrintPersonelMovementModal({
                     setSelectedTab={setSelectedTab}
                     isLoading={isLoadingEditPersonelMovement}
                     isEdit={true}
+                    isEditable={isEditable}
                     currentPosition={currentPosition}
                     setCurrentPosition={setCurrentPosition}
                     newPosition={newPosition}
