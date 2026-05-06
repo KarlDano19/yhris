@@ -129,7 +129,7 @@ export default function Content() {
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4 py-6'>
           <div className='flex p-2 mb-2'>
-            <BackButton label="HRIS Implementation Checklist" />
+            <BackButton label="HRIS Implementation Checklist" href="/setup-employer-profile" />
           </div>
 
           <div className='mb-6'>

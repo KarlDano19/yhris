@@ -587,7 +587,7 @@ const Content = () => {
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)]'>
       {/* Header */}
       <div className='flex p-4 flex-shrink-0'>
-        <BackButton label="Manage" />
+        <BackButton label="Manage" href="/manage" />
       </div>
 
       <div className='px-2 md:px-8 lg:px-4 pb-4 border-b-2 flex-shrink-0'>

@@ -561,7 +561,7 @@ const Content = () => {
         </div>
         <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
           <div className='flex p-4'>
-            <BackButton label="Dashboard" />
+            <BackButton label="Dashboard" href="/dashboard" />
           </div>
           <div className='px-2 md:px-8 lg:px-4'>
             <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-6'>

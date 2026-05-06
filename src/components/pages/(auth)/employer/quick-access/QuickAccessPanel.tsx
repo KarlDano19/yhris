@@ -66,6 +66,8 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
       return;
     }
     window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
+    const urlPath = new URL(url, window.location.origin).pathname;
+    sessionStorage.setItem('fromQuickAccess', urlPath);
     router.push(url);
   };
 
