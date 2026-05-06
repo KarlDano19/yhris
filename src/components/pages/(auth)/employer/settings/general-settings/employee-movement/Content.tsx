@@ -30,6 +30,7 @@ interface User {
 interface ApproverTag {
   id: number;
   name: string;
+  email: string;
 }
 
 type T_ModalData = {
@@ -57,22 +58,24 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const { mutate: addApproval, isLoading: isAddApprovalLoading } = useAddApproval();
   const { mutate: deleteApproval, isLoading: isDeleteApprovalLoading } = useDeleteApproval();
   const { data: dataUsers = [] } = useGetUsers();
+  const getUnselectedUsers = (search?: string) => {
+    const unselected = dataUsers.filter((user: User) => !approverTags.some((tag) => tag.id === user.id));
+    if (search?.trim()) {
+      return unselected.filter((user: User) => user.name.toLowerCase().includes(search.toLowerCase()));
+    }
+    return unselected;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputApprover(value);
     setShowSuggestions(true);
-
-    if (value.trim()) {
-      const filtered = dataUsers.filter((user: User) => user.name.toLowerCase().includes(value.toLowerCase()));
-      setFilteredUsers(filtered);
-    } else {
-      setFilteredUsers(dataUsers);
-    }
+    setFilteredUsers(getUnselectedUsers(value));
   };
 
   const handleApproverFocus = () => {
     if (!inputApprover.trim()) {
-      setFilteredUsers(dataUsers);
+      setFilteredUsers(getUnselectedUsers());
     }
     setShowSuggestions(true);
   };
@@ -83,7 +86,8 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         ...approverTags,
         {
           id: user.id,
-          name: `${user.name}`,
+          name: user.name,
+          email: user.email,
         },
       ]);
     }
@@ -170,9 +174,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
 
   useEffect(() => {
     if (showSuggestions && !inputApprover.trim()) {
-      setFilteredUsers(dataUsers);
+      setFilteredUsers(getUnselectedUsers());
     }
-  }, [dataUsers]);
+  }, [dataUsers, approverTags]);
 
   useEffect(() => {
     broadcastChannel.onmessage = (event) => {
@@ -204,18 +208,19 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   </div>
                   <div className='px-4 py-2'>
                     {approvalItems.map((item: any) => {
-                      const approverNames = (item.approver_details || []).map((a: any) => a.name).filter(Boolean);
+                      const approverDetails = item.approver_details || [];
 
                       return (
                         <div key={item.id} className='flex justify-between items-start mb-2 border-b border-gray-300 pb-3'>
                           <div className='flex flex-col gap-1 pl-4'>
                             <h1 className='text-sm font-semibold text-gray-700'>{item.stage_name}</h1>
-                            {approverNames.length > 0 ? (
-                              <div className='flex flex-wrap gap-1'>
-                                {approverNames.map((name: string) => (
-                                  <span key={name} className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700'>
-                                    {name}
-                                  </span>
+                            {approverDetails.length > 0 ? (
+                              <div className='flex flex-wrap gap-2 mt-1'>
+                                {approverDetails.map((approver: any) => (
+                                  <div key={approver.id} className='inline-flex flex-col bg-blue-100 text-blue-700 rounded-md px-3 py-1 text-xs leading-snug'>
+                                    <div><span className='font-semibold'>Name:</span> {approver.name}</div>
+                                    <div><span className='font-semibold'>Email:</span> {approver.email || '—'}</div>
+                                  </div>
                                 ))}
                               </div>
                             ) : (
@@ -273,12 +278,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                           {approverTags.map((tag) => (
                             <div
                               key={tag.id}
-                              className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-0 px-4 text-left justify-start text-sm'
+                              className='bg-[#ACB9CB] rounded-md flex items-center gap-2 py-1 px-3 text-left justify-start text-sm'
                             >
                               <button type='button' onClick={() => handleRemoveApprover(tag.id)}>
                                 <XMarkIcon className='w-4 h-4' />
                               </button>
-                              <p>{tag.name}</p>
+                              <div className='flex flex-col leading-tight'>
+                                <span className='font-medium'>{tag.name}</span>
+                                <span className='text-xs text-gray-600'>{tag.email}</span>
+                              </div>
                             </div>
                           ))}
                           <input

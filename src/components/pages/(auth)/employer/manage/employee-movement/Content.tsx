@@ -183,7 +183,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               >
                 <PrintIcon />
               </button>
-              {item.status !== 'approved' && (
+              {!item.has_acted && (
                 <button
                   onClick={() => setIsDeleteModalOpen({ id: item.id, open: true })}
                   data-tooltip-id={`delete-tooltip-${item.id}`}
