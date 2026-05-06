@@ -33,7 +33,15 @@ const menus = [
     isAvailable: true,
   },
   {
-    icon: <ThirdPartyPlaformLogo />,
+    icon: (
+      <img
+        src="/assets/3rd-party-platform-logo.png"
+        alt="Third Party Platform"
+        width={120}
+        height={98}
+      />
+    ),
+    // SVG alternative (quick-access): <ThirdPartyPlaformLogo />
     text: 'Third Party Platform',
     link: '/settings/general-settings/third-party-platform',
     isAvailable: true,
