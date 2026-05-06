@@ -9,16 +9,16 @@ async function submitFormResponse({
   answers: T_AnswerEntry[]
 }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/public/form-response/${uuid}/`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/public/form/${uuid}/`,
     {
-      method: "PATCH",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answers }),
     }
   )
   if (!res.ok) {
     const err = await res.json()
-    throw new Error(err.message || "Failed to submit form.")
+    throw new Error(err?.message ?? "Failed to submit form.")
   }
   return res.json()
 }
@@ -26,7 +26,8 @@ async function submitFormResponse({
 function useSubmitFormResponse() {
   const queryClient = useQueryClient()
   return useMutation(
-    (params: { uuid: string; answers: T_AnswerEntry[] }) => submitFormResponse(params),
+    (params: { uuid: string; answers: T_AnswerEntry[] }) =>
+      submitFormResponse(params),
     {
       onSuccess: (_data, variables) => {
         queryClient.invalidateQueries(["formResponseCache", variables.uuid])

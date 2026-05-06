@@ -205,7 +205,7 @@ const QuestionsTabPage = ({ formId }: Props) => {
         const newId = res?.data?.id
         setCurrentFormId(newId)
         toast.custom(() => <CustomToast type="success" message="Form created." />)
-        router.replace(`/manage/forms/${newId}/edit`)
+        router.replace(`/manage/forms/${newId}`)
       } else {
         await updateForm({ formId: currentFormId, data: buildPayload() })
         toast.custom(() => <CustomToast type="success" message="Form saved." />)

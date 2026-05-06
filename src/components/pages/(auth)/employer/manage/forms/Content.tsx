@@ -111,7 +111,7 @@ const Content = () => {
 
     if (formItems.length > 0) {
       return formItems.map((form) => (
-        <tr key={form.id} className='cursor-pointer'>
+        <tr key={form.id} className='cursor-pointer hover:bg-gray-50' onClick={() => router.push(`/manage/forms/${form.id}`)}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500 text-left'>
             <div className='font-medium text-gray-800'>{form.title}</div>
             {!form.can_edit && (
@@ -130,7 +130,7 @@ const Content = () => {
             {new Date(form.created_at).toLocaleDateString()}
           </td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
-            <div className='flex items-center justify-center space-x-2'>
+            <div className='flex items-center justify-center space-x-2' onClick={(e) => e.stopPropagation()}>
               <SmartButton
                 id='distribute-form-btn'
                 onClick={() => setDistributeFormId(form.id)}
