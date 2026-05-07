@@ -26,10 +26,11 @@ interface ProfileTabProps {
   setValue: UseFormSetValue<any>;
   watch: UseFormWatch<any>;
   jobDetailData?: any;
+  profilePhotoList: FileList | null;
+  setProfilePhotoList: (files: FileList | null) => void;
 }
 
-const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch, jobDetailData }: ProfileTabProps) => {
-  const [profilePhotoList, setProfilePhotoList] = useState<FileList | null>(null);
+const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch, jobDetailData, profilePhotoList, setProfilePhotoList }: ProfileTabProps) => {
   const [educationInput, setEducationInput] = useState('');
   const [skillsInput, setSkillsInput] = useState('');
   const [tagsSkill, setTagsSkill] = useState<string[]>([]);
@@ -1007,6 +1008,11 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             Photo (2x2 photo is recommended)
           </h6>
           <div className="mt-2">
+            {profilePhotoList?.[0] && (
+              <p className="text-xs text-green-600 mb-2">
+                ✓ {profilePhotoList[0].name}
+              </p>
+            )}
             <input
               type="file"
               {...register("profilePicture", {
@@ -1064,6 +1070,11 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
             Curriculum Vitae/Resume (Optional)
           </h6>
           <div className="mt-2">
+            {(watch("resume") as FileList | undefined)?.[0] && (
+              <p className="text-xs text-green-600 mb-2">
+                ✓ {(watch("resume") as FileList)[0].name}
+              </p>
+            )}
             <input
               type="file"
               {...register("resume", {
