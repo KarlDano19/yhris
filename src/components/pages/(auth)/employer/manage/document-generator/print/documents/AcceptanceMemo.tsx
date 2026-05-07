@@ -57,7 +57,7 @@ export const printAcceptanceMemo = (formData: AcceptanceMemoFormData, options: P
 
           *, *::before, *::after { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-          html, body { margin: 0; padding: 0; font-family: Georgia, serif; font-size: 14px; color: #1f2937; background: white; }
+          html, body { margin: 0; padding: 0; font-size: 14px; color: #1f2937; background: white; }
 
           /* Container */
           .print-container { width: 100%; }
@@ -133,7 +133,7 @@ export const printAcceptanceMemo = (formData: AcceptanceMemoFormData, options: P
           hr { border: none; border-top: 1px solid #d1d5db; }
 
           /* Font family */
-          .font-serif { font-family: Georgia, serif; }
+          .font-serif { }
         </style>
       </head>
       <body>

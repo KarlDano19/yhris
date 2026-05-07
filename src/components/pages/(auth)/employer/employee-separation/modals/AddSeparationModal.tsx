@@ -35,6 +35,8 @@ export default function AddSeparationModal({
     },
   });
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [selectedReason, setSelectedReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
   
   const { mutate, isLoading } = useAddSeparation();
 
@@ -47,6 +49,8 @@ export default function AddSeparationModal({
       reason: '',
     });
     setEmployeeSearch('');
+    setSelectedReason('');
+    setCustomReason('');
     setValue('department', '');
     setValue('position', '');
     setValue('name', ''); // Clear the name field
@@ -60,6 +64,7 @@ export default function AddSeparationModal({
         });
         // Clear employee select cache so the newly separated employee is no longer searchable
         queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+        queryClient.invalidateQueries(['separationStatsCache']);
         resetForm();
         setIsOpen(false);
         refetch();
@@ -253,20 +258,58 @@ export default function AddSeparationModal({
                       <div className='relative mt-2'>
                         <select
                           id='reason'
-                          {...register('reason', { required: 'Reason of Leaving is required' })}
+                          value={selectedReason}
                           className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedReason(val);
+                            if (val !== 'Others') {
+                              setCustomReason('');
+                              setValue('reason', val, { shouldValidate: true });
+                            } else {
+                              setValue('reason', 'Others: (Please specify)', { shouldValidate: false });
+                            }
+                          }}
                         >
                           <option value='' disabled>Select...</option>
                           <option value='Resignation'>Resignation</option>
                           <option value='Absence Without Leave (AWoL)'>Absence Without Leave (AWoL)</option>
                           <option value='Layoff'>Layoff</option>
                           <option value='Termination'>Termination</option>
+                          <option value='Others'>Others: (Please specify)</option>
                         </select>
                         <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4'>
                           <SelectChevronDown />
                         </div>
                         {errors.reason && <p className="text-red-500 text-xs mt-1">{errors.reason.message}</p>}
                       </div>
+                      <input
+                        type='hidden'
+                        {...register('reason', {
+                          required: 'Reason of Leaving is required',
+                          validate: (value) => {
+                            if (value === 'Others: (Please specify)') {
+                              return !customReason.trim() ? 'Please specify the reason of leaving' : true;
+                            }
+                            return true;
+                          },
+                        })}
+                      />
+                      {selectedReason === 'Others' && (
+                        <div className='mt-2'>
+                          <input
+                            type='text'
+                            placeholder='Please specify the reason of leaving...'
+                            value={customReason}
+                            className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
+                            onChange={(e) => {
+                              const custom = e.target.value;
+                              setCustomReason(custom);
+                              setValue('reason', custom || 'Others: (Please specify)', { shouldValidate: true });
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <hr />

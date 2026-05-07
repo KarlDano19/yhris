@@ -24,7 +24,7 @@ interface CreateSeparationLetterModalProps {
   refetch: () => void;
   onSuccess?: (data: any) => void;
   employerName?: string;
-  effectiveDate?: string;
+  dateOfSeparation?: string;
 }
 
 interface FormData {
@@ -40,7 +40,7 @@ export default function CreateSeparationLetterModal({
   refetch,
   onSuccess,
   employerName,
-  effectiveDate
+  dateOfSeparation
 }: CreateSeparationLetterModalProps) {
   const cancelButtonRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,11 +53,11 @@ export default function CreateSeparationLetterModal({
 
   // Default message content based on letter type
   const getDefaultMessage = (type: 'Acceptance' | 'Separation') => {
-    const dateStr = effectiveDate ? new Date(effectiveDate).toLocaleDateString('en-US', {
+    const dateStr = dateOfSeparation ? new Date(dateOfSeparation).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long', 
+      month: 'long',
       day: 'numeric'
-    }) : '{effective_date}';
+    }) : '{date_of_separation}';
     
     if (type === 'Acceptance') {
       return `<p>We acknowledge receipt of your resignation letter and accept your decision to terminate your employment with <strong>${companyName}</strong>.</p>
