@@ -6,6 +6,7 @@ async function addAccounts(accounts: any, employer_id: string) {
     const accountType = 'employer';
     const loginType = 'password';
     const hasProfile = true;
+    const hasOnboarded = true;
     const data = {
       name: accounts.name,
       account_type: accountType,
@@ -15,6 +16,7 @@ async function addAccounts(accounts: any, employer_id: string) {
       login_type: loginType,
       employer_id: employer_id,
       has_profile: hasProfile,
+      has_onboarded: hasOnboarded,
     };
     const token = getCookie('token');
     const config = {

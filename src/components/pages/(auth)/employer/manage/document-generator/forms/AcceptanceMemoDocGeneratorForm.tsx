@@ -11,19 +11,23 @@ import CustomToast from '@/components/CustomToast';
 
 import ViewPdfModal from '../modals/ViewPdfModal';
 
-import { SignatureField } from '../form-fields/Common';
+import { DocumentTypeField, SignatureField } from '../form-fields/Common';
 import { DatePickerField } from '../form-fields/DatePickerField';
 
 import { AcceptanceMemoFormData } from '@/types/document-generator/documents';
-import { FormProps } from '@/types/document-generator/form';
+import { DocumentType, FormProps } from '@/types/document-generator/form';
 
 export default function AcceptanceMemoDocGeneratorForm({
+  documentType,
+  onDocumentTypeChange,
   onFormChange,
   initialData,
   onOpenSignatureModal,
   onProceed,
+  isDocumentTypeDisabled,
   isFormDisabled,
   isViewMode,
+  showAcceptanceMemo,
 }: FormProps) {
   const router = useRouter();
   const formData = initialData as AcceptanceMemoFormData;
@@ -31,6 +35,10 @@ export default function AcceptanceMemoDocGeneratorForm({
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    if (e.target.name === 'documentType') {
+      onDocumentTypeChange(e.target.value as DocumentType);
+      return;
+    }
     onFormChange({ ...formData, [e.target.name]: e.target.value } as AcceptanceMemoFormData);
   };
 
@@ -77,6 +85,15 @@ export default function AcceptanceMemoDocGeneratorForm({
       <h2 className='text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-black'>Details</h2>
 
       <div className='space-y-5'>
+        {/* Document Type Selector */}
+        <DocumentTypeField
+          formData={formData as any}
+          documentType={documentType}
+          handleInputChange={handleInputChange}
+          disabled={isDocumentTypeDisabled}
+          showAcceptanceMemo={showAcceptanceMemo}
+        />
+
         {/* Authority Name */}
         <div>
           <label className='block mb-2 text-black font-semibold'>

@@ -109,6 +109,275 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-018
+DATE FILED: 2026-04-30
+DATE FIXED: 2026-04-30
+REPORTER: Internal - Internal - Dev
+
+ISSUE DESCRIPTION:
+  On the Employee 201 Records detail page, the back button (← Manage | Employee
+  201 Records | <Name>) was completely unresponsive — no click reaction, no
+  navigation — but ONLY when the active tab was "Personal Information" and the
+  employee had one or more missing required Government ID fields (TIN, SSS,
+  PAG-IBIG, PhilHealth). Switching to another tab (e.g., Employment Details)
+  where all required fields had values made the back button work normally.
+
+  Root cause: PersonalInfoForm calls `trigger()` on mount to surface required-
+  field validation errors in view mode. This caused `hasErrors` to update, which
+  fired the `onErrorsChange` callback via a `useEffect`. Because `onErrorsChange`
+  was an inline function prop (new reference on every render) AND was listed in
+  the effect's dependency array, the effect re-ran every render cycle. Each run
+  called `setSections(...)` in Content.tsx, which created a new object reference
+  and scheduled another render — creating an infinite re-render loop. React's
+  main thread was saturated, making the entire page unresponsive and the back
+  button unclickable.
+
+  EmploymentDetailsForm had the same `onErrorsChange` pattern but correctly
+  omitted it from the `useEffect` deps (`[hasErrors]` only), so it did not
+  exhibit the loop.
+
+DESIRED OUTCOME:
+  The back button should always be clickable in view mode regardless of whether
+  required fields have values. Clicking it should navigate to
+  /manage/employee-201-records immediately (no leave-confirmation modal) when
+  the user has not entered Edit mode and has not made any changes.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/PersonalInfoForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Components tested (rendering, props, state changes) — manual verification
+☑ Form validation tested (React Hook Form rules, error states)
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified back button navigates correctly on Personal tab with missing fields
+  - Verified back button still works on Employment Details tab
+  - Verified Edit mode still marks section dirty on user input
+  - Verified Leave Confirmation modal still appears when user edits and tries to leave
+☑ Edge cases tested:
+  - Employee with all fields filled: back button works ✓
+  - Employee with missing Government IDs: back button works ✓
+  - User enters Edit mode, makes changes, clicks back: modal appears ✓
+  - User enters Edit mode, no changes, clicks back: modal appears ✓
+☐ Cypress/Playwright e2e tests updated (if applicable)
+
+FIX EXPLANATION:
+  Two changes were made:
+
+  1. PersonalInfoForm.tsx — Removed `onErrorsChange` from `useEffect` deps:
+     The effect that calls `onErrorsChange(hasErrors)` previously had
+     `[hasErrors, onErrorsChange]` as its dependency array. Since `onErrorsChange`
+     is an inline function in Content.tsx it gets a new reference on every render,
+     causing the effect to re-run on every render → infinite loop. Changing the
+     deps to `[hasErrors]` (matching EmploymentDetailsForm's correct pattern)
+     ensures the callback only fires when the actual error state changes.
+
+  2. Content.tsx — Added edit-mode guard to `onPatchChange` callbacks:
+     Both the Personal and Employment `onPatchChange` inline handlers now return
+     early if the respective `editMode` flag is false. This is a defensive guard
+     ensuring that any unexpected RHF internal event (e.g., from `trigger()` or
+     subscription re-creation) cannot set `dirty = true` when the user has not
+     consciously entered Edit mode, which would have caused the LeaveConfirmModal
+     to appear unnecessarily on back-button click.
+
+================================================================================
+
+BUG ID: HRIS-2026-017
+DATE FILED: 2026-04-23
+DATE FIXED: 2026-04-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  Three related display bugs in the Evaluation History module, all stemming from
+  rich-text HTML stored in the database being rendered as raw escaped text in the UI:
+
+  1. In the "Questions & Responses" tab of the Evaluation History modal, question
+     titles (criterion.title) showed raw HTML tags (e.g. "<p><br></p><p>5 - Outstanding
+     ...</p>") instead of formatted content. The title was interpolated directly into
+     JSX as `{criterion.title}`, causing React to escape the markup.
+
+  2. In the "Evaluation Details" modal (EvaluationDetailsModal), the section title,
+     section description, and criterion title fields all stored rich-text HTML but were
+     likewise interpolated as plain JSX text, showing raw tags throughout the form view.
+
+  3. In the same "Evaluation Details" modal, a "Comment:" label and empty value was
+     rendered for every criterion regardless of whether the evaluator left a comment.
+     Criteria with no comment still showed the bold "Comment:" heading with nothing
+     beneath it, creating visual noise.
+
+DESIRED OUTCOME:
+  - All rich-text fields (question titles, section titles, section descriptions,
+    criterion titles) render as formatted HTML so paragraphs, line breaks, and inline
+    styles appear correctly.
+  - The "Comment" block is hidden entirely when criterionItem.comment is blank/null.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ No backend changes required
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Manual regression testing completed — HTML renders correctly, plain-text values unaffected
+☑ Cross-browser testing completed
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (plain-text titles, empty comments, mixed HTML/plain content)
+
+FIX EXPLANATION:
+
+  Fix 1 — QuestionsTab.tsx (criterion.title):
+  Replaced `{criterion.title}` with `<span dangerouslySetInnerHTML={{ __html: criterion.title }} />`.
+  The chevron icon alignment was also updated from `items-center` to `items-start` with
+  `shrink-0 mt-0.5` so it stays top-aligned when multi-line HTML causes the title to wrap.
+
+  Fix 2 — EvaluationDetails.tsx (section_title, section_description, criterionItem.title):
+  Applied `dangerouslySetInnerHTML` to all three rich-text fields:
+  - section_title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />` inside the heading.
+  - section_description: replaced `<p>{...}</p>` with `<p dangerouslySetInnerHTML={{ __html: ... }} />`.
+  - criterionItem.title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />`.
+
+  Fix 3 — EvaluationDetails.tsx (blank comment):
+  Wrapped the entire Comment block in `{criterionItem.comment && (...)}` so the label and
+  value only render when the comment field has a truthy value.
+
+================================================================================
+
+BUG ID: HRIS-2026-016
+DATE FILED: 2026-04-22
+DATE FIXED: 2026-04-22
+REPORTER: Internal (Developer)
+
+ISSUE DESCRIPTION:
+  Sub-accounts created under an employer account were incorrectly redirected to the
+  HRIS Implementation Checklist (/setup-employer-profile/onboarding-checklist) on
+  first login, even though the main employer account had already completed onboarding.
+
+  Three separate bugs combined to cause this:
+
+  1. The frontend registration payload (useAddAccounts.ts) did not include
+     `has_onboarded: true`, so there was no signal to the backend that the new
+     sub-account should skip onboarding.
+
+  2. The backend's create_user() method in ObjectManager did not pass `has_onboarded`
+     from the request payload to User.objects.create(). Even after the frontend fix,
+     the field was silently dropped and the user record was always created with
+     has_onboarded = False (the model default).
+
+  3. The backend OTP verify endpoint (/api/auth/login/otp/verify/ →
+     LoginOTPVerifyAPIView) did not include `has_onboarded` or `login_type` in its
+     response payload. The direct-login endpoint did include both fields. Because
+     sub-accounts triggered OTP on first login, the frontend iron-session never
+     received has_onboarded, so session.hasCompletedOnboarding was set to undefined,
+     which evaluated as falsy in the middleware's onboarding gate.
+
+DESIRED OUTCOME:
+  Sub-accounts created via the employer settings Users page should have
+  has_onboarded = True persisted in the database. On login (including OTP-based
+  login), the session should reflect hasCompletedOnboarding = true, and the
+  Next.js middleware should allow sub-accounts to proceed directly to the dashboard
+  without redirecting through the onboarding checklist.
+
+FILES CHANGED:
+Backend:
+- app/mixins/object_manager.py
+- app/views/otp.py
+
+Frontend:
+- src/components/pages/(auth)/employer/settings/users/accounts/hooks/useAddAccounts.ts
+- src/app/api/login/otp/verify/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (tests not yet implemented)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A — no schema changes)
+☐ Serializers tested (N/A)
+☑ Views/API endpoints tested (manual — new sub-account created, has_onboarded=True confirmed in DB, login OTP verify response includes has_onboarded: true)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A — no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (N/A)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — pending)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (sub-account login via OTP → skips onboarding; main account login unaffected; has_onboarded persisted in DB)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+
+**Fix 1 — Frontend: useAddAccounts.ts**
+
+Added `has_onboarded: true` as a constant to the registration data payload sent to
+POST /api/register/. Sub-accounts created from the employer settings page should
+always start with onboarding already complete, since the main account owns the
+onboarding checklist.
+
+**Fix 2 — Backend: app/mixins/object_manager.py (create_user)**
+
+Added `has_onboarded=data.get("has_onboarded", False)` to the User.objects.create()
+call inside the create_user() method. Previously, has_onboarded was a recognised
+model field with default=False but was never read from the incoming request payload,
+so the frontend value was silently discarded.
+
+**Fix 3 — Backend: app/views/otp.py (LoginOTPVerifyAPIView)**
+
+Added `has_onboarded` and `login_type` to the OTP verify response payload for
+employer accounts, matching the same logic used in the direct-login endpoint
+(UserLoginWithOTPAPIView.handle_direct_login):
+
+  response["has_onboarded"] = (
+      True if not get_onboarding_enabled() or user.login_type in ("yahshua-payroll", "yg-payroll")
+      else bool(user.has_onboarded)
+  )
+  response["login_type"] = user.login_type
+
+Also added the import: from utils.employer_onboarding import get_onboarding_enabled
+
+**Fix 4 — Frontend: src/app/api/login/otp/verify/route.ts**
+
+Added `session['hasCompletedOnboarding'] = data.has_onboarded` and
+`session['loginType'] = data.login_type || 'password'` to the iron-session save
+block inside the OTP verify API route. These two fields were already set by the
+direct-login route but were missing from the OTP path, causing the middleware to
+always see hasCompletedOnboarding as undefined (falsy) for OTP-based logins.
+
+================================================================================
+
 BUG ID: HRIS-2026-015
 DATE FILED: 2026-04-18
 DATE FIXED: 2026-04-18

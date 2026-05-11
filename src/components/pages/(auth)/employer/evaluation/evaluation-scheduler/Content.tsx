@@ -17,12 +17,14 @@ import SeederButton from '@/components/SeederButton';
 import CreateEvaluationSchedulerModal from './modals/CreateEvaluationSchedulerModal';
 import EditEvaluationSchedulerModal from './modals/EditEvaluationSchedulerModal';
 import ConfirmSendEmailEvaluationSchedulerModal from './modals/ConfirmSendEmailEvaluationSchedulerModal';
+import ResendCompletionEmailModal from './modals/ResendCompletionEmailModal';
 import useGetEvaluationSchedulerItems from './hooks/useGetEvaluationSchedulerItems';
 import useDeleteEvaluationScheduler from './hooks/useDeleteEvaluationScheduler';
 import useBulkDeleteEvaluationSchedulers from './hooks/useBulkDeleteEvaluationSchedulers';
 
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
 import { useForm, Controller } from 'react-hook-form';
@@ -41,6 +43,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const [isDeleteEvaluationSchedulerModalOpen, setIsDeleteEvaluationSchedulerModalOpen] = useState<{ id: number; open: boolean } | null>(null);
   const [isConfirmSendEmailEvaluationSchedulerModalOpen, setIsConfirmSendEmailEvaluationSchedulerModalOpen] =
     useState(false);
+  const [isResendCompletionEmailModalOpen, setIsResendCompletionEmailModalOpen] = useState(false);
   const [isCreateEvaluationSchedulerOpen, setIsCreateEvaluationSchedulerOpen] = useState(false);
   
   // Bulk delete states
@@ -183,6 +186,9 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
       if (actionType === 'send-email') {
         setIsConfirmSendEmailEvaluationSchedulerModalOpen(true);
       }
+      if (actionType === 'resend-completion') {
+        setIsResendCompletionEmailModalOpen(true);
+      }
     }
   }, [selectedEvaluationSchedulerId, actionType]);
 
@@ -208,6 +214,15 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     setActionType('send-email');
     if (selectedEvaluationSchedulerId && selectedEvaluationSchedulerId === evaluationDetails.id) {
       setIsConfirmSendEmailEvaluationSchedulerModalOpen(true);
+    } else {
+      setSelectedEvaluationSchedulerId(evaluationDetails.id);
+    }
+  };
+
+  const openResendCompletionEmailModal = (evaluationDetails: any) => {
+    setActionType('resend-completion');
+    if (selectedEvaluationSchedulerId && selectedEvaluationSchedulerId === evaluationDetails.id) {
+      setIsResendCompletionEmailModalOpen(true);
     } else {
       setSelectedEvaluationSchedulerId(evaluationDetails.id);
     }
@@ -349,6 +364,7 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
               <button
                 className='border rounded px-[0.65em] border-[#3d6cee9f]'
                 onClick={() => openConfirmSendEmailEvaluationSchedulerModal(item)}
+                title='Send evaluation email'
               >
                 <Image
                   src='/assets/send-icon.png'
@@ -357,6 +373,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   alt='send-icon'
                   className='max-w-[20px] max-h-[20px]'
                 />
+              </button>
+              <button
+                className='border rounded px-[0.65em] border-[#22c55e9f] text-green-600 hover:bg-green-50'
+                onClick={() => openResendCompletionEmailModal(item)}
+                title='Resend completion email'
+              >
+                <ArrowPathIcon className="w-5 h-5" />
               </button>
               <button
                 onClick={() => openEditEvaluationModal(item)}
@@ -597,6 +620,14 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
           title={`Deleting ${bulkDeleteCount} evaluation scheduler${bulkDeleteCount > 1 ? 's' : ''}...`}
           isProcessing={bulkDeleteMutation.isLoading}
           onSuccess={handleBulkDeleteSuccess}
+        />
+      )}
+
+      {isResendCompletionEmailModalOpen && selectedEvaluationSchedulerId && (
+        <ResendCompletionEmailModal
+          isOpen={isResendCompletionEmailModalOpen}
+          setIsOpen={setIsResendCompletionEmailModalOpen}
+          selectedEvaluationSchedulerId={selectedEvaluationSchedulerId}
         />
       )}
 

@@ -74,7 +74,7 @@ export default function Form({
       <AcceptanceMemoDocGeneratorForm
         documentType={documentType}
         onDocumentTypeChange={onDocumentTypeChange}
-        onFormChange={onFormChange as (data: AcceptanceMemoFormData) => void}
+        onFormChange={onFormChange}
         initialData={initialData as AcceptanceMemoFormData}
         onPrint={onPrint}
         onOpenSignatureModal={onOpenSignatureModal}
@@ -84,6 +84,7 @@ export default function Form({
         isDocumentTypeDisabled={isDocumentTypeDisabled}
         isFormDisabled={isFormDisabled}
         isViewMode={isViewMode}
+        showAcceptanceMemo={showAcceptanceMemo}
       />
     );
   }

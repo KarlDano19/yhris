@@ -20,7 +20,7 @@ function formatDate(dateStr: string) {
 
 export default function AcceptanceMemoPreview({ formData }: { formData: T_MemoFormData }) {
   return (
-    <div className='bg-white p-8 w-full text-sm text-gray-800 font-serif'>
+    <div className='bg-white p-8 w-full text-sm text-gray-800'>
       {/* Header */}
       <div className='text-center mb-5'>
         <h1 className='text-2xl font-bold uppercase tracking-wide'>Acceptance Memo</h1>

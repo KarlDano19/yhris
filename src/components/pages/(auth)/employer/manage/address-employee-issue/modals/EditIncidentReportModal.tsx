@@ -68,9 +68,6 @@ export default function EditIncidentReportModal({
   });
   const cancelButtonRef = useRef(null);
   
-  // Character limit state for brief background
-  const maxLength = 430;
-  const [hasShownToast, setHasShownToast] = useState(false);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [customIssueType, setCustomIssueType] = useState('');
   const briefBackgroundValue = watch('briefBackground') || '';
@@ -169,7 +166,7 @@ export default function EditIncidentReportModal({
   });
 
 
-  // Handle brief background input change with character limit
+  // Handle brief background input change
   const handleBriefBackgroundChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     let value = e.target.value;
     
@@ -179,19 +176,7 @@ export default function EditIncidentReportModal({
     // Also prevent excessive spaces (more than 2 consecutive spaces)
     value = value.replace(/ {3,}/g, '  ');
     
-    if (value.length <= maxLength) {
-      // Reset the toast flag when back under the limit
-      if (hasShownToast) setHasShownToast(false);
-      setValue('briefBackground', value);
-    } else if (!hasShownToast) {
-      // Show toast only once per limit exceeding attempt
-      toast.custom(() => <CustomToast message={`Brief Background cannot exceed ${maxLength} characters.`} type="error" />);
-      setHasShownToast(true);
-      
-      // Prevent further input by truncating the text
-      const truncated = value.substring(0, maxLength);
-      setValue('briefBackground', truncated);
-    }
+    setValue('briefBackground', value);
   };
 
   return (
@@ -438,8 +423,8 @@ export default function EditIncidentReportModal({
                                     menuPortalTarget={document.body}
                                     menuPosition='fixed'
                                     styles={{
-                                      menuPortal: (base) => ({ ...base, zIndex: 50 }),
-                                      menu: (base) => ({ ...base, zIndex: 50 }),
+                                      menuPortal: (base: any) => ({ ...base, zIndex: 50 }),
+                                      menu: (base: any) => ({ ...base, zIndex: 50 }),
                                     }}
                                   />
                                   {(isCustomOption || isCustomValue) && (
@@ -490,12 +475,11 @@ export default function EditIncidentReportModal({
                           id='briefBackground'
                           value={briefBackgroundValue}
                           onChange={canEdit ? handleBriefBackgroundChange : undefined}
-                          maxLength={maxLength + 1}
                           disabled={!canEdit}
                           className={`block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 resize-none sm:text-sm sm:leading-6 ${!canEdit ? 'bg-gray-100' : ''}`}
                         />
                         <div className='text-xs text-gray-500 text-right mt-1'>
-                          {briefBackgroundValue.length}/{maxLength} characters
+                          {briefBackgroundValue.length} characters
                         </div>
                       </div>
                     </div>

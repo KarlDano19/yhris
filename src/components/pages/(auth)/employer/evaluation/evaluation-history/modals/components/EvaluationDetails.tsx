@@ -55,16 +55,17 @@ const EvaluationDetails = ({ evaluationHistoryDetails }: EvaluationDetailsProps)
               <div className='p-6 border-b-2'>
                 <p className='text-[1.2rem] font-semibold'>
                   {convertToRoman(evaluationCriterionIndex + 1)}.{' '}
-                  {evaluationForm[currentFormIndex].section_title}
+                  <span dangerouslySetInnerHTML={{ __html: evaluationForm[currentFormIndex].section_title }} />
                 </p>
-                <p>{evaluationForm[currentFormIndex].section_description}</p>
+                <p dangerouslySetInnerHTML={{ __html: evaluationForm[currentFormIndex].section_description }} />
               </div>
             )}
             {evaluationForm[currentFormIndex].criterion.map((criterionItem: any, index: number) => (
               <div key={index} className='px-[1.55rem] py-4 border-b-2'>
                 <div className='flex justify-between mb-2'>
                   <div>
-                    {index + 1}. {criterionItem.title}
+                    {index + 1}.{' '}
+                    <span dangerouslySetInnerHTML={{ __html: criterionItem.title }} />
                   </div>
                   <div>
                     <p className='text-base font-semibold'>Score:</p>
@@ -72,12 +73,14 @@ const EvaluationDetails = ({ evaluationHistoryDetails }: EvaluationDetailsProps)
                     <span className='text-base'> / {criterionItem.max_score}</span>
                   </div>
                 </div>
-                <div className='flex justify-between mb-2'>
-                  <div>
-                    <p className='text-base font-semibold'>Comment:</p>
-                    {criterionItem.comment}
+                {criterionItem.comment && (
+                  <div className='flex justify-between mb-2'>
+                    <div>
+                      <p className='text-base font-semibold'>Comment:</p>
+                      {criterionItem.comment}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

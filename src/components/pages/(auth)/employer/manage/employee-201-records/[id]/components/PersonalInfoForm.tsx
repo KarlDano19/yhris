@@ -103,7 +103,7 @@ export default function PersonalInfoForm({
 
   useEffect(() => {
     onErrorsChange?.(hasErrors);
-  }, [hasErrors, onErrorsChange]);
+  }, [hasErrors]);
 
   // Trigger initial validation
   useEffect(() => {
