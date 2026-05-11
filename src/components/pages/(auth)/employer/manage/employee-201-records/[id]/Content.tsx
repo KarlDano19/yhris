@@ -620,6 +620,7 @@ export default function Employee201Content({
             emp={employeeDetails}
             editing={editMode.personal}
             onPatchChange={(patch) => {
+              if (!editMode.personal) return;
               Object.assign(personalPatchRef.current, patch);
               setSections((p) => ({
                 ...p,
@@ -639,6 +640,7 @@ export default function Employee201Content({
             emp={employeeDetails}
             editing={editMode.employment}
             onPatchChange={(patch) => {
+              if (!editMode.employment) return;
               Object.assign(employmentPatchRef.current, patch);
               setSections((p) => ({
                 ...p,

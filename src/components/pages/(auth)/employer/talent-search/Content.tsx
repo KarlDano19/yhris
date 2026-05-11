@@ -132,14 +132,16 @@ const Content = () => {
     }
 
     return (
-      <Image
-        src={applicant.photo}
-        alt={`${applicant.firstname} ${applicant.lastname}`}
-        width={size}
-        height={size}
-        className='rounded-xl object-cover flex-shrink-0'
-        onError={() => setImageError(true)}
-      />
+      <div style={{ width: size, height: size }} className='rounded-xl overflow-hidden flex-shrink-0'>
+        <Image
+          src={applicant.photo}
+          alt={`${applicant.firstname} ${applicant.lastname}`}
+          width={size}
+          height={size}
+          className='w-full h-full object-cover'
+          onError={() => setImageError(true)}
+        />
+      </div>
     );
   };
 

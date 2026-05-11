@@ -18,6 +18,7 @@ export async function middleware(request: NextRequest) {
   const hasCompletedOnboarding = session.hasCompletedOnboarding;
   const hasPendingTransaction = session.hasPendingTransaction;
   const hasActiveSubscription = session.hasActiveSubscription;
+  const loginType = session.loginType;
 
   const bypassRoutes: any = ['', 'jobs', 'job-app-form', 'pricing', 'sso', 'verify', 'dragonpay-callback', 'evaluation-form', 'directives', 'landing-page', 'features', 'faqs', 'use-cases', 'employee-issue-response', 'employee-issue-decision', 'login', 'register', 'forgot-password', 'change-password', 'docs', 'how-we-compare', 'separation'];
   const unAuthRoutes: any = ['login', 'register', 'forgot-password', 'change-password'];
@@ -100,7 +101,7 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/dashboard', request.url));
               }
               // Allow access to other sub-routes (onboarding-checklist, etc.)
-            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications') {
+            } else if (!hasCompletedOnboarding && firstRoute !== 'settings' && firstRoute !== 'notifications' && loginType !== 'yahshua-payroll' && loginType !== 'yg-payroll') {
               // Onboarding gate: block employer routes until checklist is complete.
               // settings and notifications are exempt so users can't get trapped.
               return NextResponse.redirect(new URL('/setup-employer-profile/onboarding-checklist', request.url));

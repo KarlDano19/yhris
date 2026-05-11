@@ -88,13 +88,16 @@ const QuestionsTab = ({
                     className='w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left'
                   >
                     <div className='flex-1'>
-                      <h5 className='text-sm font-medium text-gray-900 flex items-center gap-2'>
+                      <h5 className='text-sm font-medium text-gray-900 flex items-start gap-2'>
                         {isExpanded ? (
-                          <ChevronDownIcon className='w-4 h-4 text-gray-500' />
+                          <ChevronDownIcon className='w-4 h-4 text-gray-500 shrink-0 mt-0.5' />
                         ) : (
-                          <ChevronRightIcon className='w-4 h-4 text-gray-500' />
+                          <ChevronRightIcon className='w-4 h-4 text-gray-500 shrink-0 mt-0.5' />
                         )}
-                        {globalIndex + 1}. {criterion.title}
+                        <span>
+                          {globalIndex + 1}.{' '}
+                          <span dangerouslySetInnerHTML={{ __html: criterion.title }} />
+                        </span>
                       </h5>
                       {totalScore > 0 && (
                         <p className='text-xs text-gray-500 mt-0.5 ml-6'>Max Score: {totalScore}</p>

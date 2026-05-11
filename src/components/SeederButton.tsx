@@ -3,6 +3,7 @@
 import { useState, Fragment } from 'react';
 
 import { Dialog, Transition, Menu } from '@headlessui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { BeakerIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
@@ -29,7 +30,7 @@ export default function SeederButton({
   maxCount = 1000,
   defaultCount = 5,
   disabled = false,
-  showSeeder = true,
+  showSeeder = false,
   showBudgetType = false,
   renderExtraFields,
   onSeedSuccess,
@@ -41,6 +42,10 @@ export default function SeederButton({
   const [budgetType, setBudgetType] = useState<'fixed_rate' | 'hourly_rate' | 'mix'>('mix');
   const [extras, setExtras] = useState<any>({});
   const [isSeeding, setIsSeeding] = useState(false);
+
+  const queryClient = useQueryClient();
+  const cachedUserDetails = queryClient.getQueryCache().find(['userDetailsCache']) as { state: { data: any } | undefined };
+  const isDeveloper = cachedUserDetails?.state?.data?.is_developer === true;
 
   const seedMutation = useSeeder();
   const unseedMutation = useUnseeder();
@@ -114,7 +119,7 @@ export default function SeederButton({
     }
   };
 
-  if (!showSeeder) return null;
+  if (!isDeveloper) return null;
 
   return (
     <>

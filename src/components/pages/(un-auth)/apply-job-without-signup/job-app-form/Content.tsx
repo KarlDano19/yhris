@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
+import BackButton from '@/components/BackButton';
 import DataConfirmationModal from './modals/DataConfirmationModal';
 import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
@@ -16,7 +17,6 @@ import useJobApplicationDraft from './hooks/useJobApplicationDraft';
 import ProfileTab from './ProfileTab';
 import ScreeningQuestionTab from './ScreeningQuestionTab';
 import PreferencesTab from './PreferencesTab';
-import BackButton from '@/components/BackButton';
 
 const Content = () => {
   const params = useParams();
