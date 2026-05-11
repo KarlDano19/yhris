@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import { T_LetterModal } from '@/types/globals';
 import { formatDateToLocal } from '@/helpers/date';
 import AttachmentCard from '../../components/AttachmentCard';
+import UploadSignedCopyModal from '../../modals/UploadSignedCopyModal';
 
 type Props = {
   separation: any;
@@ -22,7 +23,14 @@ const InitiationStage = ({ separation, onOpenLetterModal, onOpenSendLetterModal,
   const letterSent = !!separation.is_letter_sent;
   const letterReceived = !!separation.is_letter_received;
   const [isGenerateDropdownOpen, setIsGenerateDropdownOpen] = useState(false);
+  const [uploadSignedCopyModal, setUploadSignedCopyModal] = useState<{ attachmentId: number | undefined; idx: number } | null>(null);
+  const [localSignedIdxs, setLocalSignedIdxs] = useState<Set<number>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isSignedViaEmail = !!separation.letter_signature || !!separation.is_letter_received;
+  const enrichedAttachments = (separation.letter_attachments || []).map((att: any, idx: number) => ({
+    ...att,
+    is_signed: att.is_signed || isSignedViaEmail || localSignedIdxs.has(att.id ?? idx),
+  }));
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -155,10 +163,23 @@ const InitiationStage = ({ separation, onOpenLetterModal, onOpenSendLetterModal,
           </p>
         )}
 
-        <AttachmentCard attachments={separation.letter_attachments || []} label="Attached Letters" />
+        <AttachmentCard
+          attachments={enrichedAttachments}
+          label="Attached Letters"
+          onUploadSignedCopy={(attachmentId, idx) => setUploadSignedCopyModal({ attachmentId, idx })}
+        />
       </div>
 
       <Tooltip id='initiation-tooltip' />
+
+      <UploadSignedCopyModal
+        isOpen={uploadSignedCopyModal}
+        setIsOpen={setUploadSignedCopyModal}
+        separationId={separation.id}
+        onLocalSuccess={(attachmentId, idx) => {
+          setLocalSignedIdxs(prev => new Set(prev).add(attachmentId ?? idx));
+        }}
+      />
     </div>
   );
 };

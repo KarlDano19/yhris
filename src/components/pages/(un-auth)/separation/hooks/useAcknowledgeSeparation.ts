@@ -2,20 +2,28 @@ import { useMutation } from '@tanstack/react-query';
 
 interface AcknowledgeSeparationData {
   separation_id: number;
+  signature: string | File;
 }
 
 async function acknowledgeSeparation(data: AcknowledgeSeparationData) {
   try {
-    const payload = {
-      action: "acknowledge"
-    };
+    let body: string | FormData;
+    let headers: Record<string, string> = {};
 
-    const config = {
+    if (data.signature instanceof File) {
+      const formData = new FormData();
+      formData.append('action', 'sign');
+      formData.append('signature', data.signature);
+      body = formData;
+    } else {
+      headers['content-type'] = 'application/json';
+      body = JSON.stringify({ action: 'sign', signature: data.signature });
+    }
+
+    const config: RequestInit = {
       method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      headers,
+      body,
     };
 
     const res = await fetch(
@@ -25,7 +33,7 @@ async function acknowledgeSeparation(data: AcknowledgeSeparationData) {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `Failed to acknowledge separation: ${res.status}`);
+      throw new Error(errorData.message || `Failed to submit signature: ${res.status}`);
     }
 
     return res.json();
@@ -33,7 +41,7 @@ async function acknowledgeSeparation(data: AcknowledgeSeparationData) {
     if (err instanceof Error) {
       throw err;
     }
-    throw new Error('Failed to acknowledge separation');
+    throw new Error('Failed to submit signature');
   }
 }
 
