@@ -87,6 +87,12 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
         totalPages: personelMovementListData.total_pages,
         totalRecords: personelMovementListData.total_records,
       });
+
+      // Invalidate employee select cache when any movement is approved
+      const hasApproved = formattedRecords.some((record: any) => record.status === 'approved');
+      if (hasApproved) {
+        queryClient.invalidateQueries(['employeePaginatedSelectCache']);
+      }
     }
   }, [personelMovementListData]);
 

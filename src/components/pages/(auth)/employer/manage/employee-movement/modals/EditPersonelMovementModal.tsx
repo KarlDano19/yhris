@@ -3,7 +3,6 @@ import { Dispatch, Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useQueryClient } from "@tanstack/react-query";
 
 import CustomToast from "@/components/CustomToast";
 import EmployeeProfile from "./tabs/EmployeeProfile";
@@ -30,8 +29,7 @@ function PrintPersonelMovementModal({
   isOpen: T_ModalData;
   setIsOpen: Dispatch<T_ModalData | null>;
 }) {
-  const cancelButtonRef = useRef(null);
-  const queryClient = useQueryClient();
+  const cancelButtonRef = useRef(null);;
   const [currentPosition, setCurrentPosition] = useState('');
   const [newPosition, setNewPosition] = useState('');
   const [currentEmploymentStatus, setCurrentEmploymentStatus] = useState('');
@@ -100,11 +98,6 @@ const onSubmit = handleSubmit((data) => {
             duration: 5000,
           }
         );
-        // If the movement is now fully approved, the employee's position and
-        // employment status have been updated — invalidate the select cache
-        if (data.personnel_movement?.status === 'approved') {
-          queryClient.invalidateQueries(['employeePaginatedSelectCache']);
-        }
         // Refetch all necessary data
         refetchApprovals();
         refetchPersonelMovement();
