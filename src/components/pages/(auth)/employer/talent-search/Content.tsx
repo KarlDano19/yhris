@@ -445,7 +445,7 @@ const Content = () => {
       removeFavoriteMutation.mutate(applicantId, {
         onSuccess: () => {
           refetchFavorites();
-          toast.custom((t) => <CustomToast message='Removed from favorites.' type='error' />, { duration: 4000 });
+          toast.custom((t) => <CustomToast message='Removed from favorites.' type='success' />, { duration: 4000 });
         },
         onError: (error: any) => {
           toast.custom(
@@ -563,7 +563,7 @@ const Content = () => {
         </div>
         <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
           <div className='flex p-4'>
-            <BackButton label="Dashboard" />
+            <BackButton label="Dashboard" href="/dashboard" />
           </div>
           <div className='px-2 md:px-8 lg:px-4'>
             <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-6'>
@@ -946,9 +946,9 @@ const Content = () => {
                               <div>
                                 <button
                                   onClick={() => handleToggleBookmark(applicant.id)}
-                                  className='absolute top-3 left-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
+                                  className='absolute top-3 right-3 p-1 hover:bg-gray-100 rounded-full transition-colors z-10'
                                   data-tooltip-id={`bookmark-tooltip-${applicant.id}`}
-                                  data-tooltip-place='right'
+                                  data-tooltip-place='left'
                                 >
                                   {isApplicantFavorited(applicant.id) ? (
                                     <BookmarkFilledIcon className='h-5 w-5 text-blue-600' />

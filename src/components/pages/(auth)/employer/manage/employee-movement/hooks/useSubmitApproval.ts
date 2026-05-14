@@ -73,14 +73,16 @@ function useSubmitApproval() {
         );
         
         // Update the movement details cache
-        queryClient.setQueryData(
-          ['personnelMovementDetails', variables.personnel_movement_id],
-          (oldData: any) => ({
-            ...oldData,
-            current_approval_stage: data.personnel_movement.current_approval_stage,
-            status: data.personnel_movement.status
-          })
-        );
+        if (data.personnel_movement) {
+          queryClient.setQueryData(
+            ['personnelMovementDetails', variables.personnel_movement_id],
+            (oldData: any) => ({
+              ...oldData,
+              current_approval_stage: data.personnel_movement.current_approval_stage,
+              status: data.personnel_movement.status
+            })
+          );
+        }
         
         // Invalidate queries to ensure fresh data
         queryClient.invalidateQueries(['personnelMovementApprovalsCache', variables.personnel_movement_id]);
