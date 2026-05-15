@@ -86,6 +86,7 @@ export default function CreateJobModal({
   fifthForm,
   sixthForm,
   seventhForm,
+  autoLoadDraftId,
 }: {
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
@@ -113,6 +114,7 @@ export default function CreateJobModal({
   fifthForm: ReturnType<typeof useForm>;
   sixthForm: ReturnType<typeof useForm>;
   seventhForm: ReturnType<typeof useForm>;
+  autoLoadDraftId?: number | null;
 }) {
   const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useAddJobPostItems();
@@ -130,6 +132,7 @@ export default function CreateJobModal({
   const [selectedDraft, setSelectedDraft] = useState<T_JobPostingDraft | null>(null);
   const [localDraftCleared, setLocalDraftCleared] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const autoLoadFiredRef = useRef(false);
 
   const allDrafts = useMemo(() => {
     const combinedDrafts = [...backendDrafts];
@@ -153,6 +156,24 @@ export default function CreateJobModal({
     return combinedDrafts;
   }, [backendDrafts, localDraftCleared]);
 
+
+  // Auto-load a specific draft when opened via "Resume" from Job Posting History
+  useEffect(() => {
+    if (
+      isOpen &&
+      autoLoadDraftId !== undefined &&
+      autoLoadDraftId !== null &&
+      !isDraftsLoading &&
+      allDrafts.length > 0 &&
+      !autoLoadFiredRef.current
+    ) {
+      const draftToLoad = allDrafts.find((d) => d.id === autoLoadDraftId);
+      if (draftToLoad) {
+        autoLoadFiredRef.current = true;
+        handleLoadDraftClick(draftToLoad);
+      }
+    }
+  }, [isOpen, autoLoadDraftId, isDraftsLoading, allDrafts]);
 
   // Auto-save to localStorage whenever form data changes
   useEffect(() => {
