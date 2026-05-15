@@ -36,6 +36,9 @@ export default function BackButton({ label, href, className, onClick }: Props) {
       return;
     }
 
+    // Fallback
+    router.back()
+
   };
 
   return (
