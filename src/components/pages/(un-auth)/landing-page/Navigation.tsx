@@ -1,159 +1,109 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-
 import MainLogo from "@/svg/MainLogo";
+
+const dropdownStyle = {
+  background: '#ffffff',
+  border: '1px solid rgba(0,0,0,0.08)',
+  backdropFilter: 'blur(20px)',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+};
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUseCasesOpen, setIsUseCasesOpen] = useState(false);
-  const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const pathname = usePathname();
-  const useCasesDropdownRef = useRef<HTMLDivElement>(null);
-  const docsDropdownRef = useRef<HTMLDivElement>(null);
+  const resourcesDropdownRef = useRef<HTMLDivElement>(null);
   const getStartedDropdownRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (useCasesDropdownRef.current && !useCasesDropdownRef.current.contains(event.target as Node)) {
-        setIsUseCasesOpen(false);
-      }
-      if (docsDropdownRef.current && !docsDropdownRef.current.contains(event.target as Node)) {
-        setIsDocsOpen(false);
-      }
-      if (getStartedDropdownRef.current && !getStartedDropdownRef.current.contains(event.target as Node)) {
-        setIsGetStartedOpen(false);
-      }
+      if (resourcesDropdownRef.current && !resourcesDropdownRef.current.contains(event.target as Node)) setIsResourcesOpen(false);
+      if (getStartedDropdownRef.current && !getStartedDropdownRef.current.contains(event.target as Node)) setIsGetStartedOpen(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  
-  // Helper function to create proper navigation links
-  const getNavLink = (section: string) => {
-    if (pathname === '/landing-page') {
-      return `#${section}`;
-    }
-    return `/landing-page#${section}`;
-  };
-
-  // Use cases items
-  const useCaseItems = [
-    { href: "/use-cases/employee-onboarding", label: "Employee Onboarding" },
-    { href: "/use-cases/performance-management", label: "Performance Management" },
-    { href: "/use-cases/employee-documentation", label: "Employee Documentation" }
-  ];
 
   return (
-    <nav className="fixed top-4 left-4 right-4 z-[9999] mb-8">
-      <div className="bg-white/70 backdrop-blur-xl rounded-full shadow-lg shadow-black/5 border border-white/30 max-w-screen-2xl mx-auto">
+    <nav className="fixed top-4 left-4 right-4 z-[9999]">
+      {/* Main bar */}
+      <div className="rounded-full max-w-screen-2xl mx-auto"
+        style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(0,0,0,0.08)', backdropFilter: 'blur(20px)', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
         <div className="flex justify-between items-center h-16 px-4 lg:px-6">
+
+          {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/landing-page" className="flex items-center space-x-2">
-              <div className="h-6 w-auto">
-                <MainLogo />
-              </div>
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="h-6 w-auto"><MainLogo /></div>
             </Link>
           </div>
-          
+
+          {/* Desktop nav links */}
           <div className="hidden xl:block">
-            <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7 safari-nav-container">
-              <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+            <div className="ml-8 lg:ml-10 flex items-baseline space-x-5 lg:space-x-7">
+              <Link href="/features" className="text-gray-500 hover:text-gray-900 px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Features
               </Link>
-              <div className="relative" ref={useCasesDropdownRef}>
-                <button
-                  onClick={() => setIsUseCasesOpen(!isUseCasesOpen)}
-                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center"
-                >
-                  Use Cases
-                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isUseCasesOpen ? 'rotate-180' : ''}`} />
+
+              {/* Resources */}
+              <div className="relative" ref={resourcesDropdownRef}>
+                <button onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                  className="text-gray-500 hover:text-gray-900 px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center">
+                  Resources
+                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`} />
                 </button>
-                {isUseCasesOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
-                    <Link
-                      href="/use-cases/employee-onboarding"
-                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                      onClick={() => setIsUseCasesOpen(false)}
-                    >
+                {isResourcesOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-64 rounded-2xl shadow-lg py-2 z-50" style={dropdownStyle}>
+                    <p className="px-4 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">Use Cases</p>
+                    <Link href="/use-cases/employee-onboarding" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsResourcesOpen(false)}>
                       Employee Onboarding
                     </Link>
-                    <Link
-                      href="/use-cases/performance-management"
-                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                      onClick={() => setIsUseCasesOpen(false)}
-                    >
+                    <Link href="/use-cases/performance-management" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsResourcesOpen(false)}>
                       Performance Management
                     </Link>
-                  </div>
-                )}
-              </div>
-              <div className="relative" ref={docsDropdownRef}>
-                <button
-                  onClick={() => setIsDocsOpen(!isDocsOpen)}
-                  className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center"
-                >
-                  Docs
-                  <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isDocsOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isDocsOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
-                    <Link
-                      href="/docs"
-                      className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                      onClick={() => setIsDocsOpen(false)}
-                    >
+                    <div className="my-2 mx-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} />
+                    <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">Docs</p>
+                    <Link href="/docs" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsResourcesOpen(false)}>
                       Get Setup in YAHSHUA HRIS
+                    </Link>
+                    <div className="my-2 mx-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }} />
+                    <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">Blog</p>
+                    <Link href="/blog" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsResourcesOpen(false)}>
+                      HR Insights &amp; Guides
                     </Link>
                   </div>
                 )}
               </div>
-              <Link href="/how-we-compare" className="hidden lg:block text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
-                How We Compare to Others
-              </Link>
-              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+
+              <Link href="/pricing" className="text-gray-500 hover:text-gray-900 px-2 py-2 text-sm font-medium transition-colors whitespace-nowrap">
                 Pricing
               </Link>
             </div>
           </div>
 
-          <div className="hidden xl:flex items-center space-x-4">
-            <Link 
-              href="/jobs" 
-              className="text-indigo-dye hover:text-[#FFC107] px-4 py-2 text-sm font-medium transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-full"
-            >
+          {/* Desktop right CTAs */}
+          <div className="hidden xl:flex items-center space-x-3">
+            <Link href="/jobs" className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors border border-black/15 hover:border-black/30 rounded-full">
               Find Jobs
             </Link>
             <div className="relative" ref={getStartedDropdownRef}>
-              <button
-                onClick={() => setIsGetStartedOpen(!isGetStartedOpen)}
-                className="bg-[#FFC107] hover:bg-amber-600 text-black px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg flex items-center"
-              >
+              <button onClick={() => setIsGetStartedOpen(!isGetStartedOpen)}
+                className="bg-primary hover:brightness-110 text-navy px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center shadow-lg"
+                style={{ boxShadow: '0 2px 12px rgba(255,193,7,0.3)' }}>
                 Get Started
                 <ChevronDownIcon className={`ml-1 h-4 w-4 transition-transform ${isGetStartedOpen ? 'rotate-180' : ''}`} />
               </button>
               {isGetStartedOpen && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/30 py-2 z-50">
-                  <Link
-                    href="/register"
-                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                    onClick={() => setIsGetStartedOpen(false)}
-                  >
+                <div className="absolute top-full right-0 mt-2 w-44 rounded-2xl shadow-lg py-2 z-50" style={dropdownStyle}>
+                  <Link href="/register" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsGetStartedOpen(false)}>
                     Sign Up
                   </Link>
-                  <Link
-                    href="/login"
-                    className="block px-4 py-2 text-sm text-indigo-dye hover:bg-gray-100/50 hover:text-[#FFC107] transition-colors"
-                    onClick={() => setIsGetStartedOpen(false)}
-                  >
+                  <Link href="/login" className="block px-4 py-2 text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-colors" onClick={() => setIsGetStartedOpen(false)}>
                     Sign In
                   </Link>
                 </div>
@@ -161,60 +111,34 @@ const Navigation = () => {
             </div>
           </div>
 
+          {/* Mobile hamburger */}
           <div className="xl:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-indigo-dye hover:text-[#FFC107] p-2 rounded-full hover:bg-gray-100/50 transition-colors"
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-500 hover:text-gray-900 p-2 rounded-full hover:bg-black/5 transition-colors">
+              {isMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - Separate pill-shaped container */}
+      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="xl:hidden mt-2">
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 max-w-screen-2xl mx-auto">
+          <div className="rounded-2xl max-w-screen-2xl mx-auto" style={{ background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(0,0,0,0.08)', backdropFilter: 'blur(20px)', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
             <div className="px-4 py-4 space-y-1">
-              <Link href="/features" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Features
-              </Link>
+              <Link href="/features" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-4 py-2 text-base font-medium rounded-lg transition-colors">Features</Link>
               <div className="space-y-1">
-                <div className="text-indigo-dye px-4 py-2 text-base font-medium">Use Cases</div>
-                <Link href="/use-cases/employee-onboarding" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
-                  Employee Onboarding
-                </Link>
-                <Link href="/use-cases/performance-management" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
-                  Performance Management
-                </Link>
+                <div className="text-gray-400 px-4 py-2 text-xs uppercase tracking-widest font-semibold">Resources</div>
+                <Link href="/use-cases/employee-onboarding" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Employee Onboarding</Link>
+                <Link href="/use-cases/performance-management" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Performance Management</Link>
+                <Link href="/docs" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">Get Setup in YAHSHUA HRIS</Link>
+                <Link href="/blog" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">HR Insights &amp; Guides</Link>
               </div>
-              <div className="space-y-1">
-                <div className="text-indigo-dye px-4 py-2 text-base font-medium">Docs</div>
-                <Link href="/docs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-6 py-2 text-sm font-medium rounded-lg transition-colors">
-                  Get Setup in YAHSHUA HRIS
-                </Link>
-              </div>
-              <Link href="/how-we-compare" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                How We Compare to Others
-              </Link>
-              <Link href="/landing-page/pricing" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                Pricing
-              </Link>
-              <div className="pt-3 mt-3 border-t border-gray-200/50 space-y-1">
-                <Link href="/jobs" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors border border-indigo-dye hover:border-[#FFC107] rounded-lg">
-                  Find Jobs
-                </Link>
-                <Link href="/register" className="bg-[#FFC107] hover:bg-amber-600 text-black block px-4 py-2 rounded-lg text-base font-medium transition-colors">
-                  Sign Up
-                </Link>
-                <Link href="/login" className="text-indigo-dye hover:text-[#FFC107] hover:bg-gray-100/50 block px-4 py-2 text-base font-medium rounded-lg transition-colors">
-                  Sign In
-                </Link>
+              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-4 py-2 text-base font-medium rounded-lg transition-colors">Pricing</Link>
+              <div className="pt-3 mt-3 space-y-2" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                <Link href="/jobs" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-4 py-2 text-base font-medium rounded-lg transition-colors border border-black/15">Find Jobs</Link>
+                <Link href="/register" className="bg-primary text-navy block px-4 py-2 rounded-lg text-base font-semibold transition-colors hover:brightness-110">Sign Up</Link>
+                <Link href="/login" className="text-gray-600 hover:text-gray-900 hover:bg-black/5 block px-4 py-2 text-base font-medium rounded-lg transition-colors">Sign In</Link>
               </div>
             </div>
           </div>

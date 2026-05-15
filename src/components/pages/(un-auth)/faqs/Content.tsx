@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Navigation from "@/components/pages/(un-auth)/landing-page/Navigation";
+import LpFooter from "@/components/pages/(un-auth)/landing-page/LpFooter";
 
 import SettingsLogo from "@/svg/SettingsLogo";
 import PostJobModal from "./modals/PostJobModal";
@@ -132,376 +134,157 @@ const FaqPage = () => {
     },
   ];
 
+  const featureCards = [
+    { logo: <AddPostLogo />, label: "Post a Job", desc: "Create and manage job postings.", onClick: () => setIsPostJobModalOpen(true), tutorialUrl: "https://youtu.be/iqurBHuLFgk", hasTutorial: true },
+    { logo: <ScreenApplicantsLogo />, label: "Screen Applicants", desc: "Review and evaluate job applications.", onClick: () => setIsScreenApplicantsModalOpen(true), tutorialUrl: "https://youtu.be/TiQ1NNdTbSQ", hasTutorial: true },
+    { logo: <OrientLogo />, label: "Orient", desc: "Onboard and orient new employees.", onClick: () => setIsOrientModalOpen(true), tutorialUrl: "https://youtu.be/zNAUFdsaA2c", hasTutorial: true },
+    { logo: <ManageLogo />, label: "Manage", desc: "Manage employee information and records.", onClick: () => setIsManageModalOpen(true), hasTutorial: false },
+    { logo: <TrainLogo />, label: "Train", desc: "Access training resources and programs.", onClick: () => setIsTrainModalOpen(true), hasTutorial: false },
+    { logo: <PayrollLogo />, label: "Payroll", desc: "Manage payroll and compensation.", onClick: () => setIsPayrollModalOpen(true), hasTutorial: false },
+    { logo: <EmployeeSeparationLogo />, label: "Employee Separation", desc: "Handle employee exits and separations.", onClick: () => setIsEmployeeSeparationModalOpen(true), hasTutorial: false },
+    { logo: <EmployeeKitLogo />, label: "Employee Kit", desc: "Access employee resources and tools.", onClick: () => setIsEmployeeKitModalOpen(true), hasTutorial: false },
+    { logo: <DoleLogo />, label: "DOLE", desc: "Access DOLE-related information and compliance.", onClick: () => setIsDoleModalOpen(true), hasTutorial: false },
+    { logo: <SettingsLogo />, label: "Settings", desc: "Configure system settings and preferences.", onClick: () => setIsSettingsModalOpen(true), hasTutorial: false },
+  ];
+
   return (
-    <div className="container mx-auto py-16 px-4">
-      <div className="mb-8">
-        <h1 className="text-4xl text-center text-gray-800">
-          Frequently Asked Questions
-        </h1>
-      </div>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search FAQs..."
-          className="w-full p-2 border border-yellow-500 rounded"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <div className="space-y-4">
-        {faqs
-          .filter((faq) =>
-            faq.question.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-          .map((faq) => (
-            <div key={faq.id} className="border border-yellow-500 rounded">
-              <div
-                className="flex justify-between items-center p-4 cursor-pointer bg-white hover:bg-gray-100"
-                onClick={() => handleToggle(faq.id)}
-              >
-                <h2 className="font-semibold">{faq.question}</h2>
-                {activeIndex === faq.id ? (
-                  <MinusIcon className="h-5 w-5 text-yellow-500" />
-                ) : (
-                  <PlusIcon className="h-5 w-5 text-yellow-500" />
+    <>
+      <Navigation />
+      <div style={{ background: "hsl(var(--lp-page))" }}>
+        <main className="min-h-screen pt-16">
+
+          {/* Hero */}
+          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }} />
+            <div className="lp-section-container text-center relative z-10">
+              <span className="lp-section-label justify-center mb-5">FAQS</span>
+              <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold leading-tight text-white mb-5 tracking-tight">
+                Frequently Asked <span className="text-primary">Questions</span>
+              </h1>
+              <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
+                Everything you need to know about YAHSHUA HRIS and how it can simplify your HR operations.
+              </p>
+            </div>
+          </section>
+
+          {/* FAQ accordion */}
+          <section className="py-16">
+            <div className="lp-section-container max-w-3xl mx-auto">
+              <div className="mb-6">
+                <input
+                  type="text"
+                  placeholder="Search FAQs..."
+                  className="w-full px-4 py-3 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none transition-colors"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="divide-y" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                {faqs
+                  .filter((faq) => faq.question.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map((faq) => {
+                    const isOpen = activeIndex === faq.id;
+                    return (
+                      <div key={faq.id} style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                        <button
+                          className="w-full flex items-center justify-between py-5 text-left gap-4"
+                          onClick={() => handleToggle(faq.id)}
+                          aria-expanded={isOpen}
+                        >
+                          <span className="text-sm font-semibold text-white/80">{faq.question}</span>
+                          {isOpen ? (
+                            <MinusIcon className="h-4 w-4 text-primary shrink-0" />
+                          ) : (
+                            <PlusIcon className="h-4 w-4 text-white/30 shrink-0" />
+                          )}
+                        </button>
+                        <div className="grid transition-all duration-200 ease-in-out" style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}>
+                          <div className="overflow-hidden">
+                            <div className="text-sm text-white/45 leading-relaxed pr-8 pb-5">{faq.answer}</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                {searchTerm && !faqs.some((faq) => faq.question.toLowerCase().includes(searchTerm.toLowerCase())) && (
+                  <p className="text-center text-white/40 py-8 text-sm">No matching questions found.</p>
                 )}
               </div>
-              {activeIndex === faq.id && (
-                <div className="p-4 bg-gray-50">{faq.answer}</div>
-              )}
             </div>
-          ))}
-        {/* No matching questions found */}
-        {searchTerm &&
-          !faqs.some((faq) =>
-            faq.question.toLowerCase().includes(searchTerm.toLowerCase())
-          ) && <p className="text-center">No matching questions found.</p>}
-      </div>
-      <>
-        <div className="category-cards pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Post a Job card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsPostJobModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <AddPostLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-6">
-                <div className="header font-semibold">Post a Job</div>
-                <div className="description text-center">
-                  Create and manage job postings.
-                </div>
-                <div className="extra content mt-2">
-                  <div className="extra content mt-2">
-                    <button
-                      className="text-blue-500 border-2 border-blue-500 rounded-md px-2 py-1 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-                      onClick={() =>
-                        window.open("https://youtu.be/iqurBHuLFgk", "_blank")
-                      }
-                    >
-                      <i className="youtube icon"></i>
-                      Watch Tutorial
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          </section>
 
-            {/* Screen Applicants card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsScreenApplicantsModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <ScreenApplicantsLogo />
+          {/* Feature cards */}
+          <section className="py-16" style={{ background: "hsl(var(--lp-surface))", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="lp-section-container">
+              <div className="text-center mb-10">
+                <span className="lp-section-label justify-center mb-4">EXPLORE BY FEATURE</span>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Browse tutorials and guides by module.</h2>
               </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-6">
-                <div className="header font-semibold">Screen Applicants</div>
-                <div className="description text-center">
-                  Review and evaluate job applications.
-                </div>
-                <div className="extra content mt-2">
-                  <div className="extra content mt-2">
-                    <button
-                      className="text-blue-500 border-2 border-blue-500 rounded-md px-2 py-1 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-                      onClick={() =>
-                        window.open("https://youtu.be/TiQ1NNdTbSQ", "_blank")
-                      }
-                    >
-                      <i className="youtube icon"></i>
-                      Watch Tutorial
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Orient card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsOrientModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <OrientLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">Orient</div>
-                <div className="description text-center">
-                  Onboard and orient new employees.
-                </div>
-                <div className="extra content mt-2">
-                  <div className="extra content mt-2">
-                    <div className="extra content mt-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {featureCards.map((card) => (
+                  <div
+                    key={card.label}
+                    className="lp-dark-card p-5 cursor-pointer flex flex-col items-center text-center gap-3 transition-all duration-200"
+                    onClick={card.onClick}
+                  >
+                    <div className="flex justify-center items-center w-12 h-12">{card.logo}</div>
+                    <p className="text-sm font-semibold text-white/80">{card.label}</p>
+                    <p className="text-xs text-white/35 leading-relaxed">{card.desc}</p>
+                    {card.hasTutorial ? (
                       <button
-                        className="text-blue-500 border-2 border-blue-500 rounded-md px-2 py-1 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-                        onClick={() =>
-                          window.open("https://youtu.be/zNAUFdsaA2c", "_blank")
-                        }
+                        className="text-xs text-primary border rounded-md px-2.5 py-1 transition-all hover:bg-primary hover:text-navy"
+                        style={{ borderColor: "rgba(255,193,7,0.3)" }}
+                        onClick={(e) => { e.stopPropagation(); window.open((card as any).tutorialUrl, "_blank"); }}
                       >
-                        <i className="youtube icon"></i>
                         Watch Tutorial
                       </button>
-                    </div>
+                    ) : (
+                      <span className="text-xs text-white/20 border rounded-md px-2.5 py-1 cursor-not-allowed" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                        Coming Soon
+                      </span>
+                    )}
                   </div>
-                </div>
+                ))}
               </div>
             </div>
+          </section>
 
-            {/* Manage card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsManageModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <ManageLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">Manage</div>
-                <div className="description text-center">
-                  Manage employee information and records.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Train card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsTrainModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <TrainLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">Train</div>
-                <div className="description text-center">
-                  Access training resources and programs.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Payroll card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsPayrollModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <PayrollLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">Payroll</div>
-                <div className="description text-center">
-                  Manage payroll and compensation.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Employee Separation card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsEmployeeSeparationModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <EmployeeSeparationLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-8">
-                <div className="header font-semibold">Employee Separation</div>
-                <div className="description text-center">
-                  Handle employee exits and separations.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Employee Kit card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsEmployeeKitModalOpen(true)}
-            >
-              <div className="flex justify-center items-center">
-                <EmployeeKitLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">Employee Kit</div>
-                <div className="description text-center">
-                  Access employee resources and tools.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* DOLE card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsDoleModalOpen(true)}
-            >
-              <div className="flex justify-center items-center">
-                <DoleLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-4">
-                <div className="header font-semibold">DOLE</div>
-                <div className="description text-center">
-                  Access DOLE-related information and compliance.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Settings card */}
-            <div
-              className="bg-white border border-yellow-500 rounded-lg shadow-md p-4 hover:cursor-pointer transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
-              onClick={() => setIsSettingsModalOpen(true)}
-            >
-              <div className="flex justify-center items-center pt-4">
-                <SettingsLogo />
-              </div>
-              <div className="flex flex-col justify-center items-center space-y-2 px-4 py-6">
-                <div className="header font-semibold">Settings</div>
-                <div className="description text-center">
-                  Configure system settings and preferences.
-                </div>
-                <div className="extra content mt-2">
-                  <button
-                    className="text-gray-400 cursor-not-allowed border-2 border-blue-500 rounded-md px-2 py-1"
-                    disabled
-                  >
-                    <i className="youtube icon"></i>
-                    Watch Tutorial
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
+        </main>
+        <LpFooter />
+      </div>
 
       {isPostJobModalOpen && (
-        <PostJobModal
-          isOpen={isPostJobModalOpen}
-          setIsOpen={setIsPostJobModalOpen}
-        />
+        <PostJobModal isOpen={isPostJobModalOpen} setIsOpen={setIsPostJobModalOpen} />
       )}
       {isScreenApplicantsModalOpen && (
-        <ScreenApplicantsModal
-          isOpen={isScreenApplicantsModalOpen}
-          setIsOpen={setIsScreenApplicantsModalOpen}
-        />
+        <ScreenApplicantsModal isOpen={isScreenApplicantsModalOpen} setIsOpen={setIsScreenApplicantsModalOpen} />
       )}
       {isOrientModalOpen && (
-        <OrientModal
-          isOpen={isOrientModalOpen}
-          setIsOpen={setIsOrientModalOpen}
-        />
+        <OrientModal isOpen={isOrientModalOpen} setIsOpen={setIsOrientModalOpen} />
       )}
       {isManageModalOpen && (
-        <ManageModal
-          isOpen={isManageModalOpen}
-          setIsOpen={setIsManageModalOpen}
-        />
+        <ManageModal isOpen={isManageModalOpen} setIsOpen={setIsManageModalOpen} />
       )}
       {isTrainModalOpen && (
         <TrainModal isOpen={isTrainModalOpen} setIsOpen={setIsTrainModalOpen} />
       )}
       {isPayrollModalOpen && (
-        <PayrollModal
-          isOpen={isPayrollModalOpen}
-          setIsOpen={setIsPayrollModalOpen}
-        />
+        <PayrollModal isOpen={isPayrollModalOpen} setIsOpen={setIsPayrollModalOpen} />
       )}
       {isEmployeeSeparationModalOpen && (
-        <EmployeeSeparationModal
-          isOpen={isEmployeeSeparationModalOpen}
-          setIsOpen={setIsEmployeeSeparationModalOpen}
-        />
+        <EmployeeSeparationModal isOpen={isEmployeeSeparationModalOpen} setIsOpen={setIsEmployeeSeparationModalOpen} />
       )}
       {isEmployeeKitModalOpen && (
-        <EmployeeKitModal
-          isOpen={isEmployeeKitModalOpen}
-          setIsOpen={setIsEmployeeKitModalOpen}
-        />
+        <EmployeeKitModal isOpen={isEmployeeKitModalOpen} setIsOpen={setIsEmployeeKitModalOpen} />
       )}
       {isDoleModalOpen && (
         <DoleModal isOpen={isDoleModalOpen} setIsOpen={setIsDoleModalOpen} />
       )}
       {isSettingsModalOpen && (
-        <SettingsModal
-          isOpen={isSettingsModalOpen}
-          setIsOpen={setIsSettingsModalOpen}
-        />
+        <SettingsModal isOpen={isSettingsModalOpen} setIsOpen={setIsSettingsModalOpen} />
       )}
-    </div>
+    </>
   );
 };
 
