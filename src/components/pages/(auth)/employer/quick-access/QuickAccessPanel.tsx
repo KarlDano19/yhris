@@ -38,12 +38,12 @@ type Props = {
 export default function QuickAccessPanel({ className = '', hasActiveSubscription, onGrayedOutClick }: Props) {
   const router = useRouter();
   const cachedRights = useLegacyPermissions();
-  const { data, isLoading } = useGetQuickAccess();
-  const { mutate: saveOrder } = useUpdateQuickAccess();
-  const { data: counters } = useGetQuickAccessCounters();
-
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [localItems, setLocalItems] = useState<string[]>([]);
+
+  const { data, isLoading } = useGetQuickAccess();
+  const { mutate: saveOrder } = useUpdateQuickAccess();
+  const { data: counters } = useGetQuickAccessCounters(localItems);
 
   useEffect(() => {
     if (data?.items) {
@@ -66,6 +66,8 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
       return;
     }
     window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
+    const urlPath = new URL(url, window.location.origin).pathname;
+    sessionStorage.setItem('fromQuickAccess', urlPath);
     router.push(url);
   };
 
@@ -168,7 +170,7 @@ export default function QuickAccessPanel({ className = '', hasActiveSubscription
                                 <span className='text-xs text-gray-800 font-semibold leading-tight truncate'>
                                   {catalogItem.label}
                                 </span>
-                                {counter != null && (
+                                {counter != null && counter.count > 0 && (
                                   <span className='text-xs text-savoy-blue font-medium'>
                                     {counter.count} {counter.label}
                                   </span>

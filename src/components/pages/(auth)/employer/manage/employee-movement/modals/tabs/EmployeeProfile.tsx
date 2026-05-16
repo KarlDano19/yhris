@@ -22,6 +22,7 @@ function EmployeeProfile({
   isLoading,
   watch,
   isEdit,
+  isEditable = false,
   currentPosition,
   setCurrentPosition,
   newPosition,
@@ -42,6 +43,7 @@ function EmployeeProfile({
   isLoading: boolean;
   watch: any;
   isEdit: boolean;
+  isEditable?: boolean;
   currentPosition: string;
   setCurrentPosition: (v: string) => void;
   newPosition: string;
@@ -99,7 +101,7 @@ function EmployeeProfile({
   }, [isEdit, watch, setCurrentPosition, setNewPosition, setCurrentEmploymentStatus, setNewEmploymentStatus]);
 
   const onSubmit = (data: any) => {
-    if (isEdit) {
+    if (isEdit && !isEditable) {
       setSelectedTab(2);
     } else {
       onValidSubmit(data);
@@ -107,7 +109,7 @@ function EmployeeProfile({
   };
 
   return (
-    <form onSubmit={!isEdit ? handleSubmit(onSubmit) : onSubmit}>
+    <form onSubmit={isEdit && !isEditable ? onSubmit : handleSubmit(onSubmit)}>
       <div className='px-4 pt-4 pb-6'>
 
         <div className='grid grid-cols-3 gap-6 mt-4 pb-6'>
@@ -144,19 +146,18 @@ function EmployeeProfile({
                 required={true}
                 placeholder="Select employee..."
                 isMulti={false}
-                isClearable={!isEdit}
-                disabled={isEdit}
+                isClearable={!isEdit || isEditable}
+                disabled={isEdit && !isEditable}
                 employeeSearch={employeeSearch}
                 setEmployeeSearch={setEmployeeSearch}
                 employeeName={employeeName}
                 className=""
                 onChange={(selectedOption: any) => {
-                  if (!isEdit && selectedOption && !selectedOption.isShowMore) {
+                  if ((!isEdit || isEditable) && selectedOption && !selectedOption.isShowMore) {
                     setEmployeeSearch(selectedOption.label);
-                    
+
                     // Auto-fill current position from employee data
                     if (selectedOption.position) {
-                      // Find the position ID by matching the position name
                       const matchingPosition = positionItems.find(
                         (item: any) => item.name === selectedOption.position
                       );
@@ -165,10 +166,9 @@ function EmployeeProfile({
                         setValue('current_position', matchingPosition.id);
                       }
                     }
-                    
+
                     // Auto-fill current employment status from employee data
                     if (selectedOption.employment_status) {
-                      // Find the employment status ID by matching the status name
                       const matchingStatus = employeeStatusItems.find(
                         (item: any) => item.name === selectedOption.employment_status
                       );
@@ -177,9 +177,8 @@ function EmployeeProfile({
                         setValue('current_employment_status', matchingStatus.id);
                       }
                     }
-                  } else if (!isEdit) {
+                  } else if (!isEdit || isEditable) {
                     setEmployeeSearch('');
-                    // Clear current position and employment status when employee is unselected
                     setCurrentPosition('');
                     setCurrentEmploymentStatus('');
                     setValue('current_position', '');
@@ -243,7 +242,7 @@ function EmployeeProfile({
                   setNewPosition(e.target.value);
                   setValue('new_position', e.target.value);
                 }}
-                disabled={isEdit}
+                disabled={isEdit && !isEditable}
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
               >
                 <option value=''>Select...</option>
@@ -314,7 +313,7 @@ function EmployeeProfile({
                   setNewEmploymentStatus(e.target.value);
                   setValue('new_employment_status', e.target.value);
                 }}
-                disabled={isEdit}
+                disabled={isEdit && !isEditable}
                 className='appearance-none block w-full rounded-md border-0 py-2 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
               >
                 <option value=''>Select...</option>
@@ -355,7 +354,7 @@ function EmployeeProfile({
                       pickerOnChange={(date: any) => field.onChange(date)}
                       inputOnChange={(value: any) => field.onChange(value)}
                       required={true}
-                      disabled={isEdit}
+                      disabled={isEdit && !isEditable}
                     />
                   )}
                 />
@@ -377,7 +376,7 @@ function EmployeeProfile({
                     {...register('reason', { required: true })}
                     id='early_regularization'
                     value='Early Regularization'
-                    disabled={isEdit}
+                    disabled={isEdit && !isEditable}
                   />
                   <label htmlFor='early_regularization' className='ml-2'>
                     Early Regularization
@@ -389,7 +388,7 @@ function EmployeeProfile({
                     {...register('reason', { required: true })}
                     id='passed_probation'
                     value='Passed Probation Period'
-                    disabled={isEdit}
+                    disabled={isEdit && !isEditable}
                   />
                   <label htmlFor='passed_probation' className='ml-2'>
                     Passed Probation Period
@@ -401,7 +400,7 @@ function EmployeeProfile({
                     {...register('reason', { required: true })}
                     id='appointment'
                     value='Appointment'
-                    disabled={isEdit}
+                    disabled={isEdit && !isEditable}
                   />
                   <label htmlFor='appointment' className='ml-2'>
                     Appointment
@@ -426,7 +425,7 @@ function EmployeeProfile({
                     {...register('proposed_rate', { required: true })}
                     id='No changes'
                     value='No changes'
-                    disabled={isEdit}
+                    disabled={isEdit && !isEditable}
                   />
                   <label htmlFor='No changes' className='ml-2'>
                     No changes
@@ -438,7 +437,7 @@ function EmployeeProfile({
                     {...register('proposed_rate', { required: true })}
                     id='apply_percentage_increase'
                     value='Apply Increase'
-                    disabled={isEdit}
+                    disabled={isEdit && !isEditable}
                   />
                   <label htmlFor='apply_percentage_increase' className='ml-2'>
                     Apply % Increase
@@ -455,7 +454,7 @@ function EmployeeProfile({
                       min: 0,
                       max: 100
                     })}
-                    disabled={watch('proposed_rate') !== 'Apply Increase' || isEdit}
+                    disabled={watch('proposed_rate') !== 'Apply Increase' || (isEdit && !isEditable)}
                     placeholder='Enter percentage'
                     className='rounded-md w-32 border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:black sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-500'
                   />
@@ -497,7 +496,8 @@ function EmployeeProfile({
             </div>
           )}
           {!isLoading && !isEdit && 'Submit'}
-          {!isLoading && isEdit && 'Next'}
+          {!isLoading && isEdit && !isEditable && 'View Approvals →'}
+          {!isLoading && isEdit && isEditable && 'Save Changes'}
         </button>
       </div>
     </form>

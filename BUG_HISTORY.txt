@@ -109,6 +109,876 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-018
+DATE FILED: 2026-04-30
+DATE FIXED: 2026-04-30
+REPORTER: Internal - Internal - Dev
+
+ISSUE DESCRIPTION:
+  On the Employee 201 Records detail page, the back button (← Manage | Employee
+  201 Records | <Name>) was completely unresponsive — no click reaction, no
+  navigation — but ONLY when the active tab was "Personal Information" and the
+  employee had one or more missing required Government ID fields (TIN, SSS,
+  PAG-IBIG, PhilHealth). Switching to another tab (e.g., Employment Details)
+  where all required fields had values made the back button work normally.
+
+  Root cause: PersonalInfoForm calls `trigger()` on mount to surface required-
+  field validation errors in view mode. This caused `hasErrors` to update, which
+  fired the `onErrorsChange` callback via a `useEffect`. Because `onErrorsChange`
+  was an inline function prop (new reference on every render) AND was listed in
+  the effect's dependency array, the effect re-ran every render cycle. Each run
+  called `setSections(...)` in Content.tsx, which created a new object reference
+  and scheduled another render — creating an infinite re-render loop. React's
+  main thread was saturated, making the entire page unresponsive and the back
+  button unclickable.
+
+  EmploymentDetailsForm had the same `onErrorsChange` pattern but correctly
+  omitted it from the `useEffect` deps (`[hasErrors]` only), so it did not
+  exhibit the loop.
+
+DESIRED OUTCOME:
+  The back button should always be clickable in view mode regardless of whether
+  required fields have values. Clicking it should navigate to
+  /manage/employee-201-records immediately (no leave-confirmation modal) when
+  the user has not entered Edit mode and has not made any changes.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/components/PersonalInfoForm.tsx
+- src/components/pages/(auth)/employer/manage/employee-201-records/[id]/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Components tested (rendering, props, state changes) — manual verification
+☑ Form validation tested (React Hook Form rules, error states)
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified back button navigates correctly on Personal tab with missing fields
+  - Verified back button still works on Employment Details tab
+  - Verified Edit mode still marks section dirty on user input
+  - Verified Leave Confirmation modal still appears when user edits and tries to leave
+☑ Edge cases tested:
+  - Employee with all fields filled: back button works ✓
+  - Employee with missing Government IDs: back button works ✓
+  - User enters Edit mode, makes changes, clicks back: modal appears ✓
+  - User enters Edit mode, no changes, clicks back: modal appears ✓
+☐ Cypress/Playwright e2e tests updated (if applicable)
+
+FIX EXPLANATION:
+  Two changes were made:
+
+  1. PersonalInfoForm.tsx — Removed `onErrorsChange` from `useEffect` deps:
+     The effect that calls `onErrorsChange(hasErrors)` previously had
+     `[hasErrors, onErrorsChange]` as its dependency array. Since `onErrorsChange`
+     is an inline function in Content.tsx it gets a new reference on every render,
+     causing the effect to re-run on every render → infinite loop. Changing the
+     deps to `[hasErrors]` (matching EmploymentDetailsForm's correct pattern)
+     ensures the callback only fires when the actual error state changes.
+
+  2. Content.tsx — Added edit-mode guard to `onPatchChange` callbacks:
+     Both the Personal and Employment `onPatchChange` inline handlers now return
+     early if the respective `editMode` flag is false. This is a defensive guard
+     ensuring that any unexpected RHF internal event (e.g., from `trigger()` or
+     subscription re-creation) cannot set `dirty = true` when the user has not
+     consciously entered Edit mode, which would have caused the LeaveConfirmModal
+     to appear unnecessarily on back-button click.
+
+================================================================================
+
+BUG ID: HRIS-2026-017
+DATE FILED: 2026-04-23
+DATE FIXED: 2026-04-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  Three related display bugs in the Evaluation History module, all stemming from
+  rich-text HTML stored in the database being rendered as raw escaped text in the UI:
+
+  1. In the "Questions & Responses" tab of the Evaluation History modal, question
+     titles (criterion.title) showed raw HTML tags (e.g. "<p><br></p><p>5 - Outstanding
+     ...</p>") instead of formatted content. The title was interpolated directly into
+     JSX as `{criterion.title}`, causing React to escape the markup.
+
+  2. In the "Evaluation Details" modal (EvaluationDetailsModal), the section title,
+     section description, and criterion title fields all stored rich-text HTML but were
+     likewise interpolated as plain JSX text, showing raw tags throughout the form view.
+
+  3. In the same "Evaluation Details" modal, a "Comment:" label and empty value was
+     rendered for every criterion regardless of whether the evaluator left a comment.
+     Criteria with no comment still showed the bold "Comment:" heading with nothing
+     beneath it, creating visual noise.
+
+DESIRED OUTCOME:
+  - All rich-text fields (question titles, section titles, section descriptions,
+    criterion titles) render as formatted HTML so paragraphs, line breaks, and inline
+    styles appear correctly.
+  - The "Comment" block is hidden entirely when criterionItem.comment is blank/null.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/evaluation-response-details/QuestionsTab.tsx
+- src/components/pages/(auth)/employer/evaluation/evaluation-history/modals/components/EvaluationDetails.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☑ No backend changes required
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: npm test or yarn test
+☑ TypeScript types verified (no type errors)
+☑ Manual regression testing completed — HTML renders correctly, plain-text values unaffected
+☑ Cross-browser testing completed
+
+Integration & E2E:
+☑ Manual regression testing completed
+☑ Edge cases tested (plain-text titles, empty comments, mixed HTML/plain content)
+
+FIX EXPLANATION:
+
+  Fix 1 — QuestionsTab.tsx (criterion.title):
+  Replaced `{criterion.title}` with `<span dangerouslySetInnerHTML={{ __html: criterion.title }} />`.
+  The chevron icon alignment was also updated from `items-center` to `items-start` with
+  `shrink-0 mt-0.5` so it stays top-aligned when multi-line HTML causes the title to wrap.
+
+  Fix 2 — EvaluationDetails.tsx (section_title, section_description, criterionItem.title):
+  Applied `dangerouslySetInnerHTML` to all three rich-text fields:
+  - section_title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />` inside the heading.
+  - section_description: replaced `<p>{...}</p>` with `<p dangerouslySetInnerHTML={{ __html: ... }} />`.
+  - criterionItem.title: wrapped in `<span dangerouslySetInnerHTML={{ __html: ... }} />`.
+
+  Fix 3 — EvaluationDetails.tsx (blank comment):
+  Wrapped the entire Comment block in `{criterionItem.comment && (...)}` so the label and
+  value only render when the comment field has a truthy value.
+
+================================================================================
+
+BUG ID: HRIS-2026-016
+DATE FILED: 2026-04-22
+DATE FIXED: 2026-04-22
+REPORTER: Internal (Developer)
+
+ISSUE DESCRIPTION:
+  Sub-accounts created under an employer account were incorrectly redirected to the
+  HRIS Implementation Checklist (/setup-employer-profile/onboarding-checklist) on
+  first login, even though the main employer account had already completed onboarding.
+
+  Three separate bugs combined to cause this:
+
+  1. The frontend registration payload (useAddAccounts.ts) did not include
+     `has_onboarded: true`, so there was no signal to the backend that the new
+     sub-account should skip onboarding.
+
+  2. The backend's create_user() method in ObjectManager did not pass `has_onboarded`
+     from the request payload to User.objects.create(). Even after the frontend fix,
+     the field was silently dropped and the user record was always created with
+     has_onboarded = False (the model default).
+
+  3. The backend OTP verify endpoint (/api/auth/login/otp/verify/ →
+     LoginOTPVerifyAPIView) did not include `has_onboarded` or `login_type` in its
+     response payload. The direct-login endpoint did include both fields. Because
+     sub-accounts triggered OTP on first login, the frontend iron-session never
+     received has_onboarded, so session.hasCompletedOnboarding was set to undefined,
+     which evaluated as falsy in the middleware's onboarding gate.
+
+DESIRED OUTCOME:
+  Sub-accounts created via the employer settings Users page should have
+  has_onboarded = True persisted in the database. On login (including OTP-based
+  login), the session should reflect hasCompletedOnboarding = true, and the
+  Next.js middleware should allow sub-accounts to proceed directly to the dashboard
+  without redirecting through the onboarding checklist.
+
+FILES CHANGED:
+Backend:
+- app/mixins/object_manager.py
+- app/views/otp.py
+
+Frontend:
+- src/components/pages/(auth)/employer/settings/users/accounts/hooks/useAddAccounts.ts
+- src/app/api/login/otp/verify/route.ts
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (tests not yet implemented)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A — no schema changes)
+☐ Serializers tested (N/A)
+☑ Views/API endpoints tested (manual — new sub-account created, has_onboarded=True confirmed in DB, login OTP verify response includes has_onboarded: true)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A — no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☐ Components tested (N/A)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — pending)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (sub-account login via OTP → skips onboarding; main account login unaffected; has_onboarded persisted in DB)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+
+**Fix 1 — Frontend: useAddAccounts.ts**
+
+Added `has_onboarded: true` as a constant to the registration data payload sent to
+POST /api/register/. Sub-accounts created from the employer settings page should
+always start with onboarding already complete, since the main account owns the
+onboarding checklist.
+
+**Fix 2 — Backend: app/mixins/object_manager.py (create_user)**
+
+Added `has_onboarded=data.get("has_onboarded", False)` to the User.objects.create()
+call inside the create_user() method. Previously, has_onboarded was a recognised
+model field with default=False but was never read from the incoming request payload,
+so the frontend value was silently discarded.
+
+**Fix 3 — Backend: app/views/otp.py (LoginOTPVerifyAPIView)**
+
+Added `has_onboarded` and `login_type` to the OTP verify response payload for
+employer accounts, matching the same logic used in the direct-login endpoint
+(UserLoginWithOTPAPIView.handle_direct_login):
+
+  response["has_onboarded"] = (
+      True if not get_onboarding_enabled() or user.login_type in ("yahshua-payroll", "yg-payroll")
+      else bool(user.has_onboarded)
+  )
+  response["login_type"] = user.login_type
+
+Also added the import: from utils.employer_onboarding import get_onboarding_enabled
+
+**Fix 4 — Frontend: src/app/api/login/otp/verify/route.ts**
+
+Added `session['hasCompletedOnboarding'] = data.has_onboarded` and
+`session['loginType'] = data.login_type || 'password'` to the iron-session save
+block inside the OTP verify API route. These two fields were already set by the
+direct-login route but were missing from the OTP path, causing the middleware to
+always see hasCompletedOnboarding as undefined (falsy) for OTP-based logins.
+
+================================================================================
+
+BUG ID: HRIS-2026-015
+DATE FILED: 2026-04-18
+DATE FIXED: 2026-04-18
+REPORTER: Internal (Developer)
+
+ISSUE DESCRIPTION:
+  The Quick Access panel's counter display had multiple bugs:
+
+  1. All 4 counter APIs were always fetched on dashboard load regardless of whether
+     the user had any shortcuts pinned. A user with no shortcuts still triggered 4
+     unnecessary API calls on every dashboard visit.
+
+  2. When only a single shortcut with a counter was pinned (e.g. "Job Posting
+     History"), all 4 counter APIs still fired. Root cause: getQuickAccessCounters()
+     always called all 4 endpoints via Promise.allSettled regardless of which items
+     were active.
+
+  3. Counter values were not displaying for Job Posting History, Address Employee
+     Issue, and Create Memo/Policy. Root cause: extract functions checked data?.total
+     but the API responses use total_records. Only "Employee List" worked (used data?.count).
+
+  4. Counter values were stale after navigating away and back. Root cause: staleTime:
+     60_000 prevented refetching within 1 minute. Cache key used a raw array reference
+     causing unstable cache behaviour.
+
+  5. Job Posting History counter showed ALL jobs (active + inactive) instead of only
+     active ones, because the reused pagination endpoint had no is_active filter.
+
+  6. Create Memo/Policy counter showed total directives instead of memos not yet sent.
+
+  7. Zero-value counters were rendered visibly (e.g. "0 not sent"), which is noisy
+     and unhelpful.
+
+  8. The useState for localItems was declared after useGetQuickAccessCounters, causing
+     a "Cannot access 'localItems' before initialization" ReferenceError on load.
+
+DESIRED OUTCOME:
+  - No counter API calls fire when the user has no relevant shortcuts pinned.
+  - Only a single API call is made to a dedicated counts endpoint, passing only
+    the pinned item IDs that have counters.
+  - Counts are accurate: active jobs only, pending issues only, unsent memos only,
+    active employees only.
+  - Counters with a value of 0 are hidden.
+  - Counters always reflect fresh data on every dashboard mount.
+
+FILES CHANGED:
+Backend:
+- app/views/user.py
+- app/urls.py
+
+Frontend:
+- src/components/pages/(auth)/employer/quick-access/hooks/useGetQuickAccessCounters.ts
+- src/components/pages/(auth)/employer/quick-access/QuickAccessPanel.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (tests not yet implemented)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☑ Views/API endpoints tested (manual — GET /api/quick-access/counts/?items=post-job-history,manage-employees returns correct counts)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A — no schema changes)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — no shortcuts → 0 API calls; 1 shortcut → 1 call with correct count; all 4 → 1 call with all counts; zero count hidden)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — pending)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (no shortcuts → no calls; deactivate job → count updates on next mount; 0 count → hidden; unsent memos only counted)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+
+**Backend — New dedicated counts endpoint (QuickAccessCountsAPIView)**
+
+Created GET /api/quick-access/counts/?items=<comma-separated-ids> in app/views/user.py.
+The view accepts only the item IDs that the user has pinned, intersects them against a
+SUPPORTED_ITEMS set, and runs a direct .count() DB query for each — no pagination,
+no records fetched, no serializer overhead.
+
+Count logic per item:
+  post-job-history    → JobPosting.filter(is_active=True, is_deleted=False).count()
+  manage-address-issue → EmployeeIssue.filter(status="pending").count()
+  manage-memo-policy  → Directive.filter(is_active=True, is_sent=False).count()
+  manage-employees    → Employee.filter(is_active=True).count()
+
+Registered at app/urls.py: path("quick-access/counts/", QuickAccessCountsAPIView.as_view())
+
+**Frontend — useGetQuickAccessCounters.ts rewritten**
+
+Replaced the 4-separate-fetch COUNTER_CONFIG approach with a single fetch to the new
+dedicated endpoint, passing only the relevant item IDs as a query param:
+
+  GET /api/quick-access/counts/?items=post-job-history,manage-employees
+
+The hook:
+  - Filters activeItems to only those in COUNTER_ITEM_IDS before enabling the query
+  - Is completely disabled (enabled: false) when no relevant items are pinned
+  - Uses refetchOnMount: 'always' to always fetch fresh data on dashboard mount
+  - Uses a stable sorted string cache key: ['quickAccessCountersCache', 'item-a,item-b']
+
+**Frontend — QuickAccessPanel.tsx**
+
+  - useState declarations hoisted above hook calls to fix ReferenceError
+  - Counter display now gated on counter.count > 0 to hide zero values
+
+================================================================================
+
+BUG ID: HRIS-2026-014
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+REPORTER: Internal (Stage Approval UX issues in Screen Applicants)
+SEVERITY: Medium — approval edit flow broken, data lost on re-edit
+
+ISSUE DESCRIPTION:
+  Multiple related issues in the Stage Approval section of the Checklist modal
+  (screen-applicants/[id]/modals/Checklist.tsx):
+
+  1. "Redo" button (now "Edit") showed "Fill Up Approval Details" button instead of
+     the form directly when clicked — due to showInlineForm timing and isRedoMode
+     not being respected in the gate condition.
+
+  2. After clicking Submit Approval in Edit mode, the form showed empty on the
+     next Edit click — isRedoMode remained true after submit, causing State 3
+     (read-only) to be skipped and State 2 showed an empty form.
+
+  3. The approver photo disappeared after submitting in Edit mode because
+     handleInlineApproveSubmit set approved_by_photo: null in pendingApproval,
+     overriding the server's photo value in the merged approval object.
+
+  4. Pre-fill of signature and remarks on Edit click was unreliable due to React
+     state batching timing — values set in onClick were not always available at
+     render time.
+
+  5. The "Fill Up Approval Details" intermediate button was redundant — clicking
+     Edit should go directly to the form.
+
+  6. State variable was named isRedoMode/setIsRedoMode but functionality is "Edit".
+
+DESIRED OUTCOME:
+  - Clicking "Edit" on a saved stage approval opens the inline form immediately,
+    pre-filled with the existing signature and remarks.
+  - Approver photo persists through edit/submit cycles.
+  - After clicking "Submit Approval", the read-only State 3 view is restored.
+  - Cancelling from Edit mode returns to read-only State 3 view.
+  - State variable named isEditMode throughout.
+  - No intermediate "Fill Up Approval Details" button.
+
+FILES CHANGED:
+  - src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+FIX EXPLANATION:
+  1. Renamed isRedoMode/setIsRedoMode → isEditMode/setIsEditMode throughout.
+
+  2. Renamed "Redo" button label to "Edit".
+
+  3. Removed the "Fill Up Approval Details" button entirely. State 2 now always
+     renders the signature/remarks form directly without any intermediate click.
+
+  4. Added useEffect on isEditMode to reliably pre-fill inlineSigUrl and
+     inlineRemarks from getCurrentStageApproval() whenever edit mode is entered:
+       useEffect(() => {
+         if (isEditMode) {
+           const approval = getCurrentStageApproval();
+           if (approval) {
+             setInlineSigUrl(approval.signature || '');
+             setInlineRemarks(approval.approval_remarks || '');
+           }
+         }
+       }, [isEditMode]);
+
+  5. Removed approved_by_photo: null from handleInlineApproveSubmit so the server
+     approval's photo persists through the {...serverApproval, ...pendingApproval} merge.
+
+  6. Added setIsEditMode(false) to handleInlineApproveSubmit so State 3 (read-only)
+     is restored after clicking Submit Approval.
+
+  7. Added setIsEditMode(false) to the Cancel button handler in the inline form
+     so cancelling from Edit mode also restores State 3 read-only view.
+
+UNIT TESTING CHECKLIST:
+  [ ] Manual: Click Edit on saved approval — form opens pre-filled with signature and remarks
+  [ ] Manual: Edit and Submit — read-only view restored with updated data
+  [ ] Manual: Edit and Cancel — read-only view restored with original data
+  [ ] Manual: Photo persists after multiple Edit/Submit cycles
+  [ ] Regression: First-time Approve Stage flow (State 1 → form) unaffected
+  [ ] Regression: Skip Stage flow unaffected
+
+================================================================================
+
+BUG ID: HRIS-2026-013
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+REPORTER: Internal (YP/YG account login testing)
+SEVERITY: High — users permanently locked out of the app after login
+
+ISSUE DESCRIPTION:
+  Users logging in with login_type "yahshua-payroll" or "yg-payroll" were
+  getting stuck on the /setup-employer-profile/onboarding-checklist page
+  and could not navigate anywhere else. The middleware's onboarding gate
+  blocked all employer routes until hasCompletedOnboarding was true, but
+  YP/YG accounts had hasCompletedOnboarding = false because the login API
+  response never set has_onboarded = true for these account types.
+  Additionally, loginType was defined in SessionData but was never populated
+  from the backend response, so there was no way to identify these accounts
+  in the middleware.
+
+DESIRED OUTCOME:
+  YP and YG payroll accounts should bypass the onboarding gate entirely and
+  land on the dashboard after login, just like fully onboarded employer accounts.
+
+FILES CHANGED:
+  - src/app/api/login/route.ts
+  - src/middleware.ts
+
+FIX EXPLANATION:
+  1. login/route.ts: Now reads login_type from the backend response and stores
+     it in the iron session as loginType.
+  2. middleware.ts: Reads loginType from the session and adds a guard so that
+     accounts with loginType "yahshua-payroll" or "yg-payroll" are excluded
+     from the onboarding redirect, covering users who already have an old
+     session where hasCompletedOnboarding is false.
+
+UNIT TESTING CHECKLIST:
+  [ ] Manual: Log in as a YP account and verify redirect goes to /dashboard
+  [ ] Manual: Log in as a YG account and verify redirect goes to /dashboard
+  [ ] Manual: Log in as a regular employer with incomplete onboarding and verify
+      they are still redirected to /onboarding-checklist
+  [ ] Regression: Existing employer onboarding flow unaffected
+
+================================================================================
+
+FEATURE ID: HRIS-022
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+CLIENT/REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+After the production S3 bug (HRIS-2026-012 / BE), some stage approvals were left in a
+state where `is_approved=True` but the signature was never surfaced in the UI — or the
+user received an error toast and assumed the approval did not save, when in reality the
+`AppliedJobStageApproval` record (including the signature) was already persisted to S3.
+
+In both cases the State 3 read-only block rendered in the Checklist modal with no way
+to re-submit. Users were stuck: the approval showed as saved but they could not correct
+or re-confirm it.
+
+DESIRED OUTCOME:
+When a stage approval is already saved to the server (State 3 — read-only block with
+signature), a "Redo" link should appear in the block header for users with `can_update`
+permission on that stage. Clicking it drops the UI back into the inline approval form
+so the user can re-draw or re-upload their signature and re-submit. The new submission
+overwrites the existing approval record (the backend `PATCH` endpoint already uses
+`get_or_create` and overwrites fields on each save).
+
+The Save Changes button must remain disabled while redo mode is active and no new
+`pendingApproval` has been staged, so the user cannot bypass the redo form.
+
+FILES CHANGED:
+Backend:
+- (none — the existing PATCH /api/jobs/applicants/stage-approve/<id>/ already
+  overwrites the approval record on every call; no backend change needed)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — Redo button appears in State 3; form opens; new approval overwrites server record)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — UI-only change; backend endpoint unchanged)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (redo → submit new sig → Save Changes enabled; redo → cancel → read-only restored; non-update-permission user → no Redo button; status change away from passed → isRedoMode reset)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only change)
+
+FIX EXPLANATION:
+Three state variables and one disabled-logic update in `Checklist.tsx`:
+
+**1. New `isRedoMode` state**
+
+  const [isRedoMode, setIsRedoMode] = useState(false);
+
+Tracks whether the user has clicked Redo on a saved approval. Reset in:
+- `resetFormData()` — called on modal close
+- The `currentStatus !== 'passed'` useEffect — so navigating away from Passed clears it
+
+**2. State 3 render gate changed**
+
+  // Before
+  if (approval?.signature) { ... read-only block ... }
+
+  // After
+  if (approval?.signature && !isRedoMode) { ... read-only block with Redo button ... }
+
+When `isRedoMode=true` the check is false, so execution falls through to the State 2
+block where `showInlineForm=true` causes the editable form to render.
+
+**3. Redo button added to the State 3 header**
+
+The read-only block header was refactored from a single flex row into a
+`justify-between` wrapper so the Redo button sits flush right:
+
+  <div className='flex items-center justify-between'>
+    <div className='flex items-center gap-2 text-xs font-semibold text-indigo-600 ...'>
+      <CheckBadgeIcon className='w-4 h-4' />
+      Stage Approval
+      {approval.is_skipped && <span ...>SKIPPED</span>}
+    </div>
+    {currentStage?.permissions?.can_update && (
+      <button
+        type='button'
+        onClick={() => {
+          setPendingApproval(null);
+          setIsSkipMode(false);
+          setShowInlineForm(true);
+          setIsRedoMode(true);
+        }}
+        className='text-xs text-gray-400 hover:text-indigo-600 underline'
+      >
+        Redo
+      </button>
+    )}
+  </div>
+
+**4. `isSaveDisabled` updated for redo mode**
+
+  // Before
+  const isSaveDisabled = isPassed && !pendingApproval && !serverHasApproval;
+
+  // After
+  const isSaveDisabled = isPassed && !pendingApproval && (!serverHasApproval || isRedoMode);
+
+Without this change, `serverHasApproval=true` would keep the button enabled during
+redo mode even though the user hasn't submitted a new signature yet. The added
+`|| isRedoMode` term forces the button disabled until `pendingApproval` is set by
+clicking "Submit Approval" in the inline form.
+
+================================================================================
+
+BUG ID: HRIS-021
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+CLIENT/REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+In the Screen Applicants Checklist modal, the "Save Changes" button had incorrect
+disabled logic with two related problems:
+
+1. The button was always disabled whenever the applicant status was "passed",
+   regardless of whether a stage approval had been set. This blocked saving even
+   when the user legitimately needed to save (e.g., after completing the inline
+   approval form).
+
+2. After fixing problem 1, a second gap was identified: when status is "passed"
+   but the user has not yet chosen either "Skip Stage" or "Approve Stage" (State 1
+   — showing the Skip/Approve buttons), the Save Changes button remained enabled.
+   The form submit handler already had a silent early-return guard in this state,
+   but the button itself gave no visual feedback that it was blocked.
+
+Combined effect: the button was either always disabled (original bug) or not
+visually disabled when it should be (gap after first fix), giving confusing UX
+in both directions.
+
+DESIRED OUTCOME:
+The "Save Changes" button disabled state must follow these rules when status is "passed":
+
+| State                                        | Disabled? | Tooltip                                         |
+|----------------------------------------------|-----------|--------------------------------------------------|
+| No action taken (Skip/Approve buttons shown) | Yes       | "Please complete stage approval before saving." |
+| Inline form open, not yet submitted          | Yes       | "Please complete stage approval before saving." |
+| "Submit Approval" clicked (pendingApproval)  | No        | —                                               |
+| Approval already saved to server (signature) | No        | —                                               |
+
+State 4 is ENABLED because the user may still need to save other fields (e.g., stage
+notes). The server-saved approval is already persisted; blocking Save in that state
+serves no purpose and strands users after a page refresh.
+
+For all other statuses (ongoing, withdrawn, rejected, pooling), Save Changes is
+always enabled (subject to loading state only).
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — all four states verified in browser)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — UI-only fix)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (no approval → disabled; pending approval → enabled; server approval → disabled; non-passed status → enabled)
+☐ Cross-browser testing completed (pending)
+☐ Mobile responsiveness verified (N/A — logic-only fix)
+
+FIX EXPLANATION:
+The footer Save Changes button logic in Checklist.tsx was rewritten in two iterations.
+
+**Iteration 1 (first partial fix):**
+The original condition `isPassed` (always disabled when passed) was replaced with
+`isPassed && hasApproval` where `hasApproval = !!getCurrentStageApproval()?.signature`.
+This allowed saving when status was "passed" and a pending approval had been staged.
+However it left the button enabled in State 1 (no action taken yet).
+
+**Iteration 2 (partial fix):**
+The condition was rewritten to:
+
+  const serverApprovalSignature = !!applicant?.stage_approvals
+    ?.find((a) => a.job_stage === actionState.stageId)?.signature;
+  const isSaveDisabled = isPassed && (!pendingApproval || serverApprovalSignature);
+
+This correctly handled States 1–3 but incorrectly kept State 4 (server approval
+already present) disabled, even after a page refresh — stranding the user with a
+permanently blocked Save button despite the approval already being persisted.
+
+**Iteration 3 (final fix):**
+The root insight: `pendingApproval` is local component state (lost on refresh) while
+`applicant.stage_approvals` is server data (persists). State 4 should be ENABLED
+because the approval is already saved; there is nothing left to guard against.
+
+Final condition:
+
+  const serverHasApproval = !!applicant?.stage_approvals
+    ?.find((a) => a.job_stage === actionState.stageId)?.signature;
+  // Disabled only when passed + no approval at all (neither local nor server)
+  const isSaveDisabled = isPassed && !pendingApproval && !serverHasApproval;
+
+Logic breakdown:
+- State 1/2: `pendingApproval` is null AND `serverHasApproval` is false → disabled.
+- State 3: `pendingApproval` is set → `!pendingApproval` is false → enabled.
+- State 4: `serverHasApproval` is true → `!serverHasApproval` is false → enabled.
+  (Also covers page-refresh scenario where pendingApproval is null but server has data.)
+
+Single tooltip: "Please complete stage approval before saving." — shown only in
+States 1/2 when the button is disabled. No separate "Cannot modify" message needed.
+
+================================================================================
+
+BUG ID: HRIS-020
+DATE FILED: 2026-04-17
+DATE FIXED: 2026-04-17
+CLIENT/REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+Two visual bugs on the Talent Search page affecting applicant profile cards:
+
+1. PlaceholderAvatar (SVG initials avatar) rendered oversized — filling its entire
+   parent container instead of respecting the `width` and `height` props (120px).
+   The orange/blue "KP" initials blocks were stretching to fill the card, making
+   the cards unusable.
+
+   Root cause: `PlaceholderAvatar.tsx` had an inline style `width: '100%', height: '100%'`
+   on the `<svg>` element that overrode the explicit `width={120}` and `height={120}`
+   attributes, causing the SVG to expand to 100% of its container.
+
+2. Cards containing a tall portrait photo (e.g. a 3D character image) stretched
+   taller than cards with square photos or placeholders, breaking the grid uniformity.
+
+   Root cause: The `<Image>` component in `ApplicantAvatar` had `width={size}` and
+   `height={size}` Next.js props (which define intrinsic dimensions / aspect ratio)
+   but no CSS size constraint. Tall portrait images were not clamped and overflowed
+   their intended 120×120 area.
+
+DESIRED OUTCOME:
+- PlaceholderAvatar renders at exactly the pixel dimensions passed via `width` and
+  `height` props regardless of container size.
+- Real photos are cropped to a square (120×120) via `object-cover` so all cards
+  maintain the same height regardless of the photo's original aspect ratio.
+
+FILES CHANGED:
+Backend:
+- (none)
+
+Frontend:
+- src/components/common/PlaceholderAvatar.tsx
+- src/components/pages/(auth)/employer/talent-search/Content.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+☐ Python unit tests written/updated (N/A — no backend changes)
+☐ All backend tests passing: N/A
+☐ Backend test coverage: N/A
+☐ Models tested (N/A)
+☐ Serializers tested (N/A)
+☐ Views/API endpoints tested (N/A)
+☐ Permissions tested (N/A)
+☐ Celery tasks tested (N/A)
+☐ Database migrations tested (N/A)
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated (tests not yet implemented)
+☐ All frontend tests passing: N/A
+☐ Frontend test coverage: N/A
+☑ Components tested (manual — placeholder avatars render at correct 120px size)
+☑ Components tested (manual — portrait photos cropped to square, card heights uniform)
+☐ Custom hooks tested (N/A)
+☐ React Query hooks tested (N/A)
+☐ Form validation tested (N/A)
+☐ API service functions tested (N/A)
+☑ TypeScript types verified (no type errors)
+
+Integration & E2E:
+☐ API integration tests completed (N/A — UI-only fix)
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+☑ Manual regression testing completed
+☑ Edge cases tested (no photo → placeholder correct size; wide photo → cropped; tall photo → cropped)
+☐ Cross-browser testing completed (pending)
+☑ Mobile responsiveness verified (card grid layout unaffected)
+
+FIX EXPLANATION:
+
+Fix 1 — PlaceholderAvatar.tsx:
+Removed `width: '100%', height: '100%'` from the SVG's inline style. Replaced with
+`flexShrink: 0` so the element does not collapse in flex containers but also does not
+expand beyond its intrinsic dimensions. The `width` and `height` SVG attributes now
+control the rendered size as intended.
+
+  Before:
+    style={{ display: 'block', width: '100%', height: '100%' }}
+
+  After:
+    style={{ display: 'block', flexShrink: 0 }}
+
+Fix 2 — Content.tsx (ApplicantAvatar component):
+Wrapped the `<Image>` element in a fixed-size `<div>` with `overflow-hidden` so the
+container hard-clamps both dimensions. The image fills the wrapper with `w-full h-full
+object-cover`, cropping tall or wide photos to an exact square.
+
+  Before:
+    <Image width={size} height={size} className='rounded-xl object-cover flex-shrink-0' ... />
+
+  After:
+    <div style={{ width: size, height: size }} className='rounded-xl overflow-hidden flex-shrink-0'>
+      <Image width={size} height={size} className='w-full h-full object-cover' ... />
+    </div>
+
+================================================================================
+
 BUG ID: HRIS-019
 DATE FILED: 2026-04-06
 DATE FIXED: 2026-04-06
