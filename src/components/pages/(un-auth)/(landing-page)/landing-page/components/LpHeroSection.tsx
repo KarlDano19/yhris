@@ -1,12 +1,23 @@
 "use client";
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import ScrollFadeIn from "./ScrollFadeIn";
 import LpHeroDashboard from "./LpHeroDashboard";
 
+const DEMO_CALENDAR_URL =
+  "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH";
+
 const LpHeroSection = () => {
   const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleBookDemo = () => {
+    if (!email.trim()) return;
+    const url = `${DEMO_CALENDAR_URL}?guestEmail=${encodeURIComponent(email.trim())}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    setSubmitted(true);
+  };
 
   return (
     <section className="relative pt-32 pb-0 md:pt-44 md:pb-0 overflow-hidden lp-hero-glow" style={{ background: '#ffffff', zIndex: 15 }}>
@@ -51,27 +62,47 @@ const LpHeroSection = () => {
               </p>
             </ScrollFadeIn>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2 max-w-[500px]">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter work email"
-                className="flex-1 w-full px-5 py-3.5 text-sm outline-none rounded-[10px]"
-                style={{
-                  color: 'hsl(213 32% 18%)',
-                  border: '1px solid hsl(213 32% 18% / 0.15)',
-                  background: '#ffffff',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                }}
-              />
-              <button
-                disabled={!email.trim()}
-                className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+            {submitted ? (
+              <div
+                className="flex items-center gap-3 px-5 py-4 rounded-[10px] max-w-[500px]"
+                style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}
               >
-                Book a Demo <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+                <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#16a34a' }} />
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: '#15803d' }}>Booking calendar opened!</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#4ade80', opacity: 0.8 }}>
+                    <span style={{ color: '#166534' }}>Pick a time slot that works for you.</span>{" "}
+                    <button onClick={() => setSubmitted(false)} className="underline" style={{ color: '#15803d' }}>
+                      Try a different email
+                    </button>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center gap-2 max-w-[500px]">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleBookDemo()}
+                  placeholder="Enter work email"
+                  className="flex-1 w-full px-5 py-3.5 text-sm outline-none rounded-[10px]"
+                  style={{
+                    color: 'hsl(213 32% 18%)',
+                    border: '1px solid hsl(213 32% 18% / 0.15)',
+                    background: '#ffffff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  }}
+                />
+                <button
+                  onClick={handleBookDemo}
+                  disabled={!email.trim()}
+                  className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  Book a Demo <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right — Animated Dashboard */}
