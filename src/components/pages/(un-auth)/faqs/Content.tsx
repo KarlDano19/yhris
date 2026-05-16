@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Navigation from "@/components/pages/(un-auth)/landing-page/Navigation";
@@ -154,7 +154,7 @@ const FaqPage = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid-light lp-hero-glow" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
             <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }} />
             <div className="lp-section-container text-center relative z-10">
               <span className="lp-section-label justify-center mb-5">FAQS</span>
@@ -175,7 +175,7 @@ const FaqPage = () => {
                   type="text"
                   placeholder="Search FAQs..."
                   className="w-full px-4 py-3 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none transition-colors"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -186,7 +186,7 @@ const FaqPage = () => {
                   .map((faq) => {
                     const isOpen = activeIndex === faq.id;
                     return (
-                      <div key={faq.id} style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                      <div key={faq.id} style={{ borderColor: "rgba(0,0,0,0.07)" }}>
                         <button
                           className="w-full flex items-center justify-between py-5 text-left gap-4"
                           onClick={() => handleToggle(faq.id)}
@@ -215,7 +215,7 @@ const FaqPage = () => {
           </section>
 
           {/* Feature cards */}
-          <section className="py-16" style={{ background: "hsl(var(--lp-surface))", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <section className="py-16" style={{ background: "hsl(var(--lp-surface))", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
             <div className="lp-section-container">
               <div className="text-center mb-10">
                 <span className="lp-section-label justify-center mb-4">EXPLORE BY FEATURE</span>

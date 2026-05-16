@@ -4,20 +4,13 @@
 
 /* ─── Landing page design system ─────────────────────────────── */
 :root {
-  --lp-navy: 213 32% 26%;
   --lp-primary: 43 100% 51%;
-  --lp-primary-foreground: 213 32% 26%;
-  --lp-blue: 224 61% 51%;
-  --lp-warm-bg: 46 100% 95%;
   --lp-muted: 46 100% 95%;
   --lp-muted-foreground: 213 20% 45%;
-  --lp-card: 0 0% 100%;
   --lp-border: 0 0% 91%;
-  --lp-destructive: 0 84% 60%;
 
   /* Light LP theme tokens */
   --lp-page: 0 0% 100%;
-  --lp-hero: 210 20% 96%;
   --lp-surface: 210 20% 98%;
   --lp-surface-2: 210 15% 94%;
 }
@@ -33,22 +26,8 @@
     @apply w-6 h-px inline-block;
     background-color: hsl(var(--lp-primary));
   }
-  .lp-section-label-light {
-    @apply text-xs font-semibold uppercase tracking-[0.12em] flex items-center gap-2;
-    color: hsl(var(--lp-primary));
-  }
-  .lp-section-label-light::before {
-    content: '';
-    display: inline-block;
-    width: 1.5rem;
-    height: 1px;
-    background-color: hsl(var(--lp-primary));
-  }
   .lp-section-container {
     @apply max-w-[1200px] mx-auto px-5 md:px-8;
-  }
-  .lp-card-hover {
-    @apply transition-all duration-300;
   }
   .lp-dark-card {
     background: hsl(var(--lp-surface));
@@ -109,29 +88,9 @@
     letter-spacing: 0.02em;
     @apply border-black/25 bg-black/[0.06];
   }
-  .lp-btn-ghost-light {
-    @apply border border-white/20 text-white font-semibold px-7 py-3.5 rounded-[10px]
-           transition-all duration-500
-           active:scale-[0.97] inline-flex items-center justify-center relative;
-    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-    top: 0;
-    background: rgba(255,255,255,0.05);
-    letter-spacing: 0em;
-  }
-  .lp-btn-ghost-light:hover {
-    top: -3px;
-    letter-spacing: 0.02em;
-    @apply bg-white/15 border-white/30;
-  }
 }
 
 @layer utilities {
-  /* Dark LP dot grid background */
-  .lp-dot-grid {
-    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-  /* Light LP dot grid background */
   .lp-dot-grid-light {
     background-image: radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px);
     background-size: 28px 28px;
@@ -177,15 +136,6 @@
   }
   .lp-hero-float { animation: lp-hero-float 4s ease-in-out infinite; }
 
-  @keyframes lp-float-toast {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-  }
-  .lp-float-toast {
-    animation: lp-float-toast 3s ease-in-out infinite;
-    animation-delay: 1s;
-  }
-
   /* ── Hero dashboard animations ────────────────────────────── */
   @keyframes heroScreenIn {
     from { opacity: 0; transform: translateY(8px); }
@@ -195,20 +145,9 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0);   }
   }
-  @keyframes heroProgressFill {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
-  }
   @keyframes heroToastIn {
     from { opacity: 0; transform: translateX(12px); }
     to   { opacity: 1; transform: translateX(0);    }
-  }
-  .hero-live-dot {
-    animation: heroPulse 2s ease-in-out infinite;
-  }
-  @keyframes heroPulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.35; }
   }
 }
 /* ─── End landing page design system ─────────────────────────── */

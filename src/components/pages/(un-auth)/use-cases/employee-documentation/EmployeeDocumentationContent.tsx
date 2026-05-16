@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { Cloud, Folder, Search, ShieldCheck, FileDown, Users, ArrowRight } from "lucide-react";
 import Navigation from "@/components/pages/(un-auth)/landing-page/Navigation";
@@ -60,7 +60,7 @@ const EmployeeDocumentationContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
             <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }} />
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
@@ -138,7 +138,7 @@ const EmployeeDocumentationContent = () => {
                   return (
                     <ScrollFadeIn key={f.title} delay={i * 60}>
                       <div className="lp-dark-card p-7 flex gap-5">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(0,0,0,0.06)" }}>
                           <Icon className="w-5 h-5 text-white/40" strokeWidth={1.5} />
                         </div>
                         <div>
@@ -201,7 +201,7 @@ const EmployeeDocumentationContent = () => {
                     <ScrollFadeIn key={s.step} delay={i * 60}>
                       <div className="lp-dark-card p-6">
                         <span className="text-xs font-mono text-white/20 mb-4 block">{s.step}</span>
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-4" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-4" style={{ background: "rgba(0,0,0,0.06)" }}>
                           <Icon className="w-4 h-4 text-white/40" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-sm font-bold text-white/80 mb-2">{s.label}</h3>

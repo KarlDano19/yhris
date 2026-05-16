@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import {
   Cloud,
@@ -82,7 +82,7 @@ const YahshuaPayrollContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
             <div
               className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
               style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }}
@@ -133,7 +133,7 @@ const YahshuaPayrollContent = () => {
                       <div className="lp-dark-card p-7 h-full flex flex-col">
                         <div
                           className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 shrink-0"
-                          style={{ background: "rgba(255,255,255,0.06)" }}
+                          style={{ background: "rgba(0,0,0,0.06)" }}
                         >
                           <Icon className="w-5 h-5 text-white/50" strokeWidth={1.5} />
                         </div>
@@ -144,7 +144,7 @@ const YahshuaPayrollContent = () => {
                             <span
                               key={h}
                               className="text-xs px-2.5 py-1 rounded-full text-white/40"
-                              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                              style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
                             >
                               {h}
                             </span>
@@ -175,7 +175,7 @@ const YahshuaPayrollContent = () => {
                     <div className="lp-dark-card p-7 h-full flex flex-col">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 shrink-0"
-                        style={{ background: "rgba(255,255,255,0.06)" }}
+                        style={{ background: "rgba(0,0,0,0.06)" }}
                       >
                         <Smartphone className="w-5 h-5 text-white/40" strokeWidth={1.5} />
                       </div>

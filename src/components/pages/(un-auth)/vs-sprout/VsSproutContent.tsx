@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 import Navigation from "@/components/pages/(un-auth)/landing-page/Navigation";
@@ -61,7 +61,7 @@ const VsSproutContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
             <div
               className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
               style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }}
@@ -132,7 +132,7 @@ const VsSproutContent = () => {
               <ScrollFadeIn delay={100}>
                 <div className="rounded-xl overflow-hidden max-w-3xl mx-auto" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
                   {/* Header row */}
-                  <div className="grid grid-cols-3 px-6 py-4" style={{ background: "hsl(var(--lp-surface-2))", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                  <div className="grid grid-cols-3 px-6 py-4" style={{ background: "hsl(var(--lp-surface-2))", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
                     <span className="text-xs font-semibold uppercase tracking-widest text-white/30">Feature</span>
                     <span className="text-xs font-semibold uppercase tracking-widest text-primary text-center">YAHSHUA HRIS</span>
                     <span className="text-xs font-semibold uppercase tracking-widest text-white/30 text-center">Sprout HR</span>
@@ -160,7 +160,7 @@ const VsSproutContent = () => {
                       </div>
                       <div className="flex justify-center">
                         {row.sprout ? (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
                             <Check className="w-3 h-3 text-white/40" strokeWidth={2.5} />
                           </div>
                         ) : (

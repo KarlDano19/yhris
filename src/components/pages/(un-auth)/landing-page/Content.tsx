@@ -1,7 +1,6 @@
 "use client"
 import Navigation from "./Navigation";
 import LpHeroSection from "./LpHeroSection";
-import LpScrollZoom from "./LpScrollZoom";
 import LpTrustBar from "./LpTrustBar";
 import LpValueProposition from "./LpValueProposition";
 import LpFeatureBento from "./LpFeatureBento";
@@ -18,17 +17,15 @@ const Content = () => {
     <div className="min-h-screen lp-dot-grid-light" style={{ background: '#ffffff' }}>
       <Navigation />
       <LpHeroSection />
-      <LpScrollZoom>
-        <ScrollFadeIn duration={800}><LpValueProposition /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpTrustBar /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpFeatureBento /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpPayrollIntegration /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpComplianceTrust /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpComparisonTable /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpFAQ /></ScrollFadeIn>
-        <ScrollFadeIn duration={800} delay={50}><LpFinalCTA /></ScrollFadeIn>
-        <LpFooter />
-      </LpScrollZoom>
+      <ScrollFadeIn duration={800}><LpValueProposition /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpTrustBar /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpFeatureBento /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpPayrollIntegration /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpComplianceTrust /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpComparisonTable /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpFAQ /></ScrollFadeIn>
+      <ScrollFadeIn duration={800} delay={50}><LpFinalCTA /></ScrollFadeIn>
+      <LpFooter />
     </div>
   );
 };

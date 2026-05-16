@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -57,7 +57,7 @@ const LpPayrollIntegrationContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow" style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
             <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
               style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }} />
             <div className="lp-section-container relative z-10">
