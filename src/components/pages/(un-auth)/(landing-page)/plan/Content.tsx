@@ -5,8 +5,6 @@ import styled from 'styled-components';
 
 import classNames from '@/helpers/classNames';
 import useGetPlanItems from './hooks/useGetPlanItems';
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
-
 import PlanCard from './PlanCard';
 
 const YearlyInput = styled.input`
@@ -130,7 +128,6 @@ const Content = ({ isLoggedIn }: any) => {
       <div className='absolute right-0 bottom-[-44px] z-[-1] flex'>
         <img src={`/assets/rocket-fly.png`} alt='rocket-fly' />
       </div>
-      <ScrollToTop />
     </div>
   );
 };

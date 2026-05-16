@@ -4,10 +4,7 @@ import Link from "next/link";
 
 import { FileCheck, Clock, BarChart3, Check, ArrowRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const features = [
   { icon: FileCheck, title: "Digital Document Management", body: "Streamline document collection with digital forms, e-signatures, and automated reminders for missing paperwork." },
@@ -32,9 +29,7 @@ const results = [
 
 const EmployeeOnboardingContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -169,10 +164,7 @@ const EmployeeOnboardingContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

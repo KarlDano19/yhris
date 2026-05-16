@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import Navigation from '../components/Navigation';
 import Footer from './Footer';
 
 import { CheckIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
@@ -70,7 +69,6 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
 
   return (
     <>
-      <Navigation />
       <main className='relative min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 pt-24'>
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
 

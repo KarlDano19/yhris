@@ -8,10 +8,7 @@ import {
   Zap, Shield, Clock, Users, FileText, Bell,
 } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 import MainLogo from "@/svg/MainLogo";
 
@@ -56,9 +53,7 @@ const problems = [
 
 const LpPayrollIntegrationContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: 'hsl(var(--lp-page))' }}>
+    <div style={{ background: 'hsl(var(--lp-page))' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -299,10 +294,7 @@ const LpPayrollIntegrationContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

@@ -2,9 +2,6 @@
 
 import React, { useState } from "react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
-
 import PostJobModal from "./modals/PostJobModal";
 import ScreenApplicantsModal from "./modals/ScreenApplicantsModal";
 import OrientModal from "./modals/OrientModal";
@@ -151,7 +148,6 @@ const FaqPage = () => {
 
   return (
     <>
-      <Navigation />
       <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
@@ -253,7 +249,6 @@ const FaqPage = () => {
           </section>
 
         </main>
-        <LpFooter />
       </div>
 
       {isPostJobModalOpen && (
@@ -286,7 +281,6 @@ const FaqPage = () => {
       {isSettingsModalOpen && (
         <SettingsModal isOpen={isSettingsModalOpen} setIsOpen={setIsSettingsModalOpen} />
       )}
-      <ScrollToTop />
     </>
   );
 };

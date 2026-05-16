@@ -4,10 +4,7 @@ import Link from "next/link";
 
 import { Cloud, Folder, Search, ShieldCheck, FileDown, Users, ArrowRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const features = [
   { icon: Cloud, title: "Digital Document Storage", body: "Secure cloud-based storage for all employee documents with easy upload, organization, and access controls." },
@@ -58,9 +55,7 @@ const results = [
 
 const EmployeeDocumentationContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -284,10 +279,7 @@ const EmployeeDocumentationContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

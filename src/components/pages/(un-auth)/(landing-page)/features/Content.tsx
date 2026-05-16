@@ -1,6 +1,5 @@
 "use client"
 
-import Navigation from "../landing-page/components/Navigation";
 import FeaturesSection from "../landing-page/components/FeaturesSection";
 import UseCasesSection from "../landing-page/components/UseCasesSection";
 import IntegrationSection from "../landing-page/components/IntegrationSection";
@@ -10,8 +9,6 @@ import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-pag
 const Content = () => {
   return (
     <>
-      <Navigation />
-      
       {/* Features Header */}
       <section className="relative min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 pt-24">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
@@ -36,7 +33,6 @@ const Content = () => {
       <UseCasesSection />
       <IntegrationSection />
       <Footer />
-      <ScrollToTop />
     </>
   );
 };

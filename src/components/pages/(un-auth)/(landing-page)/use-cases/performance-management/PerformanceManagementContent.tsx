@@ -4,10 +4,7 @@ import Link from "next/link";
 
 import { Users, ClipboardList, GraduationCap, CalendarDays, ArrowRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const features = [
   { icon: CalendarDays, title: "Scheduled Check-Ins", body: "Empower managers to set and track regular performance conversations ahead of time, ensuring consistency and meaningful engagement." },
@@ -32,9 +29,7 @@ const results = [
 
 const PerformanceManagementContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -170,10 +165,7 @@ const PerformanceManagementContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

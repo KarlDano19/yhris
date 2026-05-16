@@ -2,15 +2,11 @@ import Link from "next/link";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
 
 const DoleComplianceArticle = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: 'hsl(var(--lp-page))' }}>
+    <div style={{ background: 'hsl(var(--lp-page))' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -323,9 +319,7 @@ const DoleComplianceArticle = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-    </>
+    </div>
   );
 };
 

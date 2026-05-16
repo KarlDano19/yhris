@@ -4,10 +4,7 @@ import Link from "next/link";
 
 import { Check, X, ArrowRight, ArrowUpRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const valueProps = [
   {
@@ -59,9 +56,7 @@ const comparisonRows = [
 
 const VsSproutContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -208,10 +203,7 @@ const VsSproutContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

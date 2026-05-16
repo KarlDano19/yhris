@@ -6,10 +6,7 @@ import { Check, ChevronDown } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 interface LpPricingContentProps {
   isLoggedIn: boolean;
@@ -58,9 +55,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   };
 
   return (
-    <>
-      <Navigation />
-      <div style={{ background: '#ffffff' }}>
+    <div style={{ background: '#ffffff' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -345,10 +340,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

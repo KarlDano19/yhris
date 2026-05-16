@@ -6,9 +6,6 @@ import Link from "next/link";
 
 import { ChevronRight } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const tableOfContents = [
   { id: "getting-started", title: "Getting Started" },
@@ -62,9 +59,7 @@ const DocsContent = () => {
   };
 
   return (
-    <>
-      <Navigation />
-      <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-page))" }}>
         <main className="min-h-screen pt-16">
 
           <div className="lp-section-container py-12">
@@ -297,10 +292,7 @@ const DocsContent = () => {
             </div>
           </div>
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 

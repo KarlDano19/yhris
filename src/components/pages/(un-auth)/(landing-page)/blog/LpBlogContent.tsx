@@ -4,10 +4,7 @@ import Link from "next/link";
 
 import { ArrowRight, Clock, Tag } from "lucide-react";
 
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
 import ScrollFadeIn from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollFadeIn";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 const posts = [
   {
@@ -30,9 +27,7 @@ const categoryColors: Record<string, string> = {
 
 const LpBlogContent = () => {
   return (
-    <>
-      <Navigation />
-      <div style={{ background: 'hsl(var(--lp-page))' }}>
+    <div style={{ background: 'hsl(var(--lp-page))' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
@@ -89,10 +84,7 @@ const LpBlogContent = () => {
           </section>
 
         </main>
-        <LpFooter />
-      </div>
-      <ScrollToTop />
-    </>
+    </div>
   );
 };
 
