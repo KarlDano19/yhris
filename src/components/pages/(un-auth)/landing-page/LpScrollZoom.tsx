@@ -13,11 +13,12 @@ const LpScrollZoom = ({ children }: { children?: React.ReactNode }) => {
     const el = sectionRef.current;
     if (!el) return;
 
-    // Pull section up by exactly the hero's height so it starts at page top
-    // and the animation fires from the very first scroll.
+    // Pull section up by the hero's height on desktop so the circle animation
+    // fires from the very first scroll. On mobile the hero is single-column
+    // and much taller, so pulling it up would overlap the dashboard preview.
     const hero = el.previousElementSibling as HTMLElement | null;
-    const heroHeight = hero ? hero.offsetHeight : 0;
-    setMarginTop(heroHeight );
+    const getMargin = () => (window.innerWidth >= 1024 && hero ? hero.offsetHeight : 0);
+    setMarginTop(getMargin());
 
     const handleScroll = () => {
       const rect       = el.getBoundingClientRect();
@@ -27,8 +28,7 @@ const LpScrollZoom = ({ children }: { children?: React.ReactNode }) => {
     };
 
     const handleResize = () => {
-      const h = hero ? hero.offsetHeight : 0;
-      setMarginTop(h );
+      setMarginTop(getMargin());
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });

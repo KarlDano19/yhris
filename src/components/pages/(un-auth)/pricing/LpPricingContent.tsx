@@ -83,14 +83,15 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                 {/* Freemium */}
                 <ScrollFadeIn>
-                  <article className="lp-dark-card overflow-hidden h-full flex flex-col">
-                    <div className="px-8 py-6" style={{ background: 'hsl(var(--lp-surface-2))', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-2">Free Forever</p>
-                      <h2 className="text-xl font-bold text-gray-900 mb-1">YAHSHUA HRIS Freemium</h2>
-                      <p className="text-sm text-gray-500">Your digital hiring toolkit, always free</p>
+                  <article className="rounded-xl overflow-hidden h-full flex flex-col shadow-lg" style={{ border: '2px solid #355FD0' }}>
+                    <div className="px-8 py-6" style={{ background: '#355FD0' }}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] mb-2 invisible select-none">placeholder</p>
+                      <h2 className="text-xl font-bold text-white mb-1">YAHSHUA HRIS Freemium</h2>
+                      <p className="text-sm text-white/70">Your simple hiring toolkit - always free</p>
                     </div>
-                    <div className="px-8 py-6 flex flex-col flex-1">
+                    <div className="px-8 py-6 flex flex-col flex-1 bg-white">
                       <div className="mb-6">
+                        <p className="text-xs font-semibold text-primary mb-1">Introductory Price</p>
                         <div className="flex items-baseline gap-1">
                           <span className="text-4xl font-bold text-gray-900">₱0</span>
                           <span className="text-gray-400">/month</span>
@@ -99,29 +100,35 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       </div>
 
                       <ul className="space-y-3 mb-6">
-                        {["Post jobs to multiple platforms", "Screen applicants in one place"].map((f) => (
+                        {["Post a Job in Multiple Platforms", "Screen Applicants in one place"].map((f) => (
                           <li key={f} className="flex items-start gap-3 text-sm">
-                            <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
+                            <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" strokeWidth={2.5} />
                             <span className="text-gray-600">{f}</span>
                           </li>
                         ))}
                       </ul>
 
                       <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
-                        <p className="font-semibold text-gray-700 mb-2">Best for</p>
+                        <p className="font-semibold text-[#355FD0] mb-2">Best for:</p>
                         <ul className="space-y-1 text-gray-500">
-                          <li>Startups exploring digital hiring</li>
-                          <li>Small teams getting started</li>
-                          <li>Testing YAHSHUA HRIS before committing</li>
+                          <li>Startups and Small Businesses</li>
+                          <li>Exploring digital hiring solutions</li>
+                          <li>Getting a feel for YAHSHUA HRIS</li>
                         </ul>
+                      </div>
+
+                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ border: '1.5px dashed #355FD0' }}>
+                        <p className="font-semibold text-[#355FD0] mb-1">Ready to grow?</p>
+                        <p className="text-gray-500">Upgrade anytime to unlock the complete HR suite</p>
                       </div>
 
                       <div className="mt-auto">
                         <button
-                          onClick={() => router.push("/signup")}
-                          className="w-full lp-btn-ghost py-3 text-sm"
+                          onClick={() => router.push("/register")}
+                          className="w-full py-3 text-sm font-semibold text-white rounded-lg transition-opacity hover:opacity-90"
+                          style={{ background: 'linear-gradient(90deg, #355FD0 0%, #06b6d4 100%)' }}
                         >
-                          Start Free
+                          Start Free Plan
                         </button>
                       </div>
                     </div>
