@@ -6,11 +6,7 @@ export const metadata = {
 };
 
 const Jobs = () => {
-  return (
-    <div style={{ background: "hsl(var(--lp-page))" }} className="min-h-screen">
-      <Content />
-    </div>
-  );
+  return <Content />;
 };
 
 export default Jobs;
