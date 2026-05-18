@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import Content from "@/components/pages/(un-auth)/landing-page/Content";
+import Content from "@/components/pages/(un-auth)/(landing-page)/landing-page/Content";
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS - Complete Employee Data Management & Job Posting System | YAHSHUA HRIS Features, Use Cases & Sync Employee Data',
