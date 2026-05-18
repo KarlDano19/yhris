@@ -1,3 +1,21 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "plugins": ["simple-import-sort"],
+  "rules": {
+    "simple-import-sort/imports": [
+      "warn",
+      {
+        "groups": [
+          ["^react$", "^react/", "^next$", "^next/"],
+          ["^@?\\w"],
+          ["^@/components"],
+          ["^@/hooks", "^\\./hooks", "^\\.\\./hooks"],
+          ["^@/types", "^@/store", "^@/context", "^@/utils", "^@/lib", "^@/"],
+          ["^@heroicons/"],
+          ["^@/svg"]
+        ]
+      }
+    ],
+    "simple-import-sort/exports": "warn"
+  }
 }
