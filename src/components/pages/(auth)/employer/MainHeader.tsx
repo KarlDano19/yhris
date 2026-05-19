@@ -572,7 +572,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                       <Menu.Items className='absolute right-0 z-[1000] mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                         {userDetails?.email && (
                           <div className='px-3 py-2 shadow-md overflow-hidden'>
-                            <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                            <div className='flex items-center gap-2'>
+                              <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                              {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
+                                <span className='text-[9px] font-semibold bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
+                                  Yahshua Payroll
+                                </span>
+                              )}
+                            </div>
                             <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                           </div>
                         )}
@@ -590,7 +597,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
               <div className='mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4'>
                 {userDetails?.email && (
                   <div className='px-3 py-2 mb-1 shadow-md overflow-hidden'>
-                    <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                    <div className='flex items-center gap-2'>
+                      <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                      {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
+                        <span className='text-[9px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
+                          YP Sync
+                        </span>
+                      )}
+                    </div>
                     <p className='text-xs text-gray-600 font-medium truncate'>{userDetails.email}</p>
                   </div>
                 )}

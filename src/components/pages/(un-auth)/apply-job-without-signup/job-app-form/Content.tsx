@@ -17,6 +17,7 @@ import useJobApplicationDraft from './hooks/useJobApplicationDraft';
 import ProfileTab from './ProfileTab';
 import ScreeningQuestionTab from './ScreeningQuestionTab';
 import PreferencesTab from './PreferencesTab';
+import LandingPage from '@/app/page';
 
 const Content = () => {
   const params = useParams();

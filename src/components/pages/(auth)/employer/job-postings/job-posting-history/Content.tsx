@@ -1,7 +1,9 @@
 'use client';
 
-import React, { Fragment, useEffect, useState, useRef } from 'react';
+import React, { Fragment, useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+
+import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
@@ -30,6 +32,8 @@ import useBulkDeleteJobPostings from './hooks/delete/useBulkDeleteJobPostings';
 import useDeleteJobPost from './hooks/delete/useDeleteJobPost';
 import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
+import useGetJobDraftsItems from './hooks/get/useGetJobDraftsItems';
+
 import useUpdateJobPostStatus from './hooks/update/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/update/useUpdateJobSalaryStatus';
 import useUpdateJobRolesStatus from './hooks/update/useUpdateJobRolesStatus';
@@ -38,7 +42,7 @@ import useUpdateJobBenefitStatus from './hooks/update/useUpdateJobBenefitStatus'
 
 import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Facebook, Indeed, LinkedIn, Instagram, Twitter } from '@/svg/SocialMedia';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import MoreIconWithBorder from '@/svg/MoreIconWithBorder';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -54,7 +58,10 @@ import {
   T_ToggleJobRolesPayload,
   T_ToggleJobRemarkPayload,
   T_ToggleJobBenefitPayload,
+  T_JobPostingDraft,
 } from '@/types/job_posting';
+
+import { draftStorage } from '@/helpers/draftStorage';
 import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
@@ -76,6 +83,40 @@ type T_BulkDeleteModalData = DeleteModalData & {
 
 
 const Content = () => {
+  const router = useRouter();
+  const [draftCurrentPage, setDraftCurrentPage] = useState(1);
+  const [draftPageSize, setDraftPageSize] = useState(10);
+  const [draftPagination, setDraftPagination] = useState<PaginationProps>({ totalPages: 1, totalRecords: 0 });
+
+  const { data: draftsTableData, isLoading: isDraftsTableLoading } = useGetJobDraftsItems({
+    currentPage: draftCurrentPage,
+    pageSize: draftPageSize,
+  });
+
+  const draftRecords = useMemo(() => {
+    const backendRecords: T_JobPostingDraft[] = draftsTableData?.records || [];
+    if (draftCurrentPage === 1) {
+      const localDraft = draftStorage.load();
+      if (localDraft && localDraft.data && Object.keys(localDraft.data).length > 0) {
+        return [
+          {
+            id: 0,
+            draft_data: localDraft.data,
+            source: 'browser_close',
+            job_title: localDraft.data.job_title || 'Untitled Job',
+            position: localDraft.data.position || null,
+            uploaded_job_description: null,
+            uploaded_custom_poster: null,
+            created_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+            updated_at: localDraft.timestamp ? new Date(localDraft.timestamp).toISOString() : new Date().toISOString(),
+          } as T_JobPostingDraft,
+          ...backendRecords,
+        ];
+      }
+    }
+    return backendRecords;
+  }, [draftsTableData, draftCurrentPage]);
+
   const componentMap: ComponentMap = {
     Facebook,
     Indeed,
@@ -368,6 +409,15 @@ const Content = () => {
     }
   }, [dataJobPost]);
 
+  useEffect(() => {
+    if (draftsTableData?.records) {
+      setDraftPagination({
+        totalPages: draftsTableData.total_pages,
+        totalRecords: draftsTableData.total_records,
+      });
+    }
+  }, [draftsTableData]);
+
 
   // Close share options when changing pages
   useEffect(() => {
@@ -422,6 +472,15 @@ const Content = () => {
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const draftPaginationChange = (event: any) => {
+    setDraftCurrentPage(event.selected + 1);
+  };
+
+  const draftPageSizeChange = (value: number) => {
+    setDraftCurrentPage(1);
+    setDraftPageSize(value);
   };
 
   const socialMediaShare = (social: string, og_url: string) => {
@@ -1006,6 +1065,19 @@ const Content = () => {
                 >
                   Inactive
                 </div>
+                <div
+                  onClick={() => {
+                    setPendingFilter({ ...pendingFilter, status: 'drafts' });
+                    setAppliedFilter({ ...appliedFilter, status: 'drafts' });
+                  }}
+                  className={`cursor-pointer px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-center flex items-center gap-2 ${
+                    appliedFilter.status === 'drafts'
+                      ? 'bg-white text-yellow-600 border-2 border-yellow-500 shadow-sm'
+                      : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Drafts
+                </div>
               </div>
 
               {/* Bulk Actions - Right Side */}
@@ -1034,73 +1106,144 @@ const Content = () => {
             </div>
           </div>
 
-          <div className='mt-8 flow-root'>
-            <div className='overflow-x-auto'>
-              <table
-                className={classNames(
-                  'min-w-full divide-y divide-gray-300 text-center',
-                  jobPostHistoryItems.length === 0 && 'mb-6'
-                )}
-              >
-                <thead>
-                  <tr>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      <input
-                        type="checkbox"
-                        checked={selectAll}
-                        onChange={handleSelectAll}
-                        disabled={!jobPostHistoryItems || jobPostHistoryItems.length === 0}
-                        className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
-                      />
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Job No.
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Date Created
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Job Title
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Position
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Job Type
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Job Schedule
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      No. of Hires Needed
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Work Setup
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Assigned Users
-                    </th>
-                    <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
-              </table>
+          {appliedFilter.status === 'drafts' ? (
+            <div className='mt-8'>
+              {isDraftsTableLoading ? (
+                <div className='flex justify-center py-12'>
+                  <LoadingSpinner />
+                </div>
+              ) : draftRecords.length === 0 ? (
+                <div className='text-center py-16 text-gray-400'>
+                  <p className='text-base font-medium'>No drafts found.</p>
+                  <p className='text-sm mt-1'>Drafts appear here when you save a job posting as a draft.</p>
+                </div>
+              ) : (
+                <div className='overflow-x-auto'>
+                  <table className='min-w-full divide-y divide-gray-300 text-center'>
+                    <thead>
+                      <tr>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Job Title
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Last Saved
+                        </th>
+                        <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className='divide-y divide-gray-200'>
+                      {draftRecords.map((draft) => (
+                        <tr key={draft.id === 0 ? 'local' : draft.id}>
+                          <td className='px-3 py-4 text-sm text-gray-900'>
+                            <div className='font-medium'>
+                              {draft.job_title || 'Untitled Job'}
+                            </div>
+                            {draft.id === 0 && (
+                              <span className='inline-block mt-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5'>
+                                Local (not synced)
+                              </span>
+                            )}
+                          </td>
+                          <td className='px-3 py-4 text-sm text-gray-500'>
+                            {formatDateToLocal(draft.updated_at)}
+                          </td>
+                          <td className='px-3 py-4'>
+                            <button
+                              onClick={() => router.push(`/post-job?resumeDraftId=${draft.id}`)}
+                              className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
+                            >
+                              <PencilSquareIcon className='w-4 h-4' />
+                              Resume
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-            <hr />
-          </div>
+          ) : (
+            <div className='mt-8 flow-root'>
+              <div className='overflow-x-auto'>
+                <table
+                  className={classNames(
+                    'min-w-full divide-y divide-gray-300 text-center',
+                    jobPostHistoryItems.length === 0 && 'mb-6'
+                  )}
+                >
+                  <thead>
+                    <tr>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          disabled={!jobPostHistoryItems || jobPostHistoryItems.length === 0}
+                          className="w-5 h-5 rounded border-gray-300 text-savoy-blue focus:ring-savoy-blue disabled:opacity-50"
+                        />
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Job No.
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Date Created
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Job Title
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Position
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Job Type
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Job Schedule
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        No. of Hires Needed
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Work Setup
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Assigned Users
+                      </th>
+                      <th scope='col' className='px-3 py-3.5 text-sm font-semibold text-gray-900'>
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
+                </table>
+              </div>
+              <hr />
+            </div>
+          )}
         </div>
-        
+
         {/* Sticky Pagination */}
         <div className="px-2 md:px-8 lg:px-4 mt-8 mb-36 md:sticky md:bottom-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t">
-          <Pagination
-            pagination={pagination}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            onPageSizeChange={pageSizeChange}
-            onPageChange={paginationChange}
-          />
+          {appliedFilter.status === 'drafts' ? (
+            <Pagination
+              pagination={draftPagination}
+              currentPage={draftCurrentPage}
+              pageSize={draftPageSize}
+              onPageSizeChange={draftPageSizeChange}
+              onPageChange={draftPaginationChange}
+            />
+          ) : (
+            <Pagination
+              pagination={pagination}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={pageSizeChange}
+              onPageChange={paginationChange}
+            />
+          )}
         </div>
       </div>
       <JobPreviewModal
