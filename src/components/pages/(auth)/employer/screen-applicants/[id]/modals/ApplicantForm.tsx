@@ -14,7 +14,7 @@ import useUpdateApplicantContactInfo from '../../hooks/applicant/useUpdateApplic
 import useGetEAF from '../../hooks/eaf/useGetEAF';
 import StateContext from '../../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../../lib/initialActionState';
@@ -197,19 +197,9 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           <div className='flex-1 min-w-0'>
             <p className='text-[1.5rem] text-center md:text-left'>{applicantProfile.name}</p>
             <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start'>
+              <div className='flex items-start flex-1 min-w-0'>
                 <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {applicantProfile.email && (
-                  <span
-                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
-                    title={applicantProfile.email}
-                  >
-                    {applicantProfile.email}
-                  </span>
-                )}
-              </div>
-              {!applicantProfile.email && (
-                editingContactField === 'email' ? (
+                {editingContactField === 'email' ? (
                   <div className='flex items-center gap-2 flex-1'>
                     <input
                       type='email'
@@ -229,6 +219,21 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
                     >Cancel</button>
                   </div>
+                ) : applicantProfile.email ? (
+                  <>
+                    <span
+                      className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                      title={applicantProfile.email}
+                    >
+                      {applicantProfile.email}
+                    </span>
+                    <button
+                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
+                      onClick={() => { setEditingContactField('email'); setContactInputValue(applicantProfile.email); }}
+                    >
+                      <PencilIcon className='h-4 w-4' />
+                    </button>
+                  </>
                 ) : (
                   <button
                     className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
@@ -236,18 +241,13 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   >
                     <PlusIcon className='h-4 w-4' /> Add email
                   </button>
-                )
-              )}
-            </div>
-            <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start'>
-                <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {applicantProfile.mobile && (
-                  <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
                 )}
               </div>
-              {!applicantProfile.mobile && (
-                editingContactField === 'mobile' ? (
+            </div>
+            <div className='my-3 flex items-center justify-between'>
+              <div className='flex items-start flex-1 min-w-0'>
+                <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                {editingContactField === 'mobile' ? (
                   <div className='flex items-center gap-2 flex-1'>
                     <input
                       type='text'
@@ -267,6 +267,16 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
                     >Cancel</button>
                   </div>
+                ) : applicantProfile.mobile ? (
+                  <>
+                    <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
+                    <button
+                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
+                      onClick={() => { setEditingContactField('mobile'); setContactInputValue(applicantProfile.mobile); }}
+                    >
+                      <PencilIcon className='h-4 w-4' />
+                    </button>
+                  </>
                 ) : (
                   <button
                     className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
@@ -274,23 +284,13 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   >
                     <PlusIcon className='h-4 w-4' /> Add mobile
                   </button>
-                )
-              )}
-            </div>
-            <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start'>
-                <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {applicantProfile.address && (
-                  <span
-                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
-                    title={applicantProfile.address}
-                  >
-                    {applicantProfile.address}
-                  </span>
                 )}
               </div>
-              {!applicantProfile.address && (
-                editingContactField === 'address' ? (
+            </div>
+            <div className='my-3 flex items-center justify-between'>
+              <div className='flex items-start flex-1 min-w-0'>
+                <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                {editingContactField === 'address' ? (
                   <div className='flex items-center gap-2 flex-1'>
                     <input
                       type='text'
@@ -310,6 +310,21 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
                     >Cancel</button>
                   </div>
+                ) : applicantProfile.address ? (
+                  <>
+                    <span
+                      className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                      title={applicantProfile.address}
+                    >
+                      {applicantProfile.address}
+                    </span>
+                    <button
+                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
+                      onClick={() => { setEditingContactField('address'); setContactInputValue(applicantProfile.address); }}
+                    >
+                      <PencilIcon className='h-4 w-4' />
+                    </button>
+                  </>
                 ) : (
                   <button
                     className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
@@ -317,8 +332,8 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                   >
                     <PlusIcon className='h-4 w-4' /> Add location
                   </button>
-                )
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
