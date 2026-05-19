@@ -6,6 +6,8 @@ type ContactInfoPayload = {
   email?: string;
   mobile?: string;
   address?: string;
+  gender?: string;
+  birth_date?: string;
 };
 
 async function updateApplicantContactInfo(data: ContactInfoPayload) {
