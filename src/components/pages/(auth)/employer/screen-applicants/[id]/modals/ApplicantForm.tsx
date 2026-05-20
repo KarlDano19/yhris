@@ -13,7 +13,7 @@ import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScr
 import useGetEAF from '../../hooks/eaf/useGetEAF';
 import StateContext from '../../contexts/StateContext';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, UserIcon } from '@heroicons/react/24/outline';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../../lib/initialActionState';
@@ -174,27 +174,45 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           </div>
           <div className='flex-1 min-w-0'>
             <p className='text-[1.5rem] text-center md:text-left'>{applicantProfile.name}</p>
-            <div className='my-3 flex items-start'>
-              <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-              <span 
-                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
-                title={applicantProfile.email}
-              >
-                {applicantProfile.email}
-              </span>
-            </div>
-            <div className='my-3 flex items-start'>
-              <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-              <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
-            </div>
-            <div className='my-3 flex items-start'>
-              <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-              <span 
-                className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help' 
-                title={applicantProfile.address}
-              >
-                {applicantProfile.address}
-              </span>
+            <div className='flex flex-col md:flex-row gap-x-8'>
+              <div>
+                <div className='my-3 flex items-start'>
+                  <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span
+                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                    title={applicantProfile.email}
+                  >
+                    {applicantProfile.email}
+                  </span>
+                </div>
+                <div className='my-3 flex items-start'>
+                  <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
+                </div>
+                <div className='my-3 flex items-start'>
+                  <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span
+                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                    title={applicantProfile.address}
+                  >
+                    {applicantProfile.address}
+                  </span>
+                </div>
+              </div>
+              <div>
+                {applicantProfile.gender && (
+                  <div className='my-3 flex items-start'>
+                    <UserIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                    <span className='text-[1rem]'>{applicantProfile.gender}</span>
+                  </div>
+                )}
+                {applicantProfile.birth_date && (
+                  <div className='my-3 flex items-start'>
+                    <CalendarIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                    <span className='text-[1rem]'>{formatDateToLocal(applicantProfile.birth_date)}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
