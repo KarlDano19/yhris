@@ -570,14 +570,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                       leaveTo='transform opacity-0 scale-95'
                     >
                       <Menu.Items className='absolute right-0 z-[1000] mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                        {/* Desktop: logged-in user info + login type badge */}
                         {userDetails?.email && (
                           <div className='px-3 py-2 shadow-md overflow-hidden'>
                             <div className='flex items-center gap-2'>
                               <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                              {/* Desktop: login type badge */}
                               {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
                                 <span className='text-[9px] font-semibold bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
-                                  {userDetails.login_type}
+                                  {userDetails.login_type.replace(/-/g, ' ')}
                                 </span>
                               )}
                             </div>
@@ -596,14 +596,14 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
 
             <Popover.Panel as='nav' className='lg:hidden' aria-label='Global'>
               <div className='mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4'>
-                {/* Mobile: logged-in user info + login type badge */}
                 {userDetails?.email && (
                   <div className='px-3 py-2 mb-1 shadow-md overflow-hidden'>
                     <div className='flex items-center gap-2'>
                       <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                      {/* Mobile: login type badge */}
                       {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
                         <span className='text-[9px] font-semibold bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
-                          {userDetails.login_type}
+                          {userDetails.login_type.replace(/-/g, ' ')}
                         </span>
                       )}
                     </div>
