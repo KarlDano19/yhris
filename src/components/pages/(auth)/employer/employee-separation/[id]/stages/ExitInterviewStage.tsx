@@ -27,7 +27,7 @@ const ExitInterviewStage = ({ separation }: Props) => {
   const { mutate: sendExitInterview, isLoading: isSending } = useSendExitInterview(String(separation.id));
   const { mutate: patchSeparation, isLoading: isSkipping } = usePatchSeparation();
 
-  const alreadySent = !!separation.exit_interview_sent_at;
+  const alreadySent = !!separation.is_exit_interview_sent;
   const isCompleted = !!separation.exit_interview_is_completed;
   const isSkipped = !!separation.is_exit_interview_skipped;
   const isDone = isCompleted || isSkipped;
@@ -74,15 +74,28 @@ const ExitInterviewStage = ({ separation }: Props) => {
     <div className='space-y-5'>
       {/* Form Selector Card */}
       <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-5'>
-        <div className='flex items-center gap-3 mb-4'>
-          <div className='w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0'>
-            <ClipboardDocumentListIcon className='h-5 w-5 text-teal-600' />
+        <div className='flex items-center justify-between mb-4'>
+          <div className='flex items-center gap-3'>
+            <div className='w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0'>
+              <ClipboardDocumentListIcon className='h-5 w-5 text-teal-600' />
+            </div>
+            <div>
+              <h3 className='text-sm font-semibold text-gray-900'>Exit Interview Form</h3>
+              <p className='text-xs text-gray-500 mt-0.5'>
+                Select a form from your library and send it to the departing employee
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className='text-sm font-semibold text-gray-900'>Exit Interview Form</h3>
-            <p className='text-xs text-gray-500 mt-0.5'>
-              Select a form from your library and send it to the departing employee
-            </p>
+          <div className='flex items-center gap-2'>
+            {alreadySent && !isCompleted && (
+              <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700'>Sent</span>
+            )}
+            {isCompleted && (
+              <span className='inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700'>
+                <CheckCircleIcon className='h-3.5 w-3.5' />
+                Completed
+              </span>
+            )}
           </div>
         </div>
 

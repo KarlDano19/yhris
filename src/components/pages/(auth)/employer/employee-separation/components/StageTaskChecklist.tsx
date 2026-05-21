@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import ModalLayout from '@/components/ModalLayout';
 import CustomToast from '@/components/CustomToast';
 
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
 import DeleteIcon from '@/svg/DeleteIcon';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
@@ -16,6 +16,7 @@ import useGetStageTasks from '../[id]/hooks/useGetStageTasks';
 import useCreateStageTask from '../[id]/hooks/useCreateStageTask';
 import useUpdateStageTask from '../[id]/hooks/useUpdateStageTask';
 import useDeleteStageTask from '../[id]/hooks/useDeleteStageTask';
+import useUploadStageTaskAttachment from '../[id]/hooks/useUploadStageTaskAttachment';
 
 type Props = {
   separationId: string | number;
@@ -28,11 +29,13 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const { data: tasks = [], isLoading } = useGetStageTasks(separationId, stage);
   const { mutate: createTask, isLoading: isCreating } = useCreateStageTask(separationId, stage);
   const { mutate: updateTask } = useUpdateStageTask(separationId, stage);
   const { mutate: deleteTask } = useDeleteStageTask(separationId, stage);
+  const { mutate: uploadAttachment } = useUploadStageTaskAttachment(separationId, stage);
 
   // Notify parent when task state changes
   useEffect(() => {
@@ -48,6 +51,13 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
 
   const handleOpenModal = () => { setInput(''); setIsModalOpen(true); };
   const handleCloseModal = () => { setIsModalOpen(false); setInput(''); };
+
+  const handleFileChange = (taskId: number, file: File) => {
+    uploadAttachment(
+      { separationId, taskId, attachment: file },
+      { onError: (err: any) => toast.custom(() => <CustomToast message={err.message} type='error' />, { duration: 4000 }) }
+    );
+  };
 
   const handleAddTask = () => {
     const label = input.trim();
@@ -124,6 +134,37 @@ const StageTaskChecklist = ({ separationId, stage, title = 'Task Checklist', onT
                 <span className={`flex-1 text-sm ${task.is_checked ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                   {task.label}
                 </span>
+                {task.attachment ? (
+                  <a
+                    href={task.attachment}
+                    target='_blank'
+                    rel='noreferrer'
+                    className='flex-shrink-0 text-xs text-blue-600 underline hover:text-blue-800'
+                    title='View attachment'
+                  >
+                    View file
+                  </a>
+                ) : (
+                  <>
+                    <input
+                      type='file'
+                      className='hidden'
+                      ref={(el) => { fileInputRefs.current[task.id] = el; }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileChange(task.id, file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <button
+                      onClick={() => fileInputRefs.current[task.id]?.click()}
+                      className='flex-shrink-0 p-1 text-gray-300 hover:text-blue-400 transition-colors rounded'
+                      title='Upload file'
+                    >
+                      <PaperClipIcon className='h-4 w-4' />
+                    </button>
+                  </>
+                )}
                 {!task.is_checked && (
                   <button
                     onClick={() => handleDelete(task.id)}

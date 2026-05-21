@@ -68,7 +68,7 @@ const RenderingStage = ({ separation, currentPhase, onTasksChange, onSave }: Pro
             <div className='flex-1'>
               <p className='text-xs text-gray-500'>Last Working Day</p>
               {showDatePicker ? (
-                <div className='mt-1 flex items-center gap-2' style={{ position: 'relative', zIndex: 50 }}>
+                <div className='mt-1 flex items-center gap-2' style={{ position: 'relative'}}>
                   <div className='relative flex-1'>
                     <CustomDatePicker
                       id='rendering-last-working-day'

@@ -75,12 +75,10 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   let currentPhase: SeparationPhase;
   if (basePhase === 'Rendering') {
     currentPhase = renderingTasksBlocked ? 'Rendering' : 'Clearance';
-  } else if (basePhase === 'Final Pay' && clearanceTasksBlocked) {
+  } else if (basePhase === 'Legal Docs' && clearanceTasksBlocked) {
     currentPhase = 'Clearance';
-  } else if (basePhase === 'Legal Docs' && finalPayTasksBlocked) {
+  } else if (basePhase === 'Final Settlement' && finalPayTasksBlocked) {
     currentPhase = 'Final Pay';
-  } else if (basePhase === 'Exit Interview' && legalDocsTasksBlocked) {
-    currentPhase = 'Legal Docs';
   } else {
     currentPhase = basePhase;
   }

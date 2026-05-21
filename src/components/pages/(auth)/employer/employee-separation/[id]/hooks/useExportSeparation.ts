@@ -17,10 +17,13 @@ function useExportSeparation() {
       );
       if (!res.ok) throw new Error('Export failed.');
       const blob = await res.blob();
+      const disposition = res.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      const downloadName = match?.[1] || filename || `separation_${separationId}.zip`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename || `separation_${separationId}.zip`;
+      a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       a.remove();

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { CheckCircleIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, CheckBadgeIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 
 import AttachmentCard from '../../components/AttachmentCard';
 
@@ -21,7 +21,19 @@ const TaskRow = ({ task }: { task: any }) => (
       ? <CheckCircleIcon className='h-5 w-5 text-green-500 flex-shrink-0' />
       : <div className='h-5 w-5 rounded-full border-2 border-gray-300 flex-shrink-0' />
     }
-    <span className={`text-sm ${task.is_checked ? 'line-through text-gray-400' : 'text-gray-700'}`}>{task.label}</span>
+    <span className={`flex-1 text-sm ${task.is_checked ? 'line-through text-gray-400' : 'text-gray-700'}`}>{task.label}</span>
+    {task.attachment && (
+      <a
+        href={task.attachment}
+        target='_blank'
+        rel='noreferrer'
+        className='flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 flex-shrink-0'
+        title='View attachment'
+      >
+        <PaperClipIcon className='h-3.5 w-3.5' />
+        View file
+      </a>
+    )}
   </div>
 );
 
@@ -135,28 +147,9 @@ const CompletedStage = ({ separation }: Props) => {
         )}
       </StageCard>
 
-      {/* Stage 4 — Final Pay */}
+      {/* Stage 4 — Legal Docs */}
       <StageCard
-        title="4. Final Pay"
-        badge={<StatusBadge done={!!separation.is_last_pay_released} doneLabel="Released" pendingLabel="Pending" />}
-      >
-        <AttachmentCard attachments={lastPayAttachments} label='Last Pay Attachments' />
-        {tasksByStage('final-pay').length > 0 && (
-          <>
-            <p className='text-xs font-medium text-gray-500 mt-3 mb-1'>Final Pay Tasks</p>
-            <div className='divide-y divide-gray-100'>
-              {tasksByStage('final-pay').map(t => <TaskRow key={t.id} task={t} />)}
-            </div>
-          </>
-        )}
-        {!separation.is_last_pay_released && lastPayAttachments.length === 0 && (tasksByStage('final-pay').length === 0) && (
-          <p className='text-sm text-gray-400'>No final pay records yet.</p>
-        )}
-      </StageCard>
-
-      {/* Stage 5 — Legal Docs */}
-      <StageCard
-        title="5. Legal Docs"
+        title="4. Legal Docs"
         badge={<StatusBadge done={!!separation.is_quit_claim_received} doneLabel="Received" pendingLabel="Pending" />}
       >
         <dl className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-3'>
@@ -177,6 +170,42 @@ const CompletedStage = ({ separation }: Props) => {
               {tasksByStage('legal-docs').map(t => <TaskRow key={t.id} task={t} />)}
             </div>
           </>
+        )}
+      </StageCard>
+
+      {/* Stage 5 — Exit Interview */}
+      <StageCard
+        title="5. Exit Interview"
+        badge={<StatusBadge done={!!separation.exit_interview_is_completed || !!separation.is_exit_interview_skipped} doneLabel="Done" pendingLabel="Pending" />}
+      >
+        <dl className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm'>
+          <div>
+            <dt className='text-xs text-gray-400 uppercase'>Form Sent</dt>
+            <dd className='mt-0.5'><StatusBadge done={!!separation.is_exit_interview_sent} doneLabel="Sent" pendingLabel="Not sent" /></dd>
+          </div>
+          <div>
+            <dt className='text-xs text-gray-400 uppercase'>Completed</dt>
+            <dd className='mt-0.5'><StatusBadge done={!!separation.exit_interview_is_completed} doneLabel="Completed" pendingLabel={separation.is_exit_interview_skipped ? 'Skipped' : 'Awaiting'} /></dd>
+          </div>
+        </dl>
+      </StageCard>
+
+      {/* Stage 6 — Final Pay */}
+      <StageCard
+        title="6. Final Pay"
+        badge={<StatusBadge done={!!separation.is_last_pay_released} doneLabel="Released" pendingLabel="Pending" />}
+      >
+        <AttachmentCard attachments={lastPayAttachments} label='Last Pay Attachments' />
+        {tasksByStage('final-pay').length > 0 && (
+          <>
+            <p className='text-xs font-medium text-gray-500 mt-3 mb-1'>Final Pay Tasks</p>
+            <div className='divide-y divide-gray-100'>
+              {tasksByStage('final-pay').map(t => <TaskRow key={t.id} task={t} />)}
+            </div>
+          </>
+        )}
+        {!separation.is_last_pay_released && lastPayAttachments.length === 0 && tasksByStage('final-pay').length === 0 && (
+          <p className='text-sm text-gray-400'>No final pay records yet.</p>
         )}
       </StageCard>
 

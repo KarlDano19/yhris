@@ -55,10 +55,7 @@ const ClearanceStage = ({ separation, onOpenDocumentsModal, onMarkReceived, isLo
           {!docsReceived && (
             <button
               onClick={() => onMarkReceived(String(separation.id), 'sign documents')}
-              disabled={isLoading || !docsSent}
-              data-tooltip-id='clearance-tooltip'
-              data-tooltip-content={!docsSent ? 'Send documents first' : undefined}
-              data-tooltip-place='top'
+              disabled={isLoading}
               className='flex-1 flex items-center gap-2 justify-center px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
             >
               {isLoading ? (

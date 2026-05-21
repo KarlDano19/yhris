@@ -8,7 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import { SeparationPhase } from '../functions/separationPhase';
 import classNames from '@/helpers/classNames';
 
-const STAGES: SeparationPhase[] = ['Initiation', 'Rendering', 'Clearance', 'Final Pay', 'Legal Docs', 'Exit Interview', 'Final Settlement'];
+const STAGES: SeparationPhase[] = ['Initiation', 'Rendering', 'Clearance', 'Legal Docs', 'Exit Interview', 'Final Pay', 'Final Settlement'];
 
 type Props = {
   currentPhase: SeparationPhase;
