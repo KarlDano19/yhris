@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 
 import dynamic from "next/dynamic";
 
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
@@ -45,7 +45,7 @@ function EmployeeAssigneeTab({
   const selectedEmployees = useMemo(() => employeesValue || [], [employeesValue]);
 
   // Move ReactQuill memoization here
-  const ReactQuill = useMemo(() => dynamic(() => import("react-quill"), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import("react-quill-new"), { ssr: false }), []);
 
   // Set default message value for Quill editor
   const defaultMessage = `<p>A blessed day, Beloveds!</p><br><p>A gentle reminder to accomplish your evaluation on time.</p>`;

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 
 import { QUILL_FORMATS, QUILL_MODULES, CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function CreateJobPageJobDescription({
   setValue,
@@ -40,7 +40,7 @@ export default function CreateJobPageJobDescription({
   uploadedJobDescriptionUrl?: string | null;
 }) {
   // SSR-safe ReactQuill - memoized to prevent re-creation on every render
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
     jobDescriptionFile: false,
     jobDescription: false,

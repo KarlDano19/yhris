@@ -12,7 +12,7 @@ import ConfirmationModal from './modals/ConfirmationModal';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 
 function PreferencesTab({
@@ -41,7 +41,7 @@ function PreferencesTab({
     control: control,
     name: 'experiences',
   });
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
     if (fields.length !== 0) {

@@ -12,7 +12,7 @@ import useAddPosition from '../hooks/position/useAddPosition';
 import useAddEmployeeStatus from '../hooks/employee-status/useAddEmployeeStatus';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function CreateLocationModal({
   module,
@@ -37,7 +37,7 @@ export default function CreateLocationModal({
 
   // Dynamic import for React Quill
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     [isOpen]
   );
 

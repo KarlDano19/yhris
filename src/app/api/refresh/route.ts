@@ -7,7 +7,8 @@ import { sessionOptions, SessionData, ACCESS_TOKEN_LIFETIME_SECONDS } from '@/li
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
     const payload = await request.json().catch(() => ({}));
     
     const refreshToken = payload.refresh_token || session.refreshToken;

@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 import CritiriaSubItem from './CritiriaSubItem';
 import CustomToast from '@/components/CustomToast';
@@ -40,7 +40,7 @@ function EvaluationCriterionTab({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const childrenRef = useRef<any>({});
   const sectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const { fields, append, remove, move } = useFieldArray({

@@ -19,7 +19,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 type FormValues = {
   template: string;
@@ -66,7 +66,7 @@ export default function EmailProfileModal({
   applicantId?: number;
 }) {
   const cancelButtonRef = useRef(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), [isOpen]);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), [isOpen]);
   const [employeeEmail, setEmployeeEmail] = useState<string | null>(applicantEmail || null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);

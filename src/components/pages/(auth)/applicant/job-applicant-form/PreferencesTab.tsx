@@ -11,7 +11,7 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Helper to detect empty rich text (only tags/nbsp)
 const isQuillEmpty = (html?: string) =>
@@ -46,7 +46,7 @@ function PreferencesTab({
   });
 
   // SSR-safe ReactQuill
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
 
   // Track currently-employed per experience for UX (disables Date To)
   const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);

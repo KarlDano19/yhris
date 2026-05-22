@@ -29,7 +29,7 @@ export default function ComplianceAndCost({
 }) {
 
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     []
   );
 

@@ -21,7 +21,7 @@ import EyePassword from '@/svg/EyePassword';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 type T_EmailTemplateModalData = {
   id: number | null;
@@ -59,7 +59,7 @@ export default function CreateEditEmailTemplateModal({
   const { tagsCc, setTagsCc, handleKeyDown, handleRemoveTag } = useTagCC(inputCc, setInputCc);
   const { tagsBcc, setTagsBcc, handleKeyDownBcc, handleRemoveTagBcc } = useTagBcc(inputBcc, setInputBcc);
   
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const { register, handleSubmit, reset, setValue, watch, getValues } = useForm<any>();
 
   const isEditing = isOpen.mode === 'edit';

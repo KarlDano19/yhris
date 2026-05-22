@@ -16,7 +16,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;

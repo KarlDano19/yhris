@@ -11,10 +11,10 @@ import useGenerateSeparationLetter from '../hooks/useGenerateSeparationLetter';
 import CustomToast from '@/components/CustomToast';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 interface CreateSeparationLetterModalProps {
   isOpen: boolean;

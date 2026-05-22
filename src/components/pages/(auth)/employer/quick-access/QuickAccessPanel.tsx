@@ -16,7 +16,13 @@ import useGetQuickAccessCounters from './hooks/useGetQuickAccessCounters';
 import QuickAccessEditModal from './QuickAccessEditModal';
 
 // Workaround for react-beautiful-dnd + React 18 Strict Mode
-function StrictModeDroppable({ children, ...props }: DroppableProps) {
+function StrictModeDroppable({
+  children,
+  isDropDisabled = false,
+  isCombineEnabled = false,
+  ignoreContainerClipping = false,
+  ...props
+}: DroppableProps) {
   const [enabled, setEnabled] = React.useState(false);
   React.useEffect(() => {
     const animation = requestAnimationFrame(() => setEnabled(true));
@@ -26,7 +32,16 @@ function StrictModeDroppable({ children, ...props }: DroppableProps) {
     };
   }, []);
   if (!enabled) return null;
-  return <Droppable {...props}>{children}</Droppable>;
+  return (
+    <Droppable
+      isDropDisabled={isDropDisabled}
+      isCombineEnabled={isCombineEnabled}
+      ignoreContainerClipping={ignoreContainerClipping}
+      {...props}
+    >
+      {children}
+    </Droppable>
+  );
 }
 
 type Props = {

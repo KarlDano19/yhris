@@ -24,7 +24,7 @@ import EyePassword from '@/svg/EyePassword';
 import { DirectiveData, MemoFormData } from '@/types/directives';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 interface CachedProfileData {
   name: string;
@@ -57,7 +57,7 @@ export default function CreateMemoModal({
   const { register, handleSubmit, setValue, reset, trigger, clearErrors, setError, watch, control, getValues, formState: { errors } } = useForm<MemoFormData>();
   const { mutate, isLoading } = useAddDirectivesItems();
   const queryClient = useQueryClient();
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   
   const cachedProfile = queryClient
     .getQueryCache()

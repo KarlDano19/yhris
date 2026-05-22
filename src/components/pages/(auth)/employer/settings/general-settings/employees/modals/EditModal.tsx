@@ -15,7 +15,7 @@ import useGetEmployeeStatusDetails from '../hooks/employee-status/useGetEmployee
 import useEditEmployeeStatusDetails from '../hooks/employee-status/useEditEmployeeStatusDetails';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 type T_ModalData = {
   id: number;
@@ -63,7 +63,7 @@ export default function EditModal({
 
   // Dynamic import for React Quill
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     [isOpen]
   );
 

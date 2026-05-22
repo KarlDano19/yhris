@@ -7,7 +7,8 @@ import { sessionOptions, sleep } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<any>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<any>(cookieStore as any, sessionOptions);
     const data = await request.json();
     // hasCompletedOnboarding and hasOnboarded are intentionally excluded here.
     // Those flags must only be updated via /api/refresh-onboarding-session,

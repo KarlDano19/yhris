@@ -8,7 +8,7 @@ import classNames from '@/helpers/classNames';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
@@ -28,7 +28,7 @@ function EvaluationFormTab({
   setSelectedTab: any;
   errors: any;
 }) {
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const [remarks, setRemarks] = useState<boolean | null>(watch('is_show_remarks'));
   const [commentCriteria, setCommentCriteria] = useState<boolean | null>(watch('is_show_criteria_comment'));
 

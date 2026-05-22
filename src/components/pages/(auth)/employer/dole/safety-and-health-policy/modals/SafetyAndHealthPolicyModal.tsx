@@ -14,7 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, Transition } from "@headlessui/react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 
 import CustomToast from "@/components/CustomToast";
@@ -58,7 +58,7 @@ function SafetyAndHealthPolicyModal({
   const router = useRouter();
   const searchParams = useSearchParams();
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     []
   );
   const { register, handleSubmit, reset, setValue, watch } =

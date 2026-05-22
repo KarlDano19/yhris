@@ -25,7 +25,7 @@ import CalendarIcon from '@/svg/CalendarIcon';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Helper function to check if HTML content is empty
 const isHtmlEmpty = (html: string | null | undefined): boolean => {
@@ -115,7 +115,7 @@ export default function ScheduleInterview({ title, handleFormSubmit, isSendInter
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
   const [map, setMap] = useState(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const applicant: ApplicantType | undefined = useMemo(() => {
     return state
       .find((stage) => stage.id === actionState.stageId)

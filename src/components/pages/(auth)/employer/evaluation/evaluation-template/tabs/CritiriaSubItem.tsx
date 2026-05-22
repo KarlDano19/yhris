@@ -9,7 +9,7 @@ import { Tooltip } from 'react-tooltip';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 import DeleteModal from '@/components/DeleteModal';
 
@@ -35,7 +35,7 @@ function CritiriaSubItem({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: `evaluation_criterion[${sectionIndex}].criterion`,

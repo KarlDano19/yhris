@@ -20,7 +20,7 @@ import useTagBcc from "@/components/hooks/useTagBcc";
 import SelectChevronDown from "@/svg/SelectChevronDownDummy";
 
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 
 interface Field {
   onChange: (value: any) => void;
@@ -85,7 +85,7 @@ export default function SendSeparationEmail({
   prePopulatedData
 }: SendSeparationEmailProps) {
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     [isOpen]
   );
   

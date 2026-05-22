@@ -11,7 +11,7 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 function WorkExperienceTab({
   control,
@@ -39,7 +39,7 @@ function WorkExperienceTab({
     control: control,
     name: 'experiences',
   });
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
+  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   
   // State to track currently employed status for each experience
   const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);

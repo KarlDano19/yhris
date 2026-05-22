@@ -36,7 +36,7 @@ export default function SafetyMeasures({
   setSafetySignageAttachmentExist: (exists: boolean) => void;
 }) {
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     []
   );
   const [previousSignageFile, setPreviousSignageFile] = useState<string>("");

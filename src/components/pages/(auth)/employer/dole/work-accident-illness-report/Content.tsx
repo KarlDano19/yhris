@@ -24,7 +24,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import classNames from '@/helpers/classNames';
 
 import useGetWorkAccidentIlnessReportsItems from './hooks/useGetWorkAccidentIlnessReportsItems';
-import useDeleteWorkAccidentIllnessReport from './hooks/useDeleteWorkAccidentillnessReport';
+import useDeleteWorkAccidentIllnessReport from './hooks/useDeleteWorkAccidentIllnessReport';
 import CreateWorkAccidentIllnessReportModal from './modals/CreateWorkAccidentIllnessReportModal';
 import UpdateWorkAccidentIllnessReportModal from './modals/UpdateWorkAccidentIllnessReportModal';
 import SelectBranchModal from './modals/SelectBranchModal';

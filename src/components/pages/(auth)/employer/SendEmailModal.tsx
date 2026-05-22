@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
 
-import ReactQuill from 'react-quill';
+import ReactQuill from 'react-quill-new';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { XCircleIcon } from '@heroicons/react/24/solid';
@@ -14,7 +14,7 @@ import SelectChevronDown from '@/svg/SelectChevronDown';
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import { T_DocumentsModal } from '@/types/globals';
 
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 import InfoIcon from '@/svg/InfoIcon';
 
 type FormValues = {

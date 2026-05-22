@@ -29,7 +29,7 @@ export default function ProgramAndPolicy({
   missingFields?: string[];
 }) {
   const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill"), { ssr: false }),
+    () => dynamic(() => import("react-quill-new"), { ssr: false }),
     []
   );
   const [drawSignatureModal, setDrawSignatureModal] = useState(false);

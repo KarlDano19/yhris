@@ -129,15 +129,21 @@ const ApplyNowModal = ({ isOpen, handleClose, jobId }: ApplyNowModalProps) => {
   };
 
   const handleApplyWithAccount = () => {
-    router.push(`/register?redirect=${encodeURIComponent(redirectUrl)}`);
+    const url = `/register?redirect=${encodeURIComponent(redirectUrl)}`;
+    window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
+    router.push(url);
   };
 
   const handleContinueAsGuest = () => {
-    router.push(`/job-app-form/${jobId}`);
+    const url = `/job-app-form/${jobId}`;
+    window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
+    router.push(url);
   };
 
   const handleLogin = () => {
-    router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+    const url = `/login?redirect=${encodeURIComponent(redirectUrl)}`;
+    window.dispatchEvent(new CustomEvent('yahshua:navigation-start', { detail: { url } }));
+    router.push(url);
   };
 
   return (

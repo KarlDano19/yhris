@@ -7,7 +7,8 @@ import { SessionData, sessionOptions } from '@/lib/session';
 
 export async function GET() {
   try {
-    const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
     
     return NextResponse.json({
       email: session.email || '',

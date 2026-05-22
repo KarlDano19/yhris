@@ -6,7 +6,8 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions, SessionData } from './lib/session';
 
 export async function middleware(request: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies() as any, sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore as any, sessionOptions);
   const listPathname = request.nextUrl.pathname.split('/');
   const slicePaths = listPathname.slice(1);
   const firstRoute = slicePaths[0];
