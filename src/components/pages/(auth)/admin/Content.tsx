@@ -18,7 +18,6 @@ import {
   ExclamationTriangleIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 import useClientItems from './client-monitoring/hooks/useGetClientItems';
 
@@ -497,7 +496,6 @@ const Content = () => {
         </div>
       </div>
 
-      {/* <FloatingHelpButton /> */}
     </div>
   );
 };
