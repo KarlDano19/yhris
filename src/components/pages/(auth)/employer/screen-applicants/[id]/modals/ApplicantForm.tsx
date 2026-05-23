@@ -13,13 +13,13 @@ import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScr
 import useUpdateApplicantContactInfo from '../../hooks/applicant/useUpdateApplicantContactInfo';
 import useGetEAF from '../../hooks/eaf/useGetEAF';
 import StateContext from '../../contexts/StateContext';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { UserIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../../lib/initialActionState';
 import { ApplicantType, ContextTypes } from '../../types';
-import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
   title: string;
@@ -196,142 +196,43 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
           </div>
           <div className='flex-1 min-w-0'>
             <p className='text-[1.5rem] text-center md:text-left'>{applicantProfile.name}</p>
-            <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start flex-1 min-w-0'>
-                <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {editingContactField === 'email' ? (
-                  <div className='flex items-center gap-2 flex-1'>
-                    <input
-                      type='email'
-                      className='border border-gray-300 rounded px-2 py-1 text-sm flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                      placeholder='Enter email'
-                      value={contactInputValue}
-                      onChange={(e) => setContactInputValue(e.target.value)}
-                      autoFocus
-                    />
-                    <button
-                      className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50'
-                      onClick={() => handleContactSave('email')}
-                      disabled={isUpdatingContact}
-                    >Save</button>
-                    <button
-                      className='text-sm text-gray-500 hover:text-gray-700'
-                      onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
-                    >Cancel</button>
-                  </div>
-                ) : applicantProfile.email ? (
-                  <>
-                    <span
-                      className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
-                      title={applicantProfile.email}
-                    >
-                      {applicantProfile.email}
-                    </span>
-                    <button
-                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
-                      onClick={() => { setEditingContactField('email'); setContactInputValue(applicantProfile.email); }}
-                    >
-                      <PencilIcon className='h-4 w-4' />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
-                    onClick={() => { setEditingContactField('email'); setContactInputValue(''); }}
+            <div className='flex flex-col md:flex-row gap-x-8'>
+              <div>
+                <div className='my-3 flex items-start'>
+                  <EnvelopeIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span
+                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                    title={applicantProfile.email}
                   >
-                    <PlusIcon className='h-4 w-4' /> Add email
-                  </button>
-                )}
+                    {applicantProfile.email}
+                  </span>
+                </div>
+                <div className='my-3 flex items-start'>
+                  <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
+                </div>
+                <div className='my-3 flex items-start'>
+                  <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                  <span
+                    className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
+                    title={applicantProfile.address}
+                  >
+                    {applicantProfile.address}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start flex-1 min-w-0'>
-                <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {editingContactField === 'mobile' ? (
-                  <div className='flex items-center gap-2 flex-1'>
-                    <input
-                      type='text'
-                      className='border border-gray-300 rounded px-2 py-1 text-sm flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                      placeholder='Enter mobile number'
-                      value={contactInputValue}
-                      onChange={(e) => setContactInputValue(e.target.value)}
-                      autoFocus
-                    />
-                    <button
-                      className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50'
-                      onClick={() => handleContactSave('mobile')}
-                      disabled={isUpdatingContact}
-                    >Save</button>
-                    <button
-                      className='text-sm text-gray-500 hover:text-gray-700'
-                      onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
-                    >Cancel</button>
+              <div>
+                {applicantProfile.gender && (
+                  <div className='my-3 flex items-start'>
+                    <UserIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                    <span className='text-[1rem]'>{applicantProfile.gender}</span>
                   </div>
-                ) : applicantProfile.mobile ? (
-                  <>
-                    <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
-                    <button
-                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
-                      onClick={() => { setEditingContactField('mobile'); setContactInputValue(applicantProfile.mobile); }}
-                    >
-                      <PencilIcon className='h-4 w-4' />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
-                    onClick={() => { setEditingContactField('mobile'); setContactInputValue(''); }}
-                  >
-                    <PlusIcon className='h-4 w-4' /> Add mobile
-                  </button>
                 )}
-              </div>
-            </div>
-            <div className='my-3 flex items-center justify-between'>
-              <div className='flex items-start flex-1 min-w-0'>
-                <MapPinIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
-                {editingContactField === 'address' ? (
-                  <div className='flex items-center gap-2 flex-1'>
-                    <input
-                      type='text'
-                      className='border border-gray-300 rounded px-2 py-1 text-sm flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                      placeholder='Enter address'
-                      value={contactInputValue}
-                      onChange={(e) => setContactInputValue(e.target.value)}
-                      autoFocus
-                    />
-                    <button
-                      className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50'
-                      onClick={() => handleContactSave('address')}
-                      disabled={isUpdatingContact}
-                    >Save</button>
-                    <button
-                      className='text-sm text-gray-500 hover:text-gray-700'
-                      onClick={() => { setEditingContactField(null); setContactInputValue(''); }}
-                    >Cancel</button>
+                {applicantProfile.birth_date && (
+                  <div className='my-3 flex items-start'>
+                    <CalendarIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
+                    <span className='text-[1rem]'>{formatDateToLocal(applicantProfile.birth_date)}</span>
                   </div>
-                ) : applicantProfile.address ? (
-                  <>
-                    <span
-                      className='text-[1rem] max-w-full md:max-w-48 overflow-hidden text-ellipsis whitespace-nowrap cursor-help'
-                      title={applicantProfile.address}
-                    >
-                      {applicantProfile.address}
-                    </span>
-                    <button
-                      className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
-                      onClick={() => { setEditingContactField('address'); setContactInputValue(applicantProfile.address); }}
-                    >
-                      <PencilIcon className='h-4 w-4' />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800'
-                    onClick={() => { setEditingContactField('address'); setContactInputValue(''); }}
-                  >
-                    <PlusIcon className='h-4 w-4' /> Add location
-                  </button>
                 )}
               </div>
             </div>
