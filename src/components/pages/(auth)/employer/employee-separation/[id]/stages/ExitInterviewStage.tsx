@@ -14,9 +14,10 @@ import useSendExitInterview from '../hooks/useSendExitInterview';
 
 type Props = {
   separation: any;
+  refetch?: () => void;
 };
 
-const ExitInterviewStage = ({ separation }: Props) => {
+const ExitInterviewStage = ({ separation, refetch }: Props) => {
   const [selectedFormId, setSelectedFormId] = useState<number | null>(
     separation.exit_interview_form_id ?? null
   );
@@ -47,6 +48,7 @@ const ExitInterviewStage = ({ separation }: Props) => {
       {
         onSuccess: (res: any) => {
           toast.custom(() => <CustomToast message={res.message ?? 'Exit interview sent.'} type='success' />, { duration: 5000 });
+          refetch?.();
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err.message ?? 'Failed to send exit interview.'} type='error' />, { duration: 7000 });
@@ -62,6 +64,7 @@ const ExitInterviewStage = ({ separation }: Props) => {
       {
         onSuccess: (res: any) => {
           toast.custom(() => <CustomToast message={res.message ?? 'Exit interview skipped.'} type='success' />, { duration: 5000 });
+          refetch?.();
         },
         onError: (err: any) => {
           toast.custom(() => <CustomToast message={err ?? 'Failed to skip exit interview.'} type='error' />, { duration: 7000 });

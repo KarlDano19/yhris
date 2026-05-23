@@ -1,6 +1,6 @@
 import { T_SeparationEmail } from '@/types/globals';
 
-export type EmailType = 'letters' | 'sign documents' | 'last pay' | 'quit claim';
+export type EmailType = 'letters' | 'sign documents' | 'last pay' | 'quit claim' | 'legal docs';
 
 export interface EmailData {
   subject: string;
@@ -64,6 +64,13 @@ export interface SeparationItem {
     cc?: string[];
     bcc?: string[];
     attachment?: File | string;
+  };
+  legalDocs: {
+    subject: string;
+    to: string[];
+    message: string;
+    cc?: string[];
+    bcc?: string[];
   };
   isLetterSent: boolean;
   isDocumentsSent: boolean;
@@ -152,6 +159,13 @@ export const handleEmailSending = (
       separationItemCopy.quitClaim.attachment = data.attachment;
     }
     separationItemCopy.isQuitclaimSigned = true;
+  } else if (emailType === 'legal docs') {
+    if (!separationItemCopy.legalDocs) separationItemCopy.legalDocs = {};
+    separationItemCopy.legalDocs.subject = data.subject;
+    separationItemCopy.legalDocs.to = data.email;
+    separationItemCopy.legalDocs.message = data.message;
+    if (data.cc) separationItemCopy.legalDocs.cc = data.cc;
+    if (data.bcc) separationItemCopy.legalDocs.bcc = data.bcc;
   }
 
   // Set common fields

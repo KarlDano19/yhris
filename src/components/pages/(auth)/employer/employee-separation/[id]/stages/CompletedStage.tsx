@@ -63,7 +63,6 @@ const CompletedStage = ({ separation }: Props) => {
   const letterAttachments = separation.letter_attachments || [];
   const docAttachments = separation.document_attachments || [];
   const lastPayAttachments = separation.last_pay_attachments || [];
-  const quitclaimAttachments = separation.quitclaim_attachments || [];
 
   return (
     <div className='space-y-5'>
@@ -150,26 +149,14 @@ const CompletedStage = ({ separation }: Props) => {
       {/* Stage 4 — Legal Docs */}
       <StageCard
         title="4. Legal Docs"
-        badge={<StatusBadge done={!!separation.is_quit_claim_received} doneLabel="Received" pendingLabel="Pending" />}
+        badge={<StatusBadge done={tasksByStage('legal-docs').length > 0 && tasksByStage('legal-docs').every(t => t.is_checked)} doneLabel="Done" pendingLabel="Pending" />}
       >
-        <dl className='grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-3'>
-          <div>
-            <dt className='text-xs text-gray-400 uppercase'>Quitclaim Signed</dt>
-            <dd className='mt-0.5'><StatusBadge done={!!separation.is_quit_claim_signed} doneLabel="Signed" pendingLabel="Pending" /></dd>
+        {tasksByStage('legal-docs').length > 0 ? (
+          <div className='divide-y divide-gray-100'>
+            {tasksByStage('legal-docs').map(t => <TaskRow key={t.id} task={t} />)}
           </div>
-          <div>
-            <dt className='text-xs text-gray-400 uppercase'>Quitclaim Received</dt>
-            <dd className='mt-0.5'><StatusBadge done={!!separation.is_quit_claim_received} doneLabel={formatDateToLocal(separation.quit_claim_received_date) || 'Received'} pendingLabel="Awaiting" /></dd>
-          </div>
-        </dl>
-        <AttachmentCard attachments={quitclaimAttachments} label='Quitclaim Attachments' />
-        {tasksByStage('legal-docs').length > 0 && (
-          <>
-            <p className='text-xs font-medium text-gray-500 mt-3 mb-1'>Legal Docs Tasks</p>
-            <div className='divide-y divide-gray-100'>
-              {tasksByStage('legal-docs').map(t => <TaskRow key={t.id} task={t} />)}
-            </div>
-          </>
+        ) : (
+          <p className='text-sm text-gray-400'>No tasks added.</p>
         )}
       </StageCard>
 

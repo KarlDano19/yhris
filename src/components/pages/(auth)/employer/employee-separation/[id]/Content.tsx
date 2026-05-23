@@ -33,7 +33,7 @@ import CompletedStage from './stages/CompletedStage';
 
 import BackButton from '@/components/BackButton';
 
-import { T_DocumentsModal, T_LastPayModal, T_LetterModal, T_QuitclaimModal } from '@/types/globals';
+import { T_DocumentsModal, T_LastPayModal, T_LetterModal } from '@/types/globals';
 import { formatDateToLocal } from '@/helpers/date';
 import classNames from '@/helpers/classNames';
 
@@ -55,7 +55,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
   const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
-  const [isQuitclaimModalOpen, setIsQuitclaimModalOpen] = useState<T_QuitclaimModal | null>(null);
+  const [isLegalDocsModalOpen, setIsLegalDocsModalOpen] = useState<{ id: string } | null>(null);
   const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
   const [renderingTasksBlocked, setRenderingTasksBlocked] = useState(true);
   const [clearanceTasksBlocked, setClearanceTasksBlocked] = useState(true);
@@ -77,6 +77,8 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     currentPhase = renderingTasksBlocked ? 'Rendering' : 'Clearance';
   } else if (basePhase === 'Legal Docs' && clearanceTasksBlocked) {
     currentPhase = 'Clearance';
+  } else if (basePhase === 'Legal Docs') {
+    currentPhase = legalDocsTasksBlocked ? 'Legal Docs' : 'Exit Interview';
   } else if (basePhase === 'Final Settlement' && finalPayTasksBlocked) {
     currentPhase = 'Final Pay';
   } else {
@@ -100,7 +102,6 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     const now = new Date().toISOString();
     if (emailType === 'letters') { copy.is_letter_received = true; copy.letter_received_date = now; }
     if (emailType === 'sign documents') { copy.is_documents_received = true; copy.documents_received_date = now; }
-    if (emailType === 'quit claim') { copy.is_quit_claim_received = true; copy.quit_claim_received_date = now; }
 
     mutate(copy, {
       onSuccess: (data: any) => {
@@ -159,15 +160,14 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
     });
   };
 
-  const handleQuitclaimSubmit = (data: any) => {
-    if (!isQuitclaimModalOpen?.id || !separation) return;
+  const handleLegalDocsSubmit = (data: any) => {
+    if (!isLegalDocsModalOpen?.id || !separation) return;
     const items = [separation];
-    const updatedItem = handleEmailSending(data, 'quit claim', items, isQuitclaimModalOpen.id);
+    const updatedItem = handleEmailSending(data, 'legal docs', items, isLegalDocsModalOpen.id);
     mutate(updatedItem, {
       onSuccess: (res: any) => {
-        setIsQuitclaimModalOpen(null);
+        setIsLegalDocsModalOpen(null);
         toast.custom(() => <CustomToast message={res.message} type='success' />, { duration: 5000 });
-        refetch().then(() => setLocalCase(null));
       },
       onError: (err: any) => toast.custom(() => <CustomToast message={err} type='error' />, { duration: 7000 }),
     });
@@ -350,14 +350,15 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
             {displayStage === 'Legal Docs' && (
               <LegalDocsStage
                 separation={separation}
-                onOpenQuitclaimModal={(modal) => setIsQuitclaimModalOpen(modal)}
-                onMarkReceived={setReceived}
-                isLoading={loadingStates[`${separation.id}-quit claim`] || false}
                 onTasksChange={(hasAny, allComplete) => setLegalDocsTasksBlocked(!hasAny || !allComplete)}
+                onOpenLegalDocsEmail={(modal) => setIsLegalDocsModalOpen(modal)}
               />
             )}
             {displayStage === 'Exit Interview' && (
-              <ExitInterviewStage separation={separation} />
+              <ExitInterviewStage
+                separation={separation}
+                refetch={() => refetch().then(() => setLocalCase(null))}
+              />
             )}
             {displayStage === 'Final Settlement' && (
               <CompletedStage separation={separation} />
@@ -442,16 +443,16 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
           isLoading={isMutating}
         />
       )}
-      {isQuitclaimModalOpen && (
+      {isLegalDocsModalOpen && (
         <SendEmailModal
-          title="Send Quitclaim"
-          isOpen={!!isQuitclaimModalOpen}
-          onClose={() => setIsQuitclaimModalOpen(null)}
-          onSubmit={handleQuitclaimSubmit}
+          title="Send Legal Docs Files"
+          isOpen={!!isLegalDocsModalOpen}
+          onClose={() => setIsLegalDocsModalOpen(null)}
+          onSubmit={handleLegalDocsSubmit}
           defaultRecipients={letterDefaultRecipients}
-          showDragDropAttachment={true}
-          allowMultipleAttachments={true}
-          submitButtonText="Send"
+          showDragDropAttachment={false}
+          showAttachment={false}
+          submitButtonText="Send Files"
           isLoading={isMutating}
         />
       )}

@@ -11,7 +11,6 @@ export function getSeparationPhase(item: any): SeparationPhase {
   const exitDone = item.exit_interview_is_completed || item.is_exit_interview_skipped || item.is_exit_interview_sent;
   if (item.is_last_pay_released || item.isLastPayReleased) return 'Final Settlement';
   if (exitDone) return 'Final Pay';
-  if (item.is_quit_claim_received || item.isQuitclaimReceived) return 'Exit Interview';
   if (item.is_documents_received || item.isDocumentsReceived) return 'Legal Docs';
   if (item.is_letter_received || item.isLetterReceived) return 'Rendering';
   return 'Initiation';
@@ -22,10 +21,9 @@ export function getSeparationProgress(item: any): number {
   if (item.is_letter_sent || item.isLetterSent) completed++;
   if (item.is_letter_received || item.isLetterReceived) completed++;
   if (item.is_documents_received || item.isDocumentsReceived) completed++;
-  if (item.is_quit_claim_received || item.isQuitclaimReceived) completed++;
   if (item.exit_interview_is_completed || item.is_exit_interview_skipped) completed++;
   if (item.is_last_pay_released || item.isLastPayReleased) completed++;
-  return Math.round((completed / 6) * 100);
+  return Math.round((completed / 5) * 100);
 }
 
 export function getPendingTasksCount(item: any): number {
@@ -34,7 +32,6 @@ export function getPendingTasksCount(item: any): number {
   if (!item.is_letter_received && !item.isLetterReceived) pending++;
   if (!item.is_documents_received && !item.isDocumentsReceived) pending++;
   if (!item.is_last_pay_released && !item.isLastPayReleased) pending++;
-  if (!item.is_quit_claim_received && !item.isQuitclaimReceived) pending++;
   return pending;
 }
 
