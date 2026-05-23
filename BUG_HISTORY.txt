@@ -109,6 +109,70 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-019 
+DATE FILED: 2026-05-23
+DATE FIXED: 2026-05-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  The "Ask Hiyo" floating chat widget (FloatingHelpButton) was imported and
+  rendered individually across 7 separate files — including three unauthenticated
+  pages (login, register, yg-login) and the UnauthorizedHeader component. This
+  caused the ABBA Chat widget script to load and initialize on public-facing pages
+  where no user session exists, resulting in wasted network requests and potential
+  widget initialization with anonymous/unknown identity. The applicant layout and
+  employer MainHeader also each imported it independently, creating fragmented
+  maintenance overhead and risk of the widget appearing or not appearing
+  inconsistently as pages are added.
+
+DESIRED OUTCOME:
+  The "Ask Hiyo" widget should only appear on authenticated pages (i.e., when
+  a user is logged in). It should be imported once in a single location that
+  naturally wraps all authenticated routes, so no individual page or component
+  needs to manage it.
+
+FILES CHANGED:
+Frontend:
+- src/app/auth.tsx (added FloatingHelpButton, gated on session.isLoggedIn)
+- src/components/pages/(auth)/employer/MainHeader.tsx (removed import + usage)
+- src/components/pages/(auth)/admin/Content.tsx (removed import + commented usage)
+- src/components/pages/(un-auth)/UnauthorizedHeader.tsx (removed import + usage)
+- src/components/pages/(all-layout)/login/Content.tsx (removed import + 2 usages)
+- src/components/pages/(all-layout)/register/Content.tsx (removed import + 2 usages)
+- src/components/pages/(all-layout)/yg-login/Content.tsx (removed import + usage)
+- src/app/(auth)/(applicant)/(yahshua-connect)/layout.tsx (removed import + usage)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only change
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual) — widget loads on authenticated pages, absent on login/register
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified "Ask Hiyo" button appears after login (employer, applicant, admin)
+  - Verified "Ask Hiyo" button is absent on /login, /register, /yg-login
+  - Verified "Ask Hiyo" button is absent on UnauthorizedHeader public pages
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  auth.tsx is a Next.js server component that wraps every page in the app and
+  already reads the iron-session to determine if the user is logged in. A single
+  `{session.isLoggedIn && <FloatingHelpButton />}` render was added there,
+  replacing all 7 individual imports. The FloatingHelpButton component itself
+  (a client component that injects the ABBA Chat script) is unchanged — it still
+  fetches the user's email client-side via /api/get-session for widget identity.
+  The `companyName` prop previously passed from MainHeader (employer profile name)
+  is no longer passed; the widget falls back to 'Unknown' as clientId, which is
+  acceptable since the primary identity is the user email.
+
+================================================================================
+
 BUG ID: HRIS-2026-018
 DATE FILED: 2026-04-30
 DATE FIXED: 2026-04-30

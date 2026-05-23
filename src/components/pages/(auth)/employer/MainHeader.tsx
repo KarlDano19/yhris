@@ -12,7 +12,6 @@ import toast from 'react-hot-toast';
 import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import useLogout from '../../../hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
@@ -618,7 +617,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
           </>
         )}
       </Popover>
-      <FloatingHelpButton companyName={profile.name} />
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
 
       {/* Chat Modals */}

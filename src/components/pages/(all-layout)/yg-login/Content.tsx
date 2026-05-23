@@ -10,7 +10,6 @@ import { setCookie } from 'cookies-next';
 import updateSession from '@/helpers/updateSession';
 import { ACCESS_TOKEN_LIFETIME_SECONDS } from '@/lib/session';
 import SplitLayout from '@/components/SplitView';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 import SplitViewBg from '@/assets/split-view-bg.png';
 import MainIconOnly from '@/svg/MainIconOnly';
@@ -193,7 +192,6 @@ function Content() {
         }
         leftBG={SplitViewBg}
       />
-      <FloatingHelpButton />
     </>
   );
 }
