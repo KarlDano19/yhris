@@ -452,9 +452,9 @@ const Content = () => {
       </div>
 
       {/* ── Bottom Row: Chart + Events ── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Lifecycle Health Trends chart */}
-        <div className="col-span-2 bg-white rounded-xl shadow-sm p-6">
+        <div className="col-span-1 lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-base font-semibold text-gray-800 mb-4">Lifecycle Health Trends</h2>
           <div className="h-48">
             <Bar data={chartData} options={chartOptions} />

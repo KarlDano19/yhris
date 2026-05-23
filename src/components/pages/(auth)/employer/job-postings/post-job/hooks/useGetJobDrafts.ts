@@ -15,7 +15,7 @@ async function getJobDrafts(): Promise<T_JobPostingDraft[]> {
     };
 
     if (token) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/job-drafts/`, config);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/job-drafts/?view_type=select`, config);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Failed to fetch drafts');

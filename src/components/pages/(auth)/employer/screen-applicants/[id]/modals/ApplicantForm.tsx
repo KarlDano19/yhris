@@ -10,15 +10,16 @@ import { formatDateToLocal, formatDateTimeSeparate } from '@/helpers/date';
 import useGetApplicantDetails from '../../hooks/applicant/useGetApplicantDetails';
 import useGenerateApplicantSummary from '../../hooks/applicant/useGenerateApplicantSummary';
 import useDownloadScreeningAnswersPDF from '../../hooks/applicant/useDownloadScreeningAnswersPDF';
+import useUpdateApplicantContactInfo from '../../hooks/applicant/useUpdateApplicantContactInfo';
 import useGetEAF from '../../hooks/eaf/useGetEAF';
 import StateContext from '../../contexts/StateContext';
+import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, UserIcon } from '@heroicons/react/24/outline';
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, StarIcon, QuestionMarkCircleIcon, CalendarIcon, CheckCircleIcon, ArrowRightIcon, DocumentTextIcon, PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { UserIcon, XCircleIcon } from '@heroicons/react/24/solid';
 
 import { initialActionState } from '../../lib/initialActionState';
 import { ApplicantType, ContextTypes } from '../../types';
-import PlaceholderAvatar from '@/components/common/PlaceholderAvatar';
 
 type PropTypes = {
   title: string;
@@ -38,6 +39,9 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const { state, actionState, setActionState }: ContextTypes = useContext(StateContext) as ContextTypes;
   const { mutate: generateSummary, isLoading: isGeneratingMutation } = useGenerateApplicantSummary();
   const { mutate: downloadPDF, isLoading: isDownloadingPDF } = useDownloadScreeningAnswersPDF();
+  const { mutate: updateContactInfo, isLoading: isUpdatingContact } = useUpdateApplicantContactInfo();
+  const [editingContactField, setEditingContactField] = useState<'email' | 'mobile' | 'address' | null>(null);
+  const [contactInputValue, setContactInputValue] = useState('');
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -163,6 +167,24 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
     if (!applicantProfile.cv_url) return false;
     const url = applicantProfile.cv_url.toLowerCase();
     return url.includes('.docx') || url.includes('.doc');
+  };
+
+  const handleContactSave = (field: 'email' | 'mobile' | 'address') => {
+    if (!contactInputValue.trim() || !applicant?.applicationId) return;
+    updateContactInfo(
+      { appliedJobId: applicant.applicationId, [field]: contactInputValue.trim() },
+      {
+        onSuccess: () => {
+          setApplicantProfile((prev: any) => ({ ...prev, [field]: contactInputValue.trim() }));
+          setEditingContactField(null);
+          setContactInputValue('');
+          toast.custom(<CustomToast type='success' message='Contact info updated.' />);
+        },
+        onError: (err: any) => {
+          toast.custom(<CustomToast type='error' message={err?.message || 'Failed to update.'} />);
+        },
+      }
+    );
   };
 
   const renderProfileTab = () => {

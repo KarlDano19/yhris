@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
 import useApplicantItems from './hooks/useGetApplicantItems';
 
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
@@ -19,6 +20,8 @@ const Content = () => {
     search: '',
   });
   const [isApplicantGoalModalOpen, setIsApplicantGoalModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(itemsFilter);
 
   useEffect(() => {
@@ -27,8 +30,13 @@ const Content = () => {
         item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
       });
       setClientItems(dataApplicant);
+      setCurrentPage(1);
     }
   }, [dataApplicant]);
+
+  const totalRecords = clientItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isGetApplicantLoading) {
@@ -42,8 +50,8 @@ const Content = () => {
         </tr>
       );
     }
-    if (clientItems && clientItems.length > 0) {
-      return clientItems.map((item: any) => (
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.name}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.email}</td>
@@ -69,8 +77,8 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4'>
-          <div className='mt-6 flex gap-16 space-x-20'>
-            <div className='flex-none lg:w-1/2 space-y-14'>
+          <div className='mt-6 flex flex-col lg:flex-row gap-4'>
+            <div className='flex-none w-full lg:w-1/2 space-y-4'>
               <h2 className='text-xl font-bold text-indigo-dye'>Applicant Monitoring</h2>
               <div className='relative flex items-center'>
                 <input
@@ -98,8 +106,8 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className='flex-none lg:w-1/2'>
-              <div className='flex justify-between gap-3 px-5 py-5 font-semibold whitespace-nowrap rounded-xl border border-solid border-slate-400 max-w-[318px]'>
+            <div className='flex-none w-full lg:w-1/2'>
+              <div className='flex justify-between gap-3 px-5 py-5 font-semibold rounded-xl border border-solid border-slate-400 w-full max-w-[318px]'>
                 <div className='flex flex-col my-auto text-base tracking-wide text-slate-700'>
                   <div>TOTAL</div>
                   <div className='mt-3.5'>applicant</div>
@@ -137,7 +145,13 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {clientItems.length}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>
