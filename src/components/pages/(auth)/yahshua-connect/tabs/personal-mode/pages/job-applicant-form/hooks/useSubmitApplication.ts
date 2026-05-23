@@ -16,9 +16,10 @@ async function submitApplication(data: any) {
       portfolio_url: data.portfolio,
       work_experience: data.exp,
       setup_preference: (data.setupPreference || '').join(),
-      screening_answers: data.screeningAnswers || []
+      screening_answers: data.screeningAnswers || [],
+      dpa_agreed: data.dpa_agreed || false,
     };
-    
+
     const token = getCookie('token');
     const formData = new FormData();
     formData.append('application_form', JSON.stringify(finalData));

@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import CustomToast from '@/components/CustomToast';
 import BackButton from '@/components/BackButton';
 import DataConfirmationModal from './modals/DataConfirmationModal';
+import DPANoticeModal from './modals/DPANoticeModal';
 import SuggestionModal from './modals/SuggestionModal';
 import useSubmitApplication from './hooks/useSubmitApplication';
 import useGetJobDetails from './hooks/useGetJobDetails';
@@ -25,6 +26,8 @@ const Content = () => {
   const firstForm = useForm();
   const screeningForm = useForm();
   const secondForm = useForm();
+  const [isDPAModalOpen, setIsDPAModalOpen] = useState(false);
+  const [dpaAgreed, setDpaAgreed] = useState(false);
   const [isSuggestModal, setSuggestModal] = useState(false);
   const [jobDetailData, setJobDetailData] = useState<any>({});
   const [currentTab, setCurrentTab] = useState<Number>(1);
@@ -34,7 +37,13 @@ const Content = () => {
   const [profilePhotoList, setProfilePhotoList] = useState<FileList | null>(null);
   const { data } = useGetJobDetails(Number(params.id));
   const { mutate: mutateSubmitApplication, isLoading: isLoadingSubmitApplication } = useSubmitApplication();
-  const { clearDraft, hadSavedDraft } = useJobApplicationDraft(params.id as string, firstForm, screeningForm, secondForm, profilePhotoList, setProfilePhotoList);
+  const { clearDraft, hadSavedDraft, draftRestored } = useJobApplicationDraft(params.id as string, firstForm, screeningForm, secondForm, profilePhotoList, setProfilePhotoList, setDpaAgreed, setIsDPAModalOpen, dpaAgreed);
+
+  useEffect(() => {
+    if (draftRestored && !dpaAgreed) {
+      setIsDPAModalOpen(true);
+    }
+  }, [draftRestored]);
 
   useEffect(() => {
     if (data) {
@@ -65,6 +74,7 @@ const Content = () => {
     if (isConfirmed) {
       const finalData = { ...combinedFormData, ...secondForm.getValues() };
       finalData['jobPosting'] = params.id;
+      finalData['dpa_agreed'] = dpaAgreed;
 
       // Add screening question answers if they exist
       if (screeningForm.getValues().screeningAnswers) {
@@ -149,6 +159,14 @@ const Content = () => {
           </div>
         </div>
       </div>
+      <DPANoticeModal
+        open={isDPAModalOpen}
+        onAgree={() => {
+          setDpaAgreed(true);
+          setIsDPAModalOpen(false);
+        }}
+        companyName={jobDetailData?.company}
+      />
       <DataConfirmationModal open={confirmModal} onClose={handleConfirmation} />
       <SuggestionModal open={isSuggestModal} onClose={() => setSuggestModal(false)} />
     </div>
