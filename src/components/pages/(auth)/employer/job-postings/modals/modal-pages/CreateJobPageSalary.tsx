@@ -1,4 +1,4 @@
-import { Dispatch, ChangeEvent, useEffect, useRef, useState } from 'react';
+import { Dispatch, ChangeEvent, useEffect, useState } from 'react';
 
 import toast from 'react-hot-toast';
 
@@ -46,8 +46,6 @@ export default function CreateJobPageSalary({
   const [isOtherBenefitOpen, setIsOtherBenefitOpen] = useState(false);
   const SalarTypeValue = watch('salary.salaryType');
   const watchedBenefits: string[] = watch('benefits') || [];
-  // Ref flag to distinguish form→local syncs from local→form syncs (prevents circular updates)
-  const isBenefitsFromLocalUpdate = useRef(false);
 
   const ListOfBenefits = [
     'Work from home',
@@ -68,12 +66,7 @@ export default function CreateJobPageSalary({
   ];
 
   // Sync form benefits → local state (handles draft loading and external resets)
-  // Uses a ref flag to prevent circular updates when local state triggers setValue
   useEffect(() => {
-    if (isBenefitsFromLocalUpdate.current) {
-      isBenefitsFromLocalUpdate.current = false;
-      return;
-    }
     const knownBenefits = watchedBenefits.filter((b: string) => ListOfBenefits.includes(b));
     const otherBenefits = watchedBenefits.filter((b: string) => !ListOfBenefits.includes(b));
     setSelectedBenefitOptions(prev => {
@@ -89,14 +82,16 @@ export default function CreateJobPageSalary({
     }
   }, [watchedBenefits]);
 
-  // Sync local state → form benefits
+  // Sync local state → form benefits (skip if value already matches to avoid circular updates)
   useEffect(() => {
-    isBenefitsFromLocalUpdate.current = true;
     const concatenatedValue = isOtherBenefitOpen
       ? [...selectedBenefitOptions, ...selectedOtherBenefit]
       : selectedBenefitOptions;
-    setValue('benefits', concatenatedValue);
-  }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue]);
+    const current: string[] = getValues('benefits') || [];
+    if (current.length !== concatenatedValue.length || !current.every((b, i) => b === concatenatedValue[i])) {
+      setValue('benefits', concatenatedValue);
+    }
+  }, [selectedBenefitOptions, selectedOtherBenefit, isOtherBenefitOpen, setValue, getValues]);
 
   // Convert string to array of string in other benefits
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
