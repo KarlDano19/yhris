@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import { ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
@@ -29,6 +30,8 @@ type T_ModalData = {
 const Content = () => {
   const [itemsFilter, setItemsFilter] = useState({ search: '' });
   const [partnerItems, setPartnerItems] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<T_ModalData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_ModalData | null>(null);
@@ -40,8 +43,15 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    if (data) setPartnerItems(data.records || data);
+    if (data) {
+      setPartnerItems(data.records || data);
+      setCurrentPage(1);
+    }
   }, [data]);
+
+  const totalRecords = partnerItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = partnerItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isLoading) {
@@ -56,8 +66,8 @@ const Content = () => {
       );
     }
 
-    if (partnerItems && partnerItems.length > 0) {
-      return partnerItems.map((item: any) => (
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any) => (
         <tr key={item.id}>
           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-700">{item.name}</td>
           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.email}</td>
@@ -109,11 +119,11 @@ const Content = () => {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="px-2 md:px-8 lg:px-4 mt-6">
           <h2 className="text-xl font-bold text-indigo-dye">Partners</h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
-            <div className="flex-none lg:w-1/3">
+            <div className="flex-none w-full lg:w-1/3">
               <div className="relative flex items-center">
                 <input
                   type="text"
@@ -155,7 +165,13 @@ const Content = () => {
                   <tbody className="divide-y divide-gray-200">{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className="text-xs text-gray-500 mt-2">Total record/s: {partnerItems?.length ?? 0}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>
