@@ -402,7 +402,7 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
                   </li>
                 </ul>
                 <a
-                  href='https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH'
+                  href='https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026'
                   target='_blank'
                   rel='noopener noreferrer'
                   className='block w-full bg-gradient-to-r from-blue-600 to-[#FFC107] hover:from-blue-700 hover:to-amber-600 text-white text-center px-6 py-3 rounded-lg font-bold transition-all shadow-lg'
@@ -466,7 +466,7 @@ const PricingContent: React.FC<PricingContentProps> = ({ isLoggedIn }) => {
 
                     <div className='space-y-6'>
                       <a
-                        href='https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH'
+                        href='https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026'
                         target='_blank'
                         rel='noopener noreferrer'
                         className='block w-full bg-[#FFC107] hover:bg-amber-600 text-black text-center px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg'

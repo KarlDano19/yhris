@@ -18,7 +18,7 @@ const LpFinalCTA = () => {
           </ScrollFadeIn>
           <ScrollFadeIn delay={200}>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH" target="_blank" rel="noopener noreferrer" className="lp-btn-primary lp-btn-glow text-base px-9 py-4">
+              <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="lp-btn-primary lp-btn-glow text-base px-9 py-4">
                 Book a Free Demo
               </a>
               <Link href="/features" className="lp-btn-ghost-dark text-base px-9 py-4">

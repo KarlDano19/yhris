@@ -6,7 +6,7 @@ import ScrollFadeIn from "./ScrollFadeIn";
 import LpHeroDashboard from "./LpHeroDashboard";
 
 const DEMO_CALENDAR_URL =
-  "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH";
+  "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
 
 const LpHeroSection = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ const LpHeroSection = () => {
 
   const handleBookDemo = () => {
     if (!email.trim()) return;
-    const url = `${DEMO_CALENDAR_URL}?guestEmail=${encodeURIComponent(email.trim())}`;
+    const url = `${DEMO_CALENDAR_URL}&email=${encodeURIComponent(email.trim())}`;
     window.open(url, "_blank", "noopener,noreferrer");
     setSubmitted(true);
   };
