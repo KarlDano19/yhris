@@ -33,6 +33,7 @@ import useDeleteJobPost from './hooks/delete/useDeleteJobPost';
 import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
 import useGetJobDraftsItems from './hooks/get/useGetJobDraftsItems';
+import { useDeleteJobDraft } from '../post-job/hooks/useDeleteJobDraft';
 
 import useUpdateJobPostStatus from './hooks/update/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/update/useUpdateJobSalaryStatus';
@@ -172,6 +173,27 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const deleteDraftMutation = useDeleteJobDraft();
+  const [draftToDelete, setDraftToDelete] = useState<T_JobPostingDraft | null>(null);
+
+  const handleDeleteDraft = (draft: T_JobPostingDraft) => {
+    if (draft.id === 0) {
+      draftStorage.clear();
+      toast.custom(() => <CustomToast message='Local draft cleared.' type='success' />, { duration: 4000 });
+      setDraftToDelete(null);
+      return;
+    }
+    deleteDraftMutation.mutate(draft.id, {
+      onSuccess: () => {
+        toast.custom(() => <CustomToast message='Draft deleted successfully.' type='success' />, { duration: 4000 });
+        setDraftToDelete(null);
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err?.message || 'Failed to delete draft.'} type='error' />, { duration: 4000 });
+      },
+    });
+  };
+
   const { mutate: mutateStatus } = useUpdateJobPostStatus();
   const { mutate: mutateSalary } = useUpdateJobSalaryStatus();
   const { mutate: mutateRoles } = useUpdateJobRolesStatus();
@@ -1150,13 +1172,26 @@ const Content = () => {
                             {formatDateToLocal(draft.updated_at)}
                           </td>
                           <td className='px-3 py-4'>
-                            <button
-                              onClick={() => router.push(`/post-job?resumeDraftId=${draft.id}`)}
-                              className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
-                            >
-                              <PencilSquareIcon className='w-4 h-4' />
-                              Resume
-                            </button>
+                            <div className='flex items-center justify-center gap-2'>
+                              <button
+                                onClick={() => router.push(`/post-job?resumeDraftId=${draft.id}`)}
+                                className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
+                              >
+                                <PencilSquareIcon className='w-4 h-4' />
+                                Resume
+                              </button>
+                              <button
+                                type='button'
+                                data-tooltip-id='draft-delete-tooltip'
+                                data-tooltip-content={draft.id === 0 ? 'Clear local draft' : 'Delete draft'}
+                                data-tooltip-place='top'
+                                onClick={() => setDraftToDelete(draft)}
+                                disabled={deleteDraftMutation.isLoading}
+                                className={`inline-flex items-center p-1.5 ${deleteDraftMutation.isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                <DeleteIcon />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1352,6 +1387,17 @@ const Content = () => {
       <Tooltip id="duplicate-tooltip" />
       <Tooltip id="assign-tooltip" />
       <Tooltip id="fully-staffed-tooltip" />
+      <Tooltip id="draft-delete-tooltip" />
+
+      {draftToDelete && (
+        <DeleteModal<T_ModalData>
+          isOpen={{ id: draftToDelete.id, open: true }}
+          setIsOpen={() => setDraftToDelete(null)}
+          onConfirm={() => handleDeleteDraft(draftToDelete)}
+          isLoading={deleteDraftMutation.isLoading}
+          customText={draftToDelete.id === 0 ? 'this local draft' : `draft "${draftToDelete.job_title || 'Untitled Job'}"`}
+        />
+      )}
     </>
   );
 };
