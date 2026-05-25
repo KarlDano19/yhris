@@ -386,10 +386,10 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       id='birth_date_edit'
                       placeholder='mm/dd/yyyy'
                       className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                      selected={contactInputValue ? new Date(contactInputValue + 'T00:00:00') : null}
+                      selected={(() => { if (!contactInputValue) return null; const d = new Date(contactInputValue + 'T00:00:00'); return isNaN(d.getTime()) ? null : d; })()}
                       maxDate={new Date()}
                       pickerOnChange={(date: any) => setContactInputValue(date ? date.toLocaleDateString('en-CA') : '')}
-                      inputOnChange={(value: any) => setContactInputValue(value)}
+                      inputOnChange={(date: any) => setContactInputValue(date ? date.toLocaleDateString('en-CA') : '')}
                     />
                   </div>
                   <button className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50' onClick={() => handleContactSave('birth_date')} disabled={isUpdatingContact}>Save</button>
