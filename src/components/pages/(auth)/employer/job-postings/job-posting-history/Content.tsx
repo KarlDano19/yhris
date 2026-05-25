@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 
 import { useRouter } from 'next/navigation';
 
+import { useForm } from 'react-hook-form';
+
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
@@ -25,6 +27,7 @@ import SeederButton from '@/components/SeederButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import SetJob from './SetJob';
 import JobPreviewModal from './modals/JobPreviewModal';
+import CreateJobModal from '../post-job/modals/CreateJobModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/get/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
@@ -63,6 +66,7 @@ import {
 } from '@/types/job_posting';
 
 import { draftStorage } from '@/helpers/draftStorage';
+import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
@@ -85,6 +89,31 @@ type T_BulkDeleteModalData = DeleteModalData & {
 
 const Content = () => {
   const router = useRouter();
+
+  // CreateJobModal — for resuming drafts in-place
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(undefined);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
+  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
+  const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
+  const [isVideoIntroEnabled, setIsVideoIntroEnabled] = useState(false);
+  const firstForm = useForm<any>({ defaultValues: { country: 'Philippines', language: 'English' } });
+  const secondForm = useForm();
+  const thirdForm = useForm<any>({ defaultValues: { salary: { salaryType: '' } } });
+  const fourthForm = useForm<any>({ defaultValues: { jobDescription: CREATEJOB_TEMPLATE[0], qualifications: QUALIFICATION_TEMPLATE[0], notesRemarks: '', skills: [] } });
+  const fifthForm = useForm();
+  const sixthForm = useForm();
+  const seventhForm = useForm();
+
+  const handleCloseCreateJobModal = () => {
+    setIsCreateJobModalOpen(false);
+    setAutoLoadDraftId(undefined);
+  };
+
   const [draftCurrentPage, setDraftCurrentPage] = useState(1);
   const [draftPageSize, setDraftPageSize] = useState(10);
   const [draftPagination, setDraftPagination] = useState<PaginationProps>({ totalPages: 1, totalRecords: 0 });
@@ -1174,7 +1203,13 @@ const Content = () => {
                           <td className='px-3 py-4'>
                             <div className='flex items-center justify-center gap-2'>
                               <button
-                                onClick={() => router.push(`/post-job?resumeDraftId=${draft.id}`)}
+                                onClick={() => {
+                                  setAutoLoadDraftId(draft.id);
+                                  setScreeningQuestions([]);
+                                  setAutoRejectEnabled(false);
+                                  setIsVideoIntroEnabled(false);
+                                  setIsCreateJobModalOpen(true);
+                                }}
                                 className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
                               >
                                 <PencilSquareIcon className='w-4 h-4' />
@@ -1281,6 +1316,37 @@ const Content = () => {
           )}
         </div>
       </div>
+      {isCreateJobModalOpen && (
+        <CreateJobModal
+          isOpen={isCreateJobModalOpen}
+          setIsOpen={(open) => { if (!open) handleCloseCreateJobModal(); else setIsCreateJobModalOpen(true); }}
+          openConfirmSocialShareModal={openConfirmSocialShareModal}
+          pageNumber={pageNumber}
+          setPageNumber={setPageNumber}
+          isSalaryRangeModalOpen={isSalaryRangeModalOpen}
+          setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
+          isRangeBenefitsAdded={isRangeBenefitsAdded}
+          setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+          combinedFormData={combinedFormData}
+          setCombinedFormData={setCombinedFormData}
+          fileProps={fileProps}
+          setFileProps={setFileProps}
+          screeningQuestions={screeningQuestions}
+          setScreeningQuestions={setScreeningQuestions}
+          autoRejectEnabled={autoRejectEnabled}
+          setAutoRejectEnabled={setAutoRejectEnabled}
+          isVideoIntroEnabled={isVideoIntroEnabled}
+          setIsVideoIntroEnabled={setIsVideoIntroEnabled}
+          firstForm={firstForm}
+          secondForm={secondForm}
+          thirdForm={thirdForm}
+          fourthForm={fourthForm}
+          fifthForm={fifthForm}
+          sixthForm={sixthForm}
+          seventhForm={seventhForm}
+          autoLoadDraftId={autoLoadDraftId}
+        />
+      )}
       <JobPreviewModal
         id={isJobPreviewOpen?.id ? isJobPreviewOpen?.id : null}
         jobPostHistoryItems={jobPostHistoryItems}

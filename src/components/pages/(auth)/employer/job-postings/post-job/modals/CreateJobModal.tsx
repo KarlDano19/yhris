@@ -584,19 +584,21 @@ export default function CreateJobModal({
                     >
                       <ArrowPathIcon className='w-6 h-6' />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsLoadDraftModalOpen(true)}
-                      className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
-                      title="Load Draft"
-                    >
-                      <DocumentTextIcon className='w-6 h-6' />
-                      {allDrafts.length > 0 && (
-                        <span className='absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full'>
-                          {allDrafts.length}
-                        </span>
-                      )}
-                    </button>
+                    {(autoLoadDraftId === undefined || autoLoadDraftId === null) && (
+                      <button
+                        type="button"
+                        onClick={() => setIsLoadDraftModalOpen(true)}
+                        className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
+                        title="Load Draft"
+                      >
+                        <DocumentTextIcon className='w-6 h-6' />
+                        {allDrafts.length > 0 && (
+                          <span className='absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full'>
+                            {allDrafts.length}
+                          </span>
+                        )}
+                      </button>
+                    )}
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
 
