@@ -55,21 +55,21 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   };
 
   return (
-    <div style={{ background: '#ffffff' }}>
+    <div style={{ background: 'hsl(var(--lp-page))' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid-light lp-hero-glow" style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+          <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, #ffffff)' }} />
+              style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }} />
             <div className="lp-section-container text-center relative z-10">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">PRICING</span>
-                <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold text-gray-900 mb-5">
+                <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-bold text-white mb-5">
                   <span className="block mb-3">Straightforward pricing.</span>
                   <span className="text-primary">No surprises.</span>
                 </h1>
-                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
                   Start free and upgrade when you need the full HR suite. No long-term contracts. Cancel anytime.
                 </p>
               </ScrollFadeIn>
@@ -89,37 +89,37 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                       <h2 className="text-xl font-bold text-white mb-1">YAHSHUA HRIS Freemium</h2>
                       <p className="text-sm text-white/70">Your simple hiring toolkit - always free</p>
                     </div>
-                    <div className="px-8 py-6 flex flex-col flex-1 bg-white">
+                    <div className="px-8 py-6 flex flex-col flex-1" style={{ background: 'hsl(var(--lp-surface))' }}>
                       <div className="mb-6">
-                        <p className="text-xs font-semibold text-primary mb-1">Introductory Price</p>
+                        <p className="text-xs font-semibold text-[#7BA7F7] mb-1">Introductory Price</p>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-4xl font-bold text-gray-900">₱0</span>
-                          <span className="text-gray-400">/month</span>
+                          <span className="text-4xl font-bold text-white">₱0</span>
+                          <span className="text-white/40">/month</span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">No credit card required</p>
+                        <p className="text-xs text-white/30 mt-1">No credit card required</p>
                       </div>
 
                       <ul className="space-y-3 mb-6">
                         {["Post a Job in Multiple Platforms", "Screen Applicants in one place"].map((f) => (
                           <li key={f} className="flex items-start gap-3 text-sm">
-                            <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" strokeWidth={2.5} />
-                            <span className="text-gray-600">{f}</span>
+                            <Check className="w-4 h-4 text-[#7BA7F7] shrink-0 mt-0.5" strokeWidth={2.5} />
+                            <span className="text-white/70">{f}</span>
                           </li>
                         ))}
                       </ul>
 
-                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.07)' }}>
-                        <p className="font-semibold text-[#355FD0] mb-2">Best for:</p>
-                        <ul className="space-y-1 text-gray-500">
+                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ background: 'rgba(53,95,208,0.08)', border: '1px solid rgba(53,95,208,0.2)' }}>
+                        <p className="font-semibold text-[#7BA7F7] mb-2">Best for:</p>
+                        <ul className="space-y-1 text-white/45">
                           <li>Startups and Small Businesses</li>
                           <li>Exploring digital hiring solutions</li>
                           <li>Getting a feel for YAHSHUA HRIS</li>
                         </ul>
                       </div>
 
-                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ border: '1.5px dashed #355FD0' }}>
-                        <p className="font-semibold text-[#355FD0] mb-1">Ready to grow?</p>
-                        <p className="text-gray-500">Upgrade anytime to unlock the complete HR suite</p>
+                      <div className="rounded-lg p-4 mb-6 text-sm" style={{ border: '1.5px dashed rgba(53,95,208,0.5)' }}>
+                        <p className="font-semibold text-[#7BA7F7] mb-1">Ready to grow?</p>
+                        <p className="text-white/40">Upgrade anytime to unlock the complete HR suite</p>
                       </div>
 
                       <div className="mt-auto">
@@ -147,7 +147,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
 
                       {/* Calculator */}
                       <div className="mb-6">
-                        <label htmlFor="employee-count" className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label htmlFor="employee-count" className="block text-sm font-semibold text-white/80 mb-2">
                           How many employees?
                         </label>
                         <input
@@ -160,61 +160,61 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                             if (!isNaN(v) && v >= 1) setEmployeeCount(v);
                             else if (e.target.value === "") setEmployeeCount(1);
                           }}
-                          className="w-full px-4 py-3 text-center text-lg font-bold text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                          style={{ border: '2px solid rgba(0,0,0,0.1)' }}
+                          className="w-full px-4 py-3 text-center text-lg font-bold text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                          style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(255,255,255,0.12)' }}
                           aria-label="Number of employees"
                         />
                       </div>
 
                       <div className="mb-6">
                         <div className="flex items-baseline gap-1 mb-1">
-                          <span className="text-4xl font-bold text-gray-900">{formatPHP(total)}</span>
-                          <span className="text-gray-400">/month</span>
+                          <span className="text-4xl font-bold text-white">{formatPHP(total)}</span>
+                          <span className="text-white/40">/month</span>
                         </div>
                         <p className="text-xs text-primary font-semibold">Introductory price</p>
-                        {employeeCount <= 100 && <p className="text-xs text-gray-400 mt-0.5">VAT excluded</p>}
-                        {employeeCount > 100 && <p className="text-xs text-gray-400 mt-0.5">12% VAT included</p>}
+                        {employeeCount <= 100 && <p className="text-xs text-white/40 mt-0.5">VAT excluded</p>}
+                        {employeeCount > 100 && <p className="text-xs text-white/40 mt-0.5">12% VAT included</p>}
                       </div>
 
                       {/* Breakdown for 100+ */}
                       {employeeCount > 100 && (
-                        <div className="rounded-lg p-4 mb-6 text-xs space-y-1" style={{ background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)' }}>
-                          <p className="font-semibold text-gray-700 mb-2">Pricing breakdown</p>
-                          <div className="flex justify-between text-gray-500">
+                        <div className="rounded-lg p-4 mb-6 text-xs space-y-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <p className="font-semibold text-white/80 mb-2">Pricing breakdown</p>
+                          <div className="flex justify-between text-white/40">
                             <span>Base (up to 100 employees)</span><span>₱4,000</span>
                           </div>
                           {employeeCount > 100 && employeeCount <= 250 && (
-                            <div className="flex justify-between text-gray-500">
+                            <div className="flex justify-between text-white/40">
                               <span>{employeeCount - 100} employees x ₱39</span>
                               <span>₱{((employeeCount - 100) * 39).toLocaleString()}</span>
                             </div>
                           )}
                           {employeeCount > 250 && (
-                            <div className="flex justify-between text-gray-500">
+                            <div className="flex justify-between text-white/40">
                               <span>150 employees x ₱39</span><span>₱{(150 * 39).toLocaleString()}</span>
                             </div>
                           )}
                           {employeeCount > 250 && employeeCount <= 500 && (
-                            <div className="flex justify-between text-gray-500">
+                            <div className="flex justify-between text-white/40">
                               <span>{employeeCount - 250} employees x ₱37</span>
                               <span>₱{((employeeCount - 250) * 37).toLocaleString()}</span>
                             </div>
                           )}
                           {employeeCount > 500 && (
                             <>
-                              <div className="flex justify-between text-gray-500">
+                              <div className="flex justify-between text-white/40">
                                 <span>250 employees x ₱37</span><span>₱{(250 * 37).toLocaleString()}</span>
                               </div>
-                              <div className="flex justify-between text-gray-500">
+                              <div className="flex justify-between text-white/40">
                                 <span>{employeeCount - 500} employees x ₱35</span>
                                 <span>₱{((employeeCount - 500) * 35).toLocaleString()}</span>
                               </div>
                             </>
                           )}
-                          <div className="flex justify-between text-gray-500">
+                          <div className="flex justify-between text-white/40">
                             <span>12% VAT</span><span>₱{(base * 0.12).toLocaleString()}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-gray-900 pt-1" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                          <div className="flex justify-between font-bold text-white pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                             <span>Monthly total</span><span>{formatPHP(total)}</span>
                           </div>
                         </div>
@@ -231,7 +231,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                         ].map((f) => (
                           <li key={f} className="flex items-start gap-3 text-sm">
                             <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
-                            <span className="text-gray-600">{f}</span>
+                            <span className="text-white/70">{f}</span>
                           </li>
                         ))}
                       </ul>
@@ -240,7 +240,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                         <button onClick={handlePaidCTA} className="w-full lp-btn-primary lp-btn-glow py-3 text-sm">
                           Get Started
                         </button>
-                        <p className="text-center text-xs text-gray-400 mt-3">
+                        <p className="text-center text-xs text-white/30 mt-3">
                           No long-term contract. Cancel anytime.
                         </p>
                       </div>
@@ -256,8 +256,8 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
             <div className="lp-section-container">
               <ScrollFadeIn className="text-center mb-12">
                 <span className="lp-section-label justify-center mb-5">SCALING PRICING</span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Grows with your team, not against it.</h2>
-                <p className="text-gray-500 text-base max-w-md mx-auto">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Grows with your team, not against it.</h2>
+                <p className="text-white/45 text-base max-w-md mx-auto">
                   The more employees you add, the lower the per-person rate. No per-seat spikes.
                 </p>
               </ScrollFadeIn>
@@ -270,15 +270,15 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                     { range: "251 to 500", rate: "₱37", sub: "per employee/month" },
                   ].map((tier, i) => (
                     <div key={i} className="lp-dark-card p-6 text-center">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-400 mb-3">{tier.range}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/40 mb-3">{tier.range}</p>
                       <p className="text-3xl font-bold text-primary mb-1">{tier.rate}</p>
-                      <p className="text-xs text-gray-400">{tier.sub}</p>
+                      <p className="text-xs text-white/40">{tier.sub}</p>
                     </div>
                   ))}
                 </div>
-                <p className="text-center text-sm text-gray-400 mt-6">
+                <p className="text-center text-sm text-white/40 mt-6">
                   500+ employees: ₱35/employee per month.{" "}
-                  <a href="#demo" className="text-gray-600 font-semibold hover:text-primary transition-colors">Talk to us</a>{" "}
+                  <a href="#demo" className="text-white/70 font-semibold hover:text-primary transition-colors">Talk to us</a>{" "}
                   for enterprise pricing.
                 </p>
               </ScrollFadeIn>
@@ -290,10 +290,10 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
             <div className="lp-section-container">
               <ScrollFadeIn className="text-center mb-12">
                 <span className="lp-section-label justify-center mb-5">PRICING FAQS</span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Common questions about pricing.</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">Common questions about pricing.</h2>
               </ScrollFadeIn>
               <ScrollFadeIn delay={100}>
-                <div className="max-w-[640px] mx-auto divide-y divide-black/10" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <div className="max-w-[640px] mx-auto divide-y divide-white/10" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   {faqs.map((item, i) => {
                     const isOpen = openFaq === i;
                     return (
@@ -303,15 +303,15 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                           className="w-full flex items-center justify-between py-5 text-left gap-4"
                           aria-expanded={isOpen}
                         >
-                          <span className="text-sm font-semibold text-gray-700">{item.q}</span>
+                          <span className="text-sm font-semibold text-white/80">{item.q}</span>
                           <ChevronDown
-                            className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                            className={`w-4 h-4 text-white/30 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                             strokeWidth={1.5}
                           />
                         </button>
                         <div className="grid transition-all duration-200 ease-in-out" style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}>
                           <div className="overflow-hidden">
-                            <p className="text-sm text-gray-500 leading-relaxed pr-8 pb-5">{item.a}</p>
+                            <p className="text-sm text-white/40 leading-relaxed pr-8 pb-5">{item.a}</p>
                           </div>
                         </div>
                       </div>
@@ -326,8 +326,8 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
           <section className="py-24" style={{ background: 'hsl(var(--lp-surface))' }}>
             <div className="lp-section-container text-center">
               <ScrollFadeIn>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Not sure which plan is right for you?</h2>
-                <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Not sure which plan is right for you?</h2>
+                <p className="text-white/50 text-base mb-8 max-w-sm mx-auto">
                   Book a free demo and we will help you figure out exactly what your team needs.
                 </p>
                 <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH"

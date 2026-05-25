@@ -4,15 +4,22 @@
 
 /* ─── Landing page design system ─────────────────────────────── */
 :root {
+  --lp-navy: 213 32% 26%;
   --lp-primary: 43 100% 51%;
+  --lp-primary-foreground: 213 32% 26%;
+  --lp-blue: 224 61% 51%;
+  --lp-warm-bg: 46 100% 95%;
   --lp-muted: 46 100% 95%;
   --lp-muted-foreground: 213 20% 45%;
+  --lp-card: 0 0% 100%;
   --lp-border: 0 0% 91%;
+  --lp-destructive: 0 84% 60%;
 
-  /* Light LP theme tokens */
-  --lp-page: 0 0% 100%;
-  --lp-surface: 210 20% 98%;
-  --lp-surface-2: 210 15% 94%;
+  /* Dark LP theme tokens */
+  --lp-page: 222 60% 4%;
+  --lp-hero: 222 40% 16%;
+  --lp-surface: 222 50% 7%;
+  --lp-surface-2: 222 45% 10%;
 }
 
 @layer components {
@@ -31,12 +38,12 @@
   }
   .lp-dark-card {
     background: hsl(var(--lp-surface));
-    border: 1px solid rgba(0,0,0,0.07);
+    border: 1px solid rgba(255,255,255,0.07);
     @apply rounded-xl transition-all duration-300;
   }
   .lp-dark-card:hover {
     border-color: hsl(var(--lp-primary) / 0.3);
-    box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.1), 0 8px 40px rgba(0,0,0,0.08);
+    box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.1), 0 8px 40px rgba(0,0,0,0.4);
   }
 
   /* Landing page buttons */
@@ -60,19 +67,19 @@
     box-shadow: 0 4px 20px hsl(var(--lp-primary) / 0.55), 0 0 60px hsl(var(--lp-primary) / 0.25);
   }
   .lp-btn-ghost {
-    @apply border border-black/15 text-gray-800 font-semibold px-7 py-3.5 rounded-[10px]
+    @apply border border-white/15 text-white font-semibold px-7 py-3.5 rounded-[10px]
            transition-all duration-500
            active:scale-[0.97] inline-flex items-center justify-center relative;
     transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
     top: 0;
-    background: rgba(0,0,0,0.03);
+    background: rgba(255,255,255,0.04);
     backdrop-filter: blur(8px);
     letter-spacing: 0em;
   }
   .lp-btn-ghost:hover {
     top: -3px;
     letter-spacing: 0.02em;
-    @apply border-black/25 bg-black/[0.06];
+    @apply border-white/30 bg-white/10;
   }
   .lp-btn-ghost-dark {
     @apply border border-black/15 text-gray-800 font-semibold px-7 py-3.5 rounded-[10px]
@@ -88,9 +95,29 @@
     letter-spacing: 0.02em;
     @apply border-black/25 bg-black/[0.06];
   }
+  .lp-btn-ghost-light {
+    @apply border border-white/20 text-white font-semibold px-7 py-3.5 rounded-[10px]
+           transition-all duration-500
+           active:scale-[0.97] inline-flex items-center justify-center relative;
+    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+    top: 0;
+    background: rgba(255,255,255,0.05);
+    letter-spacing: 0em;
+  }
+  .lp-btn-ghost-light:hover {
+    top: -3px;
+    letter-spacing: 0.02em;
+    @apply bg-white/15 border-white/30;
+  }
 }
 
 @layer utilities {
+  /* Dark LP dot grid background */
+  .lp-dot-grid {
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  /* Light LP dot grid background */
   .lp-dot-grid-light {
     background-image: radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px);
     background-size: 28px 28px;
