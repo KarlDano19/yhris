@@ -109,6 +109,133 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-021
+DATE FILED: 2026-05-25
+DATE FIXED: 2026-05-25
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  When an applicant applies through the un-authenticated job application form
+  (apply-job-without-signup), the birthday field appeared required in the form —
+  showing a "Please fill out this field" browser tooltip when left completely empty.
+  However, certain applicants were still saved to the database with a null birthday
+  despite the field being required.
+
+  The bug was triggered by typing a partial date (e.g., "01/15/" or "01/15/202")
+  into the birthday input instead of selecting a date from the calendar picker.
+  When a partial date is typed:
+
+  1. The CustomDatePicker's internal input is no longer empty, so the browser's
+     HTML `required` validation passes silently (no tooltip shown, no block).
+  2. The CustomDatePicker's `isGoodDate()` regex fails on the partial value, so
+     neither `pickerOnChange` nor `inputOnChange` is called — the RHF form field
+     `birth_date` remains `undefined`.
+  3. Because `birth_date` was never registered via `register()`, React Hook Form
+     had no validation rule for it. `handleSubmit` fired successfully.
+  4. `profileSubmit` received `data.birth_date = undefined`.
+     `JSON.stringify` silently drops `undefined` keys, so no `birth_date` key
+     was included in the API payload.
+  5. The backend received no value and stored `null`.
+
+  A secondary bug also existed for draft restoration: `profileSubmit` called
+  `data.birth_date.toLocaleDateString('en-CA')` directly, which crashes with
+  `TypeError` when a draft restores `birth_date` as an ISO string rather than
+  a `Date` object.
+
+DESIRED OUTCOME:
+  - If a user types a partial date and clicks NEXT, the form should block
+    submission and show a validation error (the birthday field is required).
+  - If a user picks a valid date from the calendar, the form proceeds normally.
+  - Draft restoration should not crash — a previously saved ISO string birthday
+    should be accepted and converted correctly on submit.
+  - Future dates should not be selectable on the birthday picker.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(un-auth)/apply-job-without-signup/job-app-form/ProfileTab.tsx
+- src/components/CustomDatePicker.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Partial date typed → NEXT blocked, "Birth date is required." error shown ✓
+  - Letters/symbols typed into date input → blocked at keydown, not accepted ✓
+  - Valid date picked from calendar → error clears, form proceeds ✓
+  - Empty field → RHF required validation blocks submission ✓
+  - Draft restored with string birthday → no crash, submits correctly ✓
+  - Future dates disabled in calendar picker ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  The final fix spans two files and went through several iterations to correctly
+  display a validation error to the user.
+
+  --- ProfileTab.tsx (un-auth job application form) ---
+
+  1. Registered `birth_date` with React Hook Form:
+     Added `<input type='hidden' {...register('birth_date', { required: true })} />`
+     below the CustomDatePicker. This gives RHF a real validation rule for the field.
+     A partial date that never calls `setValue` leaves the registered value empty,
+     causing RHF to block `handleSubmit` with a validation error. Added
+     `shouldValidate: true` to every `setValue('birth_date', ...)` call so RHF
+     clears the error immediately when a valid date is picked.
+
+  2. Added `birthDateError` local state + `onInvalid` callback for reliable error display:
+     RHF's `formState.errors` uses a Proxy subscription — only the component that
+     reads `.errors` during its own render is subscribed to re-renders when errors
+     change. Passing `formState` or `errors` as a prop from Content.tsx to ProfileTab
+     does not establish that subscription in Content.tsx, so the parent never
+     re-rendered and the prop value remained stale.
+     Solution: removed all prop-threading of `formState`/`errors`. Instead, used the
+     two-argument form of `handleSubmit`:
+       handleSubmit(onValid, onInvalid)
+     The `onInvalid` callback fires inside ProfileTab itself when validation fails,
+     setting a local `birthDateError` state boolean that triggers ProfileTab's own
+     re-render — fully self-contained with no cross-component Proxy issues.
+
+  3. Fixed `profileSubmit` to handle both Date objects and strings:
+     Before:
+       birth_date: data.birth_date ? data.birth_date.toLocaleDateString('en-CA') : undefined
+     After:
+       const d = data.birth_date instanceof Date
+         ? data.birth_date
+         : new Date(data.birth_date + 'T00:00:00');
+       formattedBirthDate = !isNaN(d.getTime()) ? d.toLocaleDateString('en-CA') : undefined;
+     Handles draft restoration where `birth_date` is an ISO string, and guards
+     against malformed values with the `isNaN` check.
+
+  4. Fixed the `selected` prop on CustomDatePicker to normalize the watched value:
+     Before: `selected={watch('birth_date') || null}` — passes raw string to
+     react-datepicker which cannot handle it.
+     After: inline IIFE that checks `instanceof Date`, parses strings via
+     `new Date(val + 'T00:00:00')`, and returns null on invalid values.
+     Also added `maxDate={new Date()}` to prevent future date selection.
+
+  --- CustomDatePicker.tsx (shared component, affects all date pickers app-wide) ---
+
+  5. Restricted text input to date characters only:
+     The `CustomInput` component inside CustomDatePicker had no input restriction —
+     any characters (letters, symbols, etc.) could be typed freely. A user typing
+     "helloworld" would leave a non-empty input that bypasses browser `required`
+     validation while still failing `isGoodDate()`, producing the same null-birthday
+     bypass as a partial date.
+     Fixed by adding an `onKeyDown` handler that calls `e.preventDefault()` for
+     any key that is not a digit (0–9), a forward slash (/), or a navigation/edit
+     key (Backspace, Delete, ArrowLeft, ArrowRight, Tab). This change applies to
+     every CustomDatePicker instance in the application.
+
+================================================================================
+
 BUG ID: HRIS-2026-020
 DATE FILED: 2026-05-25
 DATE FIXED: 2026-05-25
