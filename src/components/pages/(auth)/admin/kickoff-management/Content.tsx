@@ -15,10 +15,10 @@ const menus = [
 
 const Content = () => {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-      <div className="p-2 md:p-8 lg:p-4 relative">
+    <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+      <div className="px-2 md:px-8 lg:px-4 mt-6">
         <h2 className="text-xl font-bold text-indigo-dye">Kickoff Management</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6 relative">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mt-6">
           {menus.map((menu, index) => (
             <Link
               href={menu.link}

@@ -68,6 +68,8 @@ const Content = () => {
       firstForm.setValue('mobileNo', applicantDetails.mobile);
       firstForm.setValue('address', applicantDetails.address);
       firstForm.setValue('profilePicture', applicantDetails.photo);
+      firstForm.setValue('gender', applicantDetails.gender);
+      firstForm.setValue('birth_date', applicantDetails.birth_date);
     }
   }, [applicantDetails]);
 

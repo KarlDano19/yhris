@@ -67,11 +67,15 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   const seventhForm = useForm();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(searchParams.get('create') === 'true');
+  const resumeDraftIdParam = searchParams.get('resumeDraftId');
+  const autoLoadDraftId = resumeDraftIdParam !== null ? parseInt(resumeDraftIdParam, 10) : undefined;
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(
+    searchParams.get('create') === 'true' || resumeDraftIdParam !== null
+  );
 
   const handleCloseCreateJobModal = () => {
     setIsCreateJobModalOpen(false);
-    if (searchParams.get('create') === 'true') {
+    if (searchParams.get('create') === 'true' || resumeDraftIdParam !== null) {
       router.replace('/post-job');
     }
   };
@@ -202,6 +206,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             fifthForm={fifthForm}
             sixthForm={sixthForm}
             seventhForm={seventhForm}
+            autoLoadDraftId={autoLoadDraftId}
           />
         )}
         {isSocialShareModalOpen && (

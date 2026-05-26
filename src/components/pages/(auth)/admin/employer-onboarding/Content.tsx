@@ -46,9 +46,7 @@ const Content = () => {
 
   return (
     <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
-      <div className='flex p-4'>
-      </div>
-      <div className='px-2 md:px-8 lg:px-4'>
+      <div className='px-2 md:px-8 lg:px-4 mt-6'>
         <div className='flex items-center gap-4'>
           <h2 className='text-xl font-bold text-indigo-dye'>Client Onboarding</h2>
           <div className='flex items-center gap-3'>

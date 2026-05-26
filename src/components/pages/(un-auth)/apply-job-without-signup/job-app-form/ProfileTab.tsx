@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 import Image from 'next/image';
 
-import { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -31,6 +31,7 @@ interface ProfileTabProps {
 }
 
 const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setValue, watch, jobDetailData, profilePhotoList, setProfilePhotoList }: ProfileTabProps) => {
+  const [birthDateError, setBirthDateError] = useState(false);
   const [educationInput, setEducationInput] = useState('');
   const [skillsInput, setSkillsInput] = useState('');
   const [tagsSkill, setTagsSkill] = useState<string[]>([]);
@@ -533,14 +534,25 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
     }
   };
 
-  const profileSubmit = handleSubmit((data: any) => {
-    const formData = {
-      ...data,
-      birth_date: data.birth_date ? data.birth_date.toLocaleDateString('en-CA') : undefined,
-      profilePicture: profilePhotoList ? profilePhotoList : [],
-    };
-    firstSubmit(formData);
-  });
+  const profileSubmit = handleSubmit(
+    (data: any) => {
+      setBirthDateError(false);
+      let formattedBirthDate: string | undefined;
+      if (data.birth_date) {
+        const d = data.birth_date instanceof Date ? data.birth_date : new Date(data.birth_date + 'T00:00:00');
+        formattedBirthDate = !isNaN(d.getTime()) ? d.toLocaleDateString('en-CA') : undefined;
+      }
+      const formData = {
+        ...data,
+        birth_date: formattedBirthDate,
+        profilePicture: profilePhotoList ? profilePhotoList : [],
+      };
+      firstSubmit(formData);
+    },
+    (errors: FieldErrors) => {
+      if (errors.birth_date) setBirthDateError(true);
+    }
+  );
 
   return (
     <form onSubmit={profileSubmit}>
@@ -666,11 +678,32 @@ const ProfileTab = ({ register, handleSubmit, firstSubmit, setCurrentTab, setVal
                 id="birth_date"
                 placeholder="mm/dd/yyyy"
                 className="block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none"
-                selected={watch("birth_date") || null}
-                pickerOnChange={(date: any) => setValue("birth_date", date)}
-                inputOnChange={(value: any) => setValue("birth_date", value)}
+                selected={(() => {
+                  const val = watch('birth_date');
+                  if (!val) return null;
+                  if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+                  const d = new Date(val + 'T00:00:00');
+                  return isNaN(d.getTime()) ? null : d;
+                })()}
+                maxDate={new Date()}
+                pickerOnChange={(date: any) => {
+                  setValue('birth_date', date ? date.toLocaleDateString('en-CA') : '', { shouldValidate: true });
+                  if (date) setBirthDateError(false);
+                }}
+                inputOnChange={(date: any) => {
+                  if (date instanceof Date && !isNaN(date.getTime())) {
+                    setValue('birth_date', date.toLocaleDateString('en-CA'), { shouldValidate: true });
+                    setBirthDateError(false);
+                  } else if (!date) {
+                    setValue('birth_date', '', { shouldValidate: true });
+                  }
+                }}
                 required={true}
               />
+              <input type='hidden' {...register('birth_date', { required: true })} />
+              {birthDateError && (
+                <p className="text-red-500 text-xs mt-1">Birth date is required.</p>
+              )}
             </div>
           </div>
           <div className="grid-item">

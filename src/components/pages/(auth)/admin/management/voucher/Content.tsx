@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import useGetVoucherItems from './hooks/useGetVoucherItems';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
 import CreateVoucherModal from './modal/CreateVoucherModal';
 import RedemptionCountModal from './modal/RedemptionCountModal';
 import EditVoucherModal from './modal/EditVoucherModal';
@@ -26,6 +27,8 @@ const Content = () => {
     search: '',
   });
   const [vouchersItems, setVouchersItems] = useState<any>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isCreateVoucherModalOpen, setIsCreateVoucherModalOpen] = useState(false);
   const [isRedemptionModalOpen, setIsRedemptionModalOpen] = useState<T_ModalData | null>(null);
   const [isEditVoucherModalOpen, setIsEditVoucherModalOpen] = useState<T_ModalData | null>(null);
@@ -47,8 +50,13 @@ const Content = () => {
         item['redemption_date_to'] = Intl.DateTimeFormat('en-US').format(new Date(item.redemption_date_to));
       });
       setVouchersItems(dataVouchers);
+      setCurrentPage(1);
     }
   }, [dataVouchers]);
+
+  const totalRecords = vouchersItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = vouchersItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isVouchersLoading) {
@@ -62,8 +70,8 @@ const Content = () => {
         </tr>
       );
     }
-    if (vouchersItems && vouchersItems.length > 0) {
-      return vouchersItems.map((item: any) => (
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any) => (
         <tr key={item.id}>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.code}</td>
           <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>
@@ -193,7 +201,13 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {vouchersItems?.length}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>

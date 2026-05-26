@@ -942,7 +942,7 @@ const Content = () => {
                                 selectedApplicants.has(applicant.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
                               }`}
                             >
-                              {/* Bookmark Icon - Top Left Corner */}
+                              {/* Bookmark Icon - Top Right Corner */}
                               <div>
                                 <button
                                   onClick={() => handleToggleBookmark(applicant.id)}

@@ -63,6 +63,14 @@ const CustomDatePicker = ({
           ref={ref}
           value={inputValue}
           onClick={onClick}
+          onKeyDown={(e) => {
+            const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+            const isDigit = e.key >= '0' && e.key <= '9';
+            const isSlash = e.key === '/';
+            if (!isDigit && !isSlash && !allowed.includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
           onChange={(e) => {
             const typedValue = e.target.value;
             setInputValue(typedValue);

@@ -14,7 +14,6 @@ import updateSession from '@/helpers/updateSession';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SplitLayout from '@/components/SplitView';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 import EmailVerificationModal from './modal/EmailVerificationModal';
 import OTPVerificationModal from './modal/OTPVerificationModal';
 
@@ -368,7 +367,6 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
           }
           leftBG={SplitViewBg}
         />
-        <FloatingHelpButton />
       </>
     );
   }
@@ -629,7 +627,6 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
         }
         leftBG={SplitViewBg}
       />
-      <FloatingHelpButton />
     </>
   );
 }

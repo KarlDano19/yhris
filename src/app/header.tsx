@@ -6,7 +6,7 @@ import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 // import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader'; // Commented out for rollback - replaced with YahshuaConnectHeader
 import YahshuaConnectHeader from '@/components/pages/(auth)/yahshua-connect/YahshuaConnectHeader';
-import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
+import Navigation from '@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation';
 import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
 
 interface HeaderProps {
