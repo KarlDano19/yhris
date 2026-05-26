@@ -20,6 +20,8 @@ import { XCircleIcon } from '@heroicons/react/24/solid';
 
 import SelectChevronDown from '@/svg/SelectChevronDown';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import DropDownArrow from '@/svg/DropDownArrow';
+import countryCode from '@/utils/country-code';
 
 import { initialActionState } from '../../lib/initialActionState';
 import { ApplicantType, ContextTypes } from '../../types';
@@ -45,6 +47,9 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   const { mutate: updateContactInfo, isLoading: isUpdatingContact } = useUpdateApplicantContactInfo();
   const [editingContactField, setEditingContactField] = useState<'email' | 'mobile' | 'address' | 'gender' | 'birth_date' | null>(null);
   const [contactInputValue, setContactInputValue] = useState('');
+  const [mobileCountryCode, setMobileCountryCode] = useState('PH');
+  const [mobileNumberOnly, setMobileNumberOnly] = useState('');
+  const [showMobileCountryDropdown, setShowMobileCountryDropdown] = useState(false);
   let applicant: ApplicantType | undefined;
   state.forEach((stage) => {
     if (stage.id === actionState.stageId) {
@@ -173,14 +178,21 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
   };
 
   const handleContactSave = (field: 'email' | 'mobile' | 'address' | 'gender' | 'birth_date') => {
-    if (!contactInputValue.trim() || !applicant?.applicationId) return;
+    const value = field === 'mobile'
+      ? `${countryCode[mobileCountryCode as keyof typeof countryCode]}${mobileNumberOnly}`
+      : contactInputValue.trim();
+    if (!value || (field === 'mobile' && !mobileNumberOnly) || !applicant?.applicationId) return;
     updateContactInfo(
-      { appliedJobId: applicant.applicationId, [field]: contactInputValue.trim() },
+      { appliedJobId: applicant.applicationId, [field]: value },
       {
         onSuccess: () => {
-          setApplicantProfile((prev: any) => ({ ...prev, [field]: contactInputValue.trim() }));
+          const savedValue = field === 'mobile'
+            ? `${countryCode[mobileCountryCode as keyof typeof countryCode]}${mobileNumberOnly}`
+            : contactInputValue.trim();
+          setApplicantProfile((prev: any) => ({ ...prev, [field]: savedValue }));
           setEditingContactField(null);
           setContactInputValue('');
+          setMobileNumberOnly('');
           toast.custom(<CustomToast type='success' message='Contact info updated.' />);
         },
         onError: (err: any) => {
@@ -231,26 +243,73 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
               <PhoneIcon className='h-6 w-6 text-blue-700 mr-3 flex-shrink-0 mt-0.5' />
               {editingContactField === 'mobile' ? (
                 <div className='flex items-center gap-2 flex-1'>
-                  <input
-                    type='text'
-                    className='border border-gray-300 rounded px-2 py-1 text-sm flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                    placeholder='Enter mobile number'
-                    value={contactInputValue}
-                    onChange={(e) => setContactInputValue(e.target.value)}
-                    autoFocus
-                  />
+                  <div className='flex flex-1'>
+                    <div className='relative flex-shrink-0'>
+                      <button
+                        type='button'
+                        onClick={() => setShowMobileCountryDropdown(!showMobileCountryDropdown)}
+                        onBlur={() => setTimeout(() => setShowMobileCountryDropdown(false), 200)}
+                        className='flex items-center justify-between w-20 h-9 px-3 py-1.5 text-sm text-gray-900 bg-white border border-r-0 border-gray-300 rounded-l-md focus:ring-2 focus:ring-inset focus:ring-black focus:outline-none'
+                      >
+                        <span className='text-xs'>{countryCode[mobileCountryCode as keyof typeof countryCode]}</span>
+                        <DropDownArrow />
+                      </button>
+                      {showMobileCountryDropdown && (
+                        <div className='absolute z-20 w-28 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto'>
+                          {Object.entries(countryCode).map(([key, code]) => (
+                            <div
+                              key={key}
+                              className='px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm'
+                              onClick={() => { setMobileCountryCode(key); setShowMobileCountryDropdown(false); }}
+                            >
+                              <div className='flex justify-between items-center'>
+                                <span className='font-medium'>{key}</span>
+                                <span className='text-gray-500'>{code}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      type='tel'
+                      value={mobileNumberOnly}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        if (digits.length <= 11) setMobileNumberOnly(digits);
+                      }}
+                      placeholder='Enter mobile number'
+                      maxLength={11}
+                      autoFocus
+                      className='flex-1 rounded-r-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6'
+                    />
+                  </div>
                   <button className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50' onClick={() => handleContactSave('mobile')} disabled={isUpdatingContact}>Save</button>
-                  <button className='text-sm text-gray-500 hover:text-gray-700' onClick={() => { setEditingContactField(null); setContactInputValue(''); }}>Cancel</button>
+                  <button className='text-sm text-gray-500 hover:text-gray-700' onClick={() => { setEditingContactField(null); setMobileNumberOnly(''); setShowMobileCountryDropdown(false); }}>Cancel</button>
                 </div>
               ) : applicantProfile.mobile ? (
                 <>
                   <span className='text-[1rem] break-all overflow-hidden'>{applicantProfile.mobile}</span>
-                  <button className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0' onClick={() => { setEditingContactField('mobile'); setContactInputValue(applicantProfile.mobile); }}>
+                  <button
+                    className='ml-2 text-gray-400 hover:text-blue-600 flex-shrink-0'
+                    onClick={() => {
+                      const existing = applicantProfile.mobile as string;
+                      const match = Object.entries(countryCode).find(([, code]) => existing.startsWith(code));
+                      if (match) {
+                        setMobileCountryCode(match[0]);
+                        setMobileNumberOnly(existing.substring(match[1].length));
+                      } else {
+                        setMobileCountryCode('PH');
+                        setMobileNumberOnly(existing);
+                      }
+                      setEditingContactField('mobile');
+                    }}
+                  >
                     <PencilIcon className='h-4 w-4' />
                   </button>
                 </>
               ) : (
-                <button className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800' onClick={() => { setEditingContactField('mobile'); setContactInputValue(''); }}>
+                <button className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800' onClick={() => { setMobileCountryCode('PH'); setMobileNumberOnly(''); setEditingContactField('mobile'); }}>
                   <PlusIcon className='h-4 w-4' /> Add mobile
                 </button>
               )}
@@ -327,10 +386,10 @@ export default function ApplicantForm({ title, JobTitle, screeningQuestions = []
                       id='birth_date_edit'
                       placeholder='mm/dd/yyyy'
                       className='block w-full rounded-md py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 appearance-none'
-                      selected={contactInputValue ? new Date(contactInputValue + 'T00:00:00') : null}
+                      selected={(() => { if (!contactInputValue) return null; const d = new Date(contactInputValue + 'T00:00:00'); return isNaN(d.getTime()) ? null : d; })()}
                       maxDate={new Date()}
                       pickerOnChange={(date: any) => setContactInputValue(date ? date.toLocaleDateString('en-CA') : '')}
-                      inputOnChange={(value: any) => setContactInputValue(value)}
+                      inputOnChange={(date: any) => setContactInputValue(date ? date.toLocaleDateString('en-CA') : '')}
                     />
                   </div>
                   <button className='text-sm text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded disabled:opacity-50' onClick={() => handleContactSave('birth_date')} disabled={isUpdatingContact}>Save</button>

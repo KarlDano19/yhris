@@ -216,7 +216,7 @@ const LpFeaturesContent = () => {
                       Start for Free <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link
-                      href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3Lq9wzoc89Sa_fVYXCXWkbS1MyNFXJTNKQtD_EfjnQ0Pyc5K5v7LpJ0u9fmTsXdOJ7yBUp1_JH"
+                      href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="lp-btn-ghost gap-2"
