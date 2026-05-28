@@ -10,20 +10,23 @@ import LpComparisonTable from "./components/LpComparisonTable";
 import LpFAQ from "./components/LpFAQ";
 import LpFinalCTA from "./components/LpFinalCTA";
 import ScrollFadeIn from "./components/ScrollFadeIn";
+import LpScrollZoom from "./components/LpScrollZoom";
 
 const Content = () => {
   return (
     <div className="min-h-screen lp-dot-grid-light" style={{ background: '#ffffff' }}>
       <LpHeroSection />
 
-      <ScrollFadeIn duration={800}> <LpValueProposition /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpTrustBar /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpFeatureBento /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpPayrollIntegration /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpComplianceTrust /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpComparisonTable /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpFAQ /> </ScrollFadeIn>
-      <ScrollFadeIn duration={800} delay={50}> <LpFinalCTA /> </ScrollFadeIn>
+      <LpScrollZoom>
+        <ScrollFadeIn duration={800}> <LpValueProposition /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpTrustBar /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpFeatureBento /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpPayrollIntegration /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpComplianceTrust /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpComparisonTable /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpFAQ /> </ScrollFadeIn>
+        <ScrollFadeIn duration={800} delay={50}> <LpFinalCTA /> </ScrollFadeIn>
+      </LpScrollZoom>
 
     </div>
   );

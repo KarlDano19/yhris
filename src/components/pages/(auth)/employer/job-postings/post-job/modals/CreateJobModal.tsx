@@ -20,6 +20,7 @@ import CreateJobPagePreview from '../../modals/modal-pages/CreateJobPagePreview'
 import CreateJobPagePlatform from '../../modals/modal-pages/CreateJobPagePlatform';
 import useAddJobPostItems from '../hooks/useAddJobPostItems';
 import { useCreateJobDraft } from '../hooks/useCreateJobDraft';
+import { useUpdateJobDraft } from '../hooks/useUpdateJobDraft';
 import useGetJobDrafts from '../hooks/useGetJobDrafts';
 import { useDeleteJobDraft } from '../hooks/useDeleteJobDraft';
 
@@ -119,6 +120,7 @@ export default function CreateJobModal({
   const cancelButtonRef = useRef(null);
   const { mutate, isLoading } = useAddJobPostItems();
   const createDraftMutation = useCreateJobDraft();
+  const updateDraftMutation = useUpdateJobDraft();
   const { data: backendDrafts = [], isLoading: isDraftsLoading } = useGetJobDrafts();
   const deleteDraftMutation = useDeleteJobDraft();
 
@@ -182,23 +184,48 @@ export default function CreateJobModal({
     }
   }, [combinedFormData, pageNumber, isOpen]);
 
+  const buildDraftRecord = (id: number, draftData: any, source: T_JobPostingDraft['source']): T_JobPostingDraft => ({
+    id,
+    draft_data: draftData,
+    source,
+    job_title: draftData?.job_title || 'Untitled Job',
+    position: draftData?.position || null,
+    uploaded_job_description: null,
+    uploaded_custom_poster: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+
   // Listen for session expiration
   useEffect(() => {
     const handleSessionExpiring = () => {
       if (Object.keys(combinedFormData).length > 0) {
         const posterFile = sixthForm.getValues('postAsUpload');
-        createDraftMutation.mutate({
-          draft_data: getAllFormData(),
-          source: 'session_expiry',
+        const draftData = getAllFormData();
+        const draftPayload = {
+          draft_data: draftData,
+          source: 'session_expiry' as const,
           ...(fileProps.file && { uploaded_job_description: fileProps.file }),
           ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
-        });
+        };
+
+        if (selectedDraft && selectedDraft.id > 0) {
+          updateDraftMutation.mutate({ ...draftPayload, draftId: selectedDraft.id });
+        } else {
+          createDraftMutation.mutate(draftPayload, {
+            onSuccess: (data: any) => {
+              if (data?.id) {
+                setSelectedDraft(buildDraftRecord(data.id, draftData, 'session_expiry'));
+              }
+            },
+          });
+        }
       }
     };
 
     window.addEventListener('session-expiring', handleSessionExpiring);
     return () => window.removeEventListener('session-expiring', handleSessionExpiring);
-  }, [combinedFormData, pageNumber]);
+  }, [combinedFormData, pageNumber, selectedDraft]);
 
 
   const customCloseModal = () => {
@@ -279,30 +306,43 @@ export default function CreateJobModal({
 
   const handleSaveDraft = () => {
     const posterFile = sixthForm.getValues('postAsUpload');
-    createDraftMutation.mutate(
-      {
-        draft_data: getAllFormData(),
-        source: 'manual',
-        ...(fileProps.file && { uploaded_job_description: fileProps.file }),
-        ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
-      },
-      {
-        onSuccess: () => {
-          toast.custom(() => <CustomToast message="Draft saved successfully." type="success" />, {
-            duration: 3000,
-          });
-          setIsSaveDraftModalOpen(false);
-          draftStorage.clear();
-          resetForm();
+    const draftData = getAllFormData();
+    const draftPayload = {
+      draft_data: draftData,
+      source: 'manual' as const,
+      ...(fileProps.file && { uploaded_job_description: fileProps.file }),
+      ...(posterFile instanceof File && { uploaded_custom_poster: posterFile }),
+    };
+
+    const afterSave = () => {
+      toast.custom(() => <CustomToast message="Draft saved successfully." type="success" />, {
+        duration: 3000,
+      });
+      setIsSaveDraftModalOpen(false);
+      draftStorage.clear();
+      resetForm();
+    };
+
+    const onError = (error: any) => {
+      toast.custom(
+        () => <CustomToast message={error.message || 'Failed to save draft.'} type="error" />,
+        { duration: 5000 }
+      );
+    };
+
+    if (selectedDraft && selectedDraft.id > 0) {
+      updateDraftMutation.mutate({ ...draftPayload, draftId: selectedDraft.id }, { onSuccess: afterSave, onError });
+    } else {
+      createDraftMutation.mutate(draftPayload, {
+        onSuccess: (data: any) => {
+          if (data?.id) {
+            setSelectedDraft(buildDraftRecord(data.id, draftData, 'manual'));
+          }
+          afterSave();
         },
-        onError: (error: any) => {
-          toast.custom(
-            () => <CustomToast message={error.message || 'Failed to save draft.'} type="error" />,
-            { duration: 5000 }
-          );
-        },
-      }
-    );
+        onError,
+      });
+    }
   };
 
   const handleDiscardDraft = () => {
@@ -528,7 +568,14 @@ export default function CreateJobModal({
               >
                 <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
-                    <h3 className='flex-1 text-white ml-2 font-semibold'>Job Form</h3>
+                    <h3 className='text-white ml-2 font-semibold'>Job Form</h3>
+                    {selectedDraft && (
+                      <span className='ml-3 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-white/20 text-white rounded-full border border-white/40'>
+                        <span className='w-1.5 h-1.5 rounded-full bg-green-300'></span>
+                        Editing: {selectedDraft.job_title || 'Untitled Draft'}
+                      </span>
+                    )}
+                    <div className='flex-1' />
                     <button
                       type="button"
                       onClick={() => setIsStartOverModalOpen(true)}
@@ -537,19 +584,21 @@ export default function CreateJobModal({
                     >
                       <ArrowPathIcon className='w-6 h-6' />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsLoadDraftModalOpen(true)}
-                      className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
-                      title="Load Draft"
-                    >
-                      <DocumentTextIcon className='w-6 h-6' />
-                      {allDrafts.length > 0 && (
-                        <span className='absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full'>
-                          {allDrafts.length}
-                        </span>
-                      )}
-                    </button>
+                    {(autoLoadDraftId === undefined || autoLoadDraftId === null) && (
+                      <button
+                        type="button"
+                        onClick={() => setIsLoadDraftModalOpen(true)}
+                        className='relative mr-2 p-1.5 text-white hover:bg-white/10 rounded-md transition-colors'
+                        title="Load Draft"
+                      >
+                        <DocumentTextIcon className='w-6 h-6' />
+                        {allDrafts.length > 0 && (
+                          <span className='absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full'>
+                            {allDrafts.length}
+                          </span>
+                        )}
+                      </button>
+                    )}
                     <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => customCloseModal()} />
                   </div>
 
@@ -751,9 +800,11 @@ export default function CreateJobModal({
                     onClose={() => setIsLoadDraftModalOpen(false)}
                     drafts={allDrafts}
                     onLoadDraft={handleLoadDraftClick}
+                    onUnloadDraft={() => resetForm(false)}
                     onDeleteDraft={handleDeleteDraft}
                     isLoading={isDraftsLoading}
                     isDeleting={deleteDraftMutation.isLoading}
+                    activeDraftId={selectedDraft?.id ?? null}
                   />
                 </Dialog.Panel>
               </Transition.Child>
