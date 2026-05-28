@@ -15,11 +15,10 @@
   --lp-border: 0 0% 91%;
   --lp-destructive: 0 84% 60%;
 
-  /* Dark LP theme tokens */
-  --lp-page: 222 60% 4%;
-  --lp-hero: 222 40% 16%;
-  --lp-surface: 222 50% 7%;
-  --lp-surface-2: 222 45% 10%;
+  /* Light LP theme tokens */
+  --lp-page: 0 0% 100%;
+  --lp-surface: 222 47% 6%;
+  --lp-surface-2: 222 40% 10%;
 }
 
 @layer components {

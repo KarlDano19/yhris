@@ -12,11 +12,17 @@ const LpHeroSection = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleBookDemo = () => {
+  const handleBookDemo = async () => {
     if (!email.trim()) return;
+    setSubmitted(true);
     const url = `${DEMO_CALENDAR_URL}&email=${encodeURIComponent(email.trim())}`;
     window.open(url, "_blank", "noopener,noreferrer");
-    setSubmitted(true);
+    // Non-blocking — fire and forget
+    fetch('/api/capture-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim() }),
+    }).catch(() => {});
   };
 
   return (
@@ -99,7 +105,7 @@ const LpHeroSection = () => {
                   disabled={!email.trim()}
                   className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  Book a Demo <ArrowRight className="w-4 h-4" />
+                  Book a Free Demo <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             )}

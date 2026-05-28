@@ -55,13 +55,13 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
   };
 
   return (
-    <div style={{ background: 'hsl(var(--lp-page))' }}>
+    <div style={{ background: 'hsl(222, 60%, 4%)' }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
           <section className="pt-24 pb-16 relative overflow-hidden lp-dot-grid lp-hero-glow" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }} />
+              style={{ background: 'linear-gradient(to bottom, transparent, hsl(222, 60%, 4%))' }} />
             <div className="lp-section-container text-center relative z-10">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">PRICING</span>
