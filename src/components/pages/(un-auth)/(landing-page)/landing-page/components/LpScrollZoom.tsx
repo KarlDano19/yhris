@@ -6,21 +6,23 @@ const easeInOut = (t: number) =>
 
 const LpScrollZoom = ({ children }: { children?: React.ReactNode }) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress]   = useState(0);
   const [marginTop, setMarginTop] = useState(0);
 
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
+    // Pull section up by exactly the hero's height so it starts at page top
+    // and the animation fires from the very first scroll.
     const hero = el.previousElementSibling as HTMLElement | null;
     const heroHeight = hero ? hero.offsetHeight : 0;
     setMarginTop(heroHeight);
 
     const handleScroll = () => {
-      const rect = el.getBoundingClientRect();
+      const rect       = el.getBoundingClientRect();
       const scrollable = el.offsetHeight - window.innerHeight;
-      const scrolled = Math.max(0, -rect.top);
+      const scrolled   = Math.max(0, -rect.top);
       setProgress(Math.min(1, scrolled / scrollable));
     };
 

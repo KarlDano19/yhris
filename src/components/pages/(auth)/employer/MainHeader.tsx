@@ -12,7 +12,6 @@ import toast from 'react-hot-toast';
 import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import CustomToast from '@/components/CustomToast';
 import classNames from '@/helpers/classNames';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useGetEmployerProfile from '../../../hooks/useGetEmployerProfile';
 import useLogout from '../../../hooks/useLogout';
 import useRefreshToken from '@/components/hooks/useRefreshToken';
@@ -574,9 +573,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                           <div className='px-3 py-2 shadow-md overflow-hidden'>
                             <div className='flex items-center gap-2'>
                               <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                              {/* Desktop: login type badge */}
                               {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
                                 <span className='text-[9px] font-semibold bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
-                                  Yahshua Payroll
+                                  {userDetails.login_type.replace(/-/g, ' ')}
                                 </span>
                               )}
                             </div>
@@ -599,9 +599,10 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
                   <div className='px-3 py-2 mb-1 shadow-md overflow-hidden'>
                     <div className='flex items-center gap-2'>
                       <p className='text-[10px] text-gray-400 uppercase tracking-wide'>Logged in as</p>
+                      {/* Mobile: login type badge */}
                       {['yahshua-payroll', 'yg-payroll'].includes(userDetails.login_type) && (
-                        <span className='text-[9px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
-                          YP Sync
+                        <span className='text-[9px] font-semibold bg-blue-100 text-blue-700 border border-blue-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide'>
+                          {userDetails.login_type.replace(/-/g, ' ')}
                         </span>
                       )}
                     </div>
@@ -616,7 +617,6 @@ const MainHeader = ({ hasProfile, hasActiveSubscription, firstRoute, lastRoute, 
           </>
         )}
       </Popover>
-      <FloatingHelpButton companyName={profile.name} />
       {!hasActiveSubscription && !['manage-subscriptions', 'setup-employer-profile', 'checkout'].includes(firstRoute)}
 
       {/* Chat Modals */}

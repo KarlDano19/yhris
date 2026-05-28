@@ -3,12 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import MainLogo from "@/svg/MainLogo";
+import MainLogoWhite from "@/svg/MainLogoWhite";
 
 const dropdownStyle = {
   background: 'rgba(8,12,30,0.97)',
   border: '1px solid rgba(255,255,255,0.1)',
   backdropFilter: 'blur(20px)',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
 };
 
 const Navigation = () => {
@@ -38,7 +39,7 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-6 w-auto"><MainLogo /></div>
+              <div className="h-6 w-auto"><MainLogoWhite /></div>
             </Link>
           </div>
 
