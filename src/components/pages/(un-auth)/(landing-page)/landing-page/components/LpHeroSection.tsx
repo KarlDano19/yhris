@@ -99,7 +99,7 @@ const LpHeroSection = () => {
                   disabled={!email.trim()}
                   className="lp-btn-primary lp-btn-glow gap-2 text-sm whitespace-nowrap w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  Book a Demo <ArrowRight className="w-4 h-4" />
+                  Book a Free Demo <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             )}
