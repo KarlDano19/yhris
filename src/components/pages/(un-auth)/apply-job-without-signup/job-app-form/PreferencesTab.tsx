@@ -41,13 +41,12 @@ function PreferencesTab({
     control: control,
     name: 'experiences',
   });
-  const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);
   const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }), []);
   const onSubmit = handleSubmit((data: any) => {
     let hasError = false;
     if (fields.length !== 0) {
       data.experiences.map((experience: any, index: number) => {
-        const isCurrentlyEmployed = currentlyEmployed[index];
+        const isCurrentlyEmployed = !!experience.currentlyEmployed;
         const requiredFields = [
           experience.position,
           experience.companyOrg,
@@ -97,6 +96,7 @@ function PreferencesTab({
       companyOrg: '',
       dateFrom: '',
       dateTo: '',
+      currentlyEmployed: false,
     });
     setShowModal(false);
   };
@@ -109,13 +109,7 @@ function PreferencesTab({
   };
 
   const handleCurrentlyEmployedChange = (index: number, checked: boolean) => {
-    setCurrentlyEmployed(prev => {
-      const newState = [...prev];
-      newState[index] = checked;
-      return newState;
-    });
-    
-    // If checked, clear the dateTo field
+    setValue(`experiences.${index}.currentlyEmployed`, checked);
     if (checked) {
       setValue(`experiences.${index}.dateTo`, '');
     }
@@ -198,14 +192,14 @@ function PreferencesTab({
                   inputOnChange={(value: any) => {
                     setValue(`experiences.${index}.dateTo`, new Date(value));
                   }}
-                  disabled={currentlyEmployed[index]}
+                  disabled={!!watch(`experiences.${index}.currentlyEmployed`)}
                 />
               </div>
               <div className='flex items-center mt-2'>
                 <input
                   type='checkbox'
                   id={`currently-employed-${index}`}
-                  checked={currentlyEmployed[index] || false}
+                  checked={!!watch(`experiences.${index}.currentlyEmployed`)}
                   onChange={(e) => handleCurrentlyEmployedChange(index, e.target.checked)}
                   className='h-4 w-4 text-savoy-blue focus:ring-savoy-blue border-gray-300 rounded'
                 />

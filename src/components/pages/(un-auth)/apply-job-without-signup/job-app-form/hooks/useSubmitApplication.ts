@@ -23,6 +23,7 @@ async function submitApplication(data: any) {
       education: data.education,
       screening_answers: data.screeningAnswers || [],
       video_intro_url: data.videoIntroductionUrl,
+      dpa_agreed: data.dpa_agreed || false,
     };
     
       const formData = new FormData();
@@ -32,7 +33,7 @@ async function submitApplication(data: any) {
     if (data.education && Array.isArray(data.education) && data.education.length > 0) {
       formData.append('education', data.education.join(','));
     }
-    formData.append('application_form', JSON.stringify(finalData));
+    formData.append('application_form', JSON.stringify({ ...finalData, dpa_agreed: data.dpa_agreed || false }));
     formData.append('job_posting', data.jobPosting);
     if (data.profilePicture.length !== 0) {
       formData.append('photo', data.profilePicture[0]);

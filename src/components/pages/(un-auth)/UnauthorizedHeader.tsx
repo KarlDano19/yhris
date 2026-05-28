@@ -7,7 +7,6 @@ import { Popover } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
 
 import classNames from '@/helpers/classNames';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 import { Bars3Icon, XMarkIcon, StarIcon, TagIcon, InformationCircleIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline';
 import MainLogo from '@/svg/MainLogo';
@@ -243,7 +242,6 @@ const UnauthorizedHeader = () => {
           </>
         )}
       </Popover>
-      <FloatingHelpButton />
     </>
   );
 };

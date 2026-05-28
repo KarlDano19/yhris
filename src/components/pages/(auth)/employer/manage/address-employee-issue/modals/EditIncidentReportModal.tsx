@@ -70,6 +70,7 @@ export default function EditIncidentReportModal({
   
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [customIssueType, setCustomIssueType] = useState('');
+  const [briefBackgroundFullView, setBriefBackgroundFullView] = useState(false);
   const briefBackgroundValue = watch('briefBackground') || '';
   const issueTypeValue = watch('issueType') || '';
   
@@ -205,7 +206,7 @@ export default function EditIncidentReportModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full w-full sm:w-[calc(100%-2rem)] sm:max-w-4xl`}>
                 <div className='flex bg-savoy-blue p-2 items-center' data-element-id="update-employee-issue-status-rights">
                   <h3 className='flex-1 text-white ml-2 font-semibold'>
                     {canEdit ? 'Edit Incident Report' : 'View Incident Report'}
@@ -214,6 +215,8 @@ export default function EditIncidentReportModal({
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
+                    {!briefBackgroundFullView && (
+                    <>
                     <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
                       <div className='flex'>
                         <div className='flex-shrink-0'>
@@ -464,13 +467,25 @@ export default function EditIncidentReportModal({
                       </div>
                     </div>
 
-                    <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Brief Background{canEdit && <span className='text-red-600'>*</span>}
-                      </label>
-                      <div className='mt-2'>
+                    </>
+                    )}
+                    <div className={`sm:col-span-4 ${briefBackgroundFullView ? '' : 'mt-4'}`}>
+                      <div className='flex items-center justify-between mb-1'>
+                        <label htmlFor='briefBackground' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Brief Background{canEdit && <span className='text-red-600'>*</span>}
+                        </label>
+                        <button
+                          type='button'
+                          onClick={() => setBriefBackgroundFullView(!briefBackgroundFullView)}
+                          className='text-xs text-savoy-blue hover:underline font-medium'
+                        >
+                          {briefBackgroundFullView ? '← Back to form' : 'Full View'}
+                        </button>
+                      </div>
+                      <div className='mt-1'>
                         <textarea
-                          rows={Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
+                          rows={briefBackgroundFullView ? undefined : Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
+                          style={briefBackgroundFullView ? { height: '60vh' } : undefined}
                           {...register('briefBackground', { required: true })}
                           id='briefBackground'
                           value={briefBackgroundValue}

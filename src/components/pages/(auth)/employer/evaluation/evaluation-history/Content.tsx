@@ -22,7 +22,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mb-20 pb-56 md:pb-0 min-h-[80vh]'>
         <div className='flex p-4'>
-          <BackButton label="Evaluation" />
+          <BackButton label="Evaluation" href="/evaluation" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>

@@ -26,6 +26,12 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
   }, []);
 
   useEffect(() => {
+    // Do not initialize the widget until we have confirmed the user's email.
+    // Without this guard, the widget initializes with userId='user-unknown'
+    // before the session fetch completes, causing all pre-fetch sessions to
+    // share a single chat thread.
+    if (!userEmail) return;
+
     const CONVEX_URL = 'https://dapper-bear-214.convex.cloud';
     const PRODUCT_NAME = 'YAHSHUA HRIS Subscription - Main';
     const SESSION_TOKEN = "abba_7fa92d99-a329-4cb9-a123-47e1e81308e1";

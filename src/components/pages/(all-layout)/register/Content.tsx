@@ -12,7 +12,6 @@ import SplitLayout from '@/components/SplitView';
 import SplitViewBg from '@/assets/split-view-bg.png';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import FloatingHelpButton from '@/components/FloatingHelpButton';
 import useRegisterAccount from './hooks/useRegisterAccount';
 import { useLoopsSync } from '@/helpers/useLoopsSync';
 
@@ -208,7 +207,6 @@ const Content = () => {
           }
           leftBG={SplitViewBg}
         />
-        <FloatingHelpButton />
       </>
     );
   }
@@ -554,7 +552,6 @@ const Content = () => {
         }
         leftBG={SplitViewBg}
       />
-      <FloatingHelpButton />
     </>
   );
 };

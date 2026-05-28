@@ -25,7 +25,7 @@ export default function NavigationModal({
     setIsNavigating(true);
     
     // Navigate immediately
-    router.push(`/orient/${jobPostingId}`);
+    router.push(`/onboarding/${jobPostingId}`);
     
     // Set a timeout to hide loading after navigation
     // This ensures loading persists during page transition

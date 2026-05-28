@@ -163,6 +163,8 @@ const ProfileTab = ({ register, handleSubmit, watch, firstSubmit, setCurrentTab 
           </div>
         </div>
       </div>
+      <input type='hidden' {...register('gender')} />
+      <input type='hidden' {...register('birth_date')} />
       <div className='flex justify-end'>
         <button
           type='submit'

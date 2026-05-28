@@ -723,7 +723,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
           <div className='min-h-screen mb-24 md:mb-0'>
             <div className={`max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 scroll-smooth`}>
               <div className='flex px-4 pt-4 pb-2'>
-                <BackButton label="Screen Applicants" />
+                <BackButton label="Screen Applicants" href="/screen-applicants" />
               </div>
               <div className='p-2 md:px-8 lg:px-4'>
                 <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>

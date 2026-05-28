@@ -44,6 +44,7 @@ export default function IncidentReportModal({
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [employeeSelected, setEmployeeSelected] = useState(false);
   const [customIssueType, setCustomIssueType] = useState('');
+  const [briefBackgroundFullView, setBriefBackgroundFullView] = useState(false);
   const briefBackgroundValue = watch('briefBackground') || '';
   const issueTypeValue = watch('issueType') || '';
   
@@ -127,7 +128,7 @@ export default function IncidentReportModal({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl'>
+              <Dialog.Panel className={`relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full w-full sm:w-[calc(100%-2rem)] sm:max-w-4xl`}>
                 <div className='flex bg-savoy-blue p-2 items-center'>
                   <h3 className='flex-1 text-white ml-2 font-semibold'>Create Incident Report</h3>
                   <XCircleIcon className='w-8 h-8 text-white cursor-pointer' onClick={() => {
@@ -137,6 +138,8 @@ export default function IncidentReportModal({
                 </div>
                 <form onSubmit={onSubmit}>
                   <div className='px-4 pt-4 pb-6'>
+                    {!briefBackgroundFullView && (
+                    <>
                     <div className={`hidden rounded-md bg-red-50 p-4 mb-3`}>
                       <div className='flex'>
                         <div className='flex-shrink-0'>
@@ -387,17 +390,29 @@ export default function IncidentReportModal({
                       </div>
                     </div>
 
-                    <div className='sm:col-span-4 mt-4'>
-                      <label htmlFor='message' className='block text-sm font-medium leading-6 text-gray-900'>
-                        Brief Background<span className='text-red-600'>*</span>
-                      </label>
-                      <div className='mt-2'>
+                    </>
+                    )}
+                    <div className={`sm:col-span-4 ${briefBackgroundFullView ? '' : 'mt-4'}`}>
+                      <div className='flex items-center justify-between mb-1'>
+                        <label htmlFor='briefBackground' className='block text-sm font-medium leading-6 text-gray-900'>
+                          Brief Background<span className='text-red-600'>*</span>
+                        </label>
+                        <button
+                          type='button'
+                          onClick={() => setBriefBackgroundFullView(!briefBackgroundFullView)}
+                          className='text-xs text-savoy-blue hover:underline font-medium'
+                        >
+                          {briefBackgroundFullView ? '← Back to form' : 'Full View'}
+                        </button>
+                      </div>
+                      <div className='mt-1'>
                         <textarea
-                          rows={Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
+                          rows={briefBackgroundFullView ? undefined : Math.max(4, Math.min(10, briefBackgroundValue.split('\n').length + 1))}
                           {...register('briefBackground', { required: true })}
                           id='briefBackground'
                           value={briefBackgroundValue}
                           onChange={handleBriefBackgroundChange}
+                          style={briefBackgroundFullView ? { height: '60vh' } : undefined}
                           className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 resize-none sm:text-sm sm:leading-6'
                         />
                         <div className='text-xs text-gray-500 text-right mt-1'>

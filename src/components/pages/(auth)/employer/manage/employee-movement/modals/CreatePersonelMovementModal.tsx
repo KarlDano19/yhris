@@ -43,6 +43,13 @@ function CreatePersonelMovementModal({
   };
 
   const onSubmit = (data: any) => {
+    const payload = { ...data };
+    if (payload.proposed_rate !== 'Apply Increase') {
+      payload.percentage_increase = null;
+    } else {
+      payload.percentage_increase = payload.percentage_increase !== '' ? parseInt(payload.percentage_increase, 10) : null;
+    }
+
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, {
@@ -56,7 +63,7 @@ function CreatePersonelMovementModal({
         toast.custom(() => <CustomToast message={err} type='error' />, { duration: 4000 });
       },
     };
-    addPersonnelMovement(data, callbackReq);
+    addPersonnelMovement(payload, callbackReq);
   };
 
   // When closing the modal, do NOT reset the form or local state

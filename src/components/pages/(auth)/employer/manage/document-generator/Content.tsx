@@ -658,7 +658,7 @@ export default function Content({ hasActiveSubscription }: { hasActiveSubscripti
             </div>
           )}
           <div className="flex p-4">
-            <BackButton label={fromChecklist ? 'HRIS Implementation Checklist' : 'Manage'} />
+            <BackButton label={fromChecklist ? 'HRIS Implementation Checklist' : 'Manage'} href={fromChecklist ? '/setup-employer-profile' : '/manage'} />
           </div>
           <div className="px-2 md:px-8 lg:px-4">
             <h2 className="text-xl font-bold text-indigo-dye">Document Generator</h2>

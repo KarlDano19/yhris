@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import CustomToast from '@/components/CustomToast';
+import Pagination from '@/components/Pagination';
 import { ArrowLeftIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import DeleteIcon from '@/svg/DeleteIcon';
 
@@ -32,6 +33,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 const Content = () => {
   const [itemsFilter, setItemsFilter] = useState({ search: '' });
   const [items, setItems] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<T_DeleteModalData | null>(null);
   const [resendingId, setResendingId] = useState<number | null>(null);
@@ -46,8 +49,15 @@ const Content = () => {
   }, []);
 
   useEffect(() => {
-    if (data) setItems(data.records || data);
+    if (data) {
+      setItems(data.records || data);
+      setCurrentPage(1);
+    }
   }, [data]);
+
+  const totalRecords = items.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = items.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleResend = (id: number) => {
     setResendingId(id);
@@ -76,8 +86,8 @@ const Content = () => {
       );
     }
 
-    if (items && items.length > 0) {
-      return items.map((item: any) => {
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any) => {
         const statusMeta = STATUS_LABELS[item.status] || { label: item.status, color: 'bg-gray-100 text-gray-500' };
         return (
           <tr key={item.id}>
@@ -187,7 +197,13 @@ const Content = () => {
                   <tbody className="divide-y divide-gray-200">{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className="text-xs text-gray-500 mt-2">Total record/s: {items?.length ?? 0}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Pagination from '@/components/Pagination';
 import ClientGoalModal from './modal/ClientGoalModal';
 import EditClientSourceModal from './modal/EditClientSourceModal';
 import CreateClientModal from './modal/CreateClientModal';
@@ -37,6 +38,8 @@ const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
   const [search, setSearch] = useState('');
   const [clientSourceFilter, setClientSourceFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isClientGoalModalOpen, setIsClientGoalModalOpen] = useState(false);
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ id: number; name: string; client_source: string; partner: string } | null>(null);
@@ -50,8 +53,13 @@ const Content = () => {
   useEffect(() => {
     if (dataClient && !isGetClientLoading) {
       setClientItems(dataClient);
+      setCurrentPage(1);
     }
   }, [dataClient]);
+
+  const totalRecords = clientItems.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const renderRows = () => {
     if (isGetClientLoading) {
@@ -65,12 +73,12 @@ const Content = () => {
         </tr>
       );
     }
-    if (clientItems && clientItems.length > 0) {
-      return clientItems.map((item: any, index: number) => {
+    if (paginatedItems && paginatedItems.length > 0) {
+      return paginatedItems.map((item: any, index: number) => {
         const sub = item.subscription;
         return (
           <tr key={item.id}>
-            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{index + 1}</td>
+            <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{(currentPage - 1) * pageSize + index + 1}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-800 font-medium'>{item.name}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{item.partner || 'Direct Client'}</td>
             <td className='whitespace-nowrap px-3 py-5 text-sm text-gray-500'>{sub?.plan_name || '—'}</td>
@@ -120,10 +128,10 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='px-2 md:px-8 lg:px-4'>
-          <div className='mt-6 flex gap-16 space-x-20'>
-            <div className='flex-none lg:w-1/2 space-y-4'>
+          <div className='mt-6 flex flex-col lg:flex-row gap-4'>
+            <div className='flex-none w-full lg:w-1/2 space-y-4'>
               <h2 className='text-xl font-bold text-indigo-dye'>Client Monitoring</h2>
-              <div className='relative flex items-center gap-2'>
+              <div className='relative flex flex-wrap items-center gap-2'>
                 <input
                   type='text'
                   name='search'
@@ -164,8 +172,8 @@ const Content = () => {
                 </div>
               </div>
             </div>
-            <div className='flex-none lg:w-1/2'>
-              <div className='flex justify-between gap-3 px-5 py-5 font-semibold whitespace-nowrap rounded-xl border border-solid border-slate-400 max-w-[318px]'>
+            <div className='flex-none w-full lg:w-1/2'>
+              <div className='flex justify-between gap-3 px-5 py-5 font-semibold rounded-xl border border-solid border-slate-400 w-full max-w-[318px]'>
                 <div className='flex flex-col my-auto text-base tracking-wide text-slate-700'>
                   <div>TOTAL</div>
                   <div className='mt-3.5'>client</div>
@@ -197,7 +205,13 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <p className='text-xs text-gray-500 mt-2'>Total record/s: {clientItems.length}</p>
+                <Pagination
+                  pagination={{ totalPages, totalRecords }}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+                />
               </div>
             </div>
           </div>

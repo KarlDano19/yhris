@@ -410,9 +410,9 @@ export default function Checklist({
       return;
     }
 
-    // Block save without a completed stage approval (signature required)
+    // Block save without a completed stage approval only when passing
     const stageApproval = getCurrentStageApproval();
-    if (!stageApproval?.signature && !stageApproval?.is_skipped) {
+    if (data.status === 'passed' && !stageApproval?.signature && !stageApproval?.is_skipped) {
       return;
     }
 
