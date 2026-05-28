@@ -4,15 +4,15 @@ import AnimatedHeadline from "./AnimatedHeadline";
 
 const LpFinalCTA = () => {
   return (
-    <section id="demo" className="py-28 md:py-36" style={{ background: '#ffffff' }}>
+    <section id="demo" className="py-28 md:py-36 bg-white dark:bg-[#0F1419]">
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center">
           <span className="lp-section-label justify-center mb-6">GET STARTED</span>
-          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 mb-5 leading-tight tracking-tight">
+          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-gray-900 dark:text-[#E8EAED] mb-5 leading-tight tracking-tight">
             Your HR team is doing too much manually. Let&apos;s fix that.
           </AnimatedHeadline>
           <ScrollFadeIn delay={100}>
-            <p className="text-gray-500 text-base md:text-lg mb-12 max-w-md mx-auto leading-relaxed">
+            <p className="text-gray-500 dark:text-[#9CA3AF] text-base md:text-lg mb-12 max-w-md mx-auto leading-relaxed">
               See how YAHSHUA HRIS works for your team. Free demo, no commitment, no credit card required.
             </p>
           </ScrollFadeIn>
@@ -28,8 +28,7 @@ const LpFinalCTA = () => {
               </a>
               <Link
                 href="/features"
-                className="text-base px-9 py-4 rounded-xl font-semibold transition-colors duration-200"
-                style={{ background: '#fff', border: '1px solid #D1D5DB', color: '#374151' }}
+                className="text-base px-9 py-4 rounded-xl font-semibold transition-colors duration-200 bg-white dark:bg-[#1A1F26] border border-[#D1D5DB] dark:border-[#374151] text-[#374151] dark:text-[#E8EAED] hover:bg-gray-50 dark:hover:bg-[#222830]"
               >
                 Explore Features
               </Link>

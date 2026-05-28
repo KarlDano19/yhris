@@ -14,7 +14,7 @@ import LpScrollZoom from "./components/LpScrollZoom";
 
 const Content = () => {
   return (
-    <div className="min-h-screen lp-dot-grid-light" style={{ background: '#ffffff' }}>
+    <div className="min-h-screen lp-dot-grid-light bg-white dark:bg-[#0F1419] dark:lp-dot-grid">
       <LpHeroSection />
 
       <LpScrollZoom>

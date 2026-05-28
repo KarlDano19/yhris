@@ -27,6 +27,22 @@ module.exports = {
         ...colors,
         "indigo-dye": "#2C3F58",
         "savoy-blue": "#355FD0",
+        // Semantic theme tokens — auto-switch with dark mode via CSS variables.
+        // Usage: bg-theme-bg, text-theme-body, border-theme-border, etc.
+        theme: {
+          bg:             'var(--color-bg)',
+          surface:        'var(--color-surface)',
+          'surface-raised': 'var(--color-surface-raised)',
+          body:           'var(--color-text)',
+          muted:          'var(--color-text-muted)',
+          border:         'var(--color-border)',
+          'border-subtle':'var(--color-border-subtle)',
+          primary:        'var(--color-primary)',
+          'primary-yellow': 'var(--color-primary-yellow)',
+          success:        'var(--color-success)',
+          error:          'var(--color-error)',
+          warning:        'var(--color-warning)',
+        },
         // Landing page design system
         navy: "hsl(var(--lp-navy))",
         "lp-blue": "hsl(var(--lp-blue))",

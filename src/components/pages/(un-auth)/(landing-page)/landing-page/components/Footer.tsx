@@ -20,51 +20,51 @@ const Footer = () => {
   };
   return (
     <footer id="contact" className="relative mt-20 mb-8">
-      <div className="bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl mx-4 sm:mx-6 lg:mx-8 p-8 lg:p-12 shadow-lg">
+      <div className="bg-white/80 dark:bg-[#0F1419]/90 backdrop-blur-md border border-white/20 dark:border-[#374151]/60 rounded-2xl mx-4 sm:mx-6 lg:mx-8 p-8 lg:p-12 shadow-lg">
         <div className="max-w-screen-2xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             <div className="lg:col-span-1">
-              <h3 className="text-2xl font-bold text-indigo-dye mb-4">
+              <h3 className="text-2xl font-bold text-indigo-dye dark:text-[#E8EAED] mb-4">
                 YAHSHUA <span className="text-[#FFC107]">HRIS</span>
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 dark:text-[#9CA3AF] mb-6">
                 Complete HR solution for modern businesses. Streamline your HR processes with our comprehensive platform.
               </p>
               <div className="flex space-x-4">
-                <Link href="https://www.facebook.com/people/Yahshua-HRIS/61561504064973/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.facebook.com/people/Yahshua-HRIS/61561504064973/" target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                   <FacebookIcon className="w-6 h-6" />
                 </Link>
-                <Link href="https://www.linkedin.com/company/yahshua-hris/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.linkedin.com/company/yahshua-hris/" target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                   <LinkedInIcon className="w-6 h-6" />
                 </Link>
-                <Link href="https://www.youtube.com/@YAHSHUAHRIS" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFC107] transition-colors">
+                <Link href="https://www.youtube.com/@YAHSHUAHRIS" target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                   <YoutubeIcon className="w-6 h-6" />
                 </Link>
               </div>
             </div>
 
             <div id="products">
-              <h5 className="text-indigo-dye text-lg font-semibold mb-4">
+              <h5 className="text-indigo-dye dark:text-[#E8EAED] text-lg font-semibold mb-4">
                 The ABBA Initiative Products
               </h5>
               <ul className="space-y-3">
                 <li>
-                  <Link href="#" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="#" className="text-gray-600 dark:text-[#9CA3AF] hover:text-savoy-blue transition-colors">
                     YAHSHUA HRIS
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://showcase.yahshuapayroll.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://showcase.yahshuapayroll.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#9CA3AF] hover:text-savoy-blue transition-colors">
                     YAHSHUA Payroll Online
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://yahshuabooksonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://yahshuabooksonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#9CA3AF] hover:text-savoy-blue transition-colors">
                     YAHSHUA Books Online
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://yahshuataxonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-savoy-blue transition-colors">
+                  <Link href="https://yahshuataxonline.com/" target="_blank" rel="noopener noreferrer" className="text-gray-600 dark:text-[#9CA3AF] hover:text-savoy-blue transition-colors">
                     YAHSHUA Tax Online
                   </Link>
                 </li>
@@ -72,27 +72,27 @@ const Footer = () => {
             </div>
 
             <div>
-              <h5 className="text-indigo-dye text-lg font-semibold mb-4">
+              <h5 className="text-indigo-dye dark:text-[#E8EAED] text-lg font-semibold mb-4">
                 Quick Links
               </h5>
               <ul className="space-y-3">
                 <li>
-                  <Link href={getNavLink("features")} className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <Link href={getNavLink("features")} className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href={getNavLink("integration")} className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <Link href={getNavLink("integration")} className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     Integration
                   </Link>
                 </li>
                 <li>
-                  <Link href="/register" className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <Link href="/register" className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     Get Started
                   </Link>
                 </li>
                 <li>
-                  <Link href="/login" className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <Link href="/login" className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     Sign In
                   </Link>
                 </li>
@@ -100,19 +100,19 @@ const Footer = () => {
             </div>
 
             <div>
-              <h5 className="text-indigo-dye text-lg font-semibold mb-4">
+              <h5 className="text-indigo-dye dark:text-[#E8EAED] text-lg font-semibold mb-4">
                 Contact Us
               </h5>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <EnvelopeIcon className="w-5 h-5 text-[#FFC107] flex-shrink-0" />
-                  <a href="mailto:marketing@abba.works" className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <a href="mailto:marketing@abba.works" className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     marketing@abba.works
                   </a>
                 </div>
                 <div className="flex items-center space-x-3">
                   <PhoneIcon className="w-5 h-5 text-[#FFC107] flex-shrink-0" />
-                  <a href="tel:+639161532902" className="text-gray-600 hover:text-[#FFC107] transition-colors">
+                  <a href="tel:+639161532902" className="text-gray-600 dark:text-[#9CA3AF] hover:text-[#FFC107] transition-colors">
                     +63 9161 532 902
                   </a>
                 </div>
@@ -120,16 +120,16 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 mt-8 pt-8">
+          <div className="border-t border-gray-200 dark:border-[#374151] mt-8 pt-8">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-              <div className="text-gray-500 text-sm text-center md:text-left">
+              <div className="text-gray-500 dark:text-[#9CA3AF] text-sm text-center md:text-left">
                 &copy; {new Date().getFullYear()} The ABBA Initiative, OPC. All rights reserved.
               </div>
               <div className="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0 text-center md:text-left">
-                <Link href="/terms-of-service" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
+                <Link href="/terms-of-service" className="text-gray-500 dark:text-[#9CA3AF] hover:text-[#FFC107] text-sm transition-colors">
                   Terms of Service
                 </Link>
-                <Link href="/privacy-policy" className="text-gray-500 hover:text-[#FFC107] text-sm transition-colors">
+                <Link href="/privacy-policy" className="text-gray-500 dark:text-[#9CA3AF] hover:text-[#FFC107] text-sm transition-colors">
                   Privacy Policy
                 </Link>
               </div>

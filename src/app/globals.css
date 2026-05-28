@@ -181,6 +181,7 @@
 
 /* Design tokens: light palette as CSS variables (dark overrides are in dark-theme.css) */
 :root {
+  /* Legacy tokens — kept for backwards compatibility */
   --primary: #355FD0;
   --primary-yellow: #FFC008;
   --success: #65C979;
@@ -191,6 +192,20 @@
   --card-bg: #FFFFFF;
   --subtle-bg: #F9FBFC;
   --muted: #6B7280;
+
+  /* Semantic tokens — use these in new components via Tailwind (e.g. bg-theme-bg, text-theme-body) */
+  --color-bg: #FFFFFF;
+  --color-surface: #F9FBFC;
+  --color-surface-raised: #FFFFFF;
+  --color-text: #2C3F58;
+  --color-text-muted: #6B7280;
+  --color-border: #ACB9CB;
+  --color-border-subtle: rgba(172, 185, 203, 0.4);
+  --color-primary: #355FD0;
+  --color-primary-yellow: #FFC008;
+  --color-success: #65C979;
+  --color-error: #D86841;
+  --color-warning: #EAC645;
 }
 
 /* Global theme defaults via CSS variables */

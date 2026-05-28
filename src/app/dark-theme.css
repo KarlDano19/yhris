@@ -8,6 +8,7 @@
 /* CSS variable overrides for dark palette                                     */
 /* -------------------------------------------------------------------------- */
 html.dark {
+  /* Legacy tokens — kept for backwards compatibility */
   --primary: #5B8AFF;
   --primary-yellow: #FFB800;
   --success: #5FE07D;
@@ -18,6 +19,20 @@ html.dark {
   --card-bg: #1A1F26;
   --subtle-bg: #1A1F26;
   --muted: #9CA3AF;
+
+  /* Semantic tokens — dark overrides */
+  --color-bg: #0F1419;
+  --color-surface: #1A1F26;
+  --color-surface-raised: #222830;
+  --color-text: #E8EAED;
+  --color-text-muted: #9CA3AF;
+  --color-border: #374151;
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-primary: #5B8AFF;
+  --color-primary-yellow: #FFB800;
+  --color-success: #5FE07D;
+  --color-error: #FF8B6B;
+  --color-warning: #FFD666;
 
   /* Status card tints */
   --status-yellow-bg: rgba(255,223,120,0.10);
