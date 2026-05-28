@@ -75,8 +75,8 @@ Tier guide: hot = 7-10, warm = 4-6, cold = 1-3`;
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
 async function createLoopsContact(data: BookDemoPayload) {
-  const apiKey = process.env.LOOPS_API_KEY;
-  if (!apiKey) throw new Error('LOOPS_API_KEY not set');
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
+  if (!apiKey) throw new Error('LOOPS_BOOKDEMO_API not set');
 
   const res = await fetch('https://app.loops.so/api/v1/contacts/create', {
     method: 'POST',
@@ -90,7 +90,7 @@ async function createLoopsContact(data: BookDemoPayload) {
       lastName: data.lastName,
       phone: data.phone,
       companyName: data.companyName,
-      source: 'book-demo',
+      source: 'HRIS Website',
       leadStatus: 'pending_qualification',
       painPoint: data.painPoint,
     }),
@@ -105,7 +105,7 @@ async function createLoopsContact(data: BookDemoPayload) {
 }
 
 async function updateLoopsContact(email: string, fields: Record<string, unknown>) {
-  const apiKey = process.env.LOOPS_API_KEY;
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
   if (!apiKey) return;
 
   await fetch('https://app.loops.so/api/v1/contacts/update', {
@@ -119,7 +119,7 @@ async function updateLoopsContact(email: string, fields: Record<string, unknown>
 }
 
 async function sendLoopsEvent(email: string, eventName: string, properties: Record<string, unknown> = {}) {
-  const apiKey = process.env.LOOPS_API_KEY;
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
   if (!apiKey) return;
 
   await fetch('https://app.loops.so/api/v1/events/send', {

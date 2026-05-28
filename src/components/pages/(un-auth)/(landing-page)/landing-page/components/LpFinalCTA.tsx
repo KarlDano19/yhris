@@ -12,11 +12,17 @@ const LpFinalCTA = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleBookDemo = () => {
+  const handleBookDemo = async () => {
     if (!email.trim()) return;
+    setSubmitted(true);
     const url = `${DEMO_CALENDAR_URL}&email=${encodeURIComponent(email.trim())}`;
     window.open(url, "_blank", "noopener,noreferrer");
-    setSubmitted(true);
+    // Non-blocking — fire and forget
+    fetch('/api/capture-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim() }),
+    }).catch(() => {});
   };
 
   return (

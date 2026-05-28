@@ -129,8 +129,8 @@ function scoreLeadWithRules(data: LeadData): ScoringResult {
 
 // ─── Loops ────────────────────────────────────────────────────────────────────
 async function createLoopsContact(data: LeadData) {
-  const apiKey = process.env.LOOPS_API_KEY;
-  if (!apiKey) throw new Error('LOOPS_API_KEY not set');
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
+  if (!apiKey) throw new Error('LOOPS_BOOKDEMO_API not set');
 
   const contactFields = {
     email: data.email,
@@ -173,7 +173,7 @@ async function createLoopsContact(data: LeadData) {
 }
 
 async function updateLoopsContact(email: string, fields: Record<string, unknown>) {
-  const apiKey = process.env.LOOPS_API_KEY;
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
   if (!apiKey) return;
 
   await fetch('https://app.loops.so/api/v1/contacts/update', {
@@ -184,7 +184,7 @@ async function updateLoopsContact(email: string, fields: Record<string, unknown>
 }
 
 async function sendLoopsEvent(email: string, eventName: string, properties: Record<string, unknown> = {}) {
-  const apiKey = process.env.LOOPS_API_KEY;
+  const apiKey = process.env.LOOPS_BOOKDEMO_API;
   if (!apiKey) return;
 
   await fetch('https://app.loops.so/api/v1/events/send', {
