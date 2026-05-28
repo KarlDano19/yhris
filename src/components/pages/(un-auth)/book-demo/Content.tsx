@@ -1,7 +1,7 @@
 "use client";
 
-import Navigation from "../landing-page/Navigation";
-import LpFooter from "../landing-page/LpFooter";
+import Navigation from "../(landing-page)/landing-page/components/Navigation";
+import LpFooter from "../(landing-page)/landing-page/components/LpFooter";
 
 const CALENDLY_URL = "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
 
