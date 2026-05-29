@@ -26,10 +26,10 @@ const LpValueProposition = () => {
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center mb-20">
           <span className="lp-section-label justify-center mb-5">WHY YAHSHUA HRIS</span>
-          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-gray-900 tracking-tight">
+          <AnimatedHeadline className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-5 leading-tight text-white tracking-tight">
             Your team deserves better than a folder full of Excel files.
           </AnimatedHeadline>
-          <p className="text-gray-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+          <p className="text-white/45 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
             YAHSHUA HRIS replaces the patchwork of spreadsheets, email threads, and disconnected tools your HR team is surviving on right now.
           </p>
         </ScrollFadeIn>
@@ -44,8 +44,8 @@ const LpValueProposition = () => {
                     style={{ background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.15)' }}>
                     <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-base font-bold mb-3 text-gray-900">{p.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{p.body}</p>
+                  <h3 className="text-base font-bold mb-3 text-white">{p.title}</h3>
+                  <p className="text-white/45 text-sm leading-relaxed">{p.body}</p>
                 </div>
               </ScrollFadeIn>
             );

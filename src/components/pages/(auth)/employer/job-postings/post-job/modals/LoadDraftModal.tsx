@@ -14,9 +14,11 @@ interface LoadDraftModalProps {
   onClose: () => void;
   drafts: T_JobPostingDraft[];
   onLoadDraft: (draft: T_JobPostingDraft) => void;
+  onUnloadDraft: () => void;
   onDeleteDraft: (draftId: number) => void;
   isLoading?: boolean;
   isDeleting?: boolean;
+  activeDraftId?: number | null;
 }
 
 export default function LoadDraftModal({
@@ -24,9 +26,11 @@ export default function LoadDraftModal({
   onClose,
   drafts,
   onLoadDraft,
+  onUnloadDraft,
   onDeleteDraft,
   isLoading = false,
   isDeleting = false,
+  activeDraftId = null,
 }: LoadDraftModalProps) {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -75,16 +79,26 @@ export default function LoadDraftModal({
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {drafts.map((draft) => (
+                      {drafts.map((draft) => {
+                        const isActive = activeDraftId !== null && draft.id === activeDraftId;
+                        return (
                         <div
                           key={draft.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:border-savoy-blue transition-colors"
+                          className={`border rounded-lg p-4 transition-colors ${isActive ? 'border-savoy-blue bg-savoy-blue/5' : 'border-gray-200 hover:border-savoy-blue'}`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-gray-900 truncate">
-                                {draft.job_title}
-                              </h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-medium text-gray-900 truncate">
+                                  {draft.job_title}
+                                </h4>
+                                {isActive && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-savoy-blue text-white rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-300"></span>
+                                    Currently editing
+                                  </span>
+                                )}
+                              </div>
                               <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
                                 <span>
                                   {formatDistanceToNow(new Date(draft.updated_at), {
@@ -104,6 +118,16 @@ export default function LoadDraftModal({
                               )}
                             </div>
                             <div className="flex items-center gap-2 ml-4">
+                              {isActive ? (
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center rounded-md border border-savoy-blue px-3 py-2.5 text-sm font-semibold text-savoy-blue shadow-sm hover:bg-savoy-blue/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  onClick={() => { onUnloadDraft(); onClose(); }}
+                                  disabled={isDeleting}
+                                >
+                                  Unload
+                                </button>
+                              ) : (
                               <button
                                 type="button"
                                 className="inline-flex items-center rounded-md bg-savoy-blue px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -112,6 +136,7 @@ export default function LoadDraftModal({
                               >
                                 Load
                               </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => onDeleteDraft(draft.id)}
@@ -125,7 +150,8 @@ export default function LoadDraftModal({
                             </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

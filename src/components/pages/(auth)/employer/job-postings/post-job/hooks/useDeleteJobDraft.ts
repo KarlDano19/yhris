@@ -31,6 +31,7 @@ export function useDeleteJobDraft() {
     mutationFn: (draftId: number) => deleteJobDraft(draftId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobDraftsCache'] });
+      queryClient.invalidateQueries({ queryKey: ['jobDraftsTableCache'] });
     },
   });
 }

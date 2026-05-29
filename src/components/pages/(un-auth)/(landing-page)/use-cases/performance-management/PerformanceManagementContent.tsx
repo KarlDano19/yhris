@@ -33,16 +33,16 @@ const PerformanceManagementContent = () => {
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
-          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
+          <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid lp-hero-glow">
             <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--lp-page)))" }} />
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">USE CASE</span>
-                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
+                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-white mb-5 tracking-tight">
                   Performance Management.<br className="hidden md:inline" />
                   <span className="text-primary"> Elevate every review.</span>
                 </h1>
-                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
+                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed mb-10">
                   Comprehensive evaluation tools, continuous feedback systems, and data-driven insights to grow your team.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -63,19 +63,19 @@ const PerformanceManagementContent = () => {
               <ScrollFadeIn>
                 <div className="text-center mb-12">
                   <span className="lp-section-label justify-center mb-4">CUSTOMER STORY</span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">Transforming Performance Reviews from Burden to Breakthrough</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Transforming Performance Reviews from Burden to Breakthrough</h2>
                   <p className="text-primary font-medium text-sm mb-1">How Companies Transform Employee Development</p>
-                  <p className="text-gray-400 text-xs italic">This is a fictional story for illustration purposes only.</p>
+                  <p className="text-white/25 text-xs italic">This is a fictional story for illustration purposes only.</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                   <div className="space-y-6">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">The Challenge</p>
-                      <p className="text-sm text-gray-500 leading-relaxed">Companies relying on paper evaluations face outdated, hard-to-manage processes, often leading to delays, lost records, and low engagement. With limited budgets, they are stuck using inefficient methods or skipping performance reviews altogether.</p>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-2">The Challenge</p>
+                      <p className="text-sm text-white/55 leading-relaxed">Companies relying on paper evaluations face outdated, hard-to-manage processes, often leading to delays, lost records, and low engagement. With limited budgets, they are stuck using inefficient methods or skipping performance reviews altogether.</p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">The Solution</p>
-                      <p className="text-sm text-gray-500 leading-relaxed">YAHSHUA HRIS simplifies everything: a single intuitive platform to create, customize, manage, and store evaluations. No paperwork, no hassle.</p>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-2">The Solution</p>
+                      <p className="text-sm text-white/55 leading-relaxed">YAHSHUA HRIS simplifies everything: a single intuitive platform to create, customize, manage, and store evaluations. No paperwork, no hassle.</p>
                     </div>
                   </div>
                   <div className="lp-dark-card p-7">
@@ -86,7 +86,7 @@ const PerformanceManagementContent = () => {
                           <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(255,193,7,0.12)", border: "1px solid rgba(255,193,7,0.2)" }}>
                             <svg className="w-2.5 h-2.5 text-primary" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6l3 3 5-5" /></svg>
                           </span>
-                          <span className="text-gray-600">{r}</span>
+                          <span className="text-white/60">{r}</span>
                         </li>
                       ))}
                     </ul>
@@ -102,7 +102,7 @@ const PerformanceManagementContent = () => {
               <ScrollFadeIn>
                 <div className="text-center mb-14">
                   <span className="lp-section-label justify-center mb-4">KEY FEATURES</span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Comprehensive performance tools.</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Comprehensive performance tools.</h2>
                 </div>
               </ScrollFadeIn>
               <div className="grid md:grid-cols-2 gap-6">
@@ -111,12 +111,12 @@ const PerformanceManagementContent = () => {
                   return (
                     <ScrollFadeIn key={f.title} delay={i * 60}>
                       <div className="lp-dark-card p-7 flex gap-5">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(0,0,0,0.05)" }}>
-                          <Icon className="w-5 h-5 text-gray-400" strokeWidth={1.5} />
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+                          <Icon className="w-5 h-5 text-white/40" strokeWidth={1.5} />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold text-gray-900 mb-2">{f.title}</h3>
-                          <p className="text-sm text-gray-500 leading-relaxed">{f.body}</p>
+                          <h3 className="text-sm font-bold text-white/80 mb-2">{f.title}</h3>
+                          <p className="text-sm text-white/45 leading-relaxed">{f.body}</p>
                         </div>
                       </div>
                     </ScrollFadeIn>
@@ -132,17 +132,17 @@ const PerformanceManagementContent = () => {
               <ScrollFadeIn>
                 <div className="text-center mb-14">
                   <span className="lp-section-label justify-center mb-4">PROCESS</span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Performance review cycle in 4 steps.</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Performance review cycle in 4 steps.</h2>
                 </div>
               </ScrollFadeIn>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {reviewCycle.map((s, i) => (
                   <ScrollFadeIn key={s.step} delay={i * 60}>
                     <div className="lp-dark-card p-6">
-                      <span className="text-xs font-mono text-gray-400 mb-4 block">{s.step}</span>
-                      <h3 className="text-sm font-bold text-gray-900 mb-2">{s.phase}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed mb-4">{s.description}</p>
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: "rgba(255,193,7,0.1)", color: "rgba(180,120,0,0.9)", border: "1px solid rgba(255,193,7,0.2)" }}>{s.duration}</span>
+                      <span className="text-xs font-mono text-white/20 mb-4 block">{s.step}</span>
+                      <h3 className="text-sm font-bold text-white/80 mb-2">{s.phase}</h3>
+                      <p className="text-sm text-white/40 leading-relaxed mb-4">{s.description}</p>
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: "rgba(255,193,7,0.1)", color: "rgba(255,193,7,0.7)", border: "1px solid rgba(255,193,7,0.15)" }}>{s.duration}</span>
                     </div>
                   </ScrollFadeIn>
                 ))}
@@ -154,8 +154,8 @@ const PerformanceManagementContent = () => {
           <section className="py-20 md:py-28">
             <div className="lp-section-container text-center">
               <ScrollFadeIn>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 tracking-tight">Ready to transform performance management?</h2>
-                <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">Start free or book a demo. No credit card required.</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">Ready to transform performance management?</h2>
+                <p className="text-white/50 text-base mb-8 max-w-sm mx-auto">Start free or book a demo. No credit card required.</p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Link href="/register" className="lp-btn-primary lp-btn-glow gap-2">Start for Free <ArrowRight className="w-4 h-4" /></Link>
                   <Link href="/use-cases" className="lp-btn-ghost gap-2">View All Use Cases</Link>

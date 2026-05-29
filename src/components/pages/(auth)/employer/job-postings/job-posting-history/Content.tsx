@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 
 import { useRouter } from 'next/navigation';
 
+import { useForm } from 'react-hook-form';
+
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 import { Menu, Transition } from '@headlessui/react';
@@ -25,6 +27,7 @@ import SeederButton from '@/components/SeederButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import SetJob from './SetJob';
 import JobPreviewModal from './modals/JobPreviewModal';
+import CreateJobModal from '../post-job/modals/CreateJobModal';
 import SetJobInactiveModal from './modals/SetJobInactiveModal';
 import useGetJobPostItems from './hooks/get/useGetJobPostItems';
 import UpdateJobModal from './modals/UpdateJobModal';
@@ -33,6 +36,7 @@ import useDeleteJobPost from './hooks/delete/useDeleteJobPost';
 import useDuplicateJobPosting from './hooks/useDuplicateJobPosting';
 
 import useGetJobDraftsItems from './hooks/get/useGetJobDraftsItems';
+import { useDeleteJobDraft } from '../post-job/hooks/useDeleteJobDraft';
 
 import useUpdateJobPostStatus from './hooks/update/useUpdateJobPostStatus';
 import useUpdateJobSalaryStatus from './hooks/update/useUpdateJobSalaryStatus';
@@ -62,6 +66,7 @@ import {
 } from '@/types/job_posting';
 
 import { draftStorage } from '@/helpers/draftStorage';
+import { CREATEJOB_TEMPLATE, QUALIFICATION_TEMPLATE } from '@/helpers/constants';
 import { useQueryClient } from '@tanstack/react-query';
 
 type PaginationProps = {
@@ -84,6 +89,31 @@ type T_BulkDeleteModalData = DeleteModalData & {
 
 const Content = () => {
   const router = useRouter();
+
+  // CreateJobModal — for resuming drafts in-place
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
+  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(undefined);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
+  const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
+  const [combinedFormData, setCombinedFormData] = useState<any>({});
+  const [fileProps, setFileProps] = useState<{ fileName?: string; fileSize?: number; file?: File }>({});
+  const [screeningQuestions, setScreeningQuestions] = useState<any[]>([]);
+  const [autoRejectEnabled, setAutoRejectEnabled] = useState(false);
+  const [isVideoIntroEnabled, setIsVideoIntroEnabled] = useState(false);
+  const firstForm = useForm<any>({ defaultValues: { country: 'Philippines', language: 'English' } });
+  const secondForm = useForm();
+  const thirdForm = useForm<any>({ defaultValues: { salary: { salaryType: '' } } });
+  const fourthForm = useForm<any>({ defaultValues: { jobDescription: CREATEJOB_TEMPLATE[0], qualifications: QUALIFICATION_TEMPLATE[0], notesRemarks: '', skills: [] } });
+  const fifthForm = useForm();
+  const sixthForm = useForm();
+  const seventhForm = useForm();
+
+  const handleCloseCreateJobModal = () => {
+    setIsCreateJobModalOpen(false);
+    setAutoLoadDraftId(undefined);
+  };
+
   const [draftCurrentPage, setDraftCurrentPage] = useState(1);
   const [draftPageSize, setDraftPageSize] = useState(10);
   const [draftPagination, setDraftPagination] = useState<PaginationProps>({ totalPages: 1, totalRecords: 0 });
@@ -172,6 +202,27 @@ const Content = () => {
     pageSize: pageSize,
     currentPage: currentPage,
   });
+  const deleteDraftMutation = useDeleteJobDraft();
+  const [draftToDelete, setDraftToDelete] = useState<T_JobPostingDraft | null>(null);
+
+  const handleDeleteDraft = (draft: T_JobPostingDraft) => {
+    if (draft.id === 0) {
+      draftStorage.clear();
+      toast.custom(() => <CustomToast message='Local draft cleared.' type='success' />, { duration: 4000 });
+      setDraftToDelete(null);
+      return;
+    }
+    deleteDraftMutation.mutate(draft.id, {
+      onSuccess: () => {
+        toast.custom(() => <CustomToast message='Draft deleted successfully.' type='success' />, { duration: 4000 });
+        setDraftToDelete(null);
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err?.message || 'Failed to delete draft.'} type='error' />, { duration: 4000 });
+      },
+    });
+  };
+
   const { mutate: mutateStatus } = useUpdateJobPostStatus();
   const { mutate: mutateSalary } = useUpdateJobSalaryStatus();
   const { mutate: mutateRoles } = useUpdateJobRolesStatus();
@@ -1150,13 +1201,32 @@ const Content = () => {
                             {formatDateToLocal(draft.updated_at)}
                           </td>
                           <td className='px-3 py-4'>
-                            <button
-                              onClick={() => router.push(`/post-job?resumeDraftId=${draft.id}`)}
-                              className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
-                            >
-                              <PencilSquareIcon className='w-4 h-4' />
-                              Resume
-                            </button>
+                            <div className='flex items-center justify-center gap-2'>
+                              <button
+                                onClick={() => {
+                                  setAutoLoadDraftId(draft.id);
+                                  setScreeningQuestions([]);
+                                  setAutoRejectEnabled(false);
+                                  setIsVideoIntroEnabled(false);
+                                  setIsCreateJobModalOpen(true);
+                                }}
+                                className='inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-savoy-blue rounded-md hover:bg-savoy-blue/90 transition-colors'
+                              >
+                                <PencilSquareIcon className='w-4 h-4' />
+                                Resume
+                              </button>
+                              <button
+                                type='button'
+                                data-tooltip-id='draft-delete-tooltip'
+                                data-tooltip-content={draft.id === 0 ? 'Clear local draft' : 'Delete draft'}
+                                data-tooltip-place='top'
+                                onClick={() => setDraftToDelete(draft)}
+                                disabled={deleteDraftMutation.isLoading}
+                                className={`inline-flex items-center p-1.5 ${deleteDraftMutation.isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                <DeleteIcon />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1246,6 +1316,37 @@ const Content = () => {
           )}
         </div>
       </div>
+      {isCreateJobModalOpen && (
+        <CreateJobModal
+          isOpen={isCreateJobModalOpen}
+          setIsOpen={(open) => { if (!open) handleCloseCreateJobModal(); else setIsCreateJobModalOpen(true); }}
+          openConfirmSocialShareModal={openConfirmSocialShareModal}
+          pageNumber={pageNumber}
+          setPageNumber={setPageNumber}
+          isSalaryRangeModalOpen={isSalaryRangeModalOpen}
+          setIsSalaryRangeModalOpen={setIsSalaryRangeModalOpen}
+          isRangeBenefitsAdded={isRangeBenefitsAdded}
+          setIsRangeBenefitsAdded={setIsRangeBenefitsAdded}
+          combinedFormData={combinedFormData}
+          setCombinedFormData={setCombinedFormData}
+          fileProps={fileProps}
+          setFileProps={setFileProps}
+          screeningQuestions={screeningQuestions}
+          setScreeningQuestions={setScreeningQuestions}
+          autoRejectEnabled={autoRejectEnabled}
+          setAutoRejectEnabled={setAutoRejectEnabled}
+          isVideoIntroEnabled={isVideoIntroEnabled}
+          setIsVideoIntroEnabled={setIsVideoIntroEnabled}
+          firstForm={firstForm}
+          secondForm={secondForm}
+          thirdForm={thirdForm}
+          fourthForm={fourthForm}
+          fifthForm={fifthForm}
+          sixthForm={sixthForm}
+          seventhForm={seventhForm}
+          autoLoadDraftId={autoLoadDraftId}
+        />
+      )}
       <JobPreviewModal
         id={isJobPreviewOpen?.id ? isJobPreviewOpen?.id : null}
         jobPostHistoryItems={jobPostHistoryItems}
@@ -1352,6 +1453,17 @@ const Content = () => {
       <Tooltip id="duplicate-tooltip" />
       <Tooltip id="assign-tooltip" />
       <Tooltip id="fully-staffed-tooltip" />
+      <Tooltip id="draft-delete-tooltip" />
+
+      {draftToDelete && (
+        <DeleteModal<T_ModalData>
+          isOpen={{ id: draftToDelete.id, open: true }}
+          setIsOpen={() => setDraftToDelete(null)}
+          onConfirm={() => handleDeleteDraft(draftToDelete)}
+          isLoading={deleteDraftMutation.isLoading}
+          customText={draftToDelete.id === 0 ? 'this local draft' : `draft "${draftToDelete.job_title || 'Untitled Job'}"`}
+        />
+      )}
     </>
   );
 };

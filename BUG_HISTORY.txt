@@ -109,6 +109,104 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-022
+DATE FILED: 2026-05-29
+DATE FIXED: 2026-05-29
+REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+  Two related issues with the "Ask Hiyo" floating chat widget (FloatingHelpButton):
+
+  1. When an authenticated employer or applicant visited any public page (landing page,
+     /jobs, /pricing, etc.), the ABBA Chat widget was visible and initialized. This happened
+     because FloatingHelpButton was rendered in auth.tsx, which wraps ALL pages — it had no
+     route awareness and showed on every page as long as session.isLoggedIn was true.
+
+  2. The job-app-form page (/job-app-form/[id]) is a public page that unauthenticated users
+     visit to apply for jobs. There was no FloatingHelpButton support on this page at all —
+     unauthenticated visitors had no way to access the chat widget, and no anonymous user
+     identity was established for chat history continuity between visits.
+
+DESIRED OUTCOME:
+  - FloatingHelpButton is only visible on authenticated employer and applicant route pages
+    (employer dashboard/manage/etc., applicant personal-mode/profile/etc.).
+  - FloatingHelpButton is NOT visible on any public page (landing page, /jobs, /pricing,
+    etc.) even when the user is authenticated.
+  - The job-app-form page shows FloatingHelpButton for all visitors:
+    - Authenticated users: widget initializes with their real email as identity.
+    - Unauthenticated users: widget initializes with a persistent anonymous ID stored
+      in localStorage (anon_chat_id), so chat history is preserved across visits.
+  - Widget DOM elements are properly cleaned up when navigating away from job-app-form
+    to prevent the widget from persisting on unintended pages.
+
+FILES CHANGED:
+Frontend:
+- src/app/auth.tsx (removed FloatingHelpButton; passes isLoggedIn to Header)
+- src/app/header.tsx (renders FloatingHelpButton only on authenticated employer/applicant routes)
+- src/components/FloatingHelpButton.tsx (added anonymousMode prop + localStorage anon ID support + widget DOM cleanup on unmount)
+- src/components/pages/(un-auth)/apply-job-without-signup/job-app-form/Content.tsx (added FloatingHelpButton with anonymousMode=true)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Authenticated employer on /dashboard → widget visible ✓
+  - Authenticated applicant on /personal-mode → widget visible ✓
+  - Authenticated user on landing page (/) → widget NOT visible ✓
+  - Authenticated user on /jobs → widget NOT visible ✓
+  - Unauthenticated user on /job-app-form/[id] → widget visible with anon ID ✓
+  - Authenticated user on /job-app-form/[id] → widget visible with real email ✓
+  - Navigate away from /job-app-form → widget DOM removed ✓
+  - Return to /job-app-form → same anon_chat_id in localStorage (history preserved) ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  --- auth.tsx ---
+  Removed FloatingHelpButton import and rendering entirely. Replaced showHelpButton
+  logic with an isLoggedIn prop passed down to Header, so Header can use it alongside
+  its existing route awareness.
+
+  --- header.tsx ---
+  Imported FloatingHelpButton and added a single conditional render inside the
+  authenticated-route block:
+
+    {isLoggedIn && (
+      (type === 'employer' && employerRoutes.includes(firstRoute)) ||
+      (type === 'applicant' && isYahshuaConnectRoute)
+    ) && <FloatingHelpButton />}
+
+  This mirrors the exact same route conditions already used for MainHeader and
+  YahshuaConnectHeader, so the widget only appears where the authenticated headers
+  appear — never on public pages like the landing page, /jobs, or /pricing.
+
+  --- FloatingHelpButton.tsx ---
+  Added anonymousMode?: boolean prop. When anonymousMode=true:
+  - Fetches /api/get-session on mount.
+  - If logged in with email: uses real email as userId (same as normal mode).
+  - If not logged in: retrieves or generates a UUID stored in localStorage as
+    anon_chat_id, and uses anon-{uuid} as the userId.
+
+  Added widget DOM cleanup on unmount (only in anonymousMode): before AbbaChat.init()
+  is called, a Set snapshot of document.body.children is taken. After init resolves,
+  any newly added body elements are stored in a useRef. On component unmount, those
+  elements are removed from the DOM so the widget does not persist after navigating
+  away from the job-app-form page.
+
+  --- job-app-form/Content.tsx ---
+  Added <FloatingHelpButton anonymousMode={true} /> at the bottom of the JSX return,
+  ensuring the widget is always present on the job application form page for all users.
+
+================================================================================
+
 BUG ID: HRIS-2026-021
 DATE FILED: 2026-05-25
 DATE FIXED: 2026-05-25
