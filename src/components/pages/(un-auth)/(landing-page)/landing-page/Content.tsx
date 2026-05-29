@@ -9,8 +9,8 @@ import LpComplianceTrust from "./components/LpComplianceTrust";
 import LpComparisonTable from "./components/LpComparisonTable";
 import LpFAQ from "./components/LpFAQ";
 import LpFinalCTA from "./components/LpFinalCTA";
-import ScrollFadeIn from "./components/ScrollFadeIn";
 import LpScrollZoom from "./components/LpScrollZoom";
+import ScrollFadeIn from "./components/ScrollFadeIn";
 
 const Content = () => {
   return (
@@ -27,7 +27,6 @@ const Content = () => {
         <ScrollFadeIn duration={800} delay={50}> <LpFAQ /> </ScrollFadeIn>
         <ScrollFadeIn duration={800} delay={50}> <LpFinalCTA /> </ScrollFadeIn>
       </LpScrollZoom>
-
     </div>
   );
 };

@@ -71,14 +71,14 @@ const LpFeaturesContent = () => {
   };
 
   return (
-    <div style={{ background: 'hsl(var(--lp-page))' }}>
+    <div style={{ background: 'hsl(222, 60%, 4%)' }}>
       <main className="min-h-screen pt-16">
 
         {/* ── Hero ── */}
         <section className="relative pt-28 pb-20 lp-dot-grid lp-hero-glow overflow-hidden">
           <div
             className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
-            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--lp-page)))' }}
+            style={{ background: 'linear-gradient(to bottom, transparent, hsl(222, 60%, 4%))' }}
           />
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
