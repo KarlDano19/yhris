@@ -41,7 +41,7 @@ export type QuickAccessCatalogItem = {
 export const QUICK_ACCESS_CATALOG: QuickAccessCatalogItem[] = [
   // Post a Job
   { id: 'post-job-create', label: 'Create a Job', url: '/post-job?create=true', parentModule: 'Post a Job', permissionId: 'post-job-page', iconComponent: CreateJobLogo },
-  { id: 'post-job-history', label: 'Job Posting History', url: '/post-job/job-posting-history', parentModule: 'Post a Job', permissionId: 'post-job-page', iconComponent: JobPostingHistory },
+  { id: 'post-job-history', label: 'Job Posting History', url: '/post-job', parentModule: 'Post a Job', permissionId: 'post-job-page', iconComponent: JobPostingHistory },
 
   // Talent Search
   { id: 'talent-search-email-history', label: 'Email History', url: '/talent-search/email-history', parentModule: 'Talent Search', permissionId: 'talent-search-page', iconComponent: EnvelopeIcon },
