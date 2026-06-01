@@ -218,7 +218,7 @@ const Content = ({ loginType, hasActiveSubscription }: { loginType: string, hasA
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <BackButton label="General Settings" />
+          <BackButton label="General Settings" href="/settings/general-settings" />
         </div>
         <div className='pl-4 md:pl-10 mb-5'>
           <div className='flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between'>

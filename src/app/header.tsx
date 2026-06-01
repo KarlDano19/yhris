@@ -6,17 +6,19 @@ import MainHeader from '@/components/pages/(auth)/employer/MainHeader';
 import UnauthorizedHeader from '@/components/pages/(un-auth)/UnauthorizedHeader';
 // import AuthorizedHeader from '@/components/pages/(auth)/applicant/AuthorizedHeader'; // Commented out for rollback - replaced with YahshuaConnectHeader
 import YahshuaConnectHeader from '@/components/pages/(auth)/yahshua-connect/YahshuaConnectHeader';
-import Navigation from '@/components/pages/(un-auth)/landing-page/Navigation';
+import Navigation from '@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation';
 import AdminHeader from '@/components/pages/(auth)/admin/AdminHeader';
+import FloatingHelpButton from '@/components/FloatingHelpButton';
 
 interface HeaderProps {
   type: string;
   hasProfile: boolean;
   hasActiveSubscription: boolean;
   tokenExpiresAt?: number;
+  isLoggedIn?: boolean;
 }
 
-function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: HeaderProps) {
+function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt, isLoggedIn }: HeaderProps) {
   const pathname = usePathname();
   const listPathname = pathname?.split('/') || [];
   const slicePaths = listPathname.slice(1);
@@ -82,12 +84,16 @@ function Header({ type, hasProfile, hasActiveSubscription, tokenExpiresAt }: Hea
           )}
           {/* Yahshua Connect Header - for personal-mode and business-mode routes */}
           {type === 'applicant' && isYahshuaConnectRoute && (
-            <YahshuaConnectHeader 
+            <YahshuaConnectHeader
               disabled={isSetupProfileRoute}
               hasProfile={hasProfile}
               initialTokenExpiresAt={tokenExpiresAt}
             />
           )}
+          {isLoggedIn && (
+            (type === 'employer' && employerRoutes.includes(firstRoute)) ||
+            (type === 'applicant' && isYahshuaConnectRoute)
+          ) && <FloatingHelpButton />}
           {/* Old Applicant Header - commented out for rollback option */}
           {/* {type === 'applicant' && applicantRoutes.includes(firstRoute) && (
             <AuthorizedHeader

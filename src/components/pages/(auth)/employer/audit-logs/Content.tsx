@@ -13,7 +13,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
         <div className='flex p-4'>
-          <BackButton label="Dashboard" />
+          <BackButton label="Dashboard" href="/dashboard" />
         </div>
 
         <div className='pl-4 md:pl-10 mb-5'>

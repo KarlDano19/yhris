@@ -1,21 +1,37 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Commented out old chat widget imports
 // import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
 // import ChatBubbleIcon from '@/svg/ChatBubbleIcon';
 
-const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
+const FloatingHelpButton = ({
+  companyName,
+  anonymousMode,
+}: {
+  companyName?: string;
+  anonymousMode?: boolean;
+}) => {
   const [userEmail, setUserEmail] = useState<string>('');
+  const widgetNodesRef = useRef<Element[]>([]);
 
   useEffect(() => {
-    // Fetch user session data to get email
     const fetchUserSession = async () => {
       try {
         const response = await fetch('/api/get-session');
         if (response.ok) {
           const sessionData = await response.json();
-          setUserEmail(sessionData.email);
+          if (sessionData.isLoggedIn && sessionData.email) {
+            setUserEmail(sessionData.email);
+          } else if (anonymousMode) {
+            // Not logged in (or token expired) — use a persistent localStorage anonymous ID
+            let anonId = localStorage.getItem('anon_chat_id');
+            if (!anonId) {
+              anonId = crypto.randomUUID();
+              localStorage.setItem('anon_chat_id', anonId);
+            }
+            setUserEmail(`anon-${anonId}`);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch session data:', error);
@@ -23,9 +39,15 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
     };
 
     fetchUserSession();
-  }, []);
+  }, [anonymousMode]);
 
   useEffect(() => {
+    // Do not initialize the widget until we have confirmed the user's email.
+    // Without this guard, the widget initializes with userId='user-unknown'
+    // before the session fetch completes, causing all pre-fetch sessions to
+    // share a single chat thread.
+    if (!userEmail) return;
+
     const CONVEX_URL = 'https://dapper-bear-214.convex.cloud';
     const PRODUCT_NAME = 'YAHSHUA HRIS Subscription - Main';
     const SESSION_TOKEN = "abba_7fa92d99-a329-4cb9-a123-47e1e81308e1";
@@ -39,6 +61,8 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
           ? 'user-' + userEmail.replace(/[^a-zA-Z0-9]/g, '-')
           : 'user-' + company.replace(/\s+/g, '-').toLowerCase();
 
+        const bodySnapshot = new Set(document.body.children);
+
         (window as any).AbbaChat.init({
           clientId: company,
           userId: userId,
@@ -47,7 +71,10 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
           productId: PRODUCT_NAME,
           convexUrl: CONVEX_URL,
         })
-          .then(() => console.log(`[${PRODUCT_NAME}] Widget initialized successfully!`))
+          .then(() => {
+            widgetNodesRef.current = Array.from(document.body.children).filter(el => !bodySnapshot.has(el));
+            console.log(`[${PRODUCT_NAME}] Widget initialized successfully!`);
+          })
           .catch((error: any) => console.error(`[${PRODUCT_NAME}] Widget initialization failed:`, error));
       } catch (error) {
         console.error(`[${PRODUCT_NAME}] Widget initialization error:`, error);
@@ -71,6 +98,10 @@ const FloatingHelpButton = ({ companyName }: { companyName?: string }) => {
     }
 
     return () => {
+      if (anonymousMode) {
+        widgetNodesRef.current.forEach(el => el.parentNode?.removeChild(el));
+        widgetNodesRef.current = [];
+      }
       if (injected && script) {
         document.head.removeChild(script);
       }

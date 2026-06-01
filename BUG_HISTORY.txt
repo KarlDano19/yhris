@@ -109,6 +109,373 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-022
+DATE FILED: 2026-05-29
+DATE FIXED: 2026-05-29
+REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+  Two related issues with the "Ask Hiyo" floating chat widget (FloatingHelpButton):
+
+  1. When an authenticated employer or applicant visited any public page (landing page,
+     /jobs, /pricing, etc.), the ABBA Chat widget was visible and initialized. This happened
+     because FloatingHelpButton was rendered in auth.tsx, which wraps ALL pages — it had no
+     route awareness and showed on every page as long as session.isLoggedIn was true.
+
+  2. The job-app-form page (/job-app-form/[id]) is a public page that unauthenticated users
+     visit to apply for jobs. There was no FloatingHelpButton support on this page at all —
+     unauthenticated visitors had no way to access the chat widget, and no anonymous user
+     identity was established for chat history continuity between visits.
+
+DESIRED OUTCOME:
+  - FloatingHelpButton is only visible on authenticated employer and applicant route pages
+    (employer dashboard/manage/etc., applicant personal-mode/profile/etc.).
+  - FloatingHelpButton is NOT visible on any public page (landing page, /jobs, /pricing,
+    etc.) even when the user is authenticated.
+  - The job-app-form page shows FloatingHelpButton for all visitors:
+    - Authenticated users: widget initializes with their real email as identity.
+    - Unauthenticated users: widget initializes with a persistent anonymous ID stored
+      in localStorage (anon_chat_id), so chat history is preserved across visits.
+  - Widget DOM elements are properly cleaned up when navigating away from job-app-form
+    to prevent the widget from persisting on unintended pages.
+
+FILES CHANGED:
+Frontend:
+- src/app/auth.tsx (removed FloatingHelpButton; passes isLoggedIn to Header)
+- src/app/header.tsx (renders FloatingHelpButton only on authenticated employer/applicant routes)
+- src/components/FloatingHelpButton.tsx (added anonymousMode prop + localStorage anon ID support + widget DOM cleanup on unmount)
+- src/components/pages/(un-auth)/apply-job-without-signup/job-app-form/Content.tsx (added FloatingHelpButton with anonymousMode=true)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Authenticated employer on /dashboard → widget visible ✓
+  - Authenticated applicant on /personal-mode → widget visible ✓
+  - Authenticated user on landing page (/) → widget NOT visible ✓
+  - Authenticated user on /jobs → widget NOT visible ✓
+  - Unauthenticated user on /job-app-form/[id] → widget visible with anon ID ✓
+  - Authenticated user on /job-app-form/[id] → widget visible with real email ✓
+  - Navigate away from /job-app-form → widget DOM removed ✓
+  - Return to /job-app-form → same anon_chat_id in localStorage (history preserved) ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  --- auth.tsx ---
+  Removed FloatingHelpButton import and rendering entirely. Replaced showHelpButton
+  logic with an isLoggedIn prop passed down to Header, so Header can use it alongside
+  its existing route awareness.
+
+  --- header.tsx ---
+  Imported FloatingHelpButton and added a single conditional render inside the
+  authenticated-route block:
+
+    {isLoggedIn && (
+      (type === 'employer' && employerRoutes.includes(firstRoute)) ||
+      (type === 'applicant' && isYahshuaConnectRoute)
+    ) && <FloatingHelpButton />}
+
+  This mirrors the exact same route conditions already used for MainHeader and
+  YahshuaConnectHeader, so the widget only appears where the authenticated headers
+  appear — never on public pages like the landing page, /jobs, or /pricing.
+
+  --- FloatingHelpButton.tsx ---
+  Added anonymousMode?: boolean prop. When anonymousMode=true:
+  - Fetches /api/get-session on mount.
+  - If logged in with email: uses real email as userId (same as normal mode).
+  - If not logged in: retrieves or generates a UUID stored in localStorage as
+    anon_chat_id, and uses anon-{uuid} as the userId.
+
+  Added widget DOM cleanup on unmount (only in anonymousMode): before AbbaChat.init()
+  is called, a Set snapshot of document.body.children is taken. After init resolves,
+  any newly added body elements are stored in a useRef. On component unmount, those
+  elements are removed from the DOM so the widget does not persist after navigating
+  away from the job-app-form page.
+
+  --- job-app-form/Content.tsx ---
+  Added <FloatingHelpButton anonymousMode={true} /> at the bottom of the JSX return,
+  ensuring the widget is always present on the job application form page for all users.
+
+================================================================================
+
+BUG ID: HRIS-2026-021
+DATE FILED: 2026-05-25
+DATE FIXED: 2026-05-25
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  When an applicant applies through the un-authenticated job application form
+  (apply-job-without-signup), the birthday field appeared required in the form —
+  showing a "Please fill out this field" browser tooltip when left completely empty.
+  However, certain applicants were still saved to the database with a null birthday
+  despite the field being required.
+
+  The bug was triggered by typing a partial date (e.g., "01/15/" or "01/15/202")
+  into the birthday input instead of selecting a date from the calendar picker.
+  When a partial date is typed:
+
+  1. The CustomDatePicker's internal input is no longer empty, so the browser's
+     HTML `required` validation passes silently (no tooltip shown, no block).
+  2. The CustomDatePicker's `isGoodDate()` regex fails on the partial value, so
+     neither `pickerOnChange` nor `inputOnChange` is called — the RHF form field
+     `birth_date` remains `undefined`.
+  3. Because `birth_date` was never registered via `register()`, React Hook Form
+     had no validation rule for it. `handleSubmit` fired successfully.
+  4. `profileSubmit` received `data.birth_date = undefined`.
+     `JSON.stringify` silently drops `undefined` keys, so no `birth_date` key
+     was included in the API payload.
+  5. The backend received no value and stored `null`.
+
+  A secondary bug also existed for draft restoration: `profileSubmit` called
+  `data.birth_date.toLocaleDateString('en-CA')` directly, which crashes with
+  `TypeError` when a draft restores `birth_date` as an ISO string rather than
+  a `Date` object.
+
+DESIRED OUTCOME:
+  - If a user types a partial date and clicks NEXT, the form should block
+    submission and show a validation error (the birthday field is required).
+  - If a user picks a valid date from the calendar, the form proceeds normally.
+  - Draft restoration should not crash — a previously saved ISO string birthday
+    should be accepted and converted correctly on submit.
+  - Future dates should not be selectable on the birthday picker.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(un-auth)/apply-job-without-signup/job-app-form/ProfileTab.tsx
+- src/components/CustomDatePicker.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Partial date typed → NEXT blocked, "Birth date is required." error shown ✓
+  - Letters/symbols typed into date input → blocked at keydown, not accepted ✓
+  - Valid date picked from calendar → error clears, form proceeds ✓
+  - Empty field → RHF required validation blocks submission ✓
+  - Draft restored with string birthday → no crash, submits correctly ✓
+  - Future dates disabled in calendar picker ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  The final fix spans two files and went through several iterations to correctly
+  display a validation error to the user.
+
+  --- ProfileTab.tsx (un-auth job application form) ---
+
+  1. Registered `birth_date` with React Hook Form:
+     Added `<input type='hidden' {...register('birth_date', { required: true })} />`
+     below the CustomDatePicker. This gives RHF a real validation rule for the field.
+     A partial date that never calls `setValue` leaves the registered value empty,
+     causing RHF to block `handleSubmit` with a validation error. Added
+     `shouldValidate: true` to every `setValue('birth_date', ...)` call so RHF
+     clears the error immediately when a valid date is picked.
+
+  2. Added `birthDateError` local state + `onInvalid` callback for reliable error display:
+     RHF's `formState.errors` uses a Proxy subscription — only the component that
+     reads `.errors` during its own render is subscribed to re-renders when errors
+     change. Passing `formState` or `errors` as a prop from Content.tsx to ProfileTab
+     does not establish that subscription in Content.tsx, so the parent never
+     re-rendered and the prop value remained stale.
+     Solution: removed all prop-threading of `formState`/`errors`. Instead, used the
+     two-argument form of `handleSubmit`:
+       handleSubmit(onValid, onInvalid)
+     The `onInvalid` callback fires inside ProfileTab itself when validation fails,
+     setting a local `birthDateError` state boolean that triggers ProfileTab's own
+     re-render — fully self-contained with no cross-component Proxy issues.
+
+  3. Fixed `profileSubmit` to handle both Date objects and strings:
+     Before:
+       birth_date: data.birth_date ? data.birth_date.toLocaleDateString('en-CA') : undefined
+     After:
+       const d = data.birth_date instanceof Date
+         ? data.birth_date
+         : new Date(data.birth_date + 'T00:00:00');
+       formattedBirthDate = !isNaN(d.getTime()) ? d.toLocaleDateString('en-CA') : undefined;
+     Handles draft restoration where `birth_date` is an ISO string, and guards
+     against malformed values with the `isNaN` check.
+
+  4. Fixed the `selected` prop on CustomDatePicker to normalize the watched value:
+     Before: `selected={watch('birth_date') || null}` — passes raw string to
+     react-datepicker which cannot handle it.
+     After: inline IIFE that checks `instanceof Date`, parses strings via
+     `new Date(val + 'T00:00:00')`, and returns null on invalid values.
+     Also added `maxDate={new Date()}` to prevent future date selection.
+
+  --- CustomDatePicker.tsx (shared component, affects all date pickers app-wide) ---
+
+  5. Restricted text input to date characters only:
+     The `CustomInput` component inside CustomDatePicker had no input restriction —
+     any characters (letters, symbols, etc.) could be typed freely. A user typing
+     "helloworld" would leave a non-empty input that bypasses browser `required`
+     validation while still failing `isGoodDate()`, producing the same null-birthday
+     bypass as a partial date.
+     Fixed by adding an `onKeyDown` handler that calls `e.preventDefault()` for
+     any key that is not a digit (0–9), a forward slash (/), or a navigation/edit
+     key (Backspace, Delete, ArrowLeft, ArrowRight, Tab). This change applies to
+     every CustomDatePicker instance in the application.
+
+================================================================================
+
+BUG ID: HRIS-2026-020
+DATE FILED: 2026-05-25
+DATE FIXED: 2026-05-25
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  In the Screen Applicants Checklist modal, selecting "Withdrawn" (or any non-passed
+  status other than "Rejected" and "For Pooling") and clicking "Save Changes" did
+  nothing — the modal appeared to submit but the applicant's status was never updated.
+
+  Root cause: `handleSubmitAsync` in Checklist.tsx contained an unconditional stage
+  approval gate immediately after the rejected/pooling interception block:
+
+    const stageApproval = getCurrentStageApproval();
+    if (!stageApproval?.signature && !stageApproval?.is_skipped) {
+      return;  // silent early-return
+    }
+
+  This check was intended only to block saving a "Passed" status without a completed
+  stage approval. However, because it was not guarded by a status check, it also
+  silently blocked saving for "Withdrawn" and "Ongoing" — statuses that have no
+  associated approval signature. The function returned early with no toast, no error,
+  and no API call, making the save button appear broken.
+
+DESIRED OUTCOME:
+  Selecting "Withdrawn" (or any valid status) and clicking "Save Changes" should
+  immediately call the update API and update the applicant's status. The stage
+  approval gate should only block saving when the status is "Passed" and no
+  approval signature has been provided.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/screen-applicants/[id]/modals/Checklist.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual) — Withdrawn status saves successfully; Passed status
+  without approval still blocked; Rejected/Pooling confirmation modals unaffected
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified "Withdrawn" saves and updates applicant status in the kanban board
+  - Verified "Ongoing" saves without requiring approval
+  - Verified "Passed" without a stage approval is still blocked (silent return)
+  - Verified "Rejected" still triggers the RejectConfirmationModal
+  - Verified "For Pooling" still triggers the PoolingConfirmationModal
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  Added a `data.status === 'passed'` condition to the approval gate in
+  `handleSubmitAsync` (Checklist.tsx line ~413):
+
+    Before:
+      const stageApproval = getCurrentStageApproval();
+      if (!stageApproval?.signature && !stageApproval?.is_skipped) {
+        return;
+      }
+
+    After:
+      const stageApproval = getCurrentStageApproval();
+      if (data.status === 'passed' && !stageApproval?.signature && !stageApproval?.is_skipped) {
+        return;
+      }
+
+  The gate now only fires when the submitted status is "passed". All other statuses
+  (withdrawn, ongoing) skip the approval check and proceed directly to the
+  `handleFormSubmit` call. The existing rejected and pooling interception blocks
+  above this line are unaffected.
+
+================================================================================
+
+BUG ID: HRIS-2026-019
+DATE FILED: 2026-05-23
+DATE FIXED: 2026-05-23
+REPORTER: Internal - HR
+
+ISSUE DESCRIPTION:
+  The "Ask Hiyo" floating chat widget (FloatingHelpButton) was imported and
+  rendered individually across 7 separate files — including three unauthenticated
+  pages (login, register, yg-login) and the UnauthorizedHeader component. This
+  caused the ABBA Chat widget script to load and initialize on public-facing pages
+  where no user session exists, resulting in wasted network requests and potential
+  widget initialization with anonymous/unknown identity. The applicant layout and
+  employer MainHeader also each imported it independently, creating fragmented
+  maintenance overhead and risk of the widget appearing or not appearing
+  inconsistently as pages are added.
+
+DESIRED OUTCOME:
+  The "Ask Hiyo" widget should only appear on authenticated pages (i.e., when
+  a user is logged in). It should be imported once in a single location that
+  naturally wraps all authenticated routes, so no individual page or component
+  needs to manage it.
+
+FILES CHANGED:
+Frontend:
+- src/app/auth.tsx (added FloatingHelpButton, gated on session.isLoggedIn)
+- src/components/pages/(auth)/employer/MainHeader.tsx (removed import + usage)
+- src/components/pages/(auth)/admin/Content.tsx (removed import + commented usage)
+- src/components/pages/(un-auth)/UnauthorizedHeader.tsx (removed import + usage)
+- src/components/pages/(all-layout)/login/Content.tsx (removed import + 2 usages)
+- src/components/pages/(all-layout)/register/Content.tsx (removed import + 2 usages)
+- src/components/pages/(all-layout)/yg-login/Content.tsx (removed import + usage)
+- src/app/(auth)/(applicant)/(yahshua-connect)/layout.tsx (removed import + usage)
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only change
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual) — widget loads on authenticated pages, absent on login/register
+
+Integration & E2E:
+☑ Manual regression testing completed
+  - Verified "Ask Hiyo" button appears after login (employer, applicant, admin)
+  - Verified "Ask Hiyo" button is absent on /login, /register, /yg-login
+  - Verified "Ask Hiyo" button is absent on UnauthorizedHeader public pages
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  auth.tsx is a Next.js server component that wraps every page in the app and
+  already reads the iron-session to determine if the user is logged in. A single
+  `{session.isLoggedIn && <FloatingHelpButton />}` render was added there,
+  replacing all 7 individual imports. The FloatingHelpButton component itself
+  (a client component that injects the ABBA Chat script) is unchanged — it still
+  fetches the user's email client-side via /api/get-session for widget identity.
+  The `companyName` prop previously passed from MainHeader (employer profile name)
+  is no longer passed; the widget falls back to 'Unknown' as clientId, which is
+  acceptable since the primary identity is the user email.
+
+================================================================================
+
 BUG ID: HRIS-2026-018
 DATE FILED: 2026-04-30
 DATE FIXED: 2026-04-30

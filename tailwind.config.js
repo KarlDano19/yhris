@@ -25,9 +25,26 @@ module.exports = {
         ...colors,
         "indigo-dye": "#2C3F58",
         "savoy-blue": "#355FD0",
+        // Landing page design system
+        navy: "hsl(var(--lp-navy))",
+        "lp-blue": "hsl(var(--lp-blue))",
+        warm: "hsl(var(--lp-warm-bg))",
+        primary: {
+          DEFAULT: "hsl(var(--lp-primary))",
+          foreground: "hsl(var(--lp-primary-foreground))",
+        },
+        "lp-muted": {
+          DEFAULT: "hsl(var(--lp-muted))",
+          foreground: "hsl(var(--lp-muted-foreground))",
+        },
+        "lp-card": "hsl(var(--lp-card))",
+        "lp-border": "hsl(var(--lp-border))",
       },
       width: {
         94: "22.2rem",
+      },
+      borderRadius: {
+        lp: "0.625rem",
       },
     },
   },
