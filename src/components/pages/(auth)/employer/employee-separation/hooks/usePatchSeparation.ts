@@ -69,6 +69,13 @@ async function sendSeparationEmail(separationEmail: T_SeparationEmail) {
           data.attachment = separationEmail.quitClaim.attachment;
         }
       }
+      if (separationEmail.emailType === 'legal docs') {
+        data.subject = separationEmail.legalDocs.subject;
+        data.to = separationEmail.legalDocs.to;
+        data.cc = separationEmail.legalDocs.cc;
+        data.bcc = separationEmail.legalDocs.bcc;
+        data.context = separationEmail.legalDocs.message;
+      }
     } else {
       data = {
         type_of_action: separationEmail.actionType,
