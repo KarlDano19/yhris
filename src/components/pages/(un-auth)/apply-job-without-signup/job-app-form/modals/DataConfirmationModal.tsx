@@ -1,26 +1,51 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-import { DocumentTextIcon, XCircleIcon } from '@heroicons/react/24/solid';
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { Tooltip } from 'react-tooltip';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+
+import PrivacyModaPagelOne from './ModalPages/PrivacyModaPagelOne';
+import PrivacyModalPageTwo from './ModalPages/PrivacyModalPageTwo';
+import PrivacyModalPageThree from './ModalPages/PrivacyModalPageThree';
+import PrivacyModalPageFive from './ModalPages/PrivacyModalPageFive';
+import PrivacyModalPageSix from './ModalPages/PrivacyModalPageSix';
 
 interface DataConfirmationModalProps {
   open: boolean;
   onClose: (isConfirmed: boolean) => void;
 }
 
-const PRIVACY_STATEMENT_URL = '/privacy-notice';
+const ProgressBar = ({ currentPage, totalPages }: { currentPage: number; totalPages: number }) => {
+  const percentage = Math.round((currentPage / totalPages) * 100);
+
+  return (
+    <div className='w-full bg-gray-200 rounded-lg'>
+      <div className='h-4 bg-gray-200 rounded-lg relative'>
+        <div
+          className='absolute inset-0 bg-green-500 rounded-lg'
+          style={{ width: `${percentage}%` }}
+        />
+        <div className='absolute text-xs inset-0 flex items-center justify-center text-black font-bold'>
+          {percentage}%
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) => {
-  const [hasViewed, setHasViewed] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  useEffect(() => {
+    if (open) {
+      setPageNumber(1);
+    }
+  }, [open]);
 
   const handleClose = () => {
     onClose(true);
   };
 
   const handleCancel = () => {
-    setHasViewed(false);
     onClose(false);
   };
 
@@ -51,67 +76,34 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md'>
-                {/* Header */}
-                <div className='flex items-start p-2 px-6 mb-4'>
-                  <h3 className='flex-1 text-[#2C3F58] text-xl font-semibold text-center pr-4'>
-                    YAHSHUA-ABBA Privacy Statement for Web App
-                  </h3>
-                  <XCircleIcon
-                    className='w-[19px] h-[19px] text-[#ACB9CB] cursor-pointer mt-1 flex-shrink-0'
-                    onClick={handleCancel}
-                  />
+                <div className='mb-4'>
+                  <div className='flex p-2'>
+                    <h3 className='flex-1 text-[#2C3F58] text-xl px-4 mb-4 font-semibold text-center'>
+                      YAHSHUA-ABBA Privacy Statement for Web App
+                    </h3>
+                    <XCircleIcon
+                      className='w-[19px] h-[19px] text-[#ACB9CB] cursor-pointer mt-1'
+                      onClick={handleCancel}
+                    />
+                  </div>
+                  <div className='px-6'>
+                    <ProgressBar currentPage={pageNumber} totalPages={5} />
+                  </div>
                 </div>
-
-                {/* Body */}
-                <div className='px-6 pb-6 space-y-4'>
-                  <p className='text-sm text-gray-600 text-center'>
-                    Please review the YAHSHUA-ABBA Privacy Statement before submitting your
-                    application.
-                  </p>
-
-                  {/* Clickable file link */}
-                  <a
-                    href={PRIVACY_STATEMENT_URL}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    onClick={() => setHasViewed(true)}
-                    className='flex items-center gap-3 rounded-lg border border-savoy-blue bg-[#EBF3FF] px-4 py-3.5 hover:bg-blue-100 transition-colors group'
-                  >
-                    <DocumentTextIcon className='h-8 w-8 text-savoy-blue flex-shrink-0' />
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-semibold text-savoy-blue truncate'>
-                        YAHSHUA-ABBA Privacy Statement for Web App
-                      </p>
-                      <p className='text-xs text-gray-500 mt-0.5'>Click to view privacy notice</p>
-                    </div>
-                    <ArrowTopRightOnSquareIcon className='h-5 w-5 text-savoy-blue flex-shrink-0 group-hover:scale-110 transition-transform' />
-                  </a>
-
-                  <p className='text-xs text-gray-500 text-center'>
-                    By clicking <strong>I Agree</strong>, you confirm that you have read and
-                    understood the YAHSHUA-ABBA Privacy Statement and consent to the processing
-                    of your personal data for the purposes described therein.
-                  </p>
+                <div style={{ display: pageNumber === 1 ? 'block' : 'none' }}>
+                  <PrivacyModaPagelOne setPageNumber={setPageNumber} handleNext={() => setPageNumber(2)} />
                 </div>
-
-                {/* Footer */}
-                <div className='bg-[#EBF3FF] py-4 flex justify-center'>
-                  <span
-                    data-tooltip-id='agree-btn-tooltip'
-                    data-tooltip-content={!hasViewed ? 'Please click the privacy notice link above first' : undefined}
-                    data-tooltip-place='top'
-                    className='w-1/2'
-                  >
-                    <button
-                      type='button'
-                      onClick={handleClose}
-                      disabled={!hasViewed}
-                      className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed bg-savoy-blue hover:bg-indigo-500'
-                    >
-                      I Agree
-                    </button>
-                  </span>
-                  <Tooltip id='agree-btn-tooltip' />
+                <div style={{ display: pageNumber === 2 ? 'block' : 'none' }}>
+                  <PrivacyModalPageTwo setPageNumber={setPageNumber} handleNext={() => setPageNumber(3)} />
+                </div>
+                <div style={{ display: pageNumber === 3 ? 'block' : 'none' }}>
+                  <PrivacyModalPageThree setPageNumber={setPageNumber} handleNext={() => setPageNumber(4)} />
+                </div>
+                <div style={{ display: pageNumber === 4 ? 'block' : 'none' }}>
+                  <PrivacyModalPageFive setPageNumber={setPageNumber} handleNext={() => setPageNumber(5)} />
+                </div>
+                <div style={{ display: pageNumber === 5 ? 'block' : 'none' }}>
+                  <PrivacyModalPageSix setPageNumber={setPageNumber} handleNext={handleClose} />
                 </div>
               </Dialog.Panel>
             </Transition.Child>
