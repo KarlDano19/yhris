@@ -55,7 +55,7 @@ const CaseDetailContent = ({ id, hasActiveSubscription }: Props) => {
   const [isLetterModalOpen, setIsLetterModalOpen] = useState<T_LetterModal | null>(null);
   const [isDocumentModalOpen, setIsDocumentModalOpen] = useState<T_DocumentsModal | null>(null);
   const [isLastPayModalOpen, setIsLastPayModalOpen] = useState<T_LastPayModal | null>(null);
-  const [isLegalDocsModalOpen, setIsLegalDocsModalOpen] = useState<{ id: string } | null>(null);
+  const [isLegalDocsModalOpen, setIsLegalDocsModalOpen] = useState<{ id: number } | null>(null);
   const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
   const [renderingTasksBlocked, setRenderingTasksBlocked] = useState(true);
   const [clearanceTasksBlocked, setClearanceTasksBlocked] = useState(true);
