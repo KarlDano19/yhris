@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 
@@ -56,23 +56,23 @@ const comparisonRows = [
 
 const CompetitorsContent = () => {
   return (
-    <div style={{ background: "hsl(222, 60%, 4%)" }}>
+    <div style={{ background: "#ffffff" }}>
         <main className="min-h-screen pt-16">
 
           {/* Hero */}
           <section className="pt-28 pb-20 relative overflow-hidden lp-dot-grid-light lp-hero-glow">
             <div
               className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, hsl(222, 60%, 4%))" }}
+              style={{ background: "linear-gradient(to bottom, transparent, #ffffff)" }}
             />
             <div className="lp-section-container relative z-10 text-center">
               <ScrollFadeIn>
                 <span className="lp-section-label justify-center mb-5">HOW WE COMPARE</span>
-                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-white mb-5 tracking-tight">
+                <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                   YAHSHUA HRIS<br className="hidden md:inline" />
                   <span className="text-primary"> vs the competition.</span>
                 </h1>
-                <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed mb-10">
+                <p className="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
                   Built for Philippine businesses with DOLE compliance, multi-channel recruiting, and complete automation from hiring to offboarding.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -83,7 +83,7 @@ const CompetitorsContent = () => {
                     href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="lp-btn-ghost gap-2"
+                    className="lp-btn-ghost-dark gap-2"
                   >
                     Book a Demo <ArrowUpRight className="w-4 h-4" />
                   </Link>
@@ -93,12 +93,12 @@ const CompetitorsContent = () => {
           </section>
 
           {/* Value Props */}
-          <section className="py-20 md:py-28">
+          <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
             <div className="lp-section-container">
               <ScrollFadeIn>
                 <div className="max-w-2xl mb-14">
                   <span className="lp-section-label mb-5">WHY YAHSHUA HRIS</span>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
                     Every HR workflow, built for the Philippine market.
                   </h2>
                 </div>
@@ -106,9 +106,9 @@ const CompetitorsContent = () => {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {valueProps.map((vp, i) => (
                   <ScrollFadeIn key={vp.title} delay={i * 60}>
-                    <div className="lp-dark-card p-7 h-full flex flex-col">
-                      <h3 className="text-base font-bold text-white mb-3">{vp.title}</h3>
-                      <p className="text-sm text-white/45 leading-relaxed mb-5 flex-1">{vp.body}</p>
+                    <div className="lp-light-card p-7 h-full flex flex-col">
+                      <h3 className="text-base font-bold text-gray-900 mb-3">{vp.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed mb-5 flex-1">{vp.body}</p>
                       <p className="text-xs font-semibold text-primary">{vp.metric}</p>
                     </div>
                   </ScrollFadeIn>
@@ -118,34 +118,34 @@ const CompetitorsContent = () => {
           </section>
 
           {/* Comparison Table */}
-          <section className="py-20 md:py-28" style={{ background: "hsl(var(--lp-surface))" }}>
+          <section className="py-20 md:py-28" style={{ background: "#ffffff" }}>
             <div className="lp-section-container">
               <ScrollFadeIn>
                 <div className="text-center mb-14">
                   <span className="lp-section-label justify-center mb-5">FEATURE COMPARISON</span>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
                     Feature by feature.
                   </h2>
                 </div>
               </ScrollFadeIn>
               <ScrollFadeIn delay={100}>
-                <div className="rounded-xl overflow-hidden max-w-3xl mx-auto" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="rounded-xl overflow-hidden max-w-3xl mx-auto" style={{ border: "1px solid rgba(255,193,7,0.25)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
                   {/* Header row */}
-                  <div className="grid grid-cols-3 px-6 py-4" style={{ background: "hsl(var(--lp-surface-2))", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-white/30">Feature</span>
+                  <div className="grid grid-cols-3 px-6 py-4" style={{ background: "rgba(255,193,7,0.08)", borderBottom: "1px solid rgba(255,193,7,0.15)" }}>
+                    <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Feature</span>
                     <span className="text-xs font-semibold uppercase tracking-widest text-primary text-center">YAHSHUA HRIS</span>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-white/30 text-center">Competitors</span>
+                    <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 text-center">Competitors</span>
                   </div>
                   {comparisonRows.map((row, i) => (
                     <div
                       key={row.feature}
                       className="grid grid-cols-3 px-6 py-4 items-center"
                       style={{
-                        background: i % 2 === 0 ? "hsl(var(--lp-surface))" : "hsl(var(--lp-surface-2))",
-                        borderBottom: i < comparisonRows.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                        background: i % 2 === 0 ? "#ffffff" : "rgba(255,250,235,0.6)",
+                        borderBottom: i < comparisonRows.length - 1 ? "1px solid rgba(255,193,7,0.1)" : "none",
                       }}
                     >
-                      <span className="text-sm text-white/70">{row.feature}</span>
+                      <span className="text-sm text-gray-700">{row.feature}</span>
                       <div className="flex justify-center">
                         {row.yahshua ? (
                           <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(255,193,7,0.12)", border: "1px solid rgba(255,193,7,0.2)" }}>
@@ -159,8 +159,8 @@ const CompetitorsContent = () => {
                       </div>
                       <div className="flex justify-center">
                         {row.competitor ? (
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                            <Check className="w-3 h-3 text-white/40" strokeWidth={2.5} />
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.1)" }}>
+                            <Check className="w-3 h-3 text-gray-400" strokeWidth={2.5} />
                           </div>
                         ) : (
                           <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)" }}>
@@ -176,12 +176,12 @@ const CompetitorsContent = () => {
           </section>
 
           {/* Who We Serve */}
-          <section className="py-20 md:py-28">
+          <section className="py-20 md:py-28" style={{ background: "#FFFBF0" }}>
             <div className="lp-section-container">
               <ScrollFadeIn>
                 <div className="max-w-xl mb-14">
                   <span className="lp-section-label mb-5">WHO WE SERVE</span>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
                     Built for growing Philippine businesses.
                   </h2>
                 </div>
@@ -194,10 +194,10 @@ const CompetitorsContent = () => {
                   { label: "BPO and Call Centers", body: "High-volume recruitment and employee management." },
                 ].map((item, i) => (
                   <ScrollFadeIn key={item.label} delay={i * 60}>
-                    <div className="lp-dark-card p-6">
+                    <div className="lp-light-card p-6">
                       <div className="w-1 h-8 rounded-full mb-4" style={{ background: "hsl(var(--lp-primary))" }} />
-                      <p className="text-sm font-bold text-white mb-2">{item.label}</p>
-                      <p className="text-sm text-white/40 leading-relaxed">{item.body}</p>
+                      <p className="text-sm font-bold text-gray-900 mb-2">{item.label}</p>
+                      <p className="text-sm text-gray-500 leading-relaxed">{item.body}</p>
                     </div>
                   </ScrollFadeIn>
                 ))}
@@ -206,13 +206,13 @@ const CompetitorsContent = () => {
           </section>
 
           {/* Bottom CTA */}
-          <section className="py-20 md:py-28" style={{ background: "hsl(var(--lp-surface))" }}>
+          <section className="py-20 md:py-28" style={{ background: "#ffffff" }}>
             <div className="lp-section-container text-center">
               <ScrollFadeIn>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 tracking-tight">
                   Ready to experience the YAHSHUA difference?
                 </h2>
-                <p className="text-white/50 text-base mb-8 max-w-sm mx-auto">
+                <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
                   Join Philippine businesses that have chosen YAHSHUA HRIS for superior HR management and DOLE compliance.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -223,7 +223,7 @@ const CompetitorsContent = () => {
                     href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="lp-btn-ghost gap-2"
+                    className="lp-btn-ghost-dark gap-2"
                   >
                     Schedule a Demo <ArrowUpRight className="w-4 h-4" />
                   </Link>
