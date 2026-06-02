@@ -44,6 +44,16 @@
     border-color: hsl(var(--lp-primary) / 0.3);
     box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.1), 0 8px 40px rgba(0,0,0,0.4);
   }
+  .lp-light-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+    @apply rounded-xl transition-all duration-300;
+  }
+  .lp-light-card:hover {
+    border-color: hsl(var(--lp-primary) / 0.4);
+    box-shadow: 0 0 0 1px hsl(var(--lp-primary) / 0.08), 0 8px 32px rgba(0,0,0,0.1);
+  }
 
   /* Landing page buttons */
   .lp-btn-primary {
@@ -120,6 +130,24 @@
   .lp-dot-grid-light {
     background-image: radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px);
     background-size: 28px 28px;
+  }
+
+  /* CSS scroll-driven progress bar */
+  @keyframes lp-grow-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  .lp-scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: hsl(var(--lp-primary));
+    transform-origin: left center;
+    animation: lp-grow-progress auto linear;
+    animation-timeline: scroll(root);
+    z-index: 10000;
   }
 
   /* Hero gradient glow */

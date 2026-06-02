@@ -19,15 +19,15 @@ const tableOfContents = [
 
 const noteBox = (type: "info" | "warning" | "success" | "tip", title: string, content: React.ReactNode) => {
   const styles = {
-    info:    { bg: "rgba(59,130,246,0.08)",  border: "rgba(59,130,246,0.25)",  text: "rgba(147,197,253,1)" },
-    warning: { bg: "rgba(251,146,60,0.08)",  border: "rgba(251,146,60,0.25)",  text: "rgba(253,186,116,1)" },
-    success: { bg: "rgba(74,222,128,0.08)",  border: "rgba(74,222,128,0.2)",   text: "rgba(134,239,172,1)" },
-    tip:     { bg: "rgba(255,193,7,0.08)",   border: "rgba(255,193,7,0.2)",    text: "hsl(var(--lp-primary))" },
+    info:    { bg: "rgba(59,130,246,0.06)",  border: "rgba(59,130,246,0.25)",  text: "rgba(37,99,235,1)" },
+    warning: { bg: "rgba(251,146,60,0.06)",  border: "rgba(251,146,60,0.25)",  text: "rgba(194,65,12,1)" },
+    success: { bg: "rgba(34,197,94,0.06)",   border: "rgba(34,197,94,0.25)",   text: "rgba(21,128,61,1)" },
+    tip:     { bg: "rgba(255,193,7,0.08)",   border: "rgba(255,193,7,0.3)",    text: "hsl(var(--lp-primary))" },
   }[type];
   return (
     <div className="rounded-xl p-5 mb-4" style={{ background: styles.bg, borderLeft: `3px solid ${styles.border}` }}>
       <p className="text-sm font-semibold mb-1.5" style={{ color: styles.text }}>{title}</p>
-      <div className="text-sm text-white/60 leading-relaxed">{content}</div>
+      <div className="text-sm text-gray-600 leading-relaxed">{content}</div>
     </div>
   );
 };
@@ -59,7 +59,7 @@ const DocsContent = () => {
   };
 
   return (
-    <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "#ffffff" }}>
         <main className="min-h-screen pt-16">
 
           <div className="lp-section-container py-12">
@@ -67,8 +67,8 @@ const DocsContent = () => {
 
               {/* Sidebar TOC */}
               <aside className="lg:w-64 shrink-0">
-                <div className="sticky top-24 rounded-xl p-5" style={{ background: "hsl(var(--lp-surface))", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Table of Contents</p>
+                <div className="sticky top-24 rounded-xl p-5" style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.2)" }}>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">Table of Contents</p>
                   <ul className="space-y-1">
                     {tableOfContents.map((item) => (
                       <li key={item.id}>
@@ -80,7 +80,7 @@ const DocsContent = () => {
                             color: "hsl(var(--lp-primary))",
                             fontWeight: 600,
                           } : {
-                            color: "rgba(255,255,255,0.45)",
+                            color: "#6b7280",
                           }}
                         >
                           {item.title}
@@ -96,10 +96,10 @@ const DocsContent = () => {
                 {/* Header */}
                 <div className="mb-12">
                   <span className="lp-section-label mb-4">DOCS</span>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
                     YAHSHUA HRIS Documentation
                   </h1>
-                  <p className="text-white/50 text-base leading-relaxed">
+                  <p className="text-gray-500 text-base leading-relaxed">
                     Complete guide to getting started with YAHSHUA HRIS, from signup to full implementation.
                   </p>
                 </div>
@@ -107,9 +107,9 @@ const DocsContent = () => {
                 {/* Quick Access Cards */}
                 <div className="grid md:grid-cols-3 gap-4 mb-14">
                   {[
-                    { label: "Quick Start", desc: "Get up and running with YAHSHUA HRIS in minutes", section: "getting-started", color: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.2)", text: "rgba(147,197,253,1)" },
-                    { label: "Integration", desc: "Connect with your existing YAHSHUA Payroll account", section: "yahshua-payroll-integration", color: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.2)", text: "rgba(134,239,172,1)" },
-                    { label: "Limitations", desc: "Current limitations and what's coming soon", section: "current-limitations", color: "rgba(255,193,7,0.08)", border: "rgba(255,193,7,0.2)", text: "hsl(var(--lp-primary))" },
+                    { label: "Quick Start", desc: "Get up and running with YAHSHUA HRIS in minutes", section: "getting-started", color: "rgba(59,130,246,0.06)", border: "rgba(59,130,246,0.2)", text: "rgba(37,99,235,1)" },
+                    { label: "Integration", desc: "Connect with your existing YAHSHUA Payroll account", section: "yahshua-payroll-integration", color: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.2)", text: "rgba(21,128,61,1)" },
+                    { label: "Limitations", desc: "Current limitations and what's coming soon", section: "current-limitations", color: "rgba(255,193,7,0.08)", border: "rgba(255,193,7,0.25)", text: "hsl(var(--lp-primary))" },
                   ].map((card) => (
                     <button
                       key={card.label}
@@ -118,7 +118,7 @@ const DocsContent = () => {
                       style={{ background: card.color, border: `1px solid ${card.border}` }}
                     >
                       <p className="text-sm font-bold mb-1.5" style={{ color: card.text }}>{card.label}</p>
-                      <p className="text-xs text-white/45 leading-relaxed mb-3">{card.desc}</p>
+                      <p className="text-xs text-gray-500 leading-relaxed mb-3">{card.desc}</p>
                       <p className="text-xs font-semibold" style={{ color: card.text }}>Go to section →</p>
                     </button>
                   ))}
@@ -129,20 +129,20 @@ const DocsContent = () => {
 
                   {/* Getting Started */}
                   <section id="getting-started">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Getting Started
                     </h2>
-                    <h3 className="text-base font-bold text-white/80 mb-3">How to Login</h3>
-                    <p className="text-sm text-white/55 mb-4 leading-relaxed">To access YAHSHUA HRIS, visit the login page and enter your credentials:</p>
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-white/55 mb-8 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3">How to Login</h3>
+                    <p className="text-sm text-gray-500 mb-4 leading-relaxed">To access YAHSHUA HRIS, visit the login page and enter your credentials:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm text-gray-500 mb-8 pl-2">
                       <li>Go to the <Link href="/login" className="text-primary hover:underline">YAHSHUA HRIS login page</Link></li>
                       <li>Enter your email address</li>
                       <li>Enter your password</li>
                       <li>Click "Sign In" to access your dashboard</li>
                     </ol>
-                    <h3 className="text-base font-bold text-white/80 mb-3">First Time Setup</h3>
-                    <p className="text-sm text-white/55 mb-4 leading-relaxed">After logging in for the first time, complete your profile setup:</p>
-                    <ul className="list-disc list-inside space-y-2 text-sm text-white/55 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3">First Time Setup</h3>
+                    <p className="text-sm text-gray-500 mb-4 leading-relaxed">After logging in for the first time, complete your profile setup:</p>
+                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-500 pl-2">
                       <li>Complete your company profile information</li>
                       <li>Set up your HR preferences and settings</li>
                       <li>Import existing employee data (optional)</li>
@@ -151,18 +151,18 @@ const DocsContent = () => {
 
                   {/* Sign Up Options */}
                   <section id="sign-up-options">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Sign Up Options
                     </h2>
-                    <h3 className="text-base font-bold text-white/80 mb-3">New User Registration</h3>
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-white/55 mb-8 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3">New User Registration</h3>
+                    <ol className="list-decimal list-inside space-y-2 text-sm text-gray-500 mb-8 pl-2">
                       <li>Visit the <Link href="/register" className="text-primary hover:underline">registration page</Link></li>
                       <li>Verify your account</li>
                       <li>Complete your company profile</li>
                       <li>Experience 30-day free trial</li>
                       <li>Choose your subscription plan</li>
                     </ol>
-                    <h3 className="text-base font-bold text-white/80 mb-4">Account Types</h3>
+                    <h3 className="text-base font-bold text-gray-800 mb-4">Account Types</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       {noteBox("info", "Employer Account", "Full access to all HR management features including employee management, YAHSHUA Payroll integration, compliance reporting, and administrative tools.")}
                       {noteBox("success", "Applicant Account", "Job seekers can create profiles, apply for positions, and track application status.")}
@@ -171,18 +171,18 @@ const DocsContent = () => {
 
                   {/* YAHSHUA Payroll Integration */}
                   <section id="yahshua-payroll-integration">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       YAHSHUA Payroll Integration
                     </h2>
                     {noteBox("warning", "Important Access Requirement", "Only the Owner account from YAHSHUA Payroll can log into YAHSHUA HRIS and sync employee records. Sub-users and superadmin accounts cannot directly access YAHSHUA HRIS yet.")}
-                    <h3 className="text-base font-bold text-white/80 mb-3 mt-6">Using Your YAHSHUA Payroll Account</h3>
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-white/55 mb-8 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3 mt-6">Using Your YAHSHUA Payroll Account</h3>
+                    <ol className="list-decimal list-inside space-y-2 text-sm text-gray-500 mb-8 pl-2">
                       <li>Click "YAHSHUA Payroll" in the login options</li>
                       <li>Click Authorize and wait to be redirected to your YAHSHUA HRIS account</li>
                       <li>Enjoy the 30-day free trial as your first experience with YAHSHUA HRIS</li>
                       <li>To sync your employee records, tap on the sync icon in the dashboard</li>
                     </ol>
-                    <h3 className="text-base font-bold text-white/80 mb-4">Account Access Requirements</h3>
+                    <h3 className="text-base font-bold text-gray-800 mb-4">Account Access Requirements</h3>
                     <div className="grid md:grid-cols-2 gap-4 mb-8">
                       {noteBox("success", "Can Access YAHSHUA HRIS", <ul className="list-disc list-inside space-y-1"><li>Owner account from YAHSHUA Payroll</li><li>Can sync employee records between systems</li><li>Can create user accounts for team members</li></ul>)}
                       {noteBox("warning", "Cannot Access YAHSHUA HRIS (Yet)", <ul className="list-disc list-inside space-y-1"><li>Sub-users from YAHSHUA Payroll</li><li>Superadmin accounts from YAHSHUA Payroll</li><li>Any non-owner accounts from YAHSHUA Payroll</li></ul>)}
@@ -192,7 +192,7 @@ const DocsContent = () => {
 
                   {/* Current Limitations */}
                   <section id="current-limitations">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Current Limitations
                     </h2>
                     {noteBox("warning", "Important", "Please review these current limitations to understand the current scope of YAHSHUA HRIS integration and features.")}
@@ -223,8 +223,8 @@ const DocsContent = () => {
                           content: <>{noteBox("success", "Currently Available", "Direct evaluation system where managers can evaluate employees directly or direct employee self-evaluation from the template created.")}{noteBox("tip", "Coming Soon", <ul className="list-disc list-inside space-y-1"><li>Peer evaluation capabilities</li><li>Employee self-evaluation combined with manager evaluation</li><li>Multi-level evaluation scoring system</li></ul>)}</>,
                         },
                       ].map((item) => (
-                        <div key={item.title} className="rounded-xl p-6" style={{ background: "hsl(var(--lp-surface))", border: "1px solid rgba(255,255,255,0.07)" }}>
-                          <h3 className="text-base font-bold text-white/80 mb-4">{item.title}</h3>
+                        <div key={item.title} className="rounded-xl p-6" style={{ background: "#FFFBF0", border: "1px solid rgba(255,193,7,0.15)" }}>
+                          <h3 className="text-base font-bold text-gray-800 mb-4">{item.title}</h3>
                           {item.content}
                         </div>
                       ))}
@@ -234,19 +234,19 @@ const DocsContent = () => {
 
                   {/* Group Companies */}
                   <section id="group-companies">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Group Companies
                     </h2>
                     {noteBox("warning", "Current Limitation", "Group company management from YAHSHUA Payroll is not yet supported in YAHSHUA HRIS. This feature is planned for a future release.")}
-                    <h3 className="text-base font-bold text-white/80 mb-3 mt-6">What This Means</h3>
-                    <ul className="list-disc list-inside space-y-2 text-sm text-white/55 mb-6 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3 mt-6">What This Means</h3>
+                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-500 mb-6 pl-2">
                       <li>Each company entity requires a separate YAHSHUA HRIS subscription</li>
                       <li>Employee data cannot be consolidated across multiple companies yet</li>
                       <li>Reporting must be done individually for each company</li>
                       <li>User access is limited to single company scope</li>
                     </ul>
-                    <h3 className="text-base font-bold text-white/80 mb-3">Workaround Solutions</h3>
-                    <ul className="list-disc list-inside space-y-2 text-sm text-white/55 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3">Workaround Solutions</h3>
+                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-500 pl-2">
                       <li>Set up separate YAHSHUA HRIS accounts for each company</li>
                       <li>Use consistent naming conventions across companies</li>
                       <li>Export and consolidate reports manually when needed</li>
@@ -256,12 +256,12 @@ const DocsContent = () => {
 
                   {/* Subscription Renewal */}
                   <section id="subscription-renewal">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Subscription Renewal
                     </h2>
-                    <h3 className="text-base font-bold text-white/80 mb-3">After Your Trial Expires</h3>
-                    <p className="text-sm text-white/55 mb-4 leading-relaxed">When your 30-day trial ends, select a paid plan to continue using YAHSHUA HRIS:</p>
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-white/55 mb-6 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3">After Your Trial Expires</h3>
+                    <p className="text-sm text-gray-500 mb-4 leading-relaxed">When your 30-day trial ends, select a paid plan to continue using YAHSHUA HRIS:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm text-gray-500 mb-6 pl-2">
                       <li>Visit your account settings before trial expiration</li>
                       <li>Choose a subscription plan that fits your needs</li>
                       <li>Add a payment method</li>
@@ -272,15 +272,15 @@ const DocsContent = () => {
 
                   {/* Data Sync */}
                   <section id="data-sync">
-                    <h2 className="text-2xl font-bold text-white mb-6 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
                       Data Synchronization
                     </h2>
-                    <h3 className="text-base font-bold text-white/80 mb-3">What Data is Synced</h3>
-                    <p className="text-sm text-white/55 mb-4 leading-relaxed">The following employee data is synchronized between YAHSHUA Payroll and YAHSHUA HRIS:</p>
+                    <h3 className="text-base font-bold text-gray-800 mb-3">What Data is Synced</h3>
+                    <p className="text-sm text-gray-500 mb-4 leading-relaxed">The following employee data is synchronized between YAHSHUA Payroll and YAHSHUA HRIS:</p>
                     {noteBox("success", "Currently Synced", <ul className="list-disc list-inside space-y-1"><li>Employee personal basic information (name, ID, address, email, etc.)</li><li>Hired dates and contact details</li></ul>)}
                     {noteBox("success", "Now Available", <ul className="list-disc list-inside space-y-1"><li>Full compensation details</li><li>Performance review scores and ratings</li></ul>)}
-                    <h3 className="text-base font-bold text-white/80 mb-3 mt-6">Sync Frequency</h3>
-                    <ul className="list-disc list-inside space-y-2 text-sm text-white/55 mb-6 pl-2">
+                    <h3 className="text-base font-bold text-gray-800 mb-3 mt-6">Sync Frequency</h3>
+                    <ul className="list-disc list-inside space-y-2 text-sm text-gray-500 mb-6 pl-2">
                       <li>Real-time for new employee additions</li>
                       <li>On-demand when you manually trigger a sync</li>
                     </ul>
