@@ -517,14 +517,14 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                     >
                       <GoogleIcon className='w-4 h-4 mr-2' /> Sign in with Google
                     </button>
-                    <button
+                    {/* <button
                       id='facebook-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
                     >
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
-                    </button>
+                    </button> */}
                     <div className="relative w-full lg:w-full group">
                       <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-lg opacity-100 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-timed"></div>
                       <button
@@ -533,7 +533,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                         onClick={() => loginWithYahshuaPayroll()}
                       >
                         <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
-                        YAHSHUA Payroll
+                        Sign in with YAHSHUA Payroll
                       </button>
                       <style jsx>{`
                         @keyframes gradient-timed {

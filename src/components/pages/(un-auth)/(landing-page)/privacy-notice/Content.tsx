@@ -2,7 +2,7 @@
 
 function Content() {
   return (
-    <div style={{ background: "hsl(var(--lp-page))" }}>
+    <div style={{ background: "hsl(var(--lp-surface))" }}>
         <main className="min-h-screen pt-16">
           <div className="lp-section-container py-20 max-w-3xl">
             <h1 className="text-2xl md:text-3xl font-bold text-white pt-8 mb-2">
