@@ -72,7 +72,7 @@ function ApplicantProfileModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-2xl">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex bg-savoy-blue p-2 items-center rounded-t-lg">
                   <h3 className="flex-1 text-white ml-2 font-semibold">
                     Profile Details
@@ -91,13 +91,13 @@ function ApplicantProfileModal({
                       <p className="mt-2 text-gray-600">Loading profile/s...</p>
                     </div>
                   ) : (
-                    <div className="flex gap-6">
-                      <div className="w-1/3 h-full">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="w-full md:w-1/3 h-full">
                         <ApplicantProfile
                           applicant={applicantDetailsData}
                         />
                       </div>
-                      <div className="w-2/3 h-full">
+                      <div className="w-full md:w-2/3 h-full">
                         <WorkExperience
                           workExperience={applicantDetailsData?.work_experience || []}
                         />
