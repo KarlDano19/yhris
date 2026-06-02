@@ -11,50 +11,83 @@ const rows = [
 ];
 
 const OtherIcon = ({ type }: { type: string }) => {
-  if (type === "x") return <X className="w-3.5 h-3.5 text-red-400 shrink-0" strokeWidth={2} />;
+  if (type === "x") return <X className="w-3.5 h-3.5 text-red-400 shrink-0" strokeWidth={2.5} />;
   return <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={2} />;
 };
 
 const LpComparisonTable = () => {
   return (
-    <section className="py-28 md:py-36">
+    <section className="py-28 md:py-36" style={{ background: "#FFFBF0" }}>
       <div className="lp-section-container">
         <ScrollFadeIn className="text-center mb-16">
           <span className="lp-section-label justify-center mb-5">HOW WE COMPARE</span>
-          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold leading-tight text-gray-900 tracking-tight">
             Why settle for less when you can get it all?
           </h2>
         </ScrollFadeIn>
 
-        <ScrollFadeIn delay={150} className="max-w-[900px] mx-auto">
+        <ScrollFadeIn className="max-w-[900px] mx-auto">
           {/* Desktop table */}
-          <div className="hidden md:block rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div
+            className="hidden md:block rounded-xl overflow-hidden"
+            style={{
+              borderTop: "3px solid hsl(43, 100%, 51%)",
+              borderLeft: "1px solid rgba(255,193,7,0.35)",
+              borderRight: "1px solid rgba(255,193,7,0.35)",
+              borderBottom: "1px solid rgba(255,193,7,0.35)",
+              borderRadius: "0.75rem",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.04), 0 16px 48px rgba(0,0,0,0.11)",
+            }}
+          >
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: 'hsl(var(--lp-surface-2))' }}>
-                  <th className="text-left px-5 py-4 font-semibold text-white/60 text-xs uppercase tracking-widest">Feature</th>
-                  <th className="text-left px-5 py-4 font-semibold text-white/40 text-xs uppercase tracking-widest">Others</th>
-                  <th className="text-left px-5 py-4 font-bold text-xs uppercase tracking-widest">
-                    <span className="text-primary">YAHSHUA</span> <span className="text-white/60">HRIS</span>
+                <tr style={{ background: "rgba(255,193,7,0.12)" }}>
+                  <th className="text-left px-6 py-4 font-semibold text-gray-500 text-xs uppercase tracking-widest w-[35%]">
+                    Feature
+                  </th>
+                  <th className="text-left px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-widest w-[30%]">
+                    Others
+                  </th>
+                  <th
+                    className="text-left px-6 py-4 font-bold text-xs uppercase tracking-widest w-[35%]"
+                    style={{ background: "hsl(43, 100%, 51%)" }}
+                  >
+                    <span className="text-white">YAHSHUA</span>{" "}
+                    <span className="text-white">HRIS</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, i) => (
-                  <tr key={i} style={{
-                    background: i % 2 === 0 ? 'hsl(var(--lp-surface))' : 'rgba(255,255,255,0.02)',
-                    borderTop: '1px solid rgba(255,255,255,0.05)',
-                  }}>
-                    <td className="px-5 py-4 font-medium text-white/80">{row.feature}</td>
-                    <td className="px-5 py-4 text-white/35">
+                  <tr
+                    key={i}
+                    style={{
+                      background: i % 2 === 0 ? "#ffffff" : "rgba(255,250,235,0.6)",
+                      borderTop: "1px solid rgba(255,193,7,0.14)",
+                    }}
+                  >
+                    <td className="px-6 py-4 font-semibold text-gray-800">{row.feature}</td>
+                    <td className="px-6 py-4 text-gray-400">
                       <span className="inline-flex items-center gap-2">
                         <OtherIcon type={row.others.icon} />
                         {row.others.text}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-white/80">
+                    <td
+                      className="px-6 py-4 font-semibold text-gray-800"
+                      style={{
+                        background: i % 2 === 0
+                          ? "rgba(255,193,7,0.07)"
+                          : "rgba(255,193,7,0.11)",
+                      }}
+                    >
                       <span className="inline-flex items-center gap-2">
-                        <Check className="w-4 h-4 text-primary shrink-0" strokeWidth={2.5} />
+                        <span
+                          className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                          style={{ background: "rgba(255,193,7,0.2)" }}
+                        >
+                          <Check className="w-3 h-3 text-primary" strokeWidth={3} />
+                        </span>
                         {row.yahshua}
                       </span>
                     </td>
@@ -67,17 +100,38 @@ const LpComparisonTable = () => {
           {/* Mobile card layout */}
           <div className="md:hidden space-y-3">
             {rows.map((row, i) => (
-              <div key={i} className="rounded-xl p-5" style={{ background: 'hsl(var(--lp-surface))', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <p className="text-sm font-semibold text-white mb-3">{row.feature}</p>
-                <div className="flex flex-col gap-2.5">
-                  <div className="flex items-start gap-2">
-                    <OtherIcon type={row.others.icon} />
-                    <span className="text-xs text-white/35">{row.others.text}</span>
+              <div
+                key={i}
+                className="rounded-xl overflow-hidden"
+                style={{
+                  borderTop: "3px solid hsl(43, 100%, 51%)",
+                  borderLeft: "1px solid rgba(255,193,7,0.3)",
+                  borderRight: "1px solid rgba(255,193,7,0.3)",
+                  borderBottom: "1px solid rgba(255,193,7,0.3)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                  background: "#ffffff",
+                }}
+              >
+                <div className="px-5 pt-4 pb-3">
+                  <p className="text-sm font-bold text-gray-900 mb-3">{row.feature}</p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start gap-2">
+                      <OtherIcon type={row.others.icon} />
+                      <span className="text-xs text-gray-400">{row.others.text}</span>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" strokeWidth={2.5} />
-                    <span className="text-xs text-white/70">{row.yahshua}</span>
-                  </div>
+                </div>
+                <div
+                  className="px-5 py-3 flex items-center gap-2"
+                  style={{ background: "rgba(255,193,7,0.09)", borderTop: "1px solid rgba(255,193,7,0.15)" }}
+                >
+                  <span
+                    className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: "rgba(255,193,7,0.25)" }}
+                  >
+                    <Check className="w-3 h-3 text-primary" strokeWidth={3} />
+                  </span>
+                  <span className="text-xs font-semibold text-gray-800">{row.yahshua}</span>
                 </div>
               </div>
             ))}
