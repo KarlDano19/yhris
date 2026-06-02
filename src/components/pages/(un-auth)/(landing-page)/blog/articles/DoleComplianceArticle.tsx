@@ -297,7 +297,7 @@ const DoleComplianceArticle = () => {
                   {/* Author / Last updated */}
                   <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: "2rem", marginTop: "2rem" }}>
                     <p style={{ color: "#9ca3af", fontSize: "0.85rem" }}>
-                      Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated April 2026
+                      Written by <strong style={{ color: "#6b7280" }}>YAHSHUA HRIS Team</strong> · Last updated June 2026
                     </p>
                     <p style={{ color: "#d1d5db", fontSize: "0.8rem", marginTop: "0.5rem" }}>
                       This article reflects requirements under DOLE Department Order No. 252-25 (effective May 16, 2025). For legal advice specific to your workplace, consult a licensed labor law practitioner or your DOLE regional office.

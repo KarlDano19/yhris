@@ -62,7 +62,8 @@ const LpPayrollIntegrationContent = () => {
               style={{ background: "linear-gradient(to bottom, transparent, #ffffff)" }} />
             <div className="lp-section-container relative z-10">
               <ScrollFadeIn>
-                <span className="lp-section-label mb-6">PAYROLL INTEGRATION</span>
+                <span className="lp-section-label mb-3">PAYROLL INTEGRATION</span>
+                <p className="text-[11px] text-gray-400 mb-6">Last reviewed: June 2026</p>
                 <div className="max-w-3xl">
                   <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] text-gray-900 mb-6 tracking-tight">
                     Your HRIS and Payroll,<br />
