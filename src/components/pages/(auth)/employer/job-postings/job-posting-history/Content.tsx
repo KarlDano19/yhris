@@ -3,7 +3,7 @@
 import React, { Fragment, useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
 
@@ -87,12 +87,17 @@ type T_BulkDeleteModalData = DeleteModalData & {
 };
 
 
-const Content = () => {
+const Content = ({ hasActiveSubscription }: { hasActiveSubscription?: boolean }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resumeDraftIdParam = searchParams.get('resumeDraftId');
+  const initAutoLoadDraftId = resumeDraftIdParam !== null ? parseInt(resumeDraftIdParam, 10) : undefined;
 
   // CreateJobModal — for resuming drafts in-place
-  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(false);
-  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(undefined);
+  const [isCreateJobModalOpen, setIsCreateJobModalOpen] = useState(
+    searchParams.get('create') === 'true' || resumeDraftIdParam !== null
+  );
+  const [autoLoadDraftId, setAutoLoadDraftId] = useState<number | undefined>(initAutoLoadDraftId);
   const [pageNumber, setPageNumber] = useState(1);
   const [isSalaryRangeModalOpen, setIsSalaryRangeModalOpen] = useState(false);
   const [isRangeBenefitsAdded, setIsRangeBenefitsAdded] = useState(false);
@@ -112,6 +117,9 @@ const Content = () => {
   const handleCloseCreateJobModal = () => {
     setIsCreateJobModalOpen(false);
     setAutoLoadDraftId(undefined);
+    if (searchParams.get('create') === 'true' || resumeDraftIdParam !== null) {
+      router.replace('/post-job');
+    }
   };
 
   const [draftCurrentPage, setDraftCurrentPage] = useState(1);
@@ -974,21 +982,12 @@ const Content = () => {
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 min-h-[80vh] flex flex-col'>
         <div className='flex p-4'>
-          <BackButton label="Dashboard" href="/post-job" />
+          <BackButton label="Dashboard" href="/dashboard" />
         </div>
         
         <div className='px-2 md:px-8 lg:px-4'>
           <div className='flex items-center justify-between mb-0'>
             <h2 className='text-xl font-bold text-indigo-dye'>Job Posting History</h2>
-            <div className='hidden lg:block -mb-4'>
-              <SeederButton
-                viewType="job_posting"
-                maxCount={1000}
-                defaultCount={5}
-                onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-              />
-            </div>
           </div>
         </div>
 
@@ -1059,16 +1058,27 @@ const Content = () => {
                 </button>
               </div>
             </div>
-            <div className='flex-1 flex justify-start lg:justify-end gap-3 flex-wrap items-center'>
-              <div className='lg:hidden'>
-                <SeederButton
-                  viewType="job_posting"
-                  maxCount={1000}
-                  defaultCount={5}
-                  onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                  onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
-                />
-              </div>
+            <div className='flex-1 flex justify-start lg:justify-end items-center gap-2'>
+              <SeederButton
+                viewType="job_posting"
+                maxCount={1000}
+                defaultCount={5}
+                onSeedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+                onUnseedSuccess={() => { setSelectedJobPostings(new Set()); setSelectAll(false); setShowShareOptions({}); refetch(); }}
+              />
+              <SmartButton
+                id="create-job-btn"
+                onClick={() => {
+                  setScreeningQuestions([]);
+                  setAutoRejectEnabled(false);
+                  setIsVideoIntroEnabled(false);
+                  setAutoLoadDraftId(undefined);
+                  setIsCreateJobModalOpen(true);
+                }}
+                className='bg-green-500 rounded-md py-2 px-5 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'
+              >
+                CREATE
+              </SmartButton>
             </div>
           </div>
           

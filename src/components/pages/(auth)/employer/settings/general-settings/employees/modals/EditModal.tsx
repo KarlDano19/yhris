@@ -4,6 +4,9 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { XCircleIcon } from '@heroicons/react/24/solid';
 import dynamic from 'next/dynamic';
+import toast from 'react-hot-toast';
+
+import CustomToast from '@/components/CustomToast';
 
 import useEditLocationDetails from '../hooks/location/useEditLocationDetails';
 import useGetLocationDetails from '../hooks/location/useGetLocationDetails';
@@ -108,9 +111,13 @@ export default function EditModal({
     
     const callbackReq = {
       onSuccess: (data: any) => {
+        toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 4000 });
         customCloseModal();
         refetch();
-      }
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err} type='error' />, { duration: 5000 });
+      },
     };
     if (module === 'location') {
       editLocation({ location_id: isOpen.id, data: submitData }, callbackReq);
