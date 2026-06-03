@@ -2,10 +2,6 @@ import Link from "next/link";
 import ScrollFadeIn from "./ScrollFadeIn";
 import MainLogoWhite from "@/svg/MainLogoWhite";
 
-const featureLinks = ["Recruitment", "Employee Management", "Leave & Attendance", "Time Tracking", "Compliance", "Performance"];
-const companyLinks = ["About The ABBA Initiative", "Pricing", "Request a Demo", "Contact"];
-const resourceLinks = ["Documentation", "Support", "Data Privacy Statement", "Blog"];
-
 const LpFooter = () => {
   return (
     <footer style={{ background: 'hsl(var(--lp-surface))', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
@@ -25,42 +21,80 @@ const LpFooter = () => {
               </p>
             </div>
 
-            {/* Links */}
-            {[
-              { heading: "Features", links: featureLinks },
-              { heading: "Company", links: companyLinks },
-              { heading: "Resources", links: resourceLinks },
-            ].map((col) => (
-              <div key={col.heading}>
-                <h4 className="text-sm font-semibold text-white mb-4">{col.heading}</h4>
-                <ul className="space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      {link === "Blog" ? (
-                        <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </Link>
-                      ) : link === "Pricing" ? (
-                        <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </Link>
-                      ) : (
-                        <a href="#" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                          {link}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {/* Features */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Features</h4>
+              <ul className="space-y-2.5">
+                {["Recruitment", "Employee Management", "Leave & Attendance", "Time Tracking", "Compliance", "Performance"].map((link) => (
+                  <li key={link}>
+                    <Link href="/features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                      {link}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <a href="https://www.theabbainitiative.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    About The ABBA Initiative
+                  </a>
+                </li>
+                <li>
+                  <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/book-demo" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Request a Demo
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <Link href="/docs" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/faqs" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Support
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy-notice" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Data Privacy Statement
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                    Blog
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </ScrollFadeIn>
 
         <ScrollFadeIn delay={100}>
           <div className="border-t border-white/10 pt-6 text-center">
             <p className="text-xs text-white/30">
-              © 2025 The ABBA Initiative (OPC). All rights reserved. · Privacy Policy · Terms of Service · Data Privacy Statement
+              © 2025 The ABBA Initiative (OPC). All rights reserved. ·{' '}
+              <Link href="/privacy-policy" className="hover:text-white/60 transition-colors duration-200">Privacy Policy</Link>
+              {' · '}
+              <Link href="/terms-of-service" className="hover:text-white/60 transition-colors duration-200">Terms of Service</Link>
+              {' · '}
+              <Link href="/privacy-notice" className="hover:text-white/60 transition-colors duration-200">Data Privacy Statement</Link>
             </p>
           </div>
         </ScrollFadeIn>
