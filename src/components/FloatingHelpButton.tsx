@@ -1,12 +1,13 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import useGetEmployerProfile from '@/components/hooks/useGetEmployerProfile';
 
 // Commented out old chat widget imports
 // import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon';
 // import ChatBubbleIcon from '@/svg/ChatBubbleIcon';
 
 const FloatingHelpButton = ({
-  companyName,
+  companyName: companyNameProp,
   anonymousMode,
 }: {
   companyName?: string;
@@ -14,6 +15,8 @@ const FloatingHelpButton = ({
 }) => {
   const [userEmail, setUserEmail] = useState<string>('');
   const widgetNodesRef = useRef<Element[]>([]);
+  const { data: profileData } = useGetEmployerProfile();
+  const companyName = companyNameProp || profileData?.name || null;
 
   useEffect(() => {
     const fetchUserSession = async () => {
@@ -47,6 +50,7 @@ const FloatingHelpButton = ({
     // before the session fetch completes, causing all pre-fetch sessions to
     // share a single chat thread.
     if (!userEmail) return;
+    if (!anonymousMode && companyName === null) return;
 
     const CONVEX_URL = 'https://dapper-bear-214.convex.cloud';
     const PRODUCT_NAME = 'YAHSHUA HRIS Subscription - Main';
@@ -55,6 +59,8 @@ const FloatingHelpButton = ({
 
     const initWidget = () => {
       console.log(`[${PRODUCT_NAME}] Initializing ABBA Chat widget...`);
+      console.log("email", userEmail)
+      console.log("company", companyName)
       try {
         const company = companyName || 'Unknown';
         const userId = userEmail
