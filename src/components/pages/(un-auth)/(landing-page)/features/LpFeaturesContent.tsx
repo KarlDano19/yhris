@@ -82,7 +82,8 @@ const LpFeaturesContent = () => {
           />
           <div className="lp-section-container relative z-10 text-center">
             <ScrollFadeIn>
-              <span className="lp-section-label justify-center mb-5">FEATURES</span>
+              <span className="lp-section-label justify-center mb-3">FEATURES</span>
+              <p className="text-[11px] text-gray-400 text-center mb-5">Last reviewed: June 2026</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] text-gray-900 mb-5 tracking-tight">
                 Every HR workflow your team needs.<br className="hidden md:inline" />
                 <span className="text-primary"> All in one system.</span>
