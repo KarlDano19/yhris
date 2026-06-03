@@ -45,6 +45,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/landing-page/:path*',
+        destination: '/:path*',
+        permanent: true,
+      },
+      {
         source: '/landing-page',
         destination: '/',
         permanent: true,
