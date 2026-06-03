@@ -50,9 +50,9 @@ const LpFooter = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/book-demo" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
+                  <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
                     Request a Demo
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>
