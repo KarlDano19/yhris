@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 
 import Content from '@/components/pages/(un-auth)/(landing-page)/pricing/LpPricingContent';
+import PixelEvents from '@/components/PixelEvents';
 
 import { SessionData, sessionOptions } from '@/lib/session';
 
@@ -33,7 +34,12 @@ async function getSession() {
 const PlanPage = async () => {
   const session = await getSession();
   const isLoggedIn = session.isLoggedIn;
-  return <Content isLoggedIn={isLoggedIn} />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Pricing', content_category: 'pricing' }} />
+      <Content isLoggedIn={isLoggedIn} />
+    </>
+  );
 };
 
 export default PlanPage;
