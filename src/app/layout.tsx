@@ -1,6 +1,5 @@
 import { Golos_Text } from 'next/font/google';
 import Script from 'next/script';
-import 'react-quill/dist/quill.snow.css';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -11,7 +10,6 @@ import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
 import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 
-import './quill-tooltips.css';
 import './globals.css';
   
 export const metadata = {

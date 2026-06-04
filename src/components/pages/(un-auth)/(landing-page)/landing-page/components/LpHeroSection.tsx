@@ -1,8 +1,22 @@
 "use client";
 import { useState } from "react";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 import ScrollFadeIn from "./ScrollFadeIn";
-import LpHeroDashboard from "./LpHeroDashboard";
+
+const LpHeroDashboard = dynamic(() => import("./LpHeroDashboard"), {
+  loading: () => (
+    <div
+      className="relative w-full rounded-2xl"
+      style={{
+        height: 350,
+        background: "#F4F6FB",
+        boxShadow:
+          "0 4px 6px -1px rgba(0,0,0,0.05), 0 24px 60px rgba(53,95,208,0.15), 0 0 0 1px rgba(53,95,208,0.1)",
+      }}
+    />
+  ),
+});
 
 const DEMO_CALENDAR_URL =
   "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
