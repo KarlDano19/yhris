@@ -9,7 +9,7 @@ import GlobalErrorHandler from '@/components/GlobalErrorHandler';
 import ReactQueryWrapper from '@/app/reactQueryWrapper';
 import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
-import PixelEvents from '@/components/PixelEvents';
+import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 
 import './quill-tooltips.css';
 import './globals.css';
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <GlobalLoadingSpinner />
             <Auth>{children}</Auth>
           </ReactQueryWrapper>
-          <PixelEvents />
+          <GlobalPixelTracker />
           <Toaster position='top-right' />
           
           {/* Google Tag Manager */}
