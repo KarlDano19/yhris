@@ -2,6 +2,67 @@ import Link from "next/link";
 import ScrollFadeIn from "./ScrollFadeIn";
 import MainLogoWhite from "@/svg/MainLogoWhite";
 
+const CALENDLY_URL = "https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026";
+
+interface FooterLinkItem {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLinkItem[];
+}
+
+const FOOTER_COLUMNS: FooterColumn[] = [
+  {
+    title: "Features",
+    links: [
+      { label: "Recruitment", href: "/features" },
+      { label: "Employee Management", href: "/features" },
+      { label: "Leave & Attendance", href: "/features" },
+      { label: "Time Tracking", href: "/features" },
+      { label: "Compliance", href: "/features" },
+      { label: "Performance", href: "/features" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About The ABBA Initiative", href: "https://www.theabbainitiative.com/", external: true },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Request a Demo", href: CALENDLY_URL, external: true },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "Documentation", href: "/docs" },
+      { label: "Support", href: "/faqs" },
+      { label: "Data Privacy Statement", href: "/privacy-notice" },
+      { label: "Blog", href: "/blog" },
+    ],
+  },
+];
+
+const linkClass = "text-sm text-white/50 hover:text-white transition-colors duration-200";
+
+const FooterLink = ({ label, href, external }: FooterLinkItem) => {
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+        {label}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={linkClass}>
+      {label}
+    </Link>
+  );
+};
+
 const LpFooter = () => {
   return (
     <footer style={{ background: 'hsl(var(--lp-surface))', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
@@ -21,68 +82,18 @@ const LpFooter = () => {
               </p>
             </div>
 
-            {/* Features */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Features</h4>
-              <ul className="space-y-2.5">
-                {["Recruitment", "Employee Management", "Leave & Attendance", "Time Tracking", "Compliance", "Performance"].map((link) => (
-                  <li key={link}>
-                    <Link href="/features" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                      {link}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2.5">
-                <li>
-                  <a href="https://www.theabbainitiative.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    About The ABBA Initiative
-                  </a>
-                </li>
-                <li>
-                  <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Request a Demo
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Resources</h4>
-              <ul className="space-y-2.5">
-                <li>
-                  <Link href="/docs" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Documentation
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/faqs" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Support
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy-notice" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Data Privacy Statement
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors duration-200">
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            {FOOTER_COLUMNS.map((column) => (
+              <div key={column.title}>
+                <h4 className="text-sm font-semibold text-white mb-4">{column.title}</h4>
+                <ul className="space-y-2.5">
+                  {column.links.map((link) => (
+                    <li key={link.label}>
+                      <FooterLink {...link} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </ScrollFadeIn>
 

@@ -1,8 +1,5 @@
 import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/landing-page/Content";
-import Navigation from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/Navigation";
-import LpFooter from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/LpFooter";
-import ScrollToTop from "@/components/pages/(un-auth)/(landing-page)/landing-page/components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS - All-in-One HR Software for Philippine Businesses',
@@ -25,14 +22,7 @@ export const metadata: Metadata = {
 };
 
 const LandingPage = () => {
-  return (
-    <>
-      <Navigation />
-      <Content />
-      <LpFooter />
-      <ScrollToTop />
-    </>
-  );
+  return <Content />;
 };
 
 export default LandingPage;
