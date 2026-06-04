@@ -119,8 +119,7 @@ const Content = () => {
 
   return (
     <>
-      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-        <div className="px-2 md:px-8 lg:px-4 mt-6">
+      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mt-6">
           <h2 className="text-xl font-bold text-indigo-dye">Partners</h2>
           <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
             <div className="flex-none w-full lg:w-1/3">
@@ -165,17 +164,16 @@ const Content = () => {
                   <tbody className="divide-y divide-gray-200">{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={{ totalPages, totalRecords }}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
-                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={{ totalPages, totalRecords }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+            />
           </div>
-        </div>
       </div>
 
       {isCreateModalOpen && (

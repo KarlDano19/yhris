@@ -201,15 +201,15 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={{ totalPages, totalRecords }}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
-                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={{ totalPages, totalRecords }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+            />
           </div>
         </div>
       </div>
