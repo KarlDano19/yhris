@@ -174,7 +174,7 @@ const Content = () => {
         {/* Back Button */}
         <div className="fixed top-4 left-4 z-50">
           <Link 
-            href="/landing-page" 
+            href="/" 
             className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
             shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
             hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
@@ -216,7 +216,7 @@ const Content = () => {
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <Link 
-          href="/landing-page" 
+          href="/" 
           className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
           shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
           hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
