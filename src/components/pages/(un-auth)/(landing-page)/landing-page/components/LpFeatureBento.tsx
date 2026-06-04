@@ -44,7 +44,10 @@ const features = [
 
 /* ── Video Modal ─────────────────────────────────────────────── */
 const VideoModal = ({ src, onClose }: { src: string; onClose: () => void }) => {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
@@ -53,6 +56,8 @@ const VideoModal = ({ src, onClose }: { src: string; onClose: () => void }) => {
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  if (!mounted) return null;
 
   return createPortal(
     <div
