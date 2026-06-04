@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import toast from 'react-hot-toast';
 
+import ConfirmModal from '@/components/ConfirmModal';
 import CustomToast from '@/components/CustomToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -15,12 +16,16 @@ import MoreIcon from '@/svg/MoreIcon';
 
 const Content = () => {
   const [clientItems, setClientItems] = useState<any>([]);
-  const [itemsFilter, setItemsFilter] = useState<any>({
-    search: '',
-  });
+  const [searchText, setSearchText] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState<any>({ search: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(itemsFilter);
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; item: any | null }>({
+    isOpen: false,
+    item: null,
+  });
+
+  const { data: dataApplicant, isLoading: isGetApplicantLoading, refetch } = useApplicantItems(appliedFilter);
   const toggleStatus = useToggleApplicantStatus();
 
   useEffect(() => {
@@ -29,25 +34,35 @@ const Content = () => {
         item['created_at'] = Intl.DateTimeFormat('en-US').format(new Date(item.created_at));
       });
       setClientItems(dataApplicant);
-      setCurrentPage(1);
     }
   }, [dataApplicant]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilter]);
 
   const totalRecords = clientItems.length;
   const totalPages = Math.ceil(totalRecords / pageSize) || 1;
   const paginatedItems = clientItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const handleToggle = (item: any) => {
-    const action = item.is_active ? 'disable' : 'enable';
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} the account of ${item.name}?`
-    );
-    if (!confirmed) return;
+  const handleSearch = () => {
+    setAppliedFilter({ search: searchText });
+  };
 
+  const handleToggle = (item: any) => {
+    setConfirmModal({ isOpen: true, item });
+  };
+
+  const handleConfirmToggle = () => {
+    const item = confirmModal.item;
+    if (!item) return;
+
+    const action = item.is_active ? 'disable' : 'enable';
     toggleStatus.mutate(
       { id: item.id, is_active: !item.is_active },
       {
         onSuccess: () => {
+          setConfirmModal({ isOpen: false, item: null });
           toast.custom(
             <CustomToast
               message={`Applicant account ${action}d successfully.`}
@@ -57,6 +72,7 @@ const Content = () => {
           refetch();
         },
         onError: (err: any) => {
+          setConfirmModal({ isOpen: false, item: null });
           toast.custom(
             <CustomToast
               message={err?.message || `Failed to ${action} applicant account.`}
@@ -134,12 +150,15 @@ const Content = () => {
                   name='search'
                   id='search'
                   className='block w-full rounded-md border-0 py-1.5 px-3 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
-                  onChange={(e) => setItemsFilter({ ...itemsFilter, search: e.target.value })}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSearch();
+                  }}
                   placeholder='Search ...'
                 />
                 <button
                   className='bg-white border border-gray-300 rounded-md p-2 ml-1 hover:bg-gray-100'
-                  onClick={() => refetch()}
+                  onClick={handleSearch}
                 >
                   <MagnifyingGlassIcon className='h-5 w-5' />
                 </button>
@@ -206,6 +225,14 @@ const Content = () => {
             />
           </div>
       </div>
+
+      <ConfirmModal
+        message={`Are you sure you want to ${confirmModal.item?.is_active ? 'disable' : 'enable'} the account of ${confirmModal.item?.name}?`}
+        isOpen={confirmModal.isOpen}
+        setIsOpen={(open) => setConfirmModal((prev) => ({ ...prev, isOpen: open }))}
+        confirmAction={handleConfirmToggle}
+        isLoading={toggleStatus.isLoading}
+      />
     </>
   );
 };
