@@ -127,7 +127,6 @@ const Content = () => {
   return (
     <>
       <div className='mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8'>
-        <div className='px-2 md:px-8 lg:px-4'>
           <div className='mt-6 flex flex-col lg:flex-row gap-4'>
             <div className='flex-none w-full lg:w-1/2 space-y-4'>
               <h2 className='text-xl font-bold text-indigo-dye'>Client Monitoring</h2>
@@ -205,17 +204,16 @@ const Content = () => {
                   <tbody className='divide-y divide-gray-200'>{renderRows()}</tbody>
                 </table>
                 <hr />
-                <Pagination
-                  pagination={{ totalPages, totalRecords }}
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
-                  onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-                />
               </div>
             </div>
+            <Pagination
+              pagination={{ totalPages, totalRecords }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageSizeChange={(val) => { setPageSize(val); setCurrentPage(1); }}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
+            />
           </div>
-        </div>
       </div>
       <ClientGoalModal isOpen={isClientGoalModalOpen} setIsOpen={setIsClientGoalModalOpen} />
       <EditClientSourceModal
