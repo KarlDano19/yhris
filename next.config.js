@@ -42,14 +42,23 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/landing-page/:path*',
+        destination: '/:path*',
+        permanent: true,
+      },
+      {
+        source: '/landing-page',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return {
-      beforeFiles: [
-        {
-          source: '/',
-          destination: '/landing-page',
-        },
-      ],
+      beforeFiles: [],
       afterFiles: [
         {
           source: '/ingest/static/:path*',

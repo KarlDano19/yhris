@@ -109,6 +109,80 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-023
+DATE FILED: 2026-06-03
+DATE FIXED: 2026-06-03
+REPORTER: Internal
+
+ISSUE DESCRIPTION:
+  The ABBA Chat widget (FloatingHelpButton) was initializing with `companyName = undefined`,
+  causing the `clientId` passed to `AbbaChat.init()` to fall back to the string `'Unknown'`
+  even for authenticated employer users who have a company profile.
+
+  Root cause: `<FloatingHelpButton />` in `header.tsx` (line 96) was rendered with no
+  `companyName` prop. The `/api/get-session` endpoint only returns `email`, `accountType`,
+  and `isLoggedIn` — it does not include the employer's company name. The component had no
+  other mechanism to retrieve it, so `companyName` was always `undefined` at widget init time.
+
+  Console output confirming the bug:
+    [YAHSHUA HRIS Subscription - Main] Initializing ABBA Chat widget...
+    email mlabos03@gmail.com
+    company undefined
+
+DESIRED OUTCOME:
+  The ABBA Chat widget should initialize with the authenticated employer's company name
+  as `clientId` so that chat sessions are correctly associated with the right account
+  in the ABBA dashboard.
+
+FILES CHANGED:
+Frontend:
+- src/components/FloatingHelpButton.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Authenticated employer logs in → widget initializes with correct company name as clientId ✓
+  - Anonymous mode (job-app-form) → widget initializes normally with 'Unknown' as clientId ✓
+  - Widget does not initialize before both email and company name are resolved ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  The component already had `companyName` as an optional prop and a fallback to `'Unknown'`,
+  but the prop was never passed from `header.tsx`. Rather than adding a separate fetch inside
+  `FloatingHelpButton`, the fix reads from the existing `['employerProfileCache']` React Query
+  cache already populated by `useGetEmployerProfile` (used by MainHeader) — so no extra
+  network request is made when the cache is warm.
+
+  Changes to FloatingHelpButton.tsx:
+
+  1. Imported `useGetEmployerProfile` and called it at the top of the component:
+       const { data: profileData } = useGetEmployerProfile();
+
+  2. Derived `companyName` from the prop (for explicit overrides) or the cached profile:
+       const companyName = companyNameProp || profileData?.name || null;
+     `null` means "not yet resolved" — distinct from `'Unknown'` which means "resolved but absent".
+
+  3. Changed the widget init guard to wait for `companyName` to be non-null for logged-in
+     users (anonymousMode bypasses this since no profile exists):
+       if (!userEmail) return;
+       if (!anonymousMode && companyName === null) return;
+
+  This ensures the widget only fires `AbbaChat.init()` after both the user email (from
+  /api/get-session) and the company name (from the React Query cache) are available,
+  preventing the `clientId: 'Unknown'` race condition.
+
+================================================================================
+
 BUG ID: HRIS-2026-022
 DATE FILED: 2026-05-29
 DATE FIXED: 2026-05-29
