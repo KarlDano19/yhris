@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useRef } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 import CustomScreeningForm from './CustomScreeningForm';
 
@@ -105,7 +105,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -115,11 +115,11 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -128,7 +128,7 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-xs sm:max-w-2xl lg:max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogPanel className="w-full max-w-xs sm:max-w-2xl lg:max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                 {/* Header */}
                 <div className="bg-[#2563eb] px-4 sm:px-6 py-4 flex justify-between items-center">
                   <h3 className="text-base sm:text-lg font-medium text-white">
@@ -306,8 +306,8 @@ const CustomQuestionsModal: React.FC<CustomQuestionsModalProps> = ({
                     Save Questions
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

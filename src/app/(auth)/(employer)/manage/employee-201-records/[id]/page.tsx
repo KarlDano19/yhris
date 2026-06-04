@@ -18,17 +18,17 @@ async function getSession() {
 }
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const EmployeeDetail = async ({ params }: PageProps) => {
-  const session = await getSession();
+  const [resolvedParams, session] = await Promise.all([params, getSession()]);
   const loginType = session.loginType;
   const hasActiveSubscription = session.hasActiveSubscription;
 
   return (
     <Content
-      params={params}
+      params={resolvedParams}
       loginType={loginType}
       hasActiveSubscription={hasActiveSubscription}
     />

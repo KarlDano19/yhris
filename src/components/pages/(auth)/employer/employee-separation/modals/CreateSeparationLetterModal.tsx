@@ -1,7 +1,6 @@
 import { Dispatch, Fragment, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useQueryClient } from "@tanstack/react-query"; 
 import { useForm, Controller } from 'react-hook-form';
@@ -9,12 +8,10 @@ import toast from 'react-hot-toast';
 
 import useGenerateSeparationLetter from '../hooks/useGenerateSeparationLetter';
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { QUILL_FORMATS, QUILL_MODULES } from '@/helpers/constants';
 import 'react-quill-new/dist/quill.snow.css';
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 interface CreateSeparationLetterModalProps {
   isOpen: boolean;
@@ -138,9 +135,9 @@ export default function CreateSeparationLetterModal({
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[60]" initialFocus={cancelButtonRef} onClose={handleClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -150,11 +147,11 @@ export default function CreateSeparationLetterModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -163,7 +160,7 @@ export default function CreateSeparationLetterModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl sm:p-6">
+              <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl sm:p-6">
                 <div className="absolute right-0 top-0 pr-4 pt-4">
                   <button
                     type="button"
@@ -177,9 +174,9 @@ export default function CreateSeparationLetterModal({
 
                 <div className="sm:flex sm:items-start">
                   <div className="w-full mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                    <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
                       Create Letter of {letterType}
-                    </Dialog.Title>
+                    </DialogTitle>
                     
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-center">
@@ -292,11 +289,11 @@ export default function CreateSeparationLetterModal({
                     </form>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

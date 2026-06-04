@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  useMemo,
-} from "react";
-
-import dynamic from "next/dynamic";
+import ReactQuill from "@/components/ReactQuillDynamic";
 
 import "react-quill-new/dist/quill.snow.css";
-
-
 import { QUILL_FORMATS, QUILL_MODULES } from "@/helpers/constants";
 
 
@@ -31,7 +25,6 @@ export default function DiscussionDetails({
   setError: any;
   clearErrors: any;
 }) {
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const detailsValue = watch("details_of_meeting");

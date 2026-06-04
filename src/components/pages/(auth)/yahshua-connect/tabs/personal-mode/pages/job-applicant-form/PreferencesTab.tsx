@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useEffect, useState } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useGetApplicantProfile from '@/components/hooks/useGetApplicantProfile';
 
 import { PlusIcon } from '@heroicons/react/24/solid';
@@ -44,9 +44,6 @@ function PreferencesTab({
     control,
     name: 'experiences',
   });
-
-  // SSR-safe ReactQuill
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
 
   // Track currently-employed per experience for UX (disables Date To)
   const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);

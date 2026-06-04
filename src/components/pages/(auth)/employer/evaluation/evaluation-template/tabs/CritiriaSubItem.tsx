@@ -1,18 +1,16 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-import dynamic from 'next/dynamic';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
 import 'react-quill-new/dist/quill.snow.css';
-
 import DeleteModal from '@/components/DeleteModal';
-
+import ReactQuill from '@/components/ReactQuillDynamic';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MinusIcon from '@/svg/MinusIcon';
 import PlusIcon from '@/svg/PlusIcon';
@@ -35,7 +33,6 @@ function CritiriaSubItem({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: `evaluation_criterion[${sectionIndex}].criterion`,

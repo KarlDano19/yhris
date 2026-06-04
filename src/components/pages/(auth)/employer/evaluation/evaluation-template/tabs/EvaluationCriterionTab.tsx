@@ -1,9 +1,8 @@
 'use client';
 
-import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 
-import dynamic from 'next/dynamic';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useFieldArray } from 'react-hook-form';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
@@ -11,11 +10,10 @@ import toast from 'react-hot-toast';
 import { QUILL_FORMATS, QUILL_MODULES_NO_TOOLBAR } from '@/helpers/constants';
 
 import 'react-quill-new/dist/quill.snow.css';
-
 import CritiriaSubItem from './CritiriaSubItem';
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import DeleteModal from '@/components/DeleteModal';
-
 import AddCircleIcon from '@/svg/AddCircleIcon';
 import DeleteIconNoBorder from '@/svg/DeleteIconNoBorder';
 import MoveIcon from '@/svg/MoveIcon';
@@ -40,7 +38,6 @@ function EvaluationCriterionTab({
   // ============================================================================
   // REFS AND STATE
   // ============================================================================
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const childrenRef = useRef<any>({});
   const sectionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const { fields, append, remove, move } = useFieldArray({

@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
-import dynamic from 'next/dynamic';
 import { useFieldArray } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import CustomToast from '@/components/CustomToast';
 import CustomDatePicker from '@/components/CustomDatePicker';
+import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { PlusIcon } from '@heroicons/react/24/solid';
 
@@ -39,8 +39,6 @@ function WorkExperienceTab({
     control: control,
     name: 'experiences',
   });
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
-  
   // State to track currently employed status for each experience
   const [currentlyEmployed, setCurrentlyEmployed] = useState<boolean[]>([]);
 

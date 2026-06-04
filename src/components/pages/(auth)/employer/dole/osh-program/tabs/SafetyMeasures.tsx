@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-
-import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 import { useFieldArray, Controller } from "react-hook-form";
 import { XCircleIcon, EyeIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import FilePreviewModal from "../modals/FilePreviewModal";
+import ReactQuill from "@/components/ReactQuillDynamic";
 
 import ClipIcon from "@/svg/ClipIcon";
 
@@ -35,10 +34,6 @@ export default function SafetyMeasures({
   safetySignageAttachmentExist: boolean;
   setSafetySignageAttachmentExist: (exists: boolean) => void;
 }) {
-  const ReactQuill = useMemo(
-    () => dynamic(() => import("react-quill-new"), { ssr: false }),
-    []
-  );
   const [previousSignageFile, setPreviousSignageFile] = useState<string>("");
   
   // For file preview - consolidated for both images and other files

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip } from 'react-tooltip';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
@@ -315,9 +315,9 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             </div>
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative'>
-                <Menu.Button className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
+                <MenuButton className='bg-savoy-blue rounded-lg py-2.5 px-3 text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50 flex items-center gap-2'>
                   <Cog6ToothIcon className='h-5 w-5' />
-                </Menu.Button>
+                </MenuButton>
                 <Transition
                   as={Fragment}
                   enter='transition ease-out duration-100'
@@ -327,7 +327,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                  <MenuItems className='absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='p-4'>
                       <div className='mb-4'>
                         <h3 className='text-sm font-semibold text-gray-900 mb-2'>
@@ -367,7 +367,7 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         </button>
                       </div>
                     </div>
-                  </Menu.Items>
+                  </MenuItems>
                 </Transition>
               </Menu>
             </div>

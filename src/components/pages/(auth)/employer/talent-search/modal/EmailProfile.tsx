@@ -1,13 +1,12 @@
-import { Dispatch, Fragment, useRef, useMemo, useState, useEffect } from 'react';
+import { Dispatch, Fragment, useRef, useState, useEffect } from 'react';
 
-import dynamic from 'next/dynamic';
-
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import CustomToast from '@/components/CustomToast';
+import ReactQuill from '@/components/ReactQuillDynamic';
 import useTagTo from '@/components/hooks/useTagTo';
 import useTagCC from '@/components/hooks/useTagCc';
 import useTagBcc from '@/components/hooks/useTagBcc';
@@ -66,7 +65,6 @@ export default function EmailProfileModal({
   applicantId?: number;
 }) {
   const cancelButtonRef = useRef(null);
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), [isOpen]);
   const [employeeEmail, setEmployeeEmail] = useState<string | null>(applicantEmail || null);
   const [isCCOpen, setIsCCOPen] = useState(false);
   const [isBCCOpen, setIsBCCOpen] = useState(false);
@@ -324,14 +322,14 @@ export default function EmailProfileModal({
 
   return (
     <>
-      <Transition.Root show={isOpen.open} as={Fragment}>
+      <Transition show={isOpen.open} as={Fragment}>
         <Dialog
           as='div'
           className='relative z-10'
           initialFocus={cancelButtonRef}
           onClose={() => setIsOpen({ id: 0, open: false })}
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -341,11 +339,11 @@ export default function EmailProfileModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -354,7 +352,7 @@ export default function EmailProfileModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
+                <DialogPanel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl'>
                   {/* Tab Bar */}
                   <div className='flex items-center bg-blue-50 rounded-lg p-3 mb-4 gap-2'>
                     {/* Main Email Tab */}
@@ -963,12 +961,12 @@ export default function EmailProfileModal({
                       </button>
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

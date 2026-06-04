@@ -1,6 +1,6 @@
 import { Dispatch, Fragment, useRef, useEffect, useState, useMemo } from 'react';
 
-import { Dialog, Transition, Listbox } from '@headlessui/react';
+import { Dialog, DialogPanel, Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition, TransitionChild } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -190,9 +190,9 @@ export default function CreateEditRoleModal({
 
   return (
     <>
-      <Transition.Root show={isOpen.open} as={Fragment}>
+      <Transition show={isOpen.open} as={Fragment}>
         <Dialog as='div' className='relative z-10' initialFocus={cancelButtonRef} onClose={() => customCloseModal()}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter='ease-out duration-300'
             enterFrom='opacity-0'
@@ -202,11 +202,11 @@ export default function CreateEditRoleModal({
             leaveTo='opacity-0'
           >
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className='fixed inset-0 z-10 overflow-y-auto'>
             <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter='ease-out duration-300'
                 enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -215,7 +215,7 @@ export default function CreateEditRoleModal({
                 leaveFrom='opacity-100 translate-y-0 sm:scale-100'
                 leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
               >
-                <Dialog.Panel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-4xl'>
+                <DialogPanel className='relative transform overflow-visible rounded-lg bg-white pb-4 text-left shadow-xl transition-all sm:my-8 sm:mx-8 sm:w-full sm:max-w-4xl'>
                   <div className='flex bg-savoy-blue p-2 items-center rounded-t-lg'>
                     <h3 className='flex-1 text-white ml-2 font-semibold'>
                       {isEditing ? 'Edit Role' : 'Create Role'}
@@ -388,7 +388,7 @@ export default function CreateEditRoleModal({
                             {({ open }) => (
                               <>
                                 <div className='relative'>
-                                  <Listbox.Button className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'>
+                                  <ListboxButton className='relative w-full cursor-default rounded-md bg-white py-2.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-savoy-blue sm:text-sm sm:leading-6'>
                                     <span className='flex flex-wrap gap-1'>
                                       {selectedPermissions.length === 0 ? (
                                         <span className='text-gray-400'>Select permissions...</span>
@@ -423,7 +423,7 @@ export default function CreateEditRoleModal({
                                     <span className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2'>
                                       <ChevronUpDownIcon className='h-5 w-5 text-gray-400' aria-hidden='true' />
                                     </span>
-                                  </Listbox.Button>
+                                  </ListboxButton>
 
                                   <Transition
                                     show={open}
@@ -432,7 +432,7 @@ export default function CreateEditRoleModal({
                                     leaveFrom='opacity-100'
                                     leaveTo='opacity-0'
                                   >
-                                    <Listbox.Options className='absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
+                                    <ListboxOptions className='absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
                                       {Object.entries(permissionsByCategory).map(([category, permissions]: [string, any]) => (
                                         <div key={category}>
                                           {/* Category Header with Select All/None */}
@@ -489,7 +489,7 @@ export default function CreateEditRoleModal({
                                             </span>
                                           </div>
                                           {!isCategoryCollapsed(category) && permissions.map((permission: any) => (
-                                            <Listbox.Option
+                                            <ListboxOption
                                               key={permission.id}
                                               value={permission.id}
                                               className={({ active }) =>
@@ -523,11 +523,11 @@ export default function CreateEditRoleModal({
                                                   </div>
                                                 </>
                                               )}
-                                            </Listbox.Option>
+                                            </ListboxOption>
                                           ))}
                                         </div>
                                       ))}
-                                    </Listbox.Options>
+                                    </ListboxOptions>
                                   </Transition>
                                 </div>
                               </>
@@ -599,12 +599,12 @@ export default function CreateEditRoleModal({
                       </div>
                     </form>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
     </>
   );
 }

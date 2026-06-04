@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useRef } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 
 
 import PrivacyModaPagelOne from './ModalPages/PrivacyModaPagelOne';
@@ -85,9 +85,9 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition show={open} as={Fragment}>
       <Dialog as='div' className={`relative z-[10000]`} onClose={() => void(0)}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter='ease-out duration-300'
           enterFrom='opacity-0'
@@ -97,10 +97,10 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
           leaveTo='opacity-0'
         >
           <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
+        </TransitionChild>
         <div className='fixed inset-0 z-10 overflow-y-auto'>
           <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter='ease-out duration-300'
               enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
@@ -109,7 +109,7 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md'>
+              <DialogPanel className='relative transform overflow-hidden rounded-lg bg-white pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md'>
                 <div className='mb-4'>
                   <div className='flex p-2'>
                     <h3 className='flex-1 text-[#2C3F58] text-xl px-4 mb-4 font-semibold text-center'>YAHSHUA-ABBA Privacy Statement for Web App</h3>
@@ -134,12 +134,12 @@ const DataConfirmationModal = ({ open, onClose }: DataConfirmationModalProps) =>
                 <div style={{ display: pageNumber == 5 ? 'block' : 'none' }}>
                   <PrivacyModaPagelSix setPageNumber={setPageNumber} handleNext={handleClose} />
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 

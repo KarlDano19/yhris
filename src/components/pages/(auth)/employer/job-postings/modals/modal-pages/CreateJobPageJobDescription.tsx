@@ -1,6 +1,6 @@
-import React, { Dispatch, useState, useEffect, useRef, useMemo } from 'react';
+import React, { Dispatch, useState, useEffect, useRef } from 'react';
 
-import dynamic from 'next/dynamic';
+import ReactQuill from '@/components/ReactQuillDynamic';
 
 import { QUILL_FORMATS, QUILL_MODULES, CREATEJOB_TEMPLATE } from '@/helpers/constants';
 
@@ -39,8 +39,6 @@ export default function CreateJobPageJobDescription({
   isLoading?: boolean;
   uploadedJobDescriptionUrl?: string | null;
 }) {
-  // SSR-safe ReactQuill - memoized to prevent re-creation on every render
-  const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { ssr: false }), []);
   const [manualInputFocus, setManualInputFocus] = useState({
     jobDescriptionFile: false,
     jobDescription: false,

@@ -5,7 +5,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
@@ -457,13 +457,13 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
             <div className='flex-1 flex justify-start lg:justify-end'>
               <Menu as='div' className='relative inline-block'>
                 <div>
-                  <Menu.Button
+                  <MenuButton
                     as={SmartButton}
                     id="create_memo_btn"
                     className='bg-green-500 rounded-md py-2 px-8 text-white text-sm font-semibold shadow enabled:hover:shadow-md enabled:focus:shadow-none enabled:focus:opacity-80 disabled:opacity-50'
                   >
                     CREATE
-                  </Menu.Button>
+                  </MenuButton>
                 </div>
 
                 <Transition
@@ -475,44 +475,34 @@ const Content = ({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-green-500 focus:outline-none'>
+                  <MenuItems className='absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-green-500 focus:outline-none'>
                     <div className='py-1'>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <span
-                            id="create-memo-btn"
-                            className={classNames(
-                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                              'block px-4 py-2 text-sm cursor-pointer'
-                            )}
-                            onClick={() => {
-                              setIsCreateMemoModalOpen(true);
-                              setIsOpen(!isOpen);
-                            }}
-                         >
-                            Create Memo
-                          </span>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <span
-                            id="create-memo-btn"
-                            className={classNames(
-                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                              'block px-4 py-2 text-sm cursor-pointer'
-                            )}
-                            onClick={() => {
-                              setIsCreatePolicyModalOpen(true);
-                              setIsOpen(!isOpen);
-                            }}
-                         >
-                            Create Policy
-                          </span>
-                        )}
-                      </Menu.Item>
+                      <MenuItem>
+                        <span
+                          id="create-memo-btn"
+                          className='text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 block px-4 py-2 text-sm cursor-pointer'
+                          onClick={() => {
+                            setIsCreateMemoModalOpen(true);
+                            setIsOpen(!isOpen);
+                          }}
+                        >
+                          Create Memo
+                        </span>
+                      </MenuItem>
+                      <MenuItem>
+                        <span
+                          id="create-memo-btn"
+                          className='text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 block px-4 py-2 text-sm cursor-pointer'
+                          onClick={() => {
+                            setIsCreatePolicyModalOpen(true);
+                            setIsOpen(!isOpen);
+                          }}
+                        >
+                          Create Policy
+                        </span>
+                      </MenuItem>
                     </div>
-                  </Menu.Items>
+                  </MenuItems>
                 </Transition>
               </Menu>
             </div>

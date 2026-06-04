@@ -6,7 +6,7 @@ import { flushSync } from 'react-dom';
 import Image from 'next/image';
 
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { Tooltip } from 'react-tooltip';
@@ -557,12 +557,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                 CREATE
               </SmartButton>
               <Menu as='div' className='relative'>
-                <Menu.Button className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
+                <MenuButton className='bg-green-500 py-2.5 px-3 rounded-r-md text-white text-sm font-semibold shadow hover:shadow-md focus:shadow-none disabled:opacity-50'>
                   <span className='sr-only'>Open options</span>
                   <div className='flex gap-4'>
                     <ChevronDownIcon className='flex-none h-5 w-5' aria-hidden='true' />
                   </div>
-                </Menu.Button>
+                </MenuButton>
                 <Transition
                   as={Fragment}
                   enter='transition ease-out duration-100'
@@ -572,10 +572,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                   leaveFrom='transform opacity-100 scale-100'
                   leaveTo='transform opacity-0 scale-95'
                 >
-                  <Menu.Items className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                  <MenuItems className='absolute right-0 z-10 mt-2 w-[8.6rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                     <div className='py-1'>
                       {smartMenuOptions.map((item) => (
-                        <Menu.Item key={item.name}>
+                        <MenuItem key={item.name}>
                           {({ active }) => (
                             <span
                               className={classNames(
@@ -598,10 +598,10 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                               {item.name}
                             </span>
                           )}
-                        </Menu.Item>
+                        </MenuItem>
                       ))}
                     </div>
-                  </Menu.Items>
+                  </MenuItems>
                 </Transition>
               </Menu>
             </div>

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
 
-import { Menu, Popover, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react';
 import classNames from '@/helpers/classNames';
 import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
 import CustomToast from '@/components/CustomToast';
@@ -70,42 +70,36 @@ const AdminHeader = () => {
     }
   }, []);
 
-  const MenuItems = ({ item }: any) => {
+  const UserMenuItemLink = ({ item }: any) => {
     return (
       <>
         {item.href && (
-          <Menu.Item>
-            {({ active }) => (
-              <Link href={item.href}>
-                <div
-                  className={classNames(
-                    'block rounded-md py-2 px-3 text-base font-medium',
-                    item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
-                    active ? 'bg-gray-100' : ''
-                  )}
-                >
-                  {item.name}
-                </div>
-              </Link>
-            )}
-          </Menu.Item>
+          <MenuItem>
+            <Link href={item.href}>
+              <div
+                className={classNames(
+                  'block rounded-md py-2 px-3 text-base font-medium data-[focus]:bg-gray-100',
+                  item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
+                )}
+              >
+                {item.name}
+              </div>
+            </Link>
+          </MenuItem>
         )}
         {!item.href && (
-          <Menu.Item>
-            {({ active }) => (
-              <div onClick={item.onClick}>
-                <div
-                  className={classNames(
-                    'block rounded-md py-2 px-3 text-base font-medium',
-                    item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
-                    active ? 'bg-gray-100' : ''
-                  )}
-                >
-                  {item.name}
-                </div>
+          <MenuItem>
+            <div onClick={item.onClick}>
+              <div
+                className={classNames(
+                  'block rounded-md py-2 px-3 text-base font-medium data-[focus]:bg-gray-100',
+                  item.isDisabled ? 'opacity-50 hover:bg-transparent' : 'hover:bg-gray-50',
+                )}
+              >
+                {item.name}
               </div>
-            )}
-          </Menu.Item>
+            </div>
+          </MenuItem>
         )}
       </>
     );
@@ -163,20 +157,20 @@ const AdminHeader = () => {
                 </div>
                 <div className='flex items-center md:absolute md:inset-y-0 md:right-0 lg:hidden'>
                   {/* Mobile menu button */}
-                  <Popover.Button className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
+                  <PopoverButton className='-mx-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500'>
                     <span className='sr-only'>Open menu</span>
                     {open ? (
                       <XMarkIcon className='block h-6 w-6' aria-hidden='true' />
                     ) : (
                       <Bars3Icon className='block h-6 w-6' aria-hidden='true' />
                     )}
-                  </Popover.Button>
+                  </PopoverButton>
                 </div>
                 <div className='hidden lg:flex lg:items-center lg:justify-end xl:col-span-4'>
                   {/* Profile dropdown */}
                   <Menu as='div' className='relative ml-5 flex-shrink-0'>
                     <div>
-                      <Menu.Button className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
+                      <MenuButton className='flex gap-2 items-center rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2'>
                         <span className='sr-only'>Open user menu</span>
                         {!isProfileLoading && profile ? (
                           profile.logo ? (
@@ -206,7 +200,7 @@ const AdminHeader = () => {
                           </div>
                         )}
                         <ChevronDownIcon className='h-5 w-5' />
-                      </Menu.Button>
+                      </MenuButton>
                     </div>
                     <Transition
                       as={Fragment}
@@ -217,24 +211,24 @@ const AdminHeader = () => {
                       leaveFrom='transform opacity-100 scale-100'
                       leaveTo='transform opacity-0 scale-95'
                     >
-                      <Menu.Items className='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                      <MenuItems className='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                         {userNavigation.map((item: any, index: any) => (
-                          <MenuItems key={index} item={item} />
+                          <UserMenuItemLink key={index} item={item} />
                         ))}
-                      </Menu.Items>
+                      </MenuItems>
                     </Transition>
                   </Menu>
                 </div>
               </div>
             </div>
 
-            <Popover.Panel as='nav' className='lg:hidden' aria-label='Global'>
+            <PopoverPanel as='nav' className='lg:hidden' aria-label='Global'>
               <div className='mx-auto max-w-3xl space-y-1 px-2 pb-3 pt-2 sm:px-4'>
                 {userNavigation.map((item: any, index: any) => (
                   <PopOverItems key={index} item={item} />
                 ))}
               </div>
-            </Popover.Panel>
+            </PopoverPanel>
           </>
         )}
       </Popover>
