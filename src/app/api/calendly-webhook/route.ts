@@ -194,6 +194,45 @@ async function sendLoopsEvent(email: string, eventName: string, properties: Reco
   });
 }
 
+// ─── Facebook Conversions API ────────────────────────────────────────────────
+async function sendMetaLeadEvent(data: LeadData) {
+  const pixelId = '2144124972722813';
+  const accessToken = process.env.META_CAPI_TOKEN;
+  if (!accessToken) return;
+
+  const { createHash } = await import('crypto');
+  const hash = (value: string) => createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
+
+  const userData: Record<string, string> = {
+    em: hash(data.email),
+  };
+  if (data.phone) userData.ph = hash(data.phone.replace(/\D/g, ''));
+  if (data.firstName) userData.fn = hash(data.firstName.toLowerCase());
+  if (data.lastName) userData.ln = hash(data.lastName.toLowerCase());
+
+  const body = {
+    data: [
+      {
+        event_name: 'Lead',
+        event_time: Math.floor(Date.now() / 1000),
+        action_source: 'website',
+        user_data: userData,
+        custom_data: {
+          lead_type: 'demo_booking',
+          company_name: data.companyName,
+          pain_point: data.painPoint,
+        },
+      },
+    ],
+  };
+
+  await fetch(`https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
 // ─── Google Sheets ────────────────────────────────────────────────────────────
 async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -333,6 +372,7 @@ export async function POST(request: NextRequest) {
     await Promise.allSettled([
       appendToSheet(data, scoring),
       sendTelegramNotification(data, scoring),
+      sendMetaLeadEvent(data),
     ]);
 
     return NextResponse.json({ success: true });

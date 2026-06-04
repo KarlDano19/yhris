@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Content from "@/components/pages/(un-auth)/(landing-page)/features/LpFeaturesContent";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Features - Payroll, 201 Files, DOLE Compliance & More',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const FeaturesPage = () => {
-  return <Content />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Features', content_category: 'features' }} />
+      <Content />
+    </>
+  );
 };
 
 export default FeaturesPage;

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import LpBlogContent from "@/components/pages/(un-auth)/(landing-page)/blog/LpBlogContent";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'Blog — HR Insights for Philippine Business Leaders | YAHSHUA HRIS',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const BlogPage = () => {
-  return <LpBlogContent />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Blog', content_category: 'blog' }} />
+      <LpBlogContent />
+    </>
+  );
 };
 
 export default BlogPage;

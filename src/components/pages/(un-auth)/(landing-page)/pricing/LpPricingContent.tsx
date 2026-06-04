@@ -279,7 +279,7 @@ const LpPricingContent = ({ isLoggedIn }: LpPricingContentProps) => {
                 </div>
                 <p className="text-center text-sm text-gray-400 mt-6">
                   500+ employees: ₱35/employee per month.{" "}
-                  <a href="#demo" className="text-gray-600 font-semibold hover:text-primary transition-colors">Talk to us</a>{" "}
+                  <a href="https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026" target="_blank" rel="noopener noreferrer" className="text-gray-600 font-semibold hover:text-primary transition-colors">Talk to us</a>{" "}
                   for enterprise pricing.
                 </p>
               </ScrollFadeIn>
