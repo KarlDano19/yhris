@@ -196,7 +196,7 @@ async function sendLoopsEvent(email: string, eventName: string, properties: Reco
 
 // ─── Facebook Conversions API ────────────────────────────────────────────────
 async function sendMetaLeadEvent(data: LeadData) {
-  const pixelId = process.env.META_PIXEL_ID ?? '2144124972722813';
+  const pixelId = process.env.META_PIXEL_ID;
   const accessToken = process.env.META_CAPI_TOKEN;
   if (!accessToken) return;
 
