@@ -109,6 +109,74 @@ FIX EXPLANATION:
 
 [NEW ENTRIES SHOULD BE PREPENDED BELOW THIS LINE]
 
+BUG ID: HRIS-2026-024
+DATE FILED: 2026-06-05
+DATE FIXED: 2026-06-05
+REPORTER: Internal - QA
+
+ISSUE DESCRIPTION:
+  On the Job Posting form — Step 3 (Salary & Benefits) — clicking any benefit button caused
+  a visual glitch where the button continuously and rapidly toggled between selected (✓) and
+  unselected (+) states, making it impossible to reliably select a benefit.
+
+  Root cause: Two `useEffect` hooks were creating a circular update loop:
+    - Effect 1 (form → local state): Watched `watchedBenefits` (react-hook-form `watch`) and
+      synced changes into `selectedBenefitOptions` local state. This was added to support
+      draft loading (pre-populating the benefit buttons from a loaded draft).
+    - Effect 2 (local state → form): Watched `selectedBenefitOptions` and called
+      `setValue('benefits', ...)` to keep the form value in sync.
+
+  Every click triggered: setSelectedBenefitOptions → Effect 2 → setValue → new watchedBenefits
+  reference → Effect 1 → setSelectedBenefitOptions → Effect 2 → ... repeating rapidly,
+  causing the glitch.
+
+  Affected component:
+    src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageSalary.tsx
+
+DESIRED OUTCOME:
+  Clicking a benefit button should immediately and stably toggle its selected state with no
+  flickering or looping. Previously selected benefits should remain selected unless explicitly
+  clicked again.
+
+FILES CHANGED:
+Frontend:
+- src/components/pages/(auth)/employer/job-postings/modals/modal-pages/CreateJobPageSalary.tsx
+
+UNIT TESTING CHECKLIST:
+
+Backend (Django REST Framework):
+N/A — frontend-only fix
+
+Frontend (Next.js/React/TypeScript):
+☐ Jest/React Testing Library tests written/updated
+☐ All frontend tests passing: N/A
+☑ TypeScript types verified (no type errors)
+☑ Components tested (manual)
+  - Clicking an unselected benefit selects it immediately with no glitch ✓
+  - Clicking a selected benefit deselects it immediately with no glitch ✓
+  - Multiple benefits can be selected/deselected without interference ✓
+  - "Other" benefit input still updates the form value correctly ✓
+  - Draft loading still pre-populates benefit buttons correctly via Effect 1 ✓
+
+Integration & E2E:
+☑ Manual regression testing completed
+☐ Cypress/Playwright e2e tests updated (e2e not yet implemented)
+
+FIX EXPLANATION:
+  Removed Effect 2 entirely (the local state → form sync effect). Instead, the benefit button
+  click handler now computes the next selection state and calls `setValue('benefits', next)`
+  directly inside the `setSelectedBenefitOptions` functional updater — updating both local
+  state and the form value atomically in a single click, with no effect needed.
+
+  Similarly, `handleInputChange` (the "Other" text input handler) now calls `setValue` directly
+  instead of relying on Effect 2 to propagate the change.
+
+  Effect 1 (form → local state, for draft loading) was kept unchanged. Because the form value
+  is now updated synchronously on click before Effect 1 can observe a mismatch, Effect 1 finds
+  them already in sync and returns `prev` with no state update — breaking the loop.
+
+================================================================================
+
 BUG ID: HRIS-2026-023
 DATE FILED: 2026-06-03
 DATE FIXED: 2026-06-03
