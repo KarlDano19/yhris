@@ -46,7 +46,6 @@ const nextConfig = {
     const trailingSlashPages = [
       '/features',
       '/pricing',
-      '/book-demo',
       '/yahshua-payroll',
       '/payroll-integration',
       '/vs-sprout',
