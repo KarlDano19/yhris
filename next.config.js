@@ -75,6 +75,11 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/book-demo',
+        destination: 'https://calendly.com/clientrelations-abba/presentation?utm_source=website&utm_medium=web&utm_campaign=hris_2026',
+        permanent: true,
+      },
       // Strip trailing slashes on all landing pages (skipTrailingSlashRedirect
       // is enabled for PostHog, so we handle this manually per-page)
       ...trailingSlashPages.map((path) => ({
