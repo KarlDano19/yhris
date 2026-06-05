@@ -18,11 +18,13 @@ import classNames from '@/helpers/classNames';
 
 import EditIcon from '@/svg/EditIcon';
 import DeleteIcon from '@/svg/DeleteIcon';
+import DuplicateIcon from '@/svg/DuplicateIcon';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 import useGetForms from './hooks/useGetForms';
 import useDeleteForm from './hooks/useDeleteForm';
+import useDuplicateForm from './hooks/useDuplicateForm';
 import FormDistributionModal from './modals/FormDistributionModal';
 
 import { T_HRForm } from '@/types/form';
@@ -58,6 +60,7 @@ const Content = () => {
   });
 
   const { mutate: deleteForm, isLoading: isDeleting } = useDeleteForm();
+  const { mutate: duplicateForm } = useDuplicateForm();
 
   useEffect(() => {
     if (formsData?.data?.records) {
@@ -84,6 +87,18 @@ const Content = () => {
   const pageSizeChange = (value: number) => {
     setCurrentPage(1);
     setPageSize(value);
+  };
+
+  const handleDuplicate = (formId: number) => {
+    duplicateForm(formId, {
+      onSuccess: () => {
+        toast.custom(() => <CustomToast message='Form duplicated successfully.' type='success' />, { duration: 4000 });
+        refetch();
+      },
+      onError: (err: any) => {
+        toast.custom(() => <CustomToast message={err?.message ?? 'Failed to duplicate form.'} type='error' />, { duration: 4000 });
+      },
+    });
   };
 
   const handleEdit = (form: T_HRForm) => {
@@ -146,12 +161,22 @@ const Content = () => {
                   />
                 </div>
               </SmartButton>
-              <SmartButton
-                id='edit-form-btn'
-                onClick={() => handleEdit(form)}
-              >
-                <EditIcon />
-              </SmartButton>
+              {form.can_edit ? (
+                <SmartButton
+                  id='edit-form-btn'
+                  onClick={() => handleEdit(form)}
+                >
+                  <EditIcon />
+                </SmartButton>
+              ) : (
+                <SmartButton
+                  id='duplicate-form-btn'
+                  onClick={() => handleDuplicate(form.id)}
+                  title='Duplicate form'
+                >
+                  <DuplicateIcon />
+                </SmartButton>
+              )}
               <SmartButton
                 id='delete-form-btn'
                 onClick={() => setIsDeleteModalOpen({ id: form.id, open: true })}
