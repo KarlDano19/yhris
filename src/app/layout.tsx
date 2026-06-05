@@ -1,6 +1,5 @@
 import { Golos_Text } from 'next/font/google';
 import Script from 'next/script';
-import 'react-quill/dist/quill.snow.css';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -9,9 +8,8 @@ import GlobalErrorHandler from '@/components/GlobalErrorHandler';
 import ReactQueryWrapper from '@/app/reactQueryWrapper';
 import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
-import PixelEvents from '@/components/PixelEvents';
+import GlobalPixelTracker from '@/components/GlobalPixelTracker';
 
-import './quill-tooltips.css';
 import './globals.css';
   
 export const metadata = {
@@ -31,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <GlobalLoadingSpinner />
             <Auth>{children}</Auth>
           </ReactQueryWrapper>
-          <PixelEvents />
+          <GlobalPixelTracker />
           <Toaster position='top-right' />
           
           {/* Google Tag Manager */}
@@ -70,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '2144124972722813');
+              fbq('init', '${process.env.META_PIXEL_ID}');
               fbq('track', 'PageView');
             `}
           </Script>
@@ -96,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </noscript>
           
           <noscript>
-            <img height="1" width="1" style={{display:'none'}} alt="" src="https://www.facebook.com/tr?id=2144124972722813&ev=PageView&noscript=1" />
+            <img height="1" width="1" style={{display:'none'}} alt="" src={`https://www.facebook.com/tr?id=${process.env.META_PIXEL_ID}&ev=PageView&noscript=1`} />
           </noscript>
           
           <noscript>

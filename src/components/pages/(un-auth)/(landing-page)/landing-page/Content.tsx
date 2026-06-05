@@ -1,5 +1,3 @@
-"use client"
-
 import LpHeroSection from "./components/LpHeroSection";
 import LpTrustBar from "./components/LpTrustBar";
 import LpValueProposition from "./components/LpValueProposition";

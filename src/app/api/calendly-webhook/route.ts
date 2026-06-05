@@ -196,7 +196,7 @@ async function sendLoopsEvent(email: string, eventName: string, properties: Reco
 
 // ─── Facebook Conversions API ────────────────────────────────────────────────
 async function sendMetaLeadEvent(data: LeadData) {
-  const pixelId = '2144124972722813';
+  const pixelId = process.env.META_PIXEL_ID;
   const accessToken = process.env.META_CAPI_TOKEN;
   if (!accessToken) return;
 
@@ -206,7 +206,12 @@ async function sendMetaLeadEvent(data: LeadData) {
   const userData: Record<string, string> = {
     em: hash(data.email),
   };
-  if (data.phone) userData.ph = hash(data.phone.replace(/\D/g, ''));
+  // Normalize phone to E.164 — prepend +63 if no country code present
+  if (data.phone) {
+    const digits = data.phone.replace(/\D/g, '');
+    const normalized = digits.startsWith('63') ? digits : `63${digits.replace(/^0/, '')}`;
+    userData.ph = hash(normalized);
+  }
   if (data.firstName) userData.fn = hash(data.firstName.toLowerCase());
   if (data.lastName) userData.ln = hash(data.lastName.toLowerCase());
 
@@ -224,13 +229,19 @@ async function sendMetaLeadEvent(data: LeadData) {
         },
       },
     ],
+    access_token: accessToken,
   };
 
-  await fetch(`https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`, {
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pixelId}/events`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error('Meta CAPI error:', JSON.stringify(err));
+  }
 }
 
 // ─── Google Sheets ────────────────────────────────────────────────────────────
