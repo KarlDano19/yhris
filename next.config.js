@@ -43,6 +43,28 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   async redirects() {
+    const trailingSlashPages = [
+      '/features',
+      '/pricing',
+      '/book-demo',
+      '/yahshua-payroll',
+      '/payroll-integration',
+      '/vs-sprout',
+      '/how-we-compare',
+      '/use-cases',
+      '/use-cases/employee-onboarding',
+      '/use-cases/performance-management',
+      '/use-cases/employee-documentation',
+      '/blog',
+      '/blog/dole-compliance-requirements-philippines',
+      '/faqs',
+      '/docs',
+      '/jobs',
+      '/privacy-notice',
+      '/privacy-policy',
+      '/terms-of-service',
+    ];
+
     return [
       {
         source: '/landing-page/:path*',
@@ -54,6 +76,13 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Strip trailing slashes on all landing pages (skipTrailingSlashRedirect
+      // is enabled for PostHog, so we handle this manually per-page)
+      ...trailingSlashPages.map((path) => ({
+        source: `${path}/`,
+        destination: path,
+        permanent: true,
+      })),
     ];
   },
   async rewrites() {
