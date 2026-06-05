@@ -5,7 +5,7 @@ import { useState } from 'react';
 import AdminHeader from './AdminHeader';
 import AdminSidebar from './AdminSidebar';
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({ children, initialTokenExpiresAt }: { children: React.ReactNode; initialTokenExpiresAt?: number }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
@@ -25,7 +25,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* Right column — header + page content stacked vertically */}
       <div className='flex flex-col flex-1 min-w-0'>
-        <AdminHeader onToggleSidebar={() => setIsSidebarOpen((v) => !v)} isSidebarOpen={isSidebarOpen} />
+        <AdminHeader
+          onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
+          isSidebarOpen={isSidebarOpen}
+          initialTokenExpiresAt={initialTokenExpiresAt}
+        />
         <main className='flex-1 overflow-auto'>{children}</main>
       </div>
     </div>

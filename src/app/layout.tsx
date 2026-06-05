@@ -10,6 +10,7 @@ import ReactQueryWrapper from '@/app/reactQueryWrapper';
 import GlobalLoadingSpinner from '@/components/GlobalLoadingSpinner';
 import Auth from '@/app/auth';
 import PixelEvents from '@/components/PixelEvents';
+import NetworkStatusWatcher from '@/components/NetworkStatusWatcher';
 
 import './quill-tooltips.css';
 import './globals.css';
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Auth>{children}</Auth>
           </ReactQueryWrapper>
           <PixelEvents />
+          <NetworkStatusWatcher />
           <Toaster position='top-right' />
           
           {/* Google Tag Manager */}
