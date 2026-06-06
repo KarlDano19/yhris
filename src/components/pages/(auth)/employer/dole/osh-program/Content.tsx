@@ -169,9 +169,12 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
   }, [oshProgramDetails, selectedTab]);
 
   // Auto-clear validation when user starts filling required fields
+  const watchedMissingFieldValues = watch(missingFields as any[]);
+
   useEffect(() => {
     autoClearValidation(watch, validationMessage, missingFields, setValidationMessage, setMissingFields);
-  }, [validationMessage, missingFields, watch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validationMessage, missingFields, JSON.stringify(watchedMissingFieldValues)]);
 
   // ============================================================================
   // UTILITY FUNCTIONS

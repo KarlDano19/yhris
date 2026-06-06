@@ -112,6 +112,10 @@ const AuthorizedHeader = ({ hasProfile, initialTokenExpiresAt }: { hasProfile: b
 
       // Show warning before expiration (5 minutes for 3-hour tokens)
       if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        if (!isExpiring) {
+          // Dispatch event for draft auto-save before showing modal
+          window.dispatchEvent(new Event('session-expiring'));
+        }
         setIsExpiring(true);
         setTimeRemaining(remaining);
       } else {

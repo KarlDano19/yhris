@@ -194,6 +194,56 @@ async function sendLoopsEvent(email: string, eventName: string, properties: Reco
   });
 }
 
+// ─── Facebook Conversions API ────────────────────────────────────────────────
+async function sendMetaLeadEvent(data: LeadData) {
+  const pixelId = process.env.META_PIXEL_ID;
+  const accessToken = process.env.META_CAPI_TOKEN;
+  if (!accessToken) return;
+
+  const { createHash } = await import('crypto');
+  const hash = (value: string) => createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
+
+  const userData: Record<string, string> = {
+    em: hash(data.email),
+  };
+  // Normalize phone to E.164 — prepend +63 if no country code present
+  if (data.phone) {
+    const digits = data.phone.replace(/\D/g, '');
+    const normalized = digits.startsWith('63') ? digits : `63${digits.replace(/^0/, '')}`;
+    userData.ph = hash(normalized);
+  }
+  if (data.firstName) userData.fn = hash(data.firstName.toLowerCase());
+  if (data.lastName) userData.ln = hash(data.lastName.toLowerCase());
+
+  const body = {
+    data: [
+      {
+        event_name: 'Lead',
+        event_time: Math.floor(Date.now() / 1000),
+        action_source: 'website',
+        user_data: userData,
+        custom_data: {
+          lead_type: 'demo_booking',
+          company_name: data.companyName,
+          pain_point: data.painPoint,
+        },
+      },
+    ],
+    access_token: accessToken,
+  };
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pixelId}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error('Meta CAPI error:', JSON.stringify(err));
+  }
+}
+
 // ─── Google Sheets ────────────────────────────────────────────────────────────
 async function appendToSheet(data: LeadData, scoring: ScoringResult | null) {
   const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -333,6 +383,7 @@ export async function POST(request: NextRequest) {
     await Promise.allSettled([
       appendToSheet(data, scoring),
       sendTelegramNotification(data, scoring),
+      sendMetaLeadEvent(data),
     ]);
 
     return NextResponse.json({ success: true });

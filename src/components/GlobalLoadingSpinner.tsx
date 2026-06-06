@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useIsFetching } from '@tanstack/react-query';
 import YahshuaLoadingLogo from './YahshuaLoadingLogo';
+import useNetworkStatus from '@/hooks/useNetworkStatus';
 
 // ─── Module-level singleton patch ────────────────────────────────────────────
 // Applied once at module load. Never inside component lifecycle.
@@ -51,6 +52,7 @@ if (typeof window !== 'undefined' && !(history.pushState as any)[PATCHED]) {
 const GlobalLoadingSpinner = () => {
   const pathname = usePathname();
   const isFetching = useIsFetching() > 0;
+  const isOnline = useNetworkStatus();
   const [visible, setVisible] = useState(false);
 
   const lastNavClickRef = useRef<number | null>(null);
@@ -190,7 +192,7 @@ const GlobalLoadingSpinner = () => {
     return () => clearTimeout(t);
   }, [isFetching, pathname]);
 
-  if (!visible) return null;
+  if (!visible || !isOnline) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">

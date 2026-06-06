@@ -334,7 +334,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
         {/* Back Button */}
         <div className="fixed top-4 left-4 z-50">
           <Link 
-            href="/landing-page" 
+            href="/" 
             className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
             shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
             hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
@@ -376,10 +376,10 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <Link 
-          href="/landing-page" 
-          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full 
-          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] 
-          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0 
+          href="/"
+          className="inline-flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full
+          shadow-[0_4px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)]
+          hover:bg-white active:bg-gray-50 hover:-translate-y-1 active:translate-y-0
           transform transition-all duration-300 ease-out hover:scale-105 active:scale-95
           border border-gray-100"
         >
@@ -517,14 +517,14 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                     >
                       <GoogleIcon className='w-4 h-4 mr-2' /> Sign in with Google
                     </button>
-                    <button
+                    {/* <button
                       id='facebook-login-button'
                       className='flex items-center justify-center text-indigo-dye mt-4 font-semibold bg-white border border-gray-400 w-full lg:w-full lg:px-10 py-2.5 rounded-md disabled:opacity-50'
                       onClick={() => setCreateAccountModal(true)}
                       disabled={true}
                     >
                       <FacebookRoundedIcon className='w-4 h-4 mr-2' /> Facebook
-                    </button>
+                    </button> */}
                     <div className="relative w-full lg:w-full group">
                       <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-lg opacity-100 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-timed"></div>
                       <button
@@ -533,7 +533,7 @@ const { register, getValues, handleSubmit, formState: { errors } } = useForm<T_L
                         onClick={() => loginWithYahshuaPayroll()}
                       >
                         <YahshuaPayrollLogo className='w-4 h-4 mr-2' />
-                        YAHSHUA Payroll
+                        Sign in with YAHSHUA Payroll
                       </button>
                       <style jsx>{`
                         @keyframes gradient-timed {

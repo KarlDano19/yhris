@@ -260,9 +260,13 @@ function Content({ hasActiveSubscription }: { hasActiveSubscription: boolean }) 
                         Stage Order <span className='text-red-500'>*</span>
                       </label>
                       <input
-                        {...register('sequence', { required: 'Stage order is required.' })}
+                        {...register('sequence', {
+                          required: 'Stage order is required.',
+                          min: { value: 1, message: 'Stage order must be at least 1.' },
+                        })}
                         id='sequence'
                         type='number'
+                        min='1'
                         className='block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'
                       />
                       {errors.sequence && (
