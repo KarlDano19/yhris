@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { getCookie, deleteCookie } from 'cookies-next';
 import toast from 'react-hot-toast';
@@ -12,14 +13,32 @@ import classNames from '@/helpers/classNames';
 import useGetAdminProfile from '@/components/hooks/useGetAdminProfile';
 import CustomToast from '@/components/CustomToast';
 import useLogout from '@/components/hooks/useLogout';
+import useRefreshToken from '@/components/hooks/useRefreshToken';
+import SessionExpirationModal from '@/components/SessionExpirationModal';
+import { TOKEN_EXPIRATION_WARNING_SECONDS } from '@/lib/session';
 import Timer from '@/components/Timer';
 
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
-const AdminHeader = ({ onToggleSidebar, isSidebarOpen }: { onToggleSidebar?: () => void; isSidebarOpen?: boolean }) => {
+const AdminHeader = ({
+  onToggleSidebar,
+  isSidebarOpen,
+  initialTokenExpiresAt,
+}: {
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
+  initialTokenExpiresAt?: number;
+}) => {
+  const router = useRouter();
   const { mutate } = useLogout();
+  const { mutate: refreshToken } = useRefreshToken();
   const [profile, setProfile] = useState<any>({});
+  const [isExpiring, setIsExpiring] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number | undefined>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const { data, isLoading: isProfileLoading } = useGetAdminProfile();
 
@@ -60,7 +79,88 @@ const AdminHeader = ({ onToggleSidebar, isSidebarOpen }: { onToggleSidebar?: () 
     }
   }, []);
 
+  // Initialize token expiration from prop
+  useEffect(() => {
+    if (initialTokenExpiresAt && !tokenExpiresAt) {
+      setTokenExpiresAt(initialTokenExpiresAt);
+    }
+  }, [initialTokenExpiresAt]);
+
+  // Check token expiration every second
+  useEffect(() => {
+    if (!tokenExpiresAt) return;
+    if (isRefreshing) return;
+
+    const checkExpiration = () => {
+      if (isRefreshing) return;
+
+      const now = Date.now();
+      const remaining = Math.floor((tokenExpiresAt - now) / 1000);
+
+      if (remaining <= 0) {
+        if (!isRefreshing) {
+          setIsExpiring(false);
+          setTokenExpiresAt(undefined);
+          logout(true);
+        }
+        return;
+      }
+
+      if (remaining <= TOKEN_EXPIRATION_WARNING_SECONDS) {
+        if (!isExpiring) {
+          window.dispatchEvent(new Event('session-expiring'));
+        }
+        setIsExpiring(true);
+        setTimeRemaining(remaining);
+      } else {
+        setIsExpiring(false);
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [tokenExpiresAt, isRefreshing, isExpiring]);
+
+  const handleRenewSession = () => {
+    setIsRefreshing(true);
+    setIsExpiring(false);
+
+    refreshToken(undefined, {
+      onSuccess: (data: any) => {
+        if (data?.expires_at) {
+          setTokenExpiresAt(data.expires_at);
+        }
+        window.location.reload();
+      },
+      onError: () => {
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsRefreshing(false);
+      },
+    });
+  };
+
+  const handleLogoutFromModal = () => {
+    setIsLoggingOut(true);
+    mutate(void 0, {
+      onSuccess: () => {
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onError: () => {
+        deleteCookie('token');
+        router.push('/login');
+      },
+      onSettled: () => {
+        setIsLoggingOut(false);
+      },
+    });
+  };
+
   return (
+    <>
     <header
       className={classNames(
         isSidebarOpen ? 'shadow-md' : 'border-b border-gray-200',
@@ -158,6 +258,15 @@ const AdminHeader = ({ onToggleSidebar, isSidebarOpen }: { onToggleSidebar?: () 
         </div>
       </div>
     </header>
+    <SessionExpirationModal
+      isOpen={isExpiring}
+      onRenew={handleRenewSession}
+      onLogout={handleLogoutFromModal}
+      timeRemaining={timeRemaining}
+      isRefreshing={isRefreshing}
+      isLoggingOut={isLoggingOut}
+    />
+    </>
   );
 };
 
