@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import UseCasesContent from "@/components/pages/(un-auth)/(landing-page)/use-cases/UseCasesContent";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA HRIS Use Cases — How Philippine Businesses Use Our Platform',
@@ -22,5 +23,10 @@ export const metadata: Metadata = {
 };
 
 export default function UseCases() {
-  return <UseCasesContent />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Use Cases', content_category: 'use-cases' }} />
+      <UseCasesContent />
+    </>
+  );
 }

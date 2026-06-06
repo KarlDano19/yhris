@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import LpPayrollIntegrationContent from "@/components/pages/(un-auth)/(landing-page)/payroll-integration/LpPayrollIntegrationContent";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'Payroll Integration — YAHSHUA HRIS and YAHSHUA Payroll',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const PayrollIntegrationPage = () => {
-  return <LpPayrollIntegrationContent />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'Payroll Integration', content_category: 'integration' }} />
+      <LpPayrollIntegrationContent />
+    </>
+  );
 };
 
 export default PayrollIntegrationPage;

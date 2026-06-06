@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import YahshuaPayrollContent from "@/components/pages/(un-auth)/(landing-page)/yahshua-payroll/Content";
+import PixelEvents from '@/components/PixelEvents';
 
 export const metadata: Metadata = {
   title: 'YAHSHUA Payroll Integration — Sync HR Data with Your Payroll System',
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 };
 
 const YahshuaPayrollPage = () => {
-  return <YahshuaPayrollContent />;
+  return (
+    <>
+      <PixelEvents viewContent={{ content_name: 'YAHSHUA Payroll', content_category: 'payroll' }} />
+      <YahshuaPayrollContent />
+    </>
+  );
 };
 
 export default YahshuaPayrollPage;
