@@ -103,8 +103,8 @@ export type T_SeparationEmail = {
   separationLetter: any;
   signDocuments: any;
   quitClaim: any;
-  dateReceived: any;
   lastPay: any;
+  legalDocs: any;
 };
 
 export type T_ApplicantOrientEmail = {
