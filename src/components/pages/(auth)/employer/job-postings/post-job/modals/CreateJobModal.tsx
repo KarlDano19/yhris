@@ -64,6 +64,7 @@ export default function CreateJobModal({
   isOpen,
   setIsOpen,
   openConfirmSocialShareModal,
+  onJobCreated,
   pageNumber,
   setPageNumber,
   isSalaryRangeModalOpen,
@@ -92,6 +93,7 @@ export default function CreateJobModal({
   isOpen: boolean;
   setIsOpen: Dispatch<boolean>;
   openConfirmSocialShareModal: (social: string, og_url: string) => void;
+  onJobCreated?: () => void;
   pageNumber: number;
   setPageNumber: Dispatch<number>;
   isSalaryRangeModalOpen: boolean;
@@ -521,6 +523,7 @@ export default function CreateJobModal({
     const callbackReq = {
       onSuccess: (data: any) => {
         toast.custom(() => <CustomToast message={data.message} type='success' />, { duration: 5000 });
+        onJobCreated?.();
         resetForm();
         setIsSalaryRangeModalOpen(false);
         openConfirmSocialShareModal(data.job_post.shared_to, data.job_post.og_url);
